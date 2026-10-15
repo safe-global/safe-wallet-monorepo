@@ -1,10 +1,50 @@
 {
-  "usd": 0.043643600000000005,
+  "usd": 0.0795096,
   "findings": [
     {
-      "file": "apps/web/src/features/feature-flags/store/index.ts",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.tsx",
+      "line": 7,
+      "claim": "Code inside the feature-flags feature imports its own store using the absolute path @/features/feature-flags/store while the same files use relative imports for everything else, so the feature does not follow one consistent import style."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 46,
+      "claim": "Several long Tailwind class strings with custom values (a multi-part before: accent bar, an exported GRID constant with custom grid-cols shared across files, and a header with custom text sizing) should be moved into named classes in a CSS module instead of being inlined, which would also remove the need for the exported string constant."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.test.tsx",
+      "line": 9,
+      "claim": "Test chains are constructed by hand and cast with (...) as unknown as Chain instead of using the existing chainBuilder helper, which would produce a fully typed chain and avoid the double type cast."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.tsx",
+      "line": null,
+      "claim": "The new components are flat files directly under components/ instead of following the project's convention of one folder per component containing an index.tsx with its test and story alongside it."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/index.ts",
       "line": 1,
-      "claim": "The new feature-flags feature folder only contains a store subdirectory with its own index.ts, but lacks a feature-root index.ts exporting its public hooks, selectors, actions and types. Without it, any future consumer of selectFeatureFlagOverrides, selectOverrideCount or setOverride would have to deep-import from the store path instead of the feature's public API, which is the pattern the feature-boundary convention and public-API rule are meant to prevent."
+      "claim": "The feature's barrel file exports only the implementation component and has no feature.ts or createFeatureHandle, deviating from how other features expose themselves; if intentional (to allow the editor to be dropped from production via dynamic import) this deviation should be noted in the PR description so it isn't copied as the normal pattern for other features."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The hook only reads data from useGetChainsConfigV2Query and ignores isLoading and error, so while the request is loading or if it fails, chains defaults to an empty array and every row displays an 'Off' badge and a false config value as if it were real data."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagSection.tsx",
+      "line": 15,
+      "claim": "When a search matches no rows, the section components return null, leaving the page blank below the toolbar with no 'no matching flags' message for the user."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 85,
+      "claim": "tabIndex={isOverridden ? undefined : -1} is placed inside a block that already only renders when isOverridden is true, so the -1 branch of the ternary can never execute."
+    },
+    {
+      "file": "apps/web/src/features/spaces/components/Sidebar/variants/SafeSidebarContent/SafeSidebarContent.tsx",
+      "line": 116,
+      "claim": "This file checks process.env.NEXT_PUBLIC_IS_PRODUCTION directly instead of using the IS_PRODUCTION constant from @/config/constants, and unlike the other two places that do this, it has no build-time pruning reason to bypass the shared constant."
     }
   ]
 }

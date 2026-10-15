@@ -1,0 +1,78 @@
+{
+  "usd": 0.7783488000000001,
+  "head": "89c646f2a3e5b61bd37c365a2970d8ca7b07a6af",
+  "verdicts": [
+    {
+      "issue": 3,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "tmjssz (2026-07-10 15:31) said the behaviour is intended: the revert button resets the flag and the sidebar badge shows the override count. The bot dropped the finding, and the Switch in FeatureFlagRow.tsx still always dispatches setOverride."
+    },
+    {
+      "issue": 7,
+      "verdict": "open",
+      "present": true,
+      "evidence": "store/index.ts:67 and :95 still register and persist featureFlagOverridesSlice unconditionally, as they did at b3a1e7e. No human replied to this point."
+    },
+    {
+      "issue": 10,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At b3a1e7e the test used MARKER = 'local feature-flag overrides' (banner copy). Commit c7c3e4b74 replaced it with a dedicated, imported EDITOR_BUNDLE_SENTINEL, and the bot confirmed the fix."
+    },
+    {
+      "issue": 11,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The slice is still persisted unconditionally at store/index.ts:95 and there is no prod cleanup. The bot repeated this 'for the record' on 07-29 and no human responded."
+    },
+    {
+      "issue": 13,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author kept the unconditional useAppSelector(selectOverrideCount) and, per the bot's re-review, added an inline comment calling it an intentional rules-of-hooks trade-off. The call now lives in useFeatureFlagsItem.tsx:10."
+    },
+    {
+      "issue": 15,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit c7c3e4b74 ('Document that useFeatureFlagEditorData reads raw (un-overridden) config') added the doc comment above useFeatureFlagEditorData."
+    },
+    {
+      "issue": 16,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At b3a1e7e the Check had only an aria-label. c7c3e4b74 and d70d9b835 ('expose the flag match indicator to AT') added role=\"img\" to it (FeatureFlagRow.tsx), and the bot acknowledged the change."
+    },
+    {
+      "issue": 19,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "c7c3e4b74 ('comment the layout spacer') added a comment above the w-12 span explaining that it reserves the width of the indicator and revert button."
+    },
+    {
+      "issue": 21,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "c7c3e4b74 added the useChains.test.ts case 'handles an override key that is not a known feature (string cast)'. It now lives in useChainOverrides.test.ts:87 (CUSTOM_UNKNOWN_FLAG)."
+    },
+    {
+      "issue": 22,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "tmjssz replied 'Good idea! done -> 9accdf3b9', a commit that renamed features/feature-flags to features/feature-flag-overrides. The old folder name existed at b3a1e7e."
+    },
+    {
+      "issue": 23,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At b3a1e7e the rows were sorted with localeCompare inside useMemo. c7c3e4b74 hoisted SORTED_FEATURES to module scope (useFeatureFlagEditorData.ts)."
+    },
+    {
+      "issue": 24,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The bot's concern was that screen-reader users never hear the match label. The author then added role=\"img\" with aria-label on the Check icon (c7c3e4b74 / d70d9b835), and the later bot review confirmed that AT users no longer need hover."
+    }
+  ]
+}

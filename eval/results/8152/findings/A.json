@@ -1,15 +1,145 @@
 {
-  "usd": 0.0380856,
+  "usd": 0.41685,
   "findings": [
     {
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 19,
-      "claim": "borderRadius is hard-coded to 12 instead of using the Tamagui radius token \"$5\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+      "claim": "wallet_getCallsStatus calls transactionsGetTransactionByIdV1.initiate without forceRefetch: true and never releases the subscription. Since RTK Query defaults refetchOnMountOrArgChange to false and nothing overrides it, when a dApp polls this endpoint, every call after the first returns the cached result, so a bundle first reported as pending is likely to stay reported as pending after it actually executes.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 330
     },
     {
+      "claim": "The two existing callers of the same transaction-by-id endpoint both pass forceRefetch: true, unlike this new call, showing an inconsistency with established usage.",
+      "file": "apps/mobile/src/services/tx/fetchTransactionDetails.ts",
+      "line": 13
+    },
+    {
+      "claim": "No test covers the new provider callback that has this caching/staleness issue.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 330
+    },
+    {
+      "claim": "The session-request handler is an async event listener that awaits routeSessionRequest with no try/catch around it, so any error thrown inside the router becomes an unhandled promise rejection and the dApp never receives a reply.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSessionRequestHandler.ts",
+      "line": 47
+    },
+    {
+      "claim": "A concrete trigger for the unhandled rejection is that rpc.params is cast with (rpc.params as unknown[]) ?? [] without checking it is actually an array; if a dApp sends an object instead of an array, the array destructuring elsewhere throws.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSessionRequestHandler.ts",
+      "line": 111
+    },
+    {
+      "claim": "The unchecked params cast causes array destructuring to throw at multiple call sites in methodRouter.ts when params is not actually an array.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 145
+    },
+    {
+      "claim": "Same destructuring issue recurs at another line in methodRouter.ts.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 163
+    },
+    {
+      "claim": "Same destructuring issue recurs at another line in methodRouter.ts.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 184
+    },
+    {
+      "claim": "Same destructuring issue recurs at another line in methodRouter.ts.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 197
+    },
+    {
+      "claim": "The handler should wrap its body in a try/catch and reply with an internal error code (-32603), or the router should validate that params is an array before destructuring it.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSessionRequestHandler.ts",
+      "line": 47
+    },
+    {
+      "claim": "The double-submit guard for sending a transaction relies only on React state (composing), which only takes effect after a re-render, so two quick taps can each compose a draft, set an outstanding request, and push the confirm-transaction screen twice.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 68
+    },
+    {
+      "claim": "The same state-only guard issue is present in the request sheet host component that navigates to confirm-transaction.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/RequestSheetHost.tsx",
+      "line": 187
+    },
+    {
+      "claim": "A synchronous ref-based guard (already used elsewhere in the same PR) should be used instead of relying solely on React state to prevent the double-submit race.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 68
+    },
+    {
+      "claim": "stripEip155Prefix now exists as a duplicate implementation in the shared utils package while an identical copy still exists and is used in the web app, instead of the web app re-exporting the shared package version as it already does for other similar utilities.",
+      "file": "packages/utils/src/features/walletconnect/utils.ts",
+      "line": 19
+    },
+    {
+      "claim": "The web app still has its own identical copy of stripEip155Prefix that is exported and used in two places, rather than re-exporting the new shared package version.",
+      "file": "apps/web/src/features/walletconnect/services/utils.ts",
+      "line": 8
+    },
+    {
+      "claim": "Mobile's EIP-5792 call-status logic (mapTxStatus and the envelope builder) is a second copy of code explicitly noted as copied verbatim from the web implementation, rather than being placed in the shared package that already holds related 5792 code.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/getCallsStatus.ts",
+      "line": 42
+    },
+    {
+      "claim": "The web implementation this mobile code was copied from lives in the safe-wallet-provider service, confirming duplication rather than reuse from the shared package.",
+      "file": "apps/web/src/services/safe-wallet-provider/index.ts",
+      "line": 102
+    },
+    {
+      "claim": "wallet_switchEthereumChain uses an unchecked parseInt on the external chainId string, which turns malformed input into 'NaN' or silently accepts a partial value such as treating '0x1g' as 1, so bad input surfaces as the wrong error code (4901, not deployed on chain) instead of an invalid-params error (-32602).",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 149
+    },
+    {
+      "claim": "The chainId parsing should instead use BigInt inside a try/catch, matching the approach already used by the wallet_sendCalls chainId check, to properly reject malformed input.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 149
+    },
+    {
+      "claim": "Neither gate in switchActiveChainByCaip2 (missing chain config, Safe not deployed on the target chain) is tested; existing router tests replace the whole function with a mock instead of exercising these branches.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 299
+    },
+    {
+      "claim": "None of the branches in getCallsStatus are tested: transaction not found, receipt fetch failure, missing chain config, and the success case; adding the success-case test would also have caught the stale-status caching bug.",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 323
+    },
+    {
+      "claim": "New UI code hard-codes a shadow color instead of using a theme token, which the mobile styling convention calls for.",
       "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 37,
-      "claim": "borderRadius is hard-coded to 8 instead of using the Tamagui radius token \"$4\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+      "line": 51
+    },
+    {
+      "claim": "New UI code hard-codes paddingTop and paddingLeft pixel values where a Tamagui spacing token would fit better.",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 47
+    },
+    {
+      "claim": "New UI code hard-codes a maxWidth pixel value rather than using a theme token.",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 61
+    },
+    {
+      "claim": "dApp-supplied name text is rendered without numberOfLines or ellipsis truncation, so a long dApp name can render awkwardly.",
+      "file": "DappIdentity.tsx",
+      "line": 68
+    },
+    {
+      "claim": "The dApp domain, rendered as a pill next to an info icon, also lacks truncation, so a long domain can wrap badly or push the info icon out of the pill.",
+      "file": "DappIdentity.tsx",
+      "line": 85
+    },
+    {
+      "claim": "The dApp name used as the header title also lacks truncation handling for long values.",
+      "file": "TransactionHeader.tsx",
+      "line": 69
+    },
+    {
+      "claim": "ShareView.tsx removes the 'This account is only available on …' line and the horizontal padding, and since ShareView is also used for the home Receive screen, this change affects that screen in addition to the new My code tab, so the design intent should be confirmed for both.",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": null
     }
   ]
 }

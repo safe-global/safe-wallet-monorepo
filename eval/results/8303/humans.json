@@ -1,0 +1,54 @@
+{
+  "usd": 0.4224742,
+  "head": "7ed66e6fd3ed1129a6c52cdadf195e3b12851c8d",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit a5460e4ef adds txSetupStatus and WcTxSetupIndicator in TestCtrls.e2e.tsx, which render e2e-wc-tx-setup-ready/-failed markers. Commit 751b2079e makes the tx flows wait on the ready marker. The round-2 review confirms the fix."
+    },
+    {
+      "issue": 9,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 3a5f8b6e0 adds a comment in WcResponseIndicator.tsx: \"Flows drive one tx at a time; the last-key read relies on that, not on key order\". This is the comment the bot suggested, tying the logic to the flow contract."
+    },
+    {
+      "issue": 10,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "proposeFetchMock.ts now has a JSDoc note (\"Install-once per JS runtime: the wrapper binds the underlying fetch at install time, so anything swapping global.fetch must do so before installing\"). That is the remedy the bot proposed for this concern."
+    },
+    {
+      "issue": 11,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The install-once contract is now documented in the module JSDoc of proposeFetchMock.ts (lines 1-9). The round-2 review marks it ✅."
+    },
+    {
+      "issue": 13,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "In WcResponseIndicator.tsx the useEffect now takes the deps array [outstanding], and Object.keys moved inside the effect (commit 3a5f8b6e0)."
+    },
+    {
+      "issue": 17,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 751b2079e adds shared wcTxUiTimeout/wcTxNetworkTimeout to e2e/utils/scripts/defaults.js. The flows (e.g. tx-send-happy.yml) now use ${output.defaults.wcTx*Timeout} instead of hard-coded values."
+    },
+    {
+      "issue": 18,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The flagged assertion at tx-send-happy.yml:48 now uses '.*-0\\.001.*' (the signed amount), and the round-2 review marks it addressed. The pending-list assertion at line 94 still uses the loose pattern."
+    },
+    {
+      "issue": 19,
+      "verdict": "open",
+      "present": true,
+      "evidence": "jitteredValue in walletConnectDappsSetup.ts still uses Date.now() + ++jitterSeq; only its comments were reworded. No human replied; the only reaction is the bot's own round-2 note calling it acceptable."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "usd": 0.6428636,
+  "head": "f15ab0530f1ba0931c1733cb9e1925a5bd5e7c65",
+  "verdicts": [
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 244191a, ScanQrSend.container.tsx:7 imports from '@/src/components/Camera/useCameraPermissionFlow'. Commit e1f553c1a switched it to the Camera barrel, and the bot's re-review confirmed the fix."
+    },
+    {
+      "issue": 8,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 244191a, handleFocusEffect in ScanQrSend.container.tsx (and in useScan) calls setIsCameraActive(true) no matter what errorMessage is. Commit 5eeb0d6c5 added an errorRef guard plus tests so the camera doesn't come back on behind the error overlay."
+    },
+    {
+      "issue": 12,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 244191a, useScannedAddressToSend.ts:38 uses `scanTimestamp: Date.now().toString()`. Commit c0e70a182 replaced it with a deterministic scanSeq nonce, and ed774d6dc documented that nonce."
+    },
+    {
+      "issue": 13,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 244191a, useScan.test.tsx:32-38 mocks parsePrefixedAddress and isValidAddress. Commit 14f7999bf ('mock resolveScannedAddress directly in the useScan test') changed this."
+    },
+    {
+      "issue": 27,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 244191a, useWalletConnectScan.ts doesn't reset handledRef when focus is lost. Commit 5a78c8f1a ('document and harden the header scanner's handledRef') added the cleanup and a comment, and the bot's re-review confirmed it."
+    }
+  ]
+}

@@ -1,30 +1,50 @@
 {
-  "usd": 0.05535999999999999,
+  "usd": 0.0924576,
   "findings": [
     {
-      "file": "apps/web/src/features/feature-flags/store/index.ts",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.tsx",
+      "line": 20,
+      "claim": "No test covers the editor's interactions, including search filtering, the 'Reset all overrides' action and its disabled state, a switch toggle calling setOverride, a revert action calling clearOverride, and a section hiding itself when it has no matching rows."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The hook reads only the data from the config query and ignores isLoading and error, so when the config service fails every flag renders as 'Off' with no indication that loading failed, and toggling a flag in that state saves an override based on invalid or missing config."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagSection.tsx",
+      "line": 15,
+      "claim": "When a search matches no flags, both sections return null, leaving the area under the search box blank instead of showing a message like other list views in the app do for zero results."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/__tests__/bundleExclusion.test.ts",
+      "line": 32,
+      "claim": "The only test verifying the editor stays out of production builds is skipped unless the RUN_BUNDLE_TESTS environment variable is set, and nothing in the workflows or scripts sets that variable, so a break in the production-exclusion guard would not be caught by CI."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.stories.tsx",
+      "line": 10,
+      "claim": "The story titles use the prefix 'FeatureFlags/...' instead of the 'Features/FeatureFlags/...' pattern used by other feature stories and specified in apps/web/AGENTS.md."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 85,
+      "claim": "The prop tabIndex={isOverridden ? undefined : -1} sits inside a block already gated on isOverridden being true, so the -1 branch can never execute, making the ternary dead code that should be simplified."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/hooks/useChains.ts",
+      "line": 18,
+      "claim": "The production check process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true' is written inline in multiple places (also in SafeSidebarContent.tsx) instead of reusing the shared IS_PRODUCTION constant from config/constants.ts, and the sidebar copy has no comment explaining why it needs the inline form."
+    },
+    {
+      "file": "apps/web/src/features/feature-flags/index.ts",
       "line": 1,
-      "claim": "The new features/feature-flags/ folder only contains a store/ folder, missing a contract.ts, feature.ts, top-level index.ts, and a feature flag, which conflicts with the documented requirement that every feature export a contract and sit behind a feature flag; other feature folders such as gtf/ follow the full structure. The slice should either be given the full feature structure or moved to apps/web/src/store/featureFlagOverridesSlice.ts alongside other slices of its kind."
+      "claim": "The feature has no contract.ts, feature.ts, or createFeatureHandle, which docs/feature-architecture.md requires for features, though other features in the codebase also skip this pattern."
     },
     {
-      "file": "apps/web/src/store/index.ts",
-      "line": 95,
-      "claim": "The feature flag overrides are added to persistedSlices, meaning they are saved to localStorage, shared across tabs, and reloaded on startup without validation in every environment including production. Although nothing currently reads the overrides, once a consumer such as useHasFeature honors them, values left in localStorage would override real chain feature flags in production and a stale dev override could persist silently; saving and reading overrides should be restricted to non-production builds or an explicit dev gate, and loaded keys should be validated against FEATURES."
-    },
-    {
-      "file": "featureFlagOverridesSlice.ts",
-      "line": 29,
-      "claim": "Saved override keys for a FEATURES value that is later removed or renamed are never cleaned up, so selectOverrideCount still counts them while the typed clearOverride cannot remove them; counting or loading should filter to Object.values(FEATURES)."
-    },
-    {
-      "file": "featureFlagOverridesSlice.ts",
-      "line": 24,
-      "claim": "setOverride, clearOverride, clearAllOverrides, and both selectors are unused outside the slice and its test, making them dead code at merge unless a stacked PR consumes them, which should be noted in the PR description."
-    },
-    {
-      "file": "featureFlagOverridesSlice.test.ts",
-      "line": 30,
-      "claim": "No test covers the store change that adds the slice to the saved-state list, and the existing 'clears a single override' test starts from a single key so it cannot distinguish clearOverride removing just that key from it wiping everything; the test should start with two keys and assert only one remains, and a load-from-storage case should be added in store/__tests__/index.test.ts."
+      "file": "apps/web/src/components/sidebar/SafeSidebarVariant.tsx",
+      "line": 130,
+      "claim": "The Developer group block is almost a copy of the DeFi group block a few lines above it, duplicating the same structure rather than sharing it."
     }
   ]
 }

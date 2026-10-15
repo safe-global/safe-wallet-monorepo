@@ -1,0 +1,54 @@
+{
+  "usd": 0.43612860000000003,
+  "head": "6794d3d4c763495b0d95b609d77baa620947edf3",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "TimDaub replied to tongyaosafe's thread and the Codex thread: 'Fixed in f320203d0: one row per Safe and chain'. At HEAD, PoliciesTable/index.tsx has no toRows and uses getRowKey={(policy) => policy.id}."
+    },
+    {
+      "issue": 3,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 01976729e ('let the search find policies by network') adds a `network` field (chain name + chainId) to the Fuse keys in hooks/usePolicySearch.ts. The author confirmed the fix in the Codex thread."
+    },
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "In reply to tongyaosafe's role=button thread, TimDaub said f320203d0 keeps the row a table row, ignores clicks on nested controls, and puts focus on a real chevron Button. That Button is in PoliciesTable/index.tsx at HEAD."
+    },
+    {
+      "issue": 6,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author called pagination optional, but f320203d0 dropped the per-Safe merge. Rows are now keyed by policy.id, so mockLongPolicyList(30) gives 30 distinct rows instead of 3 rows with duplicate keys."
+    },
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author said 'Done in f320203d0, with your format'. At HEAD, getOpenPolicyLabel returns `Open ${getPolicyLabel(policy)} for ${shortenAddress(...)}` on the chevron button."
+    },
+    {
+      "issue": 13,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author said the helper was moved to utils/policyTokens.ts in f320203d0. At HEAD, usePolicySearch.ts imports getPolicyTokens from '../utils/policyTokens'."
+    },
+    {
+      "issue": 15,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Nobody replied to the NetworkLogosPill comment, and that component was not adopted. After f320203d0 each row shows a single ChainIndicator for policy.safe.chainId, so a row can no longer list many chains."
+    },
+    {
+      "issue": 20,
+      "verdict": "open",
+      "present": true,
+      "evidence": "Nobody replied to tongyaosafe's 'Please follow the template for PR description' comment. The PR body can't be seen from the repo, so there is no evidence it was changed."
+    }
+  ]
+}

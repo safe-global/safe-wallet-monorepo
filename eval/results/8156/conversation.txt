@@ -1,0 +1,287 @@
+THREAD apps/mobile/src/features/ExecuteTx/hooks/useTransactionExecution.ts:127 resolved=true
+[compojoom 2026-06-23T11:07:36Z] what are we supposed to do with the simulation Error? Right now we are not displaying it anywhere? Is this intentional. What happens if cgw is not able to relay the tx
+[yagopv 2026-06-25T08:59:25Z] done
+
+THREAD apps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts:56 resolved=true
+[compojoom 2026-06-23T11:09:42Z] buildFeesBreakdown is the right shared primitive, but each of the three callers repeats the same store-reading + native-currency mapping:
+
+FeesBreakdown.tsx
+ReviewExecuteFooter.tsx (the safePaysGasFee block)
+TokenTransfer.tsx (the safePaidFee memo)
+
+All three independently do useAppSelector(selectActiveChainCurrency) and build { address: ZERO_ADDRESS, symbol, decimals }. A thin useFeesBreakdown(detailedExecutionInfo, transfer?) hook would own the store reads + native-currency mapping and return the breakdown, removing the repetition and the if (!nativeCurrency) return undefined guard from each call site. This is the "write it three times, then extract" trigger — you've now written it three times.
+[yagopv 2026-06-25T08:59:33Z] done
+
+THREAD apps/mobile/src/features/ExecuteTx/components/ReviewAndExecute/ReviewExecuteFooter.tsx:89 resolved=true
+[compojoom 2026-06-23T11:13:06Z] We extract feeInfoText and FeeLabelWithInfo so copy can't drift — good. But the row markup still diverges: FeesBreakdown.tsx: defines FeeRow/FeeAmount, while ReviewExecuteFooter re-implements fee rows inline with raw View flexDirection="row" + TokenAmount. The "Execution fee · FREE" and "Max gas fee" rows exist in both with subtly different styling (e.g. footer uses fontWeight={700}, breakdown uses $success text only). 
+
+Can't we  export FeeRow/FeeAmount alongside FeeLabelWithInfo so the visual contract is shared too.
+
+
+[yagopv 2026-06-25T08:59:50Z] done
+
+THREAD apps/mobile/src/features/ConfirmTx/components/TransactionInfo/feeRows.ts:21 resolved=true
+[compojoom 2026-06-23T11:14:45Z] we also have a function named FeesBreakdown, maybe it would be better to rename this to FeesBreakdownData?
+[yagopv 2026-06-25T08:59:43Z] done
+
+REVIEW APPROVED
+[compojoom 2026-06-26T10:19:24Z] thank you! 
+
+COMMENT
+[yagopv 2026-06-18T14:19:18Z] @claude review
+
+
+COMMENT
+[github-actions 2026-06-18T14:19:20Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://feat-pay-from-safe-relaying--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://feat-pay-from-safe-relaying--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[github-actions 2026-06-18T14:19:21Z] <!-- add-pr-comment:tx-builder-preview -->
+
+## tx-builder Preview
+✅ Deploy successful!
+
+**Preview URL:**
+https://feat-pay-from-safe-relaying--tx-builder.review.5afe.dev/
+
+COMMENT
+[claude 2026-06-18T14:19:45Z] **Claude finished @yagopv's task in 2m 52s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27766023811)
+
+---
+### Claude PR Review
+
+- [x] Read changed files
+- [x] Analyze code quality, bugs, performance, security, tests
+- [x] Post review feedback
+
+---
+
+Nice work on tightening up the Safe-pays relay path and adding the fee breakdown — the typed `RelaySimulationError` flow and the `INDETERMINATE_SIMULATION` opt-in sheet read cleanly. A few things worth a look, focused only on improvements:
+
+### Issues & suggestions
+
+**1. Duplicated "must relay" guard across two containers**
+`HowToExecuteSheet.container.tsx:99-118` and `ReviewAndExecuteContainer.tsx:52-58, 138-144` both re-derive `isRelayEnabled`, `requiresRelay`, and `isRelayAvailable`, and both render a "relay not available" terminal state — but with **different UI** (`RelayUnavailableSheet` in one, an inline `<Text>` in the other). This is fragile (two truths) and inconsistent UX. Extract a `useRequiresRelay(txDetails)` hook that returns `{ requiresRelay, isRelayEnabled, isRelayAvailable }`, and reuse `RelayUnavailableSheet` in both places.
+
+**2. `useEffect` dispatching execution method overlap**
+`HowToExecuteSheet.container.tsx:108-112` dispatches `setExecutionMethod(WITH_RELAY)` from an effect when `requiresRelay && isRelayEnabled`. `getExecutionMethod()` (helpers.ts:43-45) already enforces this at compute-time in `ReviewAndExecuteContainer`. The effect causes an extra render + write to a Redux slice from the picker screen — the derivation in `getExecutionMethod` is the single source of truth; the effect can go.
+
+**3. Inconsistent token-type handling in `FeesBreakdown.tsx`**
+- `useTokenDetails(transfer ?? ({ transferInfo: {} } as never))` (line 61) is calling a hook with a stub typed away. If `useTokenDetails` accepts an optional, make that explicit; otherwise lift the values out conditionally before calling.
+- `transferTokenAddress` (lines 137-140) reads `transferInfo.tokenAddress` from an untyped `Record<string, unknown>` — losing the `Erc20`/`Erc721`/`NativeCoin` distinction that `TokenTransfer.tsx` already gets via `isERC20Transfer`. Use the existing type guard so the cast disappears and ERC-721 transfers don't accidentally fall through.
+
+**4. `feeRows.ts` ignores `outgoing.amount === 0`**
+`BigInt(outgoing.amount) > 0n` (line 94) drops the outgoing line entirely when amount is zero — fine for value-transfers but wrong for zero-value calls that still display the destination (e.g. NFT mints, contract calls shown as transfers). If that's intentional, a one-liner comment would help; otherwise change to `>= 0n` and let the caller decide.
+
+**5. `useTransactionExecution.ts` — `executors` rebuilt every render**
+Lines 53-97: the dispatch table is allocated on every render but only consumed inside the `useCallback` at 99-144. Either move it inside the callback or wrap in `useMemo`. Same `useCallback` deps include `safe` (from `useSafeInfo()` — unstable reference) which will keep busting the memo.
+
+**6. `IndeterminateSimulationSheet` and `RelayUnavailableSheet` are 90% identical**
+Same `BottomSheetModal` scaffolding, badge, title, body, button layout. Worth extracting a shared `<ConfirmationSheet>` to avoid drift (icon names, paddings, badge themes already differ in subtle ways).
+
+**7. `determineExecutionPath` naming inversion (helpers.ts:113-117)**
+```ts
+if (!isBiometricsEnabled) {
+  return 'biometrics'
+}
+return 'standard'
+```
+Returning `'biometrics'` *when biometrics is disabled* (meaning: go to the opt-in screen) is confusing. Rename to `'biometrics-opt-in'` or invert the branch.
+
+**8. Test coverage gaps**
+- `useTransactionExecution.test.tsx` only exercises `WITH_RELAY`. The four-branch dispatcher refactor (lines 53-97) should at least smoke-test PK/Ledger/WC selection so a regression in `executors[executionMethod]` is caught.
+- `helpers.test.ts` doesn't appear to cover the new `txRequiresRelay` function or the `requiresRelay = true` branch of `getExecutionMethod` — add cases for both, since they gate the no-fallback flow.
+
+### Nits
+
+- `FeesBreakdown.tsx:102` — UI string `"FREE"` is the only all-caps label in the sheet; project rule is sentence case.
+- `feeRows.ts:32-41` — `Number(formatUnits(...))` loses precision on amounts with 18 decimals; acceptable for fiat display but worth a comment.
+- The fee-breakdown computation runs in both `TokenTransfer.tsx` and `FeesBreakdown.tsx` for the same tx. Cache via a single hook (`useFeesBreakdown(executionInfo, txInfo)`) so they can't drift.
+
+### Looks good
+
+- `relayExecutor.ts` simulation-error mapping is clean and the test coverage at `relayExecutor.test.ts` is thorough.
+- Moving `isGtfSafePaid` / `relayErrors` to `@safe-global/utils` removes web/mobile duplication — good cleanup.
+- `useExecutionFlow` correctly guards against state updates after unmount via `useIsMounted()`.
+ · branch: `feat/pay-from-safe-relaying`
+
+COMMENT
+[github-actions 2026-06-18T14:25:54Z] ## 📦 Next.js Bundle Analysis for @safe-global/web
+
+This analysis was generated by the [Next.js Bundle Analysis action](https://github.com/hashicorp/nextjs-bundle-analysis). 🤖
+
+### 🎉  Global Bundle Size Decreased
+  
+Page | Size (compressed) | 
+|---|---|
+| `global` | `1.38 MB` _(-47 B)_ |
+
+<details>
+<summary>Details</summary>
+<p>The <strong>global bundle</strong> is the javascript bundle that loads alongside every page. It is in its own category because its impact is much higher - an increase to its size means that every page on your website loads slower, and a decrease means every page loads faster.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>If you want further insight into what is behind the changes, give <a href='https://www.npmjs.com/package/@next/bundle-analyzer'>@next/bundle-analyzer</a> a try!</p>
+</details>
+
+<!-- __NEXTJS_BUNDLE_@safe-global/web -->
+<!-- Sticky Pull Request Commentnext-bundle-analysis -->
+
+COMMENT
+[github-actions 2026-06-18T14:31:27Z] <!-- jest coverage report action for options with hash 538b3aeca5435921509d9329a38101b7 -->
+
+## Coverage report for `apps/web`
+
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | Category | Percentage | Covered / Total |
+| :-: | :- | :- | :-: |
+| 🟢 | Statements | <div title="Base coverage is: 83.02%">82.76% (-0.26% 🔻)</div> | 30594/36967 |
+| 🟡 | Branches | <div title="Base coverage is: 66.72%">66.15% (-0.57% 🔻)</div> | 9604/14519 |
+| 🟡 | Functions | <div title="Base coverage is: 70.09%">69.69% (-0.41% 🔻)</div> | 4584/6578 |
+| 🟢 | Lines | <div title="Base coverage is: 84.31%">84.07% (-0.24% 🔻)</div> | 27474/32680 |
+
+
+<details><summary>Show files with reduced coverage 🔻</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟡 | <div title="src/utils/transaction-guards.ts">`...` / transaction-guards.ts</div> | <div title="Base coverage is: 87.3%">84.52% (-2.78% 🔻)</div> | <div title="Base coverage is: 66%">62% (-4% 🔻)</div> | <div title="Base coverage is: 84.06%">81.16% (-2.9% 🔻)</div> | <div title="Base coverage is: 83.52%">79.67% (-3.85% 🔻)</div> |
+| 🟢 | <div title="src/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/index.tsx">`...` / index.tsx</div> | 100% | <div title="Base coverage is: 83.33%">77.78% (-5.56% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/components/common/CopyTooltip/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 91.18%">82.35% (-8.82% 🔻)</div> | <div title="Base coverage is: 83.33%">66.67% (-16.67% 🔻)</div> | <div title="Base coverage is: 62.5%">50% (-12.5% 🔻)</div> | <div title="Base coverage is: 93.55%">83.87% (-9.68% 🔻)</div> |
+| 🟢 | <div title="src/components/transactions/TxDetails/TxData/DecodedData/MethodDetails/index.tsx">`...` / index.tsx</div> | 100% | <div title="Base coverage is: 86.67%">80% (-6.67% 🔻)</div> | 100% | 100% |
+| 🟡 | <div title="src/components/ui/input.tsx">`...` / input.tsx</div> | 66.67% | <div title="Base coverage is: 75%">66.67% (-8.33% 🔻)</div> | 66.67% | 66.67% |
+| 🟢 | <div title="src/features/spaces/components/SafeSelectorDropdown/index.tsx">`...` / index.tsx</div> | 95.45% | <div title="Base coverage is: 95.45%">95.24% (-0.22% 🔻)</div> | 87.5% | 97.37% |
+| 🟢 | <div title="src/features/spaces/components/SafeAccounts/SafeCardReadOnly.tsx">`...` / SafeCardReadOnly.tsx</div> | <div title="Base coverage is: 86.79%">79.66% (-7.13% 🔻)</div> | <div title="Base coverage is: 55.77%">54.55% (-1.22% 🔻)</div> | <div title="Base coverage is: 42.86%">33.33% (-9.52% 🔻)</div> | <div title="Base coverage is: 90%">83.64% (-6.36% 🔻)</div> |
+| 🟢 | <div title="src/components/common/AddressInput/index.tsx">`...` / index.tsx</div> | 100% | <div title="Base coverage is: 98.39%">98.11% (-0.27% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/components/common/AddressInput/useNameResolver.ts">`...` / useNameResolver.ts</div> | <div title="Base coverage is: 100%">80.95% (-19.05% 🔻)</div> | <div title="Base coverage is: 96.15%">50% (-46.15% 🔻)</div> | <div title="Base coverage is: 100%">75% (-25% 🔻)</div> | <div title="Base coverage is: 100%">83.33% (-16.67% 🔻)</div> |
+| 🟡 | <div title="src/components/transactions/Warning/index.tsx">`...` / index.tsx</div> | 77.78% | <div title="Base coverage is: 50%">25% (-25% 🔻)</div> | 33.33% | 75% |
+| 🟢 | <div title="src/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert.tsx">`...` / UntrustedFallbackHandlerTxAlert.tsx</div> | 85.71% | <div title="Base coverage is: 50%">37.5% (-12.5% 🔻)</div> | 80% | 84.62% |
+| 🟢 | <div title="src/components/tx/ColorCodedTxAccordion/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 100%">97.14% (-2.86% 🔻)</div> | 70% | 100% | <div title="Base coverage is: 100%">96.67% (-3.33% 🔻)</div> |
+| 🔴 | <div title="src/components/transactions/TxDetails/TxData/DecodedData/Multisend/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 88.89%">33.33% (-55.56% 🔻)</div> | <div title="Base coverage is: 76.92%">0% (-76.92% 🔻)</div> | <div title="Base coverage is: 77.78%">0% (-77.78% 🔻)</div> | <div title="Base coverage is: 96.67%">42.86% (-53.81% 🔻)</div> |
+| 🟢 | <div title="src/components/transactions/TxDetails/TxData/index.tsx">`...` / index.tsx</div> | 100% | <div title="Base coverage is: 33.33%">12.9% (-20.43% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/components/transactions/TxDetails/TxData/NestedTransaction/NestedTransaction.tsx">`...` / NestedTransaction.tsx</div> | <div title="Base coverage is: 100%">81.25% (-18.75% 🔻)</div> | <div title="Base coverage is: 50%">0% (-50% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 100%">86.67% (-13.33% 🔻)</div> |
+| 🔴 | <div title="src/components/transactions/TxDetails/TxData/NestedTransaction/useSignedHash.tsx">`...` / useSignedHash.tsx</div> | <div title="Base coverage is: 71.43%">35.71% (-35.71% 🔻)</div> | <div title="Base coverage is: 14.29%">0% (-14.29% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 69.23%">38.46% (-30.77% 🔻)</div> |
+| 🔴 | <div title="src/components/transactions/TxDetails/TxData/NestedTransaction/ExecTransaction/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 88.46%">53.85% (-34.62% 🔻)</div> | <div title="Base coverage is: 50%">0% (-50% 🔻)</div> | <div title="Base coverage is: 50%">0% (-50% 🔻)</div> | <div title="Base coverage is: 88%">56% (-32% 🔻)</div> |
+| 🟡 | <div title="src/features/spaces/components/SelectSafesOnboarding/components/SafeCardLayout.tsx">`...` / SafeCardLayout.tsx</div> | <div title="Base coverage is: 80%">78.57% (-1.43% 🔻)</div> | <div title="Base coverage is: 91.3%">93.33% (+2.03% 🔼)</div> | 0% | <div title="Base coverage is: 80%">78.57% (-1.43% 🔻)</div> |
+| 🟢 | <div title="src/features/myAccounts/components/MyAccountsV2/components/AccountItem/MultiAccountItem.tsx">`...` / MultiAccountItem.tsx</div> | <div title="Base coverage is: 97.37%">97.3% (-0.07% 🔻)</div> | 81.82% | 87.5% | <div title="Base coverage is: 97.3%">97.22% (-0.08% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/SecurityHub/components/SecurityChecks/hooks/useSecurityChecks.tsx">`...` / useSecurityChecks.tsx</div> | <div title="Base coverage is: 96.69%">96.67% (-0.03% 🔻)</div> | <div title="Base coverage is: 79.28%">78.85% (-0.43% 🔻)</div> | 93.75% | <div title="Base coverage is: 96.49%">96.46% (-0.03% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/SecurityHub/components/SecuritySafesTable/SingleSafeRow.tsx">`...` / SingleSafeRow.tsx</div> | <div title="Base coverage is: 96.43%">96.3% (-0.13% 🔻)</div> | 74.07% | 66.67% | <div title="Base coverage is: 96.3%">96.15% (-0.14% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/SecurityHub/components/SecuritySafesTable/MultichainSafeRow.tsx">`...` / MultichainSafeRow.tsx</div> | <div title="Base coverage is: 93.48%">93.33% (-0.14% 🔻)</div> | 75% | 77.78% | <div title="Base coverage is: 93.33%">93.18% (-0.15% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog.tsx">`...` / ImportAddressBookDialog.tsx</div> | <div title="Base coverage is: 97.59%">97.5% (-0.09% 🔻)</div> | 82.35% | 87.5% | <div title="Base coverage is: 98.67%">98.61% (-0.06% 🔻)</div> |
+| 🔴 | <div title="src/features/spaces/components/SpaceAddressBook/AddToWorkspaceButton.tsx">`...` / AddToWorkspaceButton.tsx</div> | <div title="Base coverage is: 93.1%">32.26% (-60.85% 🔻)</div> | <div title="Base coverage is: 83.33%">0% (-83.33% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 96.3%">34.48% (-61.81% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/SpaceActivityLog/ActivityLogFilters.tsx">`...` / ActivityLogFilters.tsx</div> | <div title="Base coverage is: 93.55%">91.43% (-2.12% 🔻)</div> | <div title="Base coverage is: 77.78%">68.42% (-9.36% 🔻)</div> | <div title="Base coverage is: 81.82%">80% (-1.82% 🔻)</div> | <div title="Base coverage is: 92.59%">92.86% (+0.26% 🔼)</div> |
+| 🟡 | <div title="src/components/dashboard/PendingTxs/PendingTxListItem.tsx">`...` / PendingTxListItem.tsx</div> | <div title="Base coverage is: 100%">72.22% (-27.78% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 100%">76.47% (-23.53% 🔻)</div> |
+
+</details>
+
+## Test suite run success
+6271 tests passing in 678 suites.
+
+<p align="right">Report generated by <a href="https://github.com/ArtiomTr/jest-coverage-report-action">🧪jest coverage report action</a> from 710e3684c1b7e9529d5f2fcc3c6c670e86874462</p>
+
+
+COMMENT
+[datadog-official 2026-06-19T07:52:15Z] <a target='_blank' href='https://app.datadoghq.eu/ci/pipeline-executions?query=ci_level%3Ajob+%40ci.status%3Aerror+%40git.commit.sha%3A4d03d6a0b1e72538d9153c92499c64ca8a1b683e&referrer=pr-comment'><picture><source media="(prefers-color-scheme: dark)" srcset="https://static.datadoghq.com/static/images/pr_comments/software_delivery/badges_header/pipelines-warning.svg"/><img src="https://static.datadoghq.com/static/images/pr_comments/software_delivery/badges_header/pipelines-warning-light.svg" alt="Pipelines" align="center" /></picture></a>
+
+## ⚠️ Warnings
+
+🚦 **1 Pipeline job failed**
+
+<blockquote>
+<div>
+
+<code> Web Smoke tests | Cypress Smoke tests (2) </code> &nbsp;&nbsp;<a href="https://app.datadoghq.eu/ci/pipeline-executions?query=ci_level%3Ajob&#43;ci.job_correlation_id%3A8e179ff812eb7297&amp;referrer=pr-comment" title="View in Datadog"><img src="https://static.datadoghq.com/static/images/pr_comments/software_delivery/datadog_icon.svg" alt="View in Datadog" align="center" /></a> &nbsp; <a href="https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27951668736/job/82710778206" title="View in GitHub Actions"><picture><source media="(prefers-color-scheme: dark)" srcset="https://static.datadoghq.com/static/images/pr_comments/software_delivery/logos/github-logo-dark.svg"/><img src="https://static.datadoghq.com/static/images/pr_comments/software_delivery/logos/github-logo-light.svg" alt="GitHub Actions" align="center" /></picture></a>
+
+</div>
+</blockquote>
+
+<sub>
+This comment will be updated automatically if new data arrives. <br />
+🔗 Commit SHA: 4d03d6a | <a href="https://docs.datadoghq.com/integrations/guide/source-code-integration/#pr-comments">Docs</a> | Give us <a href="https://forms.gle/ys6MDmdQEeC5pkzWA">feedback</a>!
+</sub>
+
+COMMENT
+[yagopv 2026-06-19T08:00:50Z] @claude review
+
+
+COMMENT
+[claude 2026-06-19T08:01:05Z] **Claude finished @yagopv's task in 3m 25s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27813381593)
+
+---
+### Claude PR Review (round 2)
+
+- [x] Diff PR against `origin/dev`
+- [x] Read key changed files
+- [x] Check what was addressed from prior review
+- [x] Identify remaining/new issues
+- [x] Post review
+
+---
+
+Most of the structural feedback from the previous round was addressed cleanly — `useRequiresRelay` is now the single source of truth, the spurious `setExecutionMethod` effect is gone, `ConfirmationSheet` was extracted, and tests for `txRequiresRelay` and the Safe-pays branch of `getExecutionMethod` are in. The web ↔ mobile dedup via `@safe-global/utils` is also a nice cleanup.
+
+A few things from last review are still open, plus one new concern.
+
+### Still open
+
+**1. `executors` rebuilt every render — `useTransactionExecution.ts:53-97`**
+The dispatch table is allocated on every render and only consumed inside the `useCallback` at 99-144. Either move it inside the callback or wrap in `useMemo`. The `useCallback` deps still include `safe` (from `useSafeInfo()`, unstable ref), so the callback re-creates on most renders anyway.
+
+**2. `FeesBreakdown.tsx:100` — UI string `"FREE"` is all-caps**
+Project rule is sentence case for UI text. Use `"Free"`.
+
+**3. `determineExecutionPath` still returns `'biometrics'` when biometrics is disabled — `helpers.ts:113-117`**
+Reads inverted (the route is the opt-in screen). `'biometrics-opt-in'` would match the actual destination and remove the head-scratcher.
+
+**4. Fee-breakdown still computed twice**
+`TokenTransfer.tsx:39-52` and `FeesBreakdown.tsx:63-89` both call `buildFeesBreakdown` for the same tx with the same `executionInfo`. A `useFeesBreakdown(executionInfo, txInfo)` hook would prevent drift (e.g. the `gasNotYetKnown` branch already differs in interpretation between the two consumers).
+
+### New
+
+**5. `FeesBreakdown.tsx:89` — `tokenDetails` in `useMemo` deps defeats memoization**
+`useTokenDetails` returns a fresh object literal each call, so the `breakdown` memo recomputes every render. Depend on the primitive fields you actually read (`tokenDetails.value`, `tokenDetails.tokenSymbol`, `tokenDetails.decimals`) or memoize `tokenDetails` upstream.
+
+### Nits
+
+- `feeRows.ts:98` — `BigInt(outgoing.amount) > 0n` still drops zero-amount outgoing lines. Last review flagged this for NFT mints / zero-value contract calls; if it's intentional, a one-line comment would document the choice.
+- `useTransactionExecution.test.tsx` — still only covers the `WITH_RELAY` branch. PK/Ledger/WC dispatcher paths remain untested, so a regression in `executors[executionMethod]` won't be caught.
+
+### Looks good
+
+- `useRequiresRelay` cleanly captures the "Safe-pays must relay / signer-pays consumes quota" rule in one place.
+- `ConfirmationSheet` extraction is nicely scoped — both downstream sheets are tiny now.
+- Tests for the `RelaySimulationError` mapping in `relayExecutor.test.ts` and the SIMULATION_FAILED / INDETERMINATE_SIMULATION branches in `useExecutionFlow.test.ts` are thorough.
+- Moving `isGtfSafePaid` and `relayErrors` to `@safe-global/utils` removes web/mobile duplication.
+ · branch: `feat/pay-from-safe-relaying`
+
+COMMENT
+[compojoom 2026-06-25T09:11:10Z] ### Suggestion: collapse the "Safe pays the fee" naming to one term per layer
+
+While reviewing, I noticed the same underlying predicate (`isGtfSafePaid` → true) currently surfaces under three names:
+
+| Layer | Name |
+|---|---|
+| Relay gating | `requiresRelay` / `txRequiresRelay` (`useRequiresRelay`, `helpers.ts`, containers) |
+| Prop boundary | `isSafePays` (`SelectExecutor`, `ReviewExecuteFooter`) |
+| Fee/display | `paidFromSafe` / `safePaidFee` / `safePaysGasFee` (`feeRows.ts`, `FeesBreakdown`, `TokenTransfer`) |
+
+The tell is in `ReviewAndExecuteContainer`: `isSafePays={requiresRelay}` — the value is renamed as it crosses the prop boundary and then re-derived as `paidFromSafe` inside the footer, so `isSafePays` is a synonym with no meaning of its own.
+
+**Proposal:** drop `isSafePays` and reuse the term that already exists in the fee layer — rename the prop to `isPaidFromSafe` (the `is` prefix matches the boolean-prop convention here: `isRelayAvailable`, `isLoadingRelays`). That leaves **two** intentional names with a clean split:
+
+- `requiresRelay` — gating layer; the fact that matters is "must go through the relayer" (drives `getExecutionMethod` and the terminal no-relay state).
+- `isPaidFromSafe` — UI/fee layer; the fact that matters is "the Safe funds the fee" (drives the `SelectExecutor` chip and the fee breakdown).
+
+
+COMMENT
+[yagopv 2026-06-25T14:43:08Z] >Proposal: drop isSafePays and reuse the term that already exists in the fee layer — rename the prop to isPaidFromSafe (the is prefix matches the boolean-prop convention here: isRelayAvailable, isLoadingRelays). That leaves two intentional names with a clean split
+
+Updated

@@ -1,15 +1,45 @@
 {
-  "usd": 0.033018000000000006,
+  "usd": 0.070542,
   "findings": [
     {
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 32,
-      "claim": "No test covers the new accessible={false} props on the backdrop and dialog-card Pressables, so reverting them would still let CI pass. DialogModal, CustomNonceModal and AddToAddressBookModal have no tests at all, and if the prop is later dropped or the dialog is wrapped in another accessible parent, screen-reader users would lose access to the nonce and contact-name inputs again with nothing to warn anyone."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 33,
+      "claim": "Two sequential waitFor calls in the setup can each take up to 20 seconds, so the setup can take up to 40 seconds before the CGW fetch and compose even start, while the Maestro step waiting for e2e-draft-setup-ready gives up after 30 seconds (draftNetworkTimeout in apps/mobile/e2e/utils/scripts/defaults.js:6, gated in apps/mobile/e2e/tests/transactions/draft-editors/approval-editor.yml:19-22). On a slow staging network the flow can fail while the setup is still in progress and would otherwise have succeeded, making the suite flaky; the setup's wait attempts should be reduced or the gate timeout raised so the two align, with a comment explaining the relationship between the numbers."
     },
     {
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 57,
-      "claim": "The Cancel and Save Pressables lack accessibilityRole=\"button\", so now that screen readers can reach them individually they are announced as plain text rather than as buttons, unlike the 40+ other Pressables in apps/mobile/src that already set this role."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 36,
+      "claim": "The timeout error path in waitFor (the 'timed out waiting for …' error and the resulting 'failed' status) is never exercised because the test mocks selectChainById and getSafeSDK to succeed on the first try, leaving that failure branch untested."
+    },
+    {
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": 50,
+      "claim": "resetReduxForE2E is mocked to do nothing in this test file, so the real Redux store's signer, active-signer, and active-Safe state carries over between tests instead of being reset in beforeEach, unlike the sibling walletConnectDappsSetup.test.ts which resets the real slice; nothing fails currently only because all three tests happen to write the same values, but a future test expecting a clean store would behave differently depending on test order."
+    },
+    {
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 20,
+      "claim": "E2E_OWNER_ADDRESS duplicates a value that is already available as mockedActiveSafeInfo.owners[0].value, whereas connectSignerSetup.ts derives the same address from that source instead of hardcoding it."
+    },
+    {
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 25,
+      "claim": "The spender address is defined twice, once as SPENDER_ADDRESS and again as hand-written hex embedded inside APPROVE_DATA, creating two copies of the same value that could drift out of sync; building the calldata with Interface.encodeFunctionData('approve', [SPENDER_ADDRESS, amount]) would keep a single source of truth."
+    },
+    {
+      "file": "apps/mobile/e2e/tests/transactions/draft-editors/approval-editor.yml",
+      "line": 38,
+      "claim": "The same 7-line block that scrolls to the edit-approval-button and taps it is duplicated at two locations in the file, despite the PR already extracting other repeated steps into utils/components/draft-editors/, where this block could also be moved."
+    },
+    {
+      "file": "apps/mobile/src/components/ReviewFooter.tsx",
+      "line": 38,
+      "claim": "The review-and-confirm-button element is added in its own commit but no flow in this diff actually uses it, leaving unused code that should either be wired into a flow or deferred to a later PR."
+    },
+    {
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": 30,
+      "claim": "The test mocks the CGW call directly rather than using MSW, which the root AGENTS.md instructs for network calls and which 19 other test files follow, though some existing tests mock initiate().unwrap() similarly for RTK Query code, so it is unclear whether this deviation is acceptable."
     }
   ]
 }

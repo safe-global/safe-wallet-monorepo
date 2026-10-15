@@ -1,0 +1,30 @@
+{
+  "usd": 0.34389,
+  "head": "b79359b15728b3f318c5ba87e76f906851fb9fd6",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit ce042263a replaced the trusted+owned concat with `(allSafes ?? []).map(...)`, and b79359b15 renamed it to allSafeAddresses (useOnboardingSafes.ts:31-33). tongyaosafe replied \"Fixed. Thanks.\" in the thread."
+    },
+    {
+      "issue": 5,
+      "verdict": "open",
+      "present": true,
+      "evidence": "None of the later commits touch SimilarityConfirmDialog or the copy in index.tsx; they only change useOnboardingSafes.ts and SafeAccounts/index.tsx. The author's blanket \"fixed\" reply only matches the code simplification (item 5 in the bot's list)."
+    },
+    {
+      "issue": 6,
+      "verdict": "open",
+      "present": true,
+      "evidence": "OnboardingSafesList.tsx:11 still says \"trusted and owned rows alike\" at HEAD, the same as at a408a4d7e."
+    },
+    {
+      "issue": 8,
+      "verdict": "open",
+      "present": true,
+      "evidence": "No docs or spec files were changed after the review, and nobody addressed this point specifically."
+    }
+  ]
+}

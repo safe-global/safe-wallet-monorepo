@@ -1,15 +1,40 @@
 {
-  "usd": 0.038855600000000004,
+  "usd": 0.037798,
   "findings": [
     {
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 32,
-      "claim": "The change adds no test, and there is currently no test for DialogModal or for the two components that use it (AddToAddressBookModal.tsx, CustomNonceModal.tsx). A small render test would prevent someone later removing accessible={false} and merging the dialog back into one element without anyone noticing, for example by checking that the dialog-cancel and dialog-save buttons can each be found by role and label."
+      "claim": "E2E_OWNER_ADDRESS and SPENDER_ADDRESS are hardcoded literals that duplicate mockedActiveSafeInfo.owners[0] and owners[1] from mock data, instead of being derived from the shared mock data as a neighboring setup file does.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 20
     },
     {
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 32,
-      "claim": "With accessible={false} set on the overlay, screen-reader users can no longer reach the tap-outside-to-cancel interaction, since VoiceOver can no longer see that element as tappable."
+      "claim": "The spender address inside APPROVE_DATA is also a hardcoded literal duplicating owners[1] from the shared mock data rather than referencing it directly.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 28
+    },
+    {
+      "claim": "The unit test repeats the owner address literal again instead of importing the shared constant, compounding the duplication.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": 59
+    },
+    {
+      "claim": "If the fixture Safe's owners change, the hardcoded addresses will no longer match the fixture, and the setup will silently build a signer and spender that are out of sync with no warning.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null
+    },
+    {
+      "claim": "The nonce assertion on the transaction details screen checks that the copied nonce text appears anywhere on screen rather than being tied to the specific Nonce row, so it could match unrelated fields like SafeTxGas, BaseGas, or GasPrice that are often 0.",
+      "file": "apps/mobile/e2e/utils/components/draft-editors/verify-details-nonce.yml",
+      "line": 27
+    },
+    {
+      "claim": "After switching back to the recommended nonce, a small nonce value could coincidentally match one of the other zero-valued fields on the details screen, allowing the test to pass even if the Nonce row itself were incorrect.",
+      "file": "apps/mobile/e2e/utils/components/draft-editors/send-nonce-editor.yml",
+      "line": 134
+    },
+    {
+      "claim": "The unit tests only cover the setup timeout/failed marker for the case where composeSafeTxDraft rejects, but do not cover the waitFor timeout path that throws after POLL_ATTEMPTS when chain config or the Safe SDK never arrives, which is a more likely CI failure mode.",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 36
     }
   ]
 }

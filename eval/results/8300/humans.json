@@ -1,0 +1,18 @@
+{
+  "usd": 0.3636438,
+  "head": "facdb566ef584caa2c4325b85804aaee4df90140",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "At abe00f9, persistCounterfactualSafe.ts:86-101 returns 'already-deployed' before spaceSafesCreateV1. vmosharova replied that this flow only handles counterfactual Safes and a deployed Safe belongs to the \"Add existing Safe\" flow. The later commit 21562374a only moved the logic into recoverAlreadyDeployed, which still never attaches the Safe to the space."
+    },
+    {
+      "issue": 12,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "removeUndeployedSafe at persistCounterfactualSafe.ts:100 (abe00f9) only removes the local entry. vmosharova explained that the backend row is deleted by middleware in counterfactualSyncListener.ts, so the behaviour is intended, and no code changed for this."
+    }
+  ]
+}

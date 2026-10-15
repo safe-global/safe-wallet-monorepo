@@ -5,147 +5,129 @@
   "findings": [
     {
       "id": "F1",
-      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 53,
-      "claim": "Much of this new test suite duplicates cases already covered in apps/web/src/hooks/__tests__/useGasPrice.test.ts (first oracle, fallback to second oracle, fixed fallback, fixed 1559, speed-up), creating redundant test coverage across the two files."
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 135,
+      "claim": "A stale TODO comment (\"use log Error here\") with commented-out code remains in the file."
     },
     {
       "id": "F2",
-      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 41,
-      "claim": "The tests replace global.fetch with a jest mock instead of using MSW, which deviates from the project's stated rule (AGENTS.md:374) to use MSW rather than mocking fetch directly."
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "The isFinite guard only rejects non-numeric values, so inputs like null, an empty string, or \"0\" from an oracle are silently converted to 0n rather than triggering a fallback to the next oracle, and if suggestBaseFee exceeds FastGasPrice the computed priority fee can come out negative without being caught; downstream code checks for null/undefined but not for zero or negative values."
     },
     {
       "id": "F3",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 89,
-      "claim": "This is a second repetition of the same multiply/check/round/convert logic noted at lines 55-65, reinforcing the duplication issue."
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 192,
+      "claim": "Once the guard is fixed to reject empty/null values, tests should be added for those inputs asserting either an error is thrown or a fallback to the next oracle occurs."
     },
     {
       "id": "F4",
-      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 13,
-      "claim": "Test data (makeChain and the fee-data helper) is built using type casts (as unknown as Chain, as unknown as FeeData) instead of the existing faker-based chainBuilder in packages/utils/src/tests/builders/chains.ts, which conflicts with the project's guidance to use faker-based builders and properly typed helpers rather than type casts."
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "The value parsing should go through a guarded helper that rejects null/undefined, trims strings, treats '' as invalid, checks Number.isFinite, and requires the result to be greater than 0 (or >= 0 for the base fee), throwing otherwise so the next-oracle fallback executes."
     },
     {
       "id": "F5",
       "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 55,
-      "claim": "The guard conflates an unknown/invalid value with a real zero value; values should be parsed with a helper that explicitly rejects null, empty or whitespace strings, non-finite numbers, and zero or negative results, with corresponding tests added for each case."
+      "line": 54,
+      "claim": "Extracting the numeric parsing into an exported pure helper and unit-testing it directly would make it cheaper to cover the rounding and empty/null-input cases and would remove the need for waitFor in those tests."
     },
     {
       "id": "F6",
-      "file": "useDefaultGasPrice.ts",
-      "line": 55,
-      "claim": "The Etherscan parsing path has the same issue as the non-Etherscan path: null values in the response would be coerced to 0 by Number(null) and pass validation instead of being treated as missing data."
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 89,
+      "claim": "The same finite-only check allows an empty gweiFactor value to pass validation and produce a zero gas price instead of failing."
     },
     {
       "id": "F7",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 64,
-      "claim": "Because no test produces a fractional wei value, removing Math.round here would not cause any test to fail, leaving the new rounding behavior unprotected by tests."
+      "file": "useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "The Etherscan response parsing has the same issue as the non-Etherscan path: a null parameter value converts to 0 via Number(null) and passes validation instead of being flagged as missing."
     },
     {
       "id": "F8",
       "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 89,
-      "claim": "The same finite-number-only guard applied to the Etherscan maxFeePerGas calculation lets an empty FastGasPrice value pass through as zero instead of being rejected."
+      "line": 55,
+      "claim": "The guard only checks Number.isFinite, but Number(''), Number('  ') and Number(null) all evaluate to 0, which is finite. An oracle response like { fast: '' }, { fast: null }, or FastGasPrice: '' therefore passes validation and is treated as a real gas price of 0n instead of being rejected as invalid."
     },
     {
       "id": "F9",
       "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
       "line": 55,
-      "claim": "The sequence of multiplying by gweiFactor, checking finiteness, rounding, and converting to BigInt is repeated three times in the file instead of being extracted into a shared helper, making it easy for a future fix (such as the positivity check) to be applied in only some of the places."
+      "claim": "The Etherscan parsing path can still produce a negative maxPriorityFeePerGas when suggestBaseFee exceeds FastGasPrice, and there is no bounds check enforcing a valid floor for this value."
     },
     {
       "id": "F10",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 55,
-      "claim": "The finite-number guard does not reject null or empty/whitespace string values, since Number(''), Number('  '), and Number(null) all evaluate to 0 and pass the check; an oracle returning an empty or null value therefore produces a zero gas price instead of triggering a fallback to the next oracle."
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 22,
+      "claim": "The test builds a Chain object by hand with makeChain using an 'as unknown as Chain' cast instead of using the existing chainBuilder() builder already available in packages/utils/src/tests/builders/chains.ts, which bypasses the project's established builder/faker pattern for test data."
     },
     {
       "id": "F11",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 55,
-      "claim": "Negative values are not rejected by the guard, so a negative oracle value would also pass through as a valid (negative) gas price."
+      "file": "useDefaultGasPrice.ts",
+      "line": 89,
+      "claim": "When data[gasParameter] is null, Number(null) evaluates to 0, which passes the Number.isFinite() check, so the code silently treats a missing oracle parameter as a valid zero value instead of raising an error."
     },
     {
       "id": "F12",
-      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 421,
-      "claim": "The provider test double is cast with as never instead of being properly typed, which is another instance of using type casts in place of proper builders/typing."
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "The same sequence of steps (multiply by gweiFactor, check isFinite, throw, then BigInt(Math.round(...))) is duplicated three times across the file instead of being extracted into a shared helper."
     },
     {
       "id": "F13",
       "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 415,
-      "claim": "The getTotalFee 'large values' test case is identical to the one in apps/web/src/hooks/__tests__/useGasPrice.test.ts:334-337, duplicating test logic instead of consolidating it."
+      "line": 247,
+      "claim": "The rounding tests should use inputs whose product is fractional, such as '22.8466851085' (which yields 22846685108.5), and assert a literal expected value like 22846685109n, so the tests would fail without correct rounding."
     },
     {
       "id": "F14",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 91,
-      "claim": "The same missing positivity check exists at this second location, allowing zero, empty, null, or negative oracle values to be accepted as a valid gas price."
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 22,
+      "claim": "The test should use chainBuilder().with({ gasPrice, features }).build() and drop the unsafe type cast."
     },
     {
       "id": "F15",
-      "file": "useDefaultGasPrice.ts",
-      "line": 89,
-      "claim": "When data[gasParameter] is null, Number(null) evaluates to 0, which passes the Number.isFinite() check even though it is not a valid oracle value; the code should explicitly check for null and throw a missing-parameter error instead of silently treating it as zero."
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 256,
+      "claim": "The expected values in the test are computed using the same BigInt(Math.round(x * 1e9)) expression used in the implementation, so the test merely restates the implementation rather than asserting an independent expected value."
     },
     {
       "id": "F16",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 54,
-      "claim": "The new parsing/validation logic lives in unexported pure functions (parseEtherscanOracleResult and the conversion step in fetchGasOracle), so every edge case must be exercised indirectly through renderHook, a mocked fetch, and waitFor rather than being tested directly."
+      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
+      "line": 247,
+      "claim": "The rounding test inputs (22.846685108*1e9, 20.123456789*1e9, 25.5*1e9) all multiply out to whole numbers, so removing Math.round from the implementation still leaves BigInt(...) working correctly and the tests still pass, meaning the float-to-BigInt rounding fix is not actually exercised by these tests."
     },
     {
       "id": "F17",
       "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 241,
-      "claim": "The test inputs '22.846685108', '20.123456789' and 25.5, when multiplied by 1e9, all produce exact integers, so BigInt() accepts them without needing Math.round; these tests do not actually exercise the fractional-value fix."
+      "line": 192,
+      "claim": "The NaN-handling test block covers undefined, non-numeric strings, and a missing key, but has no test cases for empty string, whitespace-only string, or null, which are exactly the inputs that bypass the validation guard described in the source-code finding."
     },
     {
       "id": "F18",
-      "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 262,
-      "claim": "This second floating-point test has the same problem: its expected values are computed using the identical BigInt(Math.round(x * 1e9)) formula used in the implementation, so it cannot detect a disagreement, and an input like '1.1' (which yields a non-integer product) with a literal expected value should be used instead."
+      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
+      "line": 55,
+      "claim": "Because the invalid empty/null values are accepted rather than throwing, fetchGasOracle returns normally, so getGasPrice never falls back to the next oracle and getGasParameters never falls back to the provider feeData, causing the hook to report a fabricated price of 0 wei instead of signaling an unknown price."
     },
     {
       "id": "F19",
       "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 241,
-      "claim": "This floating-point test uses input values (22.846685108 * 1e9, 20.123456789 * 1e9, 25.5 * 1e9) that all evaluate to exact integers, so the test would still pass even if the Math.round fix were removed from the implementation."
+      "line": 28,
+      "claim": "Network calls in the test are mocked by directly replacing global.fetch instead of using MSW, which conflicts with the project's stated convention to use MSW instead of mocking fetch."
     },
     {
       "id": "F20",
       "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 76,
-      "claim": "The conversion step in fetchGasOracle should be extracted into a pure, exported function such as parseOracleResponse(json, gasParameter, gweiFactor) and tested directly with a table of inputs and outputs, keeping only a few hook-level tests for fallback and error handling."
+      "line": 54,
+      "claim": "parseEtherscanOracleResult and the non-Etherscan numeric conversion are pure functions but are only exercised indirectly through renderHook with a mocked fetch, rather than being unit-tested directly."
     },
     {
       "id": "F21",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 55,
-      "claim": "A gweiFactor value of an empty string coerces to 0, which would silently turn every computed result into 0n rather than causing a validation failure."
-    },
-    {
-      "id": "F22",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 58,
-      "claim": "Number(''), Number(' ') and Number(null) all evaluate to 0, which passes the Number.isFinite check, and negative numeric strings also pass; this lets an oracle response with an empty, null, or negative gas price value be treated as a valid, winning price instead of being rejected so the code falls through to the next oracle or fixed config."
-    },
-    {
-      "id": "F23",
       "file": "packages/utils/src/hooks/__tests__/useDefaultGasPrice.test.ts",
-      "line": 262,
-      "claim": "This second float test case has the same problem as the one at line 241: its inputs yield exact integer wei values, so it passes even without Math.round and does not verify the fix."
-    },
-    {
-      "id": "F24",
-      "file": "packages/utils/src/hooks/useDefaultGasPrice.ts",
-      "line": 95,
-      "claim": "Same as the line 64/65 issue: this second Math.round call is also not covered by a test that would fail if the rounding were removed."
+      "line": 256,
+      "claim": "The test computes its expected value using the same formula (BigInt(Math.round(value * 1e9))) that the code under test uses, so a rounding bug in the implementation would not be caught by the test."
     }
   ]
 }

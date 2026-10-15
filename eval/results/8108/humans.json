@@ -1,0 +1,24 @@
+{
+  "usd": 0.48572699999999996,
+  "head": "2ba024f31dca1f3733ef6480f2359c4744093a65",
+  "verdicts": [
+    {
+      "issue": 5,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 3e3e650, PaginatedDataTable applied column.className only to header cells and callers passed renderRow. Commits 247d69c38 (per-column cell renderers) and b9e4fd01c (bounded column variants) moved cell rendering into the table, and gfendres said so in the SpaceAddressBookTable.tsx:64 thread."
+    },
+    {
+      "issue": 6,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 3e3e650, Members/index.tsx:21-27 used useDarkMode with a cn('shadcn-scope', isDarkMode && 'dark') wrapper. Commit 30922ea02 dropped it in favour of the root ShadcnProvider, and gfendres confirmed this in the Members/index.tsx:21 thread."
+    },
+    {
+      "issue": 21,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "gfendres declined in the Members/index.tsx:34 thread: \"separate topic as well, this PR is not about the design system\". ShadcnButton still has className=\"px-4 py-0\" at HEAD (Members/index.tsx:34)."
+    }
+  ]
+}

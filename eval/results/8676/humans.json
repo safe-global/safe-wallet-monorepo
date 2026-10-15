@@ -1,0 +1,36 @@
+{
+  "usd": 0.3953,
+  "head": "48dccf389d70e77d1a18530a9ccf87deba9a53be",
+  "verdicts": [
+    {
+      "issue": 5,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 97ae7fc44 only the <Progress> bar was aria-hidden. Commit 0535f84d0 added aria-hidden to the outer preview container in SpendingLimitPreview.tsx, and the author replied \"1 and 2 are fixed\"."
+    },
+    {
+      "issue": 7,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author called it a false positive (\"jest jsdom won't load img\"). PREVIEW_TOKEN.logoUri still points to safe-transaction-assets.safe.global in SpendingLimitPreview.tsx at HEAD."
+    },
+    {
+      "issue": 8,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author replied \"4 is false positive\". The `= false` default for hasSeenSpendingLimitIntro in Policies/index.tsx did not change after the review."
+    },
+    {
+      "issue": 9,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author replied \"5 not fixed. adding variant is over engineered\". `className=\"w-full gap-2\"` is still on the Button in SpendingLimitIntroDialog/index.tsx at HEAD."
+    },
+    {
+      "issue": 10,
+      "verdict": "open",
+      "present": true,
+      "evidence": "LucieFaire reported on 2026-09-15 that the page could not be scrolled on the Nest screen size. Nobody replied, and every commit after the review is dated 2026-09-09 and changes only comments and aria-hidden, so the dialog layout (DialogContent size=\"xs\", no overflow handling) is the same as at 97ae7fc44."
+    }
+  ]
+}

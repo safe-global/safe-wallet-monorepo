@@ -1,0 +1,138 @@
+COMMENT
+[github-actions 2026-07-17T09:20:17Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://tim-e2e-approval-editor-nonce-editor--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://tim-e2e-approval-editor-nonce-editor--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[tmjssz 2026-07-17T09:20:18Z] @claude review
+
+COMMENT
+[claude 2026-07-17T09:20:33Z] **Claude finished @tmjssz's task in 2m 47s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29569602144)
+
+---
+### Claude PR Review
+
+- [x] Load review tools
+- [x] Read changed files
+- [x] Analyze code quality, bugs, tests
+- [x] Post review feedback
+
+---
+
+Solid, well-scoped E2E addition. Product changes are tiny and clearly justified. A few things to consider:
+
+### Product code
+
+**`DialogModal.tsx` — `accessible={false}` on the overlay `Pressable`** ([L32](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/features/Send/components/DialogModal.tsx#L32))
+Setting `accessible={false}` on the outer overlay `Pressable` removes the "tap outside to dismiss" action from VoiceOver/TalkBack — screen-reader users must rely on the Cancel button. Since Cancel is present, this is an acceptable tradeoff, but it's worth noting explicitly in the PR body (currently it's framed as a pure a11y improvement). On the inner container `Pressable` (L33–L43) the setting is genuinely benign — RN's `accessible={false}` there just prevents grouping so children remain individually announced.
+
+### E2E setup (`draftEditorsSetup.ts`)
+
+**Truthy-check in `waitFor`** ([L38–L41](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts#L38-L41))
+```ts
+const value = read()
+if (value) { return value }
+```
+`if (value)` rejects `0`, `''`, `false`. Fine today (both readers return objects), but as a generic helper this is a footgun. Consider `value != null` so future callers don't discover this by accident.
+
+**Mixed `dispatch` sources** ([L61–L77](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts#L61-L77))
+`setupApprovalDraft` uses the passed-in `Dispatch` for `setupSendFlow` and `store.dispatch` for the RTKQ + compose calls. The comment explains the AppDispatch typing constraint, but since this is E2E-only and `store` is already imported, using `store.dispatch` throughout would be simpler. Minor.
+
+**Setup-status marker only signals `ready`/`failed`, never resets to `idle` between runs**
+`resetReduxForE2E` does call `draftEditorsE2eState.reset()`, but `setupApprovalDraft` calls `setupSendFlow` (which resets) before it flips to `ready`, so this is correct. Just calling it out — if that ordering ever changes, the marker could remain `ready` from a prior run.
+
+### Maestro flows
+
+**Spender text assertion** ([`verify-approve-amount.yml` L35](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/e2e/utils/components/draft-editors/verify-approve-amount.yml#L35))
+```yaml
+text: '.*0x81Bd.*4fec.*'
+```
+Matches only 8 hex chars total — any address rendered short-form that happens to start `0x81Bd…` and end `…4fec` would pass. Given the spender is fixed and this runs after asserting the exact `_value`, the risk is negligible, but if you want a stronger assert you could match the full shortened form the UI actually produces (usually `0x81BdB0…14fec`).
+
+**Nonce test — hardcoded `99999`** ([`send-nonce-editor.yml` L93](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/e2e/tests/transactions/draft-editors/send-nonce-editor.yml#L93))
+The "too low" branch depends on the live staging Safe's current nonce being `< 99999`. Extremely unlikely to ever be violated for a test Safe, but the test does silently couple to on-chain state — worth being aware of if this Safe ever ages.
+
+### Tests
+
+**Unit test coverage gap** ([`draftEditorsSetup.test.ts`](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts))
+The `setupSendFlow` test doesn't assert `router.replace('/(tabs)')` was called. Since navigation is core to the setup's job (Maestro flows depend on landing on the home tab), a quick `expect(router.replace).toHaveBeenCalledWith('/(tabs)')` would round out coverage.
+
+**No test for the `waitFor` timeout path**
+`setupApprovalDraft`'s `waitFor('chain config', …)` and `waitFor('Safe SDK', …)` are the two places most likely to surface real E2E flakiness (SDK init timing). A test that returns `undefined` for either and asserts the failure marker/throw would catch regressions in that error path.
+
+---
+
+**Verdict:** Ready to merge after considering the a11y note on the overlay `Pressable`. Everything else is polish.
+ · Branch: [`tim/e2e-approval-editor-nonce-editor`](https://github.com/safe-global/safe-wallet-monorepo/tree/tim/e2e-approval-editor-nonce-editor)
+
+COMMENT
+[tmjssz 2026-07-21T15:01:38Z] @claude review again
+
+COMMENT
+[claude 2026-07-21T15:01:57Z] **Claude finished @tmjssz's task in 2m 6s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29841982581)
+
+---
+### Claude PR Review (re-review)
+
+- [x] Fetch latest changes
+- [x] Read updated files
+- [x] Analyze diff vs previous review
+- [x] Post updated review
+
+---
+
+Polish from the previous round is in — `waitFor` uses `value != null`, unit test covers the failure marker, in-line comment now documents why `store.dispatch` is used for the typed endpoints. Nice.
+
+A few things still worth considering:
+
+### Product code
+
+**`DialogModal.tsx` — `accessible={false}` on the overlay `Pressable`** ([L32](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/features/Send/components/DialogModal.tsx#L32))
+Unchanged from the previous review: setting `accessible={false}` on the outer overlay removes "tap outside to dismiss" from VoiceOver/TalkBack. Cancel is present, so it's an acceptable tradeoff, but the PR body frames this as a pure a11y improvement — worth being explicit that it's a tradeoff. Consider `importantForAccessibility="no-hide-descendants"` on the inner container only, keeping the overlay `Pressable` addressable, if you want the a11y grouping fix without dropping the dismiss action.
+
+### E2E setup (`draftEditorsSetup.ts`)
+
+**No coverage for the `waitFor` timeout path** ([L36–L45](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts#L36-L45))
+`waitFor('chain config', …)` and `waitFor('Safe SDK', …)` are the two lines most likely to flake in real E2E runs (async SDK init timing). The failure-marker test only covers `composeSafeTxDraft` rejecting — a test that stubs `selectChainById` or `getSafeSDK` to return `undefined` and asserts the `'failed'` marker + timeout error would round out the error path. Not blocking, but the current coverage misses ~40 seconds of the setup's real-world failure surface.
+
+**`setupSendFlow` test doesn't assert navigation** ([L56–L65](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts#L56-L65))
+The test asserts `onboardAndNavigate` was called, which is fine since it's mocked — but the fact that `router.replace('/(tabs)')` inside `onboardAndNavigate` is what actually lands Maestro on the home tab isn't covered anywhere in this test file. Since `onboardAndNavigate` is mocked out here, this is really an integration concern (already covered by other suites). OK to leave.
+
+### Maestro flows
+
+**Spender text assertion still loose** ([`verify-approve-amount.yml` L35](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/e2e/utils/components/draft-editors/verify-approve-amount.yml#L35))
+```yaml
+text: '.*0x81Bd.*4fec.*'
+```
+Still 8 hex chars total. Given the spender is fixed and the exact `_value` was already asserted immediately above, risk is negligible — but tightening to the full shortened form the UI renders (usually `0x81BdB0…14fec`) would be a one-line improvement.
+
+**Nonce test — hardcoded `99999`** ([`send-nonce-editor.yml` L93](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/e2e/tests/transactions/draft-editors/send-nonce-editor.yml#L93))
+Still couples silently to the live staging Safe's current nonce being `< 99999`. Extremely unlikely to matter, calling out only for completeness.
+
+### TestCtrls
+
+**Error swallowed with only `console.error`** ([`TestCtrls.e2e.tsx` L348–L350](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/e2e-approval-editor-nonce-editor/apps/mobile/src/tests/e2e-maestro/components/TestCtrls.e2e.tsx#L348-L350))
+```ts
+onPress={() => {
+  setupApprovalDraft(dispatch, router).catch((e) => console.error('[E2E] setupApprovalDraft failed:', e))
+}}
+```
+The `catch/throw` inside `setupApprovalDraft` sets `setupStatus: 'failed'` first, so `DraftSetupIndicator` should still surface `e2e-draft-setup-failed` for Maestro to gate on. That means the failure marker IS visible even though the throw is caught here — good defensive design. Just noting the flow: reader might assume the catch also suppresses the marker signal, which it doesn't.
+
+---
+
+**Verdict:** Ready to merge. The a11y note on the overlay `Pressable` is the only one I'd revisit; the rest are polish suggestions.
+ · Branch: [`tim/e2e-approval-editor-nonce-editor`](https://github.com/safe-global/safe-wallet-monorepo/tree/tim/e2e-approval-editor-nonce-editor)
+
+COMMENT
+[cursor 2026-07-27T13:45:43Z] <!-- BUGBOT_FREE_TIER_DISABLED_UPSELL -->
+Bugbot is not enabled for your account, so this pull request was not reviewed.
+
+Enable Bugbot in the [Cursor dashboard](https://www.cursor.com/dashboard/bugbot) to get automatic reviews on future PRs.

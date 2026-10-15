@@ -1,0 +1,12 @@
+{
+  "usd": 0.2944778,
+  "head": "5e1213cb9b98977e5706e034f57f86f0635ecc49",
+  "verdicts": [
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At b832e7eb, events.ts:7 declared its own `export type Hex = `0x${string}``. The author replied in the thread (\"safe SDK exports an equivalent type my bad\"), and commit 9128ef80b swapped it for `export type { Hex } from '@safe-global/types-kit'`."
+    }
+  ]
+}

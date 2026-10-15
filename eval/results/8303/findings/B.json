@@ -1,35 +1,50 @@
 {
-  "usd": 0.0814416,
+  "usd": 0.047218,
   "findings": [
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
-      "line": 72,
-      "claim": "The proposeBehavior field and its accompanying comment describe a fetch interceptor for CGW's /propose endpoint that does not exist anywhere in the codebase, so a developer relying on the comment to build the CGW-failure test flow (setting proposeBehavior to 'fail500') would get a live passthrough to staging instead of a synthetic failure."
+      "file": "apps/mobile/src/tests/e2e-maestro/createE2eStore.ts",
+      "line": 6,
+      "claim": "The doc comment states that state is shallow-cloned and that mutating a nested value would corrupt initialState and break reset(), but the code performs a deep clone of initialState both at creation and inside reset() (lines 30 and 50), so initialState cannot actually be corrupted this way. The comment therefore misrepresents the store's contract to future readers."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
-      "line": 65,
-      "claim": "Comments reference a WcResponseIndicator component and associated test-ids (error-code, safeTxHash-match) that do not exist anywhere in the repository, making the documentation misleading since an adjacent, similarly-worded comment for a different field is actually accurate, giving readers no way to distinguish true documentation from aspirational documentation."
+      "file": "apps/mobile/src/tests/e2e-maestro/components/__tests__/WcResponseIndicator.test.tsx",
+      "line": 47,
+      "claim": "None of the tests clear the pending request before calling respond, so they don't exercise the scenario the component's ref-based hash tracking was written for (the propose-success listener clearing the pending request in the same tick it sends the response). If the ref were replaced with a value computed from hashes during render, all six tests would still pass, meaning the tests would not catch a regression that would break the hash-match marker in the tx-send-happy.yml and tx-send-batch.yml flows."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
-      "line": 66,
-      "claim": "The lastRequestResponse field is currently written by the fake WalletKit but read by nothing except its own unit tests, so the stated purpose of letting tx-request flows assert exactly what was delivered is not yet achievable."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/walletConnectDappsSetup.ts",
+      "line": 58,
+      "claim": "The random wei amount added to each value causes every run of tx-send-happy and tx-send-batch to add new transactions to the queue of a Safe on staging that is shared with other test suites (assets and onboarding), and nothing ever clears these transactions out of the queue."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
+      "file": "apps/mobile/e2e/tests/walletconnect-dapps/tx-send-happy.yml",
+      "line": 85,
+      "claim": "The final assertVisible check for text 'Send' in the pending list can pass because of a leftover transaction from a previous run rather than the transaction created by the current run, so it does not actually prove that this run's transaction was queued."
+    },
+    {
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/walletConnectDappsSetup.ts",
       "line": 54,
-      "claim": "The hand-rolled JsonRpcResponseLike type is justified in a comment as avoiding a dependency on @walletconnect/jsonrpc-types, but @walletconnect/jsonrpc-utils is already a declared dependency and already used by production code, so the type could be derived from it at no extra dependency cost, making the stated justification inaccurate."
+      "claim": "A private key is hardcoded in this setup file, which the root AGENTS.md rules forbid."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
-      "line": 43,
-      "claim": "No test verifies that a second call to respondSessionRequest overwrites the first, even though that last-write-wins behavior is the entire contract implied by the field name lastRequestResponse and matters because a single flow can produce multiple responses on one topic."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/walletConnectDappsSetup.ts",
+      "line": 81,
+      "claim": "chainId is hardcoded as '0xaa36a7' instead of being derived from mockedActiveAccount.chainId the way CAIP2 is built on line 28, so changing the fixture chain would silently break the batch flow without updating this value."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
-      "line": 48,
-      "claim": "The test hardcodes the topic literal 'e2e-session-topic' instead of using the exported E2E_SESSION_TOPIC constant that every other consumer in the codebase imports for this purpose, breaking the file's own established pattern and reducing readability."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/walletConnectDappsSetup.test.ts",
+      "line": 141,
+      "claim": "The same chainId assertion is duplicated, appearing at both line 141 and line 144 within the same test."
+    },
+    {
+      "file": "apps/mobile/e2e/tests/walletconnect-dapps/tx-send-readonly-safe.yml",
+      "line": 7,
+      "claim": "A comment still refers to \"the ticket's 'Add a signer' CTA\" even though a prior commit removed ticket references, leaving a stale reference that no longer makes sense to readers."
+    },
+    {
+      "file": "apps/mobile/src/tests/e2e-maestro/components/WcResponseIndicator.tsx",
+      "line": 65,
+      "claim": "The 1x1 red marker style is duplicated from the equivalent style already defined in TestCtrls.e2e.tsx:389 instead of being shared, creating redundant code that must be kept in sync manually."
     }
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "usd": 0.3458726,
+  "head": "9457f62fda7ca659d908b077f5fc421a1e0e4056",
+  "verdicts": [
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At bee8f1fa the JSDoc only said the contract supports '1.3.0 and 1.4.1 Safes'. Commit b7f226b09 (\"address review\") added 'Only the base version is matched — build metadata such as `+L2` or `+Circles` is ignored.' at packages/utils/src/services/contracts/safeContracts.ts:61-62, and the author replied \"fixed\" to the review."
+    }
+  ]
+}

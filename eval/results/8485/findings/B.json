@@ -1,50 +1,45 @@
 {
-  "usd": 0.0752376,
+  "usd": 0.0729516,
   "findings": [
     {
       "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
-      "line": 173,
-      "claim": "The row's render check does not verify that the Safenet feature chunk has finished loading, so if the audit data arrives before the lazy feature loads, the check is true while the feature's component still renders a null stub. This causes the last signing row to lose its isLast flag and the timeline connector to hang with nothing under it until the chunk loads."
-    },
-    {
-      "file": "packages/store/src/safenet/safenetCheckApi.ts",
-      "line": 53,
-      "claim": "The comment claiming the header read costs only one RPC per settled check is inaccurate: while a check is in the AWAITING_VERIFICATION state, verifyAttestation can return PENDING and polling continues every 6 seconds, with each poll also calling blockTimeMs, adding one RPC per poll rather than one total."
-    },
-    {
-      "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
-      "line": 104,
-      "claim": "The timestamp is only populated when an attestation event exists, so the MALICIOUS (risk detected) and TIMED_OUT (check failed) outcomes never display a date even though they are the most important statuses to show a time for; the accompanying comment does not mention either case."
+      "line": 270,
+      "claim": "The creation and signature rows determine whether they are the last row by checking only `!showExecutionRow`, without checking whether the new Safenet row will also render. For a transaction still collecting signatures that already has a Safenet check, this causes the last signature (or creation) row to be marked last incorrectly, so its connector line is omitted and the Safenet row appears disconnected from the timeline."
     },
     {
       "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
       "line": 78,
-      "claim": "The logic for preferring the oracle attestation and falling back to the plain one is duplicated in two places (also in safenetCheckApi.ts around lines 50-52); if the store's selection logic changes in one place but not the other, the displayed link could point to a different transaction than the one actually verified."
+      "claim": "The component duplicates the API's logic for choosing the attestation event (oracle first, plain as fallback) instead of sharing it with `packages/store/src/safenet/safenetCheckApi.ts`. The code comment claims it links to the same event the API verifies, but nothing enforces that the two implementations stay in sync, so a future change to one side could make the link point to a transaction other than the one actually verified."
     },
     {
       "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
       "line": 1,
-      "claim": "The new component has no Storybook story, despite project conventions requiring a story for new components and for components with logic; the five status states plus dark mode are exactly what such a story should cover."
+      "claim": "This new component lacks a `.stories.tsx` file, which the project's AGENTS.md conventions require for new components; its five statuses and the new `actor`/`iconColor` props on `AuditRow` are consequently only exercised in tests, not visible in Storybook."
     },
     {
-      "file": "packages/utils/src/features/safenet-checks/constants.ts",
-      "line": 53,
-      "claim": "The commit adds new environment variables (NEXT_PUBLIC_SAFENET_EXPLORER_URL / EXPO_PUBLIC_SAFENET_EXPLORER_URL) but does not add them to apps/web/.env.example, even though the same commit documents every other SAFENET_* variable there."
-    },
-    {
-      "file": "apps/web/src/features/safenet-checks/components/__tests__/SafenetAuditRow.test.tsx",
+      "file": "apps/web/src/components/transactions/TxSigners/index.test.tsx",
       "line": null,
-      "claim": "No test covers the TIMED_OUT state producing the \"Safenet check failed\" label, and no test covers the dark-mode icon colors (DARK_STEP_COLOR), even though MALICIOUS, BENIGN, and in-flight states are covered."
+      "claim": "The new tests only cover the Safenet row alongside a normal execution row and do not cover a transaction still awaiting signatures that also has a Safenet row, which is the exact scenario in which the timeline connector bug occurs."
     },
     {
       "file": "apps/web/src/features/safenet-checks/components/SafenetAuditRow.tsx",
-      "line": 79,
-      "claim": "The optional chaining on snapshot?.events is redundant since the code already returns earlier when snapshot is falsy, and its presence misleadingly suggests snapshot could still be undefined at that point."
+      "line": 32,
+      "claim": "The dark-mode `iconColor` mapping is untested."
     },
     {
-      "file": "apps/web/src/components/transactions/TxSigners/index.tsx",
-      "line": 166,
-      "claim": "The diff contains long block comments that are disproportionate to the surrounding code, conflicting with project guidance to treat code comments as tech debt; these comments (also at line 296-298 and in safenetCheckApi.ts around lines 53-55) could be shortened, particularly once the related correctness issues are fixed."
+      "file": "packages/store/src/safenet/safenetCheckApi.ts",
+      "line": 53,
+      "claim": "The comment describing the block-header read as costing 'one RPC per settled check' is inaccurate: `blockTimeMs` actually runs on every poll that sees an attestation event, including polls every 6 seconds while waiting for verification and every refetch after the 300-second cache expires, so the comment should be corrected or the read limited to only when status is `BENIGN` or `MALICIOUS`."
+    },
+    {
+      "file": "packages/store/src/safenet/safenetReader.ts",
+      "line": 447,
+      "claim": "When the block-header read fails, the reader retries each RPC endpoint in turn, which delays the verdict for that poll."
+    },
+    {
+      "file": "packages/utils/src/features/safenet-checks/constants.ts",
+      "line": 54,
+      "claim": "`NEXT_PUBLIC_SAFENET_EXPLORER_URL` is read here but is missing from `apps/web/.env.example`, even though the diff documents every other Safenet environment variable there."
     }
   ]
 }

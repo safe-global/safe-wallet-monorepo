@@ -1,50 +1,85 @@
 {
-  "usd": 0.043534,
+  "usd": 0.0900176,
   "findings": [
     {
-      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
-      "line": 22,
-      "claim": "The doc comment states the hook is shared with the header scanner used at /wallet-connect-scan, and the NavigateMode/'replace' option exists only for that scanner, but no code path in the repo (ScanConnect, WalletConnectScan.container, useWalletConnectScan) actually imports or uses this hook, so the 'replace' branch has no production caller and the comment describes something untrue at HEAD."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 68,
+      "claim": "While review() waits on the composeSafeTxDraft CGW preview call with the request still pending, a chain-switch listener triggered by a second dApp session's wallet_switchEthereumChain call can remove the entry and send the dApp a USER_REJECTED response, after which review() resumes and opens the confirm screen anyway, so a second respondSessionRequest call fails silently and the dApp is told the transaction was rejected even though the Safe transaction is still proposed."
     },
     {
-      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
-      "line": 22,
-      "claim": "Either the unused 'replace' navigation mode should be removed, or the header scanner should be wired up to use it within this PR."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/getCallsStatus.ts",
+      "line": 39,
+      "claim": "mapTxStatus and buildGetCallsResult duplicate web's BundleTxStatuses and receipts logic instead of sharing it, so the two platforms can drift; web already has a PARTIALLY_REVERTED = 600 status that mobile cannot express, and the code should be moved into the shared packages/utils/src/features/walletconnect/eip5792.ts helper and called from both apps rather than left duplicated (note that this shared helper file is currently used only by mobile, not by both apps as originally claimed)."
     },
     {
-      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
-      "line": 57,
-      "claim": "The rewritten onScan function has no test coverage: nothing verifies the invalid-code-to-toast path, the valid-code warn-and-navigate path, the ignored second scan via the hasScanned guard, or the empty codes array case, so reverting the container change would not cause any test to fail."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 299,
+      "claim": "The NOT_DEPLOYED check inside switchActiveChainByCaip2 is never exercised by a test because every test replaces the function with jest.fn()."
     },
     {
-      "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
-      "line": 57,
-      "claim": "A container test should be added that mocks QrCamera's onScan and checks the guard behavior and the order of calls."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 323,
+      "claim": "The getCallsStatus function in the provider is never run by a test; none of its three receipt outcomes (fetched, fetch failed, or no chain config) is covered, only the pure buildGetCallsResult helper is tested."
     },
     {
-      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
-      "line": 91,
-      "claim": "The 'once per value' test only checks that the same value is shown once, so a bug that deduplicates every value using a single boolean flag rather than per-value tracking would still pass the test."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/RequestSheetHost.tsx",
+      "line": 105,
+      "claim": "The composing half of the condition `if (busy || composing) return` has no test covering dismiss-while-building, while the busy half is covered."
     },
     {
-      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.test.tsx",
-      "line": 91,
-      "claim": "The test should also call the scan handler again with a different value (e.g. 'bar') and expect two toast calls to properly verify per-value deduplication."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 40,
+      "claim": "The component body grew from 121 to 364 lines and now inlines three separate jobs (propose-response listeners at 137-191, rejecting stale requests on a Safe switch at 199-252, and building dependencies for the request handler at 285-391), violating the function-length and single-responsibility limits set in apps/web/docs/code-style.md (applicable to mobile per apps/mobile/AGENTS.md:26); each job should be moved into its own hook, as already done for useSessionRequestHandler and useSendTransaction."
     },
     {
-      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
-      "line": 11,
-      "claim": "The file contains three comment blocks totaling 11 lines in a 77-line file, which conflicts with the project convention (AGENTS.md) to treat code comments as tech debt and add them only when really necessary; most of these comments repeat what the names and types already convey and should be trimmed to only what isn't obvious from the code."
+      "file": "services/methodRouter.ts",
+      "line": 106,
+      "claim": "The router dispatches on 8 sequential if (method === ...) blocks and the status mapping in services/getCallsStatus.ts:42-43 is a chained ternary, whereas apps/web/docs/code-style.md:47-58 (which mobile follows) says 5 or more conditions should become a lookup table."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 74,
+      "claim": "The call-shape check was copied from web's index.ts:410-422 rather than shared, though it is only about a 10-line predicate."
     },
     {
       "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/index.ts",
-      "line": 38,
-      "claim": "This file re-implements the same parse, validate, and 'toast once per value' logic introduced by the new hook, but keeps its deduplication set in a module-level object (toastForValueShown) instead of a per-instance ref, so the dedup state never resets across mounts; it could instead reuse resolveScannedAddress and a per-instance ref matching the pattern this PR introduces."
+      "line": 8,
+      "claim": "Scan logic in this file and in Send/ScanQrSend.container.tsx:38-91 is near-identical and duplicated, though with only two copies it may not yet need extracting into a shared implementation."
     },
     {
-      "file": null,
-      "line": null,
-      "claim": "The test setup mocks all of expo-router but exports only useRouter; whether this is sufficient depends on whether the test-utils' renderHook needs other expo-router exports, which was not confirmed."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/DappIdentity.tsx",
+      "line": 43,
+      "claim": "The fallback behavior for a URL that fails to parse is untested."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 40,
+      "claim": "The spring animation triggered on a value change is never exercised because no test re-renders the component to trigger it."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 47,
+      "claim": "Requests restored after an app restart skip the router's signer and chain checks (methodRouter.ts:223-240); the chain check is genuinely missing on the restore path, and the gap could open if a stale-request rejection never reached the dApp before the app was killed, or if the request was only picked up at restart, so a one-line check of chainId against the active chain at line 75 would close it."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 74,
+      "claim": "A malformed 'to' value passes the check at this location, leaving the request unanswered until it fails later at services/tx/draft.ts:58 with a generic 'Failed to build transaction' toast, rather than being rejected immediately."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/ConfirmTx/ConfirmTx.container.tsx",
+      "line": 66,
+      "claim": "There is no container test covering the dApp origin and back-rejection wiring."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/ConfirmTx/components/TransactionHeader/__tests__/TransactionHeader.test.tsx",
+      "line": 1,
+      "claim": "The test file is not located next to its source file, which conflicts with the convention documented in AGENTS.md:392."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/ConfirmTx/components/TransactionHeader/TransactionHeader.tsx",
+      "line": 11,
+      "claim": "ConfirmTx imports WalletConnect-specific components (also at ConfirmTx.container.tsx:20), which conflicts with the feature-import boundary documented in apps/mobile/docs/code-style.md:9."
     }
   ]
 }

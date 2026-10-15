@@ -1,63 +1,160 @@
 {
   "usage": {
-    "usd": 0.3746518,
-    "turns": 5,
-    "wallSeconds": 34
+    "usd": 0.5099304,
+    "turns": 6,
+    "wallSeconds": 51
   },
   "issues": [
     {
       "findings": [
-        "F2",
-        "F6"
+        "F5"
       ],
-      "summary": "accessible={false} on the backdrop takes tap-outside-to-dismiss away from screen readers",
+      "summary": "Setup's two 20s waitFor calls (40s worst case) exceed the 30s Maestro ready-marker gate",
       "label": "low",
-      "evidence": "DialogModal.tsx:32 does set accessible={false} on the overlay. Before this, though, the accessible overlay grouped the whole dialog into one element, so screen-reader users never had tap-outside as a separate action. The Cancel button (line 57) still dismisses the dialog, so the cost is small."
-    },
-    {
-      "findings": [
-        "F7"
-      ],
-      "summary": "Cancel/Save Pressables lack accessibilityRole=\"button\"",
-      "label": "low",
-      "evidence": "DialogModal.tsx:57 and :63 have no accessibilityRole. These lines existed before the PR, but the PR makes them individually reachable by screen readers for the first time, so they are now read out without a button role. Real but minor accessibility polish."
-    },
-    {
-      "findings": [
-        "F9",
-        "F12"
-      ],
-      "summary": "No test locks in the accessible={false} fix for DialogModal and its consumers",
-      "label": "low",
-      "evidence": "The diff only changes DialogModal.tsx:32 and :42 and adds no tests. No test file references DialogModal, CustomNonceModal or AddToAddressBookModal. If someone reverted the fix, only screen-reader users would be affected and CI would not notice, but the impact is limited to accessibility."
+      "evidence": "draftEditorsSetup.ts:33-34 gives POLL_ATTEMPTS 40 × 500ms = 20s per wait, and there are two waits in sequence (lines 63-64). approval-editor.yml:19-22 waits only draftNetworkTimeout=30000 (defaults.js:6). The budgets really are misaligned, but chain config and the SDK normally resolve fast, so this only bites on a very slow network.",
+      "category": "correctness"
     },
     {
       "findings": [
         "F1",
-        "F3",
-        "F5",
-        "F8",
-        "F10"
+        "F6",
+        "F18"
       ],
-      "summary": "Claims about draftEditorsSetup.ts and its unit test",
-      "label": "wrong",
-      "evidence": "`git diff ad6d5b93...HEAD` touches only DialogModal.tsx. apps/mobile/src/tests/e2e-maestro/setup/ has no draftEditorsSetup.ts and no matching test at the reviewed commit, so these findings describe code that is not there."
+      "summary": "The waitFor timeout/failure branch (chain config or SDK never arriving) has no unit test",
+      "label": "low",
+      "evidence": "draftEditorsSetup.test.ts:15-23 mocks selectChainById and getSafeSDK to return values straight away. Only the compose-rejects failure is tested (lines 82-87), so the 'timed out waiting for' throw at draftEditorsSetup.ts:44 never runs. This is e2e-only harness code, so the impact is small.",
+      "category": "tests"
     },
     {
       "findings": [
-        "F4"
+        "F9",
+        "F13"
       ],
-      "summary": "Spender regex in verify-approve-amount.yml is too loose",
-      "label": "wrong",
-      "evidence": "No apps/mobile/e2e/utils/components/draft-editors/ directory exists at HEAD, and the diff has no YAML changes. The claim is about a file that is not in the reviewed code."
+      "summary": "verify-details-nonce asserts the copied nonce appears anywhere on the details screen, not on the Nonce row",
+      "label": "low",
+      "evidence": "verify-details-nonce.yml:27 uses `assertVisible: '${maestro.copiedText}'` with no id or row scoping. A small recommended nonce could match other numeric fields such as zero-valued gas fields, so the second check in send-nonce-editor.yml could pass falsely. The 99999 case is safe.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F2",
+        "F16",
+        "F12",
+        "F23"
+      ],
+      "summary": "Owner/spender addresses are hardcoded instead of being derived from mockedActiveSafeInfo.owners, as connectSignerSetup does",
+      "label": "low",
+      "evidence": "draftEditorsSetup.ts:20,25 hardcode values that are identical to mockData.ts:23-24. connectSignerSetup.ts:20 uses `mockedActiveSafeInfo.owners[0].value`, and the test at line 59 repeats the literal again. Several copies could drift if the fixture changes.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F4",
+        "F7"
+      ],
+      "summary": "The spender address is duplicated as hand-encoded hex inside APPROVE_DATA",
+      "label": "low",
+      "evidence": "draftEditorsSetup.ts:28-31 embeds `81bdb0a6…14fec` as hex next to SPENDER_ADDRESS at line 25. Building the calldata with encodeFunctionData would keep one source of truth. This is a small maintainability cost.",
+      "category": "design"
     },
     {
       "findings": [
         "F11"
       ],
-      "summary": "send-nonce-editor.yml hardcodes nonce 99999",
+      "summary": "Setup marker never resets to idle between runs",
       "label": "wrong",
-      "evidence": "apps/mobile/e2e/tests/transactions/ contains only history/ and pending/, with no draft-editors suite, and the diff changes only DialogModal.tsx. The referenced file does not exist at the reviewed commit."
+      "evidence": "setupHelpers.ts (resetReduxForE2E) now calls `draftEditorsE2eState.reset()`, and setupApprovalDraft runs setupSendFlow→resetReduxForE2E before it sets any status. The reset is explicit, not a side effect of call order.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "The review-and-confirm-button testID is added but no flow in this PR uses it",
+      "label": "low",
+      "evidence": "A grep for 'review-and-confirm-button' under apps/mobile/e2e finds nothing, so the testID added in ReviewFooter.tsx:38 is unused in this diff. It is harmless and additive.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "resetReduxForE2E is mocked, so real store state leaks between unit tests",
+      "label": "low",
+      "evidence": "draftEditorsSetup.test.ts:9-13 mocks resetReduxForE2E to a no-op while the tests use the real `store`, so signer and activeSigner state persists across tests. Nothing fails today because every test writes the same values.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F15"
+      ],
+      "summary": "accessible={false} on the overlay Pressable removes tap-outside dismiss for screen readers",
+      "label": "low",
+      "evidence": "DialogModal.tsx:32 sets accessible={false} on the overlay, so assistive tech no longer exposes it as an actionable element. Cancel and the modal's own dismiss still exist, and the change fixes a real grouping bug, so the tradeoff is minor. It is also not mentioned in the PR.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "The 99999 custom nonce assumes the staging Safe's nonce stays below it",
+      "label": "nit",
+      "evidence": "send-nonce-editor.yml:93 inputs 99999. A test Safe on staging reaching that nonce is very unlikely, so there is no practical cost.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The unit test mocks RTK Query initiate() instead of using MSW",
+      "label": "nit",
+      "evidence": "draftEditorsSetup.test.ts:30-45 stubs `safesGetSafeV1.initiate`. This departs from the MSW guidance, but the setup is e2e harness code and other tests use the same pattern.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The spender regex only checks the prefix and suffix",
+      "label": "nit",
+      "evidence": "verify-approve-amount.yml:35 matches '.*0x81Bd.*4fec.*' against a fixed, known spender. A collision on the action detail screen is not realistic.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "The scroll-to-and-tap edit-approval-button block is duplicated in approval-editor.yml",
+      "label": "nit",
+      "evidence": "approval-editor.yml:38-44 and 69-75 repeat the same few steps. This is a style preference.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "waitFor uses a truthiness check",
+      "label": "nit",
+      "evidence": "draftEditorsSetup.ts:38 `if (value)` is fine for both current callers, which return objects. The risk is only to hypothetical future callers.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "Mixed use of the passed dispatch and store.dispatch",
+      "label": "nit",
+      "evidence": "draftEditorsSetup.ts:62 has a comment explaining that store.dispatch is used on purpose for the typed AppDispatch. Switching to it everywhere is a stylistic choice.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "The setupSendFlow test doesn't assert navigation",
+      "label": "nit",
+      "evidence": "The test mocks onboardAndNavigate (test.ts:12), so router.replace is never reached. Navigation belongs to the shared helper, and this test is about seeding the signer.",
+      "category": "tests"
     }
   ]
 }

@@ -11,7 +11,8 @@
       ],
       "summary": "Tenderly simulation calls getReadOnlyCurrentGnosisSafeContract without scope, which now throws under a mounted SafeScopeProvider",
       "label": "medium",
-      "evidence": "safeContracts.ts:41-45 now calls getAndValidateSafeSDK(scope), which throws when hasActiveScope() (sdk.ts:44-49). tenderly/utils.ts:41 still passes only params.safe, so simulation in a scoped flow (for example ConfirmProposedTx under a scope, which the PR says is supported) will throw."
+      "evidence": "safeContracts.ts:41-45 now calls getAndValidateSafeSDK(scope), which throws when hasActiveScope() (sdk.ts:44-49). tenderly/utils.ts:41 still passes only params.safe, so simulation in a scoped flow (for example ConfirmProposedTx under a scope, which the PR says is supported) will throw.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -21,7 +22,8 @@
       ],
       "summary": "The scope object gets a new identity on every poll because isFetching is a memo dependency, so scope-dependent effects re-run",
       "label": "medium",
-      "evidence": "SafeScopeProvider.tsx:139 includes isFetching in the deps. It toggles on each 15s poll, so the memo returns a new scope twice per poll. ConfirmProposedTx.tsx:29, SafeTxProvider and useTxActions depend on `scope`, so createExistingTx refetches and replaces safeTx during review. The poll test checks only values, never identity, so it cannot catch this."
+      "evidence": "SafeScopeProvider.tsx:139 includes isFetching in the deps. It toggles on each 15s poll, so the memo returns a new scope twice per poll. ConfirmProposedTx.tsx:29, SafeTxProvider and useTxActions depend on `scope`, so createExistingTx refetches and replaces safeTx during review. The poll test checks only values, never identity, so it cannot catch this.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -31,7 +33,8 @@
       ],
       "summary": "ConfirmProposedTx under a scope stores an error before the SDK resolves, and nothing clears it afterwards",
       "label": "medium",
-      "evidence": "With `initial`, the scope exists but scope.sdk is undefined at first, so createTx→getAndValidateSafeSDK(scope) throws and setSafeTxError is called (ConfirmProposedTx.tsx:29). The only place that clears the error is SafeTxProvider.tsx:112, and it returns early when !canEdit or the nonce and gas match, so the stale TxCheckError banner and the _103 log remain. No test covers this."
+      "evidence": "With `initial`, the scope exists but scope.sdk is undefined at first, so createTx→getAndValidateSafeSDK(scope) throws and setSafeTxError is called (ConfirmProposedTx.tsx:29). The only place that clears the error is SafeTxProvider.tsx:112, and it returns early when !canEdit or the nonce and gas match, so the stale TxCheckError banner and the _103 log remain. No test covers this.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -40,7 +43,8 @@
       ],
       "summary": "dispatchTxExecution gets signerNonce from the URL-chain provider even in a scoped flow",
       "label": "medium",
-      "evidence": "dispatch.ts:307 calls getUserNonce, which reads getWeb3ReadOnly(), the URL chain (web3.ts:58-60), even when scope is on another chain. The value is sent in the PROCESSING event and reused by SpeedUpModal:83 as txOptions.nonce. Some claimed details are wrong: txOptions.nonce is not set from it here, and SimpleTxWatcher does not compare nonces."
+      "evidence": "dispatch.ts:307 calls getUserNonce, which reads getWeb3ReadOnly(), the URL chain (web3.ts:58-60), even when scope is on another chain. The value is sent in the PROCESSING event and reused by SpeedUpModal:83 as txOptions.nonce. Some claimed details are wrong: txOptions.nonce is not set from it here, and SimpleTxWatcher does not compare nonces.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -49,7 +53,8 @@
       ],
       "summary": "A provider that is mounted but has no Safe selected yet exposes scope undefined, the same as having no provider, so hooks fall back to the URL/Redux Safe",
       "label": "low",
-      "evidence": "SafeScopeProvider.tsx:123 returns undefined when there is no target, and context.ts:10 cannot tell this apart from no provider. So useSafeInfo and the other hooks use their Safe-level branch until a Safe is selected. Signing is still blocked by the hasActiveScope throw, which limits the impact to displayed data."
+      "evidence": "SafeScopeProvider.tsx:123 returns undefined when there is no target, and context.ts:10 cannot tell this apart from no provider. So useSafeInfo and the other hooks use their Safe-level branch until a Safe is selected. Signing is still blocked by the hasActiveScope throw, which limits the impact to displayed data.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -59,7 +64,8 @@
       ],
       "summary": "The bare catch in runExecutionPreChecks swallows the missing-scope guard throw and silently skips BAD_SIGNATURE",
       "label": "low",
-      "evidence": "executionPreChecks.ts:136-141 catches every error from getAndValidateSafeSDK, including the _822 throw. It is still logged but the check is skipped. The only caller, useTxActions, passes scope, and on-chain execution would still revert with GS026, so the impact is small."
+      "evidence": "executionPreChecks.ts:136-141 catches every error from getAndValidateSafeSDK, including the _822 throw. It is still logged but the check is skipped. The only caller, useTxActions, passes scope, and on-chain execution would still revert with GS026, so the impact is small.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -70,7 +76,8 @@
       ],
       "summary": "The new scope branch and try/catch in executionPreChecks have no tests",
       "label": "low",
-      "evidence": "executionPreChecks.test.ts is unchanged and mocks only getSafeSDK. useTxActions.scope.test.tsx:27-28 mocks runExecutionPreChecks away completely, so nothing tests whether scope.sdk is used or whether the guard error is swallowed."
+      "evidence": "executionPreChecks.test.ts is unchanged and mocks only getSafeSDK. useTxActions.scope.test.tsx:27-28 mocks runExecutionPreChecks away completely, so nothing tests whether scope.sdk is used or whether the guard error is swallowed.",
+      "category": "tests"
     },
     {
       "findings": [
@@ -79,7 +86,8 @@
       ],
       "summary": "Unscoped provider paths (getSafeProvider() and the other read-only contract getters) have no scope parameter or active-scope guard",
       "label": "low",
-      "evidence": "sdk.ts:69-80: getSafeProvider() without scope silently returns the URL-chain provider, with no hasActiveScope check. The multisend, signMessageLib and other getters in safeContracts.ts use it. These are Safe-level paths today, and multisend is planned for WA-3152."
+      "evidence": "sdk.ts:69-80: getSafeProvider() without scope silently returns the URL-chain provider, with no hasActiveScope check. The multisend, signMessageLib and other getters in safeContracts.ts use it. These are Safe-level paths today, and multisend is planned for WA-3152.",
+      "category": "design"
     },
     {
       "findings": [
@@ -87,7 +95,8 @@
       ],
       "summary": "getGnosisSafeContract falls back to the URL-Safe SDK for the version when safe.version is null",
       "label": "low",
-      "evidence": "safeContracts.ts:28-31 calls getSafeSDK() without the guard, and the scoped dispatchTxRelay can reach it. The PR's Risks section documents this, and it only affects unsupported mastercopies."
+      "evidence": "safeContracts.ts:28-31 calls getSafeSDK() without the guard, and the scoped dispatchTxRelay can reach it. The PR's Risks section documents this, and it only affects unsupported mastercopies.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -95,7 +104,8 @@
       ],
       "summary": "The active-scope guard is a process-wide counter, not tied to the React tree",
       "label": "low",
-      "evidence": "activeScope.ts:8 is a module-global count, so any unscoped getAndValidateSafeSDK anywhere throws while a provider is mounted. The PR describes this as intended, but it would break Safe-level UI that shares the page with a Space flow."
+      "evidence": "activeScope.ts:8 is a module-global count, so any unscoped getAndValidateSafeSDK anywhere throws while a provider is mounted. The PR describes this as intended, but it would break Safe-level UI that shares the page with a Space flow.",
+      "category": "design"
     },
     {
       "findings": [
@@ -104,7 +114,8 @@
       ],
       "summary": "The dynamic import of web3 has no .catch, the same gap as the existing useInitWeb3",
       "label": "low",
-      "evidence": "SafeScopeProvider.tsx:65-68 has no rejection handler, so a failed chunk load leaves web3ReadOnly undefined and no error is reported. useInitWeb3.ts:34 has the same pattern and predates the PR."
+      "evidence": "SafeScopeProvider.tsx:65-68 has no rejection handler, so a failed chunk load leaves web3ReadOnly undefined and no error is reported. useInitWeb3.ts:34 has the same pattern and predates the PR.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -113,7 +124,8 @@
       ],
       "summary": "The safe-scope barrel has no importers, and it re-exports the heavy provider",
       "label": "low",
-      "evidence": "grep finds no imports of '@/components/tx-flow/safe-scope'. Every consumer deep-imports /context or /types, and comments say this is deliberate for bundle size, so the barrel is dead code and could draw heavy deps into any future importer."
+      "evidence": "grep finds no imports of '@/components/tx-flow/safe-scope'. Every consumer deep-imports /context or /types, and comments say this is deliberate for bundle size, so the barrel is dead code and could draw heavy deps into any future importer.",
+      "category": "design"
     },
     {
       "findings": [
@@ -121,7 +133,8 @@
       ],
       "summary": "The global bundle grew by 1.24 KB",
       "label": "unverifiable",
-      "evidence": "Bundle-analyzer output is not available locally. The hooks now import context.ts, which is lightweight, and that likely accounts for the small growth."
+      "evidence": "Bundle-analyzer output is not available locally. The hooks now import context.ts, which is lightweight, and that likely accounts for the small growth.",
+      "category": "performance"
     },
     {
       "findings": [
@@ -129,7 +142,8 @@
       ],
       "summary": "The scope's SafeState hardcodes deployed: true",
       "label": "wrong",
-      "evidence": "SafeScopeProvider.tsx:48. The CGW safes endpoint only returns deployed Safes and has no deployed field, and the PR excludes counterfactual Safes by design."
+      "evidence": "SafeScopeProvider.tsx:48. The CGW safes endpoint only returns deployed Safes and has no deployed field, and the PR excludes counterfactual Safes by design.",
+      "category": "correctness"
     },
     {
       "findings": [
@@ -137,7 +151,8 @@
       ],
       "summary": "Document the client-only invariant of the module counter",
       "label": "nit",
-      "evidence": "registerActiveScope runs only inside useEffect (SafeScopeProvider.tsx:38), so it never runs during SSR. Adding a comment would be preference only."
+      "evidence": "registerActiveScope runs only inside useEffect (SafeScopeProvider.tsx:38), so it never runs during SSR. Adding a comment would be preference only.",
+      "category": "docs"
     },
     {
       "findings": [
@@ -145,7 +160,8 @@
       ],
       "summary": "The _822 log should be deduplicated",
       "label": "nit",
-      "evidence": "The PR's Risks section already acknowledges this and defers it to WA-3150. There are no production entry points yet."
+      "evidence": "The PR's Risks section already acknowledges this and defers it to WA-3150. There are no production entry points yet.",
+      "category": "style"
     },
     {
       "findings": [
@@ -153,7 +169,8 @@
       ],
       "summary": "The barrel exports the internals registerActiveScope and hasActiveScope",
       "label": "nit",
-      "evidence": "index.ts:4 does export them, but nothing imports the barrel, so there is no concrete cost."
+      "evidence": "index.ts:4 does export them, but nothing imports the barrel, so there is no concrete cost.",
+      "category": "convention"
     },
     {
       "findings": [
@@ -161,7 +178,8 @@
       ],
       "summary": "An eslint-disable is used for the exhaustive-deps exclusion",
       "label": "nit",
-      "evidence": "SafeScopeProvider.tsx:88. The suppression is intentional and has a comment explaining it."
+      "evidence": "SafeScopeProvider.tsx:88. The suppression is intentional and has a comment explaining it.",
+      "category": "convention"
     },
     {
       "findings": [
@@ -169,7 +187,8 @@
       ],
       "summary": "The positional-argument lists of dispatchTxRelay and dispatchTxExecution keep growing",
       "label": "nit",
-      "evidence": "hooks.ts:210. This is about style and API ergonomics, with no defect."
+      "evidence": "hooks.ts:210. This is about style and API ergonomics, with no defect.",
+      "category": "design"
     },
     {
       "findings": [
@@ -177,7 +196,8 @@
       ],
       "summary": "The undefined placeholder argument in createExistingTx",
       "label": "nit",
-      "evidence": "ConfirmProposedTx.tsx:29. This is a style preference."
+      "evidence": "ConfirmProposedTx.tsx:29. This is a style preference.",
+      "category": "style"
     },
     {
       "findings": [
@@ -185,7 +205,8 @@
       ],
       "summary": "Move safe-scope under the spaces folder",
       "label": "nit",
-      "evidence": "This is a location preference. The scope is tx-flow infrastructure, so its current location is defensible."
+      "evidence": "This is a location preference. The scope is tx-flow infrastructure, so its current location is defensible.",
+      "category": "convention"
     },
     {
       "findings": [
@@ -193,7 +214,8 @@
       ],
       "summary": "A relative import differs from the alias style used elsewhere",
       "label": "nit",
-      "evidence": "SafeTxProvider.tsx:6 uses './safe-scope/context' while the other files use the alias. This is cosmetic."
+      "evidence": "SafeTxProvider.tsx:6 uses './safe-scope/context' while the other files use the alias. This is cosmetic.",
+      "category": "convention"
     }
   ]
 }

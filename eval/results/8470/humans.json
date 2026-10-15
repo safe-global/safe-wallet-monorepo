@@ -1,0 +1,12 @@
+{
+  "usd": 0.2981528,
+  "head": "8a706fb614de2a574cb8729df0774cab7d0b433b",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "No commits after 8a706fb (git log 8a706fb..HEAD is empty). The author did not dispute Zalens' point that safe-core-sdk/protocol-kit needs a bump. In the 2026-08-11 reply they agreed and opened WA-3110 to bump protocol-kit later, so the humans treated the claim as correct rather than wrong."
+    }
+  ]
+}

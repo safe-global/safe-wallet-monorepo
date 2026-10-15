@@ -1,0 +1,102 @@
+COMMENT
+[github-actions 2026-06-29T15:50:47Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://fix-safe-account-input-usewatch--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://fix-safe-account-input-usewatch--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[tmjssz 2026-06-29T15:51:03Z] @claude review
+
+COMMENT
+[claude 2026-06-29T15:51:22Z] **Claude finished @tmjssz's task in 1m 13s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/28384847219)
+
+---
+### Claude PR Review
+
+- [x] Read the changed file
+- [x] Analyze the fix
+- [x] Post review
+
+---
+
+The fix is correct and minimal. Root cause is accurate: `useFormContext().watch()` subscribes the component that called `useForm()` (the form root), not the descendant. Since `importedSafeResult` is not in `defaultValues`, the root only re-renders when its own subscriptions change, leaving `SafeAccountInput` with a stale `undefined`. Switching to `useWatch({ control, name })` subscribes this child via the field subject, which fires on `setValue` from `useImportSafe`. This also aligns with the sibling `ImportAccountFormView` (`apps/mobile/src/features/ImportReadOnly/components/ImportAccountFormView.tsx:26`).
+
+#### Things to improve
+
+1. **Missing test coverage** (`apps/mobile/src/components/SafeAccountInput/`).
+   The PR description acknowledges no unit test was added, and there is no colocated `index.test.tsx` for `SafeAccountInput`. A regression test asserting that the `success-icon` renders when `importedSafeResult.data` is populated via the form (e.g. by wrapping in `FormProvider` and calling `setValue('importedSafeResult', ...)`) would lock in this exact bug. Per `AGENTS.md`: "If a significant code change has no colocated unit test, write one before committing." Even a tiny render test that fails on the old `watch()` and passes on `useWatch` is high-value here.
+   [Fix this →](https://claude.ai/code?q=Add%20a%20colocated%20unit%20test%20at%20apps%2Fmobile%2Fsrc%2Fcomponents%2FSafeAccountInput%2Findex.test.tsx%20on%20branch%20fix%2Fsafe-account-input-usewatch.%20Wrap%20SafeAccountInput%20in%20a%20FormProvider%20with%20FormValues%2C%20render%20it%2C%20call%20setValue('importedSafeResult'%2C%20%7B%20data%3A%20%5B%7B%7D%5D%2C%20isFetching%3A%20false%20%7D)%20and%20assert%20the%20success-icon%20testID%20appears.%20Mock%20useImportSafe%20to%20be%20a%20no-op%20so%20the%20test%20isolates%20the%20useWatch%20subscription.&repo=safe-global/safe-wallet-monorepo)
+
+2. **Hardcoded type cast in the same file** (`apps/mobile/src/components/SafeAccountInput/index.tsx:37`).
+   Pre-existing, not introduced by this PR, but worth flagging while the file is open: `addressWithoutPrefix as \`0x${string}\`` casts without validation. If `parsePrefixedAddress` ever returns a non-hex string, downstream `Identicon` consumers get a lie from the type system. Consider gating the `Identicon` on `isAddress(addressWithoutPrefix)` instead of just truthiness. Out of scope for this fix — leave as-is or open a follow-up.
+
+3. **Comment is borderline noise** (`apps/mobile/src/components/SafeAccountInput/index.tsx:19-20`).
+   Per `AGENTS.md`: comments only when the why is non-obvious. The `useWatch` vs `watch` distinction is subtle enough that I'd lean toward keeping it, but a shorter form (e.g. "subscribe at child level — `watch()` only re-renders the form root") would read better and won't rot. Optional.
+
+Otherwise: blast-radius analysis in the PR description is accurate (only this file changes; no API/schema/`defaultValues` impact). Lint/type-check claim is reasonable for a 4-line subscription swap.
+ · [branch](https://github.com/safe-global/safe-wallet-monorepo/tree/fix/safe-account-input-usewatch)
+
+COMMENT
+[tmjssz 2026-06-29T16:04:04Z] @claude review again
+
+COMMENT
+[claude 2026-06-29T16:04:24Z] **Claude finished @tmjssz's task in 1m 41s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/28385678850)
+
+---
+### Claude PR Review (2nd pass)
+
+- [x] Read changed files (`index.tsx` + new `index.test.tsx`)
+- [x] Re-analyze diff vs previous review
+- [x] Post updated review
+
+---
+
+The previous review's main ask — a colocated test — has been addressed cleanly. The harness mocks `useImportSafe`, drives `importedSafeResult` via `setValue` **after mount**, and asserts `success-icon` appears. This is exactly the shape that fails on `watch()` and passes on `useWatch`, so it locks in the regression. Comment was also tightened as suggested.
+
+#### Minor things to improve
+
+1. **Add a negative-state assertion** (`apps/mobile/src/components/SafeAccountInput/index.test.tsx:46`).
+   The current test only covers `data: [safeOverview], isFetching: false`. The icon's render condition is `result?.data?.length && !errors.safeAddress && !result?.isFetching`, so a second case asserting `success-icon` is **not** rendered while `isFetching: true` (or `data: []`) would lock in the loading/empty branch too. Cheap to add, prevents a future regression where someone drops the `isFetching` guard.
+   [Fix this →](https://claude.ai/code?q=In%20apps%2Fmobile%2Fsrc%2Fcomponents%2FSafeAccountInput%2Findex.test.tsx%20on%20branch%20fix%2Fsafe-account-input-usewatch%2C%20add%20a%20second%20test%20case%20that%20calls%20setValue('importedSafeResult'%2C%20%7B%20data%3A%20%5BsafeOverview%5D%2C%20isFetching%3A%20true%2C%20error%3A%20undefined%20%7D)%20and%20asserts%20queryByTestId('success-icon')%20is%20null.%20Also%20add%20a%20case%20with%20data%3A%20%5B%5D%20to%20cover%20the%20empty-result%20branch.&repo=safe-global/safe-wallet-monorepo)
+
+2. **Test imports `SafeOverview` from the auto-generated module directly** (`index.test.tsx:4`).
+   `FormValues.importedSafeResult.data` is typed off `useLazySafesGetOverviewForManyQuery`, not directly off `SafeOverview`. They line up today, but reaching into `@safe-global/store/gateway/AUTO_GENERATED/safes` for the test fixture couples the test to the generated schema. Consider deriving the fixture type from `FormValues['importedSafeResult']` (e.g. `NonNullable<FormValues['importedSafeResult']>['data']`) so a future RTK Query response shape change surfaces here rather than silently. Optional / nit.
+
+3. **Pre-existing, out of scope** (`apps/mobile/src/components/SafeAccountInput/index.tsx:36`).
+   The `addressWithoutPrefix as \`0x${string}\`` cast is still unvalidated. Not introduced by this PR — flagged previously, leaving as a follow-up.
+
+Everything else looks good: comment is now tight, the change remains minimal, and blast-radius analysis still holds (single file behavior change, plus a colocated test). LGTM with the negative case added.
+ · [branch](https://github.com/safe-global/safe-wallet-monorepo/tree/fix/safe-account-input-usewatch)
+
+COMMENT
+[tmjssz 2026-06-29T16:18:58Z] @claude review again
+
+COMMENT
+[claude 2026-06-29T16:20:08Z] **Claude finished @tmjssz's task in 38s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/28386601535)
+
+---
+### Claude PR Review (3rd pass)
+
+- [x] Read changed files (`index.tsx` + `index.test.tsx`)
+- [x] Compare against previous review asks
+- [x] Post review
+
+---
+
+Both follow-ups from the 2nd pass landed cleanly in `aac0aeb`:
+
+1. **Negative cases added** — `index.test.tsx:56-68` covers both `isFetching: true` and `data: []` against the icon's render condition (`result?.data?.length && !errors.safeAddress && !result?.isFetching`). All three branches of the gate are now locked in.
+2. **Fixture type decoupled from auto-generated module** — `index.test.tsx:12-13` derives `SafeOverviewItem` from `NonNullable<FormValues['importedSafeResult']>['data'][number]`, so a future RTK Query response shape change surfaces here instead of silently drifting.
+
+Test harness is clean: the `seed` flag cleanly distinguishes the after-mount `setValue` path (the exact scenario `watch()` missed) from `defaultValues` seeding for the negative cases — no redundant async wiring on the synchronous assertions.
+
+Pre-existing `addressWithoutPrefix as \`0x${string}\`` cast at `index.tsx:36` is unchanged — out of scope, already flagged.
+
+LGTM, no further requests.
+ · [branch](https://github.com/safe-global/safe-wallet-monorepo/tree/fix/safe-account-input-usewatch)

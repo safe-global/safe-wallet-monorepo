@@ -1,0 +1,60 @@
+{
+  "usd": 0.7564834,
+  "head": "86fe25c0d371f770aae97f4c5940153e9ae3d905",
+  "verdicts": [
+    {
+      "issue": 2,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 useWalletConnectScan's useFocusEffect called setIsCameraActive(true) without checking isActive. Commit 9984b6aa6 adds isActiveRef (useWalletConnectScan.ts:28-29,55) to gate it, and the bot's re-review confirmed the fix."
+    },
+    {
+      "issue": 11,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 ScanConnect used controlClearance = insets.bottom + 64. Commit 964a4bce5 derives it as insets.bottom + getTokenValue(CONTROL_BOTTOM_OFFSET) + CONTROL_FOOTPRINT (ScanConnect.tsx:15-25)."
+    },
+    {
+      "issue": 12,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 HeaderQrButton reset isOpeningRef only in useFocusEffect. Commit 280b9aa0c adds a setTimeout fallback that resets it (HeaderQrButton.tsx:34-35) and a test for it."
+    },
+    {
+      "issue": 21,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 there was no SupportedNetworksSheet.test.tsx. Commit d04d84211 adds a smoke test of the selector wiring through a seeded store."
+    },
+    {
+      "issue": 25,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 SegmentedControl's track was width=\"50%\". Commit a4d2fa634 changes it to width=\"100%\" (SegmentedControl.tsx:48), and ScanConnect now wraps it in a CONTROL_WIDTH='50%' container."
+    },
+    {
+      "issue": 26,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 the useEffect ran withSpring(selectedIndex) on mount. Commit a4d2fa634 adds an isFirstRender ref that skips the first run (SegmentedControl.tsx:33-36)."
+    },
+    {
+      "issue": 27,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 ScanConnect.tsx:28 had `typeof insets.bottom === 'number' ? ... : 0`. Commit 964a4bce5 removes the check and uses insets.bottom directly (ScanConnect.tsx:25)."
+    },
+    {
+      "issue": 28,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 SupportedNetworksList wrapped two filter calls in useMemo. Commit 4f303b670 replaces this with a single for-loop partition and no memo (SupportedNetworksList.tsx:29-33)."
+    },
+    {
+      "issue": 29,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f70f564 SegmentedControl.test.tsx had no thumb-position test. Commit a4d2fa634 adds 'positions the thumb over the selected segment', which asserts left/width (SegmentedControl.test.tsx:48-55)."
+    }
+  ]
+}

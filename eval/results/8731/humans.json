@@ -1,0 +1,54 @@
+{
+  "usd": 0.5212276,
+  "head": "4f237b4e4030eee521cd11da4d7b2973682d437d",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author replied 'fixed, by guarding'. Commit 5c5f5a651 (linked by the author at 55fea332a) makes toDisplayAmount check the precision before calling safeParseUnits, and 4f237b4e4 switched that check to validateDecimalLength (Summary/LimitSummaryRow.tsx:18-22). At 6dde346 the function called safeParseUnits with no guard."
+    },
+    {
+      "issue": 6,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author declined ('Empty-policy sentence — keeping'): step 1 blocks `spenders: []`, so the case can't reach this code. The `names ? … : CALLOUT_TITLE_PREFIX` fallback is still in Summary/describePolicy.ts."
+    },
+    {
+      "issue": 10,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author declined ('`-${index}` in keys — keeping', since the cards hold no state and addresses could repeat). `${spender.address}-${index}` is still in Summary/index.tsx and `${limit.token.address}-${index}` in SpenderSummaryCard.tsx."
+    },
+    {
+      "issue": 11,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 5c5f5a651 deletes the mswLoader import and `loaders: [mswLoader]` from the story (renamed to SpendingLimitSummary.stories.tsx). The author confirmed 'removed' in their reply."
+    },
+    {
+      "issue": 14,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author said 'Two constants that are both 24 — keeping, agreed with your own read'. AVATAR_SIZE and TOKEN_ICON_SIZE are both still 24 in SpenderSummaryCard.tsx and LimitSummaryRow.tsx."
+    },
+    {
+      "issue": 15,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author replied 'Fixed' in vmosharova's thread. Commit 40cc095e2 renames copy.ts to Summary/describePolicy.ts (its test too)."
+    },
+    {
+      "issue": 17,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author put the comma decimal separator off to later ('For the , and . issue, let's fix it later'). No commit after the review touches it, and vmosharova approved anyway."
+    },
+    {
+      "issue": 18,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author said 'fixed the responsive issue'. Commits c538aa6b9 and ee2b13a8a (story shrinks, label stacks on narrow cards) and c11d6a318 (room for the Applies to address) followed, and vmosharova approved after re-checking."
+    }
+  ]
+}

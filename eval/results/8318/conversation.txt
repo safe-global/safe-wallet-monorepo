@@ -1,0 +1,244 @@
+THREAD packages/utils/src/utils/addressSimilarity.ts:115 resolved=false
+[tmjssz 2026-07-21T13:09:48Z] Can we try to refactor so that we use e.g. map/forEach instead of while/for loops? And also use more self-explanatory variable names. Just to make it easier to read.
+[tmjssz 2026-07-21T13:10:32Z] Also, maybe we could split the logic into mutiple functions, because this is quite big
+[tongyaosafe 2026-07-21T15:15:57Z] rewrite it to more human readable style. Thanks.
+
+THREAD apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts:57 resolved=false
+[tmjssz 2026-07-21T13:21:38Z] Can you check if we can re-use `useAllSafes` here in any way? 
+[tongyaosafe 2026-07-21T15:27:18Z] Yes. you are right. very good catch. fixed
+
+THREAD apps/web/src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts:34 resolved=false
+[tmjssz 2026-07-21T13:23:47Z] Should we make sure that the list has unique values only?
+[tongyaosafe 2026-07-21T15:30:26Z] `combinedAddresses` will be the input for `useSimilarityClusters( )`, and the `dedupeUsableAddresses ()` is executed by `useSimilarityClusters()`.
+So we don't need to make it unique here.
+
+THREAD apps/web/src/components/common/TrustedSafesModal/useTrustedSafesModal.ts:115 resolved=false
+[tmjssz 2026-07-21T13:31:04Z] This pattern is used in many places on this PR. Can we extract it into a separate hook?
+[tongyaosafe 2026-07-21T15:40:33Z] Good catch.
+Instead of a new wrapper hook (we just removed one), I folded `isAddressFlagged` into `useSimilarityClusters`'s return
+
+COMMENT
+[github-actions 2026-07-20T12:43:27Z] <!-- add-pr-comment:tx-builder-preview -->
+
+## tx-builder Preview
+✅ Deploy successful!
+
+**Preview URL:**
+https://feat-address-poisoning-mode-b-v4--tx-builder.review.5afe.dev/
+
+COMMENT
+[github-actions 2026-07-20T12:43:27Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://feat-address-poisoning-mode-b-v4--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://feat-address-poisoning-mode-b-v4--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[tongyaosafe 2026-07-20T12:43:33Z] @claude review
+
+COMMENT
+[claude 2026-07-20T12:43:49Z] **Claude finished @tongyaosafe's task in 3m 2s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29743305269)
+
+---
+### PR Review — Mode B address-poisoning
+
+- [x] Load context
+- [x] Read new/modified files
+- [x] Analyze quality, bugs, performance, security, tests
+- [x] Post review
+
+---
+
+Nice, focused PR. The `detectListClusters` primitive with union-find over the OR-relation is a clean model for the "front-4 OR back-4" flagging, and the multi-chain dedup is the right call. A few things worth improving before merge:
+
+### 1. Duplicated & inconsistent similarity computation in the trusted-safes modal
+
+`useTrustedSafesModal.ts:113` computes clusters over the **full** `allSafes` list, while `ManageTrustedSafesContent.tsx:102-103` re-runs `useFlaggedSimilarAddresses` over the **filtered** `availableItems`.
+
+Consequences:
+- Two full hook chains (`useSimilarityClusters` → `useListSimilarities` → `detectListSimilarities`) run per render.
+- `similarAddressesForSelectAll` and `toggleSelection` use the full-list `flaggedAll` (via `isAddressFlagged`) for confirmation gating, but the table's per-row badge (`flaggedAddresses={flaggedAddresses}` in `SafeAccountsTable`) uses the filtered set. Result: a user searching such that only one of a poisoned pair is visible sees **no badge**, yet still hits the "confirm similar address" dialog when they try to select it. Two sources of truth for what "flagged" means is a UX foot-gun.
+
+Fix: expose `flagged` from `useTrustedSafesModal` and consume it in the content, dropping the second `useFlaggedSimilarAddresses` call.
+
+### 2. `useSimilarityClusters` — anchor and impostor clustering assumes config parity
+
+`useSimilarityClusters.ts:35-37` flags an in-list trusted anchor when an impostor imitates it. But the anchor is **not** added to `groupIdByAddress` — the assumption is that when both anchor and impostor are in the list, `detectListClusters` already grouped them because both engines default to 4/4.
+
+This holds today, but it's a silent coupling between `SimilarityConfig` (`prefixLength`/`suffixLength`) and `AnchorSimilarityConfig` (`prefixThreshold`/`suffixThreshold`). If either is ever tuned independently, the anchor↔impostor pair silently loses its visual grouping while remaining flagged. Consider:
+- Stamping the anchor with the impostor's `groupId` here to make the invariant explicit, or
+- Adding a comment/test locking the "anchor threshold ≥ list bucket length" contract.
+
+### 3. Minor performance nit
+
+`useSimilarityClusters.ts:35-37` loops all `addresses` even when `imitated.size === 0` (the common case when the flag is off or no anchor matches). Cheap guard:
+
+```ts
+if (imitated.size > 0) {
+  for (const address of addresses) {
+    if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
+  }
+}
+```
+
+### 4. Test coverage gap on the composite hook
+
+`detectListClusters` is well-tested at the engine level, and `useFlaggedSimilarAddresses` is tested with `useListSimilarities` mocked. But `useSimilarityClusters` — where the interesting composition (union-find + anchor annotations + "flag the imitated original") happens — has no direct test.
+
+Worth adding at minimum:
+- In-list anchor + in-list impostor → both flagged, both share the same `groupId`.
+- Out-of-list anchor + in-list impostor → impostor flagged, no `groupId`.
+- Flag off (`ADDRESS_POISONING_PROTECTION`) → identical to pure intra-list result.
+
+### 5. `useOnboardingSafes` — "trusted anywhere" scope
+
+`useOnboardingSafes.ts:41-43` defines `trustedAddresses` purely from `allAdded` (pinned). Undeployed safes aren't considered trusted-anywhere, so an undeployed safe that shares an address with an owned one on another chain still ends up under "owned". If that matches product intent, ignore; otherwise consider unioning `Object.keys(allUndeployed[chainId] || {})` into the trusted set too.
+
+### 6. Naming nit
+
+`useListSimilarities` reads like it clusters a list, but it actually only runs the anchor detector (returns `Map<address, ListAnnotation>` where `match` is anchor-based). `useAnchorAnnotations` or `useAnchorListMatches` would signal that more clearly, especially now that the "list clustering" name is taken by `useSimilarityClusters` / `detectListClusters`.
+
+---
+
+Nothing here is a blocker — (1) is the most impactful because it changes user-visible behavior on filtered views.
+ · [Branch](https://github.com/safe-global/safe-wallet-monorepo/tree/feat/address-poisoning-mode-b-v4)
+
+COMMENT
+[github-actions 2026-07-20T12:55:11Z] ## 📦 Next.js Bundle Analysis for @safe-global/web
+
+This analysis was generated by the [Next.js Bundle Analysis action](https://github.com/hashicorp/nextjs-bundle-analysis). 🤖
+
+### ⚠️  Global Bundle Size Increased
+  
+Page | Size (compressed) | 
+|---|---|
+| `global` | `1.49 MB` _(🟡 +327 B)_ |
+
+<details>
+<summary>Details</summary>
+<p>The <strong>global bundle</strong> is the javascript bundle that loads alongside every page. It is in its own category because its impact is much higher - an increase to its size means that every page on your website loads slower, and a decrease means every page loads faster.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>If you want further insight into what is behind the changes, give <a href='https://www.npmjs.com/package/@next/bundle-analyzer'>@next/bundle-analyzer</a> a try!</p>
+</details>
+
+### One Page Changed Size
+  
+The following page changed size from the code in this PR compared to its base branch:
+
+Page | Size (compressed) | First Load |
+|---|---|---|
+| `/settings/security` | `2.83 KB` _(🟡 +1 B)_ | 1.49 MB |
+
+<details>
+<summary>Details</summary>
+<p>Only the gzipped size is provided here based on <a href='https://twitter.com/slightlylate/status/1412851269211811845'>an expert tip</a>.</p>
+<p><strong>First Load</strong> is the size of the global bundle plus the bundle for the individual page. If a user were to show up to your website and land on a given page, the first load size represents the amount of javascript that user would need to download. If <code>next/link</code> is used, subsequent page loads would only need to download that page's bundle (the number in the "Size" column), since the global bundle has already been downloaded.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>Next to the size is how much the size has increased or decreased compared with the base branch of this PR. If this percentage has increased by 20% or more, there will be a red status indicator applied, indicating that special attention should be given to this.
+</details>
+<!-- __NEXTJS_BUNDLE_@safe-global/web -->
+<!-- Sticky Pull Request Commentnext-bundle-analysis -->
+
+COMMENT
+[github-actions 2026-07-20T13:14:11Z] <!-- jest coverage report action for options with hash 538b3aeca5435921509d9329a38101b7 -->
+
+## Coverage report for `apps/web`
+
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | Category | Percentage | Covered / Total |
+| :-: | :- | :- | :-: |
+| 🟢 | Statements | <div title="Base coverage is: 83.43%">83.44% (+0.01% 🔼)</div> | 31613/37887 |
+| 🟡 | Branches | <div title="Base coverage is: 67.17%">67.15% (-0.02% 🔻)</div> | 10078/15008 |
+| 🟡 | Functions | <div title="Base coverage is: 70.71%">70.73% (+0.02% 🔼)</div> | 4767/6740 |
+| 🟢 | Lines | <div title="Base coverage is: 84.73%">84.74% (+0.01% 🔼)</div> | 28323/33423 |
+
+<details><summary>Show new covered files 🐣</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟢 | <div title="src/features/address-poisoning/hooks/useAnchorListMatches.ts">`...` / useAnchorListMatches.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/address-poisoning/hooks/useSimilarityClusters.ts">`...` / useSimilarityClusters.ts</div> | 96.3% | 50% | 100% | 100% |
+
+</details>
+
+
+<details><summary>Show files with reduced coverage 🔻</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟢 | <div title="src/components/common/TrustedSafesModal/useTrustedSafesModal.ts">`...` / useTrustedSafesModal.ts</div> | <div title="Base coverage is: 96.7%">96.69% (-0.02% 🔻)</div> | 80.77% | <div title="Base coverage is: 97.5%">97.44% (-0.06% 🔻)</div> | 98.16% |
+| 🟢 | <div title="src/features/spaces/components/SelectSafesOnboarding/hooks/useOnboardingSafes.ts">`...` / useOnboardingSafes.ts</div> | 100% | <div title="Base coverage is: 72.22%">62.5% (-9.72% 🔻)</div> | 100% | 100% |
+
+</details>
+
+## Test suite run success
+6513 tests passing in 720 suites.
+
+<p align="right">Report generated by <a href="https://github.com/ArtiomTr/jest-coverage-report-action">🧪jest coverage report action</a> from 94e49306eee9feee3f0120ab1c04d07cee82d9bb</p>
+
+
+COMMENT
+[tongyaosafe 2026-07-20T13:23:22Z] > **Claude finished @tongyaosafe's task in 3m 2s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29743305269)
+> 
+> ### PR Review — Mode B address-poisoning
+> * [x]  Load context
+> * [x]  Read new/modified files
+> * [x]  Analyze quality, bugs, performance, security, tests
+> * [x]  Post review
+> 
+> Nice, focused PR. The `detectListClusters` primitive with union-find over the OR-relation is a clean model for the "front-4 OR back-4" flagging, and the multi-chain dedup is the right call. A few things worth improving before merge:
+> 
+> ### 1. Duplicated & inconsistent similarity computation in the trusted-safes modal
+> `useTrustedSafesModal.ts:113` computes clusters over the **full** `allSafes` list, while `ManageTrustedSafesContent.tsx:102-103` re-runs `useFlaggedSimilarAddresses` over the **filtered** `availableItems`.
+> 
+> Consequences:
+> 
+> * Two full hook chains (`useSimilarityClusters` → `useListSimilarities` → `detectListSimilarities`) run per render.
+> * `similarAddressesForSelectAll` and `toggleSelection` use the full-list `flaggedAll` (via `isAddressFlagged`) for confirmation gating, but the table's per-row badge (`flaggedAddresses={flaggedAddresses}` in `SafeAccountsTable`) uses the filtered set. Result: a user searching such that only one of a poisoned pair is visible sees **no badge**, yet still hits the "confirm similar address" dialog when they try to select it. Two sources of truth for what "flagged" means is a UX foot-gun.
+> 
+> Fix: expose `flagged` from `useTrustedSafesModal` and consume it in the content, dropping the second `useFlaggedSimilarAddresses` call.
+> 
+> ### 2. `useSimilarityClusters` — anchor and impostor clustering assumes config parity
+> `useSimilarityClusters.ts:35-37` flags an in-list trusted anchor when an impostor imitates it. But the anchor is **not** added to `groupIdByAddress` — the assumption is that when both anchor and impostor are in the list, `detectListClusters` already grouped them because both engines default to 4/4.
+> 
+> This holds today, but it's a silent coupling between `SimilarityConfig` (`prefixLength`/`suffixLength`) and `AnchorSimilarityConfig` (`prefixThreshold`/`suffixThreshold`). If either is ever tuned independently, the anchor↔impostor pair silently loses its visual grouping while remaining flagged. Consider:
+> 
+> * Stamping the anchor with the impostor's `groupId` here to make the invariant explicit, or
+> * Adding a comment/test locking the "anchor threshold ≥ list bucket length" contract.
+> 
+> ### 3. Minor performance nit
+> `useSimilarityClusters.ts:35-37` loops all `addresses` even when `imitated.size === 0` (the common case when the flag is off or no anchor matches). Cheap guard:
+> 
+> ```ts
+> if (imitated.size > 0) {
+>   for (const address of addresses) {
+>     if (imitated.has(normalizeAddress(address))) flagged.add(address.toLowerCase())
+>   }
+> }
+> ```
+> 
+> ### 4. Test coverage gap on the composite hook
+> `detectListClusters` is well-tested at the engine level, and `useFlaggedSimilarAddresses` is tested with `useListSimilarities` mocked. But `useSimilarityClusters` — where the interesting composition (union-find + anchor annotations + "flag the imitated original") happens — has no direct test.
+> 
+> Worth adding at minimum:
+> 
+> * In-list anchor + in-list impostor → both flagged, both share the same `groupId`.
+> * Out-of-list anchor + in-list impostor → impostor flagged, no `groupId`.
+> * Flag off (`ADDRESS_POISONING_PROTECTION`) → identical to pure intra-list result.
+> 
+> ### 5. `useOnboardingSafes` — "trusted anywhere" scope
+> `useOnboardingSafes.ts:41-43` defines `trustedAddresses` purely from `allAdded` (pinned). Undeployed safes aren't considered trusted-anywhere, so an undeployed safe that shares an address with an owned one on another chain still ends up under "owned". If that matches product intent, ignore; otherwise consider unioning `Object.keys(allUndeployed[chainId] || {})` into the trusted set too.
+> 
+> ### 6. Naming nit
+> `useListSimilarities` reads like it clusters a list, but it actually only runs the anchor detector (returns `Map<address, ListAnnotation>` where `match` is anchor-based). `useAnchorAnnotations` or `useAnchorListMatches` would signal that more clearly, especially now that the "list clustering" name is taken by `useSimilarityClusters` / `detectListClusters`.
+> 
+> Nothing here is a blocker — (1) is the most impactful because it changes user-visible behavior on filtered views. · [Branch](https://github.com/safe-global/safe-wallet-monorepo/tree/feat/address-poisoning-mode-b-v4)
+
+fixed

@@ -1,0 +1,284 @@
+THREAD apps/web/src/features/spaces/hooks/useSpaceMembers.tsx:49 resolved=false
+[chatgpt-codex-connector 2026-06-12T22:26:05Z] **<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Clear members after forbidden refetch**
+
+When another session removes the current user from the space, the newly enabled focus/remount refetch hits `/v1/spaces/{spaceId}/members`, whose schema returns 403 for unauthorized users; RTK Query keeps the last successful `data` on a failed refetch, and this hook ignores the error, so `useCurrentMembership`/`useIsAdmin` can continue returning the stale active member after the refresh instead of dropping access until a full reload. Please handle the query error by clearing the returned member list (or otherwise invalidating this local space state) for forbidden/not-found responses.
+
+Useful? React with 👍 / 👎.
+
+REVIEW COMMENTED
+[chatgpt-codex-connector 2026-06-12T22:26:05Z] 
+### 💡 Codex Review
+
+Here are some automated review suggestions for this pull request.
+
+**Reviewed commit:** `4cb481effa`
+    
+
+<details> <summary>ℹ️ About Codex in GitHub</summary>
+<br/>
+
+[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you
+- Open a pull request for review
+- Mark a draft as ready
+- Comment "@codex review".
+
+If Codex has suggestions, it will comment; otherwise it will react with 👍.
+
+
+
+
+Codex can also answer questions or update the PR. Try commenting "@codex address that feedback".
+            
+</details>
+
+REVIEW CHANGES_REQUESTED
+[vmosharova 2026-06-15T06:15:43Z] I agree with the AI reviewer and would add an extra guard for `useSpaceMembers` - `useAllMembers` to make sure the member list is cleared on 403.
+
+REVIEW APPROVED
+[vmosharova 2026-06-15T07:16:55Z] Approved, thanks!
+
+COMMENT
+[github-actions 2026-06-12T22:23:55Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://danield-wa-2564-workspace-changes-require-manual-r--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://danield-wa-2564-workspace-changes-require-manual-r--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[popcorn-report 2026-06-12T22:26:34Z] <!-- popcorn-briefing -->
+[![Open the PR briefing](https://eyfiffagztwbokkxesiq.supabase.co/storage/v1/object/public/published-assets/safe-global/safe-wallet-monorepo/pr-8102/736fee80e60b7aa64a9a311726ac60836ae6afa7/thumbnail.png?v=1781507165331)](https://viewer.popcorn.report/view?briefing_id=pb_166fe662e834ce5f6d0f0658)
+
+🍿 **Approval confidence: 80% — no-brainer.** Change is small, focused on a few query hooks, with clear rationale and updated tests. The risk of UI flash or breakage is mitigated by the design (previous data shown during fetch) and explicit error handling for membership revocation. Only non-UI code touched.
+
+**This PR fixes stale space data (accounts, members, contacts) that remained outdated across browser sessions until a full page reload.** It introduces a shared RTK Query options constant `SPACE_REFRESH_OPTIONS` with `refetchOnFocus: true` and `refetchOnMountOrArgChange: 30`, applied to three space queries: space safes, members, and address book, plus the `AuthState` component. The change ensures that returning to the page or refocusing the window fetches fresh data, and that membership revocations (403/404 errors) clear stale member lists. This eliminates the need for manual refresh without introducing background polling.
+
+🍿 **[Listen to audio review](https://viewer.popcorn.report/view?briefing_id=pb_166fe662e834ce5f6d0f0658)**
+
+### 💥 Risks
+
+- [`apps/web/src/features/spaces/hooks/useSpaceMembers.tsx` L54-57](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/useSpaceMembers.tsx#L54-L57) `isMembershipRevoked` — There are a couple of boundaries to keep in mind. A user staring at the page without changing focus or navigating will still see stale data — that would need polling or push, explicitly out of scope here. Also, the 403 clearing in the member hook could briefly show an empty list if a transient auth glitch occurs, though the UI is already designed to handle empty states gracefully.
+
+<details>
+<summary><b>Full briefing — architecture, contracts, file map</b></summary>
+
+**Approval confidence:** 80% — no-brainer. Change is small, focused on a few query hooks, with clear rationale and updated tests. The risk of UI flash or breakage is mitigated by the design (previous data shown during fetch) and explicit error handling for membership revocation. Only non-UI code touched.
+
+## 🍿 Summary
+
+This PR fixes stale space data (accounts, members, contacts) that remained outdated across browser sessions until a full page reload. It introduces a shared RTK Query options constant `SPACE_REFRESH_OPTIONS` with `refetchOnFocus: true` and `refetchOnMountOrArgChange: 30`, applied to three space queries: space safes, members, and address book, plus the `AuthState` component. The change ensures that returning to the page or refocusing the window fetches fresh data, and that membership revocations (403/404 errors) clear stale member lists. This eliminates the need for manual refresh without introducing background polling.
+
+## 🏗️ Architecture notes
+
+A new module [`apps/web/src/features/spaces/hooks/refreshOptions.ts`](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/refreshOptions.ts) exports the shared constant. It is consumed by `useSpaceSafes`, `useSpaceMembers`, `useGetSpaceAddressBook`, and `AuthState`, where it is spread into the existing query options alongside skip logic. The `useSpaceMembers` hook additionally de-duplicates error handling: a 403/404 during refetch resets the member list to an empty array, preventing stale admin data from persisting. No polling is added; `refetchOnMountOrArgChange` is a staleness threshold checked only on new subscriptions, and focus-driven refetches keep last known data visible during fetch.
+
+## 🌊 Ripple risks
+
+Analyzed 1 changed export. No untouched external callers found — all usages appear to be inside the PR diff.
+
+_Analyzed 9 file(s), 2 changed export(s), 0 uncovered callsite(s) in 1.3s._
+
+## 🎬 Walkthrough outline
+
+_11 steps across 5 chapters, approximately 2 min 24s._
+
+### Why this change
+
+1. **🎯 motivation** · [`apps/web/src/features/spaces/hooks/refreshOptions.ts` L9](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/refreshOptions.ts#L9) `SPACE_REFRESH_OPTIONS`
+   Workspace changes like adding a contact or removing a member often left stale data in other sessions unless someone reloaded the page. The root cause: RTK Query cache invalidation only affects the local store, and no automatic refetch was configured for these queries. To fix that, we introduce a shared constant called space refresh options.
+
+### The shared refresh options
+
+2. **🔧 change** · [`apps/web/src/features/spaces/hooks/refreshOptions.ts` L9](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/refreshOptions.ts#L9) `SPACE_REFRESH_OPTIONS`
+   The constant sets refetch on focus to true and a refetch on mount or arg change threshold of 30 seconds. That second option is not polling — it only triggers when a new subscription mount sees data older than 30 seconds. So we get freshness with no background traffic.
+
+3. **🔧 change** · [`apps/web/src/features/spaces/hooks/useSpaceSafes.tsx` L13-18](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/useSpaceSafes.tsx#L13-L18) `useSpaceSafes`
+   The first consumer is the use space safes hook. It now imports the shared options and spreads them into the query call. Because the sidebar also reads from the same cache entry, it benefits for free whenever this hook refetches.
+
+### Hooks adapting
+
+4. **🔧 change** · [`apps/web/src/features/spaces/hooks/useSpaceMembers.tsx` L48-58](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/useSpaceMembers.tsx#L48-L58) `useAllMembers`
+   The use all members hook takes this further. It not only adds the refresh options but also introduces an error handler. If a refetch returns a 403 or 404 — meaning the user's access was revoked — the member list is immediately reset to an empty array. Other errors leave the stale data intact to avoid flashing empty lists on transient failures.
+
+5. **🔧 change** · [`apps/web/src/features/spaces/hooks/useGetSpaceAddressBook.ts` L18-25](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/useGetSpaceAddressBook.ts#L18-L25) `useGetSpaceAddressBook`
+   The address book query also adopts the shared options. By spreading them alongside the existing skip logic, the contacts list now refreshes automatically on focus or after a stale mount. This closes the gap where an admin’s contact updates would not appear in other sessions.
+
+6. **🔧 change** · [`apps/web/src/features/spaces/components/AuthState/index.tsx` L22-30](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/components/AuthState/index.tsx#L22-L30) `AuthState`
+   Even the Auth state component, which checks space membership for routing, gets the same treatment. By applying the refresh options here, the app can react to a membership revocation as soon as the window regains focus, rather than allowing a wrong access decision to linger.
+
+7. **🌊 ripple** · [`apps/web/src/features/spaces/hooks/__tests__/useAllMembers.test.ts` L30-38](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/__tests__/useAllMembers.test.ts#L30-L38) `useAllMembers`
+   The tests were updated to reflect these changes. Here in the use all members test, assertions now check that the space refresh options are spread into the query call. Additionally, new test cases verify that a 403 or 404 error during refetch clears the member list, while a 500 error does not.
+
+### Tests verifying the behavior
+
+8. **🌊 ripple** · [`apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx` L25-32](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx#L25-L32) `useSpaceSafes`
+   The use space safes test similarly validates that the shared options are passed down to the underlying query, both when the hook is active and when it is skipped. This confirms the hook won’t accidentally forget to enable the new refresh triggers.
+
+9. **🌊 ripple** · [`apps/web/src/features/spaces/hooks/__tests__/useGetSpaceAddressBook.test.ts` L15-22](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/__tests__/useGetSpaceAddressBook.test.ts#L15-L22) `useGetSpaceAddressBook`
+   And the address book test ensures the space refresh options end up alongside the skip condition in the query. A small but necessary regression guard for the new behavior.
+
+10. **💥 risk** · [`apps/web/src/features/spaces/hooks/useSpaceMembers.tsx` L54-57](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/useSpaceMembers.tsx#L54-L57) `isMembershipRevoked`
+   There are a couple of boundaries to keep in mind. A user staring at the page without changing focus or navigating will still see stale data — that would need polling or push, explicitly out of scope here. Also, the 403 clearing in the member hook could briefly show an empty list if a transient auth glitch occurs, though the UI is already designed to handle empty states gracefully.
+
+### Risks and wrap-up
+
+11. **🍿 wrap** · [`apps/web/src/features/spaces/hooks/refreshOptions.ts` L9](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/apps/web/src/features/spaces/hooks/refreshOptions.ts#L9) `SPACE_REFRESH_OPTIONS`
+   With a single constant and a handful of targeted applications, stale workspace data across sessions is almost entirely eliminated. No page reload required.
+
+## ✅ Reviewer checklist
+
+- [ ] Confirm `SPACE_REFRESH_OPTIONS` is correctly exported from [`refreshOptions.ts`](https://github.com/safe-global/safe-wallet-monorepo/blob/736fee80e60b7aa64a9a311726ac60836ae6afa7/refreshOptions.ts) and imported in all four consumer files.
+- [ ] Verify that spreading `SPACE_REFRESH_OPTIONS` does not inadvertently override the `skip` condition in `useGetSpaceAddressBook` or other hooks.
+- [ ] Test the membership revocation scenario: revoke a member's access in another session, then refocus the member's window; ensure the member list clears without a transient flash of stale data.
+- [ ] Validate that `refetchOnMountOrArgChange: 30` does not cause unintended refetches on rapid navigation (e.g., frequent mount/unmount in a tabbed UI) and that loading states are not disruptive.
+- [ ] Check `AuthState`’s behavior when refetch on focus yields a 403 after membership loss—ensure authentication state updates correctly without re-render loops.
+- [ ] Run the updated test suites (`useAllMembers`, `useSpaceSafes`, `AuthState`, `useGetSpaceAddressBook`) and confirm new assertions match actual hook implementations.
+
+## 🗂️ File-by-file
+
+### `apps/web/src/features/spaces/components/AuthState/index.test.tsx`
+
+Updated test assertions to expect that `useSpacesGetOneV1Query` is called with `SPACE_REFRESH_OPTIONS` merged into the options object, both when skip is true and false.
+
+_Ensures the test validates that the component now passes refresh configuration (like `refetchOnFocus`) to the space query hook._
+
+### `apps/web/src/features/spaces/components/AuthState/index.tsx`
+
+The AuthState component now imports SPACE_REFRESH_OPTIONS from a new hook and spreads them into useSpacesGetOneV1Query options, adding refetch-on-focus and a 30-second staleness threshold on mount.
+
+_It prevents stale space membership data from causing incorrect authentication decisions when the user refocuses or revisits the page._
+
+**💥 Risks:**
+- Refetch on focus may abruptly change rendered content if membership was revoked while the tab was inactive
+- Check for potential UI flash or re-render loop if currentData is lost during refetch
+
+### `apps/web/src/features/spaces/hooks/__tests__/useAllMembers.test.ts`
+
+Test expectations for useMembersGetUsersV1Query calls now include SPACE_REFRESH_OPTIONS spread into the options argument. Added two test cases verifying that a refetch error with status 403/404 clears the member lists, while a 500 error keeps stale data.
+
+_Validates that the hook applies the new automated refetch configuration and correctly handles membership revocation signaled by 403/404 from the refresh, without flushing members on transient failures._
+
+**💥 Risks:**
+- The mock-based tests depend on exact implementation of error handling in the hook; need to confirm that the hook's actual logic matches the tests' expectations (e.g., it indeed clears lists on 403/404).
+
+### `apps/web/src/features/spaces/hooks/__tests__/useGetSpaceAddressBook.test.ts`
+
+Updated test expectations to verify that `useGetSpaceAddressBook` passes `SPACE_REFRESH_OPTIONS` alongside the existing `skip` option to the underlying `useAddressBooksGetAddressBookItemsV1Query` hook.
+
+_Ensures the hook now triggers data refetches on window focus and stale remounts, addressing stale space address book data across sessions._
+
+**💥 Risks:**
+- Test only validates mock call arguments, not the actual refetching behavior in the RTK Query hook.
+
+### `apps/web/src/features/spaces/hooks/__tests__/useSpaceSafes.test.tsx`
+
+Test expectations in useSpaceSafes hook tests were updated to assert that SPACE_REFRESH_OPTIONS are spread into the query options parameter, both in skip and success cases.
+
+_Ensures the hook passes the new refetch-on-focus and refetch-on-mount-or-arg-change options to the API query, as introduced for space data freshness._
+
+### `apps/web/src/features/spaces/hooks/refreshOptions.ts`
+
+Added a new file exporting a constant SPACE_REFRESH_OPTIONS object with {refetchOnFocus: true, refetchOnMountOrArgChange: 30}.
+
+_Provides a shared configuration to keep space-related queries fresh across browser focus events and stale navigations, mitigating stale data from other sessions without polling._
+
+### `apps/web/src/features/spaces/hooks/useGetSpaceAddressBook.ts`
+
+Imported SPACE_REFRESH_OPTIONS and spread it into the useAddressBooksGetAddressBookItemsV1Query options, adding stale-data refetch behaviors (focus, mount/arg change) alongside the existing skip condition.
+
+_Ensures the space address book list stays current across sessions without manual reload, addressing a staleness issue when admins modify contacts in another session._
+
+**💥 Risks:**
+- Verify SPACE_REFRESH_OPTIONS are appropriate for the address book query (e.g., refetch thresholds not too aggressive for large address books).
+- Ensure the spread doesn't inadvertently disable or conflict with the skip logic when the user is signed out or spaceId is missing.
+
+### `apps/web/src/features/spaces/hooks/useSpaceMembers.tsx`
+
+In useAllMembers, the useMembersGetUsersV1 query now spreads SPACE_REFRESH_OPTIONS (enabling refetch on focus/mount), destructures error, and uses a new isMembershipRevoked helper to return an empty array when a 403 or 404 fetch error indicates lost access, preventing stale member data.
+
+_Ensures that a member whose access is revoked in another session immediately sees an empty member list instead of stale admin data, and keeps the member list fresh across focus and navigation._
+
+**💥 Risks:**
+- Returning [] on 403/404 might briefly show a blank list during a legitimate refetch if a transient auth glitch returns 403; verify UI gracefully handles empty state when membership is intact.
+- SPACE_REFRESH_OPTIONS adds refetchOnFocus/refetchOnMountOrArgChange; confirm polling behavior is as expected (no constant background refreshes) and that the 30s staleness threshold does not degrade UX.
+
+### `apps/web/src/features/spaces/hooks/useSpaceSafes.tsx`
+
+Imported SPACE_REFRESH_OPTIONS constant and spread it into the options of useSpaceSafesGetV1Query to apply refetchOnFocus and refetchOnMountOrArgChange settings.
+
+_Likely ensures space safes data updates automatically when the window regains focus or when the component mounts with stale data, reducing the need for manual refresh across sessions._
+
+**💥 Risks:**
+- Verify that SPACE_REFRESH_OPTIONS is correctly exported from './refreshOptions' and contains valid RTK Query option fields.
+- Confirm that refetchOnMountOrArgChange: 30 does not cause performance regressions or unintended loading states on frequent mounts.
+
+---
+_Generated by prbrief • model: deepseek-v4-pro • 11 LLM calls • 134.4s_
+
+</details>
+
+<sub>Generated by <a href="https://popcorn.report">Popcorn Review</a> · `safe-global/safe-wallet-monorepo@736fee80e60b`</sub>
+
+
+COMMENT
+[github-actions 2026-06-12T22:30:22Z] ## 📦 Next.js Bundle Analysis for @safe-global/web
+
+This analysis was generated by the [Next.js Bundle Analysis action](https://github.com/hashicorp/nextjs-bundle-analysis). 🤖
+
+### ⚠️  Global Bundle Size Increased
+  
+Page | Size (compressed) | 
+|---|---|
+| `global` | `1.37 MB` _(🟡 +89 B)_ |
+
+<details>
+<summary>Details</summary>
+<p>The <strong>global bundle</strong> is the javascript bundle that loads alongside every page. It is in its own category because its impact is much higher - an increase to its size means that every page on your website loads slower, and a decrease means every page loads faster.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>If you want further insight into what is behind the changes, give <a href='https://www.npmjs.com/package/@next/bundle-analyzer'>@next/bundle-analyzer</a> a try!</p>
+</details>
+
+<!-- __NEXTJS_BUNDLE_@safe-global/web -->
+<!-- Sticky Pull Request Commentnext-bundle-analysis -->
+
+COMMENT
+[github-actions 2026-06-12T22:35:03Z] <!-- add-pr-comment:oneshot-clickthrough -->
+
+## 🎬 One-shot clickthrough
+
+This PR doesn't add or modify any one-shot clickthrough, so nothing was recorded.
+
+Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](https://github.com/safe-global/safe-wallet-monorepo/blob/dev/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
+
+COMMENT
+[github-actions 2026-06-12T22:36:33Z] <!-- jest coverage report action for options with hash 538b3aeca5435921509d9329a38101b7 -->
+
+## Coverage report for `apps/web`
+
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | Category | Percentage | Covered / Total |
+| :-: | :- | :- | :-: |
+| 🟢 | Statements | <div title="Base coverage is: 82.41%">82.42% (+0.01% 🔼)</div> | 30178/36613 |
+| 🟡 | Branches | <div title="Base coverage is: 65.54%">65.56% (+0.03% 🔼)</div> | 9372/14295 |
+| 🟡 | Functions | <div title="Base coverage is: 69.24%">69.27% (+0.04% 🔼)</div> | 4500/6496 |
+| 🟢 | Lines | <div title="Base coverage is: 83.77%">83.78% (+0.01% 🔼)</div> | 27106/32355 |
+
+<details><summary>Show new covered files 🐣</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟢 | <div title="src/features/spaces/hooks/refreshOptions.ts">`...` / refreshOptions.ts</div> | 100% | 100% | 100% | 100% |
+
+</details>
+
+
+## Test suite run success
+6144 tests passing in 668 suites.
+
+<p align="right">Report generated by <a href="https://github.com/ArtiomTr/jest-coverage-report-action">🧪jest coverage report action</a> from 736fee80e60b7aa64a9a311726ac60836ae6afa7</p>
+

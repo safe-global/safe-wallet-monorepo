@@ -1,0 +1,12 @@
+{
+  "usd": 0.321652,
+  "head": "89979c027d45d82dff240b496d3accb041331916",
+  "verdicts": [
+    {
+      "issue": 5,
+      "verdict": "open",
+      "present": true,
+      "evidence": "vmosharova's unresolved nit on datadog.test.ts:389 says the 'console' case is already dropped by the NON_USER_IMPACTING_SOURCES guard. Nobody replied, and there are no commits after 89979c027: `git log 89979c027..HEAD` is empty and the test still loops over ['source', 'console', undefined]. There is also no mixed-stack or 'custom' source case."
+    }
+  ]
+}

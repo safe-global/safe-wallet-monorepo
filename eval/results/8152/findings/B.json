@@ -1,30 +1,105 @@
 {
-  "usd": 0.053767999999999996,
+  "usd": 0.073754,
   "findings": [
     {
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 30,
-      "claim": "The testID handling (container testID and the per-segment `${testID}-${option.value}` construction at line 19) has no test coverage; none of the three existing tests pass a testID or use getByTestId, so a change that breaks this logic would not be caught, and E2E selectors will depend on these IDs."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 56,
+      "claim": "Transaction requests restored from getPendingSessionRequests() only undergo a shape check, without comparing the request's chainId to the currently active chain or verifying a signer is present."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 56,
+      "claim": "Restored requests are stamped with whichever Safe is currently active rather than the Safe/chain they were originally issued for, and the review() function composes against the live activeSafe.chainId/address without ever reading pending.chainId."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 199,
+      "claim": "The Safe-switch listener only prunes the WalletKit queue when the user switches Safe or chain, so a request that is already mismatched at restoration time remains queued and can later be composed against the wrong chain (e.g., calldata meant for chain 1 drafted against a Safe on chain 137), with no chain or Safe shown in SendTransactionSheet to warn the user."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 74,
+      "claim": "isValidDappCall never checks the value field, so a value like '1.5' passes validation and later causes BigInt() to throw in composeSafeTxDraft.ts, resulting in a generic toast to the user and no response ever being sent to the dApp."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 144,
+      "claim": "An invalid chainId such as '0xzz' returns error code 4901 ('not deployed') instead of -32602, and a bare numeric chainId like 137 is misinterpreted as hex, resolving to chain 311."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 49,
+      "claim": "The ready flag ignores hasSigner, so a Safe with no signer reaches a dead-end CanNotExecute screen even though signing should still be blocked/handled differently."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 183,
+      "claim": "The dApp-supplied callsId is inserted into the CGW URL path without validation, though the impact is limited by credentials:'omit'."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 323,
+      "claim": "The real getCallsStatus implementation, including the CGW lookup and receipt fetch with fallbacks, has no test coverage."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/DappIdentity.tsx",
+      "line": 39,
+      "claim": "The fallback behavior for a malformed dApp URL is untested."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/RequestSheetHost.tsx",
+      "line": 105,
+      "claim": "The 'composing' dismiss guard has no test, unlike the adjacent 'busy' guard which is tested."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 18,
+      "claim": "The wallet_sendCalls branch of extractCalls is untested."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/DappIcon.tsx",
+      "line": 50,
+      "claim": "DappIcon.tsx and DappIdentity.tsx contain hand-rolled corner badge implementations that duplicate functionality already provided by components/BadgeWrapper."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/getCallsStatus.ts",
+      "line": 42,
+      "claim": "Status mapping in getCallsStatus.ts and CreateCall encoding in composeSafeTxDraft.ts duplicate logic already implemented in web's safe-wallet-provider, and could instead live in a shared package (packages/utils/.../eip5792.ts)."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 57,
+      "claim": "The USER_REJECTED respond/try-catch/log block is duplicated across four locations (useSendTransaction.ts, WcRejectOnBack.tsx, RequestSheetHost.tsx, WalletKitProvider.tsx) instead of following the existing safeRejectSession pattern."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 40,
+      "claim": "The WalletKitProvider component grew from about 120 to 364 lines and now handles 9 responsibilities; the listener, stale-request cleanup, getCallsStatus, and chain switching logic should be split into separate hooks."
+    },
+    {
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 106,
+      "claim": "The method routing logic uses 15+ chained if (method === ...) branches instead of a lookup table, which conflicts with the 'lookup tables over conditional chains' guidance in apps/web/docs/code-style.md."
+    },
+    {
+      "file": "apps/mobile/src/features/ConfirmTx/components/DappOriginContext.tsx",
+      "line": 1,
+      "claim": "DappOriginContext.tsx is a loose file even though its 15 sibling components each have their own folder, and other context modules in the codebase live in a context/ directory."
     },
     {
       "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 26,
-      "claim": "Each segment uses accessibilityRole=\"button\" with a selected state, and the container has no accessibility role, so VoiceOver and TalkBack will announce the segments as separate buttons instead of as a single either/or group with position information (e.g. \"2 of 2\"). The segments should use accessibilityRole=\"tab\" with the container as \"tablist\", or a radio/radiogroup pairing."
+      "line": 51,
+      "claim": "shadowColor is hardcoded as '#000' instead of using a Tamagui design token."
     },
     {
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 19,
-      "claim": "borderRadius={12} is hard-coded even though a Tamagui token with the same value ($5 = 12) exists, violating the project rule to use tokens instead of hard-coded values; the rest of the file already uses tokens."
+      "file": "apps/mobile/src/app/supported-networks.tsx",
+      "line": 1,
+      "claim": "The file imports the SupportedNetworksSheet component directly from its file path instead of through the Share/components barrel, from which it is missing."
     },
     {
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 37,
-      "claim": "borderRadius={8} is hard-coded even though a Tamagui token with the same value ($4 = 8) exists, violating the project rule to use tokens instead of hard-coded values."
-    },
-    {
-      "file": "apps/mobile/src/components/SegmentedControl/",
-      "line": null,
-      "claim": "The new component folder is missing a SegmentedControl.stories.tsx file, even though the project's documented folder layout includes a stories file alongside the component, test, and index files, and mobile Storybook is already set up."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 293,
+      "claim": "The inline pattern state.safes[address] is repeated in four places (WalletKitProvider.tsx, useApproveProposal.ts, useSessionProposalHandler.ts) instead of using the existing selector defined in store/safesSlice.ts."
     }
   ]
 }

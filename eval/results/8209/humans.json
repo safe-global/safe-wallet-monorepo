@@ -1,0 +1,12 @@
+{
+  "usd": 0.30326000000000003,
+  "head": "384a1d8359cc5cc553a923b252f572613a8524fa",
+  "verdicts": [
+    {
+      "issue": 15,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "At cea9e9de4, packages/utils/src/utils/date.ts:22 had a misleading comment saying `format` throws, placed above parseTimestamp, which already returns null for NaN via Number.isFinite. LucieFaire replied that the comment made no sense and did not add a try/catch. Commit 384a1d835 ('fix: remove comment') removed only the comment, which confirms that no catch was needed."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "usd": 0.3297856,
+  "head": "6b60cdb5858ff140bce6933fd8d1dd51c4316b8a",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "open",
+      "present": true,
+      "evidence": "There are no commits after 6b60cdb (git log 6b60cdb..HEAD is empty). apps/web/src/components/ui/stories/design-system.stories.tsx:938 still says label=\"Default grid — EnhancedTable\" while line 950 renders `<EnhancedTable … panel />`. Nobody replied to Fbartoli's point 3."
+    },
+    {
+      "issue": 8,
+      "verdict": "open",
+      "present": true,
+      "evidence": "In apps/web/src/components/common/EnhancedTable/index.tsx:219-220 the empty-state row is still a bare `<TableRow><TableCell />` with no data-no-hover. There are no later commits and no reply to Fbartoli's point 2."
+    },
+    {
+      "issue": 14,
+      "verdict": "open",
+      "present": true,
+      "evidence": "Fbartoli saw the 471px-in-311px overflow on the preview built from the reviewed head, and said it may pre-date the branch. Nobody replied and no commits followed 6b60cdb."
+    }
+  ]
+}

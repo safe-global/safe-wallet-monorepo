@@ -1,0 +1,84 @@
+{
+  "usd": 0.6985852,
+  "head": "710e3684c1b7e9529d5f2fcc3c6c670e86874462",
+  "verdicts": [
+    {
+      "issue": 3,
+      "verdict": "rejected",
+      "present": false,
+      "evidence": "At e4c8fb4 helpers.test.ts already had a `describe('txRequiresRelay')` block (line 122) and Safe-pays getExecutionMethod cases ('should force WITH_RELAY for Safe-pays...'). The bot's round-2 review also says these tests are in, so the claim was wrong for the reviewed commit."
+    },
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At e4c8fb4 both HowToExecuteSheet.container.tsx and ReviewAndExecuteContainer.tsx derived relay gating themselves, and the review screen showed an inline <Text>. Later commits added hooks/useRequiresRelay.ts, which both containers now use, and ReviewAndExecuteContainer now renders RelayUnavailableSheet."
+    },
+    {
+      "issue": 11,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "compojoom's feeRows.ts:56 thread asked for a useFeesBreakdown hook and yagopv replied \"done\". useFeesBreakdown.ts now owns the native-currency mapping and the buildFeesBreakdown call, and FeesBreakdown.tsx:53 and TokenTransfer.tsx:38 both call it."
+    },
+    {
+      "issue": 14,
+      "verdict": "open",
+      "present": true,
+      "evidence": "At HEAD, useTransactionExecution.test.tsx still covers only ExecutionMethod.WITH_RELAY (its three tests only renamed/trimmed). The round-2 bot flagged this again and no human replied."
+    },
+    {
+      "issue": 17,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The useEffect that dispatched setExecutionMethod(WITH_RELAY) in HowToExecuteSheet.container.tsx was removed after e4c8fb4. It was replaced by a derived `isRelaySelected` used only for highlighting, and the round-2 bot confirmed the effect is gone."
+    },
+    {
+      "issue": 20,
+      "verdict": "open",
+      "present": true,
+      "evidence": "helpers.ts:114 still returns 'biometrics' and the ExecutionPath type (line 26) is unchanged at HEAD. No human responded to the rename suggestion."
+    },
+    {
+      "issue": 21,
+      "verdict": "open",
+      "present": true,
+      "evidence": "useTransactionExecution.ts still builds the `executors` object literal in the hook body on every render, outside useCallback/useMemo. The round-2 bot said it was still open and nobody replied."
+    },
+    {
+      "issue": 24,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "compojoom suggested renaming it to FeesBreakdownData in the feeRows.ts:21 thread and yagopv replied \"done\". feeRows.ts now exports `interface FeesBreakdownData`."
+    },
+    {
+      "issue": 26,
+      "verdict": "open",
+      "present": true,
+      "evidence": "feeRows.ts:41 still has `Number(formatUnits(amountWei, decimals)) * rate` with no comment or change. Nobody responded."
+    },
+    {
+      "issue": 28,
+      "verdict": "open",
+      "present": true,
+      "evidence": "feeRows.ts:98 still has `BigInt(outgoing.amount) > 0n` with no explanatory comment. The round-2 bot repeated it and no human reacted."
+    },
+    {
+      "issue": 29,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "In the ReviewExecuteFooter.tsx:89 thread compojoom asked to share FeeRow/FeeAmount and yagopv replied \"done\". FeeRow.tsx now exports FeeRow/FeeAmount/FeeFreeValue, which ReviewExecuteFooter uses."
+    },
+    {
+      "issue": 30,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "yagopv replied \"done\" to compojoom's useTransactionExecution.ts:127 thread. Commit 16ebc2469 removed the unused simulationError state, and 739ed82c7 made useExecutionFlow.ts push an explicit SIMULATION_FAILED description to /execution-error."
+    },
+    {
+      "issue": 31,
+      "verdict": "open",
+      "present": true,
+      "evidence": "At HEAD, `safe` from useSafeInfo() is still in the execute useCallback deps in useTransactionExecution.ts. The round-2 bot repeated the point and no human responded."
+    }
+  ]
+}

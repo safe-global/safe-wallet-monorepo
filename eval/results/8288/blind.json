@@ -5,111 +5,207 @@
   "findings": [
     {
       "id": "F1",
-      "file": "useFeatureFlagEditorData.ts",
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
       "line": 32,
-      "claim": "The editor's configValue and chainScope fields reflect the raw config-service data, not the overridden value used by useHasFeature, creating an intentional but undocumented split between what the 'Config service' column shows and what the switch below it controls; this should be documented with a comment explaining the distinction."
+      "claim": "A doc comment on useFeatureFlagEditorData explaining that its data is deliberately un-overridden would clarify the design intent."
     },
     {
       "id": "F2",
-      "file": "FeatureFlagRow.tsx",
-      "line": 59,
-      "claim": "The switch's onCheckedChange always dispatches setOverride, even when the new value equals the config value, so toggling a row off and back on leaves it in an overridden state that merely happens to match the current chain instead of returning to a clean, non-overridden state. Users relying on the switch as their primary control will accumulate silent overrides that are indistinguishable from normal config values except via the 'matchesCurrentChain' indicator."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 85,
+      "claim": "tabIndex={isOverridden ? undefined : -1} is placed inside a block that already only renders when isOverridden is true, so the -1 branch of the ternary can never execute."
     },
     {
       "id": "F3",
-      "file": "featureFlagOverridesSlice.ts",
-      "line": 29,
-      "claim": "Saved override keys for a FEATURES value that is later removed or renamed are never cleaned up, so selectOverrideCount still counts them while the typed clearOverride cannot remove them; counting or loading should filter to Object.values(FEATURES)."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagSection.tsx",
+      "line": 15,
+      "claim": "When a search matches no rows, the section components return null, leaving the page blank below the toolbar with no 'no matching flags' message for the user."
     },
     {
       "id": "F4",
-      "file": "apps/web/src/features/feature-flags/store/index.ts",
-      "line": 1,
-      "claim": "The new features/feature-flags/ folder only contains a store/ folder, missing a contract.ts, feature.ts, top-level index.ts, and a feature flag, which conflicts with the documented requirement that every feature export a contract and sit behind a feature flag; other feature folders such as gtf/ follow the full structure. The slice should either be given the full feature structure or moved to apps/web/src/store/featureFlagOverridesSlice.ts alongside other slices of its kind."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 65,
+      "claim": "Either sr-only text alongside the visible check should be used for reliable accessibility, or the aria-label on the icon should be dropped since the TooltipContent already carries the announcement."
     },
     {
       "id": "F5",
-      "file": "bundleExclusion.test.ts",
-      "line": 18,
-      "claim": "The marker string 'local feature-flag overrides' used in the bundle exclusion test is generic enough that an unrelated future copy change could accidentally satisfy or invalidate the assertion; a longer, editor-specific sentinel string or a dedicated data attribute would make the test more robust."
+      "file": "apps/web/src/store/index.ts",
+      "line": 67,
+      "claim": "The featureFlagOverridesSlice reducer is registered unconditionally and included in persistedSlices and broadcastState, so the reducer, persisted state, and broadcast channel ship in production even though applyFeatureOverrides is a no-op there."
     },
     {
       "id": "F6",
-      "file": "FeatureFlagRow.tsx",
-      "line": 65,
-      "claim": "The check icon uses visibility: hidden combined with an aria-label, but visibility: hidden removes the element from the accessibility tree, so a screen reader never announces the match state, and the actual accessible content lives inside TooltipContent which is only exposed on focus or hover; either add sr-only text alongside the visible check or drop the aria-label on the icon since the tooltip content already provides the announcement."
+      "file": "apps/web/src/store/index.ts",
+      "line": 95,
+      "claim": "A stale featureFlagOverrides localStorage entry, for example left over from prior staging use on the same origin, will silently persist in production forever with no UI to clear it."
     },
     {
       "id": "F7",
-      "file": "featureFlagOverridesSlice.ts",
-      "line": 24,
-      "claim": "setOverride, clearOverride, clearAllOverrides, and both selectors are unused outside the slice and its test, making them dead code at merge unless a stacked PR consumes them, which should be noted in the PR description."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.tsx",
+      "line": null,
+      "claim": "The new components are flat files directly under components/ instead of following the project's convention of one folder per component containing an index.tsx with its test and story alongside it."
     },
     {
       "id": "F8",
-      "file": "store/index.ts",
-      "line": 67,
-      "claim": "featureFlagOverridesSlice's reducer is registered unconditionally and included in persistedSlices and broadcastState even in production, where applyFeatureOverrides is a no-op; this means a stale featureFlagOverrides localStorage entry from prior use on the same origin will silently persist in production with no UI available to clear it."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 46,
+      "claim": "Several long Tailwind class strings with custom values (a multi-part before: accent bar, an exported GRID constant with custom grid-cols shared across files, and a header with custom text sizing) should be moved into named classes in a CSS module instead of being inlined, which would also remove the need for the exported string constant."
     },
     {
       "id": "F9",
-      "file": "featureFlagOverridesSlice.test.ts",
-      "line": 30,
-      "claim": "No test covers the store change that adds the slice to the saved-state list, and the existing 'clears a single override' test starts from a single key so it cannot distinguish clearOverride removing just that key from it wiping everything; the test should start with two keys and assert only one remains, and a load-from-storage case should be added in store/__tests__/index.test.ts."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 65,
+      "claim": "The tooltip trigger uses visibility: hidden with an aria-label, but visibility: hidden removes the element from the accessibility tree as well as from hit-testing, so the aria-label and tooltip content are never announced to screen reader users even when matchesCurrentChain is true."
     },
     {
       "id": "F10",
-      "file": "FeatureFlagRow.tsx",
-      "line": 58,
-      "claim": "The empty span used as an alignment spacer relies on an existing grid comment for context and could be lost or misunderstood in future edits without more explicit annotation."
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The hook reads only the data from the config query and ignores isLoading and error, so when the config service fails every flag renders as 'Off' with no indication that loading failed, and toggling a flag in that state saves an override based on invalid or missing config."
     },
     {
       "id": "F11",
-      "file": "useFeatureFlagEditorData.ts",
-      "line": 53,
-      "claim": "Sorting is performed inline with localeCompare on every render even though FEATURES is a fixed enum; alphabetizing once at module scope would avoid repeated re-sorting."
+      "file": "apps/web/src/features/spaces/components/Sidebar/variants/SafeSidebarContent/SafeSidebarContent.tsx",
+      "line": 116,
+      "claim": "This file checks process.env.NEXT_PUBLIC_IS_PRODUCTION directly instead of using the IS_PRODUCTION constant from @/config/constants, and unlike the other two places that do this, it has no build-time pruning reason to bypass the shared constant."
     },
     {
       "id": "F12",
-      "file": "apps/web/src/store/index.ts",
-      "line": 95,
-      "claim": "The feature flag overrides are added to persistedSlices, meaning they are saved to localStorage, shared across tabs, and reloaded on startup without validation in every environment including production. Although nothing currently reads the overrides, once a consumer such as useHasFeature honors them, values left in localStorage would override real chain feature flags in production and a stale dev override could persist silently; saving and reading overrides should be restricted to non-production builds or an explicit dev gate, and loaded keys should be validated against FEATURES."
+      "file": "apps/web/src/features/feature-flags/index.ts",
+      "line": 1,
+      "claim": "The feature's barrel file exports only the implementation component and has no feature.ts or createFeatureHandle, deviating from how other features expose themselves; if intentional (to allow the editor to be dropped from production via dynamic import) this deviation should be noted in the PR description so it isn't copied as the normal pattern for other features."
     },
     {
       "id": "F13",
-      "file": null,
-      "line": null,
-      "claim": "There is no test covering applyFeatureOverrides when a chain has an override for a feature that is not present in the Chain['features'] enum type; the cast to string is safe but lacks a coverage anchor."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.tsx",
+      "line": 20,
+      "claim": "No test covers the editor's interactions, including search filtering, the 'Reset all overrides' action and its disabled state, a switch toggle calling setOverride, a revert action calling clearOverride, and a section hiding itself when it has no matching rows."
     },
     {
       "id": "F14",
-      "file": "SafeSidebarContent.tsx",
-      "line": 114,
-      "claim": "selectOverrideCount subscribes the sidebar to the store in production even though the feature-flag group is hidden there, causing an unnecessary (if cheap) subscription; hoisting the IS_PRODUCTION check above useAppSelector would avoid this at the cost of a conditional-hook pattern."
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The hook only reads data from useGetChainsConfigV2Query and ignores isLoading and error, so while the request is loading or if it fails, chains defaults to an empty array and every row displays an 'Off' badge and a false config value as if it were real data."
     },
     {
       "id": "F15",
-      "file": "apps/web/src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts",
-      "line": 1,
-      "claim": "The folder name feature-flags is unclear or poorly chosen and should be renamed to something else."
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 85,
+      "claim": "The prop tabIndex={isOverridden ? undefined : -1} sits inside a block already gated on isOverridden being true, so the -1 branch can never execute, making the ternary dead code that should be simplified."
     },
     {
       "id": "F16",
+      "file": "apps/web/src/features/feature-flags/hooks/useChains.ts",
+      "line": 18,
+      "claim": "The production check process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true' is written inline in multiple places (also in SafeSidebarContent.tsx) instead of reusing the shared IS_PRODUCTION constant from config/constants.ts, and the sidebar copy has no comment explaining why it needs the inline form."
+    },
+    {
+      "id": "F17",
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.test.tsx",
+      "line": 9,
+      "claim": "Test chains are constructed by hand and cast with (...) as unknown as Chain instead of using the existing chainBuilder helper, which would produce a fully typed chain and avoid the double type cast."
+    },
+    {
+      "id": "F18",
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
+      "line": 32,
+      "claim": "The editor's rows show the raw config-service value in configValue and chainScope while useHasFeature and everything gated by it reflect the overridden value, so the 'Config service' column does not reflect overrides even though the switch below it does; this intentional split is not documented."
+    },
+    {
+      "id": "F19",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.stories.tsx",
+      "line": 10,
+      "claim": "The story titles use the prefix 'FeatureFlags/...' instead of the 'Features/FeatureFlags/...' pattern used by other feature stories and specified in apps/web/AGENTS.md."
+    },
+    {
+      "id": "F20",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 58,
+      "claim": "The alignment spacer <span className=\"w-12\"></span> is a bit magic and, despite an existing comment on the grid, could get lost or become confusing in future edits."
+    },
+    {
+      "id": "F21",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 59,
+      "claim": "When the new switch value equals row.configValue, clearOverride(feature) should be dispatched instead of setOverride, matching the behavior of the revert-override control, and the corresponding test file should be updated to cover this case."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/features/feature-flags/components/bundleExclusion.test.ts",
+      "line": 18,
+      "claim": "The marker string \"local feature-flag overrides\" used in the bundle exclusion test is generic enough that an unrelated future copy change could accidentally satisfy or invalidate the test, so a more distinctive, editor-only sentinel string or a dedicated data attribute should be used instead."
+    },
+    {
+      "id": "F23",
+      "file": "apps/web/src/features/feature-flags/hooks/useFeatureFlagEditorData.ts",
+      "line": 53,
+      "claim": "Sorting is done inline via localeCompare on every render even though FEATURES is a fixed enum, so alphabetizing once at module scope would avoid redundant re-sorting."
+    },
+    {
+      "id": "F24",
+      "file": "apps/web/src/features/feature-flags/index.ts",
+      "line": 1,
+      "claim": "The feature has no contract.ts, feature.ts, or createFeatureHandle, which docs/feature-architecture.md requires for features, though other features in the codebase also skip this pattern."
+    },
+    {
+      "id": "F25",
+      "file": "apps/web/src/components/sidebar/SafeSidebarVariant.tsx",
+      "line": 130,
+      "claim": "The Developer group block is almost a copy of the DeFi group block a few lines above it, duplicating the same structure rather than sharing it."
+    },
+    {
+      "id": "F26",
+      "file": "apps/web/src/features/feature-flags/components/SafeSidebarContent.tsx",
+      "line": 114,
+      "claim": "selectOverrideCount subscribes the sidebar to the store in production even though the feature flag group is hidden there; hoisting the IS_PRODUCTION check above useAppSelector would avoid this, though it requires a conditional-hook pattern and the current cost is negligible."
+    },
+    {
+      "id": "F27",
+      "file": "apps/web/src/features/feature-flags/__tests__/bundleExclusion.test.ts",
+      "line": 32,
+      "claim": "The only test verifying the editor stays out of production builds is skipped unless the RUN_BUNDLE_TESTS environment variable is set, and nothing in the workflows or scripts sets that variable, so a break in the production-exclusion guard would not be caught by CI."
+    },
+    {
+      "id": "F28",
       "file": null,
       "line": null,
       "claim": "There is no unit test for FeatureFlagSection verifying it returns null when rows.length is 0."
     },
     {
-      "id": "F17",
-      "file": "apps/web/src/features/feature-flags/store/index.ts",
-      "line": 1,
-      "claim": "The new feature-flags feature folder only contains a store subdirectory with its own index.ts, but lacks a feature-root index.ts exporting its public hooks, selectors, actions and types. Without it, any future consumer of selectFeatureFlagOverrides, selectOverrideCount or setOverride would have to deep-import from the store path instead of the feature's public API, which is the pattern the feature-boundary convention and public-API rule are meant to prevent."
+      "id": "F29",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagEditor.tsx",
+      "line": 7,
+      "claim": "Code inside the feature-flags feature imports its own store using the absolute path @/features/feature-flags/store while the same files use relative imports for everything else, so the feature does not follow one consistent import style."
     },
     {
-      "id": "F18",
+      "id": "F30",
       "file": null,
       "line": null,
-      "claim": "There is no unit test for FeatureFlagEditor covering the search filter, the enable/disable and dispatch behavior of 'Reset all overrides', or the empty overridden section."
+      "claim": "There is no unit test for FeatureFlagEditor covering the search filter, the 'Reset all overrides' button's enable/disable state and dispatch, and the empty overridden section."
+    },
+    {
+      "id": "F31",
+      "file": null,
+      "line": null,
+      "claim": "There is no test verifying that applyFeatureOverrides correctly handles a chain with an override for a feature not present in the Chain['features'] enum type, even though the cast to string is safe."
+    },
+    {
+      "id": "F32",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagRow.tsx",
+      "line": 59,
+      "claim": "The switch's onCheckedChange always dispatches setOverride even when the new value equals the config value, so toggling a row off and back on leaves it marked as an override (shown as matching the current chain) instead of returning to a clean, non-overridden state, causing users to accumulate silent overrides."
+    },
+    {
+      "id": "F33",
+      "file": "apps/web/src/features/feature-flags/components/FeatureFlagSection.tsx",
+      "line": 15,
+      "claim": "When a search matches no flags, both sections return null, leaving the area under the search box blank instead of showing a message like other list views in the app do for zero results."
+    },
+    {
+      "id": "F34",
+      "file": "apps/web/src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts",
+      "line": 1,
+      "claim": "The folder name feature-flags should be renamed to something else, as the current name may not be appropriate or clear."
     }
   ]
 }

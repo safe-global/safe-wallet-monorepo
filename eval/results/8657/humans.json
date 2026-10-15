@@ -1,0 +1,72 @@
+{
+  "usd": 0.45803,
+  "head": "409fa09176383133d1a6e0a6bb1ec83c03a402ac",
+  "verdicts": [
+    {
+      "issue": 8,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "clovisdasilvaneto asked for useMemo on 2026-09-10; the author replied 'Done in d66d56de9', which comes after cec26432. That commit wraps matchingNetworks (AllNetworksSection.tsx:43) and matchingChains (ChainSelectorBlock.tsx:41) in useMemo."
+    },
+    {
+      "issue": 9,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "TimDaub asked for size-4, and the author switched to size-4 in ad65156dd, which is before cec26432. At cec the clear icon is already `size-4` (search-input.tsx:47)."
+    },
+    {
+      "issue": 10,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author agreed ('you're right that we should. Done in 75d0a7da4'), a commit after cec26432. It registers each row in a callback-ref Map instead of calling querySelectorAll on a container."
+    },
+    {
+      "issue": 11,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author trimmed the PR in 5e6aa5415 (415→366 lines, 6→3 files) and said most of what remained was tests. At cec the PR still adds a lot of code, since the header-picker work came afterwards."
+    },
+    {
+      "issue": 12,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author confirmed the two are separate on purpose (ChainSelectorBlock on DropdownMenu vs NetworkSelector on Select) and put the search field in both. Nothing was merged into one component; both still exist."
+    },
+    {
+      "issue": 16,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The author agreed they had built it in the wrong place first and added the field to the header picker (ChainSelectorBlock) in e1084f0e7/0f36b191d. Both commits come before cec26432."
+    },
+    {
+      "issue": 18,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The native search X was replaced with the design system's InputGroupButton plus the lucide X in 312f71584. It was then matched to the Figma 'Icon / x' node in 4394bc17c. Both commits come before cec."
+    },
+    {
+      "issue": 19,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The author searched Figma and the codebase and reported back. TimDaub concluded 'there is no original design we can go off from' and said they were fine with the current design. No code change was needed."
+    },
+    {
+      "issue": 20,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The author changed the search field radius to sit inside each popup's corner in 201805370 ('Fixed in 2018053'). That commit comes before cec26432."
+    },
+    {
+      "issue": 21,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The author made the no-matches line `block` and centred it in 3dbf45d92 ('Fixed in 3dbf45d'). That commit comes before cec26432."
+    },
+    {
+      "issue": 22,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author agreed ('You are right') and explained that the sandbox can't reach the logo CDN. They only reworded the note under the images and added a Storybook link. The screenshots themselves were never replaced."
+    }
+  ]
+}

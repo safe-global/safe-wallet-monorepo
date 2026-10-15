@@ -1,0 +1,60 @@
+{
+  "usd": 0.8114439999999999,
+  "head": "94e49306eee9feee3f0120ab1c04d07cee82d9bb",
+  "verdicts": [
+    {
+      "issue": 1,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit f98ae9dee exposes `flagged` from useTrustedSafesModal and removes the second useFlaggedSimilarAddresses call from ManageTrustedSafesContent.tsx. The author replied \"fixed\" to the bot review."
+    },
+    {
+      "issue": 13,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The trusted set is still built only from pinned (added) safes: at f5f5 it came from allAdded, and in HEAD's useOnboardingSafes.ts it comes from `safe.isPinned`, which useAllSafes.ts:52 derives from added safes only. No commit unions in undeployed safes, and the author's blanket \"fixed\" does not specifically address this point."
+    },
+    {
+      "issue": 14,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "In the useOnboardingSafes.ts:34 thread, the author explained that combinedAddresses feeds useSimilarityClusters, which already dedupes, so no unique pass is needed there."
+    },
+    {
+      "issue": 16,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author replied \"Yes... fixed\", and commit 9da16af3e rewrites useOnboardingSafes to use useAllSafes and `isPinned`."
+    },
+    {
+      "issue": 21,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit f98ae9dee has useSimilarityClusters explicitly stamp a shared groupId on an in-list impostor and its anchor, so grouping no longer depends on the configs matching. It also adds tests for this."
+    },
+    {
+      "issue": 23,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At f5f5, both useTrustedSafesModal and useManageNestedSafes.ts:75 defined the useCallback wrapper. Commit 94e49306e folds isAddressFlagged into useSimilarityClusters' return, as the author described in the thread."
+    },
+    {
+      "issue": 27,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit f98ae9dee removes the separate loop over imitated addresses and adds a guard so the anchor work only runs when anchorAnnotations.size > 0 (useSimilarityClusters.ts)."
+    },
+    {
+      "issue": 28,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit f98ae9dee renames useListSimilarities to useAnchorListMatches, the name the bot suggested."
+    },
+    {
+      "issue": 29,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author replied \"rewrite it to more human readable style\", and commit 695d0ba2a refactors the function (now detectIntraListClusters) with clearer names such as putInSameCluster, bucketByKey and membersByLeader."
+    }
+  ]
+}

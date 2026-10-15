@@ -1,0 +1,12 @@
+{
+  "usd": 0.3387698,
+  "head": "ee56167b87a85a6b2a1cb914129249332673611a",
+  "verdicts": [
+    {
+      "issue": 3,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 09d2e26 useIsValidExecution.ts only passed `{ nativeAsset }` to getContractErrorMessage. Commit 6ea84e79b ('resolve GS012 gas token symbol', which responds to vmosharova's review) and then 640e5c2ff added `token: gasTokenSymbol` (now at apps/web/src/hooks/useIsValidExecution.ts:102). The reviewer approved afterwards."
+    }
+  ]
+}

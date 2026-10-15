@@ -1,129 +1,195 @@
 {
   "usage": {
-    "usd": 0.48255059999999994,
-    "turns": 6,
-    "wallSeconds": 49
+    "usd": 0.6175250000000001,
+    "turns": 8,
+    "wallSeconds": 77
   },
   "issues": [
     {
       "findings": [
-        "F1",
-        "F9",
-        "F14",
-        "F13"
+        "F12",
+        "F17"
       ],
-      "summary": "proposeBehavior state and its doc comment describe a CGW /propose fetch interceptor that doesn't exist, so the field is dead state",
+      "summary": "The createE2eStore doc comment now wrongly says state is shallow-cloned and that initialState can be corrupted, but the code deep-clones it.",
       "label": "low",
-      "evidence": "walletKitE2eState.ts:72-77 documents an interceptor, but grep finds no reader of proposeBehavior outside the state file and its initial-state test (walletKitE2eState.test.ts:13). The comment is aspirational and could mislead someone writing the CGW-failure flow. The impact is limited because this is e2e-only harness code."
+      "evidence": "createE2eStore.ts:6-7 was changed by this PR to say state is shallow-cloned, but lines 30 and 49 call deepClone(initialState), so reset() always gets a fresh deep copy. The old comment was accurate and the new one is wrong.",
+      "category": "docs"
     },
     {
       "findings": [
-        "F5",
-        "F20",
-        "F28",
-        "F23"
+        "F11",
+        "F13"
       ],
-      "summary": "Comments name a WcResponseIndicator component that doesn't exist, so lastRequestResponse is write-only",
+      "summary": "The same chainId assertion appears twice in the synthTxRequest test.",
+      "label": "nit",
+      "evidence": "walletConnectDappsSetup.test.ts:141 and :144 contain the identical `expect(request.params.chainId).toBe(...)`. It is harmless, redundant code.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "The WcResponseIndicator tests never clear the outstanding request before responding, so they don't cover the same-tick clear that the ref was written for.",
       "label": "low",
-      "evidence": "walletKit.e2e.ts:65 and walletKitE2eState.ts:66-68 refer to WcResponseIndicator and its test-ids, but grep finds no such component. lastRequestResponse is only read in unit tests. This is a documentation mismatch in e2e-only code with no production impact."
+      "evidence": "WcResponseIndicator.test.tsx:47-63 only dispatches setOutstandingRequest and then responds; nothing removes the entry. The comment at WcResponseIndicator.tsx:15-17 says the ref exists because the entry is cleared in the same tick, and a version computed during render would still pass these tests. The Maestro flows would still catch such a regression, so the impact is limited to the harness.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F1"
+      ],
+      "summary": "The Request-object branch of requestUrl, which is the one RTK fetchBaseQuery actually hits, has no unit test.",
+      "label": "low",
+      "evidence": "cgwClient.ts:53 uses fetchBaseQuery, which calls fetch with a Request, so proposeFetchMock.ts:23 (`input.url`) is the live path. proposeFetchMock.test.ts only passes string URLs. This is a real gap, but it is confined to the e2e harness.",
+      "category": "tests"
     },
     {
       "findings": [
         "F15",
-        "F24",
-        "F19"
+        "F23"
       ],
-      "summary": "Hand-rolled JsonRpcResponseLike duplicates SDK types that are already reachable through the jsonrpc-utils dependency, and it omits error.data",
+      "summary": "A setupWcDappsTx failure is only sent to console.error, so Maestro flows go on and later fail with an unrelated symptom.",
       "label": "low",
-      "evidence": "walletKit.e2e.ts:54-56: @walletconnect/jsonrpc-utils is already in apps/mobile/package.json:88 and used in methodRouter.ts and walletKitListeners.ts, and it re-exports the jsonrpc-types. So the stated reason for the twin type doesn't hold, and the cast through unknown hides any drift. The cost is small in a test fake."
+      "evidence": "TestCtrls.e2e.tsx:343 swallows the rejection with `.catch(console.error)`, and no marker is exposed. The claim is valid, but it only affects how easy the harness is to debug.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F6"
+      ],
+      "summary": "Each happy/batch run adds a queued transaction to the shared staging Safe, and nothing ever cleans them up.",
+      "label": "low",
+      "evidence": "walletConnectDappsSetup.ts:60-69 adds jitter on purpose so every run proposes a new tx. The PR description admits the queue growth under 'Blast radius'. The risk is real but documented, and it only touches test infrastructure.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F7",
+        "F26"
+      ],
+      "summary": "The final `text: 'Send'` assertion in the pending list is weak: a tx left over from an earlier run can satisfy it.",
+      "label": "low",
+      "evidence": "tx-send-happy.yml:96-97 asserts any 'Send' row. Queued txs from earlier runs accumulate on the Safe, so the step does not prove this run's tx was queued. The earlier hash-match marker (line 82-83) does cover delivery.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F14",
+        "F18"
+      ],
+      "summary": "A comment still mentions 'the ticket's' CTA, although a commit in this PR removed ticket references.",
+      "label": "low",
+      "evidence": "tx-send-readonly-safe.yml:7-8 still says \"the ticket's 'Add a signer' CTA\", which the ticket-cleanup commit d12e9ebf1 missed. It is a minor documentation inconsistency.",
+      "category": "docs"
     },
     {
       "findings": [
         "F4"
       ],
-      "summary": "Mixed presence checks: 'result' in response vs truthy response.error",
-      "label": "nit",
-      "evidence": "walletKit.e2e.ts:72-73 uses two check styles. The asymmetry is harmless for real JSON-RPC responses, which carry either result or a non-null error object."
+      "summary": "The suite header still describes only pairing & session approval, but the suite now also runs management and tx-request flows.",
+      "label": "low",
+      "evidence": "__suite__.yml:6 reads 'pairing & session-approval suite', while the file now also runs manage-* and tx-send-* flows. This is a small documentation mismatch.",
+      "category": "docs"
     },
     {
       "findings": [
-        "F8",
+        "F8"
+      ],
+      "summary": "The claim that Object.keys insertion order is not guaranteed.",
+      "label": "wrong",
+      "evidence": "Since ES2015, Object.keys returns non-integer string keys in insertion order, and 0x… hashes are not integer-like. So taking the last key as the newest one at WcResponseIndicator.tsx:36 is well defined.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F9"
+      ],
+      "summary": "The claim that the install-once flag leaves the interceptor unhooked when Jest swaps global.fetch between suites.",
+      "label": "wrong",
+      "evidence": "Jest gives each test file its own module registry and global environment, so `installed` resets together with global.fetch. In the app, TestCtrls installs the mock once for the whole Metro lifetime, which is the documented intent (proposeFetchMock.ts:2).",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "A suggestion to document the install-once contract or add an uninstall function.",
+      "label": "nit",
+      "evidence": "proposeFetchMock.ts:2 already says it is 'Installed once from TestCtrls.e2e.tsx', and the test comment at line 12-13 explains the binding. No current consumer needs to uninstall it.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F19",
         "F25"
       ],
-      "summary": "Tests hardcode 'e2e-session-topic' instead of using E2E_SESSION_TOPIC",
+      "summary": "A hardcoded private key in the e2e setup.",
+      "label": "wrong",
+      "evidence": "The same throwaway Sepolia key was already committed before this PR, in apps/mobile/e2e/tests/onboarding/import-signer*.yml at the base commit, and walletConnectDappsSetup.ts:50-52 documents it as that public test key. It is an intentional, already-public test fixture, not a secret.",
+      "category": "security"
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "The useEffect without a dependency array runs on every render.",
       "label": "nit",
-      "evidence": "walletKit.e2e.test.ts:48,60 repeat the literal even though walletKitE2eState.ts:16 exports it and other tests import it. This is a style consistency point with no functional cost."
+      "evidence": "WcResponseIndicator.tsx:34-38 does only a cheap ref write guarded by a length check. Running it on every render is correct, just slightly wasteful.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The batch bundle's chainId '0xaa36a7' is hardcoded instead of derived from the fixture.",
+      "label": "nit",
+      "evidence": "walletConnectDappsSetup.ts:81 hardcodes it, but walletConnectDappsSetup.test.ts:156 asserts that BigInt(bundle.chainId) equals mockedActiveAccount.chainId. A fixture change would therefore not break silently.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "Owner and recipient addresses are duplicated as raw strings instead of reusing mockData.",
+      "label": "nit",
+      "evidence": "walletConnectDappsSetup.ts:53,73,85 repeat addresses that also appear in mockData.ts:23-24. Pulling them into shared constants would help maintenance, but nothing is broken today.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "The 1x1 red marker style is duplicated from TestCtrls.",
+      "label": "nit",
+      "evidence": "WcResponseIndicator.tsx:65-71 matches the style in TestCtrls.e2e.tsx:389-393. It is a trivial style duplication with no real cost.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "Timeout values are duplicated across the Maestro flows.",
+      "label": "nit",
+      "evidence": "Several flows repeat literals such as 30000 and 10000, as other suites in the repo do. This is a style preference.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The '.*0\\.001.*' assertion could match several elements.",
+      "label": "nit",
+      "evidence": "assertVisible at tx-send-happy.yml:47-48 passes if any element matches, and all it is checking is that the amount is rendered on the confirm screen, which that is enough for.",
+      "category": "tests"
     },
     {
       "findings": [
         "F16"
       ],
-      "summary": "No test for last-write-wins overwrite of lastRequestResponse",
+      "summary": "A theoretical wei-jitter collision across module reloads.",
       "label": "nit",
-      "evidence": "respondSessionRequest does a plain walletKitE2eState.set (walletKit.e2e.ts:68), so overwrite is trivially guaranteed by the store. A dedicated test would add little."
-    },
-    {
-      "findings": [
-        "F2",
-        "F7",
-        "F22"
-      ],
-      "summary": "Maestro selector/timeout concerns in tx-send-happy.yml",
-      "label": "wrong",
-      "evidence": "No tx-send-happy.yml or any new Maestro flow exists in the repo or in the PR diff (git ls-files shows none). The diff only touches four walletKit files."
-    },
-    {
-      "findings": [
-        "F3",
-        "F18"
-      ],
-      "summary": "proposeFetchMock install-once / no-restore concerns",
-      "label": "wrong",
-      "evidence": "No proposeFetchMock.ts exists anywhere in the repo at HEAD, and the PR diff adds none."
-    },
-    {
-      "findings": [
-        "F10",
-        "F27"
-      ],
-      "summary": "WcResponseIndicator useEffect lacks a dependency array",
-      "label": "wrong",
-      "evidence": "WcResponseIndicator.tsx doesn't exist in the repo or the diff (grep only finds the name in comments)."
-    },
-    {
-      "findings": [
-        "F11"
-      ],
-      "summary": "WcResponseIndicator relies on Object.keys insertion order for newest hash",
-      "label": "wrong",
-      "evidence": "WcResponseIndicator.tsx doesn't exist, so there is no such code to judge."
-    },
-    {
-      "findings": [
-        "F6",
-        "F12"
-      ],
-      "summary": "Committed raw private key E2E_TX_OWNER_PRIVATE_KEY in walletConnectDappsSetup.ts",
-      "label": "wrong",
-      "evidence": "walletConnectDappsSetup.ts isn't changed by this PR and contains no private key. Around line 54 is the buildProposal fixture, and grep finds no E2E_TX_OWNER_PRIVATE_KEY."
-    },
-    {
-      "findings": [
-        "F21",
-        "F29"
-      ],
-      "summary": "Date.now()-based wei jitter could collide / should use crypto randomness",
-      "label": "wrong",
-      "evidence": "walletConnectDappsSetup.ts has no jitter function or jitterSeq. Line 66 is inside buildProposal's verifyContext, and the file isn't in the PR diff."
-    },
-    {
-      "findings": [
-        "F17",
-        "F26"
-      ],
-      "summary": "setupWcDappsTx failure only logged to console.error in TestCtrls",
-      "label": "wrong",
-      "evidence": "TestCtrls.e2e.tsx isn't modified by the PR and has no setupWcDappsTx. Only setupWcDappsBase is wired (line 299), so the described handler doesn't exist."
+      "evidence": "walletConnectDappsSetup.ts:68-69 combines Date.now() with a counter over a range of about 16.7M values. For sequential Maestro runs a collision is negligible, and even then it would only skip the sign tail.",
+      "category": "correctness"
     }
   ]
 }

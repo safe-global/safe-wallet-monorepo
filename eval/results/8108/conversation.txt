@@ -1,0 +1,404 @@
+THREAD apps/web/src/features/spaces/components/Members/index.tsx:21 resolved=true
+[vseehausen 2026-06-15T09:33:11Z] We should not rely on hooks for dark mode, ideally. Dark mode should be set globally and then affed stylesheets.
+[gfendres 2026-06-15T13:17:42Z] there are multiple ways to do this right now in the app, the other PR for the shadcn changes we can consolidate it. <br>separate topic.
+[gfendres 2026-06-18T13:59:57Z] actually ended up doing it in this PR 👍 dropped the useDarkMode hook here, dark mode now comes from the root ShadcnProvider and just cascades down through the css vars — no more per component dark wrapper
+
+THREAD apps/web/src/features/spaces/components/Members/index.tsx:34 resolved=true
+[vseehausen 2026-06-15T09:34:59Z] Let's use only variants and sizes, no custom styling on standard components.
+[gfendres 2026-06-15T13:18:06Z] separate topic as well, this PR is not about the desgin system. it is about having the tables look the same right now.
+
+THREAD apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx:64 resolved=true
+[vseehausen 2026-06-15T09:44:30Z] The font-bold/line-through/duplicate-dimming is data-specific and fine at the call site. But column.className is applied to headers only — body cells are hand-rendered, so every caller re-implements column layout. Consider per-column cell renderers so the table owns structural styling for both header and body.
+[vseehausen 2026-06-15T09:45:01Z] Or at least remove/reduce the custom styling per column. 
+[gfendres 2026-06-15T13:21:52Z] I did not understand 😀
+[gfendres 2026-06-18T13:59:58Z] ok i think i get it now 😀 reworked the table so it owns each cell — every column has a renderCell + cellClassName now, so callers dont re-implement the column layout anymore. same for header and body
+
+THREAD apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx:109 resolved=true
+[vseehausen 2026-06-15T09:46:39Z] Same here, this should be done by `renderRow` at the Table component.
+[gfendres 2026-06-15T13:22:38Z] I did not understand what you mean?
+[gfendres 2026-06-18T14:00:00Z] same as above, done now — the table renders the cells itself via renderCell so the structural styling lives in one place
+
+THREAD apps/web/src/features/spaces/components/Members/index.test.tsx:18 resolved=true
+[vseehausen 2026-06-30T14:55:17Z] Is this used in the tests?
+
+REVIEW CHANGES_REQUESTED
+[vseehausen 2026-06-15T09:47:36Z] Great PR that consolidates the design and is a step towards the new design system. 
+
+I added a few comments that will make the design system even more consistent in the future.
+
+REVIEW APPROVED
+[vseehausen 2026-06-30T15:18:15Z] Approved as discussed. 👍 
+
+COMMENT
+[github-actions 2026-06-14T13:07:24Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://claude-magical-hamilton-kg3ay4--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://claude-magical-hamilton-kg3ay4--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[popcorn-report 2026-06-14T13:10:50Z] <!-- popcorn-briefing -->
+[![Open the PR briefing](https://eyfiffagztwbokkxesiq.supabase.co/storage/v1/object/public/published-assets/safe-global/safe-wallet-monorepo/pr-8108/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/thumbnail.png?v=1781791356174)](https://viewer.popcorn.report/view?briefing_id=pb_3742a62cadd0738d70df2fb6)
+
+✅ **Approval confidence: 70% — high.** New shared table component covers many edge cases with tests, but rewrites two core Spaces tables and changes pagination threshold; mobile breakpoints, sorting of empty values, and dependent badge variants need manual verification.
+
+**This PR unifies the visual design and implementation of the Spaces Members table and Address Book table into a single shared `PaginatedDataTable` component built on shadcn primitives.** It replaces the legacy MUI `EnhancedTable` in `MembersList` and refactors `SpaceAddressBookTable` to use the same shell, giving both tables rounded card containers without borders, muted column headers, client-side sorting, and mobile-responsive behavior. The change also extracts a reusable `useRenewInvite` hook and adds spacing between tabs and the table on the Members page. The goal is design consistency across Spaces and a more maintainable codebase.
+
+🍿 **[Listen to audio review](https://viewer.popcorn.report/view?briefing_id=pb_3742a62cadd0738d70df2fb6)**
+
+### 💥 Risks
+
+- [`apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx` L45-65](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx#L45-L65) — A few things to watch. The sorting logic relies on stable row array references — if a caller passes a new array identity on every render, the page and expanded state will reset unexpectedly. The warning badge variant used for expired and declined states must exist in the shared shadcn Badge component, or those states will render without the intended styling. And the pagination page state clamps only in a derived variable, not in React state itself, which could briefly flash a blank page before the clamp applies when rows shrink below the current page.
+
+<details>
+<summary><b>Full briefing — architecture, contracts, file map</b></summary>
+
+**Approval confidence:** 70% — high. New shared table component covers many edge cases with tests, but rewrites two core Spaces tables and changes pagination threshold; mobile breakpoints, sorting of empty values, and dependent badge variants need manual verification.
+
+## 🍿 Summary
+
+This PR unifies the visual design and implementation of the Spaces Members table and Address Book table into a single shared `PaginatedDataTable` component built on shadcn primitives. It replaces the legacy MUI `EnhancedTable` in `MembersList` and refactors `SpaceAddressBookTable` to use the same shell, giving both tables rounded card containers without borders, muted column headers, client-side sorting, and mobile-responsive behavior. The change also extracts a reusable `useRenewInvite` hook and adds spacing between tabs and the table on the Members page. The goal is design consistency across Spaces and a more maintainable codebase.
+
+## 🏗️ Architecture notes
+
+A new generic `PaginatedDataTable` component (in `features/spaces/components/PaginatedDataTable`) encapsulates sorting, pagination, and mobile column toggling via a column config + renderRow callback. Both `MembersList` and `SpaceAddressBookTable` now render through `PaginatedDataTable`, defining their own column schemas. Dark mode and shadcn scope are centralized: [`Members/index.tsx`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/Members/index.tsx) wraps its content with `shadcn-scope` and dark class, while [`SpaceAddressBook/index.tsx`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/SpaceAddressBook/index.tsx) removes its own wrapper, relying on a parent container. The `useRenewInvite` hook was extracted to share the invitation renewal logic between desktop and mobile member action components.
+
+## 🌊 Ripple risks
+
+Analyzed 2 changed exports. No untouched external callers found — all usages appear to be inside the PR diff.
+
+_Analyzed 16 file(s), 3 changed export(s), 0 uncovered callsite(s) in 3.8s._
+
+## 🎬 Walkthrough outline
+
+_10 steps across 6 chapters, approximately 2 min 56s._
+
+### Why this change
+
+1. **🎯 motivation** · [`apps/web/src/features/spaces/components/MembersList/index.tsx` L1-30](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/MembersList/index.tsx#L1-L30)
+   The Members table used MUI EnhancedTable while the Address Book already used shadcn primitives. They looked and behaved differently — different border styles, different header colors, different pagination thresholds. This PR unifies both tables behind a single shared component called PaginatedDataTable, built entirely on shadcn. The Members list gets a full rewrite, and both tables gain rounded card containers, no border lines, muted column headers, and client-side sorting.
+
+### The shared PaginatedDataTable
+
+2. **🔧 change** · [`apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx` L8-30](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx#L8-L30) `DataTableColumn`
+   The heart of the change is this new PaginatedDataTable component. It exports a typed DataTableColumn config — each column defines its header label, an optional sortValue extractor, a minimum width, CSS classes, and a sticky flag. The component receives an array of these column configs, a rows array, a renderRow callback, and an optional renderRowDetail callback for mobile expandable content. Everything else — sorting, pagination, and mobile column toggling — is handled internally by the component.
+
+3. **🔧 change** · [`apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx` L45-65](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx#L45-L65)
+   The sorting logic cycles through three states — ascending, descending, and unsorted — with empty and undefined values always sorted last regardless of direction. A useEffect hook watches the rows array and resets both the current page and any expanded mobile detail rows whenever the rows identity changes. Pagination kicks in at twenty-five rows, and the controls render only when there is more than one page, using shadcn button primitives for previous and next navigation.
+
+### MembersList rewrite
+
+4. **🔧 change** · [`apps/web/src/features/spaces/components/MembersList/index.tsx` L35-75](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/MembersList/index.tsx#L35-L75)
+   MembersList was completely rewritten. The old MUI EnhancedTable, Tooltip, IconButton, Chip, and SvgIcon imports are gone — replaced by shadcn Badge, Button, and Tooltip. The component now defines explicit column configs for name, email, role, and expiration, each with a sortValue function and cell test IDs. The email column truncates long addresses with a shadcn Tooltip, and role badges use semantic variants like warning for declined and destructive for expired states.
+
+5. **🔧 change** · [`apps/web/src/features/spaces/components/MembersList/useRenewInvite.ts` L1-30](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/MembersList/useRenewInvite.ts#L1-L30) `useRenewInvite`
+   The invitation renewal logic was extracted into a new hook called useRenewInvite. It wraps the existing RTK Query mutation for renewing member invites, dispatching Redux success and error notifications with the member name and space context. Both the desktop RenewInviteButton and the new mobile MemberRowActionsMenu consume this same hook, so the mutation wiring and notification dispatch are defined in exactly one place.
+
+### Consumers that adapted
+
+6. **🌊 ripple** · [`apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx` L25-55](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx#L25-L55)
+   SpaceAddressBookTable was refactored to render through the same PaginatedDataTable shell. It now defines its own column configs — name, address, chains, and added-by — along with a renderRowDetail callback that shows secondary columns on mobile via an expandable detail toggle. The sticky name column and duplicate entry dimming are preserved through column styling and conditional opacity classes. The old inline pagination controls and MUI media query have been removed entirely.
+
+7. **🌊 ripple** · [`apps/web/src/features/spaces/components/Members/index.tsx` L50-70](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/Members/index.tsx#L50-L70)
+   The Members page wrapper gained a few critical additions. The tab content sections are now wrapped in a div with bg-card, mt-6, rounded-lg, and p-4 classes — giving the table card breathing room below the tabs and a rounded container that matches the Address Book. The component also gained a shadcn-scope wrapper and dark class so that all shadcn tokens — Badge, Table, and card backgrounds — resolve correctly in both light and dark modes.
+
+8. **🌊 ripple** · [`apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx` L1-25](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx#L1-L25)
+   On the Address Book side, the index file removed its own shadcn-scope and dark class wrapper, along with the useDarkMode hook and the cn utility import. Dark mode is now handled higher up in the tree, shared across Spaces pages by a parent container. The card border class was also dropped from the wrapping div, making both table containers borderless and visually identical to the Members table.
+
+### What to watch for
+
+9. **💥 risk** · [`apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx` L45-65](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx#L45-L65)
+   A few things to watch. The sorting logic relies on stable row array references — if a caller passes a new array identity on every render, the page and expanded state will reset unexpectedly. The warning badge variant used for expired and declined states must exist in the shared shadcn Badge component, or those states will render without the intended styling. And the pagination page state clamps only in a derived variable, not in React state itself, which could briefly flash a blank page before the clamp applies when rows shrink below the current page.
+
+### Bottom line
+
+10. **🍿 wrap** · [`apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx` L8-30](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx#L8-L30) `PaginatedDataTable`
+   Bottom line: this PR replaces two divergent table implementations with one shared shell. Members and Address Book now look and behave identically, with rounded card containers, muted column headers, client-side sorting, and mobile-responsive adaptations — all built on shadcn primitives and backed by a comprehensive test suite. No API changes, no persistence changes, and existing analytics events are preserved.
+
+## ✅ Reviewer checklist
+
+- [ ] Manually verify that the Members table still shows the correct empty state for pending members without the old standalone border/padding.
+- [ ] Test mobile viewport for both tables: member row actions (edit/renew/remove) must work from the kebab menu, and email truncation/tooltip must display correctly.
+- [ ] Inspect the Members table when there are no members or invited members with missing names; verify that Badge variants (e.g., 'warning', 'destructive') match the installed shadcn theme and that the 'last admin' guard disables remove correctly.
+- [ ] Confirm client-side sorting on both tables: sort members by name/email/role and address book by name/address/chains/added-by, ensuring rows with empty values sort last and the original order is restored on unsorted state.
+- [ ] Toggle dark mode on both pages and check that the rounded bg-card, muted headers, badges, and the absence of borders render correctly.
+- [ ] Verify that pagination behavior is consistent between the Members table (was 10 rows, now 25) and Address book (unchanged at 25) and that pagination controls appear/hide appropriately.
+
+## 🗂️ File-by-file
+
+### `apps/web/src/features/spaces/components/Members/index.test.tsx`
+
+Added a Jest mock for '@/hooks/useDarkMode' that returns false in the Members index test file.
+
+_Ensures the Members component tests do not depend on actual dark mode detection, likely because the component now uses the hook directly or through a child._
+
+### `apps/web/src/features/spaces/components/Members/index.tsx`
+
+The SpaceMembers wrapper now encloses all content after the invite preview in a single <div>. The <TabsContent> sections are wrapped in a new <div className="bg-card mt-6 rounded-lg p-4"> that styles the entire member/pending area as a rounded card, and the empty pending state dropped its separate border/padding in favor of a simple <p> inside that card.
+
+_Likely to visually unify the Members table card with the Address book card (rounded, no border, muted background) and add spacing between the tabs and tab content._
+
+**💥 Risks:**
+- Empty pending text loses its standalone border/padding; verify that the intended empty state appearance is preserved inside the shared card.
+- The new wrapper <div> applies mt-6 only when content switches, but no regression expected—check that no existing styles depend on exact DOM depth for TabsContent.
+
+### `apps/web/src/features/spaces/components/MembersList/MemberRowActionsMenu.test.tsx`
+
+Added a new test file for MemberRowActionsMenu, mocking the dropdown-menu, Track, and dialog sub-components to verify edit/remove/renew actions, disabled state for last admin, and analytics event wrapping.
+
+_Validates that the member row actions menu works correctly before it's used in the refactored table, preventing regressions in invite and member management flows._
+
+**💥 Risks:**
+- Dropdown-menu mock bypasses base-ui portal/pointer interactions, so accessibility and real UI behavior are not tested
+- Mocked variant prop handling in DropdownMenuItem may hide issues with destructive styling
+- Track mock only checks data attributes, not actual analytics firing
+
+### `apps/web/src/features/spaces/components/MembersList/MemberRowActionsMenu.tsx`
+
+Added new MemberRowActionsMenu component that wraps Edit/Remove dialogs and RenewInvite logic into a mobile-only shadcn DropdownMenu triggered by an EllipsisVertical kebab button.
+
+_Collapses per-row desktop action buttons into a compact menu for narrow viewports, consistent with the Address Book table pattern and the overall shadcn migration of MembersList._
+
+**💥 Risks:**
+- useRenewInvite is called unconditionally for every row regardless of canRenew — confirm the hook has no side effects when canRenew is false
+- Track event labels (invite_list vs member_list) depend on isInvite prop; verify isInvite correctly distinguishes pending vs active members across all states (declined, expired)
+- DropdownMenuTrigger uses `render` prop which may be an older shadcn API; confirm it's compatible with the current installation
+
+### `apps/web/src/features/spaces/components/MembersList/RenewInviteButton.tsx`
+
+Extracted the invite renewal mutation and notification dispatch logic from RenewInviteButton into a new custom hook `useRenewInvite`. The component now destructures `renewInvite` (aliased to `handleRenew`) and `isLoading` from the hook instead of managing RTK Query, notifications, and error handling inline.
+
+_Likely deduplicates renewal logic so the same hook can be reused across multiple components or contexts within the Members table refactor._
+
+**💥 Risks:**
+- The new `useRenewInvite` hook (not in this diff) must preserve the same error/success notification messages and groupKeys used in the original code
+- Original code used [`member.user.id`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/member.user.id) and [`member.name`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/member.name) directly; verify the hook correctly extracts these from the passed `member` object
+- The mutation's `isLoading` state could behave differently if the hook re-creates its mutation reference on re-renders
+
+### `apps/web/src/features/spaces/components/MembersList/index.test.tsx`
+
+Tests for MembersList were updated: removed user-event and MUI tooltip assertions, replaced with check for 'truncate' class; added mocks for useIsMobile and MemberRowActionsMenu, and added two new tests for mobile row-action collapse and email display beneath name.
+
+_Reflects a UI change from MUI EnhancedTable to a shadcn-based table with mobile-specific behaviour; ensures tests align with new component rendering and truncation approach._
+
+**💥 Risks:**
+- Tooltip behavior after truncation is no longer tested; mobile email rendering test uses a testid not validated elsewhere.
+- useIsMobile mock always returns false for non-mobile tests, but real hook might behave differently in test environment.
+- MemberRowActionsMenu mock provides a static button; if real component logic varies, tests may not catch regressions.
+
+### `apps/web/src/features/spaces/components/MembersList/index.tsx`
+
+MembersList was rewritten from MUI's EnhancedTable to the shared PaginatedDataTable component. Replaced MUI Tooltip/IconButton/Chip/SvgIcon with shadcn Button/Badge/Tooltip, added mobile-responsive fallback (MemberRowActionsMenu, email shown under name), and defined explicit column configs (including sortValue functions and cellTestIds).
+
+_Unifies the Members table visual and behavioral design with the Address book table via the shared PaginatedDataTable, delivering consistent shadcn-styled tables across Spaces._
+
+**💥 Risks:**
+- Badge variant='warning' used but 'warning' may not exist in the shared shadcn Badge — verify the variant was added to components/ui/badge.tsx
+- MemberRowActionsMenu is used on mobile but is not defined in this diff — confirm the component handles edit/renew/remove with disabled/declined/expired states properly
+- Tooltip API changed: shadcn Tooltip requires <TooltipTrigger render={<span />}> wrapper; empty-trigger edge case when email is null on 'email' column
+- Sorting is now implicitly enabled via sortValue in column config — verify sorting is desired and sortValue accessors (e.g., m.user.email) won't throw on missing nested properties
+- getRowKey uses String(member.id) — ensure member.id is always present and unique across the list
+
+### `apps/web/src/features/spaces/components/MembersList/useRenewInvite.ts`
+
+Added new hook `useRenewInvite` that wraps `useMembersRenewInviteV1Mutation` to renew a pending member invitation with Redux-managed success/error notifications, taking a `MemberDto` and current `spaceId`.
+
+_Extracts a reusable invitation-renewal action needed by both desktop and mobile UI for the redesigned Members table._
+
+**💥 Risks:**
+- [`member.name`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/member.name) in the success notification message may be undefined for email-only invites where no name has been set yet, producing 'Invitation renewed for undefined'
+- No defensive null-check on [`member.user`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/member.user) before accessing [`member.user.id`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/member.user.id) — relies entirely on TypeScript types and API guarantees
+
+### `apps/web/src/features/spaces/components/PaginatedDataTable/index.test.tsx`
+
+Added unit tests for the new PaginatedDataTable component covering column rendering, pagination, navigation, page-reset on row change, client-side sorting (ascending/descending/no-sort), responsive column visibility via CSS classes, sticky column styling, and mobile expandable row detail toggles.
+
+_Provides baseline coverage for the shared table shell that will be reused by the Members list and Address book, ensuring core table behavior works correctly._
+
+**💥 Risks:**
+- Mobile rendering and detail toggle behaviour rely entirely on a mocked useIsMobile hook, so real viewport sizing is not validated.
+- Sorting tests do not include rows with empty/undefined sort values, so the documented 'empty values sorted last' logic is untested.
+- Tests do not cover edge cases like zero rows, single-row pagination, or accessibility attributes beyond role and aria-sort.
+- Page-reset test checks only when the rows array reference changes, not whether other prop changes (like getRowKey) trigger a reset.
+
+### `apps/web/src/features/spaces/components/PaginatedDataTable/index.tsx`
+
+Added a new shared `PaginatedDataTable` component implementing a shadcn table with client-side sorting (asc/desc/null), pagination, mobile-adaptive column visibility (via `priority`), sticky columns, and an optional mobile detail toggle via `renderRowDetail`. Exports a typed `DataTableColumn<T>` config with header, sortValue, minWidth, className, etc.
+
+_Unifies the Members and Address book tables onto a single reusable table shell, enabling consistent styling (muted headers, rounded cards, no border) and shared pagination/sorting logic across Spaces features._
+
+**💥 Risks:**
+- Sorting cycles from asc to desc to unsorted; verify that unsorted state correctly returns original order (may rely on stable `rows` array reference; ensure no mutation).
+- Mobile detail toggle shows a chevron button—ensure accessibility (aria-expanded, aria-controls) works and the chevron rotation is clear.
+- Fixed table layout on desktop (`md:table-fixed`) may cause content clipping if columns lack defined widths; verify that truncation styles in caller components are coherent.
+- `useEffect` resets page and expanded set on `rows` change; if caller passes a new array reference on every render, pagination and detail state may be lost unexpectedly.
+- `page` state clamps to `Math.min(page, totalPages - 1)` only in the derived `currentPage`; could become out-of-sync if `page` is not also clamped in state—verify no edge case where `page` > totalPages-1 yields a blank page before clamping is applied.
+- The `hideClass` and `stickyClass` use arbitrary breakpoints (`max-[767px]`) that might not align with the app's actual breakpoint for mobile; the component uses `useIsMobile` but CSS breakpoints are independent.
+
+### `apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions.tsx`
+
+Added mobile-responsive behaviour: on mobile, the address book actions (edit/delete) are consolidated into a shadcn DropdownMenu triggered by an ellipsis icon, while desktop retains the existing MUI Tooltip IconButton pattern. The dialogs are extracted into a reusable variable, and the useIsMobile hook is imported.
+
+_Likely improves mobile UX by reducing clutter and providing a familiar overflow menu pattern for contact actions._
+
+**💥 Risks:**
+- DropdownMenuTrigger uses a non-standard `render` prop instead of the expected `asChild` pattern; may not render correctly with shadcn
+- DropdownMenuItem `variant="destructive"` might not exist in the shadcn component, risking silent style omission or error
+- handleOpenModal expects native MouseEvent but onClick passes React.MouseEvent; type mismatch may cause issues with e.stopPropagation()
+
+### `apps/web/src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx`
+
+Replaced inline MUI-enhanced table and custom pagination with a shared PaginatedDataTable component; defined column configs, per-column renderCell callbacks, and a renderRowDetail for mobile secondary columns. Removed MUI media query and pagination controls.
+
+_Unifies the Address Book table with the Members table by using the same paginated table shell, enabling consistent visuals, sortable columns, and mobile layout adaptation._
+
+**💥 Risks:**
+- Short address rendering now uses `useIsMobile` instead of MUI breakpoint — verify mobile detection matches previous behavior.
+- Column `chains` sort value is [`entry.chainIds.length`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/entry.chainIds.length), and `middle` column sort value is `createdBy` or `updatedAt/createdAt` string; confirm sorting correctness and consistency with other tables.
+- Sticky `name` column may conflict with horizontal scrolling or table overflow, especially on smaller viewports.
+- Pagination threshold changed from 10 to 25 rows (PAGE_SIZE from 25 previously but page state was reset only? Original pagination used PAGE_SIZE=25, no change, but old code had condition `totalPages > 1` to show pagination, which is preserved in PaginatedDataTable — no behavioral change in page size, but confirm that the pagination component still shows correctly when >25 rows).
+- Removed `Button`, `ChevronLeftIcon`, `ChevronRightIcon` imports — verify no other local consumption accidentally broken.
+
+### `apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/SpaceAddressBookActions.test.tsx`
+
+Added a new unit test file for the SpaceAddressBookActions component covering admin gating, desktop kebab absence, and mobile kebab edit/delete dialog triggers.
+
+_Provides regression coverage for the component's render logic—non-admins should render nothing, mobile users should see a kebab menu that opens the correct dialogs._
+
+**💥 Risks:**
+- Custom DropdownMenu mock (manual state via createContext/useContext) may diverge from real Radix behavior—consider integration tests for dropdown interactions
+- Module-level mockUseIsMobile/mockUseIsAdmin could bleed state between tests if not properly reset, though beforeEach clears them
+- toBeEmptyDOMElement assertion on non-admin path is fragile—any wrapper element (e.g., empty div, fragment) would cause a false failure
+
+### `apps/web/src/features/spaces/components/SpaceAddressBook/__tests__/SpaceAddressBookTable.test.tsx`
+
+Enhanced SpaceAddressBookTable tests: mocked useIsMobile, added shortAddress tracking to EthHashInfo mock, and added four new test cases covering mobile address shortening, mobile detail-row expansion, duplicate entry dimming (opacity + line-through), and column omission when showAddedBy=false.
+
+_These tests validate new mobile-responsive behavior and duplicate-entry styling introduced by the PaginatedDataTable refactor, ensuring the AddressBook table regressions are caught._
+
+**💥 Risks:**
+- Confirm the 'Show details' button exists only on mobile in the actual component; test expects it unconditionally when mockUseIsMobile returns true.
+- Verify the real EthHashInfo receives the shortAddress prop from PaginatedDataTable/SpaceAddressBookTable in both desktop and mobile cases.
+- The mockReset in beforeEach may interfere if mockUseIsMobile is called before mockReturnValue in other test files sharing the module mock.
+
+### `apps/web/src/features/spaces/components/SpaceAddressBook/index.tsx`
+
+Removed `useDarkMode` hook, `cn` utility import, and the `shadcn-scope` + conditional `dark` class wrapper from `SpaceAddressBook` container. Also dropped the `border` class from the card `div` wrapping the tabs content, leaving it borderless.
+
+_Likely part of a broader refactor where dark mode is now handled by a parent wrapper (as mentioned in the PR's blast radius section about `shadcn-scope` + dark wrapper being added to [`Members/index.tsx`](https://github.com/safe-global/safe-wallet-monorepo/blob/3c8ba9cf6727c37a91fa8ed76bb9dac4f182132c/Members/index.tsx)), and removing the card border unifies the visual style across Space tables._
+
+**💥 Risks:**
+- Dark mode may break for Address Book if the parent wrapper doesn't reliably apply `shadcn-scope` and `dark` class
+- Removing `cn` import without adding a replacement is fine if no other `cn` calls remain in the file, but verify no orphaned usage
+
+### `apps/web/src/features/spaces/hooks/useSpaceMembers.tsx`
+
+Introduced a constant EMPTY_MEMBERS (stable reference) to replace inline empty arrays in useAllMembers and wrapped useSpaceMembersByStatus filtering in useMemo with `allMembers` dependency.
+
+_Prevents identity-based re-renders (stable empty array reference) and avoids unnecessary re-computation of filtered member lists, improving performance for consumers like the members table._
+
+**💥 Risks:**
+- The useMemo dependency array is `[allMembers]`; if allMembers changes by reference but content is the same (e.g., from a new API fetch with identical data), the memo will still recalculate, but that is expected behavior. Ensure the stable empty array reference does not cause issues if any downstream code mutates the returned array (though unlikely since it's a constant).
+
+---
+_Generated by prbrief • model: deepseek-v4-pro • 18 LLM calls • 174.4s_
+
+</details>
+
+<sub>Generated by <a href="https://popcorn.report">Popcorn Review</a> · `safe-global/safe-wallet-monorepo@3c8ba9cf6727`</sub>
+
+
+COMMENT
+[github-actions 2026-06-14T13:13:33Z] ## 📦 Next.js Bundle Analysis for @safe-global/web
+
+This analysis was generated by the [Next.js Bundle Analysis action](https://github.com/hashicorp/nextjs-bundle-analysis). 🤖
+
+### 🎉  Global Bundle Size Decreased
+  
+Page | Size (compressed) | 
+|---|---|
+| `global` | `1.46 MB` _(🟢 -382 B)_ |
+
+<details>
+<summary>Details</summary>
+<p>The <strong>global bundle</strong> is the javascript bundle that loads alongside every page. It is in its own category because its impact is much higher - an increase to its size means that every page on your website loads slower, and a decrease means every page loads faster.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>If you want further insight into what is behind the changes, give <a href='https://www.npmjs.com/package/@next/bundle-analyzer'>@next/bundle-analyzer</a> a try!</p>
+</details>
+
+### Two Pages Changed Size
+  
+The following pages changed size from the code in this PR compared to its base branch:
+
+Page | Size (compressed) | First Load |
+|---|---|---|
+| `/balances/positions` | `2.2 KB` _(🟢 -3 B)_ | 1.46 MB |
+| `/settings/security` | `2.83 KB` _(🟡 +5 B)_ | 1.46 MB |
+
+<details>
+<summary>Details</summary>
+<p>Only the gzipped size is provided here based on <a href='https://twitter.com/slightlylate/status/1412851269211811845'>an expert tip</a>.</p>
+<p><strong>First Load</strong> is the size of the global bundle plus the bundle for the individual page. If a user were to show up to your website and land on a given page, the first load size represents the amount of javascript that user would need to download. If <code>next/link</code> is used, subsequent page loads would only need to download that page's bundle (the number in the "Size" column), since the global bundle has already been downloaded.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>Next to the size is how much the size has increased or decreased compared with the base branch of this PR. If this percentage has increased by 20% or more, there will be a red status indicator applied, indicating that special attention should be given to this.
+</details>
+<!-- __NEXTJS_BUNDLE_@safe-global/web -->
+<!-- Sticky Pull Request Commentnext-bundle-analysis -->
+
+COMMENT
+[github-actions 2026-06-14T13:20:38Z] <!-- add-pr-comment:oneshot-clickthrough -->
+
+## 🎬 One-shot clickthrough
+
+This PR doesn't add or modify any one-shot clickthrough, so nothing was recorded.
+
+Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](https://github.com/safe-global/safe-wallet-monorepo/blob/dev/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
+
+COMMENT
+[github-actions 2026-06-14T13:23:14Z] <!-- jest coverage report action for options with hash 538b3aeca5435921509d9329a38101b7 -->
+
+## Coverage report for `apps/web`
+
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | Category | Percentage | Covered / Total |
+| :-: | :- | :- | :-: |
+| 🟢 | Statements | <div title="Base coverage is: 83.13%">83.16% (+0.03% 🔼)</div> | 30876/37128 |
+| 🟡 | Branches | <div title="Base coverage is: 66.9%">67.02% (+0.12% 🔼)</div> | 9830/14668 |
+| 🟡 | Functions | <div title="Base coverage is: 70.42%">70.5% (+0.08% 🔼)</div> | 4667/6620 |
+| 🟢 | Lines | <div title="Base coverage is: 84.43%">84.45% (+0.03% 🔼)</div> | 27716/32818 |
+
+<details><summary>Show new covered files 🐣</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟢 | <div title="src/features/spaces/components/PaginatedDataTable/index.tsx">`...` / index.tsx</div> | 92.68% | 90.2% | 95.45% | 97.06% |
+| 🟢 | <div title="src/features/spaces/components/MembersList/MemberRowActionsMenu.tsx">`...` / MemberRowActionsMenu.tsx</div> | 90% | 100% | 66.67% | 89.47% |
+| 🟢 | <div title="src/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions.tsx">`...` / SpaceAddressBookActions.tsx</div> | 91.67% | 100% | 66.67% | 90.63% |
+| 🟢 | <div title="src/features/spaces/components/MembersList/useRenewInvite.ts">`...` / useRenewInvite.ts</div> | 95% | 50% | 100% | 100% |
+
+</details>
+
+
+<details><summary>Show files with reduced coverage 🔻</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟡 | <div title="src/components/common/EnhancedTable/index.tsx">`...` / index.tsx</div> | 61.4% | <div title="Base coverage is: 55.1%">53.06% (-2.04% 🔻)</div> | 46.15% | 63.46% |
+| 🟢 | <div title="src/features/spaces/components/SpaceAddressBook/SpaceAddressBookTable.tsx">`...` / SpaceAddressBookTable.tsx</div> | <div title="Base coverage is: 89.74%">88.24% (-1.51% 🔻)</div> | <div title="Base coverage is: 62.96%">66.67% (+3.7% 🔼)</div> | <div title="Base coverage is: 60%">66.67% (+6.67% 🔼)</div> | <div title="Base coverage is: 94.44%">87.88% (-6.57% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/MembersList/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 85%">81.48% (-3.52% 🔻)</div> | <div title="Base coverage is: 78.79%">80% (+1.21% 🔼)</div> | <div title="Base coverage is: 50%">53.33% (+3.33% 🔼)</div> | <div title="Base coverage is: 86.84%">84.31% (-2.53% 🔻)</div> |
+| 🟡 | <div title="src/features/spaces/components/SpaceAddressBook/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 73.97%">72.86% (-1.12% 🔻)</div> | <div title="Base coverage is: 51.52%">51.61% (+0.1% 🔼)</div> | 35.71% | <div title="Base coverage is: 80.3%">79.37% (-0.94% 🔻)</div> |
+
+</details>
+
+## Test suite run success
+6377 tests passing in 693 suites.
+
+<p align="right">Report generated by <a href="https://github.com/ArtiomTr/jest-coverage-report-action">🧪jest coverage report action</a> from 2ba024f31dca1f3733ef6480f2359c4744093a65</p>
+

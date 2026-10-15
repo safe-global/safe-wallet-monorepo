@@ -1,0 +1,353 @@
+THREAD apps/web/src/features/feature-flag-overrides/__tests__/bundleExclusion.test.ts:1 resolved=false
+[tongyaosafe 2026-07-29T12:01:57Z] Maybe rename the `feature-flags` folder name to another name.
+[tmjssz 2026-07-29T12:54:21Z] Good idea! done -> 9accdf3b952a62021e99fc594decfc2f4a078991
+
+THREAD apps/web/src/hooks/useChains.test.ts:12 resolved=false
+[PooyaRaki 2026-08-06T10:18:59Z] Nit: It's recommended to pick the feature that we want to override for testing randomly instead of hard coding `EARN` and `BRIDGE`
+
+THREAD apps/web/src/hooks/useChains.test.ts:11 resolved=false
+[PooyaRaki 2026-08-06T10:19:37Z] Why do we need to cast to unknown first? Can't we create a valid `Chain` object?
+
+THREAD apps/web/src/hooks/useChains.test.ts:47 resolved=false
+[PooyaRaki 2026-08-06T10:20:19Z] Since `setIsProduction` helper is added in the sub PR of this, we should make sure that helpers is used everywhere in the tests.
+
+REVIEW APPROVED
+[tongyaosafe 2026-07-29T13:30:36Z] Approved! 🚀 
+
+COMMENT
+[github-actions 2026-07-10T14:58:02Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://feat-feature-flag-editor--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://feat-feature-flag-editor--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[tmjssz 2026-07-10T14:59:03Z] @claude review
+
+COMMENT
+[claude 2026-07-10T14:59:21Z] **Claude finished @tmjssz's task in 3m 50s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29101914232)
+
+---
+### Claude PR Review
+
+Nice, self-contained addition — the guarded dynamic import + inlined `NEXT_PUBLIC_IS_PRODUCTION` check is a clean pattern, and the `applyFeatureOverrides` prod short-circuit + `useChain`/`useChains` integration means all ~134 `useHasFeature` consumers pick up overrides for free. A few things worth improving before merge:
+
+#### Potential issues
+
+- **`FeatureFlagEditor.tsx:59` — switch does not clear an override when returned to config value.** `onCheckedChange` always dispatches `setOverride`, so toggling a row off then on again leaves it "overridden — matches current chain" (green rail + check indicator) instead of returning to a clean, non-overridden state. Users who use the switch as their primary control will accumulate silent overrides that only display as `matchesCurrentChain: true`. Consider auto-dispatching `clearOverride(feature)` when the new value equals `configValue` — matches the "revert override" affordance and prevents this drift. [Fix this →](https://claude.ai/code?q=In%20apps%2Fweb%2Fsrc%2Ffeatures%2Ffeature-flags%2Fcomponents%2FFeatureFlagRow.tsx%20around%20line%2059-63%2C%20the%20Switch%20always%20dispatches%20setOverride.%20When%20value%20%3D%3D%3D%20row.configValue%2C%20it%20should%20dispatch%20clearOverride(row.feature)%20instead%2C%20so%20toggling%20back%20to%20config%20fully%20clears%20the%20override%20(same%20effect%20as%20the%20revert%20button).%20Update%20FeatureFlagRow.test.tsx%20to%20cover%20this%20behavior.&repo=safe-global%2Fsafe-wallet-monorepo)
+
+- **`useFeatureFlagEditorData.ts:32-49` — reads raw chain data, not overridden.** The editor's rows show the *raw config-service* value in `configValue` and `chainScope`, but `useHasFeature` (and everything gated by it) shows the *overridden* value. That's the intended split — but it means the "Config service" column is not affected by overrides even though the switch below it is. Worth a quick doc-comment on `useFeatureFlagEditorData` explaining that `data` here is deliberately un-overridden (the whole point of the editor is to show what the config service delivered vs. your local value).
+
+- **`FeatureFlagRow.tsx:65-78` — hidden Check inside Tooltip.** Using `visibility: hidden` on the trigger with `aria-label` set is subtle: `visibility: hidden` removes the element from both hit-testing *and* the a11y tree, so the tooltip and aria-label are effectively dead when `matchesCurrentChain` is false. That is what you want, but a screen reader user will never hear "Matches config service setting for the current chain" even when it *is* matching, because the `aria-label` is on the icon while the accessible content is inside `TooltipContent` (only exposed on focus/hover). Consider either (a) using `sr-only` text alongside the visible check for reliable a11y, or (b) dropping the `aria-label` on the icon since `TooltipContent` already carries the announcement.
+
+- **`featureFlagOverridesSlice` runs in production.** The reducer is registered unconditionally in `store/index.ts:67` and included in `persistedSlices` (`:95`) + `broadcastState`. `applyFeatureOverrides` is a hard prod no-op, so behavior is fine — but the reducer, persisted state, and broadcast channel still ship. Small cost only; worth flagging that a stale `featureFlagOverrides` localStorage entry (e.g., from prior staging use on the same origin) will silently sit there in prod forever with no way to clear it via UI.
+
+- **`bundleExclusion.test.ts:18` — marker string is not distinctive enough.** `"local feature-flag overrides"` is generic enough that a future unrelated copy change could accidentally satisfy or invalidate the test. Consider a longer, editor-only sentinel (e.g., the full `AlertTitle` string `"Development tool."` combined with the class name, or a dedicated hidden `data-*` attribute in the editor JSX) to make the assertion robust.
+
+#### Test coverage gaps
+
+- No unit test for `FeatureFlagEditor` (search filter, "Reset all overrides" enable/disable + dispatch, empty overridden section).
+- No unit test for `FeatureFlagSection` (returns null when `rows.length === 0`).
+- No test that `applyFeatureOverrides` handles a chain with an override for a feature not in `Chain['features']` enum type (cast to string is safe but worth a coverage anchor).
+
+#### Nits
+
+- `FeatureFlagRow.tsx:58` — `<span className="w-12"></span>` as an alignment spacer is a bit magic; a comment already exists on the grid but this bare span could get lost in future edits.
+- `useFeatureFlagEditorData.ts:53` — sorting inline via `localeCompare` is fine, but `FEATURES` is already a fixed enum; alphabetizing at module scope once would avoid re-sorting on every render.
+- `SafeSidebarContent.tsx:114-123` — `selectOverrideCount` subscribes the sidebar to the store in production even though the group is hidden. It's cheap, but you could hoist the `IS_PRODUCTION` check above `useAppSelector` if you're willing to accept a conditional-hook pattern (or leave as-is; noise-level).
+
+---
+
+- [x] Fetch PR diff & metadata
+- [x] Read key files
+- [x] Analyze code quality, bugs, perf, security
+- [x] Post review
+ · [Branch](https://github.com/safe-global/safe-wallet-monorepo/tree/feat/feature-flag-editor)
+
+COMMENT
+[github-actions 2026-07-10T15:09:41Z] ## 📦 Next.js Bundle Analysis for @safe-global/web
+
+This analysis was generated by the [Next.js Bundle Analysis action](https://github.com/hashicorp/nextjs-bundle-analysis). 🤖
+
+### ⚠️  Global Bundle Size Increased
+  
+Page | Size (compressed) | 
+|---|---|
+| `global` | `1.5 MB` _(🟡 +1.97 KB)_ |
+
+<details>
+<summary>Details</summary>
+<p>The <strong>global bundle</strong> is the javascript bundle that loads alongside every page. It is in its own category because its impact is much higher - an increase to its size means that every page on your website loads slower, and a decrease means every page loads faster.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>If you want further insight into what is behind the changes, give <a href='https://www.npmjs.com/package/@next/bundle-analyzer'>@next/bundle-analyzer</a> a try!</p>
+</details>
+
+### Thirty-three Pages Changed Size
+  
+The following pages changed size from the code in this PR compared to its base branch:
+
+Page | Size (compressed) | First Load |
+|---|---|---|
+| `/address-book` | `26.65 KB` _(-1 B)_ | 1.53 MB |
+| `/apps/open` | `8.33 KB` _(🟡 +1 B)_ | 1.51 MB |
+| `/balances` | `25.14 KB` _(🟡 +1 B)_ | 1.53 MB |
+| `/balances/nfts` | `10.9 KB` _(🟡 +3 B)_ | 1.51 MB |
+| `/balances/positions` | `2.2 KB` _(🟢 -2 B)_ | 1.5 MB |
+| `/dashboard/new` | `1.48 KB` _(🟢 -1 B)_ | 1.5 MB |
+| `/home` | `321.7 KB` _(-1 B)_ | 1.82 MB |
+| `/new-safe/create` | `29.69 KB` _(🟡 +1 B)_ | 1.53 MB |
+| `/new-safe/load` | `9.52 KB` _(🟢 -2 B)_ | 1.51 MB |
+| `/settings/appearance` | `2.36 KB` _(🟡 +1 B)_ | 1.5 MB |
+| `/settings/cookies` | `2.22 KB` _(🟡 +2 B)_ | 1.5 MB |
+| `/settings/data` | `28.8 KB` _(🟢 -5 B)_ | 1.53 MB |
+| `/settings/environment-variables` | `3.76 KB` _(🟢 -1 B)_ | 1.51 MB |
+| `/settings/modules` | `3.3 KB` _(🟢 -1 B)_ | 1.51 MB |
+| `/settings/notifications` | `7.6 KB` _(🟡 +2 B)_ | 1.51 MB |
+| `/share/safe-app` | `6.79 KB` _(🟡 +2 B)_ | 1.51 MB |
+| `/spaces` | `613 B` _(🟡 +2 B)_ | 1.5 MB |
+| `/spaces/activity` | `548 B` _(🟡 +2 B)_ | 1.5 MB |
+| `/spaces/address-book` | `509 B` _(🟢 -1 B)_ | 1.5 MB |
+| `/spaces/create-space` | `442 B` _(🟡 +1 B)_ | 1.5 MB |
+| `/spaces/members` | `499 B` _(🟢 -1 B)_ | 1.5 MB |
+| `/spaces/safe-accounts` | `511 B` _(🟡 +1 B)_ | 1.5 MB |
+| `/spaces/security` | `128.82 KB` _(-1 B)_ | 1.63 MB |
+| `/stake` | `1.22 KB` _(🟡 +1 B)_ | 1.5 MB |
+| `/swap` | `728 B` _(🟢 -3 B)_ | 1.5 MB |
+| `/transactions` | `55.36 KB` _(🟡 +1 B)_ | 1.56 MB |
+| `/transactions/history` | `55.32 KB` _(🟡 +1 B)_ | 1.56 MB |
+| `/transactions/messages` | `11.5 KB` _(🟢 -3 B)_ | 1.51 MB |
+| `/transactions/queue` | `2.46 KB` _(🟡 +1 B)_ | 1.5 MB |
+| `/wc` | `586 B` _(🟡 +1 B)_ | 1.5 MB |
+| `/welcome/accounts` | `610 B` _(🟢 -1 B)_ | 1.5 MB |
+| `/welcome/invite-members` | `445 B` _(🟡 +1 B)_ | 1.5 MB |
+| `/welcome/select-safes` | `448 B` _(🟡 +1 B)_ | 1.5 MB |
+
+<details>
+<summary>Details</summary>
+<p>Only the gzipped size is provided here based on <a href='https://twitter.com/slightlylate/status/1412851269211811845'>an expert tip</a>.</p>
+<p><strong>First Load</strong> is the size of the global bundle plus the bundle for the individual page. If a user were to show up to your website and land on a given page, the first load size represents the amount of javascript that user would need to download. If <code>next/link</code> is used, subsequent page loads would only need to download that page's bundle (the number in the "Size" column), since the global bundle has already been downloaded.</p>
+<p>Any third party scripts you have added directly to your app using the <code>&lt;script&gt;</code> tag are not accounted for in this analysis</p>
+<p>Next to the size is how much the size has increased or decreased compared with the base branch of this PR. If this percentage has increased by 20% or more, there will be a red status indicator applied, indicating that special attention should be given to this.
+</details>
+<!-- __NEXTJS_BUNDLE_@safe-global/web -->
+<!-- Sticky Pull Request Commentnext-bundle-analysis -->
+
+COMMENT
+[github-actions 2026-07-10T15:16:52Z] <!-- jest coverage report action for options with hash 538b3aeca5435921509d9329a38101b7 -->
+
+## Coverage report for `apps/web`
+
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | Category | Percentage | Covered / Total |
+| :-: | :- | :- | :-: |
+| 🟢 | Statements | <div title="Base coverage is: 83.85%">83.79% (-0.06% 🔻)</div> | 32188/38416 |
+| 🟡 | Branches | <div title="Base coverage is: 67.68%">67.55% (-0.13% 🔻)</div> | 10251/15175 |
+| 🟡 | Functions | <div title="Base coverage is: 71.27%">71.21% (-0.06% 🔻)</div> | 4865/6832 |
+| 🟢 | Lines | <div title="Base coverage is: 85.12%">85.05% (-0.08% 🔻)</div> | 28809/33874 |
+
+<details><summary>Show new covered files 🐣</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟢 | <div title="src/features/feature-flag-overrides/store/index.ts">`...` / index.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/store/featureFlagOverridesSlice.ts">`...` / featureFlagOverridesSlice.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/index.ts">`...` / index.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/hooks/useChainOverrides.ts">`...` / useChainOverrides.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/index.ts">`...` / index.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/SidebarDeveloperGroup.tsx">`...` / SidebarDeveloperGroup.tsx</div> | 92.31% | 66.67% | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/Sidebar/developerItems/index.ts">`...` / index.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/Sidebar/developerItems/useFeatureFlagsItem.tsx">`...` / useFeatureFlagsItem.tsx</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/FeatureFlagEditorDialogLoader.tsx">`...` / FeatureFlagEditorDialogLoader.tsx</div> | 83.33% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/SidebarDeveloperItem.tsx">`...` / SidebarDeveloperItem.tsx</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/components/FeatureFlagRow.tsx">`...` / FeatureFlagRow.tsx</div> | 96% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/hooks/useFeatureFlagEditorData.ts">`...` / useFeatureFlagEditorData.ts</div> | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/components/FeatureFlagEditor.tsx">`...` / FeatureFlagEditor.tsx</div> | 96% | 100% | 100% | 100% |
+| 🟢 | src/utils/styles.ts | 100% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/components/FeatureFlagSection.tsx">`...` / FeatureFlagSection.tsx</div> | 90.91% | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/feature-flag-overrides/components/FeatureFlagEditorDialog.tsx">`...` / FeatureFlagEditorDialog.tsx</div> | 100% | 100% | 100% | 100% |
+
+</details>
+
+
+<details><summary>Show files with reduced coverage 🔻</summary>
+<br/>
+
+| <div title="Status of coverage:&#10; 🟢 - ok&#10; 🟡 - slightly more than threshold&#10; 🔴 - under the threshold">St.<sup>:grey_question:</sup></div> | File | Statements | Branches | Functions | Lines |
+| :-: | :- | :- | :- | :- | :- |
+| 🟢 | <div title="src/services/observability/providers/datadog.ts">`...` / datadog.ts</div> | <div title="Base coverage is: 94.52%">94.12% (-0.4% 🔻)</div> | <div title="Base coverage is: 91.89%">91.43% (-0.46% 🔻)</div> | 100% | <div title="Base coverage is: 94.92%">94.44% (-0.47% 🔻)</div> |
+| 🟢 | <div title="src/store/addressBookSlice.ts">`...` / addressBookSlice.ts</div> | <div title="Base coverage is: 96.1%">92.11% (-4% 🔻)</div> | <div title="Base coverage is: 86.36%">77.78% (-8.59% 🔻)</div> | <div title="Base coverage is: 93.33%">88.89% (-4.44% 🔻)</div> | <div title="Base coverage is: 96.77%">92.59% (-4.18% 🔻)</div> |
+| 🟡 | <div title="src/features/swap/helpers/utils.ts">`...` / utils.ts</div> | <div title="Base coverage is: 77.68%">77.06% (-0.61% 🔻)</div> | <div title="Base coverage is: 62.32%">58.73% (-3.59% 🔻)</div> | <div title="Base coverage is: 72.73%">71.43% (-1.3% 🔻)</div> | <div title="Base coverage is: 79.17%">78.95% (-0.22% 🔻)</div> |
+| 🟢 | <div title="src/services/safe-wallet-provider/index.ts">`...` / index.ts</div> | <div title="Base coverage is: 90.3%">89.76% (-0.53% 🔻)</div> | <div title="Base coverage is: 82.18%">79.17% (-3.01% 🔻)</div> | <div title="Base coverage is: 95.83%">95.45% (-0.38% 🔻)</div> | <div title="Base coverage is: 90.7%">90.32% (-0.38% 🔻)</div> |
+| 🔴 | <div title="src/features/multichain/index.ts">`...` / index.ts</div> | <div title="Base coverage is: 38.78%">38.3% (-0.48% 🔻)</div> | 100% | 29.17% | <div title="Base coverage is: 51.61%">50% (-1.61% 🔻)</div> |
+| 🟢 | <div title="src/features/counterfactual/services/persistCounterfactualSafe.ts">`...` / persistCounterfactualSafe.ts</div> | <div title="Base coverage is: 98.28%">97.67% (-0.6% 🔻)</div> | <div title="Base coverage is: 93.1%">91.3% (-1.8% 🔻)</div> | 100% | <div title="Base coverage is: 98.25%">97.62% (-0.63% 🔻)</div> |
+| 🟢 | <div title="src/hooks/useTopbarElevation.ts">`...` / useTopbarElevation.ts</div> | <div title="Base coverage is: 97.3%">96.43% (-0.87% 🔻)</div> | 100% | <div title="Base coverage is: 90%">88.89% (-1.11% 🔻)</div> | <div title="Base coverage is: 96.77%">100% (+3.23% 🔼)</div> |
+| 🟡 | <div title="src/features/spaces/index.ts">`...` / index.ts</div> | <div title="Base coverage is: 48.91%">47.78% (-1.14% 🔻)</div> | 100% | 100% | <div title="Base coverage is: 63.16%">62.5% (-0.66% 🔻)</div> |
+| 🟢 | <div title="src/components/ui/button.tsx">`...` / button.tsx</div> | <div title="Base coverage is: 100%">83.33% (-16.67% 🔻)</div> | 100% | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/SafeSelectorDropdown/components/ChainLogo.tsx">`...` / ChainLogo.tsx</div> | <div title="Base coverage is: 100%">66.67% (-33.33% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/features/spaces/components/SafeSelectorDropdown/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 86.79%">86% (-0.79% 🔻)</div> | <div title="Base coverage is: 87.76%">88% (+0.24% 🔼)</div> | 77.78% | <div title="Base coverage is: 91.11%">90.48% (-0.63% 🔻)</div> |
+| 🟡 | <div title="src/components/ui/select.tsx">`...` / select.tsx</div> | 70.59% | <div title="Base coverage is: 66.67%">60% (-6.67% 🔻)</div> | 33.33% | 70.59% |
+| 🟢 | <div title="src/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainer.tsx">`...` / SafeDropdownContainer.tsx</div> | <div title="Base coverage is: 94.74%">94.55% (-0.19% 🔻)</div> | <div title="Base coverage is: 89.8%">90.7% (+0.9% 🔼)</div> | 83.33% | <div title="Base coverage is: 96.23%">96.08% (-0.15% 🔻)</div> |
+| 🟢 | <div title="src/features/myAccounts/components/AccountItem/AccountItemChainBadge.tsx">`...` / AccountItemChainBadge.tsx</div> | <div title="Base coverage is: 88.89%">87.5% (-1.39% 🔻)</div> | 100% | 100% | <div title="Base coverage is: 87.5%">85.71% (-1.79% 🔻)</div> |
+| 🟢 | <div title="src/features/myAccounts/components/SafeAccountsTable/index.tsx">`...` / index.tsx</div> | 86.73% | <div title="Base coverage is: 89%">88.54% (-0.46% 🔻)</div> | 80.65% | 85.19% |
+| 🟢 | <div title="src/features/myAccounts/components/SafeAccountsTable/SafeAccountTableRow.tsx">`...` / SafeAccountTableRow.tsx</div> | <div title="Base coverage is: 89.39%">89.23% (-0.16% 🔻)</div> | 81.52% | 76.92% | <div title="Base coverage is: 91.94%">91.8% (-0.13% 🔻)</div> |
+| 🟡 | <div title="src/features/actions-tray/components/ActionsTray/ActionsTray.tsx">`...` / ActionsTray.tsx</div> | 77.33% | <div title="Base coverage is: 71.43%">70% (-1.43% 🔻)</div> | 50% | 76.06% |
+| 🟢 | <div title="src/components/transactions/TxSigners/index.tsx">`...` / index.tsx</div> | 100% | <div title="Base coverage is: 91.94%">91.8% (-0.13% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/components/tx-flow/features/RiskConfirmation.tsx">`...` / RiskConfirmation.tsx</div> | <div title="Base coverage is: 91.3%">83.33% (-7.97% 🔻)</div> | 66.67% | <div title="Base coverage is: 50%">25% (-25% 🔻)</div> | <div title="Base coverage is: 95%">85.71% (-9.29% 🔻)</div> |
+| 🟢 | <div title="src/components/tx-flow/slots/SlotProvider.tsx">`...` / SlotProvider.tsx</div> | 85.19% | <div title="Base coverage is: 71.43%">57.14% (-14.29% 🔻)</div> | 88.89% | 85% |
+| 🟢 | <div title="src/components/common/SpaceSafeBar/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 89.29%">89.02% (-0.26% 🔻)</div> | <div title="Base coverage is: 81.13%">82.35% (+1.22% 🔼)</div> | 61.9% | <div title="Base coverage is: 88.75%">88.46% (-0.29% 🔻)</div> |
+| 🟢 | <div title="src/features/security/data/scanners/modules.ts">`...` / modules.ts</div> | <div title="Base coverage is: 98.88%">98.75% (-0.13% 🔻)</div> | <div title="Base coverage is: 96.88%">96.43% (-0.45% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/features/swap/helpers/fee.ts">`...` / fee.ts</div> | 100% | <div title="Base coverage is: 96.43%">96.15% (-0.27% 🔻)</div> | 100% | 100% |
+| 🟢 | <div title="src/components/common/Header/Topbar/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 94.74%">94.59% (-0.14% 🔻)</div> | 91.43% | 63.64% | <div title="Base coverage is: 95.65%">95.52% (-0.13% 🔻)</div> |
+| 🟢 | <div title="src/components/new-safe/create/steps/ReviewStep/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 83.61%">81.44% (-2.17% 🔻)</div> | <div title="Base coverage is: 78.46%">74.19% (-4.27% 🔻)</div> | <div title="Base coverage is: 87.5%">85% (-2.5% 🔻)</div> | <div title="Base coverage is: 84.62%">83.77% (-0.85% 🔻)</div> |
+| 🟢 | <div title="src/features/nfts/components/NftGrid/index.tsx">`...` / index.tsx</div> | 81.36% | <div title="Base coverage is: 60.42%">58.7% (-1.72% 🔻)</div> | 52.38% | 83.33% |
+| 🟢 | <div title="src/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog.tsx">`...` / ImportAddressBookDialog.tsx</div> | <div title="Base coverage is: 97.65%">97.59% (-0.06% 🔻)</div> | 82.35% | <div title="Base coverage is: 88.24%">87.5% (-0.74% 🔻)</div> | <div title="Base coverage is: 98.68%">98.67% (-0.02% 🔻)</div> |
+| 🟢 | <div title="src/features/spaces/components/MembersList/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 83.58%">83.61% (+0.02% 🔼)</div> | <div title="Base coverage is: 80%">76.92% (-3.08% 🔻)</div> | <div title="Base coverage is: 50%">53.33% (+3.33% 🔼)</div> | <div title="Base coverage is: 85.94%">86.21% (+0.27% 🔼)</div> |
+| 🟢 | <div title="src/features/spaces/components/SafeAccounts/SpaceSafeContextMenu.tsx">`...` / SpaceSafeContextMenu.tsx</div> | 86.27% | <div title="Base coverage is: 87.5%">85.71% (-1.79% 🔻)</div> | 66.67% | 84.78% |
+| 🟢 | <div title="src/features/spaces/components/SpaceAddressBook/EditContactDialog.tsx">`...` / EditContactDialog.tsx</div> | <div title="Base coverage is: 100%">91.8% (-8.2% 🔻)</div> | 73.68% | <div title="Base coverage is: 100%">88.89% (-11.11% 🔻)</div> | <div title="Base coverage is: 100%">91.38% (-8.62% 🔻)</div> |
+| 🔴 | <div title="src/features/oidc-auth/components/SwitchAuthenticatorSection/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 100%">55.56% (-44.44% 🔻)</div> | <div title="Base coverage is: 75%">0% (-75% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 100%">58.82% (-41.18% 🔻)</div> |
+| 🟢 | <div title="src/features/multichain/components/CreateSafeOnNewChain/index.tsx">`...` / index.tsx</div> | <div title="Base coverage is: 78.9%">78.7% (-0.2% 🔻)</div> | <div title="Base coverage is: 50%">49.09% (-0.91% 🔻)</div> | 33.33% | <div title="Base coverage is: 82.52%">82.35% (-0.17% 🔻)</div> |
+| 🔴 | <div title="src/features/global-search/components/SearchSection/sections/Accounts/AccountsSection.tsx">`...` / AccountsSection.tsx</div> | <div title="Base coverage is: 94.12%">52.94% (-41.18% 🔻)</div> | <div title="Base coverage is: 25%">0% (-25% 🔻)</div> | <div title="Base coverage is: 100%">0% (-100% 🔻)</div> | <div title="Base coverage is: 93.75%">50% (-43.75% 🔻)</div> |
+| 🟡 | <div title="src/features/global-search/components/SearchSection/sections/TrustedSafes/TrustedSafesSection.tsx">`...` / TrustedSafesSection.tsx</div> | <div title="Base coverage is: 95%">80% (-15% 🔻)</div> | <div title="Base coverage is: 57.14%">42.86% (-14.29% 🔻)</div> | <div title="Base coverage is: 80%">40% (-40% 🔻)</div> | <div title="Base coverage is: 94.74%">78.95% (-15.79% 🔻)</div> |
+
+</details>
+
+## Test suite run success
+6743 tests passing in 752 suites.
+
+<p align="right">Report generated by <a href="https://github.com/ArtiomTr/jest-coverage-report-action">🧪jest coverage report action</a> from 095059db09c8f3c920f1b802a052108aa5b8ce6d</p>
+
+
+COMMENT
+[tmjssz 2026-07-10T15:31:11Z] @claude review again
+
+Regarding your first finding: This behavior is intended actually. The state of the feature flag can be reset via the button next to the switch. And the navigation entry for the Feature Flag editor in the sidebar shows a batch with the number of feature flag overrides, so it is visible that overrides are active if that's the case. 
+
+COMMENT
+[claude 2026-07-10T15:31:31Z] **Claude finished @tmjssz's task in 2m 13s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29103973251)
+
+---
+### Claude PR Review (re-run)
+
+Thanks for the clarification — you're right that the revert button + the sidebar override-count badge make the "override matches config" state visible, so the auto-clear behavior on the switch is intentional. Dropping that finding.
+
+Fresh pass on the current diff:
+
+#### Addressed since last review
+
+- `EDITOR_BUNDLE_SENTINEL` — distinctive, imported into the test, unlikely to drift with copy.
+- `SORTED_FEATURES` hoisted out of the render.
+- Doc-comment on `useFeatureFlagEditorData` explains the deliberate raw-vs-overridden read.
+- `bundleExclusion.test.ts` now guards against a vacuous pass with `expect(chunks.length).toBeGreaterThan(0)`.
+- New `FeatureFlagEditor` and `FeatureFlagSection` tests.
+
+#### Still worth improving
+
+- **`FeatureFlagRow.tsx` — handler coverage gap.** Coverage shows 50% functions for this file, and the tests only assert render output — nothing exercises `Switch.onCheckedChange` → `setOverride` or `RotateCcw` button → `clearOverride`. Since the row is the primary write surface (switch + revert), these dispatches should be pinned by tests so a future refactor can't silently break override writes. [Fix this →](https://claude.ai/code?q=In%20apps%2Fweb%2Fsrc%2Ffeatures%2Ffeature-flags%2Fcomponents%2FFeatureFlagRow.test.tsx%20add%20two%20tests%3A%20(1)%20clicking%20the%20Switch%20dispatches%20setOverride%20with%20the%20new%20value%20and%20the%20row%27s%20feature%3B%20(2)%20clicking%20the%20Revert%20button%20dispatches%20clearOverride%20with%20the%20row%27s%20feature.%20Use%20getStoreInstance().getState().featureFlagOverrides%20to%20verify%20resulting%20state%2C%20per%20AGENTS.md%20testing%20guidance.%20Branch%3A%20feat%2Ffeature-flag-editor&repo=safe-global%2Fsafe-wallet-monorepo)
+
+- **`pages/feature-flags.tsx` — blank page in production instead of 404.** In prod the default export becomes `() => null`, so `/feature-flags` still resolves to a routable page and renders a blank layout. Consider `getStaticProps` returning `{ notFound: true }` when `NEXT_PUBLIC_IS_PRODUCTION === 'true'` (still tree-shakes the editor) so accidental prod URL hits get a 404, not a mysteriously blank screen. Minor, but a nicer failure mode.
+
+- **`FeatureFlagRow.tsx:69–81` — tooltip a11y is slightly redundant.** The `Check` icon carries `aria-label={MATCH_LABEL}` *and* is wrapped in a `Tooltip` whose `TooltipContent` says the same string. When `matchesCurrentChain` is false, the element uses `visibility: hidden` which does drop it from the a11y tree in real browsers — so the announcement is correctly suppressed. When it *is* visible, though, the same label is announced both as the icon's `aria-label` and again on tooltip focus/hover, which is a bit noisy. Either drop the `aria-label` on the icon (rely on the tooltip) or drop the tooltip (rely on `sr-only` text) — pick one source of truth. Low-priority since this is a dev-only tool.
+
+- **`SafeSidebarContent.tsx:114` — production still subscribes to `selectOverrideCount`.** Acknowledged with a comment already, but the badge lookup on `:120` also relies on `AppRoutes.featureFlags`, and the whole `developerGroupConfig` short-circuits with `undefined` in prod anyway — so the `useAppSelector` subscription is doing zero useful work in prod. If you want to avoid the store subscription entirely, extract the whole dev-group construction into a small hook and no-op it behind the same env check; otherwise leave as-is (noise-level cost).
+
+Nothing else stood out. Coverage numbers, bundle exclusion, and behavior look solid. LGTM once the row handler tests are added — everything else here is optional polish.
+
+- [x] Fetch PR diff & metadata
+- [x] Read updated key files
+- [x] Analyze and post updated review
+ · [Branch](https://github.com/safe-global/safe-wallet-monorepo/tree/feat/feature-flag-editor)
+
+COMMENT
+[tmjssz 2026-07-10T16:11:46Z] @claude review again
+
+COMMENT
+[claude 2026-07-10T16:12:01Z] **Claude finished @tmjssz's task in 1m 52s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29106504799)
+
+---
+### Claude PR Review (re-run)
+
+Pass over the current diff — the previous round's asks have landed cleanly. LGTM from me.
+
+#### Addressed since last review
+
+- **`FeatureFlagRow` handler coverage** — new tests in `FeatureFlagRow.test.tsx:71-83` pin both `setOverride` (switch toggle) and `clearOverride` (revert button) via `getStoreInstance().getState()`, matching the AGENTS.md "assert resulting state, not dispatched actions" convention. Also mocks the base-ui `Switch` with a plain checkbox — good call, and the comment explaining why is on point.
+- **`/feature-flags` prod behavior** — `getStaticProps` returns `{ notFound: true }` when `NEXT_PUBLIC_IS_PRODUCTION === 'true'` (`pages/feature-flags.tsx:15-20`), so accidental prod URL hits get a real 404 instead of a blank page. Covered by `pageShell.test.tsx`.
+- **Tooltip a11y** — `aria-label` on the `Check` icon is gone; `TooltipContent` is now the single source of truth for the announcement. The `visibility: hidden` toggle correctly drops the trigger from the a11y tree when `matchesCurrentChain` is false.
+- **`SafeSidebarContent` selector-in-prod** — acknowledged with an inline comment explaining the rules-of-hooks trade-off. Fine as-is.
+
+#### Nothing else worth blocking on
+
+The remaining items from the prior review were either optional polish or explicitly reasoned about (e.g., the "override matches config" state being intentional and surfaced via the sidebar badge + revert button, as you clarified). Coverage numbers are up, bundle exclusion still holds, and the guarded `dynamic()` + `applyFeatureOverrides` prod short-circuit continue to keep the editor's runtime cost effectively zero in production.
+
+- [x] Read updated files (`FeatureFlagRow.tsx`, `useFeatureFlagEditorData.ts`, `bundleExclusion.test.ts`, `pages/feature-flags.tsx`, editor + section + tests)
+- [x] Compare against previous review findings
+- [x] Post updated review
+ · [Branch](https://github.com/safe-global/safe-wallet-monorepo/tree/feat/feature-flag-editor)
+
+COMMENT
+[tmjssz 2026-07-29T10:19:45Z] @claude review again
+
+COMMENT
+[claude 2026-07-29T10:20:02Z] **Claude finished @tmjssz's task in 3m 13s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/30443237934)
+
+---
+### Claude PR Review (re-run)
+
+Fresh pass over the current diff. The two changes since the last round both land cleanly:
+
+- **Mobile drawer preserved for action items** — `NavItem.tsx:86` gates `setOpenMobile(false)` on `!item.onSelect` so opening the dev dialog no longer unmounts the component that owns its state. The comment on `:84-85` explains the reasoning well.
+- **Import-graph guard widened** — `importGraph.test.ts` now walks the whole `Sidebar/` subtree and asserts (a) only `FeatureFlagEditorDialogLoader` + `store` are named, (b) `FeatureFlagEditor*` is spelled only as `FeatureFlagEditorDialogLoader`. Both assertions include vacuous-pass guards. Combined with `bundleExclusion.test.ts` this is a solid two-layer defence (always-on static guard + optional real-build guard).
+
+Also picked up in earlier passes: `EDITOR_BUNDLE_SENTINEL`, `role="img"` + `aria-label` on the match indicator so AT users don't need hover, `getStaticProps → { notFound: true }` in prod, and the reset/switch/revert dispatch tests all landed.
+
+#### Minor observations (all optional)
+
+- **`FeatureFlagRow.tsx:79` — a11y is slightly redundant.** With `role="img"` + `aria-label` on the `Check` icon AND the same string inside `TooltipContent`, a screen reader user hovering/focusing announces the label twice (once from the icon, once from the tooltip). Deliberate for coverage; fine given this is dev-only.
+- **`FeatureFlagEditorDialogLoader.test.tsx:18-20` — string-in-source test.** Asserting via `readFileSync` on the loader source is fragile (a comment containing the same literal would satisfy it). Only real defence is the bundle test that already runs behind `RUN_BUNDLE_TESTS`. Acceptable — you're pinning the bundler-fold shape which can't be tested at runtime.
+- **`store/index.ts:67, 95` — reducer + persistence still ship in prod.** The reducer and the `persistedSlices`/`broadcastState` inclusion are unconditional. `applyFeatureOverrides` short-circuits so behaviour is fine, but a leftover `featureFlagOverrides` localStorage entry from staging on the same origin sits in prod forever with no UI to clear it. Cost is trivial; noting for the record.
+- **`SafeSidebarContent.tsx:123` — production still subscribes to `selectOverrideCount`.** Already commented as an intentional rules-of-hooks trade-off. Fine as-is.
+
+Nothing here is blocking — LGTM. Nice bundle-exclusion story overall (guarded dynamic import + inline env check + prod no-op in `applyFeatureOverrides` + import-graph + build-time guards).
+
+- [x] Fetch latest diff & metadata
+- [x] Read key changed files
+- [x] Analyze code quality, bugs, perf, security, tests
+- [x] Post review
+ · [Branch](https://github.com/safe-global/safe-wallet-monorepo/tree/feat/feature-flag-editor)
+
+COMMENT
+[cursor 2026-07-29T11:30:17Z] <!-- BUGBOT_FREE_TIER_DISABLED_UPSELL -->
+Bugbot is not enabled for your account, so this pull request was not reviewed.
+
+Enable Bugbot in the [Cursor dashboard](https://www.cursor.com/dashboard/bugbot) to get automatic reviews on future PRs.
+
+COMMENT
+[tongyaosafe 2026-07-29T12:19:15Z] Suggestion: Add info to the banner: local overrides apply to all chains
+
+COMMENT
+[tongyaosafe 2026-07-29T12:49:21Z] useChains and useChain, early return for prod
+
+COMMENT
+[tmjssz 2026-07-29T13:05:25Z] Thanks @tongyaosafe, nice suggestions!
+
+> Suggestion: Add info to the banner: local overrides apply to all chains
+
+Done here: abe504b060b9f3964180b652640381f9fe7a229e
+
+> useChains and useChain, early return for prod
+
+Done here: 06a56efe91c2b2c94b7ad3a1718db3dcfcad7000
+
+COMMENT
+[datadog-official 2026-07-30T13:31:07Z] <picture><source media="(prefers-color-scheme: dark)" srcset="https://static.datadoghq.com/static/images/pr_comments/software_delivery/badges_header/pipelines-ok.svg"/><img src="https://static.datadoghq.com/static/images/pr_comments/software_delivery/badges_header/pipelines-ok-light.svg" alt="Pipelines" align="center" /></picture>
+
+<sub>
+This comment will be updated automatically if new data arrives. <br />
+🔗 Commit SHA: 89c646f | <a href="https://docs.datadoghq.com/integrations/guide/source-code-integration/#pr-comments">Docs</a> | <a href="https://app.datadoghq.eu/ci/pull-request/Z2l0aHViLmNvbS9zYWZlLWdsb2JhbC9zYWZlLXdhbGxldC1tb25vcmVwby84Mjg4">Datadog PR Page</a> | Give us <a href="https://forms.gle/ys6MDmdQEeC5pkzWA">feedback</a>!
+</sub>

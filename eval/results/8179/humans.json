@@ -1,0 +1,12 @@
+{
+  "usd": 0.2876904,
+  "head": "7cf1f574fcb62ad493f9eda8c533548f7d5e9f3e",
+  "verdicts": [
+    {
+      "issue": 3,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "After Zalens's 2026-08-11 comment, the author re-signed the change with an SSH key. `git cat-file commit ab035b78e` and `git cat-file commit 7cf1f574f` (HEAD) both contain a `gpgsig -----BEGIN SSH SIGNATURE-----` header. The author's 2026-08-12 comments confirm that both commits show as Verified. Git's local `%G?` check reads `N` only because no allowed-signers file is configured here, so the commit was already signed at the reviewed commit."
+    }
+  ]
+}

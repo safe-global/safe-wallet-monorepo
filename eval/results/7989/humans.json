@@ -1,0 +1,42 @@
+{
+  "usd": 0.5110726,
+  "head": "1fd3d774dc2d78ade9890b1aa7dba7667054c8fe",
+  "verdicts": [
+    {
+      "issue": 6,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit ce1f3b48c rewrote the comment in useAccountsModalItems.ts to say it fires 'once per from-empty search session' and that this is intentional. The code was left as it was, and the author replied that all comments were addressed except no.5."
+    },
+    {
+      "issue": 12,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 52b0950cc changed the shared.tsx condition to `isSimilar && address.startsWith('0x') && address.length >= 10`, which adds the missing length guard."
+    },
+    {
+      "issue": 14,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit ce1f3b48c added a module-level `EMPTY_SAFES` constant and passes `filteredAllSafes ?? EMPTY_SAFES` to useAllSafesGrouped, so the fallback is a stable reference."
+    },
+    {
+      "issue": 15,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author said 'no.5 is not solved as they are not private contracts'. useAccountsModalItems.test.ts:23-24 still calls `actual._getMultiChainAccounts` and `actual._getSingleChainAccounts`."
+    },
+    {
+      "issue": 16,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 3309d94ba ('gate filteredAllSafes on isQualifiedSafe directly') changed the early return to `if (!allSafes || !isQualifiedSafe) return allSafes`."
+    },
+    {
+      "issue": 17,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit ce1f3b48c added the test 'degrades a multi-chain safe to single-chain when one of its chains is in the workspace' to useAccountsModalItems.test.ts. It asserts the surviving item is a single-chain SafeItem on chain 100."
+    }
+  ]
+}

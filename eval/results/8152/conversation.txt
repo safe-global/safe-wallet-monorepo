@@ -1,0 +1,387 @@
+COMMENT
+[github-actions 2026-06-18T12:44:07Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://tim-wa-2323-my-code-tab-reuse-sharereceive-compone--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://tim-wa-2323-my-code-tab-reuse-sharereceive-compone--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[tmjssz 2026-06-18T12:45:35Z] @claude review
+
+COMMENT
+[claude 2026-06-18T12:45:53Z] **Claude finished @tmjssz's task in 2m 24s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27760389750)
+
+---
+### Claude PR Review
+
+- [x] Read PR context
+- [x] Review changed files
+- [x] Post review feedback
+
+### Review
+
+Nicely scoped, tests track the new behavior. A few small things worth tightening:
+
+**Bugs / correctness**
+
+1. `apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx:25-34` — the `isOpeningRef` guard relies on `useFocusEffect` firing again to reset. If the navigation `push` is ever swallowed (e.g. a transient guard upstream) the button becomes permanently dead until the user navigates away and back. A `setTimeout` (300–500 ms) reset alongside the focus reset would harden it without changing the happy path. [Fix this →](https://claude.ai/code?q=In%20apps%2Fmobile%2Fsrc%2Ffeatures%2FWalletConnect%2FWallet%2Fcomponents%2FHeaderQrButton.tsx%20on%20branch%20tim%2Fwa-2323-my-code-tab-reuse-sharereceive-component%2C%20add%20a%20setTimeout%20fallback%20%28~400ms%29%20alongside%20the%20useFocusEffect%20reset%20so%20isOpeningRef%20cannot%20get%20stuck%20true%20if%20the%20router%20push%20does%20not%20cause%20focus%20to%20leave.&repo=safe-global%2Fsafe-wallet-monorepo)
+
+2. `apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts:48-70` — the focus effect doesn't consult `isActive`. If the screen first focuses while `isActive=false` (rare today since `ScanConnect` defaults to scan, but the prop now exists), the focus effect flips the camera on and the `[isActive, permission]` effect flips it off again. Tiny race; gating `setIsCameraActive(true)` on `isActive` inside the focus effect closes it. [Fix this →](https://claude.ai/code?q=In%20apps%2Fmobile%2Fsrc%2Ffeatures%2FWalletConnect%2FWallet%2Fhooks%2FuseWalletConnectScan.ts%20on%20branch%20tim%2Fwa-2323-my-code-tab-reuse-sharereceive-component%2C%20also%20require%20isActive%20before%20setIsCameraActive%28true%29%20inside%20the%20useFocusEffect%20callback%20so%20the%20focus%20path%20and%20the%20isActive%20effect%20can%27t%20fight.&repo=safe-global%2Fsafe-wallet-monorepo)
+
+**Code quality / consistency**
+
+3. `apps/mobile/src/features/Share/components/ShareView.tsx:47-55` — `paddingTop={30} paddingLeft={20}` and `maxWidth={260}` are raw numbers in a file that otherwise uses Tamagui tokens (`$3`, `$10`, etc.). Worth swapping to tokens (or commenting why these are fixed pixels) to keep the file consistent.
+
+4. `apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:36` — the outer track is hard-coded `width="50%"`. With the percentage-based thumb the component is otherwise generic over N options, but a 3-option control inside a half-width track is going to be cramped. Either drop the `50%` (let the caller size it) or document that the control is intentionally 2-state in this codebase.
+
+5. `apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx:28` — `typeof insets.bottom === 'number' ? insets.bottom : 0` is dead defence; `useSafeAreaInsets()` is typed to return numbers. Also `controlClearance = insets.bottom + 64` doesn't match where the floating control actually sits (`bottom="$8"` ≈ 32 + insets.bottom + padding). The mismatch is harmless today (just extra breathing room) but a derived constant (e.g. measured + spacing tokens) would survive future tweaks better.
+
+6. `apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:29-32` — `progress` is initialised to `selectedIndex`, and the `useEffect` immediately runs `withSpring(selectedIndex, …)` on first mount. Visually fine, but it's a no-op spring on every fresh mount. A small `useRef` "skip first" or initialising the ref to `null` makes the intent clear.
+
+**Tests**
+
+7. `apps/mobile/src/features/Share/components/SupportedNetworksSheet.tsx` — flagged as untested in the PR description. A 5-line wrapper, but it does selector wiring (`selectSafeChains` → `getChainsByIds`); a smoke test rendering it through the store would catch future selector signature drift.
+
+8. `apps/mobile/src/components/SegmentedControl/SegmentedControl.test.tsx` — no test asserts the thumb position actually animates with the value prop. Not critical (Reanimated is hard to assert), but a snapshot or `useAnimatedStyle` mock would cover the most interesting behavior.
+
+**Nit**
+
+9. `apps/mobile/src/features/Share/components/SupportedNetworksList.tsx:35-44` — the `useMemo` over `filter`-twice is cheap; on tiny arrays it's noise. Either drop the memo or do a single pass partition.
+ · branch `tim/wa-2323-my-code-tab-reuse-sharereceive-component`
+
+COMMENT
+[github-actions 2026-06-18T13:00:02Z] <!-- add-pr-comment:oneshot-clickthrough -->
+
+## 🎬 One-shot clickthrough
+
+This PR doesn't add or modify any one-shot clickthrough, so nothing was recorded.
+
+Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/wa-2322-read-only-rpc-proxy-wallet-control-methods/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
+
+COMMENT
+[tmjssz 2026-06-18T13:15:05Z] @claude review again. I addressed your previous findings
+
+COMMENT
+[claude 2026-06-18T13:15:24Z] **Claude finished @tmjssz's task in 2m 20s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27762076637)
+
+---
+### Claude PR Re-review
+
+- [x] Read the latest changes addressing previous findings
+- [x] Verify each previous finding was addressed
+- [x] Look for any new issues introduced
+- [x] Post the review
+
+### Verdict: all previous findings addressed cleanly
+
+Walked through each item from the prior review against the new commits — every one is resolved, and most ship with a test that pins the new behavior so it can't silently regress.
+
+| # | Finding | Status | Where |
+|---|---|---|---|
+| 1 | `HeaderQrButton` could get stuck if `push` is swallowed | ✅ | `HeaderQrButton.tsx:37-39` — 500ms fallback unlock; covered by new test (`HeaderQrButton.test.tsx:61-79`) |
+| 2 | `useWalletConnectScan` focus effect ignored `isActive` | ✅ | `useWalletConnectScan.ts:29-30,56` — `isActiveRef` gates `setIsCameraActive(true)` in focus effect; covered by new tests at `useWalletConnectScan.test.ts:147-167` |
+| 3 | `ShareView` raw padding numbers | ✅ | `ShareView.tsx:47` — `$8`/`$5` tokens; `maxWidth={260}` retained with a comment justifying the fixed px |
+| 4 | `SegmentedControl` hard-coded `50%` track width | ✅ | Track is now `width="100%"`; `ScanConnect.tsx:21,91` wraps it in a `width="50%"` container |
+| 5 | `ScanConnect` `controlClearance` magic number / dead `typeof` defence | ✅ | `ScanConnect.tsx:18-19,37` — derived via `getTokenValue(CONTROL_BOTTOM_OFFSET) + CONTROL_FOOTPRINT`; defensive `typeof` gone |
+| 6 | `SegmentedControl` no-op spring on mount | ✅ | `SegmentedControl.tsx:39-46` — `isFirstRender` ref skips the first effect |
+| 7 | `SupportedNetworksSheet` untested | ✅ | New `SupportedNetworksSheet.test.tsx` exercises the real `selectSafeChains → getChainsByIds` wiring through a seeded store |
+| 8 | `SegmentedControl` thumb position not asserted | ✅ | `SegmentedControl.test.tsx:48-56` — mocks Reanimated to assert `{ left, width }` for both selected states |
+| 9 | `SupportedNetworksList` double-filter | ✅ | `SupportedNetworksList.tsx:31-35` — single-pass partition |
+
+### New observations (very minor, optional)
+
+- `HeaderQrButton.tsx:37-39` — the fallback `setTimeout` isn't cleared on unmount. Writing to a ref on an unmounted component is harmless, so this is fine; only flagging in case you prefer to clear it for tidiness.
+- `useWalletConnectScan.ts:29-30` — `isActiveRef.current = isActive` is assigned during render. Functionally correct (no concurrent-mode strictness concerns here since refs are not state), and the inline comment explains the reasoning well. Just unusual — leaving as-is is fine.
+
+Nothing blocking. LGTM.
+ · branch `tim/wa-2323-my-code-tab-reuse-sharereceive-component`
+
+COMMENT
+[popcorn-report 2026-06-18T13:25:21Z] <!-- popcorn-briefing -->
+[![Open the PR briefing](https://eyfiffagztwbokkxesiq.supabase.co/storage/v1/object/public/published-assets/safe-global/safe-wallet-monorepo/pr-8152/d38808f03090b28c30f6e6d52a1e36e7f79a119b/thumbnail.png?v=1781789109883)](https://viewer.popcorn.report/view?briefing_id=pb_aed2aa9a64ac6affdf12559c)
+
+✅ **Approval confidence: 68% — high.** Straightforward mobile-only feature reuse; SegmentedControl, camera pause, and open-once guard are well-tested, but deferred QR mount and opacity-based tab switching lack E2E validation, and it’s stacked on a parent branch not yet merged.
+
+**Adds a 'My Code' tab to the WalletConnect scanner sheet, reusing the home-screen Share/receive surface to display the Safe's address QR.** A new SegmentedControl lets users switch between Scan QR (camera) and My Code tabs with a spring-animated thumb. Tapping chain icons opens a Supported Networks sheet, and the header scan button is guarded against double-taps for a smoother experience.
+
+🍿 **[Listen to audio review](https://viewer.popcorn.report/view?briefing_id=pb_aed2aa9a64ac6affdf12559c)**
+
+### 💥 Risks
+
+- [`apps/mobile/src/app/_layout.tsx`](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/app/_layout.tsx) — Ensure the 'supported-networks' screen component exists and is properly imported.
+- [`apps/mobile/src/app/_layout.tsx`](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/app/_layout.tsx) — Verify no naming conflict with existing 'networks-sheet' route.
+- [`apps/mobile/src/app/share.tsx`](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/app/share.tsx) — Content may now be too close to edges or overlap other elements on narrow devices.
+
+<details>
+<summary><b>Full briefing — architecture, contracts, file map</b></summary>
+
+**Approval confidence:** 68% — high. Straightforward mobile-only feature reuse; SegmentedControl, camera pause, and open-once guard are well-tested, but deferred QR mount and opacity-based tab switching lack E2E validation, and it’s stacked on a parent branch not yet merged.
+
+## 🍿 Summary
+
+Adds a 'My Code' tab to the WalletConnect scanner sheet, reusing the home-screen Share/receive surface to display the Safe's address QR. A new SegmentedControl lets users switch between Scan QR (camera) and My Code tabs with a spring-animated thumb. Tapping chain icons opens a Supported Networks sheet, and the header scan button is guarded against double-taps for a smoother experience.
+
+## 🏗️ Architecture notes
+
+ScanConnect component wraps WalletConnectScanContainer (camera) and ShareContainer (QR/share) behind opacity-based toggling, pausing the camera via an isActive prop when the My Code tab is active. The SegmentedControl uses percentage-based thumb positioning for instant first-frame layout. A new /supported-networks route hosts SupportedNetworksSheet, presented modally. The header guard uses useRef + useFocusEffect to prevent duplicate scanner sheet opens.
+
+## 🌊 Ripple risks
+
+Analyzed 6 changed exports. No untouched external callers found — all usages appear to be inside the PR diff.
+
+_Analyzed 23 file(s), 12 changed export(s), 0 uncovered callsite(s) in 3.9s._
+
+## 🎬 Walkthrough outline
+
+_6 steps across 2 chapters, approximately 3 min 44s._
+
+### Why this change
+
+1. **🎯 motivation** · [`apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx` L32](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx#L32) `ScanConnect`
+   The WalletConnect scanner sheet currently shows only a camera. This PR adds a My Code tab that displays the Safe's address QR, reusing the existing receive surface from the home screen. The new ScanConnect component brings both tabs together behind a segmented control.
+
+2. **🎯 motivation** · [`apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx` L32-80](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx#L32-L80)
+   Here's the flow at a glance. The header scan button with its open-once guard navigates to the ScanConnect sheet. Inside, a segmented control lets the user pick between Scan QR, which runs the camera, and My Code, which renders the ShareContainer. Tapping chain icons on the share view opens the supported networks sheet.
+
+### The new scanner shell
+
+3. **🔧 change** · [`apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx` L32-80](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx#L32-L80) `ScanConnect`
+   ScanConnect renders the camera scanner and the ShareContainer side by side. Opacity toggles visibility, so the scanner stays mounted even when the My Code tab is active, preserving its state. A floating SegmentedControl above the bottom safe area lets users switch tabs.
+
+4. **🔧 change** · [`apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx` L28](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx#L28) `SegmentedControl`
+   The SegmentedControl positions its thumb using percentages for instant correct layout without measuring. A spring animation from Reanimated snaps the thumb to the selected option, but the very first render skips the animation to avoid an initial jump.
+
+5. **🔧 change** · [`apps/mobile/src/features/WalletConnect/Wallet/components/WalletConnectScan.container.tsx` L82](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/features/WalletConnect/Wallet/components/WalletConnectScan.container.tsx#L82) `WalletConnectScanContainer`
+   The container now accepts an optional isActive prop, defaulting to true, and forwards it to the scanner hook. Inside the hook, a new effect pauses the camera when isActive becomes false, saving resources while the My Code tab is frontmost.
+
+6. **🔧 change** · [`apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx` L70-85](https://github.com/safe-global/safe-wallet-monorepo/blob/d38808f03090b28c30f6e6d52a1e36e7f79a119b/apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx#L70-L85) `ShareContainer`
+   When the My Code tab is selected, the ShareContainer takes over, showing the exact receive surface from the home screen with the Safe's QR code, copy button, and chain icons. To keep the sheet opening fast, the QR rendering is deferred until the next animation frame.
+
+## ✅ Reviewer checklist
+
+- [ ] Manually verify that rapid double-taps on the header scan button do not open duplicate scanner sheets on iOS and Android.
+- [ ] Confirm that switching to the My Code tab pauses the camera and switching back resumes scanning without flicker or resource leaks.
+- [ ] Test that the Supported Networks sheet opens correctly from both the My Code tab chain icons and the home /share screen, and that mainnets and testnets are listed with a divider.
+- [ ] Ensure the ShareContainer’s close button navigates correctly when opened within the WalletConnect scanner (modal context) versus the home screen.
+- [ ] Inspect layout on small devices to verify maxWidth:260 and padding changes in ShareView do not cause clipping or misalignment.
+- [ ] Review the deferred QR mounting logic (requestAnimationFrame in ScanConnect) to ensure the My Code panel appears instantly when switching tabs.
+
+## 🗂️ File-by-file
+
+### `apps/mobile/src/app/+native-intent.tsx`
+
+Added the string 'supported-networks' to the `protectedRoutes` array in `+native-intent.tsx`.
+
+_Ensures the new supported-networks sheet route is protected from unauthenticated access._
+
+### `apps/mobile/src/app/_layout.tsx`
+
+Added a new Stack.Screen entry for 'supported-networks' with transparentModalOptions in the NavigationStack component.
+
+_Registers the new modal route so that the supported networks sheet can be presented._
+
+**💥 Risks:**
+- Ensure the 'supported-networks' screen component exists and is properly imported.
+- Verify no naming conflict with existing 'networks-sheet' route.
+
+### `apps/mobile/src/app/share.tsx`
+
+Removed the `paddingHorizontal={'$4'}` from the outer View wrapper in `ShareScreen`.
+
+_Likely to let the shared `ShareContainer` control its own horizontal spacing, aligning the home screen’s share layout with its reuse in the new WalletConnect My Code tab sheet._
+
+**💥 Risks:**
+- Content may now be too close to edges or overlap other elements on narrow devices.
+- Verify that ShareContainer provides sufficient internal horizontal padding for all screen variants.
+
+### `apps/mobile/src/app/supported-networks.tsx`
+
+Added a new route screen component `SupportedNetworksScreen` that simply renders the `SupportedNetworksSheet` from the Share feature.
+
+_Exposes the Supported Networks sheet as a standalone screen, likely for navigation from the WalletConnect scanner's My code tab._
+
+### `apps/mobile/src/app/wallet-connect-scan.tsx`
+
+Replaced import and usage of `WalletConnectScanContainer` with `ScanConnect` in the wallet-connect-scan screen route. The screen component now renders `ScanConnect` instead of `WalletConnectScanContainer`.
+
+_This hooks up the new WalletConnect scanner sheet that includes segmented control for Scan QR and My code tabs, as part of the My code tab feature._
+
+**💥 Risks:**
+- Verify that `ScanConnect` maintains all existing functional behavior (camera, pairing, error handling) from the old container.
+- Check that the screen route `wallet-connect-scan` is the sole consumer and no other code imports or renders the removed container.
+- Confirm that the header button opening this route still works correctly with the new component.
+
+### `apps/mobile/src/components/SegmentedControl/SegmentedControl.test.tsx`
+
+Added unit tests for SegmentedControl component, mocking reanimated hooks to test rendering, press handling, accessibility state, and thumb positioning.
+
+_Verifies core functionality of the new segmented control used in scan vs. my code tabs, ensuring correct behavior without animation side-effects._
+
+**💥 Risks:**
+- Mock of useAnimatedStyle returns the function result directly, which may bypass animation-related logic like shared value updates; not testing real animation behavior.
+- Thumb width assumption of '50%' is hardcoded for two options; if number of options changes, this test would break.
+
+### `apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx`
+
+Added a new `SegmentedControl` component that renders a track with an animated thumb sliding to the selected option using Reanimated. It accepts generic string options, positions the thumb in percentages for immediate correct placement, and uses a spring animation for subsequent changes.
+
+_Provides a reusable, theme-aware iOS-style segmented control for the WalletConnect scanner's Scan QR/My Code tabs, enabling smooth, layout-measurement-free thumb positioning on first frame._
+
+**💥 Risks:**
+- Thumb animation skips first render via `isFirstRender` ref; if `value` changes on initial mount after a state update, the thumb may jump instead of animating.
+- Shadow props (`shadowOpacity`, `shadowColor`, etc.) may not render correctly on Android without an `elevation` equivalent.
+- Component fills parent width; must be wrapped in a width-constrained container for narrow 2-state layouts.
+
+### `apps/mobile/src/components/SegmentedControl/index.ts`
+
+Added a barrel export file at apps/mobile/src/components/SegmentedControl/index.ts that re-exports the SegmentedControl component and SegmentedControlOption type from the local SegmentedControl module.
+
+_Establishes a clean public API for the new segmented control component, enabling imports like 'from @/components/SegmentedControl' without deeper path knowledge._
+
+**💥 Risks:**
+- Ensure the file './SegmentedControl' exists and exports both the SegmentedControl component and SegmentedControlOption type correctly.
+
+### `apps/mobile/src/features/Share/components/ShareView.test.tsx`
+
+Removed mock for getAvailableChainsNames, added expo-router mock (push/back), updated existing test to assert contact name 'Test Safe' instead of 'Ethereum and Polygon' string, and added two new tests: pressing supported-networks-button navigates to '/supported-networks', and pressing share-close-button calls router.back.
+
+_The ShareView component now relies on navigation (pushing to a supported networks sheet and closing the screen) and displays the contact name instead of a chain list, so tests must validate these new behaviors._
+
+**💥 Risks:**
+- Test relies on getByTestId('supported-networks-button') and getByTestId('share-close-button') – confirm these testIDs exist in the rendered component and are unique.
+- Existing test now expects contact name 'Test Safe' from the Redux store – verify that the store mock returns this value, or the test will fail.
+
+### `apps/mobile/src/features/Share/components/ShareView.tsx`
+
+Added a close button (Pressable+Badge) at top-left, wrapped ChainsDisplay in a Pressable that pushes '/supported-networks', removed the footer text showing available chains and its helper import, and added a maxWidth constraint to the QR container.
+
+_Repurposes ShareView for the WalletConnect 'My code' tab by providing a close action, making chain icons tappable to view supported networks, and cleaning up the UI for reuse while eliminating the now-unnecessary footer._
+
+**💥 Risks:**
+- router.back() assumes the component is rendered in a navigation stack; may fail if shown in a modal or sheet without a back target.
+- Pressable wrapping ChainsDisplay may capture touch events and interfere with any internal tap handling of ChainsDisplay items.
+- Removing the footer may degrade the home '/share' screen's informational value if users relied on that text.
+- The hardcoded maxWidth: 260 may cause layout issues on very small or large screens.
+- The route '/supported-networks' must be defined elsewhere; verify it exists and handles navigation correctly.
+
+### `apps/mobile/src/features/Share/components/SupportedNetworksList.test.tsx`
+
+Added a new test file for <SupportedNetworksList> with two test cases: verifying that mainnet and testnet chains are rendered with a 'Testnets' divider, and that the divider is omitted when only mainnets exist.
+
+_Validates the display logic of network names and the conditional divider, ensuring the component's behavior matches the supported-networks sheet requirements._
+
+**💥 Risks:**
+- The test factory for Chain sets chainLogoUri to null; the component may rely on logo presence, potentially making these tests insensitive to logo-related rendering issues.
+- Using getByText with exact string matching for 'Testnets' and network names is brittle to copy or localization changes.
+
+### `apps/mobile/src/features/Share/components/SupportedNetworksList.tsx`
+
+Added new SupportedNetworksList component that sorts chains into mainnets and testnets, renders NetworkRow for each, and inserts a 'Testnets' divider if testnets exist.
+
+_Provides a reusable UI component for displaying the list of supported networks a Safe is deployed on, used in the WalletConnect My Code tab and share screen._
+
+### `apps/mobile/src/features/Share/components/SupportedNetworksSheet.test.tsx`
+
+Added a new smoke test file for SupportedNetworksSheet that renders the component with a pre-configured Redux store containing a safe deployed on chains 1 and 137, seeded with chain data via upsertQueryData, and asserts that the rendered output contains 'Supported networks' and the chain names 'Ethereum' and 'Polygon'.
+
+_Ensures the selector wiring in SupportedNetworksSheet works with real store data and will catch regressions in the selector signatures._
+
+**💥 Risks:**
+- Type assertions (`as unknown as Chain`, `as never`) may hide type mismatches if Chain or store shape evolves.
+- Relies on `upsertQueryData` with a hardcoded `CONFIG_SERVICE_KEY`; changes to the cache key pattern could break test setup silently.
+- The test only checks text presence and does not verify absence of other chains or proper ordering; subtle selector bugs might pass.
+
+### `apps/mobile/src/features/Share/components/SupportedNetworksSheet.tsx`
+
+Added new component SupportedNetworksSheet that retrieves the active safe's chain IDs via selectSafeChains and full chain objects via getChainsByIds from the Redux store, then wraps SupportedNetworksList in a SafeBottomSheet titled 'Supported networks'.
+
+_Reusable UI for showing the supported networks of the active Safe, likely to be used in the WalletConnect scanner's My Code tab or the share view._
+
+**💥 Risks:**
+- useDefinedActiveSafe may throw if there is no active Safe; ensure component is rendered only when a Safe is defined.
+- SupportedNetworksList must gracefully handle an empty chains array if selectors return no data.
+- No loading/error states for chain data fetching; assumes store data is already available.
+
+### `apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx`
+
+Added a useRef guard and useFocusEffect to prevent rapid double-taps from pushing the '/wallet-connect-scan' route multiple times, with a 500ms setTimeout fallback to reset the guard.
+
+_Prevents the WalletConnect scanner sheet from being opened concurrently, which could cause duplicate camera sessions or navigation state issues._
+
+**💥 Risks:**
+- The 500ms timeout fallback might allow a second push if the sheet fails to open within that window and the button is still accessible, leading to a possible duplicate route.
+- The guard relies on focus effect; if the focus event is delayed or misses, the button could remain blocked until the fallback fires, though unlikely in practice.
+
+### `apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx`
+
+Added a new ScanConnect component that presents a tabbed scanner sheet with a Scan QR tab (camera scanner) and a My code tab (reusing ShareContainer), using opacity toggling and deferred QR mounting for performance, plus a floating SegmentedControl positioned above the safe area.
+
+_Likely to deliver a smooth, jank-free transition between scanning and viewing one's QR code while reusing existing share/receive logic and pausing the camera when not active._
+
+**💥 Risks:**
+- Deferred QR mounting via requestAnimationFrame may leave the My code panel empty if the user switches tabs within the first frame.
+- Opacity-based visibility retains both panels in the tree; camera might briefly remain visible or consume resources if isActive is not perfectly synchronized.
+- Hardcoded CONTROL_BOTTOM_OFFSET and CONTROL_FOOTPRINT constants may not correctly adapt to all device safe area insets or orientations.
+- requestAnimationFrame cleanup relies on component unmount before callback fires, which is fragile but cancelAnimationFrame handles it.
+- The clearance calculation assumes insets.bottom is non-null; if useSafeAreaInsets returns zero in some context, the bottom padding might collide with the control.
+
+### `apps/mobile/src/features/WalletConnect/Wallet/components/WalletConnectScan.container.tsx`
+
+The `WalletConnectScanContainer` component now accepts an optional `isActive` prop (default `true`) and forwards it to the `useWalletConnectScan` hook, which previously was called with no arguments.
+
+_Likely allows the parent to pause the camera scanner when the `Scan QR` tab is inactive (e.g., switching to `My code`), preventing unintended QR detections and saving device resources._
+
+**💥 Risks:**
+- Check that calling `useWalletConnectScan({ isActive })` with a default `isActive = true` preserves existing behavior for callers not providing the prop.
+- Verify that the hook gracefully handles `isActive` changes (pausing/resuming camera) and doesn't break when the prop is omitted.
+- Confirm that the default parameter syntax (`{ isActive = true } = {}`) correctly sets `isActive` even if the parent passes an empty object or no props at all.
+
+### `apps/mobile/src/features/WalletConnect/Wallet/components/__tests__/HeaderQrButton.test.tsx`
+
+Added a mock for expo-router's `useFocusEffect` that runs the callback on mount, and two new tests that verify the header QR button guard: blocking multiple scanner sheet opens on rapid taps, and re-enabling after a fallback timeout.
+
+_Validates the open-once guard logic that prevents duplicate WalletConnect scanner sheets from being pushed, which is a key UX improvement._
+
+**💥 Risks:**
+- The mock for `useFocusEffect` runs the callback only on mount; real focus effect may fire on screen focus, so the guard reset behavior in the actual app might differ if the screen loses and regains focus.
+- The fallback timeout test uses jest fake timers with a hard-coded 500ms delay; if the implementation timeout changes, the test will fail silently or misleadingly.
+
+### `apps/mobile/src/features/WalletConnect/Wallet/components/__tests__/ScanConnect.test.tsx`
+
+Added unit test file for ScanConnect component, covering tab switching behavior, camera active state, ShareContainer rendering, and scanner mount preservation across tab switches using mocked dependencies.
+
+_Ensures the ScanConnect component correctly wraps the scanner and share surface, pausing the camera when the 'My code' tab is active and preserving scanner state._
+
+**💥 Risks:**
+- Assertions rely on mocked Text children joined as strings; fragile if component output format changes.
+- Use of `includeHiddenElements: true` in `queryByTestId` depends on react-native-testing-library API that might behave differently across versions.
+
+### `apps/mobile/src/features/WalletConnect/Wallet/hooks/__tests__/useWalletConnectScan.test.ts`
+
+Added two test cases for useWalletConnectScan verifying that isActive=false keeps camera paused while preserving 'scanning' status, and that toggling isActive pauses/resumes camera while retaining status.
+
+_Likely validates the new isActive prop that controls camera activity when switching away from the scan tab in the WalletConnect scanner sheet._
+
+### `apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts`
+
+Added an optional `isActive` prop (default true) to `useWalletConnectScan`, introduced an `isActiveRef` to avoid dependency-triggered re-runs of the focus effect, and added a new `useEffect([isActive, permission])` that toggles `isCameraActive` to pause/resume the camera when the flag changes.
+
+_Allows the scanner's camera to be paused when embedded in a multi-tab sheet (e.g., ScanConnect's Scan QR / My Code tabs) without losing scanning state._
+
+**💥 Risks:**
+- Potential double-activation when combining useFocusEffect and the new useEffect on re-focus with isActive true (harmless but worth verifying no flicker).
+- isActiveRef is deliberately excluded from the focus effect deps; ensure that a change to isActive while the component is focused doesn't cause a stale read that prevents proper activation (the new effect covers it, but verify edge case).
+- The new effect's cleanup does not revert isCameraActive on dependency change; if isActive rapidly toggles, it may set active=false on false, but if the component unmounts while isActive is false, the cleanup from useFocusEffect will also run; verify no adverse side effect.
+
+---
+_Generated by prbrief • model: deepseek-v4-pro • 23 LLM calls • 172.0s_
+
+</details>
+
+<sub>Generated by <a href="https://popcorn.report">Popcorn Review</a> · `safe-global/safe-wallet-monorepo@d38808f03090`</sub>
+

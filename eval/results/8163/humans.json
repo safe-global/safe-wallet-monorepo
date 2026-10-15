@@ -1,0 +1,42 @@
+{
+  "usd": 0.444747,
+  "head": "3fd11e5e9eaf43db58d102db1db5a664b0488c57",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "tongyaosafe replied 'change the inner button to span'. At 4213de0 CopyAddressIconButton already renders `<span role=\"button\">` (index.tsx), so the button-in-button problem was gone by the reviewed commit."
+    },
+    {
+      "issue": 13,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The author said 'very good suggestion. applied'. Commit 4213de0 ('reuse CopyTooltip in CopyAddressIconButton') already wraps the span in `<CopyTooltip text={address}>`."
+    },
+    {
+      "issue": 14,
+      "verdict": "accepted",
+      "present": false,
+      "evidence": "The author replied 'fixed. Thanks' on the index.tsx:40 thread. At 4213de0 the component uses only Tailwind token classes (text-muted-foreground, hover:bg-muted, size-3.5), so the fix landed before the reviewed commit."
+    },
+    {
+      "issue": 16,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 2e693cde0 adds SingleAccountItem.test.tsx, a copy test in SafeCardReadOnly.test.tsx, and SecuritySafesTable.test.tsx tests for the copy button that check the row click does not fire. The author answered the bot review with 'Fixed'."
+    },
+    {
+      "issue": 17,
+      "verdict": "open",
+      "present": true,
+      "evidence": "CopyAddressIconButton still has `tabIndex={0}` at HEAD (index.tsx:24). No commit changes it, and nobody replied specifically about tab stops; the bot itself called this 'likely fine'."
+    },
+    {
+      "issue": 19,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 2e693cde0 adds a `mockClipboard()` helper to tests/test-utils.tsx. AccountsWidget.test.tsx and CopyAddressIconButton/index.test.tsx now use it in place of their own inline or beforeAll setups."
+    }
+  ]
+}

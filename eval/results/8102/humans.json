@@ -1,0 +1,12 @@
+{
+  "usd": 0.3525204,
+  "head": "736fee80e60b7aa64a9a311726ac60836ae6afa7",
+  "verdicts": [
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 4cb481eff, useAllMembers ignored the query error and returned `currentData?.members || []`. Commit 736fee80e then added `isMembershipRevoked` (403/404), so `useAllMembers` now returns `[]` on those errors (useSpaceMembers.tsx). vmosharova had asked for this guard and approved after the fix."
+    }
+  ]
+}

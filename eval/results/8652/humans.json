@@ -1,0 +1,36 @@
+{
+  "usd": 0.43482380000000004,
+  "head": "d248b4e2abeab30a8232b807ce08cd80e4d824d0",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "open",
+      "present": true,
+      "evidence": "Nobody replied to the bot's review. The later commits (289bf91bf..d248b4e2a) add tests for predicted reverts and for trailing flushes in error-tracking.test.ts, but none of them asserts that a later re-emit reports 1 after the counter resets."
+    },
+    {
+      "issue": 5,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The comment 'a facet added later cannot be forgotten' is still at error-tracking.ts:170-172, and mapContext is still a hand-kept whitelist with no satisfies/keyof check. Nobody responded to the point."
+    },
+    {
+      "issue": 6,
+      "verdict": "open",
+      "present": true,
+      "evidence": "error-tracking.ts:173 still keys on JSON.stringify(properties) with no sorted-key builder and no comment about key order. Nobody reacted to it."
+    },
+    {
+      "issue": 7,
+      "verdict": "open",
+      "present": true,
+      "evidence": "pruneSentErrors keeps both loops, first expired entries and then the LRU fallback. Later commits only swapped sentErrors.delete for forget(key). Nobody reacted to it."
+    },
+    {
+      "issue": 8,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The truthiness guard `context.httpStatus && …` is still there at error-tracking.ts:48 and services/exceptions/index.ts:78, and nobody replied to the review."
+    }
+  ]
+}

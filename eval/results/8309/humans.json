@@ -1,0 +1,48 @@
+{
+  "usd": 0.413828,
+  "head": "f781bd672d390b80ae3db7f39b503dd43fb0b5b0",
+  "verdicts": [
+    {
+      "issue": 5,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The bot only pointed this out as something to watch. Nobody replied, and the ordering in draftEditorsSetup.ts (setupSendFlow resets the state before the marker is set to ready) is the same at HEAD as at 30a3599c."
+    },
+    {
+      "issue": 8,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The re-review repeated this concern and nobody answered. DialogModal.tsx:32 still has `accessible={false}` on the overlay Pressable at HEAD."
+    },
+    {
+      "issue": 9,
+      "verdict": "open",
+      "present": true,
+      "evidence": "Nobody reacted. send-nonce-editor.yml:93 still uses the hardcoded '99999' at HEAD."
+    },
+    {
+      "issue": 11,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The re-review said the regex was 'still loose' and nobody responded. verify-approve-amount.yml:35 still reads `text: '.*0x81Bd.*4fec.*'` at HEAD."
+    },
+    {
+      "issue": 13,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 99d1447fd changed `if (value)` to `if (value != null)` in waitFor in draftEditorsSetup.ts. Its message says this addresses the review polish."
+    },
+    {
+      "issue": 14,
+      "verdict": "open",
+      "present": true,
+      "evidence": "There is no diff on the dispatch usage between 30a3599c and HEAD. The explanatory comment at draftEditorsSetup.ts:64 was already there, and nobody replied to the suggestion."
+    },
+    {
+      "issue": 15,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 99d1447fd ('assert setupSendFlow triggers onboarding navigation') adds `expect(onboardAndNavigate).toHaveBeenCalledWith(store.dispatch, router)` to draftEditorsSetup.test.ts."
+    }
+  ]
+}

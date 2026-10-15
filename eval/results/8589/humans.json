@@ -1,0 +1,12 @@
+{
+  "usd": 0.3465626,
+  "head": "99ed87f42143dc225281939350f263e177d3dcc6",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 99ed87f42 adds `forceBackdrop` to the ModalDialog in AddManually.tsx:87 and a regression test for it. The author confirmed the fix in the PR thread, and vmosharova approved afterward. The bug was already present at 6e8e123 and on dev, since the prop was missing there."
+    }
+  ]
+}

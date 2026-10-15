@@ -5,105 +5,351 @@
   "findings": [
     {
       "id": "F1",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 19,
-      "claim": "borderRadius is hard-coded to 12 instead of using the Tamagui radius token \"$5\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 61,
+      "claim": "New UI code hard-codes a maxWidth pixel value rather than using a theme token."
     },
     {
       "id": "F2",
       "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
       "line": 28,
-      "claim": "The check typeof insets.bottom === 'number' ? insets.bottom : 0 is unnecessary since useSafeAreaInsets() is typed to always return numbers."
+      "claim": "controlClearance = insets.bottom + 64 does not match where the floating control actually sits (bottom=\"$8\" plus insets.bottom plus padding), so the computed clearance value is inconsistent with the actual layout, though currently harmless."
     },
     {
       "id": "F3",
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts",
-      "line": 48,
-      "claim": "The focus effect does not check isActive before enabling the camera, so if the screen first focuses while isActive is false, the focus effect turns the camera on and the isActive/permission effect immediately turns it off again, creating a race."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 183,
+      "claim": "The dApp-supplied callsId is inserted into the CGW URL path without validation, though the impact is limited by credentials:'omit'."
     },
     {
       "id": "F4",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.test.tsx",
-      "line": null,
-      "claim": "No test asserts that the thumb position actually animates in response to the value prop, leaving that behavior uncovered."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 149,
+      "claim": "wallet_switchEthereumChain uses an unchecked parseInt on the external chainId string, which turns malformed input into 'NaN' or silently accepts a partial value such as treating '0x1g' as 1, so bad input surfaces as the wrong error code (4901, not deployed on chain) instead of an invalid-params error (-32602)."
     },
     {
       "id": "F5",
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx",
-      "line": 25,
-      "claim": "The isOpeningRef guard only resets when useFocusEffect fires again, so if the navigation push is ever swallowed (e.g. by a transient guard upstream), the button becomes permanently unresponsive until the user navigates away and back."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 330,
+      "claim": "wallet_getCallsStatus calls transactionsGetTransactionByIdV1.initiate without forceRefetch: true and never releases the subscription. Since RTK Query defaults refetchOnMountOrArgChange to false and nothing overrides it, when a dApp polls this endpoint, every call after the first returns the cached result, so a bundle first reported as pending is likely to stay reported as pending after it actually executes."
     },
     {
       "id": "F6",
-      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
-      "line": 47,
-      "claim": "paddingTop={30}, paddingLeft={20}, and maxWidth={260} are raw pixel numbers in a file that otherwise uses Tamagui design tokens, making the styling inconsistent with the rest of the file."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/RequestSheetHost.tsx",
+      "line": 187,
+      "claim": "The same state-only guard issue is present in the request sheet host component that navigates to confirm-transaction."
     },
     {
       "id": "F7",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 36,
-      "claim": "The outer track is hard-coded to width=\"50%\", which conflicts with the component otherwise being generic over N options since a 3-option control inside a half-width track would be cramped."
+      "file": "apps/mobile/src/features/Share/components/SupportedNetworksSheet.tsx",
+      "line": null,
+      "claim": "This component is untested per the PR description; despite being a small wrapper, it wires selectors (selectSafeChains to getChainsByIds), and a smoke test rendering it through the store would catch future selector signature drift."
     },
     {
       "id": "F8",
-      "file": "apps/mobile/src/features/Share/components/SupportedNetworksList.tsx",
-      "line": 35,
-      "claim": "The useMemo wraps a filter-twice operation that is cheap enough on small arrays that the memoization adds noise without meaningful benefit; a single-pass partition would be simpler."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 106,
+      "claim": "The method routing logic uses 15+ chained if (method === ...) branches instead of a lookup table, which conflicts with the 'lookup tables over conditional chains' guidance in apps/web/docs/code-style.md."
     },
     {
       "id": "F9",
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
-      "line": 28,
-      "claim": "controlClearance = insets.bottom + 64 does not match where the floating control actually sits (bottom=\"$8\" ≈ 32 + insets.bottom + padding), so the derived constant is inaccurate even though the mismatch is currently harmless."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts",
+      "line": 48,
+      "claim": "The focus effect does not check isActive before enabling the camera, so if the screen first focuses while isActive is false, the focus effect turns the camera on and the isActive/permission effect immediately turns it back off, creating a race condition."
     },
     {
       "id": "F10",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 37,
-      "claim": "borderRadius is hard-coded to 8 instead of using the Tamagui radius token \"$4\", which maps to the same value; mobile UI conventions require theme tokens instead of magic numbers, and since this is a new shared component the hard-coded value risks being copied into other screens."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/RequestSheetHost.tsx",
+      "line": 105,
+      "claim": "The 'composing' dismiss guard has no test, unlike the adjacent 'busy' guard which is tested."
     },
     {
       "id": "F11",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 30,
-      "claim": "The testID handling (container testID and the per-segment `${testID}-${option.value}` construction at line 19) has no test coverage; none of the three existing tests pass a testID or use getByTestId, so a change that breaks this logic would not be caught, and E2E selectors will depend on these IDs."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 197,
+      "claim": "Same destructuring issue recurs at another line in methodRouter.ts."
     },
     {
       "id": "F12",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 19,
-      "claim": "borderRadius={12} is hard-coded even though a Tamagui token with the same value ($5 = 12) exists, violating the project rule to use tokens instead of hard-coded values; the rest of the file already uses tokens."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/getCallsStatus.ts",
+      "line": 42,
+      "claim": "Mobile's EIP-5792 call-status logic (mapTxStatus and the envelope builder) is a second copy of code explicitly noted as copied verbatim from the web implementation, rather than being placed in the shared package that already holds related 5792 code."
     },
     {
       "id": "F13",
-      "file": "apps/mobile/src/components/SegmentedControl/",
-      "line": null,
-      "claim": "The new component folder is missing a SegmentedControl.stories.tsx file, even though the project's documented folder layout includes a stories file alongside the component, test, and index files, and mobile Storybook is already set up."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 184,
+      "claim": "Same destructuring issue recurs at another line in methodRouter.ts."
     },
     {
       "id": "F14",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 37,
-      "claim": "borderRadius={8} is hard-coded even though a Tamagui token with the same value ($4 = 8) exists, violating the project rule to use tokens instead of hard-coded values."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 56,
+      "claim": "Transaction requests restored from getPendingSessionRequests() only undergo a shape check, without comparing the request's chainId to the currently active chain or verifying a signer is present."
     },
     {
       "id": "F15",
-      "file": "apps/mobile/src/features/Share/components/SupportedNetworksSheet.tsx",
-      "line": null,
-      "claim": "This component is untested despite doing selector wiring (selectSafeChains to getChainsByIds), so future selector signature drift would not be caught by tests."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSessionRequestHandler.ts",
+      "line": 47,
+      "claim": "The handler should wrap its body in a try/catch and reply with an internal error code (-32603), or the router should validate that params is an array before destructuring it."
     },
     {
       "id": "F16",
-      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
-      "line": 26,
-      "claim": "Each segment uses accessibilityRole=\"button\" with a selected state, and the container has no accessibility role, so VoiceOver and TalkBack will announce the segments as separate buttons instead of as a single either/or group with position information (e.g. \"2 of 2\"). The segments should use accessibilityRole=\"tab\" with the container as \"tablist\", or a radio/radiogroup pairing."
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 57,
+      "claim": "The USER_REJECTED respond/try-catch/log block is duplicated across four locations (useSendTransaction.ts, WcRejectOnBack.tsx, RequestSheetHost.tsx, WalletKitProvider.tsx) instead of following the existing safeRejectSession pattern."
     },
     {
       "id": "F17",
+      "file": "apps/mobile/src/app/supported-networks.tsx",
+      "line": 1,
+      "claim": "The file imports the SupportedNetworksSheet component directly from its file path instead of through the Share/components barrel, from which it is missing."
+    },
+    {
+      "id": "F18",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 323,
+      "claim": "None of the branches in getCallsStatus are tested: transaction not found, receipt fetch failure, missing chain config, and the success case; adding the success-case test would also have caught the stale-status caching bug."
+    },
+    {
+      "id": "F19",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 68,
+      "claim": "The double-submit guard for sending a transaction relies only on React state (composing), which only takes effect after a re-render, so two quick taps can each compose a draft, set an outstanding request, and push the confirm-transaction screen twice."
+    },
+    {
+      "id": "F20",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": null,
+      "claim": "ShareView.tsx removes the 'This account is only available on …' line and the horizontal padding, and since ShareView is also used for the home Receive screen, this change affects that screen in addition to the new My code tab, so the design intent should be confirmed for both."
+    },
+    {
+      "id": "F21",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 144,
+      "claim": "An invalid chainId such as '0xzz' returns error code 4901 ('not deployed') instead of -32602, and a bare numeric chainId like 137 is misinterpreted as hex, resolving to chain 311."
+    },
+    {
+      "id": "F22",
+      "file": "apps/web/src/services/safe-wallet-provider/index.ts",
+      "line": 102,
+      "claim": "The web implementation this mobile code was copied from lives in the safe-wallet-provider service, confirming duplication rather than reuse from the shared package."
+    },
+    {
+      "id": "F23",
+      "file": "TransactionHeader.tsx",
+      "line": 69,
+      "claim": "The dApp name used as the header title also lacks truncation handling for long values."
+    },
+    {
+      "id": "F24",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 68,
+      "claim": "A synchronous ref-based guard (already used elsewhere in the same PR) should be used instead of relying solely on React state to prevent the double-submit race."
+    },
+    {
+      "id": "F25",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 323,
+      "claim": "The real getCallsStatus implementation, including the CGW lookup and receipt fetch with fallbacks, has no test coverage."
+    },
+    {
+      "id": "F26",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 199,
+      "claim": "The Safe-switch listener only prunes the WalletKit queue when the user switches Safe or chain, so a request that is already mismatched at restoration time remains queued and can later be composed against the wrong chain (e.g., calldata meant for chain 1 drafted against a Safe on chain 137), with no chain or Safe shown in SendTransactionSheet to warn the user."
+    },
+    {
+      "id": "F27",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/getCallsStatus.ts",
+      "line": 42,
+      "claim": "Status mapping in getCallsStatus.ts and CreateCall encoding in composeSafeTxDraft.ts duplicate logic already implemented in web's safe-wallet-provider, and could instead live in a shared package (packages/utils/.../eip5792.ts)."
+    },
+    {
+      "id": "F28",
+      "file": "DappIdentity.tsx",
+      "line": 68,
+      "claim": "dApp-supplied name text is rendered without numberOfLines or ellipsis truncation, so a long dApp name can render awkwardly."
+    },
+    {
+      "id": "F29",
+      "file": "apps/mobile/src/services/tx/fetchTransactionDetails.ts",
+      "line": 13,
+      "claim": "The two existing callers of the same transaction-by-id endpoint both pass forceRefetch: true, unlike this new call, showing an inconsistency with established usage."
+    },
+    {
+      "id": "F30",
       "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
       "line": 29,
-      "claim": "progress is initialised to selectedIndex and the useEffect immediately runs withSpring(selectedIndex, ...) on first mount, causing an unnecessary no-op spring animation on every fresh mount."
+      "claim": "progress is initialized to selectedIndex and the useEffect immediately runs withSpring(selectedIndex, ...) on mount, causing a no-op spring animation to run on every fresh mount."
+    },
+    {
+      "id": "F31",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/ScanConnect.tsx",
+      "line": 28,
+      "claim": "The check typeof insets.bottom === 'number' ? insets.bottom : 0 is unnecessary since useSafeAreaInsets() is typed to always return numbers."
+    },
+    {
+      "id": "F32",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 56,
+      "claim": "Restored requests are stamped with whichever Safe is currently active rather than the Safe/chain they were originally issued for, and the review() function composes against the live activeSafe.chainId/address without ever reading pending.chainId."
+    },
+    {
+      "id": "F33",
+      "file": "DappIdentity.tsx",
+      "line": 85,
+      "claim": "The dApp domain, rendered as a pill next to an info icon, also lacks truncation, so a long domain can wrap badly or push the info icon out of the pill."
+    },
+    {
+      "id": "F34",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 330,
+      "claim": "No test covers the new provider callback that has this caching/staleness issue."
+    },
+    {
+      "id": "F35",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 49,
+      "claim": "The ready flag ignores hasSigner, so a Safe with no signer reaches a dead-end CanNotExecute screen even though signing should still be blocked/handled differently."
+    },
+    {
+      "id": "F36",
+      "file": "apps/mobile/src/features/ConfirmTx/components/DappOriginContext.tsx",
+      "line": 1,
+      "claim": "DappOriginContext.tsx is a loose file even though its 15 sibling components each have their own folder, and other context modules in the codebase live in a context/ directory."
+    },
+    {
+      "id": "F37",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSessionRequestHandler.ts",
+      "line": 111,
+      "claim": "A concrete trigger for the unhandled rejection is that rpc.params is cast with (rpc.params as unknown[]) ?? [] without checking it is actually an array; if a dApp sends an object instead of an array, the array destructuring elsewhere throws."
+    },
+    {
+      "id": "F38",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 163,
+      "claim": "Same destructuring issue recurs at another line in methodRouter.ts."
+    },
+    {
+      "id": "F39",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/DappIcon.tsx",
+      "line": 50,
+      "claim": "DappIcon.tsx and DappIdentity.tsx contain hand-rolled corner badge implementations that duplicate functionality already provided by components/BadgeWrapper."
+    },
+    {
+      "id": "F40",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/DappIdentity.tsx",
+      "line": 39,
+      "claim": "The fallback behavior for a malformed dApp URL is untested."
+    },
+    {
+      "id": "F41",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 145,
+      "claim": "The unchecked params cast causes array destructuring to throw at multiple call sites in methodRouter.ts when params is not actually an array."
+    },
+    {
+      "id": "F42",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 40,
+      "claim": "The WalletKitProvider component grew from about 120 to 364 lines and now handles 9 responsibilities; the listener, stale-request cleanup, getCallsStatus, and chain switching logic should be split into separate hooks."
+    },
+    {
+      "id": "F43",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 36,
+      "claim": "The outer track width is hard-coded to 50%, which cramps the layout when the component is used with three options even though the percentage-based thumb otherwise makes it generic over N options."
+    },
+    {
+      "id": "F44",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 51,
+      "claim": "shadowColor is hardcoded as '#000' instead of using a Tamagui design token."
+    },
+    {
+      "id": "F45",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 47,
+      "claim": "New UI code hard-codes paddingTop and paddingLeft pixel values where a Tamagui spacing token would fit better."
+    },
+    {
+      "id": "F46",
+      "file": "apps/web/src/features/walletconnect/services/utils.ts",
+      "line": 8,
+      "claim": "The web app still has its own identical copy of stripEip155Prefix that is exported and used in two places, rather than re-exporting the new shared package version."
+    },
+    {
+      "id": "F47",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSendTransaction.ts",
+      "line": 18,
+      "claim": "The wallet_sendCalls branch of extractCalls is untested."
+    },
+    {
+      "id": "F48",
+      "file": "apps/mobile/src/features/Share/components/SupportedNetworksList.tsx",
+      "line": 35,
+      "claim": "The useMemo wraps a double filter pass that is cheap on tiny arrays, making the memoization unnecessary overhead/noise; a single-pass partition would be simpler."
+    },
+    {
+      "id": "F49",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.test.tsx",
+      "line": null,
+      "claim": "No test asserts that the thumb position actually animates in response to the value prop, leaving the most interesting behavior of the component uncovered."
+    },
+    {
+      "id": "F50",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 74,
+      "claim": "isValidDappCall never checks the value field, so a value like '1.5' passes validation and later causes BigInt() to throw in composeSafeTxDraft.ts, resulting in a generic toast to the user and no response ever being sent to the dApp."
+    },
+    {
+      "id": "F51",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useSessionRequestHandler.ts",
+      "line": 47,
+      "claim": "The session-request handler is an async event listener that awaits routeSessionRequest with no try/catch around it, so any error thrown inside the router becomes an unhandled promise rejection and the dApp never receives a reply."
+    },
+    {
+      "id": "F52",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/services/methodRouter.ts",
+      "line": 149,
+      "claim": "The chainId parsing should instead use BigInt inside a try/catch, matching the approach already used by the wallet_sendCalls chainId check, to properly reject malformed input."
+    },
+    {
+      "id": "F53",
+      "file": "apps/mobile/src/features/Share/components/ShareView.tsx",
+      "line": 47,
+      "claim": "paddingTop={30}, paddingLeft={20}, and maxWidth={260} are raw pixel values in a file that otherwise uses Tamagui design tokens, making the styling inconsistent with the rest of the file."
+    },
+    {
+      "id": "F54",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx",
+      "line": 25,
+      "claim": "The isOpeningRef guard is only reset when useFocusEffect fires again, so if a navigation push is ever swallowed (for example by a transient guard upstream), the button becomes permanently unresponsive until the user navigates away and back."
+    },
+    {
+      "id": "F55",
+      "file": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx",
+      "line": 51,
+      "claim": "New UI code hard-codes a shadow color instead of using a theme token, which the mobile styling convention calls for."
+    },
+    {
+      "id": "F56",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 299,
+      "claim": "Neither gate in switchActiveChainByCaip2 (missing chain config, Safe not deployed on the target chain) is tested; existing router tests replace the whole function with a mock instead of exercising these branches."
+    },
+    {
+      "id": "F57",
+      "file": "packages/utils/src/features/walletconnect/utils.ts",
+      "line": 19,
+      "claim": "stripEip155Prefix now exists as a duplicate implementation in the shared utils package while an identical copy still exists and is used in the web app, instead of the web app re-exporting the shared package version as it already does for other similar utilities."
+    },
+    {
+      "id": "F58",
+      "file": "apps/mobile/src/features/WalletConnect/Wallet/context/WalletKitProvider.tsx",
+      "line": 293,
+      "claim": "The inline pattern state.safes[address] is repeated in four places (WalletKitProvider.tsx, useApproveProposal.ts, useSessionProposalHandler.ts) instead of using the existing selector defined in store/safesSlice.ts."
     }
   ]
 }

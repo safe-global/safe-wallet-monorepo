@@ -1,131 +1,347 @@
 {
   "usage": {
-    "usd": 0.4648526,
-    "turns": 7,
-    "wallSeconds": 52
+    "usd": 1.314302,
+    "turns": 13,
+    "wallSeconds": 144
   },
   "issues": [
     {
       "findings": [
-        "F1",
-        "F12"
+        "F5",
+        "F29"
       ],
-      "summary": "Outer track borderRadius={12} is a raw number; the token $5 has the same value",
-      "label": "nit",
-      "evidence": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:19 uses 12, and packages/theme/src/tokens/radius.ts sets 5: 12, so there is no visual difference. Raw radii are common in apps/mobile/src/components (19 numeric uses against 6 token uses), so this is style only."
+      "summary": "wallet_getCallsStatus uses a cached RTK Query result (no forceRefetch, subscription never released), so repeated polls return the stale status",
+      "label": "high",
+      "evidence": "WalletKitProvider.tsx:329-331 dispatches transactionsGetTransactionByIdV1.initiate without forceRefetch and never unsubscribes, so the cache entry never expires and later polls with the same args get the first result. The other caller, services/tx/fetchTransactionDetails.ts:18, passes forceRefetch: true. As a result, a dApp polling a bundle that was first reported as pending keeps seeing pending.",
+      "category": "correctness"
     },
     {
       "findings": [
-        "F10",
-        "F14"
+        "F14",
+        "F26",
+        "F32"
       ],
-      "summary": "Segment borderRadius={8} is a raw number; the token $4 has the same value",
-      "label": "nit",
-      "evidence": "apps/mobile/src/components/SegmentedControl/SegmentedControl.tsx:37 uses 8, which equals radius token 4. Nothing changes on screen, and numeric radii are widespread in mobile components."
-    },
-    {
-      "findings": [
-        "F13"
-      ],
-      "summary": "The SegmentedControl folder has no stories file",
-      "label": "low",
-      "evidence": "apps/mobile/docs/code-style.md:10-16 lists Component.stories.tsx in the standard folder layout, and 32 mobile components have stories. The new folder has only the .tsx, test and index files, which is a small convention gap."
-    },
-    {
-      "findings": [
-        "F11"
-      ],
-      "summary": "The testID handling and the per-segment testID pattern are untested",
-      "label": "low",
-      "evidence": "SegmentedControl.tsx:19 and :30 build `${testID}-${option.value}`, but none of the three tests pass a testID. The logic is trivial, so a missing test costs little."
-    },
-    {
-      "findings": [
-        "F16"
-      ],
-      "summary": "Segments use accessibilityRole=\"button\" instead of tab or radio roles, so screen readers get no group or position information",
-      "label": "low",
-      "evidence": "SegmentedControl.tsx:26 sets role \"button\" with a selected state, and the container at :19 has no role. The selected state is still announced, so the impact is minor."
-    },
-    {
-      "findings": [
-        "F4"
-      ],
-      "summary": "No test covers the thumb animation",
-      "label": "wrong",
-      "evidence": "The reviewed SegmentedControl.tsx has no animated thumb, spring or progress value. Selection only swaps the background at :38, so there is nothing to animate or test."
-    },
-    {
-      "findings": [
-        "F17"
-      ],
-      "summary": "A no-op spring runs on first mount",
-      "label": "wrong",
-      "evidence": "SegmentedControl.tsx (49 lines) has no useEffect, withSpring or progress value, so the claimed code does not exist at the reviewed commit."
-    },
-    {
-      "findings": [
-        "F7"
-      ],
-      "summary": "The outer track is hard-coded to width=\"50%\"",
-      "label": "wrong",
-      "evidence": "No width prop exists in SegmentedControl.tsx, and line 36 is paddingVertical=\"$3\". The claim does not match the code."
-    },
-    {
-      "findings": [
-        "F3"
-      ],
-      "summary": "The camera focus effect ignores isActive",
-      "label": "wrong",
-      "evidence": "useWalletConnectScan.ts has no isActive parameter at the reviewed commit (grep finds only useFocusEffect at :48), and the PR diff does not touch this file."
-    },
-    {
-      "findings": [
-        "F5"
-      ],
-      "summary": "The isOpeningRef guard can lock the header button",
-      "label": "wrong",
-      "evidence": "apps/mobile/src/features/WalletConnect/Wallet/components/HeaderQrButton.tsx:20-28 calls router.push directly. There is no isOpeningRef or focus-reset guard, and the file is not in the diff."
-    },
-    {
-      "findings": [
-        "F2"
-      ],
-      "summary": "ScanConnect has an unnecessary typeof check on insets.bottom",
-      "label": "wrong",
-      "evidence": "ScanConnect.tsx does not exist at the reviewed commit, since the diff only adds the SegmentedControl files."
+      "summary": "Requests restored after a restart are not checked against the active chain or Safe, and review() composes against the active Safe",
+      "label": "medium",
+      "evidence": "WalletKitProvider.tsx:56-86 checks only the param shape of restored requests and stamps them with the current Safe address. Nothing compares r.params.chainId to the active chain, which the live path does at methodRouter.ts:238. useSendTransaction.ts:75-81 then composes using activeSafe.chainId and address and never reads pending.chainId. The Safe-switch listener at :199 runs only on switch actions, so a request that is already mismatched at restore time gets through.",
+      "category": "correctness"
     },
     {
       "findings": [
         "F9"
       ],
-      "summary": "The controlClearance constant does not match where the control sits",
-      "label": "wrong",
-      "evidence": "ScanConnect.tsx does not exist in the tree or the diff, so the claim refers to code that is not under review."
+      "summary": "The focus effect re-enables the camera without checking isActive, so the camera turns on while the My code tab is showing",
+      "label": "medium",
+      "evidence": "useWalletConnectScan.ts:48-58 sets isCameraActive(true) on focus whether or not isActive is set. The isActive effect at :63-71 does not run again on refocus because its deps have not changed. Opening supported-networks from My code (ShareView.tsx:95) and coming back refocuses the scan screen and starts the hidden camera. The first-mount race the finding describes is itself harmless because both updates are batched, but the missing isActive check is a real defect.",
+      "category": "correctness"
     },
     {
       "findings": [
+        "F18",
+        "F25",
+        "F34"
+      ],
+      "summary": "getCallsStatus provider callback (CGW lookup, receipt fetch, fallbacks) has no tests",
+      "label": "medium",
+      "evidence": "Grepping context/__tests__ finds no test of getCallsStatus. Only the pure buildGetCallsResult is tested, in getCallsStatus.test.ts. A test of the success path through polling would have caught the stale-cache bug at WalletKitProvider.tsx:330.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F56"
+      ],
+      "summary": "Neither gate in switchActiveChainByCaip2 is tested",
+      "label": "medium",
+      "evidence": "WalletKitProvider.tsx:299-317 has two gates: no chain config, and Safe not deployed on the chain. Grep finds no provider test for either, and the router tests replace the function with a mock. A regression here would let a dApp switch the Safe to a chain it is not deployed on, and nothing would catch it.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F51",
+        "F15",
+        "F37",
+        "F41",
+        "F11",
+        "F13",
+        "F38"
+      ],
+      "summary": "Non-array rpc.params make array destructuring throw in routeSessionRequest, and the async handler has no try/catch, so the rejection is unhandled and the dApp gets no reply",
+      "label": "low",
+      "evidence": "methodRouter.ts:111 casts rpc.params to an array without checking it. The array destructuring at :145, :163, :184 and :197 throws on object params. useSessionRequestHandler.ts:47 awaits the router without a try/catch. This is only reachable with a malformed or malicious dApp request, and the impact is a dApp-side timeout.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F4",
+        "F21",
+        "F52"
+      ],
+      "summary": "wallet_switchEthereumChain parses chainId with an unchecked parseInt(…,16), so malformed or numeric input gets the wrong error or a wrong chain",
+      "label": "low",
+      "evidence": "methodRouter.ts:149: parseInt('0x1g',16) returns 1, '0xzz' becomes 'NaN' and is answered with 4901 instead of -32602, and a numeric 137 is read as hex 311. EIP-3326 requires a hex string, so only non-compliant dApps are affected, and switches are still limited to deployed chains.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F19",
+        "F24",
         "F6"
       ],
-      "summary": "ShareView uses raw paddingTop, paddingLeft and maxWidth numbers",
-      "label": "wrong",
-      "evidence": "ShareView.tsx is unchanged by the diff, and the lines around :47 have no paddingTop={30}, paddingLeft={20} or maxWidth={260}."
+      "summary": "The Review double-submit guard relies only on React state (composing), not a synchronous ref",
+      "label": "low",
+      "evidence": "useSendTransaction.ts:68-72 sets composing through setState, and RequestSheetHost.tsx:184-192 disables the button only after the re-render. Two taps before that commit could each compose and push confirm-transaction. The window is narrow in practice.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F35"
+      ],
+      "summary": "The ready flag ignores hasSigner, so a restored request for a Safe without a signer can reach Review",
+      "label": "low",
+      "evidence": "useSendTransaction.ts:49 does not include a signer check. The live path rejects no-signer requests at methodRouter.ts:223, but restored requests (WalletKitProvider.tsx:56-86) skip that check. The confirm screen still blocks signing, so this is a dead end, not a safety problem.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F50"
+      ],
+      "summary": "isValidDappCall does not validate value, so a non-integer value makes BigInt throw during compose",
+      "label": "low",
+      "evidence": "methodRouter.ts:74-82 never checks call.value, and composeSafeTxDraft.ts:33 BigInt('1.5') throws. useSendTransaction.ts:97-101 catches this and shows a toast, and the user can still Reject or dismiss the sheet, which answers the dApp. So the claim that no response is ever sent is overstated.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "callsId from the dApp is interpolated unescaped into the CGW URL path",
+      "label": "low",
+      "evidence": "The generated query at packages/store/.../transactions.ts:13 builds `/v1/chains/${chainId}/transactions/${id}` without encoding. It is a GET to a public API with credentials omitted, so the impact is limited to reaching other public CGW GET paths.",
+      "category": "security"
+    },
+    {
+      "findings": [
+        "F2"
+      ],
+      "summary": "controlClearance (insets.bottom + 64) does not match the floating control's real footprint",
+      "label": "low",
+      "evidence": "ScanConnect.tsx:28 reserves insets+64. The control at :71-84 sits at bottom $8 with paddingTop $3 and paddingBottom insets, plus its own height, which comes to more than 64. The clearance is therefore inconsistent and could overlap content on short screens.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F54"
+      ],
+      "summary": "isOpeningRef is reset only on refocus, so a push that fails silently leaves the header button dead",
+      "label": "low",
+      "evidence": "HeaderQrButton.tsx:17-34 sets the ref to true before router.push and resets it only in useFocusEffect. If the push is swallowed the button stops responding until the user navigates away and back. Unlikely in practice.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F12",
+        "F22",
+        "F27"
+      ],
+      "summary": "EIP-5792 status mapping and envelope building are copied from web instead of shared",
+      "label": "low",
+      "evidence": "The comments in getCallsStatus.ts:3 and :39 say the logic is copied verbatim from web's safe-wallet-provider. Keeping two copies means they can drift, a real but moderate maintenance cost.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F46",
+        "F57"
+      ],
+      "summary": "stripEip155Prefix now exists in packages/utils while web keeps its own identical copy",
+      "label": "low",
+      "evidence": "packages/utils/src/features/walletconnect/utils.ts:19 adds the function, and apps/web/src/features/walletconnect/services/utils.ts:8 still defines an identical copy even though it already re-exports other helpers from the shared package.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "The USER_REJECTED respond/try-catch/log block is duplicated in several places",
+      "label": "low",
+      "evidence": "The same block appears in useSendTransaction.ts:57-64, RequestSheetHost.tsx:125-132 and WalletKitProvider.tsx:203-212, and the finding also cites WcRejectOnBack.tsx. A small DRY cost.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F58"
+      ],
+      "summary": "The inline state.safes[address] lookup is repeated instead of using the existing selectors",
+      "label": "low",
+      "evidence": "WalletKitProvider.tsx:293 and :309, useApproveProposal.ts:45 and useSessionProposalHandler.ts:77 all read state.safes directly, although safesSlice.ts:63-68 already provides selectSafeInfo and selectSafeChains.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F28",
+        "F33",
+        "F23"
+      ],
+      "summary": "dApp-supplied name and domain text is rendered without truncation",
+      "label": "low",
+      "evidence": "DappIdentity.tsx:67-69 and :85 render name and domain without numberOfLines, and the finding reports the same in the TransactionHeader title. A long, dApp-controlled string could wrap badly or push the info icon out of the pill.",
+      "category": "product"
+    },
+    {
+      "findings": [
+        "F47"
+      ],
+      "summary": "The wallet_sendCalls branch of extractCalls is untested",
+      "label": "low",
+      "evidence": "Grep finds no sendCalls case in hooks/__tests__/useSendTransaction.test.ts, although useSendTransaction.ts:23-25 handles it. The branch is simple, but the gap is real.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "The composing dismiss guard in RequestSheetHost is untested",
+      "label": "low",
+      "evidence": "RequestSheetHost.tsx:105 guards on busy || composing, but the test file only covers busy (test line 177).",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F40"
+      ],
+      "summary": "The DappIdentity fallback for an unparseable URL is untested",
+      "label": "low",
+      "evidence": "The catch branch at DappIdentity.tsx:43-47 has no test file of its own. It is a minor pure-function edge case.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "SupportedNetworksSheet container is untested",
+      "label": "low",
+      "evidence": "SupportedNetworksSheet.tsx wires selectSafeChains into getChainsByIds and has no test. The PR description acknowledges the gap, and the presentational list is tested.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F39"
+      ],
+      "summary": "DappIcon and DappIdentity hand-roll corner badges that BadgeWrapper already provides",
+      "label": "nit",
+      "evidence": "components/BadgeWrapper exists, and DappIdentity.tsx:61-63 positions the badge manually. This is a consistency preference with no functional cost.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F1",
+        "F45",
+        "F53"
+      ],
+      "summary": "ShareView uses raw pixel values (paddingTop 30, paddingLeft 20, maxWidth 260) instead of tokens",
+      "label": "nit",
+      "evidence": "ShareView.tsx:47 and :61 were added in this PR. The file already uses raw values elsewhere (fontSize 16, lineHeight 22), so this is a style inconsistency with no functional cost.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F44",
+        "F55"
+      ],
+      "summary": "SegmentedControl hardcodes shadowColor '#000'",
+      "label": "nit",
+      "evidence": "SegmentedControl.tsx:51. A black shadow is theme-independent in practice, and ShareView also uses '#000' for the QR code, so this is a style preference.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F43"
+      ],
+      "summary": "The SegmentedControl track width is fixed at 50%",
+      "label": "nit",
+      "evidence": "SegmentedControl.tsx:45. The only consumer passes two options, so a hypothetical three-option layout has no current cost.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F30"
+      ],
+      "summary": "A no-op spring runs on mount",
+      "label": "nit",
+      "evidence": "SegmentedControl.tsx:34-37 springs from selectedIndex to the same value, which does nothing visible and costs almost nothing.",
+      "category": "performance"
+    },
+    {
+      "findings": [
+        "F31"
+      ],
+      "summary": "The typeof insets.bottom check is redundant",
+      "label": "nit",
+      "evidence": "ScanConnect.tsx:28. useSafeAreaInsets is typed to return numbers. Harmless defensive code.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F48"
+      ],
+      "summary": "useMemo around two filters on a tiny array is unnecessary",
+      "label": "nit",
+      "evidence": "SupportedNetworksList.tsx:31-37. A style preference only.",
+      "category": "performance"
+    },
+    {
+      "findings": [
+        "F49"
+      ],
+      "summary": "No test of the thumb animation position",
+      "label": "nit",
+      "evidence": "A Reanimated animated style is hard to assert in Jest, and the selection and onChange behaviour are covered. Low value.",
+      "category": "tests"
     },
     {
       "findings": [
         "F8"
       ],
-      "summary": "SupportedNetworksList wraps a cheap double filter in useMemo",
-      "label": "wrong",
-      "evidence": "SupportedNetworksList.tsx does not exist at the reviewed commit. apps/mobile/src/features/Share/components has only ShareView files and index.ts."
+      "summary": "The method router uses an if-chain instead of a lookup table",
+      "label": "nit",
+      "evidence": "methodRouter.ts:106-273. The cited guideline is the web code-style doc, and the branches have different async and validation logic, so this is a preference.",
+      "category": "design"
     },
     {
       "findings": [
-        "F15"
+        "F42"
       ],
-      "summary": "SupportedNetworksSheet is untested",
+      "summary": "WalletKitProvider has grown large and could be split into hooks",
+      "label": "nit",
+      "evidence": "WalletKitProvider.tsx is about 360 lines, and each effect is well separated and commented. This is a maintainability preference.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F36"
+      ],
+      "summary": "DappOriginContext.tsx is a loose file rather than in a folder or context/ directory",
+      "label": "nit",
+      "evidence": "ConfirmTx/components/DappOriginContext.tsx, a 15-line file. Its placement is a style choice.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "SupportedNetworksSheet is imported by file path and is not in the barrel",
+      "label": "nit",
+      "evidence": "supported-networks.tsx:1 imports the file directly, and components/index.ts exports only ShareView. No concrete cost.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "The footer removal also affects the home Receive screen",
       "label": "wrong",
-      "evidence": "SupportedNetworksSheet.tsx does not exist in the reviewed tree, and the diff only adds SegmentedControl."
+      "evidence": "The PR description explicitly lists removing the footer from /share (shared ShareView) under Affected flows and Blast radius, so the change is intended.",
+      "category": "correctness"
     }
   ]
 }

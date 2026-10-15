@@ -1,0 +1,161 @@
+COMMENT
+[tmjssz 2026-07-15T15:47:50Z] @claude review
+
+COMMENT
+[github-actions 2026-07-15T15:47:50Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://tim-wa-2326-e2e-transaction-request-flow--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://tim-wa-2326-e2e-transaction-request-flow--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[claude 2026-07-15T15:48:07Z] **Claude finished @tmjssz's task in 2m 19s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29429669617)
+
+---
+### Claude PR Review
+
+- [x] Load tools and gather context
+- [x] Read changed files
+- [x] Analyze code quality, bugs, tests
+- [x] Post final review
+
+---
+
+Nicely scoped E2E scaffolding — the fake WalletKit + fetch-interceptor split, the two response-shape markers, and the exhaustive unit tests around `WcResponseIndicator`/`proposeFetchMock` are the right level of care for a flow this hard to reproduce. A few things worth tightening:
+
+### 1. Silent setup failure — `TestCtrls.e2e.tsx:342-344`
+
+```ts
+onPress={() => {
+  setupWcDappsTx(dispatch, router).catch((e) => console.error('[E2E] setupWcDappsTx failed:', e))
+}}
+```
+
+`setupWcDappsTx` awaits `keyStorageService.storePrivateKey`, which can genuinely fail on a simulator (biometrics/keychain). If it rejects, the flow proceeds to `synthTxRequest` and Maestro will fail later with a confusing symptom — signer missing, or sign-tail hanging — with no direct pointer back to setup. Since Maestro can't see `console.error`, surface it as a marker (e.g. `e2e-wc-setup-failed`) via `walletKitE2eState` so flows can `assertNotVisible` it before proceeding, mirroring the existing `rejectSessionCalled` / `lastRequestResponse` side-channels.
+
+### 2. `useEffect` with no dependency array — `WcResponseIndicator.tsx:34-38`
+
+```ts
+useEffect(() => {
+  if (hashes.length > 0) {
+    lastHashRef.current = hashes[hashes.length - 1]
+  }
+})
+```
+
+Missing deps: runs on every render, and `hashes = Object.keys(outstanding)` is a fresh array each time. Two things to flag:
+- Prefer `useEffect(..., [outstanding])` (the identity-stable slice input), or compute the ref update in a `useMemo` on `outstanding`.
+- `Object.keys(outstanding)` order is insertion order — "last key" is not guaranteed to be the newest logically. For one-at-a-time flows it's fine, but consider a comment tying the invariant to the flow contract (one outstanding tx per test), so future readers don't assume ordering.
+
+### 3. `proposeFetchMock.ts` — no restore, module-scoped `installed`
+
+`installProposeFetchMock` captures `global.fetch` at install time and never restores it. If Jest test isolation ever unhooks/swaps `global.fetch` between suites, the second `installProposeFetchMock()` returns early (module-scoped `installed = true`) and the interceptor is silently uninstalled from the new fetch. Not a bug in the current test setup, but worth either:
+- Documenting the "install-once, per-Metro-lifetime" contract explicitly, or
+- Exposing `uninstallProposeFetchMock()` so tests running against the module in isolation can rebind.
+
+### 4. Wei jitter based on `Date.now()` — `walletConnectDappsSetup.ts:66-69`
+
+```ts
+const jitteredValue = (base: bigint): string =>
+  `0x${(base + BigInt(((Date.now() + ++jitterSeq) % 0xffffff) + 1)).toString(16)}`
+```
+
+The `+ 1` guards zero, and `Date.now() + ++jitterSeq` guards collisions within a single run — but two flows starting within the same wall-clock millisecond and hitting the same `jitterSeq` value across module reloads could theoretically collide. Extremely unlikely in practice; the module-scoped `jitterSeq` and setup-driven reset make it effectively safe. Consider pulling from `crypto.getRandomValues` if you ever want to remove the `Date.now()` dependency (also documented as a `~4.7h` cycle in the comment).
+
+### 5. Committed private key — `walletConnectDappsSetup.ts:54`
+
+```ts
+const E2E_TX_OWNER_PRIVATE_KEY = '0xffc4b004b8746a7ce547ffa644686ca660efcf7a5a39910c714f922d7ad9bcc8'
+```
+
+Confirmed throwaway Sepolia-only key per the comment, but committing raw keys attracts scanners and secret-detection false positives on downstream forks. Consider gating behind an env var (default falls back to the committed value for CI convenience) or documenting in a `SECURITY.md`-adjacent block that this key is intentionally public.
+
+### 6. Loose `assertVisible` selectors
+
+- `tx-send-happy.yml:97` — `text: 'Send'` matches any UI element containing "Send" (Send action, Send button, Send tab). Use a stable `testID` on the queued tx row or scope the match tighter (`text: 'Send.*0\.001.*'`).
+- `tx-send-happy.yml:48` — `text: '.*0\.001.*'` — same concern; multiple UI surfaces can render this fixture value.
+
+### 7. Timeout duplication
+
+`extendedWaitUntil` timeouts (`30000` for sign, `10000` for sheet, etc.) are duplicated across all five new flows. Consider a shared `constants.yml` or Maestro env variables so a CI-slow bump only requires one edit.
+
+### 8. Test coverage — solid
+
+The unit tests for `WcResponseIndicator`, `proposeFetchMock`, `walletConnectDappsSetup`, and `walletKit.e2e` all cover meaningful branches (hash-match vs 5792-match vs extra-keys envelope; passthrough vs armed; jitter uniqueness). Good.
+
+---
+
+Nothing here is blocking. Items 1, 2, and 6 are the ones I'd address before green — the rest are polish.
+ · Branch: `tim/wa-2326-e2e-transaction-request-flow`
+
+COMMENT
+[tmjssz 2026-07-16T12:40:52Z] @claude review again
+
+COMMENT
+[claude 2026-07-16T12:41:08Z] **Claude finished @tmjssz's task in 3m 23s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/29499081050)
+
+---
+### Re-review — round 2
+
+- [x] Diff vs `origin/tim/wa-2325-e2e-connected-dapps-management`
+- [x] Verify prior-review items were addressed
+- [x] Fresh pass on new/changed surfaces
+
+### Prior review — status
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Silent setup failure | ✅ `txSetupStatus` + `WcTxSetupIndicator`; all four signer-required flows gate on `e2e-wc-tx-setup-ready` |
+| 2 | `useEffect` deps in `WcResponseIndicator` | ✅ `[outstanding]` + insertion-order comment (`WcResponseIndicator.tsx:28`) |
+| 3 | `proposeFetchMock` install-once contract | ✅ Documented in module JSDoc (`proposeFetchMock.ts:1-9`) |
+| 4 | Wei jitter | Left as-is (documented `~4.7h` cycle; acceptable) |
+| 5 | Committed private key | Left as-is with intentional-public comment (`walletConnectDappsSetup.ts:51`) |
+| 6 | Loose selectors + timeout duplication | ✅ Shared `wcTxUiTimeout`/`wcTxNetworkTimeout` in `defaults.js`; happy-path Confirm now uses `.*-0\.001.*` (signed) |
+
+Bonus: `setupWcDappsBase` now benefits from `resetReduxForE2E` → `walletKitE2eState.reset()` (`setupHelpers.ts:49`), so `proposeBehavior/txSetupStatus/lastRequestResponse` don't leak across flows within a suite — good defensive change even though `cgw-failure` runs last today.
+
+### Remaining, non-blocking
+
+**1. `tx-send-happy.yml:94` — pending-list assertion still matches "any `0.001`"**
+```yaml
+- assertVisible:
+    text: '.*0\.001.*'
+```
+The happy path appends a real tx to the staging Safe's pending queue every run. Over time the queue accumulates multiple `0.001` rows and this matches any of them — passing even if the current run's tx never lands. The `e2e-wc-response-hash-match` marker on line 80 already asserts delivery end-to-end, so this is belt-and-suspenders; but if you want the queue-UI assertion to actually verify *this* row, scope it to `pending-tx-list-item-0` (assuming newest-first) or piggy-back on a testID that includes the safeTxHash.
+
+**2. `WcResponseIndicator.tsx:28-34` — invariant is subtle**
+```ts
+useEffect(() => {
+  const hashes = Object.keys(outstanding)
+  if (hashes.length > 0) {
+    lastHashRef.current = hashes[hashes.length - 1]
+  }
+}, [outstanding])
+```
+Correct today because sign→CGW `/propose`→`respondSessionRequest` has a network round-trip, guaranteeing at least one render commits with `outstanding` filled before the response listener fires and clears it. Unit tests enforce this with `act()` boundaries. If a future refactor ever makes the response synchronous with the outstanding-clear, `lastHashRef.current` will still be `null` on the render that sees `response`, and neither marker will render — a very confusing symptom. A one-line comment naming that invariant would save the next debugger.
+
+**3. `WcResponseIndicator.tsx:16-21` — `isBundleEnvelope` type guard**
+```ts
+typeof result === 'object' && result !== null && !Array.isArray(result) && Object.keys(result).length === 1 && ...
+```
+Accepts non-plain objects (`Date`, `Map`, etc.). Not a real hazard here — `respondSessionRequest` only ever sees plain JSON — but `Object.getPrototypeOf(result) === Object.prototype` tightens it without hurting readability.
+
+### Test coverage
+
+Good delta on this round: `walletConnectDappsSetup.test.ts:177-200` covers both the success and rejection branches of `setupWcDappsTx`, matching the marker contract. `WcResponseIndicator.test.tsx` covers hash-match, 5792-match, extra-keys rejection, error passthrough, and no-lastHash. `proposeFetchMock.test.ts` covers passthrough, armed 500, non-`/propose` URLs, and `reset()` re-arming. Nothing missing.
+
+---
+
+Everything blocking from round 1 is addressed. The three items above are polish. Green on the simulator for the batch + cgw-failure flows (the two items you explicitly flagged as unverified) is the only remaining gate.
+ · Branch: `tim/wa-2326-e2e-transaction-request-flow`
+
+COMMENT
+[cursor 2026-07-16T12:58:50Z] <!-- BUGBOT_FREE_TIER_DISABLED_UPSELL -->
+Bugbot is not enabled for your account, so this pull request was not reviewed.
+
+Enable Bugbot in the [Cursor dashboard](https://www.cursor.com/dashboard/bugbot) to get automatic reviews on future PRs.

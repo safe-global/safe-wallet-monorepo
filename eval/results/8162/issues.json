@@ -1,127 +1,298 @@
 {
   "usage": {
-    "usd": 0.513972,
-    "turns": 6,
-    "wallSeconds": 53
+    "usd": 1.1954776000000003,
+    "turns": 17,
+    "wallSeconds": 169
   },
   "issues": [
     {
       "findings": [
-        "F3",
-        "F4",
-        "F5"
-      ],
-      "summary": "Hook doc comment claims it is shared with the header /wallet-connect-scan scanner and a 'replace' mode exists for it, but no such caller exists at HEAD",
-      "label": "low",
-      "evidence": "useScannedAddressToSend.ts:20-25,57-71 describe a header-scanner consumer and 'replace' mode; grep shows only ScanQrSend.container.tsx:40 imports the hook and it never passes 'replace'. The comment is inaccurate and the branch is dead code, but it doesn't change runtime behaviour."
-    },
-    {
-      "findings": [
-        "F2",
-        "F11"
-      ],
-      "summary": "Rewritten ScanQrSend onScan has no container-level test",
-      "label": "medium",
-      "evidence": "ScanQrSend.container.tsx:57-77 was rewritten (the guard/setIsCameraActive moved out of navigateToRecipient into onScan), and no ScanQrSend test exists in features/Send. Reverting or breaking this ordering would not fail any test."
-    },
-    {
-      "findings": [
-        "F8",
-        "F10",
-        "F20"
-      ],
-      "summary": "Dedupe test doesn't check that a different value still toasts",
-      "label": "low",
-      "evidence": "useScannedAddressToSend.test.tsx:91-98 only calls with 'foo' twice and checks one call, so a single-boolean dedupe would still pass. The weakness is real, but the impact is small."
-    },
-    {
-      "findings": [
-        "F13"
-      ],
-      "summary": "No test for a prefix with no active chain",
-      "label": "low",
-      "evidence": "The inline condition at useScannedAddressToSend.ts:48 is never tested with a prefix and activeChain undefined. The tests at :72-89 always set shortName 'eth'. It's equivalent to the old isChainMismatch, so the risk is small."
-    },
-    {
-      "findings": [
-        "F9"
-      ],
-      "summary": "ImportReadOnly useScan duplicates parse/validate/dedupe logic with a module-level dedupe map",
-      "label": "low",
-      "evidence": "features/ImportReadOnly/hooks/useScan/index.ts:10,38-54 does keep a module-level toastForValueShown and duplicates resolveScannedAddress logic. The file is untouched by this diff, so this is at most low."
-    },
-    {
-      "findings": [
         "F1"
       ],
-      "summary": "Claim that the ImportReadOnly test mocks internals while the hook calls resolveScannedAddress",
-      "label": "wrong",
-      "evidence": "At HEAD, ImportReadOnly/hooks/useScan/index.ts:6-7,38-40 calls parsePrefixedAddress/isValidAddress directly and never uses resolveScannedAddress. The test mocks match what the hook actually calls, and the file isn't in the diff."
+      "summary": "Restored pending tx requests skip the router's signer and chain checks; Review then builds against the active Safe's chain, not the dApp's requested chain",
+      "label": "medium",
+      "evidence": "WalletKitProvider.tsx:68-86 checks only the param shape before pushPending. useSendTransaction.ts:75-78 builds with activeSafe.chainId, and the chainId !== active check (methodRouter.ts:238) never runs on this path, so an eth_sendTransaction restored for another chain gets built on the wrong chain.",
+      "category": "correctness"
     },
     {
       "findings": [
-        "F15"
+        "F2"
       ],
-      "summary": "Focus effect re-activates the camera behind an error overlay in ScanQrSend",
-      "label": "wrong",
-      "evidence": "ScanQrSend.container.tsx at HEAD has no error overlay: errors are toasts (showInvalidAddressToast, :67) and there's no ScanErrorOverlay in components/Camera. The camera/overlay disagreement described can't happen."
-    },
-    {
-      "findings": [
-        "F19"
-      ],
-      "summary": "Same overlay/focus mismatch in ImportReadOnly useScan",
-      "label": "wrong",
-      "evidence": "ImportReadOnly/hooks/useScan/index.ts:19-30 has no error-message state or overlay (it uses a toast at :50), and the file is unchanged by the PR."
-    },
-    {
-      "findings": [
-        "F12"
-      ],
-      "summary": "handledRef in useWalletConnectScan is never reset",
-      "label": "wrong",
-      "evidence": "grep finds no handledRef or onAddressScanned under features/WalletConnect at HEAD, and useWalletConnectScan isn't in the diff. The code this finding describes doesn't exist."
-    },
-    {
-      "findings": [
-        "F7"
-      ],
-      "summary": "The expo-router mock exports only useRouter",
-      "label": "wrong",
-      "evidence": "useScannedAddressToSend.ts:2 imports only useRouter, and tests/test-utils.tsx doesn't import expo-router, so the mock at test:8-10 is enough."
-    },
-    {
-      "findings": [
-        "F14",
-        "F16"
-      ],
-      "summary": "New hook is comment-heavy compared with its siblings",
+      "summary": "Router uses sequential method ifs and a chained ternary instead of lookup tables",
       "label": "nit",
-      "evidence": "useScannedAddressToSend.ts has 11 comment lines, while sibling hooks have 0-5. AGENTS.md discourages unneeded comments, but this is style (the factual inaccuracy is covered separately)."
+      "evidence": "methodRouter.ts:126-219: each branch has different logic, so a lookup table would add little. mapTxStatus (getCallsStatus.ts:42-43) is a 4-way ternary. Style preference only.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F3"
+      ],
+      "summary": "getCallsStatus turns every fetch failure into 'Transaction not found'",
+      "label": "low",
+      "evidence": "WalletKitProvider.tsx:330-332 swallows every error. But methodRouter.ts:189-193 always sends -32603, and its comment says jsonrpc-utils replaces the message with 'Internal error', so the dApp can't tell the cases apart anyway. Only the developer-facing hint is lost.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Malformed 'to' passes isValidDappCall and fails later with a generic toast",
+      "label": "low",
+      "evidence": "methodRouter.ts:78 accepts any truthy call.to. A bad address only fails in the preview/compose step and shows 'Failed to build transaction' (useSendTransaction.ts:101) while the request stays pending until the user rejects it. Unlikely edge case.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F5"
+      ],
+      "summary": "DappIdentity's fallback for URLs that fail to parse is untested",
+      "label": "low",
+      "evidence": "DappIdentity.tsx:38-47 has a try/catch fallback, and no test file references DappIdentity. It is simple display logic.",
+      "category": "tests"
     },
     {
       "findings": [
         "F6"
       ],
-      "summary": "Import skips the Camera barrel for useCameraPermissionFlow",
+      "summary": "Share-view product change has no Figma reference in its description",
       "label": "nit",
-      "evidence": "ScanQrSend.container.tsx:7 is an unchanged pre-existing line. The barrel at components/Camera/index.ts does export it, and ScanQrAccount.container.tsx uses the same direct path. It's a pure style inconsistency."
+      "evidence": "This is about commit/PR description metadata, not code. The Share/SupportedNetworks changes are in the diff but are process concerns with no concrete defect.",
+      "category": "docs"
+    },
+    {
+      "findings": [
+        "F7"
+      ],
+      "summary": "New shared stripEip155Prefix duplicates web's copy, which is not switched to the shared one",
+      "label": "low",
+      "evidence": "packages/utils/src/features/walletconnect/utils.ts adds stripEip155Prefix, and apps/web/src/features/walletconnect/services/utils.ts:8 still defines its own, even though it already imports getEip155ChainId/isPairingUri from the package. Small duplication with a drift risk.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "ScanQrSend imports useCameraPermissionFlow via a deep path despite the barrel",
+      "label": "nit",
+      "evidence": "ScanQrSend.container.tsx:7 is unchanged by this PR, and the barrel already exported it (components/Camera/index.ts). Consistency only.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F9",
+        "F15"
+      ],
+      "summary": "Scanner focus effects turn the camera back on even while the error overlay is shown",
+      "label": "low",
+      "evidence": "useScan/index.ts:15-26 and ScanQrSend.container.tsx:43-54 call setIsCameraActive(true) on focus without checking errorMessage, while the WC hook gates on status (useWalletConnectScan.ts:67). It only matters if the user leaves and returns to the scanner with an error shown, which is uncommon.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F10"
+      ],
+      "summary": "review() re-entry is guarded only by composing state, not a synchronous ref",
+      "label": "low",
+      "evidence": "useSendTransaction.ts:68-72 sets composing via state. Two taps before the re-render could build twice. That is possible but unlikely at human tap speed.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F11"
+      ],
+      "summary": "Call-shape predicate copied from web instead of shared",
+      "label": "nit",
+      "evidence": "methodRouter.ts:74-82 is a ~8-line predicate mirroring web. Small duplication with no demonstrated drift.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F12"
+      ],
+      "summary": "switchActiveChainByCaip2's NOT_DEPLOYED gates are never tested",
+      "label": "medium",
+      "evidence": "WalletKitProvider.tsx:299-316 holds the only check that stops a dApp from switching to an undeployed or unconfigured chain. Tests only mock it with jest.fn() (methodRouter.test.ts:43,215), and no provider test references it.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F13"
+      ],
+      "summary": "Date.now() scanTimestamp could collide for two taps in the same millisecond",
+      "label": "wrong",
+      "evidence": "useScannedAddressToSend.ts:38 runs only after a scan, and the hasScanned/handledRef guards (ScanQrSend.container.tsx:60,76; useWalletConnectScan.ts:133,143) block a second navigation, so a same-millisecond double event can't happen.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F14"
+      ],
+      "summary": "useScan test mocks the underlying helpers instead of resolveScannedAddress",
+      "label": "nit",
+      "evidence": "This is test-design preference. Mocking the lower-level helpers still exercises the real resolveScannedAddress, so there is no concrete cost.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F16"
+      ],
+      "summary": "useScan imports scannedAddress via a deep path instead of the new barrel",
+      "label": "nit",
+      "evidence": "useScan/index.ts:6 uses '@/src/components/Camera/scannedAddress' while the barrel (components/Camera/index.ts:3) re-exports it. Import style only.",
+      "category": "convention"
     },
     {
       "findings": [
         "F17"
       ],
-      "summary": "Test hardcodes an address literal instead of using faker",
-      "label": "nit",
-      "evidence": "useScannedAddressToSend.test.tsx:4 hardcodes a checksummed address. A fixed known-valid checksummed value is reasonable for resolveScannedAddress assertions, so this is only a convention preference."
+      "summary": "getCallsStatus status/receipt mapping duplicates web instead of living in the shared eip5792 helper",
+      "label": "low",
+      "evidence": "getCallsStatus.ts:39-43 says it is verbatim from web, and web defines PARTIALLY_REVERTED=600 (safe-wallet-provider/index.ts:104), which mobile can't express. That is real duplication and drift risk, but it's a maintainability issue.",
+      "category": "convention"
     },
     {
       "findings": [
         "F18"
       ],
-      "summary": "Date.now() scanTimestamp could collide within one millisecond",
+      "summary": "HeaderQrButton's fallback setTimeout is never cleared on unmount",
       "label": "nit",
-      "evidence": "useScannedAddressToSend.ts:64 keeps the pre-existing Date.now() behaviour. The hasScanned guard at ScanQrSend.container.tsx:59,72 stops a second navigation, so a same-millisecond collision is practically unreachable."
+      "evidence": "HeaderQrButton.tsx:37-39 only resets a ref after 500ms, so it does no harm after unmount.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "Invalid-params error is built inline, duplicating the private invalidParamsError helper",
+      "label": "nit",
+      "evidence": "WalletKitProvider.tsx:71 repeats {code:-32602, message:'Invalid call parameters.'} from methodRouter.ts:54. A trivial duplication.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F20"
+      ],
+      "summary": "ConfirmTx imports WalletConnect-specific components despite the cross-feature component convention",
+      "label": "low",
+      "evidence": "ConfirmTx.container.tsx:19-20 and TransactionHeader.tsx:11 import from features/WalletConnect. mobile docs/code-style.md says components used across features belong in src/components/. This is a minor boundary inconsistency, and the finding's cited path is slightly wrong.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F21"
+      ],
+      "summary": "WalletKitProvider inlines several independent jobs and grew very large",
+      "label": "low",
+      "evidence": "WalletKitProvider.tsx holds the propose listeners (137-190), the stale-request rejection (199-252) and the deps builders (285-383) inline, against the small-function/one-job guidance in web code-style.md, which mobile adopts. Maintainability cost only.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "DappIcon badge uses raw -10 offsets",
+      "label": "nit",
+      "evidence": "DappIcon.tsx:52 top={-10} right={-10}. Tiny positioning literal, style-level.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "SegmentedControl uses a hex '#000' shadowColor instead of a token",
+      "label": "low",
+      "evidence": "components/SegmentedControl/SegmentedControl.tsx:64 hard-codes '#000', and mobile AGENTS.md says to use Tamagui tokens, not hard-coded values. A minor convention breach.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F24"
+      ],
+      "summary": "Provider getCallsStatus (fetch, receipt lookup, no-chain branches) is untested",
+      "label": "medium",
+      "evidence": "WalletKitProvider.tsx:323-363 has no test coverage: context/__tests__ contain no getCallsStatus references, and only the pure buildGetCallsResult is tested. Regressions in the fetch/receipt wiring would go unnoticed.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "A chain switch during an in-flight compose rejects the request, but review() still hands off to confirm",
+      "label": "low",
+      "evidence": "The switch listener (WalletKitProvider.tsx:212-247) removes and rejects the pending entry, yet useSendTransaction.ts:75-96 resumes after await and calls setOutstandingRequest/router.push with the stale activeSafe. That is real but needs a dApp-triggered wallet_switchEthereumChain inside the preview window, so it is a narrow race.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "borderRadius 10/8 magic numbers in SegmentedControl",
+      "label": "nit",
+      "evidence": "SegmentedControl.tsx:54,62 use literal radii. Style-level, no functional cost.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F27"
+      ],
+      "summary": "SegmentedControl's spring animation on value change is untested",
+      "label": "low",
+      "evidence": "SegmentedControl.tsx:40-46 skips the first render and then animates, and SegmentedControl.test.tsx has no rerender. The real file is components/SegmentedControl, not the cited path. Minor visual behaviour.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F28"
+      ],
+      "summary": "ConfirmTx container wiring for dApp origin and WcRejectOnBack has no test",
+      "label": "low",
+      "evidence": "features/ConfirmTx has no container test. WcRejectOnBack and TransactionHeader have their own tests, so only the glue in ConfirmTx.container.tsx is uncovered.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F29"
+      ],
+      "summary": "handledRef isn't reset on focus cleanup",
+      "label": "nit",
+      "evidence": "useWalletConnectScan.ts:143 sets it and onTryAgain resets it (line 152). The address path navigates away via replace, so today it only concerns hypothetical future code.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F30"
+      ],
+      "summary": "Send and import-account scanners duplicate their scan/error logic",
+      "label": "nit",
+      "evidence": "useScan/index.ts and ScanQrSend.container.tsx:43-92 are near-identical, but the finding itself says two copies may not justify extraction.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F31"
+      ],
+      "summary": "The composing half of the dismiss guard is untested",
+      "label": "low",
+      "evidence": "RequestSheetHost.tsx:105 has `busy || composing`. RequestSheetHost.test.tsx covers busy (line 177) but not dismiss-while-composing, which is a small coverage gap.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F32"
+      ],
+      "summary": "TransactionHeader test lives in __tests__ rather than next to the source",
+      "label": "nit",
+      "evidence": "There are 47 __tests__ directories in apps/mobile/src and 121 __tests__ files at the base commit, so this follows established practice.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F33"
+      ],
+      "summary": "Malformed hex in wallet_switchEthereumChain yields 'eip155:NaN' and a 4901 error instead of -32602",
+      "label": "low",
+      "evidence": "methodRouter.ts:149: parseInt('0xzz',16) is NaN, so switchActiveChainByCaip2 returns NOT_DEPLOYED and the dApp gets 4901. The error code is wrong but the switch is safely refused.",
+      "category": "correctness"
     }
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "usd": 0.3616902,
+  "head": "d11bd8ca41ae7ccb6835da68e428b36d2cfa983f",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At first the author deferred this to WA-2928. They then fixed it in PR commit d85b9e6ba: useHasUntrustedFallbackHandler.ts now calls identifyOfficialFallbackHandler, which checks both the Compatibility and ExtensibleFallbackHandler deployments."
+    },
+    {
+      "issue": 5,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 6c592b0, transaction-guards.test.ts:387 hardcoded version '1.4.1'. In 6a5d47de2 the test was parameterised (l2SingletonVersion), and the author replied '(3) Parameterised — the 1.5.0 MultiSend case now migrates to the 1.5.0 L2 singleton.'"
+    },
+    {
+      "issue": 7,
+      "verdict": "open",
+      "present": true,
+      "evidence": "The author's reply answers points (1)-(3) but says nothing about point (4), the factory scanner / mainnet deployment remark. No commit changes anything for it."
+    }
+  ]
+}

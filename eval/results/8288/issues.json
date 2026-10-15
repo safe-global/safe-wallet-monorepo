@@ -1,139 +1,243 @@
 {
   "usage": {
-    "usd": 0.4800322,
-    "turns": 7,
-    "wallSeconds": 55
+    "usd": 0.6769942,
+    "turns": 9,
+    "wallSeconds": 91
   },
   "issues": [
     {
       "findings": [
-        "F1"
+        "F27"
       ],
-      "summary": "Editor's config-service column shows raw data rather than overridden values",
-      "label": "wrong",
-      "evidence": "useFeatureFlagEditorData.ts doesn't exist at the reviewed commit. The diff only adds the slice, its test, the store barrel and store wiring, and grep finds no editor hook anywhere in apps/web/src."
+      "summary": "The bundle-exclusion test is skipped unless RUN_BUNDLE_TESTS is set, and nothing sets it in CI",
+      "label": "medium",
+      "evidence": "bundleExclusion.test.ts:32 falls back to describe.skip, and RUN_BUNDLE_TESTS appears nowhere in .github or package.json. The PR description admits this, but it is still the only check that keeps the editor out of production chunks, so a regression would go unnoticed.",
+      "category": "tests"
     },
     {
       "findings": [
-        "F2"
+        "F13",
+        "F30",
+        "F28"
       ],
-      "summary": "Switch always dispatches setOverride, so overrides pile up",
-      "label": "wrong",
-      "evidence": "FeatureFlagRow.tsx doesn't exist in the reviewed tree (`git ls-files` has no match). The PR adds no UI, only featureFlagOverridesSlice.ts."
-    },
-    {
-      "findings": [
-        "F3"
-      ],
-      "summary": "Stale override keys for removed FEATURES values are never pruned and still count toward selectOverrideCount",
+      "summary": "No tests cover FeatureFlagEditor or FeatureFlagSection (search filter, reset-all, toggle/revert dispatch, empty section returning null)",
       "label": "low",
-      "evidence": "featureFlagOverridesSlice.ts:29-32 counts Object.keys of the persisted state with no check against FEATURES, and nothing validates the state loaded from storage. clearAllOverrides still removes stale keys and nothing consumes the count yet, so the impact is minor."
+      "evidence": "Only FeatureFlagRow.test.tsx, the hook test and the slice test exist. FeatureFlagEditor.tsx:20-59 and FeatureFlagSection.tsx:15 have no tests. It is a dev-only tool, so the impact is limited.",
+      "category": "tests"
     },
     {
       "findings": [
-        "F4",
-        "F17"
+        "F10",
+        "F14"
       ],
-      "summary": "The feature-flags folder lacks the standard feature structure (no root index.ts, contract or feature.ts)",
+      "summary": "The editor ignores the config query's loading and error state, so every row shows 'Off' or false while loading or after a failure",
       "label": "low",
-      "evidence": "apps/web/src/features/feature-flags holds only store/, and slices.ts:42 deep-imports '@/features/feature-flags/store'. The inconsistency is real, but address-poisoning (hooks/index/store, no contract) is precedent for a store-only folder, and the PR description calls the missing index.ts deliberate."
+      "evidence": "useFeatureFlagEditorData.ts:32 reads only `data`. At lines 37/41, chains becomes [] and configValue becomes false, so every scope is 'off' and nothing tells the user the load failed. This is real but only affects the dev tool.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F21",
+        "F32"
+      ],
+      "summary": "Toggling a switch back to the config value keeps a redundant override instead of clearing it",
+      "label": "low",
+      "evidence": "FeatureFlagRow.tsx:61 always dispatches setOverride. Toggling twice leaves an override equal to configValue, which still counts in the badge and sits in the Overridden section. This is a minor UX wart, and the match indicator suggests it may be deliberate.",
+      "category": "correctness"
+    },
+    {
+      "findings": [
+        "F2",
+        "F15"
+      ],
+      "summary": "The tabIndex ternary on the revert button is dead code",
+      "label": "low",
+      "evidence": "FeatureFlagRow.tsx:85 sits inside the `{isOverridden && ...}` block that starts at line 65, so `isOverridden ? undefined : -1` always evaluates to undefined.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F3",
+        "F33"
+      ],
+      "summary": "A search with no matches leaves the area blank, with no empty-state message",
+      "label": "low",
+      "evidence": "FeatureFlagSection.tsx:15 returns null for empty rows, and FeatureFlagEditor renders no fallback when both filtered lists are empty.",
+      "category": "product"
+    },
+    {
+      "findings": [
+        "F11",
+        "F16"
+      ],
+      "summary": "The inline process.env production check is repeated in SafeSidebarContent, where it has no dead-code-elimination reason",
+      "label": "low",
+      "evidence": "useChains.ts:13-18 and pages/feature-flags.tsx explain why they need the inline check. The SafeSidebarContent.tsx useMemo check has no such comment, and safeDeveloperGroup is imported statically there anyway, so IS_PRODUCTION would do.",
+      "category": "design"
     },
     {
       "findings": [
         "F5"
       ],
-      "summary": "The bundle-exclusion marker string is too generic",
-      "label": "wrong",
-      "evidence": "No bundleExclusion test exists in the reviewed commit (`git ls-files` has no match), and the string 'local feature-flag overrides' appears nowhere in apps/web/src."
+      "summary": "The overrides slice is registered and persisted in production builds too",
+      "label": "low",
+      "evidence": "store/index.ts:67 and :95 add the reducer and persistence unconditionally. The code is tiny and applyFeatureOverrides is a no-op in production (useChains.ts:18), so the only cost is a little shipped code and state.",
+      "category": "security"
+    },
+    {
+      "findings": [
+        "F12",
+        "F24"
+      ],
+      "summary": "The feature's barrel exports the editor directly and has no contract.ts, feature.ts or createFeatureHandle, which differs from the architecture doc",
+      "label": "low",
+      "evidence": "index.ts:1 exports FeatureFlagEditor, while other features such as actions-tray and assets have contract.ts and feature.ts. The page imports it only through a guarded dynamic import, so this is a consistency and documentation issue, not a leak at this commit.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F19"
+      ],
+      "summary": "Story titles use 'FeatureFlags/' instead of the 'Features/' prefix",
+      "label": "low",
+      "evidence": "Stories under src/features use 'Features/' 62 times. The 3 new stories (FeatureFlagEditor.stories.tsx:10 and others) are the only ones using 'FeatureFlags/'.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F22"
+      ],
+      "summary": "The bundle-test marker is banner copy, not a dedicated sentinel",
+      "label": "low",
+      "evidence": "bundleExclusion.test.ts:18 matches the Alert text at FeatureFlagEditor.tsx:37. Editing that copy would make the test pass without checking anything, but at present the string appears nowhere else.",
+      "category": "design"
     },
     {
       "findings": [
         "F6"
       ],
-      "summary": "Check icon uses visibility:hidden together with aria-label, which hurts accessibility",
-      "label": "wrong",
-      "evidence": "FeatureFlagRow.tsx isn't in the reviewed tree, so the component this claim describes doesn't exist."
+      "summary": "A stale overrides entry in localStorage persists in production with no UI to clear it",
+      "label": "nit",
+      "evidence": "applyFeatureOverrides returns early in production (useChains.ts:18), so a stale entry has no effect. Staging and production also run on different origins, so there is no concrete cost.",
+      "category": "product"
+    },
+    {
+      "findings": [
+        "F25"
+      ],
+      "summary": "The Developer group JSX duplicates the DeFi group block",
+      "label": "nit",
+      "evidence": "SafeSidebarVariant.tsx:130-144 mirrors the DeFi block. It is a small, readable duplicate with no concrete cost.",
+      "category": "design"
+    },
+    {
+      "findings": [
+        "F26"
+      ],
+      "summary": "The override-count selector subscribes in production",
+      "label": "nit",
+      "evidence": "The code comment in SafeSidebarContent explains the unconditional hook call (rules of hooks), and the cost is negligible, as the finding itself admits.",
+      "category": "performance"
+    },
+    {
+      "findings": [
+        "F17"
+      ],
+      "summary": "The hook test hand-builds chains with a double cast instead of using chainBuilder",
+      "label": "nit",
+      "evidence": "useFeatureFlagEditorData.test.tsx:9 uses `as unknown as Chain`. chainBuilder exists in tests/builders/chains.ts, but this is only test style.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F18",
+        "F1"
+      ],
+      "summary": "The config-service column shows the un-overridden value, and a doc comment could say this is intended",
+      "label": "nit",
+      "evidence": "useFeatureFlagEditorData.ts:32 reads the raw query on purpose so it can compare against config (matchesCurrentChain). A comment would be nice but nothing is wrong.",
+      "category": "docs"
+    },
+    {
+      "findings": [
+        "F4"
+      ],
+      "summary": "Suggestion to change how the check icon is labelled for accessibility",
+      "label": "nit",
+      "evidence": "FeatureFlagRow.tsx:70-77 labels the icon and repeats the text in the tooltip. This is an accessibility preference without a demonstrated failure.",
+      "category": "product"
+    },
+    {
+      "findings": [
+        "F8"
+      ],
+      "summary": "Move long Tailwind class strings and the exported GRID constant into a CSS module",
+      "label": "nit",
+      "evidence": "The recent commits deliberately restyle the feature with shadcn and Tailwind, so the inline classes at FeatureFlagRow.tsx:19/46 are a style choice.",
+      "category": "style"
     },
     {
       "findings": [
         "F7"
       ],
-      "summary": "Slice actions and selectors have no consumer outside the test",
-      "label": "low",
-      "evidence": "grep finds setOverride, clearOverride and selectOverrideCount only in featureFlagOverridesSlice.ts and its test. At this commit the slice is dead code, even though the PR description describes an editor, hook wiring and sidebar changes that aren't here."
+      "summary": "Components are flat files rather than one folder per component",
+      "label": "nit",
+      "evidence": "The components/ layout is a style preference, and tests and stories sit next to the files.",
+      "category": "convention"
     },
     {
       "findings": [
-        "F8",
-        "F12"
+        "F20"
       ],
-      "summary": "Overrides are persisted and broadcast in every environment, production included, and loaded without validation",
-      "label": "low",
-      "evidence": "store/index.ts:67 and :95 register and persist the slice unconditionally, and lines 105-106 persist and broadcast it. Nothing reads the overrides yet, so they have no effect in production today. The only concrete cost is a harmless stale localStorage key."
+      "summary": "The w-12 alignment spacer is a magic value",
+      "label": "nit",
+      "evidence": "FeatureFlagRow.tsx:58 is a small layout spacer, and the HIDDEN comment covers the alignment intent.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F29"
+      ],
+      "summary": "Mixed absolute and relative imports inside the feature",
+      "label": "nit",
+      "evidence": "FeatureFlagEditor.tsx:7 imports '@/features/feature-flags/store' while other imports in the file are relative. This matches the documented public store import path and is only style.",
+      "category": "convention"
+    },
+    {
+      "findings": [
+        "F31"
+      ],
+      "summary": "No test for an override of a feature missing from the Chain features enum",
+      "label": "nit",
+      "evidence": "The finding itself says the string cast at useChains.ts:20-25 is safe, so the test has no concrete value.",
+      "category": "tests"
+    },
+    {
+      "findings": [
+        "F34"
+      ],
+      "summary": "Rename the feature-flags folder",
+      "label": "nit",
+      "evidence": "No concrete problem is identified. The cited path features/feature-flag-overrides does not even exist, and 'feature-flags' is descriptive.",
+      "category": "style"
+    },
+    {
+      "findings": [
+        "F23"
+      ],
+      "summary": "Sorting runs on every render",
+      "label": "wrong",
+      "evidence": "useFeatureFlagEditorData.ts:36-59 does the sort inside useMemo keyed on data, overrides and chainId, not on every render. The cost is also trivial.",
+      "category": "performance"
     },
     {
       "findings": [
         "F9"
       ],
-      "summary": "Weak clearOverride test and no persistence test",
-      "label": "low",
-      "evidence": "featureFlagOverridesSlice.test.ts:30-34 starts from one key, so a reducer that wiped all state would still pass. Persisting the slice has no test. Both are simple code paths, so the regression risk is small."
-    },
-    {
-      "findings": [
-        "F10"
-      ],
-      "summary": "Spacer span in FeatureFlagRow needs a comment",
+      "summary": "The claim is that visibility:hidden hides the match indicator from screen readers even when matchesCurrentChain is true",
       "label": "wrong",
-      "evidence": "FeatureFlagRow.tsx doesn't exist at the reviewed commit."
-    },
-    {
-      "findings": [
-        "F11"
-      ],
-      "summary": "FEATURES gets re-sorted on every render",
-      "label": "wrong",
-      "evidence": "useFeatureFlagEditorData.ts doesn't exist in the reviewed tree. The PR adds no sorting code."
-    },
-    {
-      "findings": [
-        "F13"
-      ],
-      "summary": "No test for applyFeatureOverrides with an unknown feature",
-      "label": "wrong",
-      "evidence": "grep finds applyFeatureOverrides nowhere in apps/web/src at this commit, so there is no function to test."
-    },
-    {
-      "findings": [
-        "F14"
-      ],
-      "summary": "selectOverrideCount subscribes the sidebar to the store in production",
-      "label": "wrong",
-      "evidence": "SafeSidebarContent.tsx exists but never references selectOverrideCount (grep matches only the slice and its test). The PR diff doesn't touch that file."
-    },
-    {
-      "findings": [
-        "F15"
-      ],
-      "summary": "The feature-flags folder name is unclear",
-      "label": "nit",
-      "evidence": "This is a naming preference with no concrete cost. The file it cites (features/feature-flag-overrides/__tests__/bundleExclusion.test.ts) doesn't exist."
-    },
-    {
-      "findings": [
-        "F16"
-      ],
-      "summary": "No test for FeatureFlagSection's empty state",
-      "label": "wrong",
-      "evidence": "No FeatureFlagSection component exists in the reviewed commit (grep finds no match)."
-    },
-    {
-      "findings": [
-        "F18"
-      ],
-      "summary": "No tests for FeatureFlagEditor search or reset-all",
-      "label": "wrong",
-      "evidence": "No FeatureFlagEditor component exists in the reviewed commit. The PR adds only the slice and store wiring."
+      "evidence": "FeatureFlagRow.tsx:72 applies HIDDEN only when matchesCurrentChain is false. When it is true, style is undefined and the labelled icon is exposed, as the test's toBeVisible assertion confirms.",
+      "category": "correctness"
     }
   ]
 }

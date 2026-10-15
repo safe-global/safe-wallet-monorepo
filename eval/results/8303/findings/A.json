@@ -1,50 +1,35 @@
 {
-  "usd": 0.045002,
+  "usd": 0.062124,
   "findings": [
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
-      "line": 25,
-      "claim": "The proposeBehavior field, its type, and its initial value are added but nothing in the codebase reads them; the only fetch override in the app does not consult this state, so this is dead, unused state."
+      "file": "apps/mobile/src/tests/e2e-maestro/createE2eStore.ts",
+      "line": 6,
+      "claim": "A commit replaced an accurate comment with one claiming the state is shallow-cloned and that in-place mutation of a nested value would corrupt initialState and break reset(), but the code actually performs a full deep copy on store creation and again on reset(), so initialState cannot be corrupted and reset() still works; this gives readers an incorrect mental model of the store and should be reverted or reworded to state only what is true."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
-      "line": 73,
-      "claim": "The doc comment for proposeBehavior describes an e2e fetch interceptor for CGW's /propose endpoint that does not exist anywhere in the diff or repo, so the comment documents behavior that isn't actually implemented."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/proposeFetchMock.ts",
+      "line": 661,
+      "claim": "The requestUrl handling supports string, URL, and Request inputs, but the tests only exercise the string case even though the app's CGW client, built on RTK's fetchBaseQuery, calls fetch with a Request object, meaning the branch the app actually uses (input.url) is untested; if that branch broke, unit tests would still pass and the only symptom would be an unexplained timeout in the tx-send-cgw-failure Maestro run."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKitE2eState.test.ts",
-      "line": 13,
-      "claim": "The test asserts proposeBehavior: 'live', providing coverage for a behavior that has no real implementation yet, which is misleading test coverage."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/walletConnectDappsSetup.test.ts",
+      "line": 587,
+      "claim": "The same assertion (expect(request.params.chainId).toBe(`eip155:${…}`)) appears on both line 587 and line 590, apparently left over from an edit, and the duplicate line should be removed."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
-      "line": 65,
-      "claim": "The comment claims that WcResponseIndicator surfaces the recorded response to Maestro via error-code/safeTxHash-match test-ids, but no such component exists anywhere in the repository, so the comment asserts something false."
+      "file": "apps/mobile/e2e/tests/walletconnect-dapps/tx-send-readonly-safe.yml",
+      "line": 7,
+      "claim": "A commit removed ticket references from e2e comments, but this file still contains a comment referencing the ticket's 'Add a signer' CTA not existing in the implementation, which should be deleted or reworded to remove the ticket mention."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKitE2eState.ts",
-      "line": 66,
-      "claim": "A second comment repeats the same false claim about WcResponseIndicator, and as a result lastRequestResponse is write-only: there is no indicator component, no test-id, and no consuming e2e flow that reads it."
+      "file": "apps/mobile/e2e/tests/walletconnect-dapps/__suite__.yml",
+      "line": 6,
+      "claim": "The suite header still describes only a 'pairing & session-approval suite', but the suite now also includes connected-apps management flows and transaction-request flows, so the header should be updated to reflect all three groups."
     },
     {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
-      "line": 54,
-      "claim": "JsonRpcResponseLike hand-duplicates a type already exported by the installed @walletconnect/jsonrpc-utils dependency, which is already used elsewhere in this same feature, making the justification for avoiding a direct dependency invalid."
-    },
-    {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
-      "line": 56,
-      "claim": "The hand-duplicated type already diverges from the real JsonRpcError shape by omitting error.data, and because the fake object is cast through unknown to IWalletKit, TypeScript cannot catch this or any future drift if the SDK's shape changes."
-    },
-    {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/walletKit.e2e.ts",
-      "line": 72,
-      "claim": "The code uses two different presence checks for the same purpose: 'result' in response (key-presence, prototype-chain-walking) versus response.error (truthiness check), so a response with result: undefined records {result: undefined} while one with error: undefined records nothing, an inconsistent trap for future callers even though current call sites avoid triggering it."
-    },
-    {
-      "file": "apps/mobile/src/features/WalletConnect/Wallet/__tests__/walletKit.e2e.test.ts",
-      "line": 48,
-      "claim": "The tests hardcode the literal string 'e2e-session-topic' instead of using the exported E2E_SESSION_TOPIC constant that holds the same value, which is unnecessary duplication of a value already available as a named constant."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/walletConnectDappsSetup.ts",
+      "line": 730,
+      "claim": "E2E_TX_OWNER_ADDRESS duplicates the first owner address from mockData.ts instead of referencing it, and a recipient address (0x81BdB0…) is repeated as a raw string at two other locations rather than a named constant, so if the fixture Safe's owners change these copies will silently drift and break the tx flows without an obvious cause."
     }
   ]
 }

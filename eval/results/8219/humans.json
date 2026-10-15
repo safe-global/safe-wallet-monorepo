@@ -1,0 +1,18 @@
+{
+  "usd": 0.3101228,
+  "head": "aac0aeb1d56730a439a7ac2f556b35333cd4c0b2",
+  "verdicts": [
+    {
+      "issue": 2,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The `addressWithoutPrefix as `0x${string}`` cast in SafeAccountInput/index.tsx predates the PR, and HEAD leaves it as it was. The bot called it out of scope in all three reviews, and the third review said LGTM with the cast still in place, so it was declined for this PR."
+    },
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 878a50a51 the useWatch comment in index.tsx took two lines. Commit 051c30f0b (\"...tighten comment\") cut it to one: \"useWatch subscribes this child to the field; the watch() method only re-renders the form root.\" The bot's second review confirmed the comment \"was also tightened as suggested.\""
+    }
+  ]
+}

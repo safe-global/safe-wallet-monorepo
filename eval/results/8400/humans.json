@@ -1,0 +1,42 @@
+{
+  "usd": 0.3204486,
+  "head": "67d58de744cda79fd3e34a7292bcfc962dc24055",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author declined the hardening in the 67d58de follow-up comment: attestations are self-authenticating, and gating on the proposal would degrade VERIFIED checks on partial fetches. Commit 67d58de only adds a comment explaining this, at deriveCheckState.ts ~line 82; the logic did not change."
+    },
+    {
+      "issue": 5,
+      "verdict": "open",
+      "present": true,
+      "evidence": "types/snapshot.ts:27 still declares `events: NormalizedCheckEvent[]`. The author's follow-up comment does not mention this item, and 67d58de did not touch the file."
+    },
+    {
+      "issue": 6,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 67d58de adds an 'order independence' test in deriveCheckState.test.ts that asserts a reversed event set derives the same status. The author's follow-up comment calls this out."
+    },
+    {
+      "issue": 11,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author skipped item (2) in the follow-up comment because the UNVERIFIED/PENDING fallthrough is already pinned by tests. No exhaustive switch was added in 67d58de."
+    },
+    {
+      "issue": 19,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 67d58de adds the requested invariant note on `hasNegativeVerdict` about the coupling between resolveDispute and OracleResult (deriveCheckState.ts ~lines 38-43). The author's comment confirms it."
+    },
+    {
+      "issue": 20,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author skipped item (6), saying `deadlineBlockOf` is a per-poll fold over a handful of events and is cold. `BigInt(event.deadlineBlock)` remains at deriveCheckState.ts:23."
+    }
+  ]
+}

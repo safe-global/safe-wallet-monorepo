@@ -1,35 +1,35 @@
 {
-  "usd": 0.06088160000000001,
+  "usd": 0.036421999999999996,
   "findings": [
     {
       "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
       "line": 43,
-      "claim": "The focus effect unconditionally sets the camera active and resets the scanned flag even when an error overlay is currently displayed, so regaining focus after a blur shows a live camera behind the 'Not a valid address' overlay and can trigger a new scan before the user taps 'Try again'."
+      "claim": "The focus effect unconditionally sets the camera active and resets the scanned flag when the screen regains focus, even if an error overlay is currently shown for an invalid address. This puts a live camera behind the error overlay and can trigger scan logic on a new frame before the user dismisses the overlay, so the effect should be gated on the absence of an error message or the error should be cleared on focus."
     },
     {
       "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/index.ts",
       "line": 15,
-      "claim": "The same focus effect issue applies here: it re-activates the camera and resets the scanned ref without checking whether an error message is currently shown, allowing the camera and error overlay states to disagree."
+      "claim": "The focus effect unconditionally sets the camera active and resets the scanned flag when the screen regains focus, even if an error overlay is currently shown for an invalid address. This puts a live camera behind the error overlay and can trigger scan logic on a new frame before the user dismisses the overlay, so the effect should be gated on the absence of an error message or the error should be cleared on focus."
     },
     {
       "file": "apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts",
       "line": 42,
-      "claim": "handledRef is never reset on focus/cleanup and currently only works because the address path uses router.replace to unmount the scanner; if a future navigation path keeps the scanner mounted, handledRef.current staying true would silently swallow all subsequent scans with no user feedback, and the reliance on replace unmounting the modal is undocumented."
+      "claim": "handledRef is not reset on focus cleanup; it currently only works because the address path unmounts the scanner via router.replace. If a future code path keeps the scanner mounted instead of unmounting it, handledRef staying true would silently suppress all subsequent scans with no indication to the user, so the invariant should be documented with a comment or the ref should be reset in the cleanup."
     },
     {
       "file": "apps/mobile/src/features/ImportReadOnly/hooks/useScan/useScan.test.tsx",
       "line": 32,
-      "claim": "The test mocks parsePrefixedAddress and isValidAddress even though the hook now calls resolveScannedAddress, coupling the test to internal helpers rather than mocking @/src/components/Camera/scannedAddress directly."
+      "claim": "The test mocks parsePrefixedAddress and isValidAddress transitively even though the hook now calls resolveScannedAddress, coupling the test to internal implementation helpers rather than the actual dependency; mocking @/src/components/Camera/scannedAddress directly would reduce this coupling."
     },
     {
       "file": "apps/mobile/src/features/Send/ScanQrSend.container.tsx",
       "line": 7,
-      "claim": "The import reaches directly into @/src/components/Camera/useCameraPermissionFlow instead of using the Camera barrel export at apps/mobile/src/components/Camera/index.ts:4, which is inconsistent with the other Camera import in the same file."
+      "claim": "The import reaches directly into @/src/components/Camera/useCameraPermissionFlow instead of using the barrel export at apps/mobile/src/components/Camera/index.ts, which is already used for other Camera imports in the same file, creating inconsistency."
     },
     {
-      "file": "apps/mobile/src/features/Send/hooks/useScannedAddressToSend.ts",
+      "file": "apps/mobile/src/features/Send/useScannedAddressToSend.ts",
       "line": 38,
-      "claim": "scanTimestamp is generated with Date.now().toString(), so two rapid taps within the same millisecond produce identical values and the route would not treat them as distinct new scans; a monotonic counter would avoid this."
+      "claim": "Date.now().toString() is used for scanTimestamp, but two rapid taps landing within the same millisecond produce identical values, so the route would not treat them as a new event; a monotonic counter or ref-based increment would be more deterministic."
     }
   ]
 }

@@ -1,0 +1,42 @@
+{
+  "usd": 0.4344808,
+  "head": "eb4efccb921e431d9e3fd64278332b27a9d7eb5d",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "At 8006ed the Created and last Signed rows used isLast={... && !showExecutionRow}. Commit eb4efccb9 adds a showsSafenetRow flag in TxSigners/index.tsx:173 and folds it into both isLast props (lines ~281 and ~292). The author confirmed the fix in the thread at TxSigners:270."
+    },
+    {
+      "issue": 2,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "tmjssz asked for the `isSafenetEnabled &&` wrapper around SafenetAuditRow to be moved. In eb4efccb9 the author removed it and now mounts <safenet.SafenetAuditRow> directly, relying on the registry stub, and replied \"Done\" in the thread at TxSigners:287."
+    },
+    {
+      "issue": 3,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The claim is wrong: useLoadFeature.ts:193-194 returns early from the effect when isEnabled !== true, so no import() runs. The author's reply that the registry already stubs disabled features explains this is intended, and the loading code was not changed."
+    },
+    {
+      "issue": 8,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "tmjssz asked for this in the .env.example:31 thread and the author replied \"Done\". Commit eb4efccb9 removes NEXT_PUBLIC_SAFENET_CHECKS_FORCE from .env.example and reduces useIsSafenetChecksEnabled to useHasFeature(FEATURES.SAFENET_CHECKS) === true in safenet-checks/index.ts."
+    },
+    {
+      "issue": 15,
+      "verdict": "open",
+      "present": true,
+      "evidence": "SafenetAuditRow.tsx:65 still calls useChain(snapshot?.chainId ?? ''). The file did not change after 8006ed and nobody responded to this bot point."
+    },
+    {
+      "issue": 16,
+      "verdict": "open",
+      "present": true,
+      "evidence": "SafenetAuditRow.tsx:79-80 still uses snapshot?.events after the early return on !snapshot at line 68. The file did not change after 8006ed and nobody replied to the point."
+    }
+  ]
+}

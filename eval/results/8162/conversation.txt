@@ -1,0 +1,209 @@
+COMMENT
+[github-actions 2026-06-19T11:04:45Z] <!-- add-pr-comment:praul -->
+
+## Branch preview
+✅  Deploy successful!
+
+**Website:**
+https://tim-scan-address-from-header-scanner--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+
+**Storybook:**
+https://tim-scan-address-from-header-scanner--walletweb.review.5afe.dev/storybook/
+
+COMMENT
+[tmjssz 2026-06-19T11:04:50Z] @claude review
+
+COMMENT
+[claude 2026-06-19T11:05:05Z] **Claude finished @tmjssz's task in 3m 18s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27821966198)
+
+---
+### Claude PR Review
+
+- [x] Read PR context
+- [x] Read changed files
+- [x] Analyze code quality, bugs, performance, security, tests
+- [x] Post review feedback
+
+Nice consolidation — single-sourced address parsing, shared error overlay, three scanners now consistent. A few things worth a look:
+
+### Potential issues
+
+1. **Focus effect re-activates the camera even when the error overlay is shown** — `apps/mobile/src/features/Send/ScanQrSend.container.tsx:43-55` and `apps/mobile/src/features/ImportReadOnly/hooks/useScan/index.ts:15-28`.
+   If the screen blurs while the lens shows the "Not a valid address" overlay (`errorMessage` set, `isCameraActive=false`), and then it regains focus, the effect unconditionally calls `setIsCameraActive(true)` and resets `hasScanned.current = false`. The user lands on a live camera *behind* the error overlay, and a new frame can fire scan logic again before they tap "Try again". Suggest gating on `!errorMessage`, or clearing `errorMessage` on focus so the two states can't disagree.
+
+2. **`handledRef` isn't reset on focus cleanup** — `apps/mobile/src/features/WalletConnect/Wallet/hooks/useWalletConnectScan.ts:42-74`.
+   Today it works because the address path uses `router.replace`, which unmounts the scanner. But if any future path keeps the scanner mounted (e.g. a back-nav from `/(send)/recipient`), `handledRef.current === true` will silently swallow every subsequent scan with no UX cue. Mirroring `pairingRef` and resetting in the cleanup (or in `onTryAgain` only, which is what it does today) is defensible — but worth a one-line comment that the invariant relies on `replace` unmounting the modal.
+
+### Nits / cleanup
+
+3. **Brittle test mocks** — `apps/mobile/src/features/ImportReadOnly/hooks/useScan/useScan.test.tsx:32-38`. The hook now calls `resolveScannedAddress`, but the test still mocks `parsePrefixedAddress` / `isValidAddress` transitively. Mocking `@/src/components/Camera/scannedAddress` directly would make the test less coupled to internal helpers.
+
+4. **Inconsistent import** — `apps/mobile/src/features/Send/ScanQrSend.container.tsx:7` reaches into `@/src/components/Camera/useCameraPermissionFlow`, but the barrel at `apps/mobile/src/components/Camera/index.ts:4` already re-exports it. Use the barrel for consistency with the other Camera imports on line 6.
+
+5. **`useScannedAddressToSend.ts:38` — `Date.now().toString()` for `scanTimestamp`**. Works, but if two rapid taps land in the same millisecond the param is identical and the route doesn't treat them as new. A monotonic counter (or `useRef` increment) would be deterministic. Low impact.
+
+### Looks good
+
+- Two refs (`pairingRef`, `handledRef`) for the two distinct burst-frame paths — clear and well-tested.
+- Shared `resolveScannedAddress` + `INVALID_ADDRESS_MESSAGE` keep the address contract in one place; the wc-specific "Unrecognised QR code" copy stays local, which is correct (wc accepts a superset).
+- Container tests assert the surfaces a user sees (overlay shown / heading hidden / chain-mismatch toast / nav call) rather than internal state. Good.
+- `useScannedAddressToSend` cleanly separates "warn" + "navigate" so the in-Send vs header scanner can pick their nav mode.
+ · `tim/scan-address-from-header-scanner`
+
+COMMENT
+[github-actions 2026-06-19T11:20:24Z] <!-- add-pr-comment:oneshot-clickthrough -->
+
+## 🎬 One-shot clickthrough
+
+This PR doesn't add or modify any one-shot clickthrough, so nothing was recorded.
+
+Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](https://github.com/safe-global/safe-wallet-monorepo/blob/tim/wa-2323-my-code-tab-reuse-sharereceive-component/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
+
+COMMENT
+[tmjssz 2026-06-19T11:57:58Z] @claude review again now
+
+COMMENT
+[claude 2026-06-19T11:58:14Z] **Claude finished @tmjssz's task in 3m 15s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27824320122)
+
+---
+### Claude PR Review (re-run)
+
+All five points from the prior review were addressed by the latest commits (`a2d1bc4`, `ee4b692`, `e5fca38`, `93b5d7c`, `af1b17e`) — focus-effect now refuses to re-arm behind the error overlay, `handledRef` is documented and cleaned up on focus blur, the `useScan` test mocks `resolveScannedAddress` directly, the Camera barrel is used for `useCameraPermissionFlow` in Send, and `scanNonce` is a deterministic counter. Looks good.
+
+A few small things worth a look in this pass:
+
+### Things to improve
+
+1. **`useScan/index.ts:6` still bypasses the Camera barrel** — `import { resolveScannedAddress, INVALID_ADDRESS_MESSAGE } from '@/src/components/Camera/scannedAddress'`. The Send container and the WC container both went through `'@/src/components/Camera'` after `93b5d7c`. Importing through the barrel here would make the three scanners line up exactly.
+
+2. **Chain-mismatch toast may flash-then-vanish on cross-route navigation** — `useScannedAddressToSend.ts:31` calls `toast.show(...)`, then `navigateToRecipient` immediately fires `router.replace` (header) or `router.dismissTo` (in-Send). The `<ToastViewport>` is mounted *inside* `WalletConnectScanContainer.tsx:145` and `ScanQrSend.container.tsx:124`. When the scanner unmounts on navigation, its viewport unmounts too — so a toast that was just queued may never get a chance to render to the user. Worth confirming on-device that the warning is actually visible after the route change; if not, the viewport needs to live on the destination screen (or globally).
+
+3. **`scanSeq` is process-scoped state in a hooks module** — fine in practice and clean compared to `Date.now()`, but worth a one-line note that it's intentional module-level singleton state (it survives the scanner unmount, which is the whole point). Otherwise a reader skimming `useScannedAddressToSend.ts:12` might "fix" it into a `useRef` and break the cross-mount uniqueness.
+
+### Nits
+
+- `WalletConnectScanContainer.tsx:76-87` — `onAddressScanned` returns `false` for "not an address" without distinguishing "definitely not an address" from "couldn't parse". Today both paths fall through to "Unrecognised QR code" in the hook, which is correct. Just noting that the boolean contract is coarse — if a third format (e.g. EIP-681) is added later, the contract may need a tri-state.
+- `useWalletConnectScan.ts:155-162` — `onTryAgain` resets `handledRef`. In practice the address path never lands on `error` (it navigates away via `replace`), so this reset is dead code today; harmless defensiveness.
+
+### Looks good
+
+- Three scanners (header / in-Send / add-account) now share `resolveScannedAddress`, `INVALID_ADDRESS_MESSAGE`, and `ScanErrorOverlay` — single source of truth, easy to reason about.
+- Focus effect's `errorRef` mirror pattern is consistent between `ScanQrSend.container.tsx:50-51` and `useScan/index.ts:17-18` — no `errorMessage` in the focus deps, which would otherwise re-run on every keystroke.
+- Container tests assert what the user sees (overlay shown, heading hidden, navigation called) rather than internal state — robust to refactors.
+- `useScannedAddressToSend` cleanly separates "warn" + "navigate" so each scanner can pick its nav mode (`dismissTo` vs `replace`) without duplicating the chain-mismatch path.
+ · `tim/scan-address-from-header-scanner`
+
+COMMENT
+[tmjssz 2026-06-19T12:19:57Z] @claude review again.
+
+For issue 2 (chain-mismatch toast on navigation): Already handled. The root SafeToastProvider (`app/_layout.tsx`) hosts a global CurrentToast + ToastViewport
+
+COMMENT
+[claude 2026-06-19T12:20:12Z] **Claude finished @tmjssz's task in 3m 21s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27825311978)
+
+---
+### Claude PR Review (re-run)
+
+All five points from the previous review are addressed by the latest commits (`a2d1bc4`, `ee4b692`, `e5fca38`, `93b5d7c`, `af1b17e`, `2b3b281`, `a8156bd`):
+
+- focus-effect no longer re-arms behind the error overlay,
+- `handledRef` is documented and cleaned on focus blur,
+- `useScan` test mocks `resolveScannedAddress` directly,
+- the Camera barrel is used everywhere (Send container, `useScan`, WC container),
+- `scanNonce` is a deterministic counter with a comment explaining the module-level singleton.
+
+Acknowledging the toast clarification: global `<ToastViewport>` lives in `SafeToastProvider` (apps/mobile/src/theme/provider/toastProvider.tsx:17), so the chain-mismatch warning survives the route change — agreed, point dropped.
+
+A couple of small things in this pass:
+
+### Things to improve
+
+1. **Local `<ToastViewport>` is redundant now that there's a global one** — `apps/mobile/src/features/Send/ScanQrSend.container.tsx:124` and `apps/mobile/src/features/WalletConnect/Wallet/components/WalletConnectScan.container.tsx:145` both still mount an unnamed `<ToastViewport multipleToasts={false} left={0} right={0} />`. The global `SafeToastProvider` already mounts an unnamed viewport, so Tamagui sees two viewports with the default name. Two consequences worth checking on-device:
+   - Pre-navigation: while the scanner is mounted, the local viewport (mounted later in the tree) may "win" and render the toast at the bottom of the lens instead of the global top position the rest of the app uses.
+   - Post-navigation: when the scanner unmounts, the toast smoothly reassociates with the remaining global viewport — which is precisely what makes the cross-route case work today. If anyone "cleans up" by adding `name=` to the local one in the future, this implicit fallback breaks. Either remove the local viewports outright (consistent with `useScan` which dropped its viewport in this PR) or note the dependency. [Fix this →](https://claude.ai/code?q=On%20branch%20tim/scan-address-from-header-scanner%2C%20remove%20the%20now-redundant%20local%20%3CToastViewport%3E%20from%20apps/mobile/src/features/Send/ScanQrSend.container.tsx%20line%20124%20and%20apps/mobile/src/features/WalletConnect/Wallet/components/WalletConnectScan.container.tsx%20line%20145.%20The%20global%20SafeToastProvider%20already%20mounts%20one.%20Verify%20chain-mismatch%20toasts%20still%20render%20at%20the%20top%20after%20the%20change.&repo=safe-global/safe-wallet-monorepo)
+
+2. **`useScan/index.ts:3–4` imports `expo-router` twice** — `useRouter` and `useFocusEffect` come from the same module; collapsing into one import is mechanical and consistent with `useWalletConnectScan.ts:2`.
+
+### Nits
+
+- `useWalletConnectScan.ts:155-162` — `onTryAgain` resets `handledRef`. In practice the address path never lands on `error` (it navigates away via `replace`), so this reset is dead code today; harmless defensiveness, kept consistent with `pairingRef`.
+- `WalletConnectScanContainer.tsx:76-87` — `onAddressScanned` returns a boolean. Coarse but correct contract for today's two recognised QR types (wc / address). If EIP-681 is added later, a tri-state may be cleaner.
+
+### Looks good
+
+- Three scanners (header / in-Send / add-account) share `resolveScannedAddress`, `INVALID_ADDRESS_MESSAGE`, and `ScanErrorOverlay` — single source of truth, easy to reason about.
+- The `errorRef` mirror pattern is consistent between `ScanQrSend.container.tsx:50-51` and `useScan/index.ts:17-18` — keeps `errorMessage` out of the focus-effect deps so re-running the effect doesn't fight live state.
+- Container tests assert what the user sees (overlay shown / heading hidden / chain-mismatch toast / nav call) rather than internal state.
+- `useScannedAddressToSend` cleanly separates "warn" + "navigate" so each scanner picks `dismissTo` vs `replace` without duplicating the chain-mismatch path.
+- `scanSeq` comment makes the cross-mount invariant explicit; reads well.
+ · `tim/scan-address-from-header-scanner`
+
+COMMENT
+[tmjssz 2026-06-19T12:36:52Z] @claude review again
+
+COMMENT
+[claude 2026-06-19T12:37:06Z] **Claude finished @tmjssz's task in 1m 51s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27826098575)
+
+---
+### Claude PR Review (re-run)
+
+All five items from the previous pass were addressed by `0aed29f`, `2eec3b0`, `a8156bd`, `2b3b281`, `af1b17e`:
+
+- duplicate `expo-router` import in `useScan` collapsed,
+- redundant local `<ToastViewport>` removed from both `ScanQrSend.container.tsx` and `WalletConnectScan.container.tsx` (global one in `SafeToastProvider` is now the only viewport — chain-mismatch toast survives the route change cleanly),
+- `scanSeq` documented as an intentional module-level singleton,
+- `useScan` imports `resolveScannedAddress`/`INVALID_ADDRESS_MESSAGE` via the Camera barrel,
+- `scanNonce` is a deterministic counter.
+
+Small things left over in this pass:
+
+### Things to improve
+
+1. **`ScanQrAccount.container.tsx:6` still bypasses the Camera barrel** — `import { useCameraPermissionFlow } from '@/src/components/Camera/useCameraPermissionFlow'`. After `2b3b281` and `93b5d7c`, this is the only remaining direct deep import; the other two scanners (Send container, WC container) and `useScan` all go through `@/src/components/Camera`. Cheap one-line consistency fix. [Fix this →](https://claude.ai/code?q=On%20branch%20tim%2Fscan-address-from-header-scanner%2C%20change%20apps%2Fmobile%2Fsrc%2Ffeatures%2FImportReadOnly%2FScanQrAccount.container.tsx%20line%206%20to%20import%20useCameraPermissionFlow%20from%20%27%40%2Fsrc%2Fcomponents%2FCamera%27%20(the%20barrel)%20instead%20of%20%27%40%2Fsrc%2Fcomponents%2FCamera%2FuseCameraPermissionFlow%27%2C%20to%20match%20the%20other%20scanner%20files.&repo=safe-global/safe-wallet-monorepo)
+
+2. **`useScan/index.ts:19-31` skips its cleanup when an error overlay is showing** — early-return on `errorRef.current` is correct in intent (don't re-arm behind the error), but it also means the cleanup that sets `setIsCameraActive(false)` on blur isn't registered for that render. In practice the camera is already off (line 54 paused it before the error overlay), so this is benign today. If anyone later flips `setIsCameraActive(true)` somewhere else while an error is up, the blur won't pause it. Worth either returning the same cleanup unconditionally or adding a one-line note that the camera-off invariant is upheld at the error-set site.
+
+### Nits
+
+- `useWalletConnectScan.ts:155-162` — `onTryAgain` resets `handledRef`. Address path never lands on `error` today (it navigates away via `replace`), so this reset is dead code; kept for symmetry with `pairingRef`, which is fine.
+- `WalletConnectScanContainer.tsx:75-86` — `onAddressScanned` returns a boolean. Coarse but correct for today's two QR types; a tri-state would be cleaner if EIP-681 lands later.
+
+### Looks good
+
+- Three scanners share `resolveScannedAddress`, `INVALID_ADDRESS_MESSAGE`, and `ScanErrorOverlay` — single source of truth.
+- Local `<ToastViewport>`s removed from both scanners now that `SafeToastProvider` mounts the global one — toasts queued just before navigation reassociate with the global viewport on unmount, exactly what makes the cross-route case work.
+- `scanSeq` comment makes the cross-mount uniqueness invariant explicit; reads well and pre-empts the obvious "fix this into a `useRef`" reflex.
+- `errorRef` mirror pattern between `ScanQrSend.container.tsx:49-50` and `useScan/index.ts:16-17` keeps `errorMessage` out of focus-effect deps without fighting live state.
+- Container tests assert what the user sees (overlay / heading / nav call / toast) rather than internal state.
+ · `tim/scan-address-from-header-scanner`
+
+COMMENT
+[tmjssz 2026-06-19T13:32:36Z] @claude review again
+
+COMMENT
+[claude 2026-06-19T13:32:55Z] **Claude finished @tmjssz's task in 2m 40s** —— [View job](https://github.com/safe-global/safe-wallet-monorepo/actions/runs/27828805925)
+
+---
+### Claude PR Review (re-run)
+
+Both items from the previous pass are addressed:
+
+- **`useCameraPermissionFlow` now via the Camera barrel** in `ScanQrAccount.container.tsx:6` (`1373b30`) — last deep Camera import gone; all four scanners + `useScan` line up.
+- **Focus cleanup always registered** in `useScan/index.ts:19-30` and `ScanQrSend.container.tsx:52-63` (`42ee31c`) — the `setIsCameraActive(false)` cleanup now runs on blur unconditionally, so the invariant holds even if any future code path flips `isCameraActive` to true while permission is missing or an error is up. Matches the WC scanner.
+
+I don't see meaningful new issues in this pass. The remaining items below are all previously-noted nits worth either leaving as-is or sweeping in a follow-up if anyone touches these files.
+
+### Pre-existing nits (carried from prior reviews — leave or sweep later)
+
+- **`useWalletConnectScan.ts:155-162`** — `onTryAgain` resets `handledRef`. Defensive only: the address path navigates via `router.replace`, which unmounts the modal, so it never lands on `error`. Kept for symmetry with `pairingRef`; fine.
+- **`WalletConnectScan.container.tsx:75-86`** — `onAddressScanned` returns a boolean. Coarse but correct for the two QR types recognised today (wc / address). If EIP-681 is added later, a tri-state may read cleaner.
+
+### Looks good
+
+- Three scanners (header / in-Send / add-account) share `resolveScannedAddress`, `INVALID_ADDRESS_MESSAGE`, and `ScanErrorOverlay` — one source of truth across the surfaces this PR touches.
+- `errorRef`-mirrors-`errorMessage` pattern is consistent between `ScanQrSend.container.tsx:49-50` and `useScan/index.ts:16-17` — keeps `errorMessage` out of focus-effect deps without fighting live state.
+- New test `useScan.test.tsx:119-136` locks in the "don't re-arm camera behind error overlay" behavior added in `a2d1bc4`.
+- `scanSeq` comment makes the cross-mount uniqueness invariant explicit and pre-empts the reflex to "fix" it into a `useRef`.
+- Local `<ToastViewport>`s removed in favor of `SafeToastProvider`'s global one — chain-mismatch toasts now reassociate cleanly on scanner unmount.
+- Container tests assert what the user sees (overlay / heading / nav call / toast) rather than internal state.
+ · `tim/scan-address-from-header-scanner`

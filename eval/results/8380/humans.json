@@ -1,0 +1,18 @@
+{
+  "usd": 0.324438,
+  "head": "3231a0b6a77c19c9e1d38a3ab5733811bc45bd7b",
+  "verdicts": [
+    {
+      "issue": 2,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "ZKSYNC_PROXY_BYTECODE_HASH (apps/web/src/features/multichain/utils/utils.ts:107) is unchanged at HEAD. In the re-review of commit 3231a0b6a, the reviewer called the duplication \"bounded (EraVM ends at 1.4.1)… not blocking\", and the PR description itself says the table is closed, so the drift risk was accepted as intended."
+    },
+    {
+      "issue": 9,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "getZkSyncProxyBytecodeHash still checks only deployments.zksync?.address (utils.ts:118-122) and was not changed after the review. The re-review says \"In practice this is fine… no action needed unless a future chain registers only via networkAddresses\", which dismisses the suggestion."
+    }
+  ]
+}

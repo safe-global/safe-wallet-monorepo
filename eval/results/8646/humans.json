@@ -1,0 +1,36 @@
+{
+  "usd": 0.31342580000000003,
+  "head": "32c7b6b9326186edf6f481d3ec32de4b58e8a484",
+  "verdicts": [
+    {
+      "issue": 12,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author replied to point 4 with \"checked. false positive\". No change was made for bundle size."
+    },
+    {
+      "issue": 13,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author pushed back: \"CGW don't return deployed status. Add comments for cleanness.\" The only change after the review is an explanatory comment in SafeScopeProvider.tsx:48-49; `deployed: true` is still hardcoded at line 51."
+    },
+    {
+      "issue": 14,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author replied \"6. fixed\". The diff from 5636a0a to HEAD adds a \"Client-only state…\" paragraph to the header comment in activeScope.ts."
+    },
+    {
+      "issue": 15,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author pushed back: \"logError only log in browser. will not blow up the datadog.\" No dedupe was added."
+    },
+    {
+      "issue": 20,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "tongyaosafe declined on 2026-09-09: safe-scope is mostly used by useSafeInfo, useChainId, useSafeSDK and useWeb3ReadOnly, which are not Space-level hooks. The folder is still at apps/web/src/components/tx-flow/safe-scope/."
+    }
+  ]
+}

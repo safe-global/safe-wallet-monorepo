@@ -1,0 +1,18 @@
+{
+  "usd": 0.3439236,
+  "head": "efd47fbbfd8ac4b074f37a580cf60a9707f4deb8",
+  "verdicts": [
+    {
+      "issue": 6,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "In 27b43f254, isSafeMigrationCall rebuilt the address list and interface on every call. Commit efd47fbbf moved them into module-level SAFE_MIGRATION_INTERFACE, MIGRATION_METHOD_SELECTORS and SAFE_MIGRATION_ADDRESSES in apps/web/src/utils/safe-migrations.ts, and the author replied \"fixed\" to the bot review."
+    },
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit efd47fbbf added the test 'should return false for migration calldata sent to a non-SafeMigration contract' (selector 0xed007fc6 sent to a random address) in transaction-guards.test.ts, and the author replied \"fixed\"."
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "usd": 0.5717273999999999,
+  "head": "0fa08b3a6992f5a43c6ca4d1afeccc06291b34fc",
+  "verdicts": [
+    {
+      "issue": 0,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 1857d714d adds `if (identityKey === '') return` to the reset effect in TokenSelector/index.tsx and two regression tests in TokenSelector.test.tsx. The author's reply says 'took 1 … Real bug, fixed'."
+    },
+    {
+      "issue": 7,
+      "verdict": "open",
+      "present": true,
+      "evidence": "Nobody replied to this point, and the useSpendingLimitTokenOptions.test.ts diff since 7bbf775 adds only native-token and popular-error tests. None combines trusted=false with an empty safeAddress."
+    },
+    {
+      "issue": 10,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "vmosharova asked to trim the comments and tongyaosafe replied 'fixed'. Commits 7aa3c0998 and 0fa08b3a6 remove the WA-3149 and AC C15 comment blocks from TokenSelector/index.tsx."
+    },
+    {
+      "issue": 13,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The nested ternary in TokenOptionRow.tsx was replaced by a `secondaryLine` helper built from an if chain, answering LucieFaire's 'this is hard to read' thread, which is resolved."
+    },
+    {
+      "issue": 14,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "tongyaosafe replied 'fixed eb870938e'. TokenGroupError now renders the shared Policies/components/LoadError, which gained message and testid props."
+    },
+    {
+      "issue": 15,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "tongyaosafe replied 'fixed eb870938e'. SKELETON_ROW_COUNT moved out of TokenSelector/constants.ts into Policies/constants.ts."
+    },
+    {
+      "issue": 16,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit eeed2bdab ('build token fixtures with builders') adds SpendingLimitFlow/utils/testBuilders.ts and apps/web/src/tests/builders/tokens.ts, and both of LucieFaire's threads are resolved."
+    },
+    {
+      "issue": 18,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author declined it ('3 — excludeAddresses as a Set. No change'), arguing the lists are tiny and the memoisation caveat stays either way. The `.some()` filter is unchanged."
+    },
+    {
+      "issue": 21,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author declined it ('2 — trusted passed as undefined. No change'): the generated arg type is `trusted?: boolean`, and skip is true in that state."
+    },
+    {
+      "issue": 23,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author explained that unknownTokenOption is module-local and only `next?.address` leaves the component, so `decimals: 0` can't leak into an amount. The code is unchanged."
+    },
+    {
+      "issue": 24,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author called the shared test util a fair style point but is 'leaving both until there's a second consumer'. No util was added."
+    },
+    {
+      "issue": 26,
+      "verdict": "rejected",
+      "present": true,
+      "evidence": "The author confirmed that `shadcn: true` exists on createMockStory (MockProviderDecorator.tsx:17) and that 114 other stories pass it, so it was kept."
+    },
+    {
+      "issue": 27,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 89a934b89 ('show the full token text on hover') adds a `title` to the primary and secondary Typography in TokenOptionRow.tsx. The author replied 'All fixed'."
+    },
+    {
+      "issue": 28,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "Commit 406d543e5 adds `autoHighlight` to the Combobox so Enter picks the first match. The author replied 'the enter selecting token after search is enabled also. good catch'."
+    },
+    {
+      "issue": 29,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The author replied 'The width of the component also fixed'. The stories now wrap every state in a fixed `w-[236px]` Field wrapper (TokenSelector.stories.tsx)."
+    },
+    {
+      "issue": 30,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "The error state now uses the shared LoadError/PopupMessage layout, with the message above a separate retry button (eb870938e), instead of the inline row. The author replied 'All fixed' with screenshots."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+COMMENT
+[tenderdeve 2026-06-23T07:01:40Z] Hi @compojoom — gentle ping when you have a moment. PR resolves #7517 (nonce replacement label now prefers `transaction.note`). CI green, unit tests included. Happy to adjust scope or reviewer assignment.
+
+COMMENT
+[Zalens 2026-08-11T08:05:12Z] Thanks @tenderdeve, I've verified locally and reproduced in the browser, code LGTM. One blocker before it can land: the commit is unsigned. 
+
+COMMENT
+[tenderdeve 2026-08-12T06:52:16Z] @Zalens signing sorted — re-signed the change with my SSH key in `ab035b78e` (now shows **Verified**). Also linearized onto `main` so it's a single clean commit; diff is unchanged. Ready to land.
+
+COMMENT
+[tenderdeve 2026-08-12T06:56:52Z] Rebased onto `dev` in `7cf1f574f` — conflicts resolved (the nonce-dropdown Base UI Combobox refactor landed on dev meanwhile; kept both test `describe` blocks and aligned my note-label tests to the async `userEvent.click` + `findByRole('listbox')` open pattern). Commit is signed/**Verified**, single clean commit, now mergeable. `index.tsx` note change is unchanged.
+
+COMMENT
+[Zalens 2026-08-12T12:29:35Z] Please fix the broken tests @tenderdeve 
+
+
+COMMENT
+[tenderdeve 2026-08-13T06:44:08Z] @Zalens I dug into the red "Web Unit tests" check — the tests themselves aren't broken. The Jest run in that job passes fully:
+
+```
+Test Suites: 836 passed, 836 total
+Tests:       7170 passed, 7170 total
+```
+
+What turns the job red is the step *after* Jest — "Annotations and coverage report":
+
+```
+Jest coverage report action failed
+HttpError: Resource not accessible by integration
+Missing `checks: write` permission
+```
+
+That's the known fork-PR limitation: GitHub only grants the default `GITHUB_TOKEN` read scope for workflows triggered from a fork, so the coverage action can't write check annotations. It fails regardless of the diff — same reason the smoke/bundle/deploy checks are red here. Nothing in the two changed files (`TxNonce/index.tsx` + its test) fails.
+
+Re-running the workflow from within the repo (or from a maintainer's `workflow_dispatch`) should give it the `checks: write` scope and go green. Let me know if you'd like me to change anything on the code itself — otherwise this is ready from my side.

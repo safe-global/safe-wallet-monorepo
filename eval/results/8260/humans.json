@@ -1,0 +1,12 @@
+{
+  "usd": 0.2964214,
+  "head": "11b6884701012c59fc3279f15c9a09eeb4bb6a41",
+  "verdicts": [
+    {
+      "issue": 4,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "In the thread on SafeAppPreviewDrawer/index.tsx:99, the author vmosharova agreed ('Good catch, thank you!') and later said the refactor was done in a separate PR, #8282. No commits came after 11b6884, so at HEAD the duplicated NetworksTooltip/NetworkLogosList/ChainIndicator block is still inline in this PR (index.tsx ~98-110)."
+    }
+  ]
+}

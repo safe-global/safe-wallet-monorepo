@@ -1,0 +1,42 @@
+{
+  "usd": 0.3402464,
+  "head": "6c3ca1b436a5cb84590de69fddf0163702786bc9",
+  "verdicts": [
+    {
+      "issue": 6,
+      "verdict": "open",
+      "present": true,
+      "evidence": "useKnownAddresses.ts still filters knownAddresses by chainId only and never resets addressBookItems when the cache key changes. The only follow-up commit, 6c3ca1b43, just added useMemo, and nobody replied to this point."
+    },
+    {
+      "issue": 7,
+      "verdict": "accepted",
+      "present": true,
+      "evidence": "In the thread at useKnownAddresses.ts:42, Zalens replied \"Yes, we should, adding it\". Commit 6c3ca1b43 then wrapped knownAddresses in useMemo with deps [addressBookItems, chainId]."
+    },
+    {
+      "issue": 8,
+      "verdict": "open",
+      "present": true,
+      "evidence": "AddressInput.tsx:74 and :133 still declare a local `const checksumAddress` that shadows the imported helper (imported at line 8, used at line 259). Nobody reacted to this."
+    },
+    {
+      "issue": 9,
+      "verdict": "open",
+      "present": true,
+      "evidence": "useKnownAddresses.ts still calls `request.then(setAddressBookItems)` with no mounted guard, and no unmount test was added after the review. Nobody reacted to this."
+    },
+    {
+      "issue": 13,
+      "verdict": "open",
+      "present": true,
+      "evidence": "AddressInput.tsx:203 still uses `Children.count(params.children)`, and Children is still imported at line 1. Nobody reacted to this."
+    },
+    {
+      "issue": 14,
+      "verdict": "open",
+      "present": true,
+      "evidence": "After 53b0b10, the only tx-builder changes are to useKnownAddresses.ts and package.json. No test files changed, so no checksummed-address filter test was added. Nobody reacted to this."
+    }
+  ]
+}

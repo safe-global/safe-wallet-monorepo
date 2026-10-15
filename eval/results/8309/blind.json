@@ -5,75 +5,141 @@
   "findings": [
     {
       "id": "F1",
-      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "file": null,
       "line": null,
-      "claim": "The setupSendFlow unit test does not assert that router.replace('/(tabs)') was called, leaving a coverage gap since navigation to the home tab is core to the setup's job and Maestro flows depend on it."
+      "claim": "There is no test covering the waitFor timeout path for setupApprovalDraft's 'chain config' and 'Safe SDK' waits, which are the most likely places to surface real E2E flakiness from SDK initialization timing; a test simulating undefined returns to verify the failure marker/throw would catch regressions there."
     },
     {
       "id": "F2",
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 32,
-      "claim": "With accessible={false} set on the overlay, screen-reader users can no longer reach the tap-outside-to-cancel interaction, since VoiceOver can no longer see that element as tappable."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 20,
+      "claim": "E2E_OWNER_ADDRESS duplicates a value that is already available as mockedActiveSafeInfo.owners[0].value, whereas connectSignerSetup.ts derives the same address from that source instead of hardcoding it."
     },
     {
       "id": "F3",
-      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
-      "line": null,
-      "claim": "The setup-status marker only signals ready/failed and never resets to idle between runs; correctness currently depends on setupSendFlow resetting it before setupApprovalDraft flips it to ready, so if that ordering changes the marker could remain ready from a prior run."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": 30,
+      "claim": "The test mocks the CGW call directly rather than using MSW, which the root AGENTS.md instructs for network calls and which 19 other test files follow, though some existing tests mock initiate().unwrap() similarly for RTK Query code, so it is unclear whether this deviation is acceptable."
     },
     {
       "id": "F4",
-      "file": "apps/mobile/e2e/utils/components/draft-editors/verify-approve-amount.yml",
-      "line": 35,
-      "claim": "The spender text assertion regex '.*0x81Bd.*4fec.*' matches only 8 hex characters total, so any address rendered in short form that happens to start with 0x81Bd and end with 4fec would incorrectly pass; matching the full shortened form the UI actually produces would make the assertion stronger."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 28,
+      "claim": "The spender address inside APPROVE_DATA is also a hardcoded literal duplicating owners[1] from the shared mock data rather than referencing it directly."
     },
     {
       "id": "F5",
       "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
-      "line": null,
-      "claim": "There is no test covering the waitFor timeout path for 'chain config' or 'Safe SDK' in setupApprovalDraft, even though these are the most likely places to surface real E2E flakiness from SDK init timing; a test asserting the failure marker/throw when the value resolves to undefined would catch regressions in that error path."
+      "line": 33,
+      "claim": "Two sequential waitFor calls in the setup can each take up to 20 seconds, so the setup can take up to 40 seconds before the CGW fetch and compose even start, while the Maestro step waiting for e2e-draft-setup-ready gives up after 30 seconds (draftNetworkTimeout in apps/mobile/e2e/utils/scripts/defaults.js:6, gated in apps/mobile/e2e/tests/transactions/draft-editors/approval-editor.yml:19-22). On a slow staging network the flow can fail while the setup is still in progress and would otherwise have succeeded, making the suite flaky; the setup's wait attempts should be reduced or the gate timeout raised so the two align, with a comment explaining the relationship between the numbers."
     },
     {
       "id": "F6",
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 32,
-      "claim": "Setting accessible={false} on the outer overlay Pressable removes the tap-outside-to-dismiss action from screen readers (VoiceOver/TalkBack), forcing screen-reader users to rely solely on the Cancel button; this tradeoff should be explicitly noted in the PR description rather than framed as a pure accessibility improvement."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 36,
+      "claim": "The timeout error path in waitFor (the 'timed out waiting for …' error and the resulting 'failed' status) is never exercised because the test mocks selectChainById and getSafeSDK to succeed on the first try, leaving that failure branch untested."
     },
     {
       "id": "F7",
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 57,
-      "claim": "The Cancel and Save Pressables lack accessibilityRole=\"button\", so now that screen readers can reach them individually they are announced as plain text rather than as buttons, unlike the 40+ other Pressables in apps/mobile/src that already set this role."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 25,
+      "claim": "The spender address is defined twice, once as SPENDER_ADDRESS and again as hand-written hex embedded inside APPROVE_DATA, creating two copies of the same value that could drift out of sync; building the calldata with Interface.encodeFunctionData('approve', [SPENDER_ADDRESS, amount]) would keep a single source of truth."
     },
     {
       "id": "F8",
-      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
-      "line": 38,
-      "claim": "The waitFor helper uses a truthy check (if (value)) which rejects falsy-but-valid values like 0, '', or false; while it works today since both readers return objects, this is a footgun for a generic helper and should use value != null instead."
+      "file": "apps/mobile/e2e/tests/transactions/draft-editors/send-nonce-editor.yml",
+      "line": 93,
+      "claim": "The too-low nonce test branch hardcodes 99999 and depends on the live staging Safe's current nonce staying below that value, silently coupling the test to on-chain state that could eventually change as the test Safe ages."
     },
     {
       "id": "F9",
-      "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
-      "line": 32,
-      "claim": "The change adds no test, and there is currently no test for DialogModal or for the two components that use it (AddToAddressBookModal.tsx, CustomNonceModal.tsx). A small render test would prevent someone later removing accessible={false} and merging the dialog back into one element without anyone noticing, for example by checking that the dialog-cancel and dialog-save buttons can each be found by role and label."
+      "file": "apps/mobile/e2e/utils/components/draft-editors/verify-details-nonce.yml",
+      "line": 27,
+      "claim": "The nonce assertion on the transaction details screen checks that the copied nonce text appears anywhere on screen rather than being tied to the specific Nonce row, so it could match unrelated fields like SafeTxGas, BaseGas, or GasPrice that are often 0."
     },
     {
       "id": "F10",
-      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
-      "line": 61,
-      "claim": "setupApprovalDraft mixes dispatch sources, using the passed-in Dispatch for setupSendFlow but store.dispatch for RTKQ and compose calls; since this is E2E-only code and store is already imported, consistently using store.dispatch throughout would be simpler."
+      "file": "apps/mobile/e2e/utils/components/draft-editors/verify-approve-amount.yml",
+      "line": 35,
+      "claim": "The spender text assertion regex '.*0x81Bd.*4fec.*' only matches 8 hex characters total, so any short-form address that happens to start with 0x81Bd and end with 4fec would also pass; a stronger assertion would match the full shortened form the UI actually renders."
     },
     {
       "id": "F11",
-      "file": "apps/mobile/e2e/tests/transactions/draft-editors/send-nonce-editor.yml",
-      "line": 93,
-      "claim": "The nonce test's too-low branch hardcodes 99999 and depends on the live staging Safe's current nonce being below that value, silently coupling the test to on-chain state that could eventually change as the Safe ages."
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null,
+      "claim": "The setup-status marker only signals ready or failed and never resets to idle between runs; resetReduxForE2E and the current call ordering in setupApprovalDraft happen to make this correct today, but if that ordering changes the marker could remain stuck at ready from a prior run."
     },
     {
       "id": "F12",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": null,
+      "claim": "If the fixture Safe's owners change, the hardcoded addresses will no longer match the fixture, and the setup will silently build a signer and spender that are out of sync with no warning."
+    },
+    {
+      "id": "F13",
+      "file": "apps/mobile/e2e/utils/components/draft-editors/send-nonce-editor.yml",
+      "line": 134,
+      "claim": "After switching back to the recommended nonce, a small nonce value could coincidentally match one of the other zero-valued fields on the details screen, allowing the test to pass even if the Nonce row itself were incorrect."
+    },
+    {
+      "id": "F14",
+      "file": "apps/mobile/e2e/tests/transactions/draft-editors/approval-editor.yml",
+      "line": 38,
+      "claim": "The same 7-line block that scrolls to the edit-approval-button and taps it is duplicated at two locations in the file, despite the PR already extracting other repeated steps into utils/components/draft-editors/, where this block could also be moved."
+    },
+    {
+      "id": "F15",
       "file": "apps/mobile/src/features/Send/components/DialogModal.tsx",
       "line": 32,
-      "claim": "No test covers the new accessible={false} props on the backdrop and dialog-card Pressables, so reverting them would still let CI pass. DialogModal, CustomNonceModal and AddToAddressBookModal have no tests at all, and if the prop is later dropped or the dialog is wrapped in another accessible parent, screen-reader users would lose access to the nonce and contact-name inputs again with nothing to warn anyone."
+      "claim": "Setting accessible={false} on the outer overlay Pressable removes the tap-outside-to-dismiss action from VoiceOver/TalkBack, so screen-reader users must rely on the Cancel button instead; this tradeoff is currently framed in the PR body as a pure accessibility improvement rather than being called out explicitly."
+    },
+    {
+      "id": "F16",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 20,
+      "claim": "E2E_OWNER_ADDRESS and SPENDER_ADDRESS are hardcoded literals that duplicate mockedActiveSafeInfo.owners[0] and owners[1] from mock data, instead of being derived from the shared mock data as a neighboring setup file does."
+    },
+    {
+      "id": "F17",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 38,
+      "claim": "The waitFor helper uses `if (value)` to check readiness, which rejects falsy-but-valid values like 0, '', or false; this works today only because both readers return objects, and is a footgun for future callers of this generic helper unless changed to a `value != null` check."
+    },
+    {
+      "id": "F18",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 36,
+      "claim": "The unit tests only cover the setup timeout/failed marker for the case where composeSafeTxDraft rejects, but do not cover the waitFor timeout path that throws after POLL_ATTEMPTS when chain config or the Safe SDK never arrives, which is a more likely CI failure mode."
+    },
+    {
+      "id": "F19",
+      "file": "apps/mobile/src/components/ReviewFooter.tsx",
+      "line": 38,
+      "claim": "The review-and-confirm-button element is added in its own commit but no flow in this diff actually uses it, leaving unused code that should either be wired into a flow or deferred to a later PR."
+    },
+    {
+      "id": "F20",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/draftEditorsSetup.ts",
+      "line": 61,
+      "claim": "setupApprovalDraft mixes dispatch sources, using the passed-in Dispatch for setupSendFlow but store.dispatch for the RTKQ and compose calls; since this is E2E-only code and store is already imported, using store.dispatch consistently throughout would be simpler."
+    },
+    {
+      "id": "F21",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": null,
+      "claim": "The setupSendFlow test does not assert that router.replace('/(tabs)') was called, leaving a coverage gap for navigation behavior that is core to the setup's job since Maestro flows depend on landing on the home tab."
+    },
+    {
+      "id": "F22",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": 50,
+      "claim": "resetReduxForE2E is mocked to do nothing in this test file, so the real Redux store's signer, active-signer, and active-Safe state carries over between tests instead of being reset in beforeEach, unlike the sibling walletConnectDappsSetup.test.ts which resets the real slice; nothing fails currently only because all three tests happen to write the same values, but a future test expecting a clean store would behave differently depending on test order."
+    },
+    {
+      "id": "F23",
+      "file": "apps/mobile/src/tests/e2e-maestro/setup/__tests__/draftEditorsSetup.test.ts",
+      "line": 59,
+      "claim": "The unit test repeats the owner address literal again instead of importing the shared constant, compounding the duplication."
     }
   ]
 }
