@@ -1,6 +1,7 @@
 import { getAddress, id, Interface, keccak256 } from 'ethers'
 import { faker } from '@faker-js/faker'
-import { PolicyOperation, type PolicyConfiguration } from '../../types'
+import { OperationType } from '@safe-global/types-kit'
+import type { PolicyConfiguration } from '../../types'
 import {
   createApplyConfigurationTx,
   createFirstSetupTxs,
@@ -22,7 +23,7 @@ const configurations: PolicyConfiguration[] = [
   {
     target: faker.finance.ethereumAddress(),
     selector: '0xa9059cbb',
-    operation: PolicyOperation.Call,
+    operation: OperationType.Call,
     policy: faker.finance.ethereumAddress(),
     data: '0x1234',
   },
@@ -45,7 +46,7 @@ describe('createFirstSetupTxs', () => {
     const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
     const [decoded] = guardIface.decodeFunctionData('configureImmediately', configure.data)
     expect(decoded[0].selector).toBe('0xa9059cbb')
-    expect(Number(decoded[0].operation)).toBe(PolicyOperation.Call)
+    expect(Number(decoded[0].operation)).toBe(OperationType.Call)
     expect(decoded[0].data).toBe('0x1234')
   })
 })

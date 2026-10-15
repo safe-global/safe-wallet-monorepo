@@ -1,12 +1,9 @@
-export enum PolicyOperation {
-  Call = 0,
-  DelegateCall = 1,
-}
+import type { OperationType } from '@safe-global/types-kit'
 
 export type PolicyConfiguration = {
   target: string
   selector: string
-  operation: PolicyOperation
+  operation: OperationType
   policy: string
   data: string
 }
