@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import SafeLogo from '@/components/common/SafeLogo'
 import { Button } from '@safe-global/views/components/ui/button'
+import { FeedbackButton, PENDING_QUEUE_FEEDBACK } from './FeedbackButton'
 import { spacesMainNavigation, spacesSetupGroup } from '../../components/Sidebar/config'
 
 const navigation = [
@@ -106,6 +107,7 @@ export function PrototypeFrame({ children }: { children: ReactNode }) {
             </Button>
           </div>
           <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1 rounded-xl bg-card p-2 @max-[660px]:ml-0">
+            <FeedbackButton {...PENDING_QUEUE_FEEDBACK} />
             <Button variant="ghost" size="icon" disabled aria-label="Notifications unavailable in preview">
               <Bell />
             </Button>
