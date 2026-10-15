@@ -45,7 +45,6 @@ export const isolatedSpecs = {
       '[Recipient Analyse] Verify that Unsupported network warning is shown - 4C': securityProviders,
       '[Tenderly Simulation] Verify failed simulation state': securityProviders,
       '[Tenderly Simulation] Verify success simulation state': securityProviders,
-      '[Tenderly Simulation] Verify that tenderly section is presented in the safe shield': securityProviders,
       '[Threat Analyse] Verify Malicious Approval detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious Native Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious Transfer detection - 9A': securityProviders,
