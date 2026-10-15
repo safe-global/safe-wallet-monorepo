@@ -91,7 +91,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
   'cypress/e2e/regression/nfts_2.cy.js': { scenario: 'prepareNftsScenario' },
   'cypress/e2e/regression/nfts.cy.js': { scenario: 'prepareNftsScenario' },
-  'cypress/e2e/regression/notifications.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/portfolio.cy.js': {
     scenario: 'preparePortfolioScenario',
     chains: [137],
@@ -160,7 +159,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/tx_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/tx_share_block.cy.js': { scenario: 'prepareSharingScenario' },
   'cypress/e2e/regression/walletconnect_2.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/walletconnect.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/safe-apps/apps_list.cy.js': { scenario: 'prepareSafeAppsHostScenario' },
   'cypress/e2e/safe-apps/drain_account.spec.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
   'cypress/e2e/safe-apps/info_modal.cy.js': { scenario: 'prepareSafeAppsHostScenario' },

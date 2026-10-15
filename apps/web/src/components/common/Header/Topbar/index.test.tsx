@@ -4,6 +4,7 @@ import Topbar, {
   SEARCH_CONTEXT_HEIGHT,
   SEARCH_CONTEXT_WRAP,
 } from './index'
+import type { ReactNode } from 'react'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -48,6 +49,7 @@ jest.mock('@/features/walletconnect', () => ({
 
 jest.mock('@/features/batching', () => ({
   useDraftBatch: () => [],
+  BatchTooltip: ({ children }: { children: ReactNode }) => children,
 }))
 
 const mockUseSafeAddress = jest.fn<string, []>(() => '')
@@ -158,6 +160,22 @@ describe('Topbar', () => {
   it('renders the wallet address in HeaderNavigation', () => {
     render(<Topbar />)
     expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
+  })
+
+  it('renders the WalletConnect and notifications buttons on a Safe page', () => {
+    mockIsSpaceRoute.mockReturnValue(false)
+    mockUseSafeAddress.mockReturnValue('0x1234567890123456789012345678901234567890')
+    mockUseLoadFeature.mockReturnValue({
+      WalletPopover: () => null,
+      GlobalSearchModal: () => null,
+      GlobalSearchInput: () => null,
+      WalletConnectWidget: () => <button aria-label="WalletConnect" />,
+    })
+
+    render(<Topbar />)
+
+    expect(screen.getByRole('button', { name: 'WalletConnect' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument()
   })
 
   it('renders notification badge when there are unread notifications', () => {
