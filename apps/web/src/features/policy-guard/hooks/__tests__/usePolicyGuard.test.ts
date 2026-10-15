@@ -6,6 +6,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
 import * as useChains from '@/hooks/useChains'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
+import { initialState as settingsInitialState } from '@/store/settingsSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { act, renderHook } from '@/tests/test-utils'
@@ -82,6 +83,25 @@ describe('usePolicyGuard', () => {
     const { query } = mockModuleGuard({ currentData: ZERO_ADDRESS })
     renderHook(() => usePolicyGuard())
     expect(query).toHaveBeenCalledWith({ chainId: '11155111', safeAddress: safe.address.value, txHistoryTag: '7' })
+  })
+
+  it("reads through the user's custom RPC for the chain", () => {
+    const safe = mockSafe()
+    const { query } = mockModuleGuard({ currentData: ZERO_ADDRESS })
+    renderHook(() => usePolicyGuard(), {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { ...settingsInitialState.env, rpc: { '11155111': 'https://custom.rpc' } },
+        },
+      },
+    })
+    expect(query).toHaveBeenCalledWith({
+      chainId: '11155111',
+      safeAddress: safe.address.value,
+      txHistoryTag: '1',
+      customRpc: 'https://custom.rpc',
+    })
   })
 
   it('is loading while the module guard is read', () => {

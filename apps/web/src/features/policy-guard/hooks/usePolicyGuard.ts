@@ -5,6 +5,8 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { POLLING_INTERVAL } from '@/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
+import { useAppSelector } from '@/store'
+import { selectRpc } from '@/store/settingsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getPolicyGuardAddress } from '../services/policyEngineDeployments'
 import { isSafeEligibleForAllowlist } from '../services/allowlistAvailability'
@@ -59,8 +61,9 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const shouldRead = safeLoaded && eligibility.eligible
 
   // CGW Safe info has no module guard field yet, so it is read from the storage slot
+  const customRpc = useAppSelector(selectRpc)[safe.chainId]
   const readArgs = shouldRead
-    ? { chainId: safe.chainId, safeAddress, txHistoryTag: safe.txHistoryTag ?? '' }
+    ? { chainId: safe.chainId, safeAddress, txHistoryTag: safe.txHistoryTag ?? '', customRpc }
     : undefined
   const moduleGuardQuery = useGetModuleGuardQuery(readArgs ?? skipToken)
   const moduleGuard = moduleGuardQuery.currentData
@@ -80,7 +83,9 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
 
   // A partial result may come from an RPC node a block behind the setup transaction
   const shouldReread = !!readError || state?.status === 'partial'
-  const readKey = readArgs ? `${readArgs.chainId}:${readArgs.safeAddress}:${readArgs.txHistoryTag}` : ''
+  const readKey = readArgs
+    ? `${readArgs.chainId}:${readArgs.safeAddress}:${readArgs.txHistoryTag}:${customRpc ?? ''}`
+    : ''
   const [rereads, setRereads] = useState({ readKey, count: 0 })
   const rereadCount = rereads.readKey === readKey ? rereads.count : 0
   const { refetch } = moduleGuardQuery

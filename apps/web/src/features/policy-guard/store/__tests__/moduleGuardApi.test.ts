@@ -2,7 +2,6 @@ import type { JsonRpcProvider } from 'ethers'
 import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { makeStore } from '@/store'
-import { setRpc } from '@/store/settingsSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getReadOnlyProvider } from '../../services/getReadOnlyProvider'
 import { moduleGuardApi } from '../moduleGuardApi'
@@ -47,12 +46,32 @@ describe('moduleGuardApi.getModuleGuard', () => {
     expect(getStorage).toHaveBeenCalledWith(SAFE, expect.any(String))
   })
 
-  it("passes the user's custom RPC for the chain", async () => {
+  it('reads through the custom RPC given in the args', async () => {
     const store = await setupStore()
-    store.dispatch(setRpc({ chainId: '11155111', rpc: 'https://custom.rpc' }))
     mockStorage(jest.fn().mockResolvedValue(slotOf(GUARD)))
-    await read(store).unwrap()
+    await store
+      .dispatch(
+        moduleGuardApi.endpoints.getModuleGuard.initiate({
+          chainId: '11155111',
+          safeAddress: SAFE,
+          txHistoryTag: '1',
+          customRpc: 'https://custom.rpc',
+        }),
+      )
+      .unwrap()
     expect(mockGetProvider).toHaveBeenCalledWith(sepolia, 'https://custom.rpc')
+  })
+
+  it('reads again when the custom RPC changes', async () => {
+    const store = await setupStore()
+    const getStorage = jest.fn().mockResolvedValue(slotOf(GUARD))
+    mockStorage(getStorage)
+    const args = { chainId: '11155111', safeAddress: SAFE, txHistoryTag: '1' }
+    await store.dispatch(moduleGuardApi.endpoints.getModuleGuard.initiate(args)).unwrap()
+    await store
+      .dispatch(moduleGuardApi.endpoints.getModuleGuard.initiate({ ...args, customRpc: 'https://custom.rpc' }))
+      .unwrap()
+    expect(getStorage).toHaveBeenCalledTimes(2)
   })
 
   it('reads once for many subscribers of the same Safe', async () => {
