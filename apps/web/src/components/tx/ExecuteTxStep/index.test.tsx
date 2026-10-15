@@ -113,9 +113,7 @@ describe('ExecuteTxStep', () => {
     expect(signedNotice).toHaveTextContent(
       'This transaction is fully signed. Nothing has been sent to the network yet.',
     )
-    expect(executeNotice).toHaveTextContent(
-      "Executing submits this transaction on-chain and costs gas. Anyone can execute it — it doesn't have to be you.",
-    )
+    expect(executeNotice).toHaveTextContent('Any signer can execute this transaction.')
     expect(screen.getAllByRole('note')).toEqual([signedNotice, executeNotice])
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 

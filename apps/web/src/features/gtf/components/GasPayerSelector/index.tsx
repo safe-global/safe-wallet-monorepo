@@ -1,74 +1,86 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { AppRoutes } from '@/config/routes'
-import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import WalletIcon from '@safe-global/views/components/common/WalletIcon'
-import TokenIcon from '@/components/common/TokenIcon'
-import BalanceInfo from '@/components/tx/BalanceInfo'
-import SponsoredTxsCounter from '@/components/tx/SponsoredTxsCounter'
-import { ExecutionMethod, SponsoredRadio, SponsoredStrip } from '@/components/tx/ExecutionMethodSelector'
-import useWallet from '@/hooks/wallets/useWallet'
-import { useCurrentChain } from '@/hooks/useChains'
-import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import type { SponsoredOffer } from '@/utils/gasPayment'
-import type { GasPayerChoice } from '../../types'
-import type { GasPayerSelection } from '../../hooks/useGasPayerSelection'
-import { GasTokenSelector, TotalOutgoingSection } from '../FeesPreview'
-import { FeeBreakdownRow } from '@safe-global/views/features/gtf/components/shared/FeeBreakdownRow'
-import { GAS_FEE_TOOLTIP } from '@safe-global/views/features/gtf/components/shared/tooltips'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { AppRoutes } from '@/config/routes'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import type { FeePayerView, GasPayerChoice, NetworkFee } from '../../types'
+import { GasTokenSelector } from '../FeesPreview'
 import css from './styles.module.css'
 
-const SAFE_LOGO = '/images/logo-no-text.svg'
+const formatResetDate = (iso: string | null): string | null => {
+  if (!iso) return null
+  const timestamp = Date.parse(iso)
+  if (Number.isNaN(timestamp)) return null
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(timestamp)
+}
 
-/** Radio values: the sponsored one is `ExecutionMethod.RELAY` so `SponsoredRadio` can be reused as is. */
-const toRadioValue = (choice: GasPayerChoice): string => (choice === 'SPONSORED' ? ExecutionMethod.RELAY : choice)
-const fromRadioValue = (value: unknown): GasPayerChoice =>
-  value === ExecutionMethod.RELAY ? 'SPONSORED' : (value as GasPayerChoice)
+const FeeAmount = ({ fee }: { fee: NetworkFee }): ReactElement => {
+  if (fee.loading) return <Skeleton className="inline-block h-4 min-w-[5em]" />
+  if (fee.error)
+    return (
+      <Typography variant="paragraph-small" className="text-[var(--color-warning-main)]">
+        Cannot estimate
+      </Typography>
+    )
+  if (fee.note)
+    return (
+      <Typography variant="paragraph-small" color="muted">
+        {fee.note}
+      </Typography>
+    )
+  return (
+    <span className={css.feeAmount}>
+      <Typography variant="paragraph-small-bold">
+        {fee.amount} {fee.currency}
+      </Typography>
+      {fee.fiatAmount && (
+        <Typography variant="paragraph-small" color="muted">
+          {fee.fiatAmount}
+        </Typography>
+      )}
+    </span>
+  )
+}
 
-const PayFromSafeRadio = ({ locked }: { locked: boolean }): ReactElement => (
-  <Label
-    data-testid="pay-from-safe-execution-method"
-    className={locked ? 'flex flex-1 items-center gap-2' : 'flex flex-1 cursor-pointer items-center gap-2'}
-  >
-    <RadioGroupItem value="PAY_FROM_SAFE" disabled={locked} />
-    <Typography className={css.radioLabel}>
-      <img src={SAFE_LOGO} alt="Safe" className={css.safeLogo} /> Pay from Safe
+/** The one "Network fee" row of the spec, replacing Estimated / Max / Total outgoing. */
+const NetworkFeeRow = ({ fee, free }: { fee?: NetworkFee; free?: boolean }): ReactElement => (
+  <div className={css.feeRow} data-testid="network-fee-row">
+    <Typography variant="paragraph-small" color="muted">
+      Network fee
     </Typography>
+    {free ? <Typography variant="paragraph-small-bold">Free</Typography> : fee ? <FeeAmount fee={fee} /> : null}
+  </div>
+)
+
+const Option = ({
+  value,
+  children,
+  testId,
+}: {
+  value: GasPayerChoice
+  children: ReactNode
+  testId: string
+}): ReactElement => (
+  <Label data-testid={testId} className={css.option}>
+    <RadioGroupItem value={value} />
+    <Typography className={css.optionLabel}>{children}</Typography>
   </Label>
 )
 
-/** The option as a Safe Pro upsell: visible, not selectable. */
-const PayFromSafeUpsellRadio = (): ReactElement => (
-  <Tooltip>
-    <TooltipTrigger
-      render={
-        <Label data-testid="pay-from-safe-upsell" className="flex flex-1 cursor-not-allowed items-center gap-2">
-          <RadioGroupItem value="PAY_FROM_SAFE" disabled />
-          <Typography className={`${css.radioLabel} text-muted-foreground`}>
-            <img src={SAFE_LOGO} alt="Safe" className={css.safeLogo} /> Pay from Safe
-            <span className="block h-4 w-6" role="img" aria-label="Safe Pro">
-              <ProChip className="size-full" />
-            </span>
-          </Typography>
-        </Label>
-      }
-    />
-    <TooltipContent>Paying gas fees from the Safe account is included in Safe Pro.</TooltipContent>
-  </Tooltip>
+const Message = ({ children, testId }: { children: ReactNode; testId?: string }): ReactElement => (
+  <Typography variant="paragraph-small" color="muted" className={css.message} data-testid={testId}>
+    {children}
+  </Typography>
 )
 
-const PayFromSafeUpsellStrip = (): ReactElement => (
-  <div className={css.upsell} data-testid="pay-from-safe-upsell-strip">
-    <Typography variant="paragraph-small">Pay gas fees from your Safe account with Safe Pro</Typography>
+const ProUpsell = ({ children }: { children: ReactNode }): ReactElement => (
+  <div className={css.upsell} data-testid="fee-payer-upsell">
+    <Typography variant="paragraph-small">{children}</Typography>
     <Button variant="outline" size="xs" render={<NextLink href={AppRoutes.welcome.spaces} />}>
       Upgrade to
       <span className="block h-4 w-6" aria-label="Safe Pro">
@@ -79,131 +91,114 @@ const PayFromSafeUpsellStrip = (): ReactElement => (
   </div>
 )
 
-/** The fee details of paying from the Safe: token, max gas fee, total outgoing, balance warning. */
-const PayFromSafeDetails = ({ fees, locked }: { fees: GasPayerSelection['fees']; locked: boolean }): ReactElement => {
-  const { availableGasTokens, selectedGasToken, gasFee, totalOutgoing, safeHasEnoughGas } = fees
-  const token =
-    availableGasTokens?.find((t) => sameAddress(t.address, selectedGasToken ?? '')) ?? availableGasTokens?.[0]
-
-  return (
-    <div className={css.details} data-testid="pay-from-safe-details">
-      {locked ? (
-        <div className={css.tokenRow}>
-          <Typography variant="paragraph-small-bold">Fees are paid from the Safe using</Typography>
-          <TokenIcon logoUri={token?.logoUri} tokenSymbol={token?.symbol} size={24} />
-          <Typography variant="paragraph-small-bold">{token?.symbol}</Typography>
-        </div>
-      ) : (
-        <div className={css.tokenRow}>
-          <Typography variant="paragraph-small" color="muted">
-            Fees token:
-          </Typography>
-          <GasTokenSelector
-            availableGasTokens={availableGasTokens}
-            selectedGasToken={selectedGasToken ?? ''}
-            onGasTokenChange={fees.onGasTokenChange}
-          />
-        </div>
-      )}
-
-      <Separator bleed="4" />
-
-      <FeeBreakdownRow {...gasFee} loading={fees.loading} error={fees.error} tooltip={GAS_FEE_TOOLTIP} />
-
-      {totalOutgoing && <TotalOutgoingSection totalOutgoing={totalOutgoing} />}
-
-      {safeHasEnoughGas === false && !fees.loading && (
-        <Alert variant="warning" outlined={false} className="mt-2">
-          <AlertSeverityIcon variant="warning" />
-          <AlertDescription>
-            Insufficient {gasFee.currency} balance to cover the gas fee. Top up before execution, otherwise the
-            transaction will fail.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {locked && (
-        <Typography variant="paragraph-small" color="muted" className="mt-2">
-          The fee was fixed when this transaction was signed. It is relayed and the Safe refunds the relayer on-chain,
-          so it can&apos;t be sponsored or executed from a connected wallet.
-        </Typography>
-      )}
-    </div>
-  )
-}
-
 /**
- * Who pays the gas: a sponsor (plan, daily limit, campaign), the Safe itself, or the connected wallet.
- * One selector for the three, replacing the sponsored/wallet one and the standalone fee card.
+ * Who pays the network fee, one screen per state of the fee payment spec. Two options render as a
+ * toggle; one option renders as text, never as a lone radio; a locked fee renders as a read-only line.
  */
 const GasPayerSelector = ({
-  offer,
-  showsProUpsell,
-  selection,
+  view,
+  onChoiceChange,
+  onGasTokenChange,
 }: {
-  offer: SponsoredOffer | null
-  /** No sponsored option is left, but a Safe Pro plan would sponsor this Safe. */
-  showsProUpsell?: boolean
-  selection: GasPayerSelection
-}): ReactElement | null => {
-  const wallet = useWallet()
-  const chain = useCurrentChain()
-  const isSafeProEnabled = useIsSafeProEnabled()
-  const { choice, setChoice, isLocked, canPayFromSafe, mustUpgradeToPayFromSafe, fees } = selection
+  view: FeePayerView
+  onChoiceChange: (choice: GasPayerChoice) => void
+  onGasTokenChange?: (address: string) => void
+}): ReactElement => {
+  switch (view.kind) {
+    case 'locked':
+      return (
+        <div className={css.locked} data-testid="fee-payer-locked">
+          <div className={css.feeRow}>
+            <Typography variant="paragraph-small-bold">Paid from Safe</Typography>
+            <FeeAmount fee={view.fee} />
+          </div>
+          <Message>Fee was set at signing and can&apos;t be changed.</Message>
+        </div>
+      )
 
-  const showsPayFromSafe = isLocked || canPayFromSafe
-  if (!offer && !showsPayFromSafe && !mustUpgradeToPayFromSafe && !showsProUpsell) return null
+    case 'sponsored_info':
+      return (
+        <div className={css.single} data-testid="fee-payer-sponsored-info">
+          <Typography variant="paragraph-small-bold">Network fee: free, sponsored by Pro</Typography>
+        </div>
+      )
 
-  return (
-    <div className={css.container} data-testid="gas-payer-selector">
-      <div className={css.method}>
-        <Typography variant="paragraph-small" className={css.label}>
-          Who will pay gas fees
-        </Typography>
+    case 'sponsored_toggle':
+      return (
+        <div className={css.container} data-testid="fee-payer-sponsored-toggle">
+          <RadioGroup
+            value={view.choice}
+            onValueChange={(value) => onChoiceChange(value as GasPayerChoice)}
+            className={css.toggle}
+          >
+            <Option value="SPONSORED" testId="fee-payer-sponsored">
+              Sponsored <span className={css.counter}>· {view.counter}</span>
+            </Option>
+            <Option value="WALLET" testId="fee-payer-signer">
+              Pay from signer
+            </Option>
+          </RadioGroup>
+          <NetworkFeeRow free={view.choice === 'SPONSORED'} fee={view.signerFee} />
+        </div>
+      )
 
-        <RadioGroup
-          value={toRadioValue(choice)}
-          onValueChange={(value) => setChoice(fromRadioValue(value))}
-          className={css.radioGroup}
-        >
-          {!isLocked && offer && <SponsoredRadio offer={offer} chainId={chain?.chainId ?? ''} />}
-
-          {showsPayFromSafe && <PayFromSafeRadio locked={isLocked} />}
-          {mustUpgradeToPayFromSafe && <PayFromSafeUpsellRadio />}
-
-          {!isLocked && (
-            <Label
-              data-testid="connected-wallet-execution-method"
-              className="flex flex-1 cursor-pointer items-center gap-2"
-            >
-              <RadioGroupItem value="WALLET" />
-              <Typography className={css.radioLabel}>
-                <WalletIcon provider={wallet?.label || ''} width={20} height={20} icon={wallet?.icon} /> Connected
-                wallet
+    case 'safe_toggle':
+      return (
+        <div className={css.container} data-testid="fee-payer-safe-toggle">
+          <RadioGroup
+            value={view.choice}
+            onValueChange={(value) => onChoiceChange(value as GasPayerChoice)}
+            className={css.toggle}
+          >
+            <Option value="WALLET" testId="fee-payer-signer">
+              Pay from signer
+            </Option>
+            <Option value="PAY_FROM_SAFE" testId="fee-payer-safe">
+              Pay from Safe
+              {view.premium && <span className={css.counter}>+ premium</span>}
+            </Option>
+          </RadioGroup>
+          {view.choice === 'PAY_FROM_SAFE' && view.gasTokens.length > 0 && (
+            <div className={css.feeRow} data-testid="fee-token-row">
+              <Typography variant="paragraph-small" color="muted">
+                Fee token
               </Typography>
-            </Label>
+              <GasTokenSelector
+                availableGasTokens={view.gasTokens}
+                selectedGasToken={view.selectedGasToken}
+                onGasTokenChange={onGasTokenChange}
+                locked={view.gasTokens.length === 1}
+                forcedDisplay={view.gasTokens.length === 1 ? view.gasTokens[0] : undefined}
+              />
+            </div>
           )}
-        </RadioGroup>
-      </div>
+          <NetworkFeeRow fee={view.choice === 'PAY_FROM_SAFE' ? view.safeFee : view.signerFee} />
+          {view.choice === 'PAY_FROM_SAFE' && view.reachesThreshold && (
+            <Message testId="fee-payer-sign-and-execute">
+              Fee is paid from Safe. No gas needed from your wallet.
+            </Message>
+          )}
+        </div>
+      )
 
-      {choice === 'PAY_FROM_SAFE' ? (
-        <PayFromSafeDetails fees={fees} locked={isLocked} />
-      ) : offer ? (
-        <SponsoredStrip
-          offer={offer}
-          isRelay={choice === 'SPONSORED'}
-          isSafeProEnabled={isSafeProEnabled}
-          hasWallet={!!wallet}
-        />
-      ) : showsProUpsell ? (
-        <SponsoredTxsCounter left={0} quota={null} resetsAt={null} isSubscription={false} isPro={false} />
-      ) : mustUpgradeToPayFromSafe ? (
-        <PayFromSafeUpsellStrip />
-      ) : wallet ? (
-        <BalanceInfo />
-      ) : null}
-    </div>
-  )
+    case 'signer_only':
+      return (
+        <div className={css.container} data-testid="fee-payer-signer-only">
+          <div className={css.single}>
+            <Typography variant="paragraph-small-bold">Pay from signer</Typography>
+          </div>
+          <NetworkFeeRow fee={view.signerFee} />
+          {view.reason === 'quota' ? (
+            <Message testId="fee-payer-quota">
+              No sponsored transactions left.
+              {view.resetsAt && ` Resets ${formatResetDate(view.resetsAt)}.`} Your connected wallet pays the fee.
+            </Message>
+          ) : (
+            <ProUpsell>Sponsored transactions are included in Pro</ProUpsell>
+          )}
+        </div>
+      )
+  }
 }
 
 export default GasPayerSelector

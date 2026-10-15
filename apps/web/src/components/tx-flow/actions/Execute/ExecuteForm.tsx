@@ -90,12 +90,11 @@ export const ExecuteForm = ({
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
   const { gasPayer: offeredGasPayer, sponsorSpaceId: offeredSponsorSpaceId } = getGasPayment(offer, executionMethod)
 
-  // One selector for the three gas payers where the chain lists PAY_FROM_SAFE; the sponsored/wallet one elsewhere.
+  // The fee payment spec's selector where the chain lists PAY_FROM_SAFE; the sponsored/wallet one elsewhere.
   const { GasPayerSelector, $isReady: isGtfReady } = useLoadFeature(GTFFeature)
-  const selection = useGasPayerSelection({ safeTx, offer })
-  const isPayFromSafe = selection.choice === 'PAY_FROM_SAFE'
-  const showsGasPayerSelector =
-    isGtfReady && (selection.isLocked || selection.canPayFromSafe || selection.mustUpgradeToPayFromSafe)
+  const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
+  const isPayFromSafe = selection.isPayFromSafe
+  const showsGasPayerSelector = isGtfReady && selection.view !== null
 
   // Paying from the Safe relays through the public route, never against a Workspace allowance: the
   // Safe refunds the relayer on-chain (`handlePayment()`), and `WorkspaceRelayer` refuses such payloads.
@@ -104,7 +103,7 @@ export const ExecuteForm = ({
   const willRelay = gasPayer !== 'WALLET'
   const showExecutionSelector = !showsGasPayerSelector && (offer !== null || showsProUpsell)
 
-  // Keep the selector and the execution method in step while the legacy selector is the one rendered.
+  // Keep the legacy execution method in step with the spec selector while the latter is the one rendered.
   useEffect(() => {
     if (showsGasPayerSelector) {
       setExecutionMethod(selection.choice === 'SPONSORED' ? ExecutionMethod.RELAY : ExecutionMethod.WALLET)
@@ -246,9 +245,13 @@ export const ExecuteForm = ({
             }
           />
 
-          {showsGasPayerSelector ? (
+          {showsGasPayerSelector && selection.view ? (
             <div className={css.noTopBorder}>
-              <GasPayerSelector offer={offer} showsProUpsell={showsProUpsell} selection={selection} />
+              <GasPayerSelector
+                view={selection.view}
+                onChoiceChange={selection.setChoice}
+                onGasTokenChange={selection.onGasTokenChange}
+              />
             </div>
           ) : showExecutionSelector ? (
             <div className={css.noTopBorder}>

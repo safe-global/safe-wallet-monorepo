@@ -8,7 +8,16 @@ import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
 import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeesPreview, RiskConfirmation } from './features'
-import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
+import {
+  Batching,
+  ComboSubmit,
+  Counterfactual,
+  Execute,
+  ExecuteThroughRole,
+  Propose,
+  Sign,
+  SignAndExecute,
+} from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import { useLoadFeature } from '@/features/__core__'
@@ -126,6 +135,7 @@ export const TxFlow = <T extends unknown>({
                     <ComboSubmit>
                       <Sign />
                       <Execute />
+                      <SignAndExecute />
                       <ExecuteThroughRole />
                       <Batching />
                     </ComboSubmit>

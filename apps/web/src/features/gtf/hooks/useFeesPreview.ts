@@ -20,7 +20,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
-import { IS_RELAYING_LIVE } from '../constants'
+import { IS_RELAYING_LIVE, PAY_FROM_SAFE_ON_FREE_PLAN } from '../constants'
 import {
   computeTotalOutgoing,
   getSendInGasToken,
@@ -149,7 +149,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   // Paying from the Safe is a Safe Pro feature: without a live plan on the current Workspace the
   // section renders as signer-pays, as on a chain that cannot quote.
   const { hasProFeatures, isLoading: isProLoading } = useSafeProAccess()
-  const feePreviewAvailable = isGtfFeePreviewAvailable(chain) && hasProFeatures && !isProLoading
+  const feePreviewAvailable =
+    isGtfFeePreviewAvailable(chain) && !isProLoading && (hasProFeatures || PAY_FROM_SAFE_ON_FREE_PLAN)
   const isSignerMode =
     !isConfirmation &&
     (!IS_RELAYING_LIVE || !feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)

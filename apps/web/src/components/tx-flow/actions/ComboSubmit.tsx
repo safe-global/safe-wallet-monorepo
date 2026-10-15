@@ -11,11 +11,13 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 const EXECUTE_ACTION = 'execute'
+const SIGN_AND_EXECUTE_ACTION = 'signAndExecute'
 const EXECUTE_THROUGH_ROLE_ACTION = 'executeThroughRole'
 const SIGN_ACTION = 'sign'
 
-// Priority order for auto-selection when no stored preference exists
-const AUTO_SELECT_PRIORITY = [EXECUTE_ACTION, EXECUTE_THROUGH_ROLE_ACTION]
+// Priority order for auto-selection when no stored preference exists. "Sign and execute" first is the
+// spec's proposed default (open decision A); a Safe Account setting may change it later.
+const AUTO_SELECT_PRIORITY = [SIGN_AND_EXECUTE_ACTION, EXECUTE_ACTION, EXECUTE_THROUGH_ROLE_ACTION]
 
 const resolveSlotId = (slotIds: string[], storedAction: string | undefined): string | undefined => {
   // Respect the user's stored choice if it's still available
@@ -46,7 +48,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const slotId = useMemo(() => resolveSlotId(slotIds, submitAction), [slotIds, submitAction])
 
   // Show warning if Execute is available but user selected Sign (either manually or from stored preference)
-  const executeAvailable = slotIds.includes(EXECUTE_ACTION)
+  const executeAvailable = slotIds.includes(EXECUTE_ACTION) || slotIds.includes(SIGN_AND_EXECUTE_ACTION)
   const showLastSignerWarning = executeAvailable && submitAction === SIGN_ACTION && !hasSigned
 
   if (slotIds.length === 0) {
