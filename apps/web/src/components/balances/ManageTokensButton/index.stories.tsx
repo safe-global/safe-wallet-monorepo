@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ManageTokensButton from './index'
 import { TOKEN_LISTS } from '@/store/settingsSlice'

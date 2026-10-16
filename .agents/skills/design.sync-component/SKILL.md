@@ -18,8 +18,8 @@ Sync the **$ARGUMENTS** component from Figma to code.
 ## Source Files
 
 - **Figma File**: `trBVcpjZslO63zxiNUI9io` (Obra shadcn-ui safe)
-- **Component Mapping**: `apps/web/src/components/ui/docs/figma-code-connect.md`
-- **Target**: `apps/web/src/components/ui/<component>.tsx`
+- **Component Mapping**: `packages/views/src/components/ui/docs/figma-code-connect.md`
+- **Target**: `packages/views/src/components/ui/<component>.tsx`
 
 ## Process
 

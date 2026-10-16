@@ -26,7 +26,7 @@ jest.mock('../../../hooks/useSpaceMembers', () => ({
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
-jest.mock('../../SafeProModals', () => ({
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => ({
   SafeProNoticeModal: ({
     title,
     body,
@@ -171,7 +171,7 @@ describe('WorkspaceLockModal', () => {
     mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
-    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined)
   })
 
   it('words the member explanation by lock reason', () => {

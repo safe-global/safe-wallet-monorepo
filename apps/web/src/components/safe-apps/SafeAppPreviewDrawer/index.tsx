@@ -2,19 +2,20 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
-import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Drawer, DrawerContent, DrawerTitle } from '@safe-global/views/components/ui/drawer'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { NetworkLogosTooltip } from '@/features/multichain'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
+import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCard'
 import CloseIcon from '@/public/images/common/close.svg'
 import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import css from './styles.module.css'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
 
@@ -29,7 +30,8 @@ type SafeAppPreviewDrawerProps = {
 const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookmark }: SafeAppPreviewDrawerProps) => {
   const { markSafeAppOpened } = useOpenedSafeApps()
   const router = useRouter()
-  const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '')
+  const safeLinkQuery = useSafeLinkQuery()
+  const safeAppUrl = getSafeAppUrl(router, safeLinkQuery, safeApp?.url || '')
   const { configs } = useChains()
   const knownChainIds = safeApp?.chainIds.filter((chainId) => configs.some((chain) => chain.chainId === chainId)) ?? []
 

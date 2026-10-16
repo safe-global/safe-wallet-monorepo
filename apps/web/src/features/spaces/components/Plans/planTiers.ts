@@ -6,7 +6,7 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_ORDER } from './planCatalog'
+import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -15,7 +15,7 @@ import type {
   PlanSeatOption,
   PlanSummary,
   PlanTier,
-} from './types'
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 const CYCLES = ['month', 'year'] as const
 
@@ -28,7 +28,10 @@ const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null)
   billingCycle === 'year' ? price / 12 : price
 
 /** The analytics properties naming a picked plan, shared by every event that records a plan choice. */
-export const pickProps = (pick: PlanPick) => ({
+export const pickProps = (pick: {
+  tier: Pick<PlanTier, 'name' | 'billingCycle'>
+  option: Pick<PlanPick['option'], 'seats'>
+}) => ({
   [MixpanelEventParams.TARGET_PLAN]: pick.tier.name.toLowerCase(),
   [MixpanelEventParams.SEATS]: pick.option.seats ?? undefined,
   [MixpanelEventParams.BILLING_PERIOD]:

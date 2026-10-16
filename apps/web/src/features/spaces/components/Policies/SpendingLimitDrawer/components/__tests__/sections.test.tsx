@@ -1,6 +1,6 @@
 import { act, mockClipboard, render, screen, waitFor, within } from '@/tests/test-utils'
 import { CopyTransactionLink } from '../CopyTransactionLink'
-import { PendingBanner } from '../PendingBanner'
+import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import { PendingSignatures } from '../PendingSignatures'
 import { PolicyOverview } from '../PolicyOverview'
 
@@ -48,7 +48,7 @@ describe('PolicyOverview', () => {
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
         chainId="1"
         lastUpdated="Sep 22, 2026"
-        enforcedBy="Safe allowance module"
+        enforcedBy={{ label: 'Safe allowance module' }}
       />,
     )
 
@@ -72,12 +72,19 @@ describe('PolicyOverview', () => {
       <PolicyOverview
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
         chainId="1"
-        enforcedBy="Safe allowance module"
+        enforcedBy={{ label: 'Safe allowance module' }}
       />,
     )
 
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
     expect(screen.getByText('Enforced by')).toBeInTheDocument()
+  })
+
+  it('leaves out the enforced by row when no enforcer is given', () => {
+    render(<PolicyOverview appliesTo={{ address: SAFE.address, name: 'Treasury' }} chainId="1" />)
+
+    expect(screen.queryByText('Enforced by')).not.toBeInTheDocument()
+    expect(screen.getByText('Safe account')).toBeInTheDocument()
   })
 
   it('binds each account to its own row when an initiator is given', () => {
@@ -87,7 +94,7 @@ describe('PolicyOverview', () => {
         chainId="1"
         initiatedBy={{ address: SAFE.address, name: 'Alice' }}
         lastUpdated="Sep 22, 2026"
-        enforcedBy="Safe allowance module"
+        enforcedBy={{ label: 'Safe allowance module' }}
       />,
     )
 
@@ -113,5 +120,31 @@ describe('CopyTransactionLink', () => {
     })
 
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(TRANSACTION_LINK))
+  })
+
+  it('confirms the copy on the button itself', async () => {
+    mockClipboard()
+    render(<CopyTransactionLink transactionLink={TRANSACTION_LINK} />)
+
+    expect(screen.queryByText('Copied!')).not.toBeInTheDocument()
+
+    act(() => {
+      screen.getByRole('button', { name: /Copy transaction link/ }).click()
+    })
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /Copied!/ })).toBeInTheDocument())
+  })
+
+  it('keeps the original label when the clipboard is unavailable', async () => {
+    const writeText = mockClipboard()
+    writeText.mockRejectedValueOnce(new Error('denied'))
+    render(<CopyTransactionLink transactionLink={TRANSACTION_LINK} />)
+
+    act(() => {
+      screen.getByRole('button', { name: /Copy transaction link/ }).click()
+    })
+
+    await waitFor(() => expect(writeText).toHaveBeenCalled())
+    expect(screen.queryByText('Copied!')).not.toBeInTheDocument()
   })
 })

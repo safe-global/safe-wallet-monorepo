@@ -2,7 +2,6 @@ import { useCallback, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllChains } from '@/src/store/chains'
 import { selectDelegates } from '@/src/store/delegatesSlice'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { useNotificationCleanup } from '@/src/hooks/useNotificationCleanup'
 import { type Address } from '@/src/types/address'
 import {
@@ -13,6 +12,9 @@ import {
   DelegateCleanupErrorType,
 } from '@/src/services/delegate-cleanup'
 import { StandardErrorResult, ErrorType } from '@/src/utils/errors'
+import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
+import Logger from '@/src/utils/logger'
+import { type DeleteDelegate } from '@/src/hooks/useDelegateCleanup/utils'
 
 // Re-export types for backward compatibility
 export type { DelegateCleanupError, DelegateCleanupProgress } from '@/src/services/delegate-cleanup'
@@ -57,7 +59,16 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
 
   const { cleanupNotificationsForDelegate } = useNotificationCleanup()
 
-  const [deleteDelegate] = cgwApi.useDelegatesDeleteDelegateV2Mutation()
+  const { deleteDelegate: deleteDelegateMutation } = useDelegateMutations()
+
+  // A failed backend delete must not block removing the private key
+  const deleteDelegate = useCallback<DeleteDelegate>(
+    (chain, delegateAddress, deleteDelegateDto) =>
+      deleteDelegateMutation({ chain, delegateAddress, deleteDelegateDto }).catch((error) =>
+        Logger.warn(`Failed to delete delegate ${delegateAddress} on chain ${chain.chainId}`, error),
+      ),
+    [deleteDelegateMutation],
+  )
 
   const cleanupService = useMemo(() => {
     return new DelegateCleanupService({

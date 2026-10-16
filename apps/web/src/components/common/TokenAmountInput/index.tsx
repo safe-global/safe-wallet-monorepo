@@ -3,10 +3,10 @@ import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/Creat
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import classNames from 'classnames'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { get, useFormContext } from 'react-hook-form'
@@ -16,7 +16,7 @@ import {
   MultiTokenTransferFields,
   type MultiTokenTransferParams,
   TokenAmountFields,
-} from '@/components/tx-flow/flows/TokenTransfer/types'
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import FiatValue from '@/components/common/FiatValue'

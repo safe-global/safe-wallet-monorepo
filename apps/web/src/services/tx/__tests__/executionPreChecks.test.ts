@@ -9,7 +9,7 @@ import {
 } from '../executionPreChecks'
 import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { registerActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
+import { registerActiveScope } from '@safe-global/views/components/tx-flow/safe-scope/activeScope'
 
 jest.mock('@/services/tx/tx-sender/recommendedNonce', () => ({
   getNonces: jest.fn(),

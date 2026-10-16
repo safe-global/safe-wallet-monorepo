@@ -1,6 +1,6 @@
 import { Wallet, type LucideIcon } from 'lucide-react'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Badge, BadgeDot } from '@/components/ui/badge'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { getMemberTwoFactorStatus, MemberTwoFactorStatus } from '../../utils/twoFactor'
 
 const BADGE_BY_STATUS: Record<

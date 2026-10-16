@@ -2,13 +2,13 @@ import { useCallback } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { Check } from 'lucide-react'
 
-import { Typography, typographyVariants } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography, typographyVariants } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
 import CopyButton from '@/components/common/CopyButton'
 import ShareIcon from '@/public/images/common/share.svg'
-import css from './styles.module.css'
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
+import css from '@safe-global/views/components/safe-apps/AddCustomAppModal/styles.module.css'
+import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 
 type CustomAppProps = {
   safeApp: SafeAppData

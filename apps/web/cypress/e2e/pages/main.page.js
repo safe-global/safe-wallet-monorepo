@@ -29,6 +29,29 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
+/**
+ * Yields whether `isReady()` returns true within `timeout` ms. Unlike an assertion, it does not
+ * fail the test, so the caller can recover, for example by clicking again.
+ */
+export function pollUntil(isReady, timeout) {
+  return cy.wrap(null, { log: false }).then(
+    { timeout: timeout + 1000 },
+    () =>
+      new Cypress.Promise((resolve) => {
+        const deadline = Date.now() + timeout
+        const check = () => {
+          if (isReady()) resolve(true)
+          else if (Date.now() > deadline) resolve(false)
+          else setTimeout(check, 100)
+        }
+        check()
+      }),
+  )
+}
+
+// NameInput can miss its 50-character error when keystrokes come with no delay (the Cypress 16 default).
+export const nameTypingOptions = { delay: 10 }
+
 /** Waits for the page to settle before Argos captures the screenshot. */
 export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)
@@ -39,15 +62,15 @@ export function acceptWidgetDisclaimer() {
 }
 
 /**
- * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * Intercepts the chains list endpoint to inject and/or remove a feature flag for a specific chain,
  * and optionally aliases the feature's data endpoint for use with cy.wait().
  *
  * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
  *
  * @param {object} options
  * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
- * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
- * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.removeFlag]  - Feature flag to remove (before adding `addFlag`, if any)
  * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
  * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
  */
@@ -57,7 +80,7 @@ export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint,
       const applyFlags = (chain) => {
         let features = chain.features || []
         if (removeFlag) features = features.filter((f) => f !== removeFlag)
-        if (!features.includes(addFlag)) features.push(addFlag)
+        if (addFlag && !features.includes(addFlag)) features.push(addFlag)
         return { ...chain, features }
       }
 
@@ -268,9 +291,8 @@ export function checkTokenBalanceIsNull(safeAddress, tokenSymbol) {
   cy.wrap(null).then(poll).should('be.true')
 }
 
+// The global beforeEach stores the current cookie consent, so the banner shows only when that storage is gone.
 export function acceptCookies(index = 0) {
-  cy.wait(1000)
-
   cy.findAllByText('Got it!')
     .should('have.length.at.least', index)
     .each(($el) => $el.click())
@@ -284,26 +306,24 @@ export function acceptCookies(index = 0) {
       }
       cy.wrap($button).click()
       cy.contains(acceptSelection).should('not.exist')
-      cy.wait(500)
     })
 }
 
 export function acceptCookies2() {
-  cy.wait(2000)
   cy.get('body').then(($body) => {
     if ($body.find('button:contains(' + acceptSelection + ')').length > 0) {
       cy.contains('button', acceptSelection).click()
-      cy.wait(500)
+      cy.contains('button', acceptSelection).should('not.exist')
     }
   })
 }
 
+// The global beforeEach stores the outreach session key, so the popup shows only when that storage is gone.
 export function closeOutreachPopup() {
-  cy.wait(1000)
   cy.get('body').then(($body) => {
     if ($body.find(closeOutreachPopupBtn).length > 0) {
       cy.get(closeOutreachPopupBtn).click()
-      cy.wait(500)
+      cy.get(closeOutreachPopupBtn).should('not.exist')
     }
   })
 }
@@ -541,13 +561,17 @@ export function verifyAppLocalStorageItemEquals(key, expectedValue) {
     })
 }
 
+const addedSafesOnChain = (win, chainId) =>
+  Object.keys(JSON.parse(win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes))?.[chainId] ?? {})
+
+/** Yields the address of the added Safe at `index` on the chain, after the app stores it. */
 export function getAddedSafeAddressFromLocalStorage(chainId, index) {
-  return cy.window().then((win) => {
-    const addedSafes = win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes)
-    const addedSafesObj = JSON.parse(addedSafes)
-    const safeAddress = Object.keys(addedSafesObj[chainId])[index]
-    return safeAddress
-  })
+  return cy
+    .window()
+    .should((win) => {
+      expect(addedSafesOnChain(win, chainId), `added Safes on chain ${chainId}`).to.have.length.above(index)
+    })
+    .then((win) => addedSafesOnChain(win, chainId)[index])
 }
 
 export function changeSafeChainName(originalChain, newChain) {

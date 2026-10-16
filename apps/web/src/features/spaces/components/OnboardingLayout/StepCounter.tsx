@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { MixpanelEventParams, WorkspaceCreateStep, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 

@@ -3,24 +3,27 @@ import type { LinkProps } from 'next/link'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
-import { getPolicyIcon } from '../utils/policyIcon'
-import { getPolicyLabel } from '../utils/policyLabel'
+import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
+import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import { PendingBanner } from './components/PendingBanner'
+import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import { getPolicyStatus, type QueuedSpendingLimitPolicy } from '../types'
+import {
+  getPolicyStatus,
+  type QueuedSpendingLimitPolicy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import {
   resolveSpendingLimitDrawerState,
   type ActiveDrawerPolicy,
   type PendingTxOutcome,
   type Viewer,
-} from './resolveState'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 
 type SpendingLimitDrawerBaseProps = {
   open: boolean
@@ -28,7 +31,7 @@ type SpendingLimitDrawerBaseProps = {
   viewer: Viewer
   /** The Safe the policy applies to. The overview's "applies to" row derives from it. */
   safe: { address: string; name?: string }
-  overview: Omit<PolicyOverviewProps, 'appliesTo' | 'chainId' | 'enforcedByHref'>
+  overview: Omit<PolicyOverviewProps, 'appliesTo' | 'chainId' | 'enforcedBy'> & { enforcedBy: string }
   names?: Record<string, string>
   onConnectWallet: () => void
 }
@@ -37,6 +40,8 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
   policy: ActiveDrawerPolicy
   /** Arrives with WA-3156; without it the footer's `Edit` stays disabled. */
   onEdit?: () => void
+  /** Only reachable while the policy is unenforced; without it the footer's CTA stays disabled. */
+  onEnableModule?: () => void
 }
 
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
@@ -76,7 +81,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
           onRetry: props.onRetry,
         },
       }
-    : { onEdit: props.onEdit }
+    : { onEdit: props.onEdit, onEnableModule: props.onEnableModule }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
@@ -84,9 +89,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
-          {(state.kind === 'pending' || state.kind === 'closed') && (
-            <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
-          )}
+          {state.kind !== 'active' && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {state.kind === 'pending' && (
             <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
           )}
@@ -98,7 +101,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
               href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
             chainId={policy.safe.chainId}
-            enforcedByHref={enforcedByHref}
+            enforcedBy={state.kind === 'unenforced' ? undefined : { label: overview.enforcedBy, href: enforcedByHref }}
           />
         </div>
       </DrawerBody>

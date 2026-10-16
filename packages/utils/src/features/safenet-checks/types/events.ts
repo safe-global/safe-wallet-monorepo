@@ -13,10 +13,6 @@ export enum CheckEventType {
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
   /** Consensus `TransactionAttested` from the oracle pair — carries the FROST signature. */
   ORACLE_ATTESTED = 'ORACLE_ATTESTED',
-  /** Consensus `TransactionProposed` — the non-oracle path live beta uses. */
-  PLAIN_PROPOSED = 'PLAIN_PROPOSED',
-  /** Consensus `TransactionAttested` — the non-oracle attestation. */
-  PLAIN_ATTESTED = 'PLAIN_ATTESTED',
   /** Sentinel `NewRequest` — carries the per-check deadline block. */
   REQUEST_CREATED = 'REQUEST_CREATED',
   /** Sentinel `Committed` — a blind commitment; the verdict arrives with the reveal. */
@@ -27,6 +23,10 @@ export enum CheckEventType {
   ORACLE_RESULT = 'ORACLE_RESULT',
   /** `DisputeResolved` — a frozen/contested request was resolved. */
   DISPUTE_RESOLVED = 'DISPUTE_RESOLVED',
+  DISPUTE_TRIGGERED = 'DISPUTE_TRIGGERED',
+  DISPUTE_OUT_OF_SCOPE = 'DISPUTE_OUT_OF_SCOPE',
+  ARBITRATION_TIMED_OUT = 'ARBITRATION_TIMED_OUT',
+  REQUEST_TIMED_OUT = 'REQUEST_TIMED_OUT',
 }
 
 /** Fields present on every decoded event; used for ordering and de-duplication. */
@@ -63,24 +63,6 @@ export type OracleAttestedEvent = CheckEventBase & {
   attestation: FrostSignature
   /** The EIP-712 encoding of `oracleData`, needed for the attestation preimage. */
   oracleDataHash: Hex
-}
-
-export type PlainProposedEvent = CheckEventBase & {
-  type: CheckEventType.PLAIN_PROPOSED
-  safeTxHash: Hex
-  chainId: string
-  safe: string
-  epoch: string
-}
-
-export type PlainAttestedEvent = CheckEventBase & {
-  type: CheckEventType.PLAIN_ATTESTED
-  safeTxHash: Hex
-  chainId: string
-  safe: string
-  epoch: string
-  signatureId: Hex
-  attestation: FrostSignature
 }
 
 export type RequestCreatedEvent = CheckEventBase & {
@@ -126,16 +108,33 @@ export type DisputeResolvedEvent = CheckEventBase & {
   slashed: string
 }
 
+/**
+ * `DisputeResolved.outcome` values: `SentinelOracleRequest.State` indexes (`NONE` = 0).
+ * `resolveDispute` emits only these two; timeouts and out-of-scope rulings emit their own events.
+ */
+export enum DisputeOutcome {
+  RESOLVED_APPROVED = 3,
+  RESOLVED_DENIED = 4,
+}
+
+export type DisputeTriggeredEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_TRIGGERED
+  requestId: Hex
+  deadlineBlock: string
+}
+
+export type InconclusiveEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_OUT_OF_SCOPE | CheckEventType.ARBITRATION_TIMED_OUT | CheckEventType.REQUEST_TIMED_OUT
+  requestId: Hex
+}
+
 export type NormalizedCheckEvent =
   | OracleProposedEvent
   | OracleAttestedEvent
-  | PlainProposedEvent
-  | PlainAttestedEvent
   | RequestCreatedEvent
   | SentinelCommittedEvent
   | SentinelRevealedEvent
   | OracleResultEvent
   | DisputeResolvedEvent
-
-/** The two attesting events. Both carry the attested Safe's chain id and address. */
-export type AttestedCheckEvent = OracleAttestedEvent | PlainAttestedEvent
+  | DisputeTriggeredEvent
+  | InconclusiveEvent

@@ -358,16 +358,6 @@
   background: transparent !important;
 }
 
-.profileName {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 400;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
 .profileTriggerAvatar {
   display: flex;
   align-items: center;
@@ -409,31 +399,57 @@
 .profilePopover {
   display: flex;
   flex-direction: column;
-  gap: 12px !important;
-  padding: 16px !important;
-  width: 13.5rem !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  width: 19.5rem !important;
   background-color: var(--popover) !important;
   /* Match the notifications popover radius (overrides the base popover's rounded-md). */
   border-radius: 24px !important;
+  overflow: hidden;
 }
 
-.profileHeader {
+.profileSection {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
 }
 
-.profileSignedIn {
-  font-size: 12px;
+.profileSectionLabel {
+  font-size: 11px;
   line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #737373);
+}
+
+.profileSectionCaption {
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 400;
   color: var(--color-text-secondary, #737373);
 }
 
-.profileInfo {
+.profileDivider {
+  margin: 0;
+}
+
+.profileIdentity {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profileName {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .profileRole {
@@ -450,9 +466,9 @@
   gap: 8px;
   font-size: 14px;
   line-height: 20px;
-  font-weight: 400;
+  font-weight: 700;
   cursor: pointer;
-  padding: 0;
+  padding: 16px;
   color: var(--color-text-primary, #171717);
   background: none;
   border: none;
@@ -464,10 +480,6 @@
 }
 
 :global(.group[data-collapsible='icon']) {
-  .profileName {
-    display: none !important;
-  }
-
   .profileTrigger {
     height: 3rem !important;
     width: 3rem !important;

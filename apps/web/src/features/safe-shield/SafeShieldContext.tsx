@@ -89,6 +89,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
   const isOffchainMessage = !safeShieldTx && !!safeTxContext.safeMessage
+  const safeShieldTxKey = safeShieldTx ? JSON.stringify(safeShieldTx.data).toLowerCase() : undefined
 
   // Safe-level analysis: untrusted Safe check
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
@@ -119,7 +120,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
+  }, [primaryThreatSeverity, safeShieldTxKey, safeAnalysis, deadlockResults, hasPoisoning])
 
   return (
     <SafeShieldContext.Provider
@@ -176,9 +177,10 @@ export const useSafeShieldForRecipients = (recipientAddresses: string[]) => {
  * spending-limit beneficiary, signers, …): a matched address surfaces in the Copilot recipient
  * card with just the ADDRESS_POISONING state.
  *
- * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place, so a
- * value key is what makes the check re-trigger. (Do NOT key on the array reference / useMemoDeepCompare:
- * they compare by reference and would miss the in-place mutation.)
+ * The registration lives as long as the provider, i.e. the flow. It is not cleared on unmount:
+ * the registering step unmounts on Next, and the review step must keep the card.
+ *
+ * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place.
  * @param addresses - Addresses to check against the user's trusted anchors (undefined entries are dropped)
  */
 export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undefined>) => {
@@ -188,10 +190,6 @@ export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undef
   useEffect(() => {
     setPoisoningAddresses(key ? key.split(',') : undefined)
   }, [key, setPoisoningAddresses])
-
-  // Clear the registration when the owning flow unmounts, so a stale look-alike card can't linger
-  // against addresses no current flow cares about if the provider outlives the flow.
-  useEffect(() => () => setPoisoningAddresses(undefined), [setPoisoningAddresses])
 
   return recipient
 }

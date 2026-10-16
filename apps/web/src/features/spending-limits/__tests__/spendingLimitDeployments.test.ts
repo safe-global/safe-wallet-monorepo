@@ -3,6 +3,7 @@ import {
   getLatestSpendingLimitAddress,
   getDeployment,
   getDeployedSpendingLimitModuleAddress,
+  isAllowanceModuleAddress,
 } from '../services/spendingLimitDeployments'
 
 describe('getLatestSpendingLimitAddress', () => {
@@ -179,5 +180,40 @@ describe('getDeployedSpendingLimitModuleAddress', () => {
     const result = getDeployedSpendingLimitModuleAddress('1', modules)
 
     expect(result).toBeUndefined()
+  })
+})
+
+describe('isAllowanceModuleAddress', () => {
+  const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
+  const v011 = getAllowanceModuleDeployment({ version: '0.1.1' })
+  const mainnetAddress = v010?.networkAddresses['1'] as string
+
+  it('should accept the module registered on the chain, in any letter case', () => {
+    expect(isAllowanceModuleAddress('1', mainnetAddress)).toBe(true)
+    expect(isAllowanceModuleAddress('1', mainnetAddress.toLowerCase())).toBe(true)
+  })
+
+  it('should accept either registered version', () => {
+    const sharedChainId = Object.keys(v011?.networkAddresses ?? {}).find(
+      (chainId) => v010?.networkAddresses[chainId] != null,
+    ) as string
+
+    expect(isAllowanceModuleAddress(sharedChainId, v010?.networkAddresses[sharedChainId] as string)).toBe(true)
+    expect(isAllowanceModuleAddress(sharedChainId, v011?.networkAddresses[sharedChainId] as string)).toBe(true)
+  })
+
+  it('should reject an address that is not an AllowanceModule', () => {
+    expect(isAllowanceModuleAddress('1', '0x000000000000000000000000000000000000dEaD')).toBe(false)
+  })
+
+  it('should reject a version never registered on the chain', () => {
+    const v011Address = Object.values(v011?.networkAddresses ?? {})[0] as string
+    expect(v011Address).not.toBe(mainnetAddress)
+
+    expect(isAllowanceModuleAddress('1', v011Address)).toBe(false)
+  })
+
+  it('should reject every address on a chain with no deployment', () => {
+    expect(isAllowanceModuleAddress('999999999', mainnetAddress)).toBe(false)
   })
 })

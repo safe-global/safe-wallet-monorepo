@@ -25,6 +25,7 @@ const mockSpace: GetSpaceResponse = {
   members: [],
   safeCount: 0,
   memberCount: 0,
+  experimentalFeatures: [],
 }
 
 const renderWithStore = (onSuccess?: () => void) => {

@@ -2,21 +2,11 @@ import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { DrawerList, DrawerSection } from '@/components/common/Drawer'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-  AccountIdentity,
-  AccountIdentitySkeleton,
-  type AccountIdentityProps,
-} from '../../../components/AccountIdentity'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { AccountIdentity, AccountIdentitySkeleton } from '../../../components/AccountIdentity'
+import type { ProposerOverviewProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/types'
 
-export type ProposerOverviewProps = {
-  proposer: AccountIdentityProps
-  appliesTo: AccountIdentityProps
-  initiatedBy: AccountIdentityProps
-  chainId: string
-  lastUpdated: string
-  enforcedBy: string
-}
+export type { ProposerOverviewProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/types'
 
 const ProposerOverview = ({
   proposer,

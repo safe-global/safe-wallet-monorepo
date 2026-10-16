@@ -26,9 +26,7 @@ export type FeePreviewTx = {
  * no RELAY_FEE relayer so previews are impossible.
  */
 export type ResolvedGasTokenState =
-  | { status: 'resolving' }
-  | { status: 'resolved'; address: string }
-  | { status: 'blocked' }
+  { status: 'resolving' } | { status: 'resolved'; address: string } | { status: 'blocked' }
 
 /**
  * Probe `/fees/preview` for the sent token only — probing every held token flooded the CGW and

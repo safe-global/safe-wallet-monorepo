@@ -1,10 +1,15 @@
 import { type MouseEvent, useState } from 'react'
 import { Download, EllipsisVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import EditIcon from '@/public/images/common/edit.svg'
+import EditIcon from '@safe-global/views/assets/images/common/edit.svg'
 import {
   type GetSpaceResponse,
   useLazyAddressBooksGetAddressBookItemsV1Query,

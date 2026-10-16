@@ -124,7 +124,12 @@ function publicAssetsPlugin(): Plugin {
 }
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/views/src/**/*.mdx',
+    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-onboarding',
@@ -184,7 +189,7 @@ const config: StorybookConfig = {
 
     // Ensure proper resolution of monorepo packages
     config.resolve = config.resolve || {}
-    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom']
+    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom', 'react-hook-form']
 
     return config
   },

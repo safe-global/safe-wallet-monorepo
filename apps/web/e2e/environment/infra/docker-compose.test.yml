@@ -1,0 +1,809 @@
+x-fork-proxy-healthcheck: &fork-proxy-healthcheck
+  test:
+    - CMD
+    - python
+    - -c
+    - import urllib.request;
+      urllib.request.urlopen('http://localhost:8546/health')
+  interval: 5s
+  timeout: 5s
+  retries: 5
+x-fork-upstream: &fork-upstream
+  image: ${TXS_IMAGE:?Load test-images.env}
+  entrypoint:
+    - python
+    - /fork_upstream.py
+  volumes:
+    - ./scripts/fork_upstream.py:/fork_upstream.py:ro
+  healthcheck: *fork-proxy-healthcheck
+x-anvil: &anvil
+  image: ${ANVIL_IMAGE:?Load test-images.env}
+  # Fork reads at the pinned block are cached on the host, so resets do not refetch them.
+  volumes:
+    - ${ANVIL_CACHE_DIR:-./.anvil-cache}:/home/foundry/.foundry/cache/rpc
+  entrypoint:
+    - anvil
+    - --host
+    - 0.0.0.0
+    - --compute-units-per-second
+    - ${FORK_COMPUTE_UNITS_PER_SECOND:-20}
+    - --fork-retry-backoff
+    - '1000'
+    # The fork RPC throttles bursts of new-account reads; retrying keeps scenarios from failing.
+    - --retries
+    - '40'
+    - --hardfork
+    - prague
+    - --block-time
+    - '5'
+    - --mixed-mining
+    - --quiet
+x-anvil-healthcheck-timing: &anvil-healthcheck-timing
+  interval: 5s
+  timeout: 10s
+  retries: 12
+  start_period: 20s
+x-anvil-init: &anvil-init
+  image: ${TXS_IMAGE:?Load test-images.env}
+  entrypoint:
+    - python
+    - /align_fork_clock.py
+  volumes:
+    - ./scripts/align_fork_clock.py:/align_fork_clock.py:ro
+x-fork-rpc: &fork-rpc
+  image: ${TXS_IMAGE:?Load test-images.env}
+  entrypoint:
+    - python
+    - /fork_rpc.py
+  volumes:
+    - ./scripts/fork_rpc.py:/fork_rpc.py:ro
+  healthcheck: *fork-proxy-healthcheck
+x-txs-init: &txs-init
+  image: ${TXS_IMAGE:?Load test-images.env}
+  env_file:
+    - container_env_files/txs.test.env
+  volumes:
+    - &fork-indexing-mount ./scripts/setup_fork_indexing.py:/app/safe_transaction_service/history/management/commands/setup_fork_indexing.py:ro
+  command: |
+    bash -c "
+      python manage.py migrate --noinput &&
+      python manage.py setup_fork_indexing
+    "
+x-celery-healthcheck: &celery-healthcheck
+  test:
+    - CMD
+    - celery
+    - inspect
+    - ping
+  interval: 30s
+  timeout: 30s
+  retries: 3
+x-txs-mainnet: &txs-mainnet
+  profiles:
+    - mainnet
+  image: ${TXS_IMAGE:?Load test-images.env}
+  env_file:
+    - container_env_files/txs.test.env
+  environment:
+    DATABASE_URL: psql://postgres:postgres@postgres:5432/txs_mainnet
+    REDIS_URL: redis://redis:6379/4
+    CELERY_BROKER_URL: amqp://guest:guest@general-rabbitmq/txs-mainnet
+    FORCE_SCRIPT_NAME: /txs-mainnet/
+    ETHEREUM_NODE_URL: http://fork-rpc-mainnet:8546
+    FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER_MAINNET:-}
+    FORK_CHAIN_ID: '1'
+    FORK_BLOCK_HASH: ${FORK_BLOCK_HASH_MAINNET:-}
+    WORKER_QUEUES: default,indexing,processing,contracts,tokens,notifications,webhooks
+    CELERYD_CONCURRENCY: '20'
+x-txs-polygon: &txs-polygon
+  profiles:
+    - polygon
+  image: ${TXS_IMAGE:?Load test-images.env}
+  env_file:
+    - container_env_files/txs.test.env
+  environment:
+    DATABASE_URL: psql://postgres:postgres@postgres:5432/txs_polygon
+    REDIS_URL: redis://redis:6379/5
+    CELERY_BROKER_URL: amqp://guest:guest@general-rabbitmq/txs-polygon
+    FORCE_SCRIPT_NAME: /txs-polygon/
+    ETHEREUM_NODE_URL: http://fork-rpc-polygon:8546
+    FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER_POLYGON:-}
+    FORK_CHAIN_ID: '137'
+    FORK_BLOCK_HASH: ${FORK_BLOCK_HASH_POLYGON:-}
+    WORKER_QUEUES: default,indexing,processing,contracts,tokens,notifications,webhooks
+    CELERYD_CONCURRENCY: '20'
+x-cfg-job: &cfg-job
+  image: ${CFG_IMAGE:?Load test-images.env}
+  entrypoint: []
+  env_file:
+    - container_env_files/cfg.env
+  volumes:
+    - ./scripts/cfg_management:/app/src/chains/management:ro
+    - nginx-shared-cfg:/nginx
+  command:
+    - bash
+    - -c
+    - |
+      python src/manage.py setup_test_chain &&
+      cp -r src/media /nginx/
+x-decoder-env: &decoder-env
+  DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/decoder
+  REDIS_URL: redis://redis:6379/2
+  RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
+x-decoder-chain: &decoder-chain
+  image: ${DECODER_IMAGE:?Load test-images.env}
+  volumes:
+    - ./scripts/setup_decoder.py:/app/setup_decoder.py:ro
+  depends_on:
+    decoder-init:
+      condition: service_completed_successfully
+  command: python setup_decoder.py
+volumes:
+  nginx-shared-txs:
+  nginx-shared-cfg:
+  postgres-data:
+  cow-api-tls:
+services:
+  price-fixtures:
+    image: ${TXS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - python
+      - /price_fixtures.py
+    volumes:
+      - ./scripts/price_fixtures.py:/price_fixtures.py:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:8091/health')
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  cow-api:
+    image: ${TXS_IMAGE:?Load test-images.env}
+    # Writes the self-signed certificate into the shared volume that the gateway trusts.
+    user: root
+    entrypoint:
+      - python
+      - /cow_api.py
+    environment:
+      COW_API_OFFLINE: 'true'
+    volumes:
+      - ./scripts/cow_api.py:/cow_api.py:ro
+      - ./scripts/cow_api_orders.json:/cow_api_orders.json:ro
+      - cow-api-tls:/tls
+    networks:
+      default:
+        aliases:
+          - api.cow.fi
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import ssl, urllib.request;
+          urllib.request.urlopen('https://localhost/health',
+          context=ssl._create_unverified_context())
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  relay-api:
+    image: ${TXS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - python
+      - /relay_api.py
+    environment:
+      RELAY_RPC_URLS: 11155111=http://anvil:${RPC_PORT:-8545},1=http://anvil-mainnet:8547,137=http://anvil-polygon:8548
+    volumes:
+      - ./scripts/relay_api.py:/relay_api.py:ro
+    depends_on:
+      anvil:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:8092/health')
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  billing-api:
+    image: ${TXS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - python
+      - /billing_api.py
+    environment:
+      BILLING_WEBHOOK_URL: http://cgw-web:3000/v1/billing/webhooks
+      BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
+      # Throwaway P-256 test key; its public half is BILLING_WEBHOOK_JWT_PUBLIC_KEY of cgw-web.
+      BILLING_WEBHOOK_SIGNING_KEY: 9df1216f154fc36b2e5df222b08470df3cac20b9f5679328781f959373e2b23d
+    volumes:
+      - ./scripts/billing_api.py:/billing_api.py:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:8093/health')
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  fork-upstream:
+    <<: *fork-upstream
+    environment:
+      FORK_UPSTREAM_URL: ${SEPOLIA_FORK_RPC_URL:?Set SEPOLIA_FORK_RPC_URL}
+  anvil:
+    <<: *anvil
+    depends_on:
+      fork-upstream:
+        condition: service_healthy
+    command:
+      - --port
+      - ${RPC_PORT:-8545}
+      - --fork-url
+      - http://fork-upstream:8546
+      - --fork-block-number
+      - ${FORK_BLOCK_NUMBER:?Set FORK_BLOCK_NUMBER}
+      - --chain-id
+      - ${FORK_CHAIN_ID:-11155111}
+    ports:
+      - 127.0.0.1:${RPC_PORT:-8545}:${RPC_PORT:-8545}
+    networks:
+      default:
+        aliases:
+          - rpc.safe-e2e.test
+    healthcheck:
+      <<: *anvil-healthcheck-timing
+      test:
+        - CMD
+        - cast
+        - block-number
+        - --rpc-url
+        - http://localhost:${RPC_PORT:-8545}
+  anvil-init:
+    <<: *anvil-init
+    environment:
+      ANVIL_RPC_URL: http://anvil:${RPC_PORT:-8545}
+      FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER}
+      FORK_BLOCK_HASH: ${FORK_BLOCK_HASH:-}
+    depends_on:
+      anvil:
+        condition: service_healthy
+  fork-rpc:
+    <<: *fork-rpc
+    environment:
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER}
+      FORK_RPC_TARGET: http://anvil:${RPC_PORT:-8545}
+    depends_on:
+      anvil-init:
+        condition: service_completed_successfully
+  nginx:
+    image: ${NGINX_IMAGE:?Load test-images.env}
+    ports:
+      - 127.0.0.1:${REVERSE_PROXY_PORT:-8000}:8000
+    volumes:
+      - ./docker/nginx/nginx.test.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/cors.conf:/etc/nginx/cors.conf:ro
+      - nginx-shared-txs:/nginx-txs
+      - nginx-shared-cfg:/nginx-cfg
+    depends_on:
+      - txs-web
+      - cfg-web
+      - cgw-web
+      - events-web
+  txs-init:
+    <<: *txs-init
+    environment:
+      - ETHEREUM_NODE_URL=http://fork-rpc:8546
+      - FORK_BLOCK_NUMBER=${FORK_BLOCK_NUMBER}
+      - FORK_CHAIN_ID=${FORK_CHAIN_ID:-11155111}
+      - FORK_BLOCK_HASH=${FORK_BLOCK_HASH:-}
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@test.local
+      - DJANGO_SUPERUSER_PASSWORD=admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+      fork-rpc:
+        condition: service_healthy
+  txs-worker-indexer: &txs-worker
+    image: ${TXS_IMAGE:?Load test-images.env}
+    env_file:
+      - container_env_files/txs.test.env
+    environment:
+      ETHEREUM_NODE_URL: http://fork-rpc:8546
+      WORKER_QUEUES: default,indexing,processing,contracts,tokens,notifications,webhooks
+    depends_on:
+      txs-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+      fork-rpc:
+        condition: service_healthy
+    command: docker/web/celery/worker/run.sh
+    healthcheck: *celery-healthcheck
+  txs-checks:
+    profiles:
+      - checks
+    image: ${TXS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - python
+    command:
+      - manage.py
+      - test
+      - /fork-tests
+      - --noinput
+    env_file:
+      - container_env_files/txs.test.env
+    environment:
+      ETHEREUM_NODE_URL: http://fork-rpc:8546
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER}
+      FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
+      FORK_BLOCK_HASH: ${FORK_BLOCK_HASH:-}
+      RPC_PORT: ${RPC_PORT:-8545}
+    volumes:
+      - ./tests/txs:/fork-tests:ro
+      - *fork-indexing-mount
+  txs-web:
+    image: ${TXS_IMAGE:?Load test-images.env}
+    env_file:
+      - container_env_files/txs.test.env
+    environment:
+      - ETHEREUM_NODE_URL=http://fork-rpc:8546
+    depends_on:
+      txs-worker-indexer:
+        condition: service_healthy
+    working_dir: /app
+    volumes:
+      - nginx-shared-txs:/nginx
+    command: docker/web/run_web.sh
+  txs-scheduler:
+    <<: *txs-worker
+    depends_on:
+      txs-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/celery/scheduler/run.sh
+  cfg-init:
+    <<: *cfg-job
+    environment:
+      FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
+      TEST_RPC_URL: http://rpc.safe-e2e.test:${RPC_PORT:-8545}
+      TEST_PUBLIC_TXS_URL: http://localhost:${REVERSE_PROXY_PORT:-8000}/txs/
+      TEST_CHAIN_NAME: Sepolia
+      TEST_CHAIN_SHORT_NAME: sep
+      TEST_TXS_URL: http://nginx:8000/txs/
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - bash
+      - -c
+      - |
+        python src/manage.py collectstatic --noinput &&
+        cp -r staticfiles/* /nginx/ &&
+        python src/manage.py migrate --noinput &&
+        python src/manage.py setup_test_chain &&
+        cp -r src/media /nginx/
+  cfg-web:
+    image: ${CFG_IMAGE:?Load test-images.env}
+    tty: true
+    volumes:
+      - nginx-shared-cfg:/nginx
+    env_file:
+      - container_env_files/cfg.env
+    depends_on:
+      cfg-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+  decoder-init:
+    image: ${DECODER_IMAGE:?Load test-images.env}
+    environment:
+      <<: *decoder-env
+      FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
+    volumes:
+      - ./scripts/setup_decoder.py:/app/setup_decoder.py:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "alembic upgrade head && python setup_decoder.py"
+  decoder-web:
+    image: ${DECODER_IMAGE:?Load test-images.env}
+    environment:
+      <<: *decoder-env
+      FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
+      # Scenarios register ABIs and decode with them seconds later; the default reload waits 30 s.
+      DECODER_ABI_RELOAD_SECONDS: '0'
+    depends_on:
+      decoder-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/run_web.sh
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:8888/health/ready',
+          timeout=5)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+  cgw-web:
+    image: ${CGW_IMAGE:?Load test-images.env}
+    env_file:
+      - container_env_files/cgw.env
+    environment:
+      AMQP_URL: amqp://general-rabbitmq:5672
+      USE_TX_SERVICE_VPC_URL: 'true'
+      FF_FILTER_VALUE_PARSING: 'true'
+      FF_SAFE_QUEUE_SERVICE: 'false'
+      FF_AUTH: 'true'
+      FF_USERS: 'true'
+      FF_TRUSTED_DELEGATE_CALL: 'true'
+      # Scenarios change chain and backend state within seconds; production lifetimes (60 s, 404s for 30 s) only delay
+      # what the tests see. Event-driven cache invalidation still runs as in production.
+      EXPIRATION_TIME_DEFAULT_SECONDS: '5'
+      EXPIRATION_TIME_RPC_SECONDS: '2'
+      DEFAULT_NOT_FOUND_EXPIRE_TIME_SECONDS: '2'
+      CONTRACT_NOT_FOUND_EXPIRE_TIME_SECONDS: '2'
+      TOKEN_NOT_FOUND_EXPIRE_TIME_SECONDS: '2'
+      PRICES_PROVIDER_API_BASE_URI: http://price-fixtures:8091
+      PRICES_PROVIDER_API_KEY: ''
+      SAFE_DATA_DECODER_BASE_URI: http://decoder-web:8888
+      NODE_EXTRA_CA_CERTS: /cow-api-tls/cert.pem
+      AUTH_POST_LOGIN_REDIRECT_URI: http://localhost:${SAFE_E2E_WEB_PORT:-3080}
+      JWT_ISSUER: safe-e2e-local
+      JWT_SECRET: ${SAFE_E2E_JWT_SECRET:-local-test-only-signing-secret}
+      BLOCKLIST_ENABLED: 'false'
+      BLOCKLIST_ENCRYPTED_DATA: ''
+      BLOCKLIST_SECRET_KEY: ''
+      BLOCKLIST_SECRET_SALT: ''
+      RELAY_PROVIDER_API_KEY: ''
+      RELAY_PROVIDER_API_BASE_URI: http://relay-api:8092
+      # One sponsored transaction per Safe and day, as on staging.
+      RELAY_THROTTLE_LIMIT: '1'
+      FF_BILLING_SERVICE: 'true'
+      SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
+      SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
+      BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
+      BILLING_WEBHOOK_JWT_PUBLIC_KEY: |
+        -----BEGIN PUBLIC KEY-----
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEs8n5hJq0AZO7nlpT9j1DbeqmXzxf
+        REwUz4CWG6xB157GPQBjEc7aG4AAAZjdSxZO2XbyZeZvF0Y3X3TTGHhkKA==
+        -----END PUBLIC KEY-----
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: cgw
+      REDIS_HOST: redis
+    volumes:
+      - cow-api-tls:/cow-api-tls:ro
+    depends_on:
+      price-fixtures:
+        condition: service_healthy
+      cow-api:
+        condition: service_healthy
+      relay-api:
+        condition: service_healthy
+      billing-api:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      decoder-web:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+  general-rabbitmq:
+    image: ${RABBITMQ_IMAGE:?Load test-images.env}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -f /var/lib/rabbitmq/.erlang.cookie && rabbitmq-diagnostics -q
+          ping
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    volumes:
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+  events-web:
+    image: ${EVENTS_IMAGE:?Load test-images.env}
+    env_file:
+      - container_env_files/events.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: psql://postgres:postgres@postgres:5432/events
+  fork-upstream-mainnet:
+    <<: *fork-upstream
+    profiles:
+      - mainnet
+    environment:
+      FORK_UPSTREAM_URL: ${FORK_RPC_URL_MAINNET:-}
+  anvil-mainnet:
+    <<: *anvil
+    profiles:
+      - mainnet
+    depends_on:
+      fork-upstream-mainnet:
+        condition: service_healthy
+    command:
+      - --port
+      - '8547'
+      - --fork-url
+      - http://fork-upstream-mainnet:8546
+      - --fork-block-number
+      - ${FORK_BLOCK_NUMBER_MAINNET:-}
+      - --chain-id
+      - '1'
+    ports:
+      - 127.0.0.1:8547:8547
+    networks:
+      default:
+        aliases:
+          - rpc-mainnet.safe-e2e.test
+    healthcheck:
+      <<: *anvil-healthcheck-timing
+      test:
+        - CMD
+        - cast
+        - block-number
+        - --rpc-url
+        - http://localhost:8547
+  anvil-init-mainnet:
+    <<: *anvil-init
+    profiles:
+      - mainnet
+    environment:
+      ANVIL_RPC_URL: http://anvil-mainnet:8547
+      FORK_CHAIN_ID: '1'
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER_MAINNET:-}
+      FORK_BLOCK_HASH: ${FORK_BLOCK_HASH_MAINNET:-}
+    depends_on:
+      anvil-mainnet:
+        condition: service_healthy
+  fork-rpc-mainnet:
+    <<: *fork-rpc
+    profiles:
+      - mainnet
+    environment:
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER_MAINNET:-}
+      FORK_RPC_TARGET: http://anvil-mainnet:8547
+    depends_on:
+      anvil-init-mainnet:
+        condition: service_completed_successfully
+  txs-init-mainnet:
+    <<: [*txs-mainnet, *txs-init]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      fork-rpc-mainnet:
+        condition: service_healthy
+  txs-worker-mainnet:
+    <<: *txs-mainnet
+    depends_on: &txs-mainnet-celery-dependencies
+      txs-init-mainnet:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/celery/worker/run.sh
+    healthcheck: *celery-healthcheck
+  txs-scheduler-mainnet:
+    <<: *txs-mainnet
+    depends_on: *txs-mainnet-celery-dependencies
+    command: docker/web/celery/scheduler/run.sh
+  txs-web-mainnet:
+    <<: *txs-mainnet
+    depends_on:
+      txs-worker-mainnet:
+        condition: service_healthy
+    working_dir: /app
+    command: docker/web/run_web.sh
+  cfg-chain-mainnet:
+    <<: *cfg-job
+    profiles:
+      - mainnet
+    environment:
+      FORK_CHAIN_ID: '1'
+      TEST_RPC_URL: http://rpc-mainnet.safe-e2e.test:8547
+      TEST_PUBLIC_TXS_URL: http://localhost:${REVERSE_PROXY_PORT:-8000}/txs-mainnet/
+      TEST_TXS_URL: http://nginx:8000/txs-mainnet/
+      TEST_CHAIN_NAME: Ethereum
+      TEST_CHAIN_SHORT_NAME: eth
+      TEST_CHAIN_CURRENCY_NAME: Ether
+      TEST_CHAIN_CURRENCY_SYMBOL: ETH
+      TEST_CHAIN_PRICES_COIN: ethereum
+      TEST_CHAIN_PRICES_CHAIN: ethereum
+      TEST_CHAIN_EXPLORER: https://etherscan.io
+      TEST_CHAIN_EXPLORER_API: https://api.etherscan.io/api
+      TEST_CHAIN_IS_TESTNET: 'false'
+      # As on staging: default tokens come from the portfolio, falling back to trusted Transaction Service tokens.
+      TEST_CHAIN_EXTRA_FEATURES: PORTFOLIO_ENDPOINT
+    depends_on:
+      cfg-init:
+        condition: service_completed_successfully
+      txs-web-mainnet:
+        condition: service_started
+  decoder-chain-mainnet:
+    <<: *decoder-chain
+    profiles:
+      - mainnet
+    environment:
+      <<: *decoder-env
+      FORK_CHAIN_ID: '1'
+  fork-upstream-polygon:
+    <<: *fork-upstream
+    profiles:
+      - polygon
+    environment:
+      FORK_UPSTREAM_URL: ${FORK_RPC_URL_POLYGON:-}
+  anvil-polygon:
+    <<: *anvil
+    profiles:
+      - polygon
+    depends_on:
+      fork-upstream-polygon:
+        condition: service_healthy
+    command:
+      - --port
+      - '8548'
+      - --fork-url
+      - http://fork-upstream-polygon:8546
+      - --fork-block-number
+      - ${FORK_BLOCK_NUMBER_POLYGON:-}
+      - --chain-id
+      - '137'
+    ports:
+      - 127.0.0.1:8548:8548
+    networks:
+      default:
+        aliases:
+          - rpc-polygon.safe-e2e.test
+    healthcheck:
+      <<: *anvil-healthcheck-timing
+      test:
+        - CMD
+        - cast
+        - block-number
+        - --rpc-url
+        - http://localhost:8548
+  anvil-init-polygon:
+    <<: *anvil-init
+    profiles:
+      - polygon
+    environment:
+      ANVIL_RPC_URL: http://anvil-polygon:8548
+      FORK_CHAIN_ID: '137'
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER_POLYGON:-}
+      FORK_BLOCK_HASH: ${FORK_BLOCK_HASH_POLYGON:-}
+    depends_on:
+      anvil-polygon:
+        condition: service_healthy
+  fork-rpc-polygon:
+    <<: *fork-rpc
+    profiles:
+      - polygon
+    environment:
+      FORK_BLOCK_NUMBER: ${FORK_BLOCK_NUMBER_POLYGON:-}
+      FORK_RPC_TARGET: http://anvil-polygon:8548
+    depends_on:
+      anvil-init-polygon:
+        condition: service_completed_successfully
+  txs-init-polygon:
+    <<: [*txs-polygon, *txs-init]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      fork-rpc-polygon:
+        condition: service_healthy
+  txs-worker-polygon:
+    <<: *txs-polygon
+    depends_on: &txs-polygon-celery-dependencies
+      txs-init-polygon:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/celery/worker/run.sh
+    healthcheck: *celery-healthcheck
+  txs-scheduler-polygon:
+    <<: *txs-polygon
+    depends_on: *txs-polygon-celery-dependencies
+    command: docker/web/celery/scheduler/run.sh
+  txs-web-polygon:
+    <<: *txs-polygon
+    depends_on:
+      txs-worker-polygon:
+        condition: service_healthy
+    working_dir: /app
+    command: docker/web/run_web.sh
+  cfg-chain-polygon:
+    <<: *cfg-job
+    profiles:
+      - polygon
+    environment:
+      FORK_CHAIN_ID: '137'
+      TEST_RPC_URL: http://rpc-polygon.safe-e2e.test:8548
+      TEST_PUBLIC_TXS_URL: http://localhost:${REVERSE_PROXY_PORT:-8000}/txs-polygon/
+      TEST_TXS_URL: http://nginx:8000/txs-polygon/
+      TEST_CHAIN_NAME: Polygon
+      TEST_CHAIN_SHORT_NAME: matic
+      TEST_CHAIN_CURRENCY_NAME: POL
+      TEST_CHAIN_CURRENCY_SYMBOL: POL
+      TEST_CHAIN_PRICES_COIN: polygon-ecosystem-token
+      TEST_CHAIN_PRICES_CHAIN: polygon-pos
+      TEST_CHAIN_EXPLORER: https://polygonscan.com
+      TEST_CHAIN_EXPLORER_API: https://api.polygonscan.com/api
+      TEST_CHAIN_IS_TESTNET: 'false'
+    depends_on:
+      cfg-init:
+        condition: service_completed_successfully
+      txs-web-polygon:
+        condition: service_started
+  decoder-chain-polygon:
+    <<: *decoder-chain
+    profiles:
+      - polygon
+    environment:
+      <<: *decoder-env
+      FORK_CHAIN_ID: '137'
+  postgres:
+    image: ${POSTGRES_IMAGE:?Load test-images.env}
+    command:
+      - postgres
+      - -c
+      - max_connections=250
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/databases.sql:/docker-entrypoint-initdb.d/databases.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres -h 127.0.0.1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  redis:
+    image: ${REDIS_IMAGE:?Load test-images.env}
+    command:
+      - redis-server
+      - --rename-command
+      - FLUSHALL
+      - ''
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 5s
+      timeout: 5s
+      retries: 10

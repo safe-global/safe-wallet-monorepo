@@ -13,10 +13,14 @@ import {
   SPENDER_HELPER_TEXT,
   SPENDER_IS_SAFE_ERROR,
   SPENDER_RESERVED_ERROR,
-} from '../../constants'
-import { createEmptySpender, type SpenderFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import {
+  createEmptySpender,
+  type SpenderFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '../../EditFlow/EditModeContext'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpenderCard from '../SpenderCard'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -46,8 +50,7 @@ jest.mock('@/components/common/AddressBookInput', () => {
     const error = name
       .split('.')
       .reduce<unknown>((acc, key) => (acc as Record<string, unknown> | undefined)?.[key], errors) as
-      | { message?: string }
-      | undefined
+      { message?: string } | undefined
     return (
       <div>
         <input

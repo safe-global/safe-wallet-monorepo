@@ -7,11 +7,11 @@ import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 /**
  * Signed-out empty state on the welcome "Trusted accounts" tab: invites the

@@ -7,6 +7,7 @@ import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as assets from './assets.pages.js'
 import * as addressbook from './address_book.page.js'
 import * as dashboard from './dashboard.pages.js'
+import { fixtureGetters } from '../../support/fixture.js'
 
 export const inputCurrencyInput = '[id="input-currency-input"]'
 export const outputCurrencyInput = '[id="output-currency-input"]'
@@ -107,9 +108,7 @@ export const orderTypes = {
   limit: 'Limit',
 }
 
-export const limitOrderSafe = 'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551'
-
-export const swapTxs = {
+export const swapTxs = fixtureGetters('swaps', {
   sell1Action:
     '&id=multisig_0x03042B890b99552b60A073F808100517fb148F60_0xd033466000a40227fba7a7deb1a668371c213fec90bac9f2583096be2e0fd959',
   buy2actions:
@@ -134,7 +133,7 @@ export const swapTxs = {
     '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
   swapQueue:
     '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
-}
+})
 
 export const tokenBlockLabels = {
   sell: 'Sell',
@@ -196,8 +195,17 @@ export function setLimitExpiry(value) {
   cy.get(limitOrderExpiryItem(value)).dblclick()
 }
 
+// On slow runners the widget rewrites "0x" mid-typing and drops a keystroke, so the address is set at once.
 export function enterRecipient(address) {
-  cy.get(customRecipient).find('input').clear().type(address)
+  cy.get(customRecipient)
+    .find('input')
+    .clear()
+    .then(([input]) => {
+      const frameWindow = input.ownerDocument.defaultView
+      Object.getOwnPropertyDescriptor(frameWindow.HTMLInputElement.prototype, 'value').set.call(input, address)
+      input.dispatchEvent(new frameWindow.Event('input', { bubbles: true }))
+    })
+    .should('have.value', address)
 }
 
 export function verifyBlockedAddressFormShown() {
@@ -311,20 +319,22 @@ export function acceptLegalDisclaimer() {
   cy.get('button').contains('Continue').click()
 }
 
+const WIDGET_WALLET_TIMEOUT_MS = 15000
+
+const isWidgetWalletConnected = (iframeSelector) => () => {
+  const $body = Cypress.$(Cypress.$(iframeSelector)[0]?.contentDocument?.body)
+  return $body.find(inputCurrencyInput).length > 0 && !$body.find('button:contains("Connect Wallet")').length
+}
+
 // The widget can miss the host wallet handshake and stay on "Connect Wallet" — reload to redo it.
 export function ensureWidgetWalletConnected(iframeSelector, attempt = 0) {
-  cy.wait(5000)
-  main.getIframeBody(iframeSelector).then(($body) => {
-    if (!$body.find('button:contains("Connect Wallet")').length) return
+  main.pollUntil(isWidgetWalletConnected(iframeSelector), WIDGET_WALLET_TIMEOUT_MS).then((connected) => {
+    if (connected) return
     if (attempt >= 2) {
       throw new Error('CoW widget did not receive the connected wallet after reloading')
     }
     cy.reload()
-    cy.wait(4000)
-    cy.get('button').then(($btns) => {
-      const $continue = $btns.filter(':contains("Continue")')
-      if ($continue.length) cy.wrap($continue.first()).click()
-    })
+    cy.get('button').contains('Continue').click()
     ensureWidgetWalletConnected(iframeSelector, attempt + 1)
   })
 }

@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import HubSpotForm from '../HubSpotForm/HubSpotForm'
-import HnSignupLayout from './HnSignupLayout'
-import css from './styles.module.css'
+import HnSignupLayout from '@safe-global/views/features/hypernative/components/HnSignupFlow/HnSignupLayout'
+import css from '@safe-global/views/features/hypernative/components/HnSignupFlow/styles.module.css'
 
 export type HnSignupFormProps = {
   portalId: string

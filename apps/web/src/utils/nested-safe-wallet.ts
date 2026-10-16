@@ -12,6 +12,7 @@ import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
+import { verifyAndStripNestedTxCalldata, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import type { TransactionResult } from '@safe-global/types-kit'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
@@ -20,6 +21,7 @@ export type NestedWallet = {
   chainId: string
   provider: Eip1193Provider | null
   isSafe: true
+  threshold: number
 }
 
 export const getNestedWallet = (
@@ -64,11 +66,18 @@ export const getNestedWallet = (
         return Promise.reject('Could not initialize core sdk')
       }
 
+      // Verify and strip any nested-tx envelope; the child tx is proposed alongside the parent below
+      let nestedChildTx: NestedTxEnvelope | undefined
       const transactions = params.txs.map(({ to, value, data }: any) => {
+        const { data: strippedData, childTx } = verifyAndStripNestedTxCalldata(data, {
+          to,
+          chainId: safeInfo.chainId,
+        })
+        nestedChildTx = nestedChildTx ?? childTx
         return {
           to: getAddress(to),
           value: BigInt(value).toString(),
-          data,
+          data: strippedData,
           operation: 0,
         }
       })
@@ -88,20 +97,28 @@ export const getNestedWallet = (
           // has been submitted in the wallet not when it has been executed
 
           // First we propose so the backend will pick it up
-          await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, safeTx, safeTxHash)
+          await proposeTx(
+            safeInfo.chainId,
+            safeInfo.address.value,
+            actualWallet.address,
+            safeTx,
+            safeTxHash,
+            undefined,
+            nestedChildTx,
+          )
           result = await connectedSDK.approveTransactionHash(safeTxHash)
         } else {
-          // Sign off-chain
-          if (safeInfo.threshold === 1) {
-            // Always propose the tx so the resulting link to the parentTx does not error out
-            await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, safeTx, safeTxHash)
-
-            // Directly execute the tx
-            result = await connectedSDK.executeTransaction(safeTx)
-          } else {
-            const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
-            await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, signedTx, safeTxHash)
-          }
+          // Never executed here, even at threshold 1: the user executes it from the parent Safe
+          const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
+          await proposeTx(
+            safeInfo.chainId,
+            safeInfo.address.value,
+            actualWallet.address,
+            signedTx,
+            safeTxHash,
+            undefined,
+            nestedChildTx,
+          )
         }
       } catch (err) {
         logError(ErrorCodes._817, err)
@@ -160,5 +177,6 @@ export const getNestedWallet = (
     address: safeInfo.address.value,
     chainId: safeInfo.chainId,
     isSafe: true,
+    threshold: safeInfo.threshold,
   }
 }

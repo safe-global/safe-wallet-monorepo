@@ -5,6 +5,7 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import { navigateTo } from '@/utils/navigation'
 import { isElevationRequiredError } from './elevation'
 
@@ -120,10 +121,11 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
     // cancellation and not something to report back to them.
     if (isElevationRequiredError(result.error)) return false
 
+    const isQuotaRefusal = getQuotaExceededError(result.error) !== undefined
     dispatch(
       showNotification({
         message: getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE,
-        variant: 'error',
+        variant: isQuotaRefusal ? 'warning' : 'error',
         groupKey: 'step-up-replay-failed',
       }),
     )

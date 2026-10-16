@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SafeAppsInfoModal from './index'
-import { FEATURES } from '../types'
-import type { AllowedFeatures } from '../types'
+import { FEATURES } from '@safe-global/views/components/safe-apps/types'
+import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
 
 const meta = {
   title: 'Components/SafeApps/SafeAppsInfoModal',

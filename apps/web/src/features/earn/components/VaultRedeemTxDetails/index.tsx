@@ -1,5 +1,5 @@
 import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import TokenAmount from '@/components/common/TokenAmount'
 import VaultRedeemConfirmation from '../VaultRedeemConfirmation'
 

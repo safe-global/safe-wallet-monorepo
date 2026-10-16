@@ -13,21 +13,23 @@
 **Rationale**: Only expose components that are directly consumed by external files. Internal composition components (HOCs, wrappers) remain internal.
 
 **Public Components**:
-| Component | Purpose | Consumers |
-|-----------|---------|-----------|
-| `HnBanner` | Main promotional banner | Dashboard carousel |
-| `HnDashboardBanner` | Dashboard-specific variant | Dashboard |
-| `HnMiniTxBanner` | Mini banner for transactions | TxDetails, TxSummary |
-| `HnPendingBanner` | Pending transaction banner | Queue page |
-| `HnQueueAssessmentBanner` | Queue assessment results | Queue page, NewTx |
-| `HnActivatedSettingsBanner` | Settings confirmation | Settings page |
-| `HnSecurityReportBtn` | Security report button | TxDetails |
-| `HnLoginCard` | OAuth login card | Settings |
-| `HypernativeLogo` | Brand logo | Safe-shield |
+
+| Component                   | Purpose                      | Consumers            |
+| --------------------------- | ---------------------------- | -------------------- |
+| `HnBanner`                  | Main promotional banner      | Dashboard carousel   |
+| `HnDashboardBanner`         | Dashboard-specific variant   | Dashboard            |
+| `HnMiniTxBanner`            | Mini banner for transactions | TxDetails, TxSummary |
+| `HnPendingBanner`           | Pending transaction banner   | Queue page           |
+| `HnQueueAssessmentBanner`   | Queue assessment results     | Queue page, NewTx    |
+| `HnActivatedSettingsBanner` | Settings confirmation        | Settings page        |
+| `HnSecurityReportBtn`       | Security report button       | TxDetails            |
+| `HnLoginCard`               | OAuth login card             | Settings             |
+| `HypernativeLogo`           | Brand logo                   | Safe-shield          |
 
 **Public Service**:
-| Service | Purpose | Consumers |
-|---------|---------|-----------|
+
+| Service              | Purpose                  | Consumers                         |
+| -------------------- | ------------------------ | --------------------------------- |
 | `isHypernativeGuard` | Guard bytecode detection | Safe-shield (programmatic checks) |
 
 **Internal (not in contract)**:
@@ -53,14 +55,15 @@
 **Rationale**: Hooks cannot be lazy-loaded (Rules of Hooks violation). Export lightweight hooks that don't carry heavy dependencies.
 
 **Public Hooks**:
-| Hook | Purpose | Primary Consumers |
-|------|---------|-------------------|
-| `useIsHypernativeEligible` | Check if safe is eligible | Safe-shield (critical) |
-| `useHypernativeOAuth` | OAuth flow management | Safe-shield, settings |
-| `useIsHypernativeGuard` | Check if guard is installed | Safe-shield, settings |
-| `useIsHypernativeFeatureEnabled` | Main feature flag check | Various |
-| `useIsHypernativeQueueScanFeature` | Queue scan flag check | Queue pages |
-| `useHnAssessmentSeverity` | Get assessment severity | Transaction pages |
+
+| Hook                               | Purpose                     | Primary Consumers      |
+| ---------------------------------- | --------------------------- | ---------------------- |
+| `useIsHypernativeEligible`         | Check if safe is eligible   | Safe-shield (critical) |
+| `useHypernativeOAuth`              | OAuth flow management       | Safe-shield, settings  |
+| `useIsHypernativeGuard`            | Check if guard is installed | Safe-shield, settings  |
+| `useIsHypernativeFeatureEnabled`   | Main feature flag check     | Various                |
+| `useIsHypernativeQueueScanFeature` | Queue scan flag check       | Queue pages            |
+| `useHnAssessmentSeverity`          | Get assessment severity     | Transaction pages      |
 
 **Also export** (for OAuth callback page):
 
@@ -105,11 +108,12 @@ export { useIsHypernativeQueueScanFeature } from './hooks/useIsHypernativeQueueS
 ```
 
 **Feature Flags**:
-| Flag | Controls | Checked By |
-|------|----------|------------|
-| `FEATURES.HYPERNATIVE` | Main feature / lazy bundle loading | Feature handle |
-| `FEATURES.HYPERNATIVE_QUEUE_SCAN` | Queue scanning behavior | `useIsHypernativeQueueScanFeature` |
-| `FEATURES.HYPERNATIVE_RELAX_GUARD_CHECK` | ABI check bypass | `useIsHypernativeGuard` (internal) |
+
+| Flag                                     | Controls                           | Checked By                         |
+| ---------------------------------------- | ---------------------------------- | ---------------------------------- |
+| `FEATURES.HYPERNATIVE`                   | Main feature / lazy bundle loading | Feature handle                     |
+| `FEATURES.HYPERNATIVE_QUEUE_SCAN`        | Queue scanning behavior            | `useIsHypernativeQueueScanFeature` |
+| `FEATURES.HYPERNATIVE_RELAX_GUARD_CHECK` | ABI check bypass                   | `useIsHypernativeGuard` (internal) |
 
 **Alternatives Considered**:
 

@@ -22,6 +22,7 @@ const mockSpace: GetSpaceResponse = {
   name: 'Space Name',
   safeCount: 5,
   memberCount: 3,
+  experimentalFeatures: [],
   members: [
     {
       name: 'Admin User',

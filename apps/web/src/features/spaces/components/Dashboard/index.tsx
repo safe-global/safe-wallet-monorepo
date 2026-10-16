@@ -26,6 +26,7 @@ import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
+import { useSpacePlanState } from '../../hooks/useSpacePlanState'
 
 const EmptyStateAddAction = () => {
   return (
@@ -65,8 +66,10 @@ const SpaceDashboard = () => {
     !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
   )
 
+  const planState = useSpacePlanState(spaceId)
+
   useEffect(() => {
-    if (!spaceId) return
+    if (!spaceId || !planState) return
     trackEvent(
       { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: spaceId },
       {
@@ -74,9 +77,11 @@ const SpaceDashboard = () => {
         pending_tx_count: pendingTxCount,
         member_count: activeMembers.length,
         safe_count: safeItems.length,
+        [MixpanelEventParams.PLAN_STATUS]: planState.status,
+        [MixpanelEventParams.PLAN_TIER]: planState.tier,
       },
     )
-  }, [spaceId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [spaceId, Boolean(planState)]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 

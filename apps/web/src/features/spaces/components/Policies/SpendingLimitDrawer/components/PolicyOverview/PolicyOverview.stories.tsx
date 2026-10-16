@@ -15,8 +15,10 @@ const meta = {
     appliesTo: { address: MOCK_SAFES.treasury.address, name: MOCK_SAFE_NAME },
     chainId: MOCK_SAFES.treasury.chainId,
     lastUpdated: 'Jun 24, 2026 · 03:35 UTC',
-    enforcedBy: 'Safe allowance module',
-    enforcedByHref: 'https://etherscan.io/address/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134',
+    enforcedBy: {
+      label: 'Safe allowance module',
+      href: 'https://etherscan.io/address/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134',
+    },
   },
 } satisfies Meta<typeof PolicyOverview>
 

@@ -2,12 +2,7 @@ import { MixpanelEvent, MixpanelEventParams, trackMixpanelEvent } from '@/servic
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 
 export type SafeProBannerLocation =
-  | 'sidebar'
-  | 'workspaces_list'
-  | 'workspaces_sign_in'
-  | 'my_accounts'
-  | 'announcement_modal'
-  | 'plans_page'
+  'sidebar' | 'workspaces_list' | 'workspaces_sign_in' | 'my_accounts' | 'announcement_modal' | 'plans_page'
 
 export const trackSafeProBannerClick = (location: SafeProBannerLocation) =>
   trackMixpanelEvent(MixpanelEvent.SAFE_PRO_BANNER_CLICKED, {

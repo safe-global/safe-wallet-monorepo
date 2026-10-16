@@ -15,7 +15,7 @@ describe('Load Safe tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.loadNewSafeSepoliaUrl)
-    cy.wait(2000)
+    createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
   })
 
   it('Verify custom name in the first owner can be set', () => {

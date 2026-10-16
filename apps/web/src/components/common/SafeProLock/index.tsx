@@ -1,17 +1,16 @@
-import { useEffect, useRef } from 'react'
 import NextLink, { type LinkProps } from 'next/link'
 import { Lock } from 'lucide-react'
-import { highlightSafePro } from '@/components/common/ProHighlight'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
+import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import {
   MixpanelEventParams,
   PlanSelectionEntryPoint,
   UpgradeLocation,
   type UpgradeFeature,
 } from '@/services/analytics'
-import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '@/features/spaces'
 
@@ -21,12 +20,7 @@ const SafeProLock = ({ title, href, feature }: { title: string; href: LinkProps[
     [MixpanelEventParams.FEATURE]: feature,
     [MixpanelEventParams.LOCATION]: UpgradeLocation.SETTINGS_SETUP,
   }
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, prompt)
-  }, [feature]) // eslint-disable-line react-hooks/exhaustive-deps -- prompt is derived from feature
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, prompt)
 
   return (
     <Alert variant="subtle" data-testid="safe-pro-lock">

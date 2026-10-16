@@ -1,10 +1,14 @@
-import { render, screen } from '@/tests/test-utils'
+import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { buildCheckView, buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders'
+import {
+  buildCheckView,
+  buildSnapshot,
+  sentinelRevealedEvent,
+} from '@safe-global/utils/features/safenet-checks/builders'
 import { SafenetChecksSection } from '../SafenetChecksSection'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
@@ -26,10 +30,10 @@ const txDetails = {
   },
 } as unknown as TransactionDetails
 
-const renderInFlow = (flow: Partial<TxFlowContextType>) =>
-  render(
+const renderInFlow = (flow: Partial<TxFlowContextType>, locked = false) =>
+  renderWithUserEvent(
     <TxFlowContext.Provider value={flow as TxFlowContextType}>
-      <SafenetChecksSection />
+      <SafenetChecksSection locked={locked} />
     </TxFlowContext.Provider>,
   )
 
@@ -124,8 +128,7 @@ describe('SafenetChecksSection', () => {
 
     const section = screen.getByTestId('safenet-checks-section')
     expect(section).toHaveAttribute('data-reason', 'WINDOW_UNCERTAIN')
-    expect(section).toHaveTextContent('Status unavailable')
-    expect(section).toHaveTextContent('The Safenet check status could not be read. Retry later.')
+    expect(section).toHaveTextContent('Safenet status unknown')
     expect(section).not.toHaveTextContent('No Safenet check was requested')
   })
 
@@ -142,8 +145,7 @@ describe('SafenetChecksSection', () => {
 
     const section = screen.getByTestId('safenet-checks-section')
     expect(section).toHaveAttribute('data-reason', 'READ_FAILED')
-    expect(section).toHaveTextContent('Status unavailable')
-    expect(section).toHaveTextContent('The Safenet check status could not be read. Retry later.')
+    expect(section).toHaveTextContent("Couldn't read Safenet status")
   })
 
   it.each<[Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string]>([
@@ -160,7 +162,53 @@ describe('SafenetChecksSection', () => {
 
     const section = screen.getByTestId('safenet-checks-section')
     expect(section).toHaveAttribute('data-status', status)
-    expect(section).toHaveTextContent('Safenet check')
     expect(section).toHaveTextContent(copy)
+  })
+
+  it('lists the cited rules on a risk under one title, most-cited first', () => {
+    const events = ['R-4.4', 'R-4.5', 'R-4.5'].map((reason) => sentinelRevealedEvent({ approved: false, reason }))
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.MALICIOUS, events })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    expect(screen.getByRole('status')).toHaveTextContent('Risks detected')
+    const rules = screen.getByTestId('safenet-rejection-rules').textContent ?? ''
+    expect(rules.indexOf('Unlimited approval')).toBeLessThan(rules.indexOf('Unknown spender'))
+  })
+
+  it('pulses instead of showing a severity icon while the check runs', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.IN_PROGRESS })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.IN_PROGRESS, publicStatus: CheckStatus.IN_PROGRESS }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    expect(screen.getByTestId('safenet-check-pulse')).toBeInTheDocument()
+  })
+
+  it('keeps the check locked and shows its education on keyboard focus', async () => {
+    mockUseSafenetCheck.mockReturnValue(buildCheckView())
+
+    const { user } = renderInFlow({ txId: TX_ID, txDetails }, true)
+
+    expect(screen.getByTestId('safenet-checks-locked')).toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-checks-section')).not.toBeInTheDocument()
+    await user.tab()
+    expect(await screen.findByRole('link', { name: /Learn more/ })).toBeInTheDocument()
+  })
+
+  it('shows the pre-check note while a new transaction is being created', async () => {
+    mockUseSafenetCheck.mockReturnValue(buildCheckView())
+
+    const { user } = renderInFlow({ isCreation: true, isProposing: false, willExecute: false, txLayoutProps: {} })
+
+    expect(screen.getByTestId('safenet-checks-section')).toHaveAttribute('data-status', 'PRE_CHECK')
+    await user.tab()
+    expect(await screen.findByRole('link', { name: /Learn more/ })).toBeInTheDocument()
+    expect(screen.getByText(/The check starts after you sign/)).toBeInTheDocument()
   })
 })
