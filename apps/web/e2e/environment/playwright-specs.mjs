@@ -10,6 +10,7 @@ export const playwrightSpecs = {
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'e2e/batch.spec.ts': {},
+  'e2e/bulk-execute.spec.ts': {},
   'e2e/delete.spec.ts': {},
   'e2e/reject.spec.ts': {},
   'e2e/replace.spec.ts': {},

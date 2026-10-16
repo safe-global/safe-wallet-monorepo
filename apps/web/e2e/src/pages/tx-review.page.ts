@@ -17,6 +17,8 @@ export class TxReviewPage {
   readonly submitActions: Locator
   readonly addToBatchChoice: Locator
   readonly addToBatchButton: Locator
+  /** Submits a bulk execution, which has no sign step */
+  readonly submitButton: Locator
 
   constructor(page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -28,6 +30,7 @@ export class TxReviewPage {
     this.submitActions = page.getByTestId('combo-submit-dropdown')
     this.addToBatchChoice = page.getByRole('menuitem', { name: 'Add to batch' })
     this.addToBatchButton = page.getByTestId('combo-submit-batching')
+    this.submitButton = page.getByRole('button', { name: 'Submit', exact: true })
   }
 
   /** Confirm the risk, continue from the review and sign with the connected wallet */
@@ -50,6 +53,13 @@ export class TxReviewPage {
     await this.submitActions.click()
     await this.addToBatchChoice.click()
     await this.addToBatchButton.click()
+  }
+
+  /** Confirm the risk and execute the reviewed bulk with the connected wallet, not the relay */
+  async executeBulk(): Promise<void> {
+    await this.confirmRisk()
+    await this.connectedWalletMethod.click()
+    await this.submitButton.click()
   }
 
   /** Wait until the success screen reports the transaction as mined; the indexer may still be behind */

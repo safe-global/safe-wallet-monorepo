@@ -18,10 +18,16 @@ export type QueuedTransaction = {
   txId: string
 }
 
-/** Deploys a Safe of OWNER_4 and OWNER_1 with 1 ETH, and waits until CGW serves it. */
-export async function seedSafe(journey: Journey, { threshold }: { threshold: 1 | 2 }): Promise<SeededSafe> {
+/** Deploys a Safe of OWNER_4 and OWNER_1 (and OWNER_2 for 3 owners) with 1 ETH, and waits until CGW serves it. */
+export async function seedSafe(
+  journey: Journey,
+  { threshold, ownerCount = 2 }: { threshold: 1 | 2; ownerCount?: 2 | 3 },
+): Promise<SeededSafe> {
   const { env, owners } = journey
-  const address = await createSafeAddress(env, owners, { threshold })
+  const ownerAddresses = [owners.owner4, owners.owner1, owners.owner2]
+    .slice(0, ownerCount)
+    .map((owner) => owner.address)
+  const address = await createSafeAddress(env, owners, { threshold, ownerAddresses })
   return {
     address,
     prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}`,

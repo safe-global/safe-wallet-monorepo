@@ -9,6 +9,8 @@ export class TxQueuePage {
   readonly rejectChoice: Locator
   readonly deleteChoice: Locator
   readonly confirmDeleteButton: Locator
+  /** Opens the review of every fully signed transaction in a row from the next nonce */
+  readonly bulkExecuteButton: Locator
 
   constructor(private readonly page: Page) {
     this.transactions = page.getByTestId('transaction-item')
@@ -18,6 +20,7 @@ export class TxQueuePage {
     this.rejectChoice = page.getByRole('button', { name: /Reject transaction/ })
     this.deleteChoice = page.getByRole('button', { name: /Delete from the queue/ })
     this.confirmDeleteButton = page.getByTestId('delete-tx-btn')
+    this.bulkExecuteButton = page.getByRole('button', { name: /^Bulk execute/ })
   }
 
   /** Open the queue of the Safe (`sep:0x…`) */
