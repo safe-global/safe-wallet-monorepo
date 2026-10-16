@@ -61,38 +61,44 @@ describe('QueuedNonceHint', () => {
     mockUsePreviousNonces.mockReturnValue([13, 14])
   })
 
-  it('tells how many transactions are queued and offers to replace the lowest one', () => {
+  it('tells that queued transactions run first and offers to replace the oldest one', () => {
     renderHint()
 
-    expect(screen.getByText(/2 transactions already queued, so this one will be #15\./)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Replace #13 instead' })).toBeInTheDocument()
+    expect(screen.getByText(/Queued transactions will run before this one\./)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Replace the oldest instead' })).toBeInTheDocument()
   })
 
-  it('uses singular copy for a single queued transaction', () => {
-    mockUsePreviousNonces.mockReturnValue([14])
-    setSafeNonce(14)
-
-    renderHint()
-
-    expect(screen.getByText(/1 transaction already queued/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Replace #14 instead' })).toBeInTheDocument()
-  })
-
-  it('offers to use the lowest nonce when no queued transaction occupies it', () => {
+  it('offers to move the transaction to the front when no queued transaction occupies the lowest nonce', () => {
     mockUsePreviousNonces.mockReturnValue([14])
 
     renderHint()
 
-    expect(screen.getByRole('button', { name: 'Use #13 instead' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Move it to the front instead' })).toBeInTheDocument()
   })
 
   it('sets the nonce to the Safe nonce when the action is clicked', async () => {
     const setNonce = jest.fn()
     renderHint({ setNonce })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Replace #13 instead' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Replace the oldest instead' }))
 
     expect(setNonce).toHaveBeenCalledWith(13)
+  })
+
+  it('warns that a queued transaction will be replaced when the chosen nonce is already queued', () => {
+    renderHint({ nonce: 14 })
+
+    expect(screen.getByText(/This will replace a queued transaction if it's executed first\./)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Replace the oldest instead' })).not.toBeInTheDocument()
+  })
+
+  it('resets the nonce to the recommended one when undo is clicked', async () => {
+    const setNonce = jest.fn()
+    renderHint({ nonce: 13, setNonce })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Undo' }))
+
+    expect(setNonce).toHaveBeenCalledWith(15)
   })
 
   it('renders nothing when the queue is empty', () => {
@@ -104,8 +110,17 @@ describe('QueuedNonceHint', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing once the user picked a nonce other than the recommended one', () => {
-    const { container } = renderHint({ nonce: 13 })
+  it('renders nothing when the user picked a custom nonce that is not queued', () => {
+    const { container } = renderHint({ nonce: 16 })
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing until the Safe is loaded', () => {
+    const safe = extendedSafeInfoBuilder().with({ nonce: 13 }).build()
+    mockUseSafeInfo.mockReturnValue({ safe, safeAddress: safe.address.value, safeLoaded: false, safeLoading: true })
+
+    const { container } = renderHint()
 
     expect(container).toBeEmptyDOMElement()
   })
