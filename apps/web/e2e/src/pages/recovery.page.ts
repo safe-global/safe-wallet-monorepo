@@ -16,6 +16,7 @@ export class RecoveryPage {
   readonly proposeButton: Locator
   /** The dashboard card that tells owners and the recoverer about a pending proposal and its review window */
   readonly inProgressCard: Locator
+  readonly actionRequiredToggle: Locator
   readonly goToQueueButton: Locator
   readonly queuedRecoveries: Locator
   readonly executeButton: Locator
@@ -36,6 +37,7 @@ export class RecoveryPage {
     this.startRecoveryButton = this.proposalCard.getByTestId('start-recovery')
     this.proposeButton = page.getByTestId('execute-btn')
     this.inProgressCard = page.getByTestId('recovery-in-progress-card')
+    this.actionRequiredToggle = page.getByTestId('action-required-panel-toggle')
     this.goToQueueButton = page.getByTestId('queue-btn')
     this.queuedRecoveries = page.getByTestId('recovery-item')
     this.executeButton = this.queuedRecoveries.getByTestId('execute-btn')
@@ -81,6 +83,13 @@ export class RecoveryPage {
     await this.addressInput.fill(newOwner)
     await this.nextButton.click()
     await this.proposeButton.click()
+  }
+
+  /** Expand the "Action required" panel, which keeps its cards mounted while closed; Enter avoids toasts on top */
+  async openActionRequiredPanel(): Promise<void> {
+    if ((await this.actionRequiredToggle.getAttribute('aria-expanded')) !== 'true') {
+      await this.actionRequiredToggle.press('Enter')
+    }
   }
 
   /** Open the queued recovery and start its cancellation; the review opens */
