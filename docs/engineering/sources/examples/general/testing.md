@@ -375,3 +375,84 @@ it('handles 6-decimal tokens', () => {
 ### Why
 
 MSW fixtures are scenario-shaped real responses tied to specific Safes. They are not minimal test cases, they hide which field the assertion actually depends on, and they deterministically encode values that should be free in a unit test.
+
+## DATA-04 — Read E2E test data and hosts from shared sources
+
+Source: PR #9075, #9065 (RL-20261014-001)
+
+### Avoid
+
+```ts
+const SEPOLIA = '11155111'
+const CONTACT = { name: 'Treasury contact', address: '0x1111111111111111111111111111111111111111' }
+
+await page.waitForURL((url) => url.hostname === 'localhost' && !url.pathname.startsWith('/cgw'))
+```
+
+### Prefer
+
+```ts
+import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
+
+const SEPOLIA = CHAIN_IDS.sepolia
+const CONTACT = { name: 'Treasury contact', address: TEST_ADDRESSES.NON_OWNER }
+
+const { baseURL } = test.info().project.use
+if (!baseURL) throw new Error('signInWithEmail needs the baseURL of the wallet')
+await page.waitForURL((url) => url.origin === new URL(baseURL).origin)
+```
+
+### Why
+
+A change to the shared test data reaches every spec only when the specs import it. A run whose wallet URL points at `127.0.0.1` or another port never matches a hardcoded `localhost`, so the wait times out before the test checks anything; the configured `baseURL` is the one source of the wallet's origin.
+
+## TEST-01 — Click links without asserting their href
+
+Source: PR #9003 (RL-20261012-001)
+
+### Avoid
+
+```js
+const appLink = () => cy.get(`a[aria-label="Open ${app}"]`).first()
+appLink().should('have.attr', 'href').and('match', linkWithSafe)
+appLink().click()
+```
+
+### Prefer
+
+```js
+cy.get(`a[aria-label="Open ${app}"]`).first().click()
+```
+
+### Why
+
+The `href` check makes every spec that uses the helper depend on how the link encodes its target, so a valid move to client-side navigation fails them while clicking still opens the right app. The spec checks the app that opens. The `href` was only checked to wait for the router; the product now reads the Safe from the URL until the router is ready.
+
+## TEST-04 — Extend CI path filters when tests or stories move
+
+Source: PR #8988 (RL-20261009-002)
+
+### Avoid
+
+```yaml
+# Storybook now also loads packages/<new-package>/src/**/*.stories.tsx,
+# but the workflow that snapshots the stories still triggers only on the app
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+```
+
+### Prefer
+
+```yaml
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+      - packages/<new-package>/**
+```
+
+### Why
+
+A PR that changes only the moved files no longer triggers the run, so their tests or stories lose coverage without any failure. Every discovery glob that scans the old path (changed-story scripts, screenshot steps) needs the new location too.

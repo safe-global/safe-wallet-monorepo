@@ -729,3 +729,61 @@ useEffect(() => {
 ### Why
 
 A length stands in for the collection only until one entry is swapped for another; the count stays the same and the effect never re-runs. A key built from the identifying values stays stable across polls and changes exactly when the content does.
+
+## STATE-02 — Reset entity-scoped state with a key, not an effect
+
+Source: PR #8979, #9093 (RL-20261015-002)
+
+### Avoid
+
+```tsx
+const [answeredSafe, setAnsweredSafe] = useState<string>()
+if (!isChoosing || answeredSafe === safeKey) return null
+```
+
+```tsx
+const [isConfirmed, setIsConfirmed] = useState(false)
+const confirmationKey = JSON.stringify([txKey, criticalFindings])
+useEffect(() => {
+  setIsConfirmed(false)
+}, [confirmationKey])
+```
+
+### Prefer
+
+```tsx
+const ChooserDialog = (): ReactElement | null => {
+  const { safeKey, pick } = useSafePick()
+  return safeKey ? <Chooser key={safeKey} pick={pick} /> : null
+}
+```
+
+```tsx
+const riskKey = JSON.stringify([txKey, criticalFindings])
+const [confirmedRiskKey, setConfirmedRiskKey] = useState<string>()
+const isConfirmed = confirmedRiskKey === riskKey
+```
+
+### Why
+
+A stored id compared with the current one survives leaving and reopening the same entity, so the second visit to Safe A skips the question. Remounting with `key` starts each visit with fresh state. An effect reset runs only after the render with the new key, so for one render the old confirmation still counts; deriving the flag from the stored key is right in that same render.
+
+## DATA-06 — Key list items by everything that distinguishes them
+
+Source: PR #9027 (RL-20261014-004)
+
+### Avoid
+
+```tsx
+const rows = removedSpenders.map((spender) => <SpenderRow key={spender} spender={spender} />)
+```
+
+### Prefer
+
+```tsx
+const rows = removedSpenders.map((spender, index) => <SpenderRow key={`${spender}-${index}`} spender={spender} />)
+```
+
+### Why
+
+The usual flow removes each spender once, but the decoder accepts any batch, so a hand-built one can repeat a spender and two rows would share a key. A key stays unique for every input the parser accepts, not only for what the usual flow produces.
