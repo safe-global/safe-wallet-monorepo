@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { render } from '@/tests/test-utils'
-import { CookieAndTermType, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
+import local from '@/services/local-storage/local'
+import { CookieAndTermType, cookiesAndTermsInitialState, cookiesAndTermsSlice } from '@/store/cookiesAndTermsSlice'
 import { version } from '@/markdown/terms/version'
 import Analytics from '../Analytics'
 
@@ -21,13 +23,31 @@ describe('Analytics', () => {
     expect(document.getElementById('_next-ga-init')).toBeNull()
   })
 
-  it('should, when the user has given analytics consent, load Google Analytics', () => {
-    render(<Analytics />, {
-      initialReduxState: {
-        cookies_terms: { ...cookiesAndTermsInitialState, [CookieAndTermType.ANALYTICS]: true, termsVersion: version },
-      },
+  it('should, when analytics consent is stored from an earlier visit, load Google Analytics before the mount effects of later components', () => {
+    local.setItem(cookiesAndTermsSlice.name, {
+      ...cookiesAndTermsInitialState,
+      [CookieAndTermType.ANALYTICS]: true,
+      termsVersion: version,
     })
+    let isGaLoadedAtMount: boolean | undefined
+    const LaterComponent = () => {
+      useEffect(() => {
+        isGaLoadedAtMount = document.getElementById('_next-ga-init') !== null
+      }, [])
+      return null
+    }
 
-    expect(document.getElementById('_next-ga-init')).not.toBeNull()
+    try {
+      render(
+        <>
+          <Analytics />
+          <LaterComponent />
+        </>,
+      )
+
+      expect(isGaLoadedAtMount).toBe(true)
+    } finally {
+      local.removeItem(cookiesAndTermsSlice.name)
+    }
   })
 })
