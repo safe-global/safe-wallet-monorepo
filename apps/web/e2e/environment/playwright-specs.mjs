@@ -9,6 +9,7 @@ export const playwrightSpecs = {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
+  'e2e/reject.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario', 'prepareProposersScenario'],
