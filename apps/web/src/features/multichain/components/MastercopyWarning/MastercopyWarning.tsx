@@ -1,14 +1,14 @@
 import { useCallback, useContext } from 'react'
-import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow, UpdateSafeFlow } from '@/components/tx-flow/flows'
 import { ActionCard } from '@/components/common/ActionCard'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import CheckWallet from '@/components/common/CheckWallet'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { useMastercopyMigration } from '../../hooks/useMastercopyMigration'
 
@@ -42,18 +42,17 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
         <AlertDescription>
           It may miss security fixes and improvements. You should migrate it to a compatible version.
           <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-foreground"
-              data-testid="migrate-mastercopy-btn"
-              onClick={() => {
-                trackEvent(ATTENTION_PANEL_EVENTS.MIGRATE_MASTERCOPY)
-                openMigrateModal()
-              }}
-            >
-              Migrate
-            </Button>
+            <Track {...ATTENTION_PANEL_EVENTS.MIGRATE_MASTERCOPY}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-foreground"
+                data-testid="migrate-mastercopy-btn"
+                onClick={openMigrateModal}
+              >
+                Migrate
+              </Button>
+            </Track>
           </div>
         </AlertDescription>
       </Alert>
@@ -83,16 +82,17 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
         <AlertDescription>
           It may miss security fixes and improvements. You must use our CLI tool to migrate.
           <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-foreground"
-              data-testid="get-cli-link"
-              render={<a href={CLI_LINK} target="_blank" rel="noopener noreferrer" />}
-              onClick={() => trackEvent(ATTENTION_PANEL_EVENTS.GET_CLI_MASTERCOPY)}
-            >
-              Get CLI
-            </Button>
+            <Track {...ATTENTION_PANEL_EVENTS.GET_CLI_MASTERCOPY}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-foreground"
+                data-testid="get-cli-link"
+                render={<a href={CLI_LINK} target="_blank" rel="noopener noreferrer" />}
+              >
+                Get CLI
+              </Button>
+            </Track>
           </div>
         </AlertDescription>
       </Alert>

@@ -18,7 +18,7 @@ import {
   PERMISSION_REQUIRED_MESSAGE,
   RETRY_MESSAGE,
   SIGNATURE_REJECTED_MESSAGE,
-} from '../constants'
+} from '@safe-global/views/components/settings/PushNotifications/constants'
 import { isWalletRejection } from '@/utils/wallets'
 import { logError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'

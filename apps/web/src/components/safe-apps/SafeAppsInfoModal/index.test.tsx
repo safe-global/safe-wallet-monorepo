@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAppsInfoModal from '.'
-import { PermissionStatus } from '../types'
-import type { AllowedFeatures } from '../types'
+import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
+import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
 
 const defaultProps = {
   onCancel: jest.fn(),

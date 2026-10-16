@@ -1,8 +1,11 @@
 import { Info, UserRoundPen } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Typography } from '@/components/ui/typography'
-import { PROPOSER_ROLE_DESCRIPTION, PROPOSER_ROLE_TITLE } from './constants'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import {
+  PROPOSER_ROLE_DESCRIPTION,
+  PROPOSER_ROLE_TITLE,
+} from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 
 const ProposerRoleHeader = () => (
   <div className="flex items-center gap-4">

@@ -4,20 +4,13 @@ import { secp256k1 } from '@noble/curves/secp256k1'
 import { concatBytes } from '@noble/hashes/utils'
 import { getBytes, keccak256, toBeHex, toUtf8Bytes } from 'ethers'
 import { h2, verifyAttestation, type AttestationInput } from '../frost'
-import { plainProposalHash, transactionProposalHash } from '../proposalHash'
+import { transactionProposalHash } from '../proposalHash'
 import type { Hex } from '../../types'
+import { decodeLogs, type RawLog } from '../decodeLogs'
+import { CheckEventType } from '../../types'
 
 const N = secp256k1.Point.Fn.ORDER
 
-/**
- * Both vectors are live captures — validators that never saw this code produced
- * both signatures, so neither can be satisfied by a bug here. Each fixture's
- * `provenance` field records where it came from and how to re-capture it.
- *
- * Two vectors because the paths sign different preimages AND live on different
- * contracts: the Gnosis beta Consensus emits only the plain pair, so the
- * oracle vector comes from the relaunched Sepolia deployment.
- */
 type Vector = {
   chainId: string
   consensus: string
@@ -28,13 +21,20 @@ type Vector = {
   z: string
 }
 
-const load = <T extends Vector>(name: string): T =>
-  JSON.parse(readFileSync(join(__dirname, '../../__fixtures__', name), 'utf8'))
+const load = <T>(name: string): T => JSON.parse(readFileSync(join(__dirname, '../../__fixtures__', name), 'utf8'))
 
-const gnosis = load<Vector & { safeChainId: string }>('gnosis-plain-attestation.golden.json')
-const relaunch = load<Vector & { oracle: string; oracleDataHash: Hex; signatureId: Hex }>(
-  'sepolia-relaunch-attestation.golden.json',
-)
+const captured = load<{
+  provenance: { chainId: string; consensus: string; oracle: string }
+  captures: Array<{ epoch: string; safeTxHash: Hex; groupKey: Vector['groupKey']; logs: RawLog[] }>
+}>('safenet-gnosis-chain.captured.json')
+const approved = captured.captures[0]
+const attested = decodeLogs(approved.logs).find((event) => event.type === CheckEventType.ORACLE_ATTESTED)!
+const upgraded = {
+  ...captured.provenance,
+  ...approved,
+  ...attested.attestation,
+  oracleDataHash: attested.oracleDataHash,
+}
 
 const inputFor = (vector: Vector, message: Hex): AttestationInput => ({
   groupKey: { ...vector.groupKey },
@@ -42,62 +42,23 @@ const inputFor = (vector: Vector, message: Hex): AttestationInput => ({
   message,
 })
 
-const plainMessage = (chainId: string): Hex =>
-  plainProposalHash({ chainId, consensus: gnosis.consensus, epoch: gnosis.epoch, safeTxHash: gnosis.safeTxHash })
-
-const relaunchMessage: Hex = transactionProposalHash({
-  chainId: relaunch.chainId,
-  consensus: relaunch.consensus,
-  epoch: relaunch.epoch,
-  oracle: relaunch.oracle,
-  oracleDataHash: relaunch.oracleDataHash,
-  safeTxHash: relaunch.safeTxHash,
+const upgradedMessage: Hex = transactionProposalHash({
+  chainId: upgraded.chainId,
+  consensus: upgraded.consensus,
+  epoch: upgraded.epoch,
+  oracle: upgraded.oracle,
+  oracleDataHash: upgraded.oracleDataHash,
+  safeTxHash: upgraded.safeTxHash,
 })
 
 describe('verifyAttestation — live golden vectors', () => {
-  it('verifies the Gnosis beta non-oracle attestation against the derived plain preimage', () => {
-    expect(verifyAttestation(inputFor(gnosis, plainMessage(gnosis.chainId)))).toBe(true)
-  })
-
-  it('verifies the Sepolia relaunch oracle attestation against the derived unified preimage', () => {
-    expect(verifyAttestation(inputFor(relaunch, relaunchMessage))).toBe(true)
+  it('verifies the Safenet deployment on Gnosis Chain oracle attestation against the derived unified preimage', () => {
+    expect(verifyAttestation(inputFor(upgraded, upgradedMessage))).toBe(true)
   })
 
   it('h2 matches the RFC-9591 known-answer vector from the protocol repo', () => {
     const input = getBytes('0x37e58bc84afff4e1afade4140135583af3d6d3523a435e60cec5dc75ae3d7e8b')
     expect(h2(input)).toBe(33150593925562805502779376598105657283445871999808781975649610745815960364725n)
-  })
-})
-
-describe('verifyAttestation — the preimage must match the path and the domain', () => {
-  it('uses the Safenet chain id for the EIP-712 domain, not the Safe transaction chain id', () => {
-    // The event carries chainId 42161 (the Safe is on Arbitrum); the domain is
-    // Gnosis (100), where Consensus is deployed. Reaching for the event's field
-    // derives a different preimage that verifies against nothing.
-    expect(gnosis.safeChainId).not.toBe(gnosis.chainId)
-    expect(verifyAttestation(inputFor(gnosis, plainMessage(gnosis.safeChainId)))).toBe(false)
-  })
-
-  it('rejects the oracle-transaction preimage for a non-oracle attestation (paths never cross)', () => {
-    const crossed = transactionProposalHash({
-      chainId: gnosis.chainId,
-      consensus: gnosis.consensus,
-      epoch: gnosis.epoch,
-      oracle: '0x0000000000000000000000000000000000000000',
-      oracleDataHash: keccak256('0x') as Hex,
-      safeTxHash: gnosis.safeTxHash,
-    })
-    expect(verifyAttestation(inputFor(gnosis, crossed))).toBe(false)
-  })
-
-  it('rejects the plain preimage for an oracle attestation (paths never cross)', () => {
-    const crossed = plainProposalHash({
-      chainId: relaunch.chainId,
-      consensus: relaunch.consensus,
-      epoch: relaunch.epoch,
-      safeTxHash: relaunch.safeTxHash,
-    })
-    expect(verifyAttestation(inputFor(relaunch, crossed))).toBe(false)
   })
 })
 
@@ -107,17 +68,17 @@ describe('verifyAttestation — total over malformed input', () => {
   // and off-curve points are also rejected by @noble/curves before our own
   // guards see them, so passing here does not prove those guards work.
   it.each([
-    ['z = N', inputFor({ ...relaunch, z: N.toString() }, relaunchMessage)],
-    ['z = 0', inputFor({ ...relaunch, z: '0' }, relaunchMessage)],
-    ['z negative', inputFor({ ...relaunch, z: '-1' }, relaunchMessage)],
-    ['z not a number', inputFor({ ...relaunch, z: 'not-a-number' }, relaunchMessage)],
+    ['z = N', inputFor({ ...upgraded, z: N.toString() }, upgradedMessage)],
+    ['z = 0', inputFor({ ...upgraded, z: '0' }, upgradedMessage)],
+    ['z negative', inputFor({ ...upgraded, z: '-1' }, upgradedMessage)],
+    ['z not a number', inputFor({ ...upgraded, z: 'not-a-number' }, upgradedMessage)],
     [
       'off-curve points',
-      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: relaunchMessage },
+      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: upgradedMessage },
     ],
     [
       'identity group key',
-      { groupKey: { x: '0', y: '0' }, attestation: { r: { ...relaunch.r }, z: relaunch.z }, message: relaunchMessage },
+      { groupKey: { x: '0', y: '0' }, attestation: { r: { ...upgraded.r }, z: upgraded.z }, message: upgradedMessage },
     ],
   ] as Array<[string, AttestationInput]>)('returns false without throwing for %s', (_name, input) => {
     expect(verifyAttestation(input)).toBe(false)
@@ -129,8 +90,8 @@ describe('verifyAttestation — total over malformed input', () => {
 })
 
 /**
- * Round-trip properties. The golden vectors prove the verifier *accepts* two
- * specific real signatures; they cannot prove it rejects anything, and a
+ * Round-trip properties. The golden vector proves the verifier accepts a
+ * specific real signature; it cannot prove it rejects anything, and a
  * verifier that returns `true` too easily is a security hole where one that
  * returns `false` is only a UX bug.
  *
@@ -139,7 +100,7 @@ describe('verifyAttestation — total over malformed input', () => {
  * `@noble/curves`. It shares exactly one thing with the code under test: `h2`.
  * That means it catches a wrong challenge *preimage* (the concat order is
  * re-derived here, independently) but NOT a wrong DST inside `h2` itself — the
- * RFC-9591 known-answer vector and the two live golden vectors are what pin
+ * RFC-9591 known-answer vector and the live golden vector are what pin
  * that.
  */
 const scalarAt = (seed: string, index: number): bigint =>

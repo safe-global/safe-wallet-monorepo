@@ -30,9 +30,9 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
 
       # Run tests with coverage
       - name: Run Jest tests with coverage
@@ -44,7 +44,7 @@ jobs:
             | tee ./coverage.txt && exit ${PIPESTATUS[0]}
 
       - name: Jest Coverage Comment
-        uses: MishaKav/jest-coverage-comment@642ef024cc554a34b7082cea12c7bf63575ae151 # v1.0.36
+        uses: MishaKav/jest-coverage-comment@v1.0.37
         with:
           title: Package @safe-global/utils coverage
           coverage-summary-path: ./coverage/coverage-summary.json
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload coverage to Datadog
         if: success() && github.event_name == 'push'
-        uses: ./.github/actions/upload-coverage
+        uses: $/.github/actions/upload-coverage
         with:
           api-key: ${{ secrets.DATADOG_API_KEY }}
           site: datadoghq.eu

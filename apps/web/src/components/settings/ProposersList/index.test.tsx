@@ -5,32 +5,23 @@ import useProposers from '@/hooks/useProposers'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import useWallet from '@/hooks/wallets/useWallet'
-import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
-import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import type Safe from '@safe-global/protocol-kit'
+import { mockRole } from '@/tests/mocks/roles'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-const mockWalletAddress = faker.finance.ethereumAddress()
+const NOT_CONNECTED = 'Please connect your wallet'
+const NOT_OWNER = 'Your connected wallet is not a signer of this Safe account'
 
-jest.mock('@/hooks/wallets/useWallet', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    address: mockWalletAddress,
-  })),
-}))
+jest.mock('@/hooks/wallets/useWallet')
+jest.mock('@/hooks/useIsSafeOwner')
+jest.mock('@/hooks/useIsWrongChain')
+jest.mock('@/hooks/useProposers')
+jest.mock('@/hooks/useIsNestedSafeOwner')
+jest.mock('@/hooks/coreSDK/safeCoreSDK')
 
-jest.mock('@/hooks/useIsSafeOwner', () => ({
+jest.mock('@/features/spending-limits', () => ({
   __esModule: true,
-  default: jest.fn(() => true),
-}))
-
-jest.mock('@/hooks/useProposers', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({ data: { results: [] } })),
-  useIsWalletProposer: jest.fn(() => false),
+  useIsOnlySpendingLimitBeneficiary: jest.fn(),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -39,28 +30,16 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(() => true),
 }))
 
-jest.mock('@/features/spending-limits', () => ({
-  __esModule: true,
-  useIsOnlySpendingLimitBeneficiary: jest.fn(() => false),
-}))
-
 const mockUsePlanGate = jest.fn()
 jest.mock('@/features/spaces/hooks/usePlanGate', () => ({
   usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
 }))
 
-jest.mock('@/hooks/useIsWrongChain', () => ({
-  __esModule: true,
-  default: jest.fn(() => false),
-}))
-
 jest.mock('@/hooks/useNestedSafeOwners')
 const mockUseNestedSafeOwners = useNestedSafeOwners as jest.MockedFunction<typeof useNestedSafeOwners>
 
-jest.mock('@/hooks/coreSDK/safeCoreSDK')
-const mockUseSafeSdk = useSafeSDK as jest.MockedFunction<typeof useSafeSDK>
-
 const mockSafeAddress = faker.finance.ethereumAddress()
+const mockOwnerAddress = faker.finance.ethereumAddress()
 
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
@@ -69,7 +48,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
     safe: {
       address: { value: mockSafeAddress },
       chainId: '1',
-      owners: [{ value: mockWalletAddress }],
+      owners: [{ value: mockOwnerAddress }],
       threshold: 1,
       deployed: true,
     },
@@ -80,21 +59,16 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 describe('ProposersList', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseSafeSdk.mockReturnValue({} as unknown as Safe)
+    mockRole('owner')
     mockUseNestedSafeOwners.mockReturnValue([])
     mockUsePlanGate.mockReturnValue({ mustUpgradeToSafePro: false, isLoading: false, upgradeHref: '/spaces/plans' })
-    ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(true)
-    ;(useIsWalletProposer as jest.MockedFunction<typeof useIsWalletProposer>).mockReturnValue(false)
     ;(useHasFeature as jest.MockedFunction<typeof useHasFeature>).mockReturnValue(true)
-    ;(useWallet as jest.MockedFunction<typeof useWallet>).mockReturnValue({
-      address: mockWalletAddress,
-    } as ReturnType<typeof useWallet>)
     ;(useSafeInfo as jest.MockedFunction<typeof useSafeInfo>).mockReturnValue({
       safeAddress: mockSafeAddress,
       safe: extendedSafeInfoBuilder()
         .with({ address: { value: mockSafeAddress } })
         .with({ deployed: true })
-        .with({ owners: [{ value: mockWalletAddress }] })
+        .with({ owners: [{ value: mockOwnerAddress }] })
         .build(),
       safeLoaded: true,
     } as unknown as ReturnType<typeof useSafeInfo>)
@@ -103,44 +77,43 @@ describe('ProposersList', () => {
     } as unknown as ReturnType<typeof useProposers>)
   })
 
-  it('should enable the Add proposer button for direct Safe owners', () => {
-    const { getByTestId } = render(<ProposersList />)
+  it.each(['owner', 'nestedOwner', 'proposerAndOwner'] as const)(
+    'should enable the Add proposer button for %s',
+    (role) => {
+      mockRole(role)
 
-    const button = getByTestId('add-proposer-btn')
-    expect(button).not.toBeDisabled()
-  })
+      const { getByTestId } = render(<ProposersList />)
 
-  it('should enable the Add proposer button when user is a nested Safe owner', () => {
-    ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(false)
-    mockUseNestedSafeOwners.mockReturnValue([faker.finance.ethereumAddress()])
+      expect(getByTestId('add-proposer-btn')).toBeEnabled()
+    },
+  )
 
-    const { getByTestId } = render(<ProposersList />)
-
-    const button = getByTestId('add-proposer-btn')
-    expect(button).not.toBeDisabled()
-  })
-
-  it('should disable the Add proposer button when user is only a proposer', () => {
-    ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(false)
-    ;(useIsWalletProposer as jest.MockedFunction<typeof useIsWalletProposer>).mockReturnValue(true)
-    mockUseNestedSafeOwners.mockReturnValue([])
-
-    const { getByTestId } = render(<ProposersList />)
-
-    const button = getByTestId('add-proposer-btn')
-    expect(button).toBeDisabled()
-  })
-
-  it('should disable the Add proposer button when user has no relationship to the Safe', () => {
-    ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(false)
-    ;(useIsWalletProposer as jest.MockedFunction<typeof useIsWalletProposer>).mockReturnValue(false)
-    mockUseNestedSafeOwners.mockReturnValue([])
+  it.each([
+    ['proposer', NOT_OWNER],
+    ['nonOwner', NOT_OWNER],
+    ['disconnected', NOT_CONNECTED],
+  ] as const)('should disable the Add proposer button for %s with the reason "%s"', (role, reason) => {
+    mockRole(role)
 
     const { getByTestId, getByLabelText } = render(<ProposersList />)
 
-    const button = getByTestId('add-proposer-btn')
-    expect(button).toBeDisabled()
-    expect(getByLabelText('Your connected wallet is not a signer of this Safe account')).toBeInTheDocument()
+    expect(getByTestId('add-proposer-btn')).toBeDisabled()
+    expect(getByLabelText(reason)).toBeInTheDocument()
+  })
+
+  it('marks the Add proposer button with the Pro tag only when the plan gate asks for it', () => {
+    const { getByTestId, queryByTestId, rerender } = render(<ProposersList />)
+    expect(queryByTestId('pro-tag')).not.toBeInTheDocument()
+
+    mockUsePlanGate.mockReturnValue({
+      mustUpgradeToSafePro: false,
+      isLoading: false,
+      showProTag: true,
+      upgradeHref: '/spaces/plans',
+    })
+    rerender(<ProposersList />)
+
+    expect(getByTestId('add-proposer-btn')).toContainElement(getByTestId('pro-tag'))
   })
 
   it('should disable the Add proposer button when Safe is undeployed', () => {
@@ -149,7 +122,7 @@ describe('ProposersList', () => {
       safe: extendedSafeInfoBuilder()
         .with({ address: { value: mockSafeAddress } })
         .with({ deployed: false })
-        .with({ owners: [{ value: mockWalletAddress }] })
+        .with({ owners: [{ value: mockOwnerAddress }] })
         .build(),
       safeLoaded: true,
     } as unknown as ReturnType<typeof useSafeInfo>)

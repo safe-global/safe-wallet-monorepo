@@ -3,7 +3,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import { useSpaceSafesGetAllV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import type { SafeLimit } from '@/utils/spaces'
+import { hasSpacePlan, type SafeLimit } from '@/utils/spaces'
 import { SAFE_ACCOUNTS_LIMIT } from '../constants'
 import { getSeatsMeter } from './billing/entitlements'
 import { useRateLimitRetry } from './billing/useRateLimitRetry'
@@ -53,11 +53,8 @@ export const useSpacesSafeEligibility = (enabled: boolean): SpacesSafeEligibilit
     return seats ? seats.quota : undefined
   }
 
-  const hasPlan = (spaceId: string): boolean | undefined => {
-    if (!isSafePro) return true
-    const entitlements = entitlementsQuery.currentData?.[spaceId]
-    return entitlements ? entitlements.plan !== null : undefined
-  }
+  const hasPlan = (spaceId: string): boolean | undefined =>
+    hasSpacePlan(isSafePro, entitlementsQuery.currentData?.[spaceId])
 
   return {
     getSafes: (spaceId) => safesBySpace.get(spaceId),

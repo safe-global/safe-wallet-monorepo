@@ -370,4 +370,94 @@ describe('replayStepUpAction', () => {
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
     expect(selectNotifications(store.getState())).toEqual([])
   })
+
+  it('should, when the replayed mutation is refused because all seats are used, show the friendly seat warning instead of the gateway text', async () => {
+    const spaceId = faker.string.uuid()
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
+        HttpResponse.json(
+          {
+            code: 'QUOTA_EXCEEDED',
+            feature: 'safe_seats',
+            quota: 20,
+            used: 20,
+            resetsAt: null,
+            message: 'Quota exceeded for safe_seats: 20 of 20 used.',
+          },
+          { status: 402 },
+        ),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({
+        message:
+          'Your plan covers 20 Safe accounts and this Workspace already holds 20. Remove one to add another, or upgrade your plan.',
+        variant: 'warning',
+      }),
+    ])
+  })
+
+  it('should, when the replayed mutation fails for another reason, show the gateway error', async () => {
+    const spaceId = faker.string.uuid()
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
+        HttpResponse.json({ message: 'Boom' }, { status: 500 }),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({ message: 'Boom', variant: 'error' }),
+    ])
+  })
+
+  it('should, when the replayed mutation is refused because the plan lacks the feature, show the gateway error', async () => {
+    const spaceId = faker.string.uuid()
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
+        HttpResponse.json(
+          {
+            code: 'FEATURE_NOT_GRANTED',
+            feature: 'policies',
+            message: "Feature 'policies' is not available on the current plan.",
+          },
+          { status: 402 },
+        ),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({
+        message: "Feature 'policies' is not available on the current plan.",
+        variant: 'error',
+      }),
+    ])
+  })
 })

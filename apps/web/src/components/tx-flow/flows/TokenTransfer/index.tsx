@@ -1,12 +1,16 @@
 import CreateTokenTransfer from './CreateTokenTransfer'
 import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTx'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
+import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import { TokenTransferType, type MultiTokenTransferParams, type TokenTransferParams } from './types'
+import {
+  TokenTransferType,
+  type MultiTokenTransferParams,
+  type TokenTransferParams,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 
 export {
   TokenTransferFields,
@@ -15,7 +19,7 @@ export {
   MultiTokenTransferFields,
   type TokenTransferParams,
   type MultiTokenTransferParams,
-} from './types'
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 
 type MultiTokenTransferFlowProps = {
   recipients?: Partial<TokenTransferParams>[]

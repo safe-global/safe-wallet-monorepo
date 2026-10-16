@@ -13,7 +13,7 @@ import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
 import AssetsTable from '../index'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 const mockUseSafeTokenEnabled = jest.fn(() => false)
 jest.mock('@/hooks/useSafeTokenEnabled', () => ({ useSafeTokenEnabled: () => mockUseSafeTokenEnabled() }))
@@ -129,6 +129,22 @@ describe('AssetsTable', () => {
       expect(screen.getByText('Price')).toBeInTheDocument()
       expect(screen.getByText('Balance')).toBeInTheDocument()
       expect(screen.getByText('Value')).toBeInTheDocument()
+    })
+
+    it('shows the price and value with two decimals in the list', async () => {
+      const item = balanceBuilder().with({ fiatConversion: '2345.67', fiatBalance: '9876.54' }).build()
+      renderAssetsTable({
+        balances: balancesBuilder()
+          .with({ items: [item] })
+          .build(),
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText('$ 2,345')).toBeInTheDocument()
+        expect(screen.getByText('.67')).toBeInTheDocument()
+        expect(screen.getAllByText('$ 9,876')[0]).toBeInTheDocument()
+        expect(screen.getAllByText('.54')[0]).toBeInTheDocument()
+      })
     })
   })
 

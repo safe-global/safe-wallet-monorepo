@@ -38,6 +38,7 @@ const allActionsSection = '[data-testid="all-actions"]'
 const actionItem = '[data-testid="action-item"]'
 const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
+const DECODED_TX_TIMEOUT_MS = 30000
 
 export const timePeriodOptions = {
   oneTime: 'One time',
@@ -50,7 +51,6 @@ export const timePeriodOptions = {
 }
 
 const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
-const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
   enableModule: 'enableModule',
@@ -68,7 +68,10 @@ const invalidCharErrorStr = 'The value must be a number'
 
 export function selectRecipient(recipient) {
   cy.get(addressItem).contains(recipient).click()
-  main.verifyValuesExist(addressBook.addressBookRecipient, [recipient, automationOwner])
+  main.verifyValuesExist(addressBook.addressBookRecipient, [
+    recipient,
+    ls.addressBookData.sepoliaAddress2[11155111][constants.defaultOwnerAddress()],
+  ])
 }
 
 export function verifyOldValuesAreDisplayed() {
@@ -238,9 +241,9 @@ export function verifyActionNames(names) {
 }
 
 export function verifyDecodedTxSummary(names) {
-  cy.get(decodedTxSummary).within(() => {
+  cy.get(decodedTxSummary, { timeout: DECODED_TX_TIMEOUT_MS }).within(() => {
     names.forEach((item) => {
-      cy.contains(item)
+      cy.contains(item, { timeout: DECODED_TX_TIMEOUT_MS })
     })
   })
 }

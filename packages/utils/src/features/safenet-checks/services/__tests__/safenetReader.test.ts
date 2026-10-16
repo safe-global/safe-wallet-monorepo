@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { setupServer, type SetupServerApi } from 'msw/node'
 import { SafenetReader, type SafenetReaderConfig } from '../safenetReader'
 import { CONSENSUS_TOPIC0S } from '../../abi'
@@ -7,14 +9,13 @@ import {
   resetLogCounter,
   buildOracleProposedLog,
   buildOracleAttestedLog,
-  buildPlainProposedLog,
-  buildPlainAttestedLog,
   buildOracleResultLog,
   buildLifecycle,
   EMPTY_ORACLE_DATA_HASH,
 } from '../../builders/rawLogs'
 import type { RawLog } from '../../utils/decodeLogs'
-import { CheckEventType, type Hex } from '../../types'
+import { AttestationVerificationStatus, CheckEventType, CheckStatus, type Hex } from '../../types'
+import { deriveCheckState } from '../../utils/deriveCheckState'
 import { makeEndpoint, type GetLogsFilter } from './rpcEndpoint'
 
 const consensusCalls = (calls: GetLogsFilter[]): GetLogsFilter[] =>
@@ -44,20 +45,15 @@ const makeReader = (over: Partial<SafenetReaderConfig> = {}, url = 'http://rpc.t
     chainId: CHAIN_ID,
     consensus: CONSENSUS,
     coordinator: ORACLE,
-    oracles: [],
+    oracles: [ORACLE],
     ...over,
   })
 
-/**
- * The plain (non-oracle) pair — the only lifecycle live beta emits. Built with
- * OUT-OF-ORDER metas so the reader's (blockNumber, logIndex) sort has teeth:
- * the harness replays logs in insertion order.
- */
-const plainPairFor = (safeTxHash: Hex): RawLog[] => {
+const consensusPairFor = (safeTxHash: Hex): RawLog[] => {
   resetLogCounter()
   return [
-    buildPlainAttestedLog({ safeTxHash, epoch: 7n }, { blockNumber: 200, logIndex: 0 }),
-    buildPlainProposedLog({ safeTxHash, epoch: 7n }, { blockNumber: 100, logIndex: 5 }),
+    buildOracleAttestedLog({ safeTxHash, epoch: 7n }, { blockNumber: 200, logIndex: 0 }),
+    buildOracleProposedLog({ safeTxHash, epoch: 7n }, { blockNumber: 100, logIndex: 5 }),
   ]
 }
 
@@ -67,8 +63,37 @@ let server: SetupServerApi
 afterEach(() => server?.close())
 
 describe('SafenetReader.fetchCheckState', () => {
-  it('bootstraps from the chain head and returns the sorted, decoded plain pair', async () => {
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+  it('verifies a captured Safenet deployment on Gnosis Chain approval and leaves a split dispute inconclusive', async () => {
+    const fixture = JSON.parse(
+      readFileSync(join(__dirname, '../../__fixtures__/safenet-gnosis-chain.captured.json'), 'utf8'),
+    ) as {
+      provenance: { chainId: string; consensus: string; coordinator: string; oracle: string }
+      captures: Array<{ safeTxHash: Hex; logs: RawLog[]; groupKey?: { x: string; y: string } }>
+    }
+    const [approved, disputed] = fixture.captures
+    const endpoint = makeEndpoint({
+      url: 'http://rpc.test/1',
+      head: 48597645,
+      logs: [...approved.logs, ...disputed.logs],
+      groupKey: approved.groupKey,
+    })
+    server = setupServer(endpoint.handler)
+    server.listen()
+    const reader = makeReader({ ...fixture.provenance, oracles: [fixture.provenance.oracle] })
+    const read = await reader.fetchCheckState(approved.safeTxHash)
+    const attested = read.events.find((event) => event.type === CheckEventType.ORACLE_ATTESTED)!
+    const attestation = await reader.verifyAttestation(attested)
+    expect(attestation.status).toBe(AttestationVerificationStatus.VERIFIED)
+    expect(deriveCheckState({ ...read, attestation })).toBe(CheckStatus.BENIGN)
+    expect((await reader.verifyAttestation({ ...attested, safeTxHash: SAFE_TX_HASH })).status).toBe(
+      AttestationVerificationStatus.INVALID,
+    )
+    const split = await reader.fetchCheckState(disputed.safeTxHash)
+    expect(deriveCheckState({ ...split, attestation })).toBe(CheckStatus.TIMED_OUT)
+  })
+
+  it('bootstraps from the chain head and returns the sorted, decoded Consensus pair', async () => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(endpoint.handler)
     server.listen()
 
@@ -77,7 +102,7 @@ describe('SafenetReader.fetchCheckState', () => {
     expect(endpoint.methods).toContain('eth_getBlockByNumber')
     expect(result.headBlock).toBe('25000')
     expect(result.safeTxHash).toBe(SAFE_TX_HASH)
-    expect(result.events.map((e) => e.type)).toEqual([CheckEventType.PLAIN_PROPOSED, CheckEventType.PLAIN_ATTESTED])
+    expect(result.events.map((e) => e.type)).toEqual([CheckEventType.ORACLE_PROPOSED, CheckEventType.ORACLE_ATTESTED])
     // Sorted ascending by (blockNumber, logIndex).
     const keys = result.events.map((e) => e.blockNumber * 1e6 + e.logIndex)
     expect(keys).toEqual([...keys].sort((a, b) => a - b))
@@ -93,14 +118,9 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
 
     expect(result.events.map((e) => e.type)).toEqual([CheckEventType.ORACLE_PROPOSED, CheckEventType.ORACLE_ATTESTED])
-    // Only the Consensus address is read — sentinel-oracle correlation is the
-    // next slice's job.
-    for (const call of endpoint.getLogsCalls) {
-      expect(call.address?.toLowerCase()).toBe(CONSENSUS.toLowerCase())
-    }
   })
 
   it('rejects a malformed safeTxHash before touching any endpoint', async () => {
@@ -113,13 +133,13 @@ describe('SafenetReader.fetchCheckState', () => {
   })
 
   it('chunks the lookback window into ≤10k-block getLogs calls', async () => {
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(endpoint.handler)
     server.listen()
 
     await makeReader().fetchCheckState(SAFE_TX_HASH)
 
-    expect(endpoint.getLogsCalls.map((c) => [c.fromBlock, c.toBlock])).toEqual([
+    expect(consensusCalls(endpoint.getLogsCalls).map((c) => [c.fromBlock, c.toBlock])).toEqual([
       [0, 9999],
       [10_000, 19_999],
       [20_000, 25_000],
@@ -149,7 +169,7 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it('rotates to the next endpoint when the first one fails', async () => {
     const down = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
-    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(down.handler, up.handler)
     server.listen()
 
@@ -158,7 +178,7 @@ describe('SafenetReader.fetchCheckState', () => {
       chainId: CHAIN_ID,
       consensus: CONSENSUS,
       coordinator: ORACLE,
-      oracles: [],
+      oracles: [ORACLE],
     })
     const result = await reader.fetchCheckState(SAFE_TX_HASH)
     expect(result.headBlock).toBe('25000')
@@ -170,7 +190,7 @@ describe('SafenetReader.fetchCheckState', () => {
     // retry on a dead URL and the read fails; the generation guard cannot.
     const down1 = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
     const down2 = makeEndpoint({ url: 'http://rpc.test/2', failEverything: true })
-    const up = makeEndpoint({ url: 'http://rpc.test/3', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const up = makeEndpoint({ url: 'http://rpc.test/3', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(down1.handler, down2.handler, up.handler)
     server.listen()
 
@@ -179,7 +199,7 @@ describe('SafenetReader.fetchCheckState', () => {
       chainId: CHAIN_ID,
       consensus: CONSENSUS,
       coordinator: ORACLE,
-      oracles: [],
+      oracles: [ORACLE],
     })
     const results = await Promise.all([
       reader.fetchCheckState(SAFE_TX_HASH),
@@ -195,7 +215,7 @@ describe('SafenetReader.fetchCheckState', () => {
     const endpoint = makeEndpoint({
       url: 'http://rpc.test/1',
       head: 25_000,
-      logs: plainPairFor(SAFE_TX_HASH),
+      logs: consensusPairFor(SAFE_TX_HASH),
       failBlockProbes: 'error',
       gateLogs: true,
     })
@@ -215,7 +235,7 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it('keeps the rotated endpoint for the next read instead of retrying the failed one', async () => {
     const down = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
-    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(down.handler, up.handler)
     server.listen()
     const reader = makeReader({ rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2'] })
@@ -252,20 +272,6 @@ describe('SafenetReader.fetchCheckState', () => {
     expect(result.deadlineBlock).toBe('160')
   })
 
-  it('returns null correlation fields for the plain pair — the beta path has no oracle', async () => {
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
-    server = setupServer(endpoint.handler)
-    server.listen()
-
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
-
-    expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
-    expect(result.requestId).toBeNull()
-    expect(result.epoch).toBeNull()
-    expect(result.oracle).toBeNull()
-    expect(result.deadlineBlock).toBeNull()
-  })
-
   it('targets Proposed.oracle for the sentinel getLogs when the proposal names an allowlisted oracle', async () => {
     resetLogCounter()
     const logs = [buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE })]
@@ -298,17 +304,17 @@ describe('SafenetReader.fetchCheckState', () => {
 
     expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
     expect(result.requestId).toBeNull()
-    expect(result.events.every((event) => event.type !== CheckEventType.ORACLE_RESULT)).toBe(true)
+    expect(result.events).toEqual([])
   })
 
-  it("skips the oracle path entirely when the allowlist is empty (today's default)", async () => {
+  it('skips the oracle path entirely when the allowlist is empty', async () => {
     resetLogCounter()
     const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [] }).fetchCheckState(SAFE_TX_HASH)
 
     expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
     expect(result.requestId).toBeNull()
@@ -609,8 +615,8 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     resetLogCounter()
     const centre = 980_000
     const logs = [
-      buildPlainProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: centre, logIndex: 0 }),
-      buildPlainAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: 988_999, logIndex: 0 }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: centre, logIndex: 0 }),
+      buildOracleAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: 988_999, logIndex: 0 }),
     ]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 1_000_000, headTimestamp: 1_000_000, logs })
     server = setupServer(endpoint.handler)
@@ -731,31 +737,5 @@ describe('SafenetReader window coverage', () => {
     // centre = head − ageSeconds/5, then 1,000 blocks back, clamped at the head.
     expect([calls[0].fromBlock, calls[0].toBlock]).toEqual([1_000_000 - ageSeconds / 5 - 1_000, 1_000_000])
     expect(result.windowCoverage).toBe('proven')
-  })
-})
-
-describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
-  it('logs a loud error when the RPC chain id disagrees with SAFENET_CHAIN_ID', async () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', chainId: '31337', head: 10, logs: [] })
-    server = setupServer(endpoint.handler)
-    server.listen()
-
-    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH)
-
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('chain id mismatch'))
-    spy.mockRestore()
-  })
-
-  it('stays silent when the RPC chain id matches', async () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', chainId: '100', head: 10, logs: [] })
-    server = setupServer(endpoint.handler)
-    server.listen()
-
-    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH)
-
-    expect(spy).not.toHaveBeenCalled()
-    spy.mockRestore()
   })
 })

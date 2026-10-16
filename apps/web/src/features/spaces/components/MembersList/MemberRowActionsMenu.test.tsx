@@ -31,6 +31,7 @@ jest.mock('@/components/common/Track', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/spaces').SPACE_EVENTS,
     REMOVE_MEMBER_MODAL: { action: 'Open remove member modal' },
     WORKSPACE_MEMBER_INVITE_RENEWED: { action: 'Workspace member invite renewed' },
   },
@@ -39,7 +40,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 
 // The codebase tests dropdown menus with a lightweight stand-in rather than
 // driving base-ui's portal/pointer machinery in jsdom (see SpaceSelectorDropdown.test).
-jest.mock('@/components/ui/dropdown-menu', () => {
+jest.mock('@safe-global/views/components/ui/dropdown-menu', () => {
   const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
 
   type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }

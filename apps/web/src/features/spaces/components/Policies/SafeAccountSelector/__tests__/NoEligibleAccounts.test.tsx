@@ -1,6 +1,10 @@
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
-import NoEligibleAccounts from '../components/NoEligibleAccounts'
-import { NO_ELIGIBLE_ACCOUNTS_TEXT, NO_WALLET_TEXT, SIGNERS_ONLY_COPY } from '../constants'
+import NoEligibleAccounts from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/components/NoEligibleAccounts'
+import {
+  NO_ELIGIBLE_ACCOUNTS_TEXT,
+  NO_WALLET_TEXT,
+  SIGNERS_ONLY_COPY,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 
 describe('NoEligibleAccounts', () => {
   it('explains why the list is empty', () => {

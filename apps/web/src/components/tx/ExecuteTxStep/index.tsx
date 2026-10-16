@@ -1,0 +1,133 @@
+import { useContext, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { TxModalContext } from '@/components/tx-flow'
+import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
+import { Execute } from '@/components/tx-flow/actions/Execute'
+import SubmitErrors from '@/components/tx-flow/actions/SubmitErrors'
+import { Receipt } from '../ConfirmTxDetails/Receipt'
+import ErrorMessage from '../ErrorMessage'
+import useTxPreview from '../confirmation-views/useTxPreview'
+import useChainId from '@/hooks/useChainId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { createExistingTx } from '@/services/tx/tx-sender'
+
+const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
+
+/**
+ * Execute step for a fully signed transaction: after the signature that completes the threshold, or
+ * straight from the queue. The transaction is reloaded from the gateway so gas is estimated against
+ * the real signatures before executing.
+ */
+export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean }) => {
+  const chainId = useChainId()
+  const scope = useSafeScope()
+  const { safeTx, safeTxError, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { txId, onPrev } = useContext(TxFlowContext)
+  const { setTxFlow } = useContext(TxModalContext)
+  const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
+  const [txPreview] = useTxPreview(safeTx?.data)
+  const [isReloaded, setIsReloaded] = useState(false)
+
+  const scopeSafeAddress = scope?.safeAddress
+  const scopeSdk = scope?.sdk
+  const txSenderScope = useMemo<TxSenderScope | undefined>(
+    () => (scopeSafeAddress ? { chainId, safeAddress: scopeSafeAddress, sdk: scopeSdk } : undefined),
+    [chainId, scopeSafeAddress, scopeSdk],
+  )
+  const scopedSafeQuery = scope?.chain ? `${scope.chain.shortName}:${scope.safeAddress}` : undefined
+
+  useEffect(() => {
+    if (!txId) return
+    if (txSenderScope && !txSenderScope.sdk) return
+    setSafeTxError(undefined)
+    createExistingTx(chainId, txId, undefined, txSenderScope)
+      .then((signedTx) => {
+        setSafeTx(signedTx)
+        setIsReloaded(true)
+      })
+      .catch(setSafeTxError)
+  }, [txId, chainId, txSenderScope, setSafeTx, setSafeTxError])
+
+  const executeLater = () => {
+    setTxFlow(undefined)
+    const query = scopedSafeQuery ? { ...safeLinkQuery, safe: scopedSafeQuery } : safeLinkQuery
+    router.push({ pathname: AppRoutes.transactions.queue, query })
+  }
+
+  return (
+    <TxFlowStep title="Execute transaction" fixedNonce hideBack>
+      <TxCard contentPadding="compactBottom">
+        {safeTxError && !isReloaded ? (
+          <ErrorMessage error={safeTxError}>
+            Could not load the signed transaction. Try again from the queue.
+          </ErrorMessage>
+        ) : !safeTx || !isReloaded ? (
+          <div className="flex items-center justify-center py-10">
+            <Spinner className="size-6" />
+          </div>
+        ) : (
+          <>
+            <Alert
+              variant="subtle"
+              role="note"
+              data-testid="signed-notice"
+              className="border-[var(--color-border-light)] *:data-[slot=alert-description]:text-foreground *:[svg]:text-muted-foreground"
+            >
+              <AlertSeverityIcon variant="info" aria-hidden="true" />
+              <AlertDescription>
+                This transaction is fully signed. Nothing has been sent to the network yet.
+              </AlertDescription>
+            </Alert>
+
+            <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} txInfo={txPreview?.txInfo} outlined />
+
+            <SubmitErrors />
+
+            <Execute
+              options={EXECUTE_OPTIONS}
+              onChange={() => {}}
+              slotId="execute"
+              secondaryAction={
+                afterSigning ? (
+                  <Button data-testid="execute-later-btn" variant="outline" size="lg" onClick={executeLater}>
+                    Execute later
+                  </Button>
+                ) : (
+                  <Button data-testid="modal-back-btn" variant="outline" size="lg" onClick={onPrev}>
+                    Back
+                  </Button>
+                )
+              }
+            />
+
+            <Separator bleed="6" />
+
+            <Typography
+              variant="paragraph-small"
+              color="muted"
+              role="note"
+              data-testid="execute-notice"
+              className="flex gap-3"
+            >
+              <AlertSeverityIcon variant="info" aria-hidden="true" className="size-4 shrink-0 translate-y-0.5" />
+              Executing submits this transaction on-chain and costs gas. Anyone can execute it &mdash; it doesn&apos;t
+              have to be you.
+            </Typography>
+          </>
+        )}
+      </TxCard>
+    </TxFlowStep>
+  )
+}

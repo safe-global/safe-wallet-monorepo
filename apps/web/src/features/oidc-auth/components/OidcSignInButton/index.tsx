@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { useHasFeature } from '@/hooks/useChains'

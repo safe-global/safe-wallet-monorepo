@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { CircleAlert } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { WidgetEmptyState } from './WidgetEmptyState'
 
 interface WidgetErrorStateProps {

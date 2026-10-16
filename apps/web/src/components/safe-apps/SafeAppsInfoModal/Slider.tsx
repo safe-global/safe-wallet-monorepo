@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import css from './styles.module.css'
+import { Button } from '@safe-global/views/components/ui/button'
+import css from '@safe-global/views/components/safe-apps/SafeAppsInfoModal/styles.module.css'
 
 type SliderProps = {
   onSlideChange: (slideIndex: number) => void

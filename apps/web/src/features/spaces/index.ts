@@ -69,12 +69,13 @@ export { default as useGetSpaceAddressBook, useSpaceAddressBookState } from './h
 export { useMemberNameResolver } from './hooks/useMemberNameResolver'
 export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
 export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
-export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
+export { default as useGetAddressBookRequests, useAddressBookRequestsState } from './hooks/useGetAddressBookRequests'
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
 export { useSafeWorkspaceCheck } from './hooks/useSafeWorkspaceCheck'
+export { useSafeWorkspaceAttach } from './hooks/useSafeWorkspaceAttach'
 export { useLandingSpaceId } from './hooks/useLandingSpaceId'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
@@ -131,8 +132,12 @@ export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSideba
 export { default as ConnectWalletHint } from './components/ConnectWalletHint'
 export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
 export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
-export type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from './components/SafeSelectorDropdown/types'
-export { matchesSafeSearch } from './components/SafeSelectorDropdown/utils'
+export type {
+  SafeItemData,
+  SafeItemDataChain,
+  SafeRenameTarget,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+export { matchesSafeSearch } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils'
 export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
 export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'

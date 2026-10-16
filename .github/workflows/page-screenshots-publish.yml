@@ -35,7 +35,7 @@ jobs:
       # Check out the default branch only. The workspace must not contain
       # head-branch contents — the validated artifact is the only thing
       # this workflow consumes from the build half.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: dev
           fetch-depth: 1
@@ -43,7 +43,7 @@ jobs:
 
       - name: Resolve, download, and validate artifact
         id: artifact
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@v9.0.0
         env:
           RUN_ID: ${{ github.event.workflow_run.id }}
         with:
@@ -54,7 +54,7 @@ jobs:
 
       - name: Resolve PR number
         id: pr
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@v9.0.0
         env:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         with:
@@ -65,7 +65,7 @@ jobs:
       - name: Upload screenshots to storage branch
         if: steps.artifact.outputs.found == 'true' && steps.pr.outputs.skip == 'false'
         # Local composite action resolved from the `dev` checkout above.
-        uses: ./.github/actions/upload-to-storage-branch
+        uses: $/.github/actions/upload-to-storage-branch
         with:
           storage_branch: pr-${{ steps.pr.outputs.number }}-screenshots
           source_dir: page-screenshots
@@ -77,7 +77,7 @@ jobs:
 
       - name: Post, update, or delete PR comment
         if: steps.pr.outputs.skip == 'false'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@v9.0.0
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           STALE: ${{ steps.pr.outputs.stale }}

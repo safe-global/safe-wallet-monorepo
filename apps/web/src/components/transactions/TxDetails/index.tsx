@@ -1,7 +1,7 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useIsExpiredSwap } from '@/features/swap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -22,11 +22,11 @@ import {
   isBridgeOrderTxInfo,
   isLifiSwapTxInfo,
 } from '@/utils/transaction-guards'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
+import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import classNames from 'classnames'
 import css from './styles.module.css'
-import { Card } from '@/components/ui/card'
+import { Card } from '@safe-global/views/components/ui/card'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
@@ -48,6 +48,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HypernativeFeature } from '@/features/hypernative'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -111,6 +112,12 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const { safe } = useSafeInfo()
 
   const isModuleExecution = isModuleDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+  const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
+  const safenetInfo =
+    isSafenetEnabled && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+      ? txDetails.detailedExecutionInfo
+      : undefined
   const showAuditLog =
     (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && (!isUnsigned || !!proposer)) ||
     isModuleExecution ||
@@ -170,6 +177,14 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
+          {safenetInfo && (
+            <safenet.SafenetDetailsCard
+              safeTxHash={safenetInfo.safeTxHash}
+              chainId={safe.chainId}
+              timestampMs={safenetInfo.submittedAt}
+              isQueued={isQueue}
+            />
+          )}
           <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
             <Summary
               txDetails={txDetails}

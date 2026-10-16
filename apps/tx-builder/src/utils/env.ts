@@ -6,3 +6,6 @@ export const isProdEnv = (): boolean => {
     return false
   }
 }
+
+// When set, this Client Gateway serves every gateway request, and it is the only ABI provider.
+export const getGatewayUrl = (): string | undefined => import.meta.env.VITE_GATEWAY_URL || undefined

@@ -61,6 +61,7 @@ export enum TxFlowType {
   SETUP_SPENDING_LIMIT = 'setup-spending-limit',
   SETUP_SPACE_SPENDING_LIMIT = 'setup-space-spending-limit',
   EDIT_SPACE_SPENDING_LIMIT = 'edit-space-spending-limit',
+  ENABLE_SPACE_SPENDING_LIMIT_MODULE = 'enable-space-spending-limit-module',
   SIGN_MESSAGE_ON_CHAIN = 'sign-message-on-chain',
   SIGNERS_STRUCTURE = 'signers-structure',
   START_RECOVERY = 'propose-recovery',

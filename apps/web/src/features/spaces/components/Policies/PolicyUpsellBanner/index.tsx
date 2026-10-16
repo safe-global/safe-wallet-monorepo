@@ -1,22 +1,17 @@
 import { ArrowRight, Lock } from 'lucide-react'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import {
-  trackEvent,
-  MixpanelEventParams,
-  PlanSelectionEntryPoint,
-  UpgradeFeature,
-  UpgradeLocation,
-} from '@/services/analytics'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import Track from '@/components/common/Track'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '../../Plans/planSelection'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import type { PolicyLock } from '../policyLock'
+import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 
 type PolicyUpsellBannerProps = Pick<PolicyLock, 'planName' | 'workspaceName' | 'onUpgrade'>
 
@@ -54,20 +49,21 @@ const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsell
             </Typography>
           </div>
 
-          <Button
-            onClick={() => {
-              trackEvent(POLICY_EVENTS.POLICY_UPSELL_UPGRADE_CLICKED)
-              trackPlanSelectionStarted({
-                [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
-                ...PROMPT,
-              })
-              onUpgrade()
-            }}
-            className="shrink-0 font-semibold"
-          >
-            Upgrade to Business
-            <ArrowRight aria-hidden className="text-[var(--color-static-text-brand)]" />
-          </Button>
+          <Track {...POLICY_EVENTS.POLICY_UPSELL_UPGRADE_CLICKED}>
+            <Button
+              onClick={() => {
+                trackPlanSelectionStarted({
+                  [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+                  ...PROMPT,
+                })
+                onUpgrade()
+              }}
+              className="shrink-0 font-semibold"
+            >
+              Upgrade to Business
+              <ArrowRight aria-hidden className="text-[var(--color-static-text-brand)]" />
+            </Button>
+          </Track>
         </div>
       </CardContent>
     </Card>

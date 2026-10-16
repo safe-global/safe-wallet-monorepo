@@ -27,7 +27,7 @@ import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { didRevert } from '@/utils/ethers-utils'
 import { getAndValidateSafeSDK, getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export const NO_ALLOWANCE_MODULE_ERROR =

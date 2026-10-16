@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Check } from 'lucide-react'
 import { DrawerFooter } from '@/components/common/Drawer'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 
 export type CopyTransactionLinkProps = {

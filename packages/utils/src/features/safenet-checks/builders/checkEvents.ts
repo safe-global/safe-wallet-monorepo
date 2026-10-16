@@ -5,8 +5,6 @@ import {
   buildOracleAttestedLog,
   buildOracleProposedLog,
   buildOracleResultLog,
-  buildPlainAttestedLog,
-  buildPlainProposedLog,
   buildRevealedLog,
 } from './rawLogs'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
@@ -16,8 +14,6 @@ import type {
   OracleAttestedEvent,
   OracleProposedEvent,
   OracleResultEvent,
-  PlainAttestedEvent,
-  PlainProposedEvent,
   RequestCreatedEvent,
   SentinelCommittedEvent,
   SentinelRevealedEvent,
@@ -43,16 +39,6 @@ export const proposedEvent = (over: Partial<OracleProposedEvent> = {}): OraclePr
 
 export const attestedEvent = (over: Partial<OracleAttestedEvent> = {}): OracleAttestedEvent => ({
   ...decodeOne<OracleAttestedEvent>(buildOracleAttestedLog()),
-  ...over,
-})
-
-export const plainProposedEvent = (over: Partial<PlainProposedEvent> = {}): PlainProposedEvent => ({
-  ...decodeOne<PlainProposedEvent>(buildPlainProposedLog()),
-  ...over,
-})
-
-export const plainAttestedEvent = (over: Partial<PlainAttestedEvent> = {}): PlainAttestedEvent => ({
-  ...decodeOne<PlainAttestedEvent>(buildPlainAttestedLog()),
   ...over,
 })
 

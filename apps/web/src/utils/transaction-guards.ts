@@ -318,6 +318,9 @@ export const isSignableBy = (txSummary: Transaction, walletAddress: string): boo
   return !!executionInfo?.missingSigners?.some((address) => address.value === walletAddress)
 }
 
+export const isOneSignatureShort = (signatureCount: number, threshold: number): boolean =>
+  signatureCount + 1 === threshold
+
 export const isConfirmableBy = (txSummary: Transaction, walletAddress: string): boolean => {
   if (!txSummary.executionInfo || !isMultisigExecutionInfo(txSummary.executionInfo)) {
     return false
@@ -325,7 +328,7 @@ export const isConfirmableBy = (txSummary: Transaction, walletAddress: string): 
   const { confirmationsRequired, confirmationsSubmitted } = txSummary.executionInfo
   return (
     confirmationsSubmitted >= confirmationsRequired ||
-    (confirmationsSubmitted === confirmationsRequired - 1 && isSignableBy(txSummary, walletAddress))
+    (isOneSignatureShort(confirmationsSubmitted, confirmationsRequired) && isSignableBy(txSummary, walletAddress))
   )
 }
 

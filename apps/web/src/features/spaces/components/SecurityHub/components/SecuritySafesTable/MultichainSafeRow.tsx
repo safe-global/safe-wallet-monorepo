@@ -9,11 +9,17 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { cn } from '@/utils/cn'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
-import { BalanceCell, ScoreCell } from './cells'
-import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
+import { BalanceCell, ScoreCell, UpdateCell } from './cells'
+import {
+  CARD_ROW_CLASS,
+  CELL_BASE,
+  GRID_COLS,
+  HIDE_BALANCE,
+  ROW_VARIANTS,
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import {
   formatBalance,
   getAggregateNonPassingCount,
@@ -21,11 +27,16 @@ import {
   getAggregateSummary,
   getNonPassingCount,
   hasMultichainWarning,
+  hasUpgradeAvailable,
   isAnyChainScanning,
-  type GetSafeSecurityHref,
+  type GetSafeHref,
   type RowSecurity,
 } from './utils'
-import type { ChainEntry, SelectedSafe, SpaceSafeEntry } from '../../types'
+import type {
+  ChainEntry,
+  SelectedSafe,
+  SpaceSafeEntry,
+} from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 export type MultichainSafeRowProps = {
   safe: SpaceSafeEntry
@@ -40,7 +51,8 @@ export type MultichainSafeRowProps = {
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
-  getSafeSecurityHref: GetSafeSecurityHref
+  getSafeSecurityHref: GetSafeHref
+  getSafeUpdateHref: GetSafeHref
 }
 
 type ChildRowProps = {
@@ -53,7 +65,8 @@ type ChildRowProps = {
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
-  getSafeSecurityHref: GetSafeSecurityHref
+  getSafeSecurityHref: GetSafeHref
+  getSafeUpdateHref: GetSafeHref
 }
 
 /** Per-chain row rendered under an expanded multichain parent. */
@@ -68,6 +81,7 @@ const MultichainChildRow = ({
   balanceMap,
   security,
   getSafeSecurityHref,
+  getSafeUpdateHref,
 }: ChildRowProps) => {
   const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, chain.chainId)
@@ -78,6 +92,7 @@ const MultichainChildRow = ({
   const isSelected = sameAddress(selectedSafe?.address, safe.address) && selectedSafe?.chainId === chain.chainId
   const isScanning = scanningKeys?.has(key)
   const childHref = getSafeSecurityHref(safe.address, chain.chainId)
+  const childUpdateHref = hasUpgradeAvailable(results) ? getSafeUpdateHref(safe.address, chain.chainId) : undefined
   const childName = safe.name || shortenAddress(safe.address)
 
   return (
@@ -120,6 +135,9 @@ const MultichainChildRow = ({
       <div className={CELL_BASE}>
         <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} />
       </div>
+      <div className={CELL_BASE}>
+        <UpdateCell href={childUpdateHref} />
+      </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {chain.isDeployed ? (
           <ChevronRight className={cn('h-5 w-5', isSelected ? 'text-primary' : 'text-muted-foreground')} />
@@ -158,6 +176,7 @@ const MultichainSafeRow = ({
   balanceMap,
   security,
   getSafeSecurityHref,
+  getSafeUpdateHref,
 }: MultichainSafeRowProps) => {
   const { scanKey, getSafeGrade } = security
   const aggregateSummary = getAggregateSummary(safe, scanResults, security)
@@ -246,6 +265,7 @@ const MultichainSafeRow = ({
         <div className={CELL_BASE}>
           <StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />
         </div>
+        <div className={CELL_BASE} />
         <div className={cn(CELL_BASE, 'justify-end')} />
       </motion.div>
 
@@ -263,6 +283,7 @@ const MultichainSafeRow = ({
             balanceMap={balanceMap}
             security={security}
             getSafeSecurityHref={getSafeSecurityHref}
+            getSafeUpdateHref={getSafeUpdateHref}
           />
         ))}
     </Fragment>

@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
-import SafeLogo from '@/public/images/logo-no-text.svg'
+import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 
 interface CaptchaModalProps {
   open: boolean

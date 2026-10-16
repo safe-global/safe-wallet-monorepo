@@ -1,10 +1,6 @@
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { seedConnectedWallet } from '../../src/fixtures/seed-wallet'
 import { AssetsPage } from '../../src/pages/assets.page'
-import { SAFES } from '../../src/data/constants'
-
-const SAFE = SAFES.SEP_ASSETS_SAFE
-const SAFE_ADDRESS = SAFE.split(':')[1]
 
 // TODO: assets_2's spending-limit test was dropped because its signer (OWNER_4) is also an owner of
 // that Safe, so it never exercised the allowance path. Covering it needs a dedicated Safe with a
@@ -14,13 +10,14 @@ test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
   test('should show a hide checkbox on every token row when "Hide tokens" is picked from the manage-tokens menu', async ({
     safePage,
     safeApiClient,
+    safes,
   }, testInfo) => {
-    testInfo.annotations.push({ type: 'safe-address', description: SAFE })
-    const balances = await safeApiClient.getBalances(SAFE_ADDRESS)
+    testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_ASSETS_SAFE })
+    const balances = await safeApiClient.getBalances(safes.SEP_ASSETS_SAFE.split(':')[1])
     expect(balances.items.length).toBeGreaterThan(1)
 
     const assets = new AssetsPage(safePage)
-    await assets.goto(SAFE)
+    await assets.goto(safes.SEP_ASSETS_SAFE)
     await expect(assets.tokenRows.first()).toBeVisible()
 
     // Small balances are hidden by default and every test token here is worth $0, so unhide them to
@@ -46,12 +43,13 @@ test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
     safePage,
     walletPage,
     credentials,
+    safes,
   }, testInfo) => {
-    testInfo.annotations.push({ type: 'safe-address', description: SAFE })
+    testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_ASSETS_SAFE })
     await seedConnectedWallet(safePage, credentials.OWNER_4_PRIVATE_KEY)
 
     const assets = new AssetsPage(safePage)
-    await assets.goto(SAFE)
+    await assets.goto(safes.SEP_ASSETS_SAFE)
     // The seeded wallet reconnects asynchronously after load; a rate-limited RPC can push it past 10s.
     await expect(walletPage.accountCenter).toBeVisible({ timeout: 30_000 })
 
@@ -71,13 +69,13 @@ test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
   test(
     'should enable Send and Swap on a token row when the connected wallet is a proposer but not an owner',
     { tag: '@permissions' },
-    async ({ safePage, walletPage, credentials }, testInfo) => {
-      testInfo.annotations.push({ type: 'safe-address', description: SAFES.SEP_PROPOSER_SAFE })
+    async ({ safePage, walletPage, credentials, safes }, testInfo) => {
+      testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_PROPOSER_SAFE })
       expect(credentials.OWNER_1_PRIVATE_KEY, 'OWNER_1_PRIVATE_KEY is the proposer key').toBeTruthy()
       await seedConnectedWallet(safePage, credentials.OWNER_1_PRIVATE_KEY!)
 
       const assets = new AssetsPage(safePage)
-      await assets.goto(SAFES.SEP_PROPOSER_SAFE)
+      await assets.goto(safes.SEP_PROPOSER_SAFE)
       await expect(walletPage.accountCenter).toBeVisible({ timeout: 30_000 })
       // This Safe only holds a fraction of a cent of ETH, which the default dust filter hides.
       await assets.setHideSmallBalances(false)

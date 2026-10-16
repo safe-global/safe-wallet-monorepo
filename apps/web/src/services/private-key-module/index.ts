@@ -4,6 +4,7 @@ import { type WalletInit, createEIP1193Provider } from '@web3-onboard/common'
 import { getRpcServiceUrl } from '@/hooks/wallets/web3'
 import pkPopupStore from './pk-popup-store'
 import { numberToHex } from '@/utils/hex'
+import { signTypedData } from './signTypedData'
 
 import { PRIVATE_KEY_MODULE_LABEL } from './constants'
 export { PRIVATE_KEY_MODULE_LABEL }
@@ -132,11 +133,7 @@ const PrivateKeyModule = (chainId: Chain['chainId'], rpcUri: Chain['rpcUri']): W
                   throw new Error('Invalid parameters for eth_signTypedData_v4')
                 }
 
-                return await wallet.signTypedData(
-                  parsedTypedData.domain,
-                  { [parsedTypedData.primaryType]: parsedTypedData.types[parsedTypedData.primaryType] },
-                  parsedTypedData.message,
-                )
+                return signTypedData(wallet, parsedTypedData)
               },
 
               // @ts-ignore

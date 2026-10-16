@@ -1,0 +1,274 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./ExternalLink.stories ButtonMode 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+      data-slot="button"
+      href="https://safe.global"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        Open Documentation
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-external-link external-link-icon size-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 3h6v6"
+          />
+          <path
+            d="M10 14 21 3"
+          />
+          <path
+            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+          />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`./ExternalLink.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
+      data-slot="link"
+      data-variant="default"
+      href="https://safe.global"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        Visit Safe Global
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-external-link external-link-icon size-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 3h6v6"
+          />
+          <path
+            d="M10 14 21 3"
+          />
+          <path
+            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+          />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`./ExternalLink.stories EmptyHref 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    This will not be a link
+  </div>
+</div>
+`;
+
+exports[`./ExternalLink.stories InsideTransactionFlow 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
+      data-slot="link"
+      data-variant="default"
+      href="https://safe.global"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        Visit Safe Global
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-up-right external-link-icon size-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 7h10v10"
+          />
+          <path
+            d="M7 17 17 7"
+          />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`./ExternalLink.stories NoChildren 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
+      data-slot="link"
+      data-variant="default"
+      href="https://safe.global"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        https://safe.global
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-external-link external-link-icon size-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 3h6v6"
+          />
+          <path
+            d="M10 14 21 3"
+          />
+          <path
+            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+          />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`./ExternalLink.stories WithCustomStyling 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-[var(--color-secondary-main)] font-bold"
+      data-slot="link"
+      data-variant="default"
+      href="https://etherscan.io"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        View on Etherscan
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-external-link external-link-icon size-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 3h6v6"
+          />
+          <path
+            d="M10 14 21 3"
+          />
+          <path
+            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+          />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+`;
+
+exports[`./ExternalLink.stories WithoutIcon 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
+      data-slot="link"
+      data-variant="default"
+      href="https://safe.global"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        Visit Safe Global
+      </span>
+    </a>
+  </div>
+</div>
+`;

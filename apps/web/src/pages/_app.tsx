@@ -39,7 +39,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceCheck } from '@/features/spaces'
+import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -96,7 +96,8 @@ import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/feat
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import RenderAfterMount from '@/components/common/RenderAfterMount'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -113,7 +114,7 @@ setStoreInstance(reduxStore)
 // be unmounted entirely while the require-login gate is keeping the user out
 // — otherwise they subscribe to tx/message events and surface pending-tx
 // toasts on the login page before the user has signed in.
-const SafeScopedSubscriptions = (): null => {
+export const SafeScopedSubscriptions = (): null => {
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -126,6 +127,7 @@ const SafeScopedSubscriptions = (): null => {
   useCounterfactualSafeSync()
   useInviteNotification()
   useSafeWorkspaceCheck()
+  useSafeWorkspaceAttach()
   return null
 }
 
@@ -226,4 +228,11 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
   )
 }
 
-export default SafeWalletApp
+// In dev the server renders every page as empty (see next.config.mjs), so the first client render must be empty too.
+const DevClientOnlyApp = (props: AppProps): ReactElement => (
+  <RenderAfterMount>
+    <SafeWalletApp {...props} />
+  </RenderAfterMount>
+)
+
+export default process.env.NODE_ENV === 'development' ? DevClientOnlyApp : SafeWalletApp
