@@ -33,23 +33,52 @@ describe('GuardStatusBanner', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows the slot and address of an unknown guard, with a link to remove it', () => {
-    renderBanner({ status: 'unknown', foreignGuards: [{ slot: 'module', address: FOREIGN_GUARD }] })
+  it('shows the slot and address of an unknown transaction guard, with a link to remove it in settings', () => {
+    renderBanner({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] })
 
     expect(screen.getByText('This Safe account has an unknown guard installed')).toBeInTheDocument()
-    expect(screen.getByText(/Module guard/)).toBeInTheDocument()
+    expect(screen.getByText(/Transaction guard/)).toBeInTheDocument()
     expect(screen.getByText(FOREIGN_GUARD)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Remove it in the Safe account settings/ })).toHaveAttribute(
-      'href',
-      SETTINGS_HREF,
-    )
+    expect(
+      screen.getByRole('link', { name: /Remove the transaction guard in the Safe account settings/ }),
+    ).toHaveAttribute('href', SETTINGS_HREF)
+    expect(screen.queryByText(/Removing a module guard needs a transaction/)).not.toBeInTheDocument()
   })
 
-  it('names the missing slot of a partly enabled guard', () => {
+  it('does not link an unknown module guard to settings, which cannot remove it', () => {
+    renderBanner({ status: 'unknown', foreignGuards: [{ slot: 'module', address: FOREIGN_GUARD }] })
+
+    expect(screen.getByText(/Module guard/)).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByText('Removing a module guard needs a transaction from this Safe account.')).toBeInTheDocument()
+  })
+
+  it('offers both ways when unknown guards sit in both slots', () => {
+    renderBanner({
+      status: 'unknown',
+      foreignGuards: [
+        { slot: 'transaction', address: FOREIGN_GUARD },
+        { slot: 'module', address: FOREIGN_GUARD },
+      ],
+    })
+
+    expect(screen.getByRole('link', { name: /Remove the transaction guard/ })).toBeInTheDocument()
+    expect(screen.getByText(/Removing a module guard needs a transaction/)).toBeInTheDocument()
+  })
+
+  it('links to settings when only the transaction slot holds the policy guard', () => {
+    renderBanner({ status: 'partial', missingSlot: 'module' })
+
+    expect(screen.getByText(/The module guard slot isn't set/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Remove the transaction guard/ })).toHaveAttribute('href', SETTINGS_HREF)
+  })
+
+  it('says a transaction is needed when only the module slot holds the policy guard', () => {
     renderBanner({ status: 'partial', missingSlot: 'transaction' })
 
     expect(screen.getByText(/The transaction guard slot isn't set/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Remove it in the Safe account settings/ })).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.getByText(/Removing a module guard needs a transaction/)).toBeInTheDocument()
   })
 
   it('names the version a Safe needs', () => {

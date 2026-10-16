@@ -41,8 +41,17 @@ const SLOT_LABELS: Record<GuardSlotName, string> = {
 /** Next is only enabled once the read shows the allowlist can be set up. */
 export const isGuardReady = (guard: GuardStatus): boolean => guard.status === 'none' || guard.status === 'known'
 
-const SettingsLink = ({ href }: { href?: string }): ReactElement | null =>
-  href ? <ExternalLink href={href}>Remove it in the Safe account settings</ExternalLink> : null
+const OTHER_SLOT: Record<GuardSlotName, GuardSlotName> = { transaction: 'module', module: 'transaction' }
+
+/** The settings page can only remove a transaction guard; a module guard needs a transaction of its own. */
+const RemoveGuardHint = ({ slots, href }: { slots: GuardSlotName[]; href?: string }): ReactElement => (
+  <>
+    {slots.includes('transaction') && href && (
+      <ExternalLink href={href}>Remove the transaction guard in the Safe account settings</ExternalLink>
+    )}
+    {slots.includes('module') && <span>Removing a module guard needs a transaction from this Safe account.</span>}
+  </>
+)
 
 const Banner = ({
   variant,
@@ -104,7 +113,7 @@ const GuardStatusBanner = ({ guard, safeName, settingsHref, onRetry }: GuardStat
               </li>
             ))}
           </ul>
-          <SettingsLink href={settingsHref} />
+          <RemoveGuardHint slots={guard.foreignGuards.map(({ slot }) => slot)} href={settingsHref} />
         </Banner>
       )
 
@@ -114,7 +123,7 @@ const GuardStatusBanner = ({ guard, safeName, settingsHref, onRetry }: GuardStat
           <span>
             The {SLOT_LABELS[guard.missingSlot].toLowerCase()} slot isn&apos;t set. Remove the guard and try again.
           </span>
-          <SettingsLink href={settingsHref} />
+          <RemoveGuardHint slots={[OTHER_SLOT[guard.missingSlot]]} href={settingsHref} />
         </Banner>
       )
 

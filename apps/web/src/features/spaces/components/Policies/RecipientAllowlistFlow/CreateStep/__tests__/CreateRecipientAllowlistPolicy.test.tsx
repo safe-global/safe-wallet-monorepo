@@ -145,10 +145,9 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'partial', missingSlot: 'module' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.getByRole('link', { name: /Remove it in the Safe account settings/ })).toHaveAttribute(
-      'href',
-      `/settings/modules?safe=sep:${SAFE_A}&spaceId=${SPACE_ID}`,
-    )
+    expect(
+      screen.getByRole('link', { name: /Remove the transaction guard in the Safe account settings/ }),
+    ).toHaveAttribute('href', `/settings/modules?safe=sep:${SAFE_A}&spaceId=${SPACE_ID}`)
   })
 
   it('links to the Safe settings without a Workspace when the URL has none', () => {
@@ -156,10 +155,9 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'partial', missingSlot: 'module' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.getByRole('link', { name: /Remove it in the Safe account settings/ })).toHaveAttribute(
-      'href',
-      `/settings/modules?safe=sep:${SAFE_A}`,
-    )
+    expect(
+      screen.getByRole('link', { name: /Remove the transaction guard in the Safe account settings/ }),
+    ).toHaveAttribute('href', `/settings/modules?safe=sep:${SAFE_A}`)
   })
 
   it('retries a failed guard check', () => {
