@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { skipToken } from '@reduxjs/toolkit/query'
 import * as safesQueries from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
@@ -75,7 +76,13 @@ describe('usePolicyGuard', () => {
     mockSafe({ guard: txGuard ? guardInfo(txGuard) : null })
     mockModuleGuard({ currentData: moduleGuard })
     const { result } = renderHook(() => usePolicyGuard())
-    expect(result.current).toEqual({ state: expected, isLoading: false, error: undefined })
+    expect(result.current).toEqual({
+      state: expected,
+      isLoading: false,
+      error: undefined,
+      isRetrying: false,
+      refetch: expect.any(Function),
+    })
   })
 
   it('reads the module guard for the Safe at its current tx history', () => {
@@ -108,7 +115,13 @@ describe('usePolicyGuard', () => {
     mockSafe()
     mockModuleGuard({ currentData: undefined, isFetching: true })
     const { result } = renderHook(() => usePolicyGuard())
-    expect(result.current).toEqual({ state: undefined, isLoading: true, error: undefined })
+    expect(result.current).toEqual({
+      state: undefined,
+      isLoading: true,
+      error: undefined,
+      isRetrying: false,
+      refetch: expect.any(Function),
+    })
   })
 
   it('is loading while the Safe loads', () => {
@@ -124,22 +137,40 @@ describe('usePolicyGuard', () => {
     const rpcError = new Error('rpc down')
     mockModuleGuard({ currentData: undefined, isError: true, error: rpcError })
     const { result } = renderHook(() => usePolicyGuard())
-    expect(result.current).toEqual({ state: undefined, isLoading: false, error: rpcError })
+    expect(result.current).toEqual({
+      state: undefined,
+      isLoading: false,
+      error: rpcError,
+      isRetrying: false,
+      refetch: expect.any(Function),
+    })
   })
 
-  it('keeps the error while a retry is in flight', () => {
+  it('keeps the error, and reports the retry, while a retry is in flight', () => {
     mockSafe()
     const rpcError = new Error('rpc down')
     mockModuleGuard({ currentData: undefined, isError: false, isFetching: true, error: rpcError })
     const { result } = renderHook(() => usePolicyGuard())
-    expect(result.current).toEqual({ state: undefined, isLoading: false, error: rpcError })
+    expect(result.current).toEqual({
+      state: undefined,
+      isLoading: false,
+      error: rpcError,
+      isRetrying: true,
+      refetch: expect.any(Function),
+    })
   })
 
   it('returns the last read state without an error when a later read fails', () => {
     mockSafe()
     mockModuleGuard({ currentData: ZERO_ADDRESS, isError: true, error: new Error('rpc down') })
     const { result } = renderHook(() => usePolicyGuard())
-    expect(result.current).toEqual({ state: { status: 'none' }, isLoading: false, error: undefined })
+    expect(result.current).toEqual({
+      state: { status: 'none' },
+      isLoading: false,
+      error: undefined,
+      isRetrying: false,
+      refetch: expect.any(Function),
+    })
   })
 
   it.each([
@@ -151,7 +182,13 @@ describe('usePolicyGuard', () => {
     mockSafe(overrides as Partial<ExtendedSafeInfo>)
     const { query } = mockModuleGuard({})
     const { result } = renderHook(() => usePolicyGuard())
-    expect(result.current).toEqual({ state: undefined, isLoading: false, error: undefined })
+    expect(result.current).toEqual({
+      state: undefined,
+      isLoading: false,
+      error: undefined,
+      isRetrying: false,
+      refetch: expect.any(Function),
+    })
     expect(query).toHaveBeenCalledWith(skipToken)
   })
 
@@ -247,6 +284,41 @@ describe('usePolicyGuard', () => {
     expect(query).toHaveBeenCalledWith(skipToken, expect.anything())
   })
 
+  describe('refetch', () => {
+    it('re-reads the module guard on demand', () => {
+      mockSafe()
+      const { refetch } = mockModuleGuard({ isError: true, error: new Error('rpc down') })
+      const { result } = renderHook(() => usePolicyGuard())
+      act(() => result.current.refetch())
+      expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not re-read a module guard read that never started', () => {
+      mockSafe({ version: '1.4.1' })
+      const { refetch } = mockModuleGuard({ isUninitialized: true })
+      const { result } = renderHook(() => usePolicyGuard())
+      act(() => result.current.refetch())
+      expect(refetch).not.toHaveBeenCalled()
+    })
+
+    it('reloads a target Safe that failed to load', () => {
+      mockSafe()
+      const safeRefetch = jest.fn()
+      jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
+        refetch: safeRefetch,
+        isUninitialized: false,
+        isError: true,
+        error: { status: 500, data: 'Server error' },
+      } as unknown as SafeQuery)
+      mockModuleGuard({ isUninitialized: true })
+      const { result } = renderHook(() =>
+        usePolicyGuard({ chainId: '11155111', safeAddress: faker.finance.ethereumAddress() }),
+      )
+      act(() => result.current.refetch())
+      expect(safeRefetch).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('with a target Safe', () => {
     const TARGET = { chainId: '11155111', safeAddress: '0x3333333333333333333333333333333333333333' }
 
@@ -303,7 +375,13 @@ describe('usePolicyGuard', () => {
       })
       const { query } = mockModuleGuard({})
       const { result } = renderHook(() => usePolicyGuard(TARGET))
-      expect(result.current).toEqual({ state: undefined, isLoading: false, error: undefined })
+      expect(result.current).toEqual({
+        state: undefined,
+        isLoading: false,
+        error: undefined,
+        isRetrying: false,
+        refetch: expect.any(Function),
+      })
       expect(query).toHaveBeenCalledWith(skipToken)
     })
 
