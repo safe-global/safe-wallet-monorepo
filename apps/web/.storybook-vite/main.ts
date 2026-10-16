@@ -173,8 +173,6 @@ const config: StorybookConfig = {
       ...(config.resolve.alias || {}),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),
-      // Mock next/image to bypass the image loader stub
-      'next/image': path.resolve(__dirname, '../.storybook/mocks/nextImage.js'),
       // Polyfill Node.js querystring module for browser
       querystring: path.resolve(__dirname, '../.storybook/mocks/querystring.ts'),
     }
