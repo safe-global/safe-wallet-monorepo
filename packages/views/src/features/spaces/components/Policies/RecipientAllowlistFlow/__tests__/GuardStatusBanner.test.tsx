@@ -1,8 +1,9 @@
+import { faker } from '@faker-js/faker'
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import GuardStatusBanner, { isGuardReady, type GuardStatus } from '../GuardStatusBanner'
 
-const FOREIGN_GUARD = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
-const SETTINGS_HREF = '/settings/modules?safe=sep:0x3333333333333333333333333333333333333333'
+const FOREIGN_GUARD = faker.finance.ethereumAddress()
+const SETTINGS_HREF = `/settings/modules?safe=sep:${faker.finance.ethereumAddress()}`
 
 const renderBanner = (guard: GuardStatus, onRetry = jest.fn()) =>
   render(<GuardStatusBanner guard={guard} safeName="Treasury" settingsHref={SETTINGS_HREF} onRetry={onRetry} />)

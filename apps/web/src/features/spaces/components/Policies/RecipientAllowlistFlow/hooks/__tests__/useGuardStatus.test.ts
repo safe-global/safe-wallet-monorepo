@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import { usePolicyGuard, type UsePolicyGuardResult } from '@/features/policy-guard'
 import { useGuardStatus } from '../useGuardStatus'
@@ -6,7 +7,7 @@ jest.mock('@/features/policy-guard', () => ({ usePolicyGuard: jest.fn() }))
 
 const mockUsePolicyGuard = usePolicyGuard as jest.MockedFunction<typeof usePolicyGuard>
 
-const TARGET = { chainId: '11155111', safeAddress: '0x3333333333333333333333333333333333333333' }
+const TARGET = { chainId: '11155111', safeAddress: faker.finance.ethereumAddress() }
 
 const read = (result: Partial<UsePolicyGuardResult>) => {
   const refetch = jest.fn()

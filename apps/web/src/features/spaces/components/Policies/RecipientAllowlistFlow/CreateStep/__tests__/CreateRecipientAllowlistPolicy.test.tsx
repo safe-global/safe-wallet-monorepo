@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
@@ -8,8 +9,8 @@ import { useGuardStatus } from '../../hooks/useGuardStatus'
 import CreateRecipientAllowlistPolicy from '..'
 
 const SEPOLIA = '11155111'
-const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
-const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+const SAFE_A = faker.finance.ethereumAddress()
+const SAFE_B = faker.finance.ethereumAddress()
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))

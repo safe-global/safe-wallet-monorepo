@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
@@ -5,8 +6,8 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { useSafeVersions } from '../useSafeVersions'
 
 const SEPOLIA = '11155111'
-const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
-const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+const SAFE_A = faker.finance.ethereumAddress()
+const SAFE_B = faker.finance.ethereumAddress()
 
 const account = (address: string) => ({ id: `${SEPOLIA}:${address}`, chainId: SEPOLIA, address })
 

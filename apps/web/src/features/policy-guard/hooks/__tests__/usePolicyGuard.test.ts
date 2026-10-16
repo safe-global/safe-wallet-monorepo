@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { skipToken } from '@reduxjs/toolkit/query'
 import * as safesQueries from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
@@ -305,7 +306,7 @@ describe('usePolicyGuard', () => {
       } as unknown as SafeQuery)
       mockModuleGuard({ isUninitialized: true })
       const { result } = renderHook(() =>
-        usePolicyGuard({ chainId: '11155111', safeAddress: '0x3333333333333333333333333333333333333333' }),
+        usePolicyGuard({ chainId: '11155111', safeAddress: faker.finance.ethereumAddress() }),
       )
       act(() => result.current.refetch())
       expect(safeRefetch).toHaveBeenCalledTimes(1)

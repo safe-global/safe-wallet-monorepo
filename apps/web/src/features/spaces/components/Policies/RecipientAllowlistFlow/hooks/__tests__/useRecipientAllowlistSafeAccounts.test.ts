@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import { buildSafeAccountId, findSafeAccount, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
@@ -32,8 +33,8 @@ jest.mock('@/hooks/useChains', () => ({
 const mockUseEligibleSafeAccounts = useEligibleSafeAccounts as jest.MockedFunction<typeof useEligibleSafeAccounts>
 const mockUseSafeVersions = useSafeVersions as jest.MockedFunction<typeof useSafeVersions>
 
-const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
-const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+const SAFE_A = faker.finance.ethereumAddress()
+const SAFE_B = faker.finance.ethereumAddress()
 
 const option = (chainId: string, address = SAFE_A, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
   id: buildSafeAccountId(chainId, address),

@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
 import {
@@ -6,8 +7,8 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { hasSelectableSafeAccount, markAllowlistIneligibility } from '../safeAccounts'
 
-const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
-const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+const SAFE_A = faker.finance.ethereumAddress()
+const SAFE_B = faker.finance.ethereumAddress()
 const SEPOLIA = '11155111'
 const MAINNET = '1'
 
