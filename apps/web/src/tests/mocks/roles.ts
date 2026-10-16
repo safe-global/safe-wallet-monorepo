@@ -57,14 +57,6 @@ const asMock = <T extends (...args: never[]) => unknown>(hook: T) => {
   return mocked
 }
 
-/**
- * Sets the return values of the role hooks that `CheckWallet` reads, so the wallet acts as `role`.
- * Each hook's module must be mocked with `jest.mock()` in the test file.
- *
- * @param role - The wallet role to simulate.
- * @param overrides - Flags to add to the role, e.g. `{ isProposer: true }` on `nestedOwner`.
- * @returns The connected wallet, or `null` for `disconnected`.
- */
 export function mockRole(role: TestRole, overrides: Partial<RoleFlags> = {}) {
   const flags = { ...ROLE_FLAGS[role], ...overrides }
   const wallet = flags.isConnected ? connectedWalletBuilder().build() : null
