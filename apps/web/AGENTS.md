@@ -164,7 +164,7 @@ Run: `yarn workspace @safe-global/web storybook` (port 6006). Every new componen
 Choosing a setup:
 
 1. **No store/API needs** → plain `Meta`/`StoryObj`.
-2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/preview`.
+2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
 3. **Pages/widgets needing API mocks** → `createMockStory` from `@/stories/mocks` — do NOT hand-roll `StoreDecorator`/provider stacks/MSW handlers.
 
 ```typescript
