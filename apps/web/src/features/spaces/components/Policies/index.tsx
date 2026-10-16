@@ -3,7 +3,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { usePolicyIntro } from './hooks/usePolicyIntro'
 import AddPolicyDialog from './AddPolicyDialog'
 import {
   ADD_POLICY_OPTIONS,
@@ -83,17 +83,7 @@ const Policies = ({
   onSelectPolicy,
   locked,
 }: PoliciesProps): ReactElement => {
-  const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
-    useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
-  const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
   const { setTxFlow } = useContext(TxModalContext)
-
-  const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
-  const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
-  const [hasSeenAllowlistIntro = false, setHasSeenAllowlistIntro] = useLocalStorage<boolean>(
-    RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY,
-  )
-  const [isAllowlistIntroOpen, setIsAllowlistIntroOpen] = useState(false)
   const isAllowlistAvailable = useIsAllowlistAvailableInSpace()
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
@@ -143,25 +133,19 @@ const Policies = ({
 
   const startAllowlistFlow = useCallback(() => setTxFlow(<RecipientAllowlistFlow />), [setTxFlow])
 
+  const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
+  const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
+  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow)
+
   const handleSelect = useCallback(
     (id: AddPolicyId) => {
       switch (id) {
         case 'spending-limit':
-          if (hasSeenSpendingLimitIntro) {
-            startSpendingLimitFlow()
-            return
-          }
-
-          setIsSpendingLimitIntroOpen(true)
+          spendingLimitIntro.request()
           return
 
         case 'proposer':
-          if (hasSeenProposerIntro) {
-            startProposerFlow()
-            return
-          }
-
-          setIsProposerIntroOpen(true)
+          proposerIntro.request()
           return
 
         case 'suggestion':
@@ -169,13 +153,7 @@ const Policies = ({
           return
 
         case 'recipient-allowlist':
-          if (!isAllowlistAvailable) return
-          if (hasSeenAllowlistIntro) {
-            startAllowlistFlow()
-            return
-          }
-
-          setIsAllowlistIntroOpen(true)
+          if (isAllowlistAvailable) allowlistIntro.request()
           return
 
         // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
@@ -189,27 +167,8 @@ const Policies = ({
         }
       }
     },
-    [
-      hasSeenSpendingLimitIntro,
-      startSpendingLimitFlow,
-      hasSeenProposerIntro,
-      startProposerFlow,
-      isAllowlistAvailable,
-      hasSeenAllowlistIntro,
-      startAllowlistFlow,
-    ],
+    [spendingLimitIntro, proposerIntro, allowlistIntro, isAllowlistAvailable],
   )
-
-  // Any dismissal counts as shown: an explainer that returns after you closed it reads as a bug.
-  const closeSpendingLimitIntro = useCallback(() => {
-    setIsSpendingLimitIntroOpen(false)
-    setHasSeenSpendingLimitIntro(true)
-  }, [setHasSeenSpendingLimitIntro])
-
-  const proceedToSpendingLimitFlow = useCallback(() => {
-    closeSpendingLimitIntro()
-    startSpendingLimitFlow()
-  }, [closeSpendingLimitIntro, startSpendingLimitFlow])
 
   const selectFromAddPolicyDialog = useCallback(
     (id: AddPolicyId) => {
@@ -229,26 +188,6 @@ const Policies = ({
       ),
     [locked, isAllowlistAvailable],
   )
-
-  const closeProposerIntro = useCallback(() => {
-    setIsProposerIntroOpen(false)
-    setHasSeenProposerIntro(true)
-  }, [setHasSeenProposerIntro])
-
-  const proceedToProposerFlow = useCallback(() => {
-    closeProposerIntro()
-    startProposerFlow()
-  }, [closeProposerIntro, startProposerFlow])
-
-  const closeAllowlistIntro = useCallback(() => {
-    setIsAllowlistIntroOpen(false)
-    setHasSeenAllowlistIntro(true)
-  }, [setHasSeenAllowlistIntro])
-
-  const proceedToAllowlistFlow = useCallback(() => {
-    closeAllowlistIntro()
-    startAllowlistFlow()
-  }, [closeAllowlistIntro, startAllowlistFlow])
 
   return (
     <div data-testid="policies">
@@ -300,27 +239,21 @@ const Policies = ({
       />
 
       <SpendingLimitIntroDialog
-        open={isSpendingLimitIntroOpen}
-        onOpenChange={(open) => {
-          if (!open) closeSpendingLimitIntro()
-        }}
-        onProceed={proceedToSpendingLimitFlow}
+        open={spendingLimitIntro.isOpen}
+        onOpenChange={spendingLimitIntro.onOpenChange}
+        onProceed={spendingLimitIntro.proceed}
       />
 
       <ProposerIntroDialog
-        open={isProposerIntroOpen}
-        onOpenChange={(open) => {
-          if (!open) closeProposerIntro()
-        }}
-        onProceed={proceedToProposerFlow}
+        open={proposerIntro.isOpen}
+        onOpenChange={proposerIntro.onOpenChange}
+        onProceed={proposerIntro.proceed}
       />
 
       <RecipientAllowlistIntroDialog
-        open={isAllowlistIntroOpen}
-        onOpenChange={(open) => {
-          if (!open) closeAllowlistIntro()
-        }}
-        onProceed={proceedToAllowlistFlow}
+        open={allowlistIntro.isOpen}
+        onOpenChange={allowlistIntro.onOpenChange}
+        onProceed={allowlistIntro.proceed}
       />
 
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
