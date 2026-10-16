@@ -122,8 +122,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
               className="flex gap-3"
             >
               <AlertSeverityIcon variant="info" aria-hidden="true" className="size-4 shrink-0 translate-y-0.5" />
-              Executing submits this transaction on-chain and costs gas. Anyone can execute it &mdash; it doesn&apos;t
-              have to be you.
+              Any signer can execute this transaction.
             </Typography>
           </>
         )}

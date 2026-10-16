@@ -91,7 +91,7 @@ const SponsoredRadioLabel = ({ offer, chainId }: { offer: SponsoredOffer; chainI
     </Typography>
   )
 
-const SponsoredRadio = ({ offer, chainId }: { offer: SponsoredOffer; chainId: string }) => {
+export const SponsoredRadio = ({ offer, chainId }: { offer: SponsoredOffer; chainId: string }) => {
   if (!offer.disabledReason) {
     return (
       <Label data-testid="relay-execution-method" className="flex flex-1 cursor-pointer items-center gap-2">
@@ -123,7 +123,7 @@ const SponsoredRadio = ({ offer, chainId }: { offer: SponsoredOffer; chainId: st
   )
 }
 
-const SponsoredStrip = ({
+export const SponsoredStrip = ({
   offer,
   isRelay,
   isSafeProEnabled,

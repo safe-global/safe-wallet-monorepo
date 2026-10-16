@@ -5,6 +5,7 @@ import ExecuteForm from './ExecuteForm'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
+import { useIsPayFromSafeSignAndExecute } from '@/features/gtf'
 
 export const Execute = ({
   onSubmit,
@@ -54,11 +55,25 @@ export const Execute = ({
   )
 }
 
-const useShouldRegisterSlot = () => {
+const useCanExecuteHere = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { canExecute, isProposing, willSignBeforeExecute } = useContext(TxFlowContext)
 
   return !isCounterfactualSafe && canExecute && !isProposing && !willSignBeforeExecute
+}
+
+const useShouldRegisterSlot = () => {
+  const canExecuteHere = useCanExecuteHere()
+  const isSignAndExecute = useIsPayFromSafeSignAndExecute()
+  return canExecuteHere && !isSignAndExecute
+}
+
+// Spec §4: a signature that moves assets must say so. When the fee is paid from the Safe and this
+// signature reaches the threshold, the same action is offered as "Sign and execute" instead of "Execute".
+const useShouldRegisterSignAndExecuteSlot = () => {
+  const canExecuteHere = useCanExecuteHere()
+  const isSignAndExecute = useIsPayFromSafeSignAndExecute()
+  return canExecuteHere && isSignAndExecute
 }
 
 const ExecuteSlot = withSlot({
@@ -67,6 +82,14 @@ const ExecuteSlot = withSlot({
   label: 'Execute',
   id: 'execute',
   useSlotCondition: useShouldRegisterSlot,
+})
+
+export const SignAndExecuteSlot = withSlot({
+  Component: Execute,
+  slotName: SlotName.ComboSubmit,
+  label: 'Sign and execute',
+  id: 'signAndExecute',
+  useSlotCondition: useShouldRegisterSignAndExecuteSlot,
 })
 
 export default ExecuteSlot

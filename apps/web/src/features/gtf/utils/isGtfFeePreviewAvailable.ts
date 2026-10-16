@@ -1,16 +1,12 @@
-import type { Chain, Relayer } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-
-const PREVIEW_RELAYER_TYPES: ReadonlyArray<Relayer['type']> = ['RELAY_FEE', 'GTF']
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
 
 /**
- * Whether the CGW can quote Safe-pays fees on this chain. `/fees/{safe}/preview` requires a
- * RELAY_FEE or GTF relayer and rejects every request without one ("Accessing fee preview is
- * only available for chains with RELAY_FEE relayer"), regardless of gas token or payload.
- *
- * A chain can carry the GTF feature flag while previews are impossible —
- * the fee section still renders, but as signer-pays with a free execution
- * fee, and the preview endpoint must never be called.
+ * Whether the CGW can quote Safe-pays fees on this chain. `/fees/{safe}/preview` and the relay of a
+ * refunding transaction both require `PAY_FROM_SAFE` in the chain's `relayer.gasPaymentOptions`
+ * (`FeesService.getFeePreview`, `RelayManager.getRefundingRelayer`), so the web keys on the same
+ * option: a chain can carry the GTF feature flag while previews are impossible — the fee section
+ * then renders as signer-pays and the preview endpoint is never called.
  */
 export const isGtfFeePreviewAvailable = (chain: Chain | undefined): chain is Chain =>
-  !!chain && hasFeature(chain, FEATURES.GTF) && PREVIEW_RELAYER_TYPES.includes(chain.relayer?.type ?? null)
+  !!chain && getGasPaymentOptions(chain).includes('PAY_FROM_SAFE')
