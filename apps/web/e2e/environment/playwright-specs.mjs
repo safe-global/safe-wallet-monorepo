@@ -34,7 +34,6 @@ export const playwrightSpecs = {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
   },
-  'regression/spaces-members-table.spec.ts': {},
   'regression/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },

@@ -167,7 +167,7 @@ Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membershi
 | 11  | Multichain & safe creation   | 14    | Cross-chain + counterfactual state                           | `create_wallet.pages.js` (436)             |
 | 12  | Swaps / CoW widget           | 11    | Third-party iframe                                           | `swaps.pages.js` (846)                     |
 | 13  | Safe Apps & tx-builder       | 7     | Iframe-heavy, most complex                                   | `safeapps` (378), `copilot` (371)          |
-| 14  | Spaces & remainder           | 4     | Extends `spaces-members-table.spec.ts`                       | `spaces.page.js` (731)                     |
+| 14  | Spaces & remainder           | 4     | Members table is covered in Jest, not Playwright             | `spaces.page.js` (731)                     |
 
 ### The per-stage loop
 
@@ -209,7 +209,7 @@ yarn cypress:run --browser chrome --spec 'cypress/e2e/<area>/*.cy.js' --config r
 
 Deliberately not built up front. Do them when your stage needs them, then delete the bullet.
 
-- **Shared route-mock helper.** `page.route` for `/v1/auth/me`, `/v1/users` and `/v1/spaces/*` is currently copy-pasted across `tests/regression/spaces-members-table.spec.ts` and both `recipient-dropdown-*` specs. Whoever needs it a fourth time extracts it into `e2e/src/api/mocks.ts`.
+- **Shared route-mock helper.** `page.route` for `/v1/auth/me`, `/v1/users` and `/v1/spaces/*` is currently copy-pasted across `tests/regression/step-up-auth.spec.ts` and both `recipient-dropdown-*` specs. Whoever needs it a fourth time extracts it into `e2e/src/api/mocks.ts`.
 - **Safe registry expansion.** `SAFES` in `e2e/src/data/constants.ts` holds 3 entries. Cypress has ~30 in `cypress/fixtures/safes/static.js` plus `funds.json`, `nfts.json`, `recovery.json` and `safeapps.json`. Port only the entries your stage needs, keeping the existing naming (`SEP_STATIC_SAFE_n`).
 - **Page objects.** Cypress has 25 page objects totalling ~9,100 lines; Playwright has two. Do **not** port a Cypress page object line by line — the Playwright ones are thin (locators and actions only, no assertions) and are typically a fraction of the size.
 
