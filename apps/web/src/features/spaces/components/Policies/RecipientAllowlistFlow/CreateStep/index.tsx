@@ -70,7 +70,12 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
         />
 
         {isSettled && hasWallet && !hasSelectableAccount && (
-          <Alert variant="warning" data-testid="no-eligible-safes">
+          <Alert
+            variant="warning"
+            outlined={false}
+            className="*:data-[slot=alert-description]:text-muted-foreground"
+            data-testid="no-eligible-safes"
+          >
             <AlertSeverityIcon variant="warning" />
             <AlertTitle>{NO_ELIGIBLE_SAFES_TITLE}</AlertTitle>
             <AlertDescription>{NO_ELIGIBLE_SAFES_DESCRIPTION}</AlertDescription>
