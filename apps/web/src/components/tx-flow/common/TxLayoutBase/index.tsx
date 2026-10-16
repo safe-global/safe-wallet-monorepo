@@ -9,6 +9,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import { SafeTxContext } from '../../SafeTxProvider'
 import TxNonce from '../TxNonce'
+import QueuedNonceHint from '../QueuedNonceHint'
 import TxStatusWidget from '../TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield'
 import css from './styles.module.css'
@@ -31,21 +32,26 @@ export const TxLayoutHeader = ({
 
   const Icon = icon
 
-  return (
-    <div className={css.headerInner}>
-      <div className="flex min-w-0 flex-1 items-center">
-        {Icon && (
-          <div className={css.icon}>
-            <Icon />
-          </div>
-        )}
+  const showNonce = !hideNonce && safe.deployed && nonceNeeded
 
-        <Typography variant="h4" className="font-bold [overflow-wrap:anywhere]">
-          {subtitle}
-        </Typography>
+  return (
+    <>
+      <div className={css.headerInner}>
+        <div className="flex min-w-0 flex-1 items-center">
+          {Icon && (
+            <div className={css.icon}>
+              <Icon />
+            </div>
+          )}
+
+          <Typography variant="h4" className="font-bold [overflow-wrap:anywhere]">
+            {subtitle}
+          </Typography>
+        </div>
+        {showNonce && <TxNonce canEdit={!fixedNonce} />}
       </div>
-      {!hideNonce && safe.deployed && nonceNeeded && <TxNonce canEdit={!fixedNonce} />}
-    </div>
+      {showNonce && !fixedNonce && <QueuedNonceHint />}
+    </>
   )
 }
 

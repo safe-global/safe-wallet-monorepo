@@ -30,6 +30,11 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* The queued-nonce hint is the only possible sibling and carries the divider itself */
+.headerInner:has(+ *) {
+  border-bottom: 0;
+}
+
 .step {
   position: relative;
 }
