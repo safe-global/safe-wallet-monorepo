@@ -5,8 +5,15 @@ import GuardStatusBanner, { type GuardStatus } from '../GuardStatusBanner'
 const FOREIGN_GUARD = faker.finance.ethereumAddress()
 const SETTINGS_HREF = `/settings/modules?safe=sep:${faker.finance.ethereumAddress()}`
 
-const renderBanner = (guard: GuardStatus, onRetry = jest.fn()) =>
-  render(<GuardStatusBanner guard={guard} safeName="Treasury" settingsHref={SETTINGS_HREF} onRetry={onRetry} />)
+const renderBanner = (guard: GuardStatus) =>
+  render(
+    <GuardStatusBanner
+      guard={guard}
+      safeName="Treasury"
+      settingsLink={<a href={SETTINGS_HREF}>Go to Safe settings</a>}
+      renderAddress={(address) => <span data-testid="guard-address">{address}</span>}
+    />,
+  )
 
 describe('GuardStatusBanner', () => {
   it('names the Safe being checked while loading', () => {
@@ -36,21 +43,19 @@ describe('GuardStatusBanner', () => {
   it('shows the slot and address of an unknown transaction guard, with a link to remove it in settings', () => {
     renderBanner({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] })
 
-    expect(screen.getByText('This Safe account has an unknown guard installed')).toBeInTheDocument()
-    expect(screen.getByText(/Transaction guard/)).toBeInTheDocument()
-    expect(screen.getByText(FOREIGN_GUARD)).toBeInTheDocument()
-    expect(
-      screen.getByRole('link', { name: /Remove the transaction guard in the Safe account settings/ }),
-    ).toHaveAttribute('href', SETTINGS_HREF)
+    expect(screen.getByText('This Safe account has an unknown guard')).toBeInTheDocument()
+    expect(screen.getByText('Transaction guard')).toBeInTheDocument()
+    expect(screen.getByTestId('guard-address')).toHaveTextContent(FOREIGN_GUARD)
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute('href', SETTINGS_HREF)
     expect(screen.queryByText(/Removing a module guard needs a transaction/)).not.toBeInTheDocument()
   })
 
   it('does not link an unknown module guard to settings, which cannot remove it', () => {
     renderBanner({ status: 'unknown', foreignGuards: [{ slot: 'module', address: FOREIGN_GUARD }] })
 
-    expect(screen.getByText(/Module guard/)).toBeInTheDocument()
+    expect(screen.getByText('Module guard')).toBeInTheDocument()
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
-    expect(screen.getByText('Removing a module guard needs a transaction from this Safe account.')).toBeInTheDocument()
+    expect(screen.getByText(/Removing a module guard needs a transaction from this Safe account\./)).toBeInTheDocument()
   })
 
   it('offers both ways when unknown guards sit in both slots', () => {
@@ -62,7 +67,8 @@ describe('GuardStatusBanner', () => {
       ],
     })
 
-    expect(screen.getByRole('link', { name: /Remove the transaction guard/ })).toBeInTheDocument()
+    expect(screen.getAllByTestId('guard-address')).toHaveLength(2)
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toBeInTheDocument()
     expect(screen.getByText(/Removing a module guard needs a transaction/)).toBeInTheDocument()
   })
 
@@ -70,7 +76,7 @@ describe('GuardStatusBanner', () => {
     renderBanner({ status: 'partial', missingSlot: 'module' })
 
     expect(screen.getByText(/The module guard slot isn't set/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Remove the transaction guard/ })).toHaveAttribute('href', SETTINGS_HREF)
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute('href', SETTINGS_HREF)
   })
 
   it('says a transaction is needed when only the module slot holds the policy guard', () => {
@@ -79,6 +85,18 @@ describe('GuardStatusBanner', () => {
     expect(screen.getByText(/The transaction guard slot isn't set/)).toBeInTheDocument()
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
     expect(screen.getByText(/Removing a module guard needs a transaction/)).toBeInTheDocument()
+  })
+
+  it('shows a guard address shortened when the app supplies no identity row', () => {
+    render(
+      <GuardStatusBanner
+        guard={{ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] }}
+        safeName="Treasury"
+      />,
+    )
+
+    expect(screen.getByText(`${FOREIGN_GUARD.slice(0, 6)}...${FOREIGN_GUARD.slice(-4)}`)).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 
   it('names the version a Safe needs', () => {

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
+import { Link } from '@safe-global/views/components/ui/link'
+import { AccountIdentity } from '@/features/spaces/components/Policies/components/AccountIdentity'
 import GuardStatusBanner from './GuardStatusBanner'
 
 const FOREIGN_GUARD = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
@@ -10,7 +12,7 @@ const meta = {
   parameters: { layout: 'padded' },
   decorators: [
     (Story) => (
-      <div className="max-w-xl">
+      <div className="max-w-xl rounded-xl bg-card p-6">
         <Story />
       </div>
     ),
@@ -18,7 +20,8 @@ const meta = {
   tags: ['autodocs'],
   args: {
     safeName: 'Treasury',
-    settingsHref: '/settings/modules?safe=sep:0x3333333333333333333333333333333333333333',
+    settingsLink: <Link href="#">Go to Safe settings</Link>,
+    renderAddress: (address: string) => <AccountIdentity address={address} showCopyButton />,
     onRetry: fn(),
     guard: { status: 'none' },
   },

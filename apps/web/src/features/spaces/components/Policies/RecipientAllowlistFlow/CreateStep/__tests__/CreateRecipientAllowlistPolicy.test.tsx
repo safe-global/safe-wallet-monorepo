@@ -145,9 +145,10 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'partial', missingSlot: 'module' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(
-      screen.getByRole('link', { name: /Remove the transaction guard in the Safe account settings/ }),
-    ).toHaveAttribute('href', `/settings/modules?safe=sep:${SAFE_A}&spaceId=${SPACE_ID}`)
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+      'href',
+      `/settings/modules?safe=sep:${SAFE_A}&spaceId=${SPACE_ID}`,
+    )
   })
 
   it('links to the Safe settings without a Workspace when the URL has none', () => {
@@ -155,9 +156,19 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'partial', missingSlot: 'module' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(
-      screen.getByRole('link', { name: /Remove the transaction guard in the Safe account settings/ }),
-    ).toHaveAttribute('href', `/settings/modules?safe=sep:${SAFE_A}`)
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+      'href',
+      `/settings/modules?safe=sep:${SAFE_A}`,
+    )
+  })
+
+  it('shows an unknown guard as a shortened, copyable address', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(screen.getByText(new RegExp(`${SAFE_B.slice(0, 6)}\\.\\.\\.${SAFE_B.slice(-4)}`, 'i'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /copy/i })).toBeInTheDocument()
   })
 
   it('retries a failed guard check', () => {

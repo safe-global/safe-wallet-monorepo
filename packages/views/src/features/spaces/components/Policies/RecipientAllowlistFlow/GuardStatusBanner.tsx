@@ -9,7 +9,7 @@ import {
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
@@ -29,8 +29,10 @@ export type GuardStatus =
 export type GuardStatusBannerProps = {
   guard: GuardStatus
   safeName: string
-  /** The Safe's settings page, where a guard is removed. */
-  settingsHref?: string
+  /** Leads to the Safe's settings, where a transaction guard can be removed. */
+  settingsLink?: ReactNode
+  /** The app's identity row for a guard address; a shortened address without it. */
+  renderAddress?: (address: string) => ReactNode
   onRetry?: () => void
 }
 
@@ -41,14 +43,12 @@ const SLOT_LABELS: Record<GuardSlotName, string> = {
 
 const OTHER_SLOT: Record<GuardSlotName, GuardSlotName> = { transaction: 'module', module: 'transaction' }
 
-/** The settings page can only remove a transaction guard; a module guard needs a transaction of its own. */
-const RemoveGuardHint = ({ slots, href }: { slots: GuardSlotName[]; href?: string }): ReactElement => (
-  <>
-    {slots.includes('transaction') && href && (
-      <ExternalLink href={href}>Remove the transaction guard in the Safe account settings</ExternalLink>
-    )}
-    {slots.includes('module') && <span>Removing a module guard needs a transaction from this Safe account.</span>}
-  </>
+const MODULE_GUARD_HINT = 'Removing a module guard needs a transaction from this Safe account.'
+
+const defaultRenderAddress = (address: string): ReactNode => (
+  <Typography variant="paragraph-mini" className="font-mono">
+    {shortenAddress(address)}
+  </Typography>
 )
 
 const Banner = ({
@@ -62,24 +62,34 @@ const Banner = ({
   children: ReactNode
   action?: ReactNode
 }): ReactElement => (
-  <Alert variant={variant} data-testid={`guard-status-${variant}`}>
+  <Alert
+    variant={variant}
+    outlined={false}
+    // The success variant keeps a border even with `outlined={false}`
+    className="border-transparent *:data-[slot=alert-description]:text-muted-foreground"
+    data-testid={`guard-status-${variant}`}
+  >
     <AlertSeverityIcon variant={variant} />
     <AlertTitle>{title}</AlertTitle>
-    <AlertDescription className="flex flex-col gap-2">{children}</AlertDescription>
+    <AlertDescription className="flex flex-col gap-3">{children}</AlertDescription>
     {action && <AlertAction>{action}</AlertAction>}
   </Alert>
 )
 
-const GuardStatusBanner = ({ guard, safeName, settingsHref, onRetry }: GuardStatusBannerProps): ReactElement => {
+const GuardStatusBanner = ({
+  guard,
+  safeName,
+  settingsLink,
+  renderAddress = defaultRenderAddress,
+  onRetry,
+}: GuardStatusBannerProps): ReactElement => {
   switch (guard.status) {
     case 'loading':
       return (
-        <div className="flex items-center gap-2" data-testid="guard-status-loading">
-          <Spinner className="size-4" />
-          <Typography variant="paragraph-small" color="muted">
-            Checking guards on {safeName}…
-          </Typography>
-        </div>
+        <Alert variant="subtle" data-testid="guard-status-loading">
+          <Spinner />
+          <AlertTitle>Checking guards on {safeName}…</AlertTitle>
+        </Alert>
       )
 
     case 'none':
@@ -97,33 +107,39 @@ const GuardStatusBanner = ({ guard, safeName, settingsHref, onRetry }: GuardStat
         </Banner>
       )
 
-    case 'unknown':
+    case 'unknown': {
+      const slots = guard.foreignGuards.map(({ slot }) => slot)
       return (
-        <Banner variant="destructive" title="This Safe account has an unknown guard installed">
-          <span>
+        <Banner variant="destructive" title="This Safe account has an unknown guard">
+          <p>
             A Safe account can only have one guard, so you can&apos;t set up a recipient allowlist until it&apos;s
-            removed.
-          </span>
-          <ul className="flex flex-col gap-1">
+            removed.{slots.includes('module') && ` ${MODULE_GUARD_HINT}`}
+          </p>
+          <dl className="flex flex-col gap-2">
             {guard.foreignGuards.map(({ slot, address }) => (
-              <li key={slot}>
-                {SLOT_LABELS[slot]}: <span className="font-mono break-all text-foreground">{address}</span>
-              </li>
+              <div key={slot} className="flex items-center justify-between gap-3">
+                <dt>{SLOT_LABELS[slot]}</dt>
+                <dd className="min-w-0 text-foreground">{renderAddress(address)}</dd>
+              </div>
             ))}
-          </ul>
-          <RemoveGuardHint slots={guard.foreignGuards.map(({ slot }) => slot)} href={settingsHref} />
+          </dl>
+          {slots.includes('transaction') && settingsLink}
         </Banner>
       )
+    }
 
-    case 'partial':
+    case 'partial': {
+      const guardSlot = OTHER_SLOT[guard.missingSlot]
       return (
         <Banner variant="destructive" title="The Safe policy guard is only partly enabled">
-          <span>
+          <p>
             The {SLOT_LABELS[guard.missingSlot].toLowerCase()} slot isn&apos;t set. Remove the guard and try again.
-          </span>
-          <RemoveGuardHint slots={[OTHER_SLOT[guard.missingSlot]]} href={settingsHref} />
+            {guardSlot === 'module' && ` ${MODULE_GUARD_HINT}`}
+          </p>
+          {guardSlot === 'transaction' && settingsLink}
         </Banner>
       )
+    }
 
     case 'unsupported':
       return (

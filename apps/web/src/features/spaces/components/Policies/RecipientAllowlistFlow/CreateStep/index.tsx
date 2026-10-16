@@ -1,13 +1,16 @@
 import type { ReactElement } from 'react'
+import NextLink from 'next/link'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Link } from '@safe-global/views/components/ui/link'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { AccountIdentity } from '../../components/AccountIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import GuardStatusBanner from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -20,6 +23,8 @@ import {
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+
+const renderGuardAddress = (address: string) => <AccountIdentity address={address} showCopyButton />
 
 /** Step 1: picks the Safe and checks its guards. The allowlist form itself comes with WA-3079. */
 const CreateRecipientAllowlistPolicy = (): ReactElement => {
@@ -76,7 +81,8 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
           <GuardStatusBanner
             guard={guard}
             safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
-            settingsHref={settingsHref}
+            settingsLink={settingsHref && <Link render={<NextLink href={settingsHref} />}>Go to Safe settings</Link>}
+            renderAddress={renderGuardAddress}
             onRetry={retry}
           />
         )}
