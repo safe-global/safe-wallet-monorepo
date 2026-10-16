@@ -93,6 +93,18 @@ For "who uses this symbol?" questions, prefer the `LSP` tool (`findReferences`, 
 
 Web-specific principles live in [apps/web/AGENTS.md](apps/web/AGENTS.md); mobile-specific ones in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md).
 
+### Keep presentation in `@safe-global/views`
+
+We separate presentation from business logic as much as we can: it makes reviews faster, keeps concerns apart and lets us isolate UI code. That is why `@safe-global/views` (`packages/views`) exists. Code in that package only turns props into markup. Hooks, state, data and handlers stay in `apps/web` and reach the views as props.
+
+This applies to new code; do not refactor existing code into this shape unless the task asks for it. Whenever a change adds UI:
+
+- Look in `packages/views` for a view that already renders it, and reuse it or add a prop.
+- Otherwise write the new markup as a view in `packages/views`, in the same folders as its feature, and render it from `apps/web` with the data and callbacks as props. Do not add new markup, class names or copy to an `apps/web` file that also gets new logic.
+- Keep the condition, the data and any analytics in the `apps/web` hook or container.
+
+This is a default, not a gate: if splitting would make the change larger or worse, keep it together and say why in the PR description.
+
 ## Testing Requirements
 
 Every behavioral change must include tests — each platform's file defines the exact matrix and exemptions (see the Test Decision Matrix in [apps/web/AGENTS.md](apps/web/AGENTS.md) for web). Suggest developer-owned tests (unit / component / integration) before reaching for QA automation — the full rule lives in the Web Testing section of [apps/web/AGENTS.md](apps/web/AGENTS.md). Before writing or changing any test, read the cross-cutting conventions in [docs/ai/testing-conventions.md](docs/ai/testing-conventions.md); web templates and mock patterns: [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md).
