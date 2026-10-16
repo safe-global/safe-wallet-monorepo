@@ -47,6 +47,7 @@ import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesActivityRoute } from './routes/spaces/activity'
 import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
+import { Route as SpacesTransactionsRoute } from './routes/spaces/transactions'
 import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
@@ -121,6 +122,7 @@ const routeTree = RootRoute.addChildren([
   SpacesSecurityRoute,
   SpacesActivityRoute,
   SpacesPoliciesRoute,
+  SpacesTransactionsRoute,
   SpacesPlansRoute,
   SpacesSettingsRoute,
   SpacesSettingsGeneralRoute,
