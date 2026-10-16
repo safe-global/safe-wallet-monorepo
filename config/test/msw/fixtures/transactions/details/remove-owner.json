@@ -1,0 +1,143 @@
+{
+  "safeAddress": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+  "txId": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xafd58598ec10f89395d57c4d914480e50a568416e3226bc4d1853fae06697929",
+  "executedAt": 1701344808000,
+  "txStatus": "SUCCESS",
+  "txInfo": {
+    "type": "SettingsChange",
+    "humanDescription": "Remove owner 0x8a39...8E4E with threshold 1",
+    "dataDecoded": {
+      "method": "removeOwner",
+      "parameters": [
+        {
+          "name": "prevOwner",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000001",
+          "valueDecoded": null
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
+          "valueDecoded": null
+        },
+        {
+          "name": "_threshold",
+          "type": "uint256",
+          "value": "1",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "settingsInfo": {
+      "type": "REMOVE_OWNER",
+      "owner": {
+        "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
+        "name": null,
+        "logoUri": null
+      },
+      "threshold": 1
+    }
+  },
+  "txData": {
+    "hexData": "0xf8dc5dd900000000000000000000000000000000000000000000000000000000000000010000000000000000000000008a39ce4e27c326b87b75aaff820d442311cd8e4e0000000000000000000000000000000000000000000000000000000000000001",
+    "dataDecoded": {
+      "method": "removeOwner",
+      "parameters": [
+        {
+          "name": "prevOwner",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000001",
+          "valueDecoded": null
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
+          "valueDecoded": null
+        },
+        {
+          "name": "_threshold",
+          "type": "uint256",
+          "value": "1",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "to": {
+      "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+      "name": null,
+      "logoUri": null
+    },
+    "value": "0",
+    "operation": 0,
+    "trustedDelegateCallTarget": null,
+    "addressInfoIndex": null,
+    "tokenInfoIndex": null
+  },
+  "txHash": "0xac665db3053c6e0ef0b0bba8d508117be28667aa96fee858cbc514c57371a4b8",
+  "detailedExecutionInfo": {
+    "type": "MULTISIG",
+    "submittedAt": 1701344791592,
+    "nonce": 8,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "fee": "121010220046375",
+    "payment": "0",
+    "refundReceiver": {
+      "value": "0x0000000000000000000000000000000000000000",
+      "name": null,
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+    },
+    "safeTxHash": "0xafd58598ec10f89395d57c4d914480e50a568416e3226bc4d1853fae06697929",
+    "executor": {
+      "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+      "name": null,
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xC16Db0251654C0a72E91B190d81eAD367d2C6fED.png"
+    },
+    "signers": [
+      {
+        "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+        "name": null,
+        "logoUri": null
+      }
+    ],
+    "confirmationsRequired": 1,
+    "confirmations": [
+      {
+        "signer": {
+          "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+          "name": null,
+          "logoUri": null
+        },
+        "signature": "0x000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed000000000000000000000000000000000000000000000000000000000000000001",
+        "submittedAt": 1701344808000
+      }
+    ],
+    "rejectors": [],
+    "gasTokenInfo": null,
+    "trusted": true,
+    "proposer": {
+      "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+      "name": null,
+      "logoUri": null
+    },
+    "proposedByDelegate": null
+  },
+  "safeAppInfo": null,
+  "note": null
+}
