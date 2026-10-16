@@ -801,6 +801,31 @@ describe('Policies', () => {
       expect(onUpgrade).not.toHaveBeenCalled()
     })
 
+    it('should, when the plan does not include the recipient allowlist, disable it in the add policy dialog', async () => {
+      mockIsAllowlistAvailable = true
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
+
+      expect(screen.getByTestId('add-policy-option-recipient-allowlist')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when the plan does not include the recipient allowlist, lead its catalogue tile to the upgrade', async () => {
+      mockIsAllowlistAvailable = true
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-recipient-allowlist')).getByRole('button'))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
+    })
+
     it('should, when a policy the plan includes is picked in the add policy dialog, open its intro dialog', async () => {
       const onUpgrade = jest.fn()
       const { user } = renderWithUserEvent(
