@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import NextLink from 'next/link'
-import { Controller, useFormContext } from 'react-hook-form'
+import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import { FieldDescription, FieldError } from '@safe-global/views/components/ui/field'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
   InputGroup,
@@ -47,6 +48,7 @@ const TenderlySection = ({
     formState: { errors },
   } = useFormContext<EnvVariablesFormData>()
   const { hasProFeatures, spaceId } = useSafeProAccess()
+  const hasAccessToken = Boolean(useWatch({ control, name: EnvVariablesField.tenderlyToken }))
   const [isTokenVisible, setIsTokenVisible] = useState(false)
   const tokenVisibilityLabel = isTokenVisible ? 'Hide access token' : 'Show access token'
   const urlError = errors[EnvVariablesField.tenderlyURL]
@@ -199,6 +201,30 @@ const TenderlySection = ({
             )}
           />
         </div>
+
+        <Controller
+          name={EnvVariablesField.tenderlyPublicSharing}
+          control={control}
+          render={({ field }) => (
+            <Field orientation="horizontal" data-disabled={!hasAccessToken || undefined}>
+              <Checkbox
+                id={EnvVariablesField.tenderlyPublicSharing}
+                checked={field.value ?? false}
+                onCheckedChange={field.onChange}
+                disabled={!hasAccessToken}
+              />
+              <FieldContent>
+                <FieldLabel htmlFor={EnvVariablesField.tenderlyPublicSharing}>
+                  Make simulations publicly shareable
+                </FieldLabel>
+                <FieldDescription>
+                  Requires a Tenderly access token. Simulations will be shared via a public Tenderly link that works
+                  without logging in. Anyone with the link can view them.
+                </FieldDescription>
+              </FieldContent>
+            </Field>
+          )}
+        />
       </div>
     </>
   )
