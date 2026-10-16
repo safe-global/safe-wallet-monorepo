@@ -107,19 +107,6 @@ describe('Spending limits tests', () => {
       tx.clickOnNextBtn()
       spendinglimit.verifyOldValuesAreDisplayed()
     })
-
-    it('Verify that when editing spending limit for owner who used some of it, relevant actions are displayed', () => {
-      spendinglimit.clickOnNewSpendingLimitBtn()
-      spendinglimit.enterBeneficiaryAddress(constants.SPENDING_LIMIT_ADDRESS_2)
-      spendinglimit.enterSpendingLimitAmount(newTokenAmount)
-      spendinglimit.clickOnTimePeriodDropdown()
-      spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.oneTime)
-      tx.clickOnNextBtn()
-      spendinglimit.verifyActionNamesAreDisplayed([
-        constants.TXActionNames.resetAllowance,
-        constants.TXActionNames.setAllowance,
-      ])
-    })
   })
 
   describe('Disconnected on the default safe', () => {

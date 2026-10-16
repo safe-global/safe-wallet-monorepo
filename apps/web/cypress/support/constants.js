@@ -20,8 +20,6 @@ export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
 export const SAFE_APP_ADDRESS_2 = '0x49d4450977E2c95362C13D3a31a09311E0Ea26A6'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
 export { defaultOwnerAddress } from './credentials.js'
-// Below is also used in sidebar tests as a beneficiary
-export const SPENDING_LIMIT_ADDRESS_2 = '0x52835f11E348605E9D791Ec09380a3224526d538'
 // AllowanceModule contract addresses — keyed by contract version, not by network
 export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
 export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
@@ -157,10 +155,6 @@ export const safeContractVersions = {
 
 export const commonThresholds = {
   oneOfOne: '1 out of 1 signer',
-}
-export const TXActionNames = {
-  resetAllowance: 'resetAllowance',
-  setAllowance: 'setAllowance',
 }
 
 export const networkKeys = {

@@ -30,11 +30,6 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
       owner.waitForConnectionStatus()
     })
 
-    it('Verify the Add batch button is present in a transaction form', () => {
-      //The "true" is to validate that the add to batch button is not visible if "Yes, execute" is selected
-      batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
-    })
-
     it('Verify a second transaction can be added to the batch', () => {
       batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
       batch.verifyBatchIconCount(1)
