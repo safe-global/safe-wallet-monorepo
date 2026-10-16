@@ -105,6 +105,8 @@ This applies to new code; do not refactor existing code into this shape unless t
 
 This is a default, not a gate: if splitting would make the change larger or worse, keep it together and say why in the PR description.
 
+Before every commit that touches UI, run `node scripts/design-check/index.cjs --base <the commit your branch starts from>`, whoever the change is for. It marks each changed `apps/web` file that changes behaviour (hooks, state, conditions, data, handlers). For each marked file where you also added markup, class names or copy, move that UI into a view in `packages/views`, or say in the PR description why it stays. The check never blocks a commit or a PR.
+
 ## Testing Requirements
 
 Every behavioral change must include tests — each platform's file defines the exact matrix and exemptions (see the Test Decision Matrix in [apps/web/AGENTS.md](apps/web/AGENTS.md) for web). Suggest developer-owned tests (unit / component / integration) before reaching for QA automation — the full rule lives in the Web Testing section of [apps/web/AGENTS.md](apps/web/AGENTS.md). Before writing or changing any test, read the cross-cutting conventions in [docs/ai/testing-conventions.md](docs/ai/testing-conventions.md); web templates and mock patterns: [apps/web/docs/TESTING.md](apps/web/docs/TESTING.md).
