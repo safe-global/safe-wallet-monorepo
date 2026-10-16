@@ -56,4 +56,9 @@ export class TxQueuePage {
     await this.deleteChoice.click()
     await this.confirmDeleteButton.click()
   }
+
+  /** Confirm the queued transaction at `nonce` from its queue row; its review opens */
+  async confirm(nonce: number): Promise<void> {
+    await this.transactionWithNonce(nonce).getByRole('button', { name: 'Confirm' }).click()
+  }
 }
