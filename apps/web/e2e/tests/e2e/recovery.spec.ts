@@ -63,4 +63,31 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     await expect(recovery.setupButton).toBeVisible()
     await expect(recovery.recoverers).toBeHidden()
   })
+
+  test('should set the new cooldown on the Delay modifier when an owner changes the review window', async ({
+    safePage,
+    journey,
+  }, testInfo) => {
+    const safe = await seedSafe(journey, { threshold: 1 })
+    const { delayModifier } = await seedRecovery(safe, {
+      recoverer: Wallet.createRandom().address,
+      cooldownSeconds: 2 * DAY_IN_SECONDS,
+    })
+    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
+
+    const recovery = new RecoveryPage(safePage)
+    const review = new TxReviewPage(safePage)
+    await recovery.gotoSettings(safe.prefixedAddress)
+    await recovery.changeDelay('7 days')
+    await review.sign()
+    await review.execute()
+    await review.waitForExecution()
+
+    await expect
+      .poll(async () => (await readDelayModifier(journey.env, delayModifier)).cooldownSeconds)
+      .toBe(7 * DAY_IN_SECONDS)
+
+    await recovery.gotoSettings(safe.prefixedAddress)
+    await expect(recovery.recoverers).toContainText('7 days')
+  })
 })
