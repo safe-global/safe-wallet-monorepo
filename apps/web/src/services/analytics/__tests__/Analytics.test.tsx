@@ -1,20 +1,33 @@
 import { render } from '@/tests/test-utils'
+import { CookieAndTermType, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
+import { version } from '@/markdown/terms/version'
 import Analytics from '../Analytics'
 
 describe('Analytics', () => {
-  it('should, when mounted, inject a GA consent default that denies analytics storage before the GA config', () => {
+  beforeAll(() => {
     // jsdom has no performance.mark, which GoogleAnalytics calls on mount
     Object.defineProperty(window.performance, 'mark', { value: jest.fn(), configurable: true })
+  })
 
-    render(<Analytics />)
+  it('should, when the user has not given analytics consent, not load Google Analytics', () => {
+    document.getElementById('_next-ga-init')?.remove()
 
-    const consentScript = document.getElementById('ga-consent-default')
-    const gaInitScript = document.getElementById('_next-ga-init')
+    render(<Analytics />, {
+      initialReduxState: {
+        cookies_terms: { ...cookiesAndTermsInitialState, [CookieAndTermType.ANALYTICS]: false, termsVersion: version },
+      },
+    })
 
-    expect(consentScript).not.toBeNull()
-    expect(gaInitScript).not.toBeNull()
-    expect(consentScript!.compareDocumentPosition(gaInitScript!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(consentScript!.innerHTML).toContain("gtag('consent', 'default'")
-    expect(consentScript!.innerHTML).toContain("analytics_storage: 'denied'")
+    expect(document.getElementById('_next-ga-init')).toBeNull()
+  })
+
+  it('should, when the user has given analytics consent, load Google Analytics', () => {
+    render(<Analytics />, {
+      initialReduxState: {
+        cookies_terms: { ...cookiesAndTermsInitialState, [CookieAndTermType.ANALYTICS]: true, termsVersion: version },
+      },
+    })
+
+    expect(document.getElementById('_next-ga-init')).not.toBeNull()
   })
 })
