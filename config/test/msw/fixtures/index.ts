@@ -148,6 +148,16 @@ export const safeAppsFixtures = {
 }
 
 /**
+ * SEP_STATIC_SAFE_7 on Sepolia, the Safe whose history the transaction fixtures record
+ */
+export const TX_HISTORY_SAFE = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+  shortName: 'sep',
+  version: '1.3.0',
+} as const
+
+/**
  * Transaction history of SEP_STATIC_SAFE_7 on Sepolia, with the details of selected rows
  */
 export const transactionFixtures = {

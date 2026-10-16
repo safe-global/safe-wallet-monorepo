@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { transactionFixtures } from '@safe-global/test/msw/fixtures'
+import { TX_HISTORY_SAFE, transactionFixtures } from '@safe-global/test/msw/fixtures'
 import { createTransactionHandlersFromFixture } from '@safe-global/test/msw/handlers/fromFixtures'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
@@ -13,6 +13,16 @@ const setup = createMockStory({
   wallet: 'owner',
   layout: 'paper',
   pathname: AppRoutes.transactions.history,
+  query: { safe: `${TX_HISTORY_SAFE.shortName}:${TX_HISTORY_SAFE.address}` },
+  store: {
+    safeInfo: {
+      data: {
+        address: { value: TX_HISTORY_SAFE.address },
+        chainId: TX_HISTORY_SAFE.chainId,
+        version: TX_HISTORY_SAFE.version,
+      },
+    },
+  },
 })
 
 const meta = {

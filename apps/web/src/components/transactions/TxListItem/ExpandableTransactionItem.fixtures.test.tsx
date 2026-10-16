@@ -1,5 +1,5 @@
 import type { TransactionDetails, TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { transactionFixtures } from '@safe-global/test/msw/fixtures'
+import { TX_HISTORY_SAFE, transactionFixtures } from '@safe-global/test/msw/fixtures'
 import { createTransactionHandlersFromFixture } from '@safe-global/test/msw/handlers/fromFixtures'
 import { userEvent } from '@testing-library/user-event'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -15,9 +15,6 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-const HISTORY_SAFE_ADDRESS = '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb'
-const SEPOLIA_CHAIN_ID = '11155111'
-const HISTORY_SAFE_VERSION = '1.3.0'
 const STATUS_SUCCESS = 'Success'
 const REQUIRED_CONFIRMATIONS_TITLE = 'Required confirmations for new transactions'
 
@@ -98,12 +95,19 @@ const findHistoryItem = (txId: string): TransactionItem => {
 }
 
 const historySafe = extendedSafeInfoBuilder()
-  .with({ address: { value: HISTORY_SAFE_ADDRESS }, chainId: SEPOLIA_CHAIN_ID, version: HISTORY_SAFE_VERSION })
+  .with({
+    address: { value: TX_HISTORY_SAFE.address },
+    chainId: TX_HISTORY_SAFE.chainId,
+    version: TX_HISTORY_SAFE.version,
+  })
   .build()
 
 const renderHistoryItem = (item: TransactionItem, txDetails?: TransactionDetails) =>
   render(<ExpandableTransactionItem item={item} txDetails={txDetails} />, {
-    routerProps: { pathname: AppRoutes.transactions.history, query: { safe: `sep:${HISTORY_SAFE_ADDRESS}` } },
+    routerProps: {
+      pathname: AppRoutes.transactions.history,
+      query: { safe: `${TX_HISTORY_SAFE.shortName}:${TX_HISTORY_SAFE.address}` },
+    },
     initialReduxState: { safeInfo: { data: historySafe, loading: false, loaded: true } },
   })
 
