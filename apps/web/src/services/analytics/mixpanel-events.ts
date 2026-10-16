@@ -109,6 +109,8 @@ export enum MixpanelEvent {
   FREE_ACCESS_REMINDER_VIEWED = 'Free Access Reminder Viewed',
   WORKSPACE_LOCKED_VIEWED = 'Workspace Locked Viewed',
   UPGRADE_PROMPT_VIEWED = 'Upgrade Prompt Viewed',
+  WC_SAFE_APP_SUGGESTED = 'WC Safe App Suggested',
+  WC_SAFE_APP_SUGGESTION_RESULT = 'WC Safe App Suggestion Result',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -279,6 +281,8 @@ export enum MixpanelEventParams {
   SPONSORED_QUOTA = 'Sponsored Quota',
   DEFAULT_SEATS = 'Default Seats',
   DEFAULT_BILLING_PERIOD = 'Default Billing Period',
+  SAFE_APP_AVAILABLE = 'Safe App Available',
+  SUGGESTION_DISMISSED = 'Suggestion Dismissed',
 }
 
 export enum AuthLoginMethod {
@@ -290,6 +294,7 @@ export enum AuthLoginMethod {
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
+  WC_PROPOSAL = 'WalletConnect Proposal',
 }
 
 export const ADDRESS_PROPERTIES = new Set([
