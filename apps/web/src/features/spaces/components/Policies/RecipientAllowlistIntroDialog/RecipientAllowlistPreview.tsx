@@ -9,7 +9,7 @@ const ALLOWED_RECIPIENTS = [
   '0x7a219e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b4412',
   '0x1f8e2a3b4c5d6e7f8091a2b3c4d5e6f708195517',
 ]
-const BLOCKED_RECIPIENT = '0x6D0a9f2c71b8e04d6a3c5b17e92f08d4c6a13e58'
+const BLOCKED_RECIPIENT = '0x6d0a9f2c71b8e04d6a3c5b17e92f08d4c6a13e58'
 
 const PreviewRow = ({ address, isBlocked = false }: { address: string; isBlocked?: boolean }): ReactElement => (
   <div className="flex items-center gap-2 rounded-md bg-muted p-2">

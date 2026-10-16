@@ -36,6 +36,13 @@ describe('RecipientAllowlistIntroDialog', () => {
     expect(screen.getByText('Allowed recipients')).toBeInTheDocument()
   })
 
+  it('renders an identicon, not a loading placeholder, for every previewed recipient', () => {
+    render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
+
+    const preview = screen.getByTestId('recipient-allowlist-preview')
+    expect(preview.querySelector('[data-slot="skeleton"]')).toBeNull()
+  })
+
   it('links the title icon to the policies article', () => {
     render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
 
