@@ -868,6 +868,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
+    spaceAuditLog: features.spaceAuditLog ?? false,
   }
 
   // Build handlers array

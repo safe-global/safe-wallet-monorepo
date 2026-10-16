@@ -4,6 +4,7 @@ import { TX_HISTORY_SAFE, transactionFixtures } from '@safe-global/test/msw/fixt
 import { createTransactionHandlersFromFixture } from '@safe-global/test/msw/handlers/fromFixtures'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
+import { userEvent, within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from './ExpandableTransactionItem'
@@ -61,6 +62,13 @@ export const OnChainRejectionExpanded = expandedOf(details.onChainRejection)
 
 export const Batch = summaryOf(details.batch)
 export const BatchExpanded = expandedOf(details.batch)
+
+export const BatchActionsExpanded: Story = {
+  ...expandedOf(details.batch),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(await within(canvasElement).findByTestId('expande-all-btn'))
+  },
+}
 
 export const AddOwner = summaryOf(details.addOwner)
 export const AddOwnerExpanded = expandedOf(details.addOwner)

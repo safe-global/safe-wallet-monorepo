@@ -47,6 +47,8 @@ export interface FeatureFlags {
   safePro?: boolean
   /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
   workspacesExperimentalFeatures?: boolean
+  /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
+  spaceAuditLog?: boolean
 }
 
 /**
