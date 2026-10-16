@@ -6,19 +6,33 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@safe-global/views/components/ui/table'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import type { BulkBatch } from '../../services/queue'
+import type { RowSecondaryAction } from '../../services/model'
 import type { Persona, Proposal } from '../../types'
 import { SafeIdentity, STATUS_META, type GroupBy } from '../shared'
 import { QueueRow } from './QueueRow'
 import { getColumns, type QueueSectionData } from './sections'
 
-const columnWidths = (isWide: boolean): Record<string, string | undefined> => ({
-  Type: isWide ? 'w-56' : 'w-44',
-  Safe: isWide ? 'w-[18%]' : 'w-[22%]',
-  Network: 'w-16',
-  Signatures: isWide ? 'w-40' : 'w-24',
-  Note: 'w-16',
-  Action: 'w-24',
-})
+// Action has no width so it takes the slack and right-aligns its buttons.
+const columnWidths = (isWide: boolean): Record<string, string | undefined> =>
+  isWide
+    ? {
+        Type: 'w-64',
+        Nonce: 'w-16',
+        Safe: 'w-52',
+        Network: 'w-20',
+        Signatures: 'w-24',
+        Note: 'w-16',
+        Status: 'w-44',
+        Proposed: 'w-24',
+      }
+    : {
+        Type: 'w-44',
+        Nonce: 'w-12',
+        Safe: 'w-40',
+        Signatures: 'w-20',
+        Status: 'w-36',
+        Proposed: 'w-20',
+      }
 
 export type QueueSectionProps = {
   section: QueueSectionData
@@ -32,10 +46,12 @@ export type QueueSectionProps = {
   onBulkExecute: (accountId: string) => void
   onGroupByChange: (groupBy: GroupBy) => void
   reviewId?: string
+  cursorId?: string
   bulkHover: string[]
   replaceHover: string | null
   onReplaceHover: (id: string | null) => void
   onReview: (tx: Proposal) => void
+  onSecondaryAction: (tx: Proposal, action: RowSecondaryAction) => void
 }
 
 function SectionHeader({
@@ -115,10 +131,12 @@ export function QueueSection({
   onBulkExecute,
   onGroupByChange,
   reviewId,
+  cursorId,
   bulkHover,
   replaceHover,
   onReplaceHover,
   onReview,
+  onSecondaryAction,
 }: QueueSectionProps) {
   const grouped = groupBy !== 'none'
   const columns = getColumns(groupBy, isWide)
@@ -141,7 +159,7 @@ export function QueueSection({
               <Table
                 aria-label={grouped ? `${section.label} transactions` : 'Pending transactions'}
                 variant="panel"
-                className="table-fixed max-md:min-w-[900px]"
+                className="table-fixed min-w-[920px]"
               >
                 <colgroup>
                   {columns.map((label) => (
@@ -204,10 +222,12 @@ export function QueueSection({
                       isWide={isWide}
                       columnCount={columns.length}
                       selected={reviewId === tx.id}
+                      cursor={cursorId === tx.id}
                       highlighted={bulkHover.includes(tx.id)}
                       replaceHover={replaceHover}
                       onReplaceHover={onReplaceHover}
                       onReview={onReview}
+                      onSecondaryAction={onSecondaryAction}
                     />
                   ))}
                   {!section.items.length && (

@@ -65,10 +65,12 @@ export function buildSections({
 
 export const getColumns = (groupBy: GroupBy, isWide: boolean) => [
   'Type',
+  'Nonce',
   ...(groupBy !== 'safe' ? ['Safe'] : []),
   ...(groupBy !== 'safe' && isWide ? ['Network'] : []),
   'Signatures',
   ...(isWide ? ['Note'] : []),
   'Status',
+  'Proposed',
   'Action',
 ]

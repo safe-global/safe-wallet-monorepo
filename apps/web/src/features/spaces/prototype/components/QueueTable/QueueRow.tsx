@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { ListFilter, StickyNote, TriangleAlert } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
@@ -16,6 +16,7 @@ import {
   getCreatedAt,
   getOutstandingSigners,
   getRowAction,
+  getSecondaryActions,
   getSignatureCount,
   getSignerSummary,
   getState,
@@ -25,8 +26,10 @@ import {
   getTypeLabel,
   getWarnings,
   WARNING_LABELS,
+  type RowSecondaryAction,
 } from '../../services/model'
 import type { Persona, Proposal } from '../../types'
+import { SignatureGauge } from './SignatureGauge'
 import { chainLogoUrl, SafeIdentity, TYPE_ICONS, type GroupBy } from '../shared'
 
 export type QueueRowProps = {
@@ -38,11 +41,15 @@ export type QueueRowProps = {
   isWide: boolean
   columnCount: number
   selected: boolean
+  cursor: boolean
   highlighted: boolean
   replaceHover: string | null
   onReplaceHover: (id: string | null) => void
   onReview: (tx: Proposal) => void
+  onSecondaryAction: (tx: Proposal, action: RowSecondaryAction) => void
 }
+
+const SECONDARY_ACTIONS: Record<RowSecondaryAction, string> = { replace: 'Replace', reject: 'Reject' }
 
 export function QueueRow({
   tx,
@@ -53,11 +60,14 @@ export function QueueRow({
   isWide,
   columnCount,
   selected,
+  cursor,
   highlighted,
   replaceHover,
   onReplaceHover,
   onReview,
+  onSecondaryAction,
 }: QueueRowProps) {
+  const [hovered, setHovered] = useState(false)
   const state = getState(tx, persona)
   const conflicts = getConflicts(tx, items)
   const sameNonce = (other: Proposal) => other.account === tx.account && other.nonce === tx.nonce
@@ -119,9 +129,7 @@ export function QueueRow({
               >
                 <ListFilter className="size-3" />
               </span>
-              <span className="font-medium">
-                Nonce #{tx.nonce} · {conflicts.length + 1} competing proposals
-              </span>
+              <span className="font-medium">{conflicts.length + 1} competing proposals</span>
               <span className="text-muted-foreground">Executing one replaces the others.</span>
               <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} className="text-muted-foreground" noIcon>
                 Why did this happen?
@@ -132,9 +140,12 @@ export function QueueRow({
       )}
       <TableRow
         data-state={selected ? 'selected' : undefined}
+        data-cursor={cursor || undefined}
         data-conflict-group={groupSize > 1 || undefined}
         onClick={() => onReview(tx)}
-        className={`group/transaction relative h-14 cursor-pointer data-[state=selected]:bg-transparent [&:focus-within>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted ? '[&>td]:bg-muted' : ''}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={`group/transaction relative h-14 cursor-pointer data-[state=selected]:bg-transparent [&:focus-within>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted || cursor ? '[&>td]:bg-muted' : ''}`}
       >
         <TableCell
           className={`py-2 max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card ${groupSize > 1 ? 'shadow-[inset_2px_0_0_var(--warning-accent)]' : ''}`}
@@ -165,6 +176,9 @@ export function QueueRow({
             {!isWide && noteButton}
           </div>
         </TableCell>
+        <TableCell className="text-xs tabular-nums text-muted-foreground" aria-label={`Nonce ${tx.nonce}`}>
+          #{tx.nonce}
+        </TableCell>
         {groupBy !== 'safe' && (
           <TableCell className="text-xs">
             <SafeIdentity address={account.iconAddress} size={24} className="flex min-w-0 items-center gap-2">
@@ -193,15 +207,13 @@ export function QueueRow({
           <Tooltip delay={150}>
             <TooltipTrigger
               aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
-              className="max-w-full text-left text-xs tabular-nums"
+              className="text-xs tabular-nums"
               onClick={(event) => event.stopPropagation()}
             >
-              <span className="block">
+              <span className="flex items-center gap-1.5">
+                <SignatureGauge count={signatureCount} threshold={account.threshold} />
                 {signatureCount}/{account.threshold}
               </span>
-              {isWide && (
-                <span className="block max-w-36 truncate text-muted-foreground">{getSignerSummary(tx, persona)}</span>
-              )}
             </TooltipTrigger>
             <TooltipContent>
               <div className="space-y-1">
@@ -226,47 +238,48 @@ export function QueueRow({
             {conflicts.length > 0 && groupSize < 2 && (
               <Badge variant="warning">{conflicts.length + 1} competing proposals</Badge>
             )}
-            <Badge
-              variant="outline"
-              size="default"
-              shape="pill"
-              className="tabular-nums"
-              aria-label={`Nonce ${tx.nonce}`}
-            >
-              #{tx.nonce}
-            </Badge>
-            <Tooltip delay={150}>
-              <TooltipTrigger
-                render={
-                  <Badge
-                    variant="outline"
-                    size="default"
-                    shape="pill"
-                    className="text-muted-foreground"
-                    aria-label={`Proposed ${tx.age}`}
-                  >
-                    {tx.age}
-                  </Badge>
-                }
-              />
-              <TooltipContent>{formatDateTime(getCreatedAt(tx))}</TooltipContent>
-            </Tooltip>
           </div>
         </TableCell>
-        <TableCell className="text-right">
-          <Button
-            size="2xs"
-            variant="outline"
-            className="w-18"
-            aria-label={`${rowAction} ${getTransactionLabel(tx)}`}
-            onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
-            onMouseLeave={() => onReplaceHover(null)}
-            onFocus={() => conflicts.length && onReplaceHover(tx.id)}
-            onBlur={() => onReplaceHover(null)}
-            onClick={review}
-          >
-            {rowAction}
-          </Button>
+        <TableCell className="text-xs text-muted-foreground">
+          <Tooltip delay={150}>
+            <TooltipTrigger aria-label={`Proposed ${tx.age}`} onClick={(event) => event.stopPropagation()}>
+              {tx.age}
+            </TooltipTrigger>
+            <TooltipContent>{formatDateTime(getCreatedAt(tx))}</TooltipContent>
+          </Tooltip>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center justify-end gap-1">
+            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/transaction:opacity-100 group-focus-within/transaction:opacity-100 [@media(hover:none)]:opacity-100">
+              {getSecondaryActions(tx, persona).map((action) => (
+                <Button
+                  key={action}
+                  size="2xs"
+                  variant="outline"
+                  aria-label={`${SECONDARY_ACTIONS[action]} ${getTransactionLabel(tx)}`}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onSecondaryAction(tx, action)
+                  }}
+                >
+                  {SECONDARY_ACTIONS[action]}
+                </Button>
+              ))}
+            </div>
+            <Button
+              size="2xs"
+              variant={hovered ? 'default' : 'outline'}
+              className="w-18"
+              aria-label={`${rowAction} ${getTransactionLabel(tx)}`}
+              onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
+              onMouseLeave={() => onReplaceHover(null)}
+              onFocus={() => conflicts.length && onReplaceHover(tx.id)}
+              onBlur={() => onReplaceHover(null)}
+              onClick={review}
+            >
+              {rowAction}
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
     </Fragment>

@@ -93,7 +93,7 @@ describe('prototype queue state', () => {
     const swap = getScenario('conflict').find((tx) => tx.id === 'treasury-42-swap')!
     expect([getTransactionLabel(proposal('treasury-42')), getAmountLabel(proposal('treasury-42'))]).toEqual([
       'Send to Bitwave Payroll',
-      '48.5 ETH',
+      '48.5 ETH · $155,200',
     ])
     expect(getTransactionLabel(proposal('treasury-42'), true)).toBe('Sent to Bitwave Payroll')
     expect([getTransactionLabel(proposal('payroll-17')), getAmountLabel(proposal('payroll-17'))]).toEqual([
@@ -126,7 +126,7 @@ describe('prototype queue state', () => {
       ['payroll-19', 'Batch', 'Batch · 2 actions', '2 actions', []],
       ['payroll-20', 'Nested', 'Approve #44 on Treasury Main', 'Approves #44 on Treasury Main', []],
       ['grants-9', 'Swap', 'Swap ARB → USDC', '10,000 ARB → 7,950 USDC · Limit', ['expired']],
-      ['grants-10', 'Send', 'Send to this Safe', '0.1 ETH · to this Safe', ['toSelf']],
+      ['grants-10', 'Send', 'Send to this Safe', '0.1 ETH · $320 · to this Safe', ['toSelf']],
     ])('labels %s as %s', (id, type, label, line, warnings) => {
       const tx = real(id)
       expect([getTypeLabel(tx), getTransactionLabel(tx), getAmountLabel(tx), getWarnings(tx)]).toEqual([

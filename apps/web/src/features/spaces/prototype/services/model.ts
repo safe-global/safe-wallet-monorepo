@@ -98,6 +98,7 @@ const proposals: Proposal[] = [
     nonce: 42,
     recipient: 'Bitwave Payroll · 0x1c9f…77aa',
     amount: '48.5 ETH',
+    fiat: '$155,200',
     kind: { type: 'transfer' },
     age: '3d ago',
     signers: ['Ana', 'Max'],
@@ -149,6 +150,7 @@ const proposals: Proposal[] = [
     nonce: 8,
     recipient: 'Atlas Labs · 0x55c1…e3f0',
     amount: '25,000 ARB',
+    fiat: '$20,000',
     kind: { type: 'transfer' },
     age: '4d ago',
     signers: ['Jonas'],
@@ -196,6 +198,7 @@ const realisticProposals: Proposal[] = [
     nonce: 47,
     recipient: 'Kraken deposit · 0x2910…54fa',
     amount: '10 ETH',
+    fiat: '$32,000',
     kind: { type: 'transfer' },
     age: '1h ago',
     signers: ['Ana', 'Max'],
@@ -207,6 +210,7 @@ const realisticProposals: Proposal[] = [
     nonce: 47,
     recipient: 'Kraken deposit · 0x2910…54fa',
     amount: '1 ETH',
+    fiat: '$3,200',
     kind: { type: 'transfer' },
     age: '40m ago',
     signers: ['Lena'],
@@ -276,6 +280,7 @@ const realisticProposals: Proposal[] = [
     nonce: 10,
     recipient: 'Grants · 0xAb58…eC9B',
     amount: '0.1 ETH',
+    fiat: '$320',
     kind: { type: 'transfer', toSelf: true },
     age: '1d ago',
     signers: ['Ana'],
@@ -287,6 +292,7 @@ const realisticProposals: Proposal[] = [
     nonce: 11,
     recipient: 'Atlas Labs · 0x55c1…e3f0',
     amount: '5,000 ARB',
+    fiat: '$4,000',
     kind: { type: 'transfer' },
     age: '15m ago',
     signers: [],
@@ -425,6 +431,9 @@ export const getRowAction = (tx: Proposal, persona: Persona) => {
   if (state.canSign) return 'Sign'
   return 'Review'
 }
+export type RowSecondaryAction = 'replace' | 'reject'
+export const getSecondaryActions = (tx: Proposal, persona: Persona): RowSecondaryAction[] =>
+  persona === 'owner' && getAccount(tx).owners.includes('Dev') ? ['replace', 'reject'] : []
 export const getStatusLabel = (tx: Proposal, persona: Persona) => {
   const state = getState(tx, persona)
   if (state.ready) return 'Ready to execute'
@@ -545,7 +554,7 @@ export const getAmountLabel = (tx: Proposal) => {
     case 'settings':
       return describeChangeShort(kind.change, getAccount(tx).threshold)
     case 'batch':
-      return tx.amount ? `${kind.actions.length} actions · ${tx.amount}` : `${kind.actions.length} actions`
+      return [`${kind.actions.length} actions`, tx.amount, tx.fiat].filter(Boolean).join(' · ')
     case 'contract':
       return `${kind.method} · ${kind.contract}`
     case 'swap':
@@ -555,7 +564,7 @@ export const getAmountLabel = (tx: Proposal) => {
     case 'nested':
       return `Approves #${kind.parentNonce} on ${kind.parentSafe}`
     case 'transfer':
-      return kind.toSelf ? `${tx.amount} · to this Safe` : tx.amount
+      return [tx.amount, tx.fiat, kind.toSelf && 'to this Safe'].filter(Boolean).join(' · ')
   }
 }
 export type Warning = 'delegateCall' | 'unverifiedContract' | 'unknownNetwork' | 'expired' | 'policyChange' | 'toSelf'

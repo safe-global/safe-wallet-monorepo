@@ -37,6 +37,8 @@ export type Proposal = {
   nonce: number
   recipient: string
   amount: string
+  // Left out where the token already reads as dollars.
+  fiat?: string
   age: string
   signers: string[]
   eligible: boolean

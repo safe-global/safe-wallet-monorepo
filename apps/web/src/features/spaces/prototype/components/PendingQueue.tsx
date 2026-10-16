@@ -23,9 +23,16 @@ import {
 } from '@safe-global/views/components/ui/empty'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import { accounts as fixtureAccounts, getAccount, getTransactionLabel, getTypeLabel } from '../services/model'
+import {
+  accounts as fixtureAccounts,
+  getAccount,
+  getTransactionLabel,
+  getTypeLabel,
+  type RowSecondaryAction,
+} from '../services/model'
 import {
   applyPreviewAction,
   createPreviewQueue,
@@ -81,6 +88,7 @@ function PendingQueueView() {
   const toggleCommenting = () => setCommenting(!commenting)
 
   const [review, setReview] = useState<Proposal | null>(null)
+  const [cursorId, setCursorId] = useState<string | null>(null)
   const [reviewSections, setReviewSections] = useState<string[]>([])
   const [signersOpen, setSignersOpen] = useState(true)
   const [reject, setReject] = useState(false)
@@ -111,7 +119,15 @@ function PendingQueueView() {
       setSignersOpen(true)
     }
     setFeedback('')
+    setCursorId(tx.id)
     setReview(tx)
+  }
+
+  const runSecondaryAction = (tx: Proposal, action: RowSecondaryAction) => {
+    reviewTx(tx)
+    setReject(true)
+    setReviewSections(['cancel'])
+    if (action === 'replace') setReplacement({ recipient: tx.recipient, amount: tx.amount })
   }
 
   const performAction = (action: PreviewAction) => {
@@ -182,9 +198,24 @@ function PendingQueueView() {
         setCommenting(true)
         return
       }
-      if (command || event.altKey || !review || commenting) return
-      if (event.key === 'j') stepReview(1)
-      if (event.key === 'k') stepReview(-1)
+      if (command || event.altKey || commenting || bulkScope !== null) return
+      const offset = event.key === 'j' ? 1 : event.key === 'k' ? -1 : 0
+      if (review) {
+        if (offset) stepReview(offset)
+        return
+      }
+      const cursorIndex = reviewOrder.findIndex((tx) => tx.id === cursorId)
+      if (offset) {
+        const next = cursorIndex < 0 ? reviewOrder[0] : reviewOrder[cursorIndex + offset]
+        if (next) setCursorId(next.id)
+      }
+      // Enter on a focused button already opens its own target.
+      if (
+        event.key === 'Enter' &&
+        cursorIndex >= 0 &&
+        !(event.target instanceof Element && event.target.closest('button, a'))
+      )
+        reviewTx(reviewOrder[cursorIndex])
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
@@ -202,6 +233,10 @@ function PendingQueueView() {
   useEffect(() => {
     document.querySelector('tr[data-state="selected"]')?.scrollIntoView?.({ block: 'nearest' })
   }, [review?.id])
+
+  useEffect(() => {
+    if (!review) document.querySelector('tr[data-cursor]')?.scrollIntoView?.({ block: 'nearest' })
+  }, [cursorId, review])
 
   return (
     <div className="min-h-screen bg-secondary text-foreground">
@@ -352,17 +387,27 @@ function PendingQueueView() {
                       onBulkExecute={setBulkScope}
                       onGroupByChange={setGroupBy}
                       reviewId={review?.id}
+                      cursorId={review ? undefined : (cursorId ?? undefined)}
                       bulkHover={bulkHover}
                       replaceHover={replaceHover}
                       onReplaceHover={setReplaceHover}
                       onReview={reviewTx}
+                      onSecondaryAction={runSecondaryAction}
                     />
                   ))}
                 </div>
               )}
-              <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-                <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
-                transactions.
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
+                  transactions.
+                </span>
+                {!isMobile && filters.visible.length > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Kbd>J</Kbd>
+                    <Kbd>K</Kbd> to move, <Kbd>Enter</Kbd> to open
+                  </span>
+                )}
               </div>
             </TabsContent>
             <TabsContent value="history">

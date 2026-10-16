@@ -50,11 +50,13 @@ describe('queue design exploration', () => {
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'Type',
+      'Nonce',
       'Safe',
       'Network',
       'Signatures',
       'Note',
       'Status',
+      'Proposed',
       'Action',
     ])
     expect(screen.queryByRole('button', { name: /^(Collapse|Expand) / })).not.toBeInTheDocument()
@@ -283,10 +285,13 @@ describe('queue design exploration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Earlier transactions' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('Send to Bitwave Payroll')
   })
-  it('shows outstanding signers inline on wide screens only and the note as an icon', () => {
+  it('shows signatures as a count with a gauge, keeping outstanding signers in the tooltip, and the note as an icon', () => {
     const { unmount } = render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     const row = () => allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }).closest('tr')!
-    expect(row()).toHaveTextContent('1 more from you, Jonas, Lena')
+    const signatures = () => within(row()).getByRole('button', { name: /^2 of 3 signatures/ })
+    expect(signatures()).toHaveTextContent(/^2\/3$/)
+    expect(signatures().querySelector('svg path')).toBeInTheDocument()
+    expect(row()).not.toHaveTextContent('1 more from')
     expect(row()).not.toHaveTextContent('September contractor payouts')
     expect(within(row()).getByRole('button', { name: 'Note for Send to Bitwave Payroll' })).toBeVisible()
     unmount()
@@ -428,7 +433,7 @@ describe('queue design exploration', () => {
     expect(within(transfer).getByRole('img', { name: 'Send' })).toBeVisible()
     expect(within(swap).getByRole('img', { name: 'Swap' })).toBeVisible()
     expect(within(settings).getByRole('img', { name: 'Update' })).toBeVisible()
-    expect(within(transfer).getByText('48.5 ETH').closest('td')).toContainElement(
+    expect(within(transfer).getByText('48.5 ETH · $155,200').closest('td')).toContainElement(
       within(transfer).getByRole('img', { name: 'Send' }),
     )
     expect(within(swap).getByText('200,000 USDC → 62.4 ETH').closest('td')).toContainElement(
@@ -449,6 +454,37 @@ describe('queue design exploration', () => {
     await user.click(allPending().getByRole('button', { name: 'Open Swap USDC → ETH' }))
     expect(screen.getByRole('dialog').querySelector('svg.lucide-repeat-2')).toBeVisible()
     expect(screen.getByRole('dialog').querySelector('svg.lucide-arrow-up-right')).not.toBeInTheDocument()
+  })
+  it('keeps one primary button per row and opens replace or reject from the hover buttons', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />)
+    const row = allPending().getByRole('button', { name: 'Open Send to Lightbridge Ltd' }).closest('tr')!
+    expect(within(row).getByRole('button', { name: 'Sign Send to Lightbridge Ltd' })).toBeInTheDocument()
+    const replace = within(row).getByRole('button', { name: 'Replace Send to Lightbridge Ltd' })
+    expect(replace.parentElement).toHaveClass('opacity-0', 'group-hover/transaction:opacity-100')
+    const primary = within(row).getByRole('button', { name: 'Sign Send to Lightbridge Ltd' })
+    expect(primary).not.toHaveClass('bg-primary')
+    fireEvent.mouseEnter(row)
+    expect(primary).toHaveClass('bg-primary')
+    fireEvent.mouseLeave(row)
+    expect(primary).not.toHaveClass('bg-primary')
+    expect(replace).toHaveTextContent('Replace')
+    expect(within(row).getByRole('button', { name: 'Reject Send to Lightbridge Ltd' })).toHaveTextContent('Reject')
+    await user.click(replace)
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Lightbridge Ltd')
+    expect(screen.getByRole('button', { name: 'Propose replacement in preview' })).toBeVisible()
+  })
+  it('offers no replace or reject buttons to observers', () => {
+    render(<PendingQueue />, { routerProps: { query: { persona: 'observer' } } })
+    const row = allPending().getByRole('button', { name: 'Open Send to Lightbridge Ltd' }).closest('tr')!
+    expect(within(row).queryByRole('button', { name: /^(Replace|Reject) / })).not.toBeInTheDocument()
+  })
+  it('gives the nonce its own column after the type, keeping the type icon first', () => {
+    render(<PendingQueue />)
+    const row = allPending().getByRole('button', { name: 'Open Send to Lightbridge Ltd' }).closest('tr')!
+    const [type, nonce] = within(row).getAllByRole('cell')
+    expect(type).toContainElement(within(row).getByRole('img', { name: 'Send' }))
+    expect(nonce).toHaveTextContent(/^#44$/)
+    expect(nonce).toHaveAccessibleName('Nonce 44')
   })
   it('shows the action type and nonce with Safe context, hiding the repeated Safe in Safe grouping', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
@@ -521,16 +557,20 @@ describe('queue design exploration', () => {
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'Type',
+      'Nonce',
       'Safe',
       'Signatures',
       'Status',
+      'Proposed',
       'Action',
     ])
     const row = table.getByRole('button', { name: 'Open Send to Bitwave Payroll' }).closest('tr')!
     expect(within(row).getByText('Treasury Main').closest('td')).toHaveTextContent('Ethereum')
     const status = within(row).getByText('Ready to sign').closest('td')!
-    expect(status).toContainElement(within(row).getByLabelText('Nonce 42'))
-    expect(status).toContainElement(within(row).getByLabelText('Proposed 3d ago'))
+    expect(status).not.toHaveTextContent('#42')
+    expect(status).not.toHaveTextContent('3d ago')
+    expect(within(row).getByLabelText('Nonce 42').closest('td')).toHaveTextContent(/^#42$/)
+    expect(within(row).getByLabelText('Proposed 3d ago').closest('td')).toHaveTextContent(/^3d ago$/)
     expect(within(row).getByRole('button', { name: 'Open Send to Bitwave Payroll' }).closest('td')).toContainElement(
       within(row).getByRole('button', { name: 'Note for Send to Bitwave Payroll' }),
     )
@@ -538,7 +578,7 @@ describe('queue design exploration', () => {
   })
   it('gives each status and each Safe its own labelled table, hiding Safe columns when grouped by Safe', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    const statusColumns = ['Type', 'Safe', 'Network', 'Signatures', 'Note', 'Status', 'Action']
+    const statusColumns = ['Type', 'Nonce', 'Safe', 'Network', 'Signatures', 'Note', 'Status', 'Proposed', 'Action']
     expect(screen.getAllByRole('table')).toHaveLength(4)
     for (const table of screen.getAllByRole('table')) {
       expect(
@@ -559,7 +599,7 @@ describe('queue design exploration', () => {
       within(treasury)
         .getAllByRole('columnheader')
         .map((header) => header.textContent),
-    ).toEqual(['Type', 'Signatures', 'Note', 'Status', 'Action'])
+    ).toEqual(['Type', 'Nonce', 'Signatures', 'Note', 'Status', 'Proposed', 'Action'])
     expect(screen.getByRole('button', { name: 'Collapse Treasury Main' }).compareDocumentPosition(treasury)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
@@ -570,11 +610,19 @@ describe('queue design exploration', () => {
     render(<PendingQueue />)
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     const headers = table.getAllByRole('columnheader')
-    expect(headers.map((header) => header.textContent)).toEqual(['Type', 'Safe', 'Signatures', 'Status', 'Action'])
+    expect(headers.map((header) => header.textContent)).toEqual([
+      'Type',
+      'Nonce',
+      'Safe',
+      'Signatures',
+      'Status',
+      'Proposed',
+      'Action',
+    ])
     expect(headers[0]).toHaveClass('max-md:sticky', 'max-md:left-0')
     const title = table.getByRole('button', { name: 'Open Send to Bitwave Payroll' })
     expect(title.closest('td')).toHaveClass('max-md:sticky', 'max-md:left-0', 'max-md:bg-card')
-    expect(within(title.closest('tr')!).getAllByRole('cell')).toHaveLength(5)
+    expect(within(title.closest('tr')!).getAllByRole('cell')).toHaveLength(7)
     fireEvent.click(title.closest('tr')!)
     expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
   })
@@ -624,7 +672,7 @@ describe('queue design exploration', () => {
 
     it('keeps competing proposals together under one conflict sub-header', () => {
       render(<PendingQueue />, heavy())
-      expect(screen.getAllByText('Nonce #42 · 4 competing proposals')).toHaveLength(1)
+      expect(screen.getAllByText('4 competing proposals')).toHaveLength(1)
       expect(screen.getByRole('link', { name: 'Why did this happen?' })).toHaveAttribute('target', '_blank')
       const titles = allPending()
         .getAllByRole('button', { name: /^Open / })
@@ -637,12 +685,12 @@ describe('queue design exploration', () => {
       ]
       const first = titles.indexOf(competing[0])
       expect(titles.slice(first, first + 4).sort()).toEqual([...competing].sort())
-      expect(screen.queryByText('4 competing proposals')).not.toBeInTheDocument()
+      expect(screen.getAllByText('4 competing proposals')).toHaveLength(1)
     })
     it('groups competitors within a status table too', () => {
       render(<PendingQueue />, heavy({ groupBy: 'status' }))
       const ready = within(screen.getByRole('table', { name: 'Ready to execute transactions' }))
-      expect(ready.getByText('Nonce #42 · 4 competing proposals')).toBeVisible()
+      expect(ready.getByText('4 competing proposals')).toBeVisible()
     })
     it('strikes through the proposals an execution would replace', () => {
       render(<PendingQueue />, heavy())
@@ -712,7 +760,7 @@ describe('queue design exploration', () => {
       await user.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
       await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
       const summary = within(screen.getByRole('group', { name: 'Transaction summary' }))
-      expect(dialog().getAllByText('48.5 ETH')).toHaveLength(1)
+      expect(dialog().getAllByText('48.5 ETH · $155,200')).toHaveLength(1)
       expect(summary.getByText('Treasury Main · Ethereum')).toBeVisible()
       expect(summary.getByText('Ready to sign')).toBeVisible()
       expect(summary.getByText('#42')).toBeVisible()
@@ -728,6 +776,19 @@ describe('queue design exploration', () => {
       expect(dialog().getByText(/September contractor payouts/)).toBeVisible()
       expect(dialog().getByText(/Ana Reyes · 6 Oct, 09:15 · Off-chain, not verified/)).toBeVisible()
     })
+    it('moves through the table with J/K and opens the highlighted row with Enter', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      const titles = rowTitles()
+      const cursorRow = () => document.querySelector('tr[data-cursor]')
+      expect(cursorRow()).toBeNull()
+      await user.keyboard('j')
+      expect(within(cursorRow() as HTMLElement).getByRole('button', { name: `Open ${titles[0]}` })).toBeInTheDocument()
+      await user.keyboard('jjk')
+      expect(within(cursorRow() as HTMLElement).getByRole('button', { name: `Open ${titles[1]}` })).toBeInTheDocument()
+      await user.keyboard('{Enter}')
+      expect(screen.getByRole('dialog')).toHaveAccessibleName(titles[1])
+      expect(cursorRow()).toBeNull()
+    })
     it('shows the position only in full screen, next to the drawer controls', async () => {
       const { user } = renderWithUserEvent(<PendingQueue />)
       const titles = rowTitles()
@@ -740,7 +801,7 @@ describe('queue design exploration', () => {
       const { user } = renderWithUserEvent(<PendingQueue />)
       await user.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
       expect(dialog().getByText('Send')).toBeVisible()
-      expect(dialog().getByText('48.5 ETH')).toBeVisible()
+      expect(dialog().getByText('48.5 ETH · $155,200')).toBeVisible()
       expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
       await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
       const summary = within(screen.getByRole('group', { name: 'Transaction summary' }))

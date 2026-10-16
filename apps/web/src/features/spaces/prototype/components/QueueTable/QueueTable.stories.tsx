@@ -51,6 +51,7 @@ function QueueTablePreview({
           replaceHover={replaceHover}
           onReplaceHover={setReplaceHover}
           onReview={() => undefined}
+          onSecondaryAction={() => undefined}
         />
       ))}
     </div>
