@@ -4,6 +4,7 @@ import SettingsRail, { type SettingsPageKey } from './SettingsRail'
 import GeneralPage from './pages/GeneralPage'
 import AccountPage from './pages/AccountPage'
 import AboutPage from './pages/AboutPage'
+import ExperimentalPage from './pages/ExperimentalPage'
 
 const SpaceSettings = ({ activePage = 'general' }: { activePage?: SettingsPageKey }) => {
   const isInvited = useIsInvited()
@@ -17,6 +18,7 @@ const SpaceSettings = ({ activePage = 'general' }: { activePage?: SettingsPageKe
           {activePage === 'general' && <GeneralPage />}
           {activePage === 'account' && <AccountPage />}
           {activePage === 'about' && <AboutPage />}
+          {activePage === 'experimental' && <ExperimentalPage />}
         </div>
       </div>
     </div>
