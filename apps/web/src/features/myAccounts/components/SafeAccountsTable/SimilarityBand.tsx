@@ -1,35 +1,27 @@
 import type { ReactElement } from 'react'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { TriangleAlert, Info, Copy, Check } from 'lucide-react'
+import { TriangleAlert, Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import useCopyToClipboard from '@/hooks/useCopyToClipboard'
+import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
+import PeerAddress from '@/components/common/PeerAddress'
+import { useChain } from '@/hooks/useChains'
 import type { SimilarWarning } from '@/features/address-poisoning'
 
-/**
- * Full address + inline copy for the warning tooltip. A bare button, not CopyAddressButton — its
- * hover tint and nested Tooltip are both wrong inside this dark hover popup.
- */
-const PeerAddress = ({ address }: { address: string }) => {
-  const { copied, copy } = useCopyToClipboard()
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="whitespace-nowrap font-mono text-xs">{address}</span>
-      <button
-        type="button"
-        aria-label="Copy address"
-        className="inline-flex shrink-0 cursor-pointer rounded p-0.5 transition-colors hover:bg-background/15"
-        onClick={() => copy(address)}
-      >
-        {copied ? <Check className="size-3 text-green-500" /> : <Copy className="size-3" />}
-      </button>
-    </div>
-  )
-}
-
 /** Inline ⚠️ after a name, listing cross-list look-alike peers in its tooltip (same-list = band only). */
-export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) => {
+export const SimilarityWarningIcon = ({
+  address,
+  warning,
+  explorerChainId,
+}: {
+  /** The row's own address — each peer bolds the ends it shares with it. */
+  address: string
+  warning: SimilarWarning
+  /** Links peers to this chain's explorer; omit for multi-chain rows. */
+  explorerChainId?: string
+}) => {
+  const chain = useChain(explorerChainId ?? '')
   const sections = (
     [
       ['Similar accounts from trusted safes:', warning.trusted],
@@ -52,8 +44,13 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
           {sections.map(([label, peers]) => (
             <div key={label} className="mb-1 last:mb-0">
               <div className="font-semibold">{label}</div>
-              {peers.map((address) => (
-                <PeerAddress key={address} address={address} />
+              {peers.map((peer) => (
+                <PeerAddress
+                  key={peer}
+                  address={peer}
+                  {...getCommonAffixLengths(peer, address)}
+                  explorerLink={chain ? getBlockExplorerLink(chain, peer) : undefined}
+                />
               ))}
             </div>
           ))}
