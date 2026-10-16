@@ -61,11 +61,11 @@ describe('QueuedNonceHint', () => {
     mockUsePreviousNonces.mockReturnValue([13, 14])
   })
 
-  it('tells that queued transactions run first and offers to replace the oldest one', () => {
+  it('tells that queued transactions run first and offers to use the oldest nonce', () => {
     renderHint()
 
     expect(screen.getByText(/Queued transactions will run before this one\./)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Replace the oldest instead' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Use the oldest nonce instead' })).toBeInTheDocument()
   })
 
   it('offers to move the transaction to the front when no queued transaction occupies the lowest nonce', () => {
@@ -80,16 +80,18 @@ describe('QueuedNonceHint', () => {
     const setNonce = jest.fn()
     renderHint({ setNonce })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Replace the oldest instead' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Use the oldest nonce instead' }))
 
     expect(setNonce).toHaveBeenCalledWith(13)
   })
 
-  it('warns that a queued transaction will be replaced when the chosen nonce is already queued', () => {
+  it('warns that the chosen nonce is already queued', () => {
     renderHint({ nonce: 14 })
 
-    expect(screen.getByText(/This will replace a queued transaction if it's executed first\./)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Replace the oldest instead' })).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/A queued transaction already uses this nonce\. Only the one executed first will go through\./),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Use the oldest nonce instead' })).not.toBeInTheDocument()
   })
 
   it('resets the nonce to the recommended one when undo is clicked', async () => {

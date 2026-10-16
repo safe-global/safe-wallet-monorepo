@@ -32,7 +32,7 @@ const QueuedNonceHint = () => {
       <Typography variant="paragraph-small" color="warning" className="flex items-start gap-1">
         <TriangleAlert className="mt-0.5 size-4 shrink-0" />
         <span>
-          This will replace a queued transaction if it&apos;s executed first.{' '}
+          A queued transaction already uses this nonce. Only the one executed first will go through.{' '}
           <HintLink onClick={() => setNonce(recommendedNonce)}>Undo</HintLink>
         </span>
       </Typography>
@@ -43,7 +43,7 @@ const QueuedNonceHint = () => {
       <Typography variant="paragraph-small" color="muted">
         Queued transactions will run before this one.{' '}
         <HintLink onClick={() => setNonce(lowestNonce)}>
-          {previousNonces.includes(lowestNonce) ? 'Replace the oldest instead' : 'Move it to the front instead'}
+          {previousNonces.includes(lowestNonce) ? 'Use the oldest nonce instead' : 'Move it to the front instead'}
         </HintLink>
         <Tooltip>
           <TooltipTrigger
@@ -55,7 +55,7 @@ const QueuedNonceHint = () => {
           />
           <TooltipContent className="max-w-xs">
             Transactions are executed in order of their nonce, starting from the lowest one. Using the lowest nonce puts
-            this transaction first in line. If a queued transaction already has that nonce, only one of the two can be
+            this transaction first in line. If a queued transaction already has that nonce, only one of them can be
             executed.
           </TooltipContent>
         </Tooltip>
