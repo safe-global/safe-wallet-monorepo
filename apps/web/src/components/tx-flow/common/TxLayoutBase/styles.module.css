@@ -30,6 +30,10 @@
   border-bottom: 1px solid var(--border);
 }
 
+.headerInner:has(+ [data-queued-nonce-hint]) {
+  border-bottom: 0;
+}
+
 .step {
   position: relative;
 }
