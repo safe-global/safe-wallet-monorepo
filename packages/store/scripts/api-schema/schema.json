@@ -3961,7 +3961,7 @@
     },
     "/v1/spaces/{spaceId}/policies/active": {
       "get": {
-        "description": "Returns the policies of every Safe in the Space. A Safe whose spending-limit or proposer data could not be read is omitted from the corresponding policies.",
+        "description": "Returns the policies of every Safe in the Space. A Safe whose enabled modules and guards could not be read is omitted from the spending-limit and guard-enforced policies; a Safe whose delegates could not be read is omitted from the proposer policies.",
         "operationId": "spacePoliciesGetActivePoliciesV1",
         "parameters": [
           {
@@ -7321,7 +7321,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-2a92a92",
+    "version": "main-3bc60f7",
     "contact": {}
   },
   "tags": [],
@@ -10177,6 +10177,9 @@
           },
           "version": {
             "type": "string"
+          },
+          "safe": {
+            "type": "string"
           }
         }
       },
@@ -12287,6 +12290,31 @@
           }
         }
       },
+      "PolicyAccessDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "The contract the governed calls target"
+          },
+          "selector": {
+            "type": "string",
+            "description": "The 4-byte function selector of the governed calls"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "CALL",
+              "DELEGATECALL"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation"
+        ]
+      },
       "GuardEnforcementDto": {
         "type": "object",
         "properties": {
@@ -12298,11 +12326,20 @@
           },
           "guards": {
             "$ref": "#/components/schemas/GuardSlotsDto"
+          },
+          "access": {
+            "description": "The calls the guard applies the policy to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicyAccessDto"
+              }
+            ]
           }
         },
         "required": [
           "via",
-          "guards"
+          "guards",
+          "access"
         ]
       },
       "OffChainEnforcementDto": {
@@ -12573,6 +12610,62 @@
           "proposers"
         ]
       },
+      "Erc20TransferRecipientDto": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "An address the Safe can send this token to"
+          },
+          "permission": {
+            "type": "string",
+            "enum": [
+              "ONCE",
+              "ALWAYS"
+            ]
+          }
+        },
+        "required": [
+          "account",
+          "permission"
+        ]
+      },
+      "Erc20TransferPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The ERC20 token the allowlist applies to"
+          },
+          "recipients": {
+            "description": "The recipients of the token transfers the policy permits",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Erc20TransferRecipientDto"
+            }
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "recipients"
+        ]
+      },
+      "CosignerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "cosignerAddress": {
+            "type": "string",
+            "description": "The cosigner the policy enforces."
+          }
+        },
+        "required": [
+          "cosignerAddress"
+        ]
+      },
+      "StatelessPolicyDataDto": {
+        "type": "object",
+        "properties": {}
+      },
       "SafeRefDto": {
         "type": "object",
         "properties": {
@@ -12601,7 +12694,8 @@
               "cosigner",
               "allow",
               "native-transfer",
-              "deny"
+              "deny",
+              "multisend"
             ]
           },
           "enforcement": {
@@ -12636,6 +12730,15 @@
               },
               {
                 "$ref": "#/components/schemas/ProposerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TransferPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/CosignerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/StatelessPolicyDataDto"
               }
             ]
           },

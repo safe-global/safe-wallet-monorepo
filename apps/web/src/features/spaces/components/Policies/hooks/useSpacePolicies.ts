@@ -15,14 +15,23 @@ import {
 } from '@/store/api/gateway/spacePolicies'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
-import { mapActivePolicies } from '../utils/mapActivePolicies'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import useChains from '@/hooks/useChains'
+import { mapActivePolicies, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
-export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']
+export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
+  'spending-limit',
+  'proposer',
+  'erc20-transfer',
+  'native-transfer',
+  'multisend',
+  'allow',
+]
 
 /** Proposer grants take effect off chain at once, so only spending limits can be pending. */
 export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = ['spending-limit']
@@ -81,7 +90,20 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
   }, [pendingDtos])
 
-  const activeRows = useMemo(() => mapActivePolicies(dtos), [dtos])
+  // CGW sends no token metadata with a native-transfer policy, so the coin comes from the chain config.
+  const { configs: chains } = useChains()
+  const resolveNativeToken = useMemo<NativeTokenResolver>(() => {
+    const byChainId = new Map(chains.map((chain) => [chain.chainId, chain.nativeCurrency]))
+
+    return (chainId) => {
+      const native = byChainId.get(chainId)
+      return native
+        ? { address: ZERO_ADDRESS, symbol: native.symbol, decimals: native.decimals, logoUri: native.logoUri }
+        : undefined
+    }
+  }, [chains])
+
+  const activeRows = useMemo(() => mapActivePolicies(dtos, resolveNativeToken), [dtos, resolveNativeToken])
   const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,

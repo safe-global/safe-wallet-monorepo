@@ -1,4 +1,5 @@
-import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useMemo, useState, type ComponentType, type ReactElement } from 'react'
+import { useRouter } from 'next/router'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
@@ -9,9 +10,22 @@ import {
   ADD_POLICY_OPTIONS,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
+import GuardPolicyDrawer from './GuardPolicyDrawer'
+import EditTokenAllowlistFlow from './ERC20TransferPolicy/EditFlow'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
+import {
+  POLICY_CATALOGUE,
+  type PolicyCatalogueId,
+  type PolicyWizardId,
+} from '@safe-global/views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
+import CosignerPolicyFlow from './CosignerPolicy'
+import ERC20TransferPolicyFlow from './ERC20TransferPolicy'
+import FallbackPolicyFlow from './FallbackPolicy'
+import MultiSendPolicyFlow from './MultiSendPolicy'
+import RecoveryFlow from './RecoveryFlow'
+import SafeManagementPolicyFlow from './SafeManagementPolicy'
 import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
@@ -30,12 +44,14 @@ import {
   REQUEST_POLICY_FORM_WIDTH,
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
+  isGuardPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
   type Policy,
   type PolicySafe,
   type SpendingLimitPolicy,
+  type TokenAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 
 interface PoliciesProps {
@@ -54,6 +70,23 @@ interface PoliciesProps {
   locked?: PolicyLock
 }
 
+const WIZARDS: Record<PolicyWizardId, ComponentType<{ safe?: PolicySafe }>> = {
+  accountRecovery: RecoveryFlow,
+  tokenWithdraw: ERC20TransferPolicyFlow,
+  cosigner: CosignerPolicyFlow,
+  fallback: FallbackPolicyFlow,
+  multisend: MultiSendPolicyFlow,
+  safeManagement: SafeManagementPolicyFlow,
+}
+
+const isWizardId = (value: unknown): value is PolicyWizardId => typeof value === 'string' && value in WIZARDS
+
+const parsePolicySafe = (value: unknown): PolicySafe | undefined => {
+  if (typeof value !== 'string') return undefined
+  const [chainId, address] = value.split(':')
+  return chainId && address ? { chainId, address } : undefined
+}
+
 const openRequestPolicyForm = () => {
   const left = window.screenX + Math.max(0, (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2)
   const top = window.screenY + Math.max(0, (window.outerHeight - REQUEST_POLICY_FORM_HEIGHT) / 2)
@@ -69,7 +102,7 @@ const openRequestPolicyForm = () => {
  * failed, only the heading stays and the body is the load state. A plan without some policies shows the
  * upgrade banner above either mode, and the catalogue loses its suggestion tile.
  */
-const Policies = ({
+const PoliciesOverview = ({
   policies = [],
   isLoading = false,
   isError = false,
@@ -78,6 +111,7 @@ const Policies = ({
   onSelectPolicy,
   locked,
 }: PoliciesProps): ReactElement => {
+  const router = useRouter()
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -91,7 +125,7 @@ const Policies = ({
   const isSettled = !isLoading && !isError
 
   const selectPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isGuardPolicy(policy)) setOpenPolicy(policy)
   }, [])
 
   const closeDetails = useCallback(() => setOpenPolicy(null), [])
@@ -127,12 +161,25 @@ const Policies = ({
     [setTxFlow],
   )
 
+  // The panel stays open behind the flow, as the spending limit's edit does, so cancelling lands back on it.
+  const editTokenAllowlist = useCallback(
+    (policy: TokenAllowlistPolicy) => setTxFlow(<EditTokenAllowlistFlow policy={policy} />),
+    [setTxFlow],
+  )
+
   const startProposerFlow = useCallback(() => {
     setTxFlow(<ProposerRoleFlow />)
   }, [setTxFlow])
 
+  const openWizard = useCallback(
+    (wizard: PolicyWizardId) => {
+      void router.push({ pathname: router.pathname, query: { ...router.query, policy: wizard } })
+    },
+    [router],
+  )
+
   const handleSelect = useCallback(
-    (id: AddPolicyId) => {
+    (id: AddPolicyId | PolicyCatalogueId) => {
       switch (id) {
         case 'spending-limit':
           if (hasSeenSpendingLimitIntro) {
@@ -156,6 +203,14 @@ const Policies = ({
           openRequestPolicyForm()
           return
 
+        case 'token-allowlist':
+        case 'multisend':
+        case 'safe-management': {
+          const wizard = POLICY_CATALOGUE.find((entry) => entry.id === id)?.wizard
+          if (wizard) openWizard(wizard)
+          return
+        }
+
         // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
         case 'recovery':
           return
@@ -167,7 +222,7 @@ const Policies = ({
         }
       }
     },
-    [hasSeenSpendingLimitIntro, startSpendingLimitFlow, hasSeenProposerIntro, startProposerFlow],
+    [hasSeenSpendingLimitIntro, startSpendingLimitFlow, hasSeenProposerIntro, startProposerFlow, openWizard],
   )
 
   // Any dismissal counts as shown: an explainer that returns after you closed it reads as a bug.
@@ -274,6 +329,14 @@ const Policies = ({
         onProceed={proceedToProposerFlow}
       />
 
+      {openedPolicy && isGuardPolicy(openedPolicy) && (
+        <GuardPolicyDrawer
+          policy={openedPolicy}
+          onClose={closeDetails}
+          onEdit={openedPolicy.type === 'token-allowlist' ? () => editTokenAllowlist(openedPolicy) : undefined}
+        />
+      )}
+
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
       )}
@@ -289,6 +352,22 @@ const Policies = ({
       )}
     </div>
   )
+}
+
+/**
+ * `?policy=` swaps the overview for that policy's builder. The builder picks its own Safe, so it
+ * replaces the page rather than opening over it.
+ */
+const Policies = (props: PoliciesProps): ReactElement => {
+  const router = useRouter()
+  const wizard = router.query.policy
+
+  if (isWizardId(wizard)) {
+    const Wizard = WIZARDS[wizard]
+    return <Wizard safe={parsePolicySafe(router.query.policySafe)} />
+  }
+
+  return <PoliciesOverview {...props} />
 }
 
 export default Policies

@@ -79,9 +79,12 @@ describe('TxNonce', () => {
       expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
 
-    it('shows a skeleton when recommendedNonce is undefined', () => {
+    // Not a skeleton: the nonce is known, and only the editable form needs the recommendation.
+    it('shows the nonce when only recommendedNonce is undefined', () => {
       const { container } = renderTxNonce({ recommendedNonce: undefined })
-      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
+
+      expect(container.querySelector('[data-slot="skeleton"]')).not.toBeInTheDocument()
+      expect(screen.getByTestId('nonce-fld')).toHaveTextContent('5')
     })
 
     it('shows a skeleton when both nonce and recommendedNonce are undefined', () => {
@@ -360,5 +363,28 @@ describe('TxNonce', () => {
       expect(trigger).toBeInTheDocument()
       expect(trigger).not.toHaveClass('contents')
     })
+  })
+})
+
+/**
+ * The policy wizards hand a prebuilt batch to the tx flow, so `nonce` arrives from the
+ * built SafeTransaction while `recommendedNonce` can still be resolving — or never resolve,
+ * when the flow opens before the Safe is loaded into the store. The nonce is known either
+ * way, so it has to be shown rather than left as a skeleton.
+ */
+describe('TxNonce without a recommended nonce', () => {
+  it('shows the nonce when only the recommended nonce is missing', () => {
+    renderTxNonce({ nonce: 7, recommendedNonce: undefined })
+
+    expect(screen.getByTestId('nonce-fld')).toHaveTextContent('7')
+  })
+
+  // The editable form needs a recommended nonce for its suggestion, so without one the
+  // read-only value is the correct fallback rather than a reason to render nothing.
+  it('falls back to the read-only value instead of the editable form', () => {
+    renderTxNonce({ nonce: 7, recommendedNonce: undefined }, true)
+
+    expect(screen.getByTestId('nonce-fld')).toHaveTextContent('7')
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 })

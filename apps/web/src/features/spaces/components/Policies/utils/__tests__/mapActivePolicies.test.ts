@@ -1,4 +1,13 @@
-import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import {
+  mockMultiSendDto,
+  mockNativeFallbackDto,
+  mockNativeTransferDto,
+  mockProposerDto,
+  mockSafeManagementDto,
+  mockSpendingLimitDto,
+  mockTokenAllowlistDto,
+} from '../../mocks/activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
 import { mapActivePolicies } from '../mapActivePolicies'
 
@@ -132,5 +141,137 @@ describe('mapActivePolicies', () => {
     dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
 
     expect(mapActivePolicies([dto])).toEqual([])
+  })
+})
+
+describe('mapActivePolicies — guard-enforced policies', () => {
+  it('maps a token allowlist, keeping its recipients', () => {
+    const [policy] = mapActivePolicies([mockTokenAllowlistDto()])
+
+    expect(policy.type).toBe('token-allowlist')
+    if (policy.type !== 'token-allowlist') throw new Error('expected a token allowlist')
+
+    expect(policy.data.token.address).toBe(MOCK_TOKENS.usdc.address)
+    expect(policy.data.recipients).toEqual([{ address: MOCK_ADDRESSES.bob, permission: 'ALWAYS' }])
+  })
+
+  it('maps a multisend policy', () => {
+    const [policy] = mapActivePolicies([mockMultiSendDto()])
+
+    expect(policy.type).toBe('multisend')
+    expect(policy.status).toBe('active')
+  })
+
+  // An `allow` is only a Safe-management policy when it targets the Safe on a known selector.
+  it('names the management function an allow policy keeps permitted', () => {
+    const [policy] = mapActivePolicies([mockSafeManagementDto()])
+
+    expect(policy.type).toBe('safe-management')
+    if (policy.type !== 'safe-management') throw new Error('expected a safe management policy')
+
+    expect(policy.data.changes).toEqual([{ selector: '0x0d582f13', label: 'Add a signer' }])
+  })
+
+  // The guard keys one policy per selector; a reader wants one rule per Safe.
+  it('groups every permitted change on a Safe into one row', () => {
+    const removeSigner = mockSafeManagementDto()
+    if (removeSigner.enforcement.via !== 'guard' || !removeSigner.enforcement.access) {
+      throw new Error('expected guard enforcement')
+    }
+    removeSigner.enforcement.access = { ...removeSigner.enforcement.access, selector: '0xf8dc5dd9' }
+
+    const policies = mapActivePolicies([mockSafeManagementDto(), removeSigner])
+
+    expect(policies).toHaveLength(1)
+    const [policy] = policies
+    if (policy.type !== 'safe-management') throw new Error('expected a safe management policy')
+
+    expect(policy.data.changes.map((change) => change.label)).toEqual(['Add a signer', 'Remove a signer'])
+    expect(policy.data.total).toBe(9)
+  })
+
+  it('keeps the management changes of each Safe in its own row', () => {
+    const other = mockSafeManagementDto({ safe: MOCK_SAFES.payroll })
+    if (other.enforcement.via !== 'guard' || !other.enforcement.access) throw new Error('expected guard enforcement')
+    other.enforcement.access = { ...other.enforcement.access, target: MOCK_SAFES.payroll.address }
+
+    const policies = mapActivePolicies([mockSafeManagementDto(), other])
+
+    expect(policies).toHaveLength(2)
+    expect(policies[0].id).not.toBe(policies[1].id)
+  })
+
+  it('drops an allow policy that is not a Safe-management call', () => {
+    const dto = mockSafeManagementDto()
+    if (dto.enforcement.via !== 'guard') throw new Error('expected guard enforcement')
+    dto.enforcement.access = { target: MOCK_TOKENS.usdc.address, selector: '0xa9059cbb', operation: 'CALL' }
+
+    expect(mapActivePolicies([dto])).toEqual([])
+  })
+
+  // Two allowlists on one Safe differ only by their access, so the row id has to carry it.
+  it('gives each access its own row', () => {
+    const second = mockTokenAllowlistDto()
+    if (second.enforcement.via !== 'guard') throw new Error('expected guard enforcement')
+    second.enforcement.access = { ...second.enforcement.access, target: MOCK_ADDRESSES.alice }
+
+    const policies = mapActivePolicies([mockTokenAllowlistDto(), second])
+
+    expect(policies).toHaveLength(2)
+    expect(policies[0].id).not.toBe(policies[1].id)
+  })
+})
+
+describe('mapActivePolicies — the native allowlist', () => {
+  const ETH = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: 'https://example.test/eth.png' }
+  const resolveNative = () => ETH
+
+  it('collapses every allowed recipient into one row for the native coin', () => {
+    const policies = mapActivePolicies(
+      [mockNativeTransferDto(MOCK_ADDRESSES.alice), mockNativeTransferDto(MOCK_ADDRESSES.bob)],
+      resolveNative,
+    )
+
+    expect(policies).toHaveLength(1)
+    const [policy] = policies
+    if (policy.type !== 'token-allowlist') throw new Error('expected a token allowlist')
+
+    expect(policy.data.token).toEqual(ETH)
+    expect(policy.data.recipients.map((recipient) => recipient.address)).toEqual([
+      MOCK_ADDRESSES.alice,
+      MOCK_ADDRESSES.bob,
+    ])
+  })
+
+  // The zero-target entry is the fallback flow's "allow any native transfer", a different policy.
+  it('leaves the catch-all fallback out of the allowlist', () => {
+    expect(mapActivePolicies([mockNativeFallbackDto()], resolveNative)).toEqual([])
+  })
+
+  it('keeps the fallback out while still listing real recipients', () => {
+    const policies = mapActivePolicies(
+      [mockNativeFallbackDto(), mockNativeTransferDto(MOCK_ADDRESSES.alice)],
+      resolveNative,
+    )
+
+    expect(policies).toHaveLength(1)
+    const [policy] = policies
+    if (policy.type !== 'token-allowlist') throw new Error('expected a token allowlist')
+    expect(policy.data.recipients).toHaveLength(1)
+  })
+
+  // Without the chain config there is no symbol or decimals to name the coin by.
+  it('drops the row when the chain native currency is unknown', () => {
+    expect(mapActivePolicies([mockNativeTransferDto(MOCK_ADDRESSES.alice)], () => undefined)).toEqual([])
+  })
+
+  it('keeps an ERC20 allowlist and the native one as separate rows', () => {
+    const policies = mapActivePolicies(
+      [mockTokenAllowlistDto(), mockNativeTransferDto(MOCK_ADDRESSES.alice)],
+      resolveNative,
+    )
+
+    expect(policies).toHaveLength(2)
+    expect(policies.map((policy) => policy.id)).toEqual([...new Set(policies.map((policy) => policy.id))])
   })
 })

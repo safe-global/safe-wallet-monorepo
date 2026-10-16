@@ -56,3 +56,79 @@ export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   name: 'USD Coin',
   trusted: true,
 })
+
+const GUARD_SLOTS = {
+  transactionGuard: {
+    policyContract: '0x25DDa3b8974a10E93ca188F9C149A42F938Bd187',
+    safePolicyGuard: '0x5202B1ebE100812437d47eae769e155945fbba6a',
+  },
+}
+
+/** `transfer(address,uint256)` on USDC, the access a token allowlist occupies. */
+export const mockTokenAllowlistDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'erc20-transfer',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: MOCK_TOKENS.usdc.address, selector: '0xa9059cbb', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {
+    tokenAddress: MOCK_TOKENS.usdc.address,
+    recipients: [{ account: MOCK_ADDRESSES.bob, permission: 'ALWAYS' }],
+  },
+  ...overrides,
+})
+
+export const mockMultiSendDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'multisend',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: {
+      target: '0x9641d764fc13c8B624c04430C7356C1C7C8102e2',
+      selector: '0x8d80ff0a',
+      operation: 'DELEGATECALL',
+    },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** `addOwnerWithThreshold`, a call the Safe makes to itself. */
+export const mockSafeManagementDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'allow',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: MOCK_SAFES.treasury.address, selector: '0x0d582f13', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** One allowed native recipient: the guard keys native transfers per recipient, not per token. */
+export const mockNativeTransferDto = (
+  recipient: string,
+  overrides: Partial<ActivePolicyDto> = {},
+): ActivePolicyDto => ({
+  type: 'native-transfer',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: recipient, selector: '0x00000000', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** The catch-all "any native transfer" entry the fallback flow sets, on the zero target. */
+export const mockNativeFallbackDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto =>
+  mockNativeTransferDto('0x0000000000000000000000000000000000000000', overrides)

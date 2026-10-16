@@ -39,6 +39,7 @@ export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
     "Spending limits on this network aren't supported in the Workspace view. Set them up in the Safe account settings.",
   'no-spending-limits':
     "The spending limit module isn't deployed on this network yet, so new spending limits can't be created here.",
+  'no-policy-engine': "The policy engine isn't deployed on this network yet, so this policy can't be set here.",
 }
 
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'

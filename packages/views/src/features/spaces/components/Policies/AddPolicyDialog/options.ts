@@ -1,6 +1,16 @@
-import { LockKeyholeOpen, MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
+import {
+  Layers,
+  LockKeyholeOpen,
+  MessageSquarePlus,
+  Settings2,
+  UserRoundCheck,
+  UserRoundPen,
+  WalletCards,
+  type LucideIcon,
+} from 'lucide-react'
 
-export type AddPolicyId = 'spending-limit' | 'proposer' | 'suggestion' | 'recovery'
+export type AddPolicyId =
+  'spending-limit' | 'proposer' | 'token-allowlist' | 'multisend' | 'safe-management' | 'suggestion' | 'recovery'
 
 export interface AddPolicyOption {
   id: AddPolicyId
@@ -23,6 +33,24 @@ export const ADD_POLICY_OPTIONS: AddPolicyOption[] = [
     title: 'Proposer role',
     description: 'Let teammates without signing rights propose transactions.',
     Icon: UserRoundPen,
+  },
+  {
+    id: 'token-allowlist',
+    title: 'Token recipient allowlist',
+    description: 'Restrict who each token can be sent to. Transfers to anyone else are blocked onchain.',
+    Icon: UserRoundCheck,
+  },
+  {
+    id: 'multisend',
+    title: 'Batched transactions',
+    description: 'Apply your other policies to every call inside a batch, not just the batch itself.',
+    Icon: Layers,
+  },
+  {
+    id: 'safe-management',
+    title: 'Safe management',
+    description: 'Choose which signer, module and guard changes this Safe account still allows.',
+    Icon: Settings2,
   },
   {
     id: 'suggestion',

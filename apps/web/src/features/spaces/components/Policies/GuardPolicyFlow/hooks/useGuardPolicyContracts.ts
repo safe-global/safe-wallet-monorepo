@@ -1,0 +1,38 @@
+import type { Address } from 'viem'
+import type { PolicyType } from '@safe-global/store/gateway/policies/types'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { usePolicyContracts } from '../../shared/usePolicyContracts'
+import { usePolicyGuard } from '../../hooks/usePolicyGuard'
+
+export type GuardPolicyContracts = {
+  chainId: string
+  safeAddress: Address | undefined
+  safePolicyGuard: Address | undefined
+  policyContract: Address | undefined
+  currentGuard: Address | undefined
+  /** The policy guard is already the Safe's guard, so the change is requested rather than applied. */
+  isGuardSet: boolean
+  /** Another guard is installed and the batch replaces it. */
+  isUnknownGuard: boolean
+  isLoading: boolean
+}
+
+/** What every guard policy builds against, for the Safe the flow is scoped to. */
+export const useGuardPolicyContracts = (type: PolicyType): GuardPolicyContracts => {
+  const scope = useSafeScope()
+  const chainId = scope?.chainId ?? ''
+  const safeAddress = scope?.safeAddress ?? ''
+  const { safePolicyGuard, policyContract } = usePolicyContracts(chainId, safeAddress, type)
+  const { currentGuard, isSet, isUnknownGuard, isLoading } = usePolicyGuard(chainId, safeAddress, safePolicyGuard)
+
+  return {
+    chainId,
+    safeAddress: (safeAddress || undefined) as Address | undefined,
+    safePolicyGuard: safePolicyGuard as Address | undefined,
+    policyContract: policyContract as Address | undefined,
+    currentGuard: currentGuard as Address | undefined,
+    isGuardSet: isSet,
+    isUnknownGuard,
+    isLoading,
+  }
+}

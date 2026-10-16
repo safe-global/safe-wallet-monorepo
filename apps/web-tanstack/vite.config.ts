@@ -79,13 +79,6 @@ export default defineConfig(({ mode }) => {
     // dep into a single optimized chunk.
     optimizeDeps: {
       include: [
-        '@mui/material',
-        '@mui/material/styles',
-        '@mui/icons-material',
-        '@mui/system',
-        '@emotion/react',
-        '@emotion/styled',
-        '@emotion/cache',
         'react',
         'react/jsx-runtime',
         'react/jsx-dev-runtime',
@@ -172,8 +165,9 @@ export default defineConfig(({ mode }) => {
         // apps/web/src/pages/_app.tsx uses bare `src/...` imports (Next.js baseUrl convention).
         { find: /^src\/(.*)$/, replacement: path.resolve(webRoot, 'src/$1') },
 
-        // Webpack aliases ported verbatim from apps/web/next.config.mjs.
-        { find: /^@mui\/material$/, replacement: path.resolve(webRoot, 'src/components/common/Mui') },
+        // Webpack aliases ported from apps/web/next.config.mjs. The @mui/material alias that
+        // used to sit here went with the shadcn migration, which deleted both the dependency
+        // and the components/common/Mui shim it pointed at.
         { find: 'bn.js', replacement: path.resolve(__dirname, '../../node_modules/bn.js/lib/bn.js') },
       ],
     },
