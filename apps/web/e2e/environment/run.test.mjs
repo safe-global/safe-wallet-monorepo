@@ -97,6 +97,16 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
   assert.throws(() => walletEnvironment({ ...manifest, chainId: 1 }), /identity/)
 })
 
+test('points the wallet at the local Ledger emulator when the stack has one', () => {
+  const emulator = 'http://localhost:9555'
+  assert.equal(
+    walletEnvironment({ ...manifest, ledgerEmulatorUrl: emulator }).NEXT_PUBLIC_LEDGER_EMULATOR_URL,
+    emulator,
+  )
+  assert.equal(walletEnvironment(manifest, {}).NEXT_PUBLIC_LEDGER_EMULATOR_URL, undefined)
+  assert.throws(() => walletEnvironment({ ...manifest, ledgerEmulatorUrl: 'https://speculos.example' }), /local/)
+})
+
 test('cleans a partially started stack and preserves the original failure', async () => {
   const calls = []
   const failure = new Error('startup failed')

@@ -15,6 +15,7 @@ import * as history from './history.mjs'
 import * as historyFilters from './history-filters.mjs'
 import * as historySmoke from './history-smoke.mjs'
 import * as historySummary from './history-summary.mjs'
+import * as ledger from './ledger.mjs'
 import * as messages from './messages.mjs'
 import * as nested from './nested.mjs'
 import * as nfts from './nfts.mjs'
@@ -48,6 +49,7 @@ const modules = [
   historyFilters,
   historySmoke,
   historySummary,
+  ledger,
   messages,
   nested,
   nfts,
