@@ -62,4 +62,10 @@ export class SendTokensPage {
   suggestion(text: string): Locator {
     return this.suggestions.filter({ hasText: text })
   }
+
+  /** Enter the recipient's address and amount in the recipient row at `row`, counted from 0 */
+  async fillTransferAt(row: number, { recipient, amount }: { recipient: string; amount: string }): Promise<void> {
+    await this.page.getByTestId('address-book-input').nth(row).getByRole('combobox').fill(recipient)
+    await this.amountField.nth(row).fill(amount)
+  }
 }
