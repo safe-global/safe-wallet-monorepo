@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import SafeLogo from '@/components/common/SafeLogo'
@@ -30,7 +29,7 @@ export const _getRedirectUrl = (location: Location): string | undefined => {
   }
 }
 
-const Custom404: NextPage = () => {
+const Custom404 = () => {
   const router = useRouter()
   const [isRedirecting, setIsRedirecting] = useState<boolean>(true)
 

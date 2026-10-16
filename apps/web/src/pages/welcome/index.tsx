@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
@@ -7,7 +6,7 @@ import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 // The standalone welcome/login screen has been replaced by the tabbed welcome
 // (Workspaces + Trusted accounts). Keep this route as a redirect so existing
 // bookmarks and deep links to /welcome still resolve.
-const Welcome: NextPage = () => {
+const Welcome = () => {
   const router = useRouter()
   const { chain } = router.query
 

@@ -1,11 +1,10 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import SingleTx from '@/components/transactions/SingleTx'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 
-const SingleTransaction: NextPage = () => {
+const SingleTransaction = () => {
   return (
     <>
       <Head>
