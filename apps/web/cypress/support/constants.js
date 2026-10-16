@@ -11,17 +11,13 @@ export const GOERLI_TEST_SAFE = 'gor:0x97d314157727D517A706B5D08507A1f9B44AaaE9'
 export const SEPOLIA_TEST_SAFE_6 = 'sep:0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1'
 
 export const SEPOLIA_CONTRACT_SHORT = '0x11AB...34aF'
-export const SEPOLIA_RECIPIENT_ADDR_SHORT = '0x4DD4...7bde'
 // Need clarification/refactor: TEST_SAFE / GNO_TEST_SAFE
 export const GNO_TEST_SAFE = 'gno:0xB8d760a90a5ed54D3c2b3EFC231277e99188642A'
 export const TEST_SAFE = 'gor:0x04f8b1EA3cBB315b87ced0E32deb5a43cC151a91'
 export const EOA = '0x03042B890b99552b60A073F808100517fb148F60'
 export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
-export const SAFE_APP_ADDRESS_2 = '0x49d4450977E2c95362C13D3a31a09311E0Ea26A6'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
 export { defaultOwnerAddress } from './credentials.js'
-// Below is also used in sidebar tests as a beneficiary
-export const SPENDING_LIMIT_ADDRESS_2 = '0x52835f11E348605E9D791Ec09380a3224526d538'
 // AllowanceModule contract addresses — keyed by contract version, not by network
 export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
 export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
@@ -157,10 +153,6 @@ export const safeContractVersions = {
 
 export const commonThresholds = {
   oneOfOne: '1 out of 1 signer',
-}
-export const TXActionNames = {
-  resetAllowance: 'resetAllowance',
-  setAllowance: 'setAllowance',
 }
 
 export const networkKeys = {

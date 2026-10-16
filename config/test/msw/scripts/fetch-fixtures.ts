@@ -9,6 +9,7 @@
  * Usage (Node ≥24 runs .ts directly):
  *   node config/test/msw/scripts/fetch-fixtures.ts
  *   node config/test/msw/scripts/fetch-fixtures.ts --safe=ef-safe
+ *   node config/test/msw/scripts/fetch-fixtures.ts --group=transactions
  */
 
 import * as fs from 'fs'
@@ -44,6 +45,22 @@ const SAFES = {
 
 type SafeKey = keyof typeof SAFES
 
+const TX_HISTORY_SAFE = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+} as const
+
+const HISTORY_TRANSACTION_IDS = {
+  'on-chain-rejection': `multisig_${TX_HISTORY_SAFE.address}_0x9b4ee6ef9271fa2f2a4e97c3b5165dc7844a124accbf02cddaf91393ef2687da`,
+  batch: `multisig_${TX_HISTORY_SAFE.address}_0x4dd0916d9fea51b6b724ff8155c3e7cd616f2c54634c0769b9dc0edfd4f6b2b8`,
+  'add-owner': `multisig_${TX_HISTORY_SAFE.address}_0x85835820c4119ea7e44537dd4a447264cc08d80ea1467b545b500670573c3d2d`,
+  'swap-owner': `multisig_${TX_HISTORY_SAFE.address}_0xd7a2578ba2e610959961ad9816115d33521d7e7904797cece08051c38fa3af6f`,
+  'remove-owner': `multisig_${TX_HISTORY_SAFE.address}_0xafd58598ec10f89395d57c4d914480e50a568416e3226bc4d1853fae06697929`,
+  'disable-module': `multisig_${TX_HISTORY_SAFE.address}_0xb82070c01297392754b4b972c064f48f4ab944c5979813c01b871c8f8d57bc4a`,
+  'change-threshold': `multisig_${TX_HISTORY_SAFE.address}_0x46eb9b5370d38a676d0bc895dbd8e7e3c9544f121c7019bfb0e632597d7be7d5`,
+  'receive-qtrust': `transfer_${TX_HISTORY_SAFE.address}_ed89d768d24991bca3a9eed93f369a3fa10727accc3d02aacb5c38794ba5b9136119`,
+} as const
+
 // Endpoints to fetch
 const ENDPOINTS = {
   portfolio: (address: string) => `/v1/portfolio/${address}?fiatCode=USD`,
@@ -52,12 +69,15 @@ const ENDPOINTS = {
   positions: (address: string, chainId: string) => `/v1/chains/${chainId}/safes/${address}/positions/USD`,
   safe: (address: string, chainId: string) => `/v1/chains/${chainId}/safes/${address}`,
   chains: (serviceKey: string) => `/v2/chains?serviceKey=${serviceKey}`,
+  txHistory: (address: string, chainId: string) =>
+    `/v1/chains/${chainId}/safes/${address}/transactions/history?trusted=false&imitation=true`,
+  txDetails: (txId: string, chainId: string) => `/v1/chains/${chainId}/transactions/${txId}`,
 }
 
 async function fetchJson(url: string): Promise<unknown> {
   const response = await fetch(url)
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    throw new Error(`HTTP ${response.status} ${response.statusText} from ${url}`)
   }
   return response.json()
 }
@@ -122,6 +142,23 @@ async function fetchChainFixtures(): Promise<void> {
   }
 }
 
+async function fetchTransactionFixtures(): Promise<void> {
+  const { address, chainId } = TX_HISTORY_SAFE
+  console.log(`\nFetching transaction history of ${address} on chain ${chainId}...`)
+
+  const history = await fetchJson(`${GATEWAY_URL}${ENDPOINTS.txHistory(address, chainId)}`)
+  await saveFixture('transactions/history.json', history)
+
+  for (const [name, txId] of Object.entries(HISTORY_TRANSACTION_IDS)) {
+    const details = await fetchJson(`${GATEWAY_URL}${ENDPOINTS.txDetails(txId, chainId)}`)
+    await saveFixture(`transactions/details/${name}.json`, details)
+  }
+}
+
+const FIXTURE_GROUPS: Record<string, () => Promise<void>> = {
+  transactions: fetchTransactionFixtures,
+}
+
 async function createEmptyFixtures(): Promise<void> {
   console.log('\nCreating empty state fixtures...')
 
@@ -149,6 +186,19 @@ function parseSafeArg(args: string[]): SafeKey | undefined {
   return args.find((a) => a.startsWith('--safe='))?.split('=')[1] as SafeKey | undefined
 }
 
+function parseGroupArg(args: string[]): string | undefined {
+  return args.find((a) => a.startsWith('--group='))?.split('=')[1]
+}
+
+async function fetchGroup(group: string): Promise<void> {
+  const fetchFixtures = FIXTURE_GROUPS[group]
+  if (!fetchFixtures) {
+    console.error(`Unknown group: ${group}. Available: ${Object.keys(FIXTURE_GROUPS).join(', ')}`)
+    process.exit(1)
+  }
+  await fetchFixtures()
+}
+
 /** Fetch fixtures for a single safe, exit with error if unknown */
 async function fetchSingleSafe(safeArg: SafeKey): Promise<void> {
   if (!SAFES[safeArg]) {
@@ -158,7 +208,7 @@ async function fetchSingleSafe(safeArg: SafeKey): Promise<void> {
   await fetchSafeFixtures(safeArg)
 }
 
-/** Fetch all fixtures: chains, all safes, and empty fixtures */
+/** Fetch all fixtures: chains, all safes, empty fixtures and every group */
 async function fetchAllFixtures(): Promise<void> {
   await fetchChainFixtures()
 
@@ -167,17 +217,24 @@ async function fetchAllFixtures(): Promise<void> {
   }
 
   await createEmptyFixtures()
+
+  for (const fetchFixtures of Object.values(FIXTURE_GROUPS)) {
+    await fetchFixtures()
+  }
 }
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   const safeArg = parseSafeArg(args)
+  const groupArg = parseGroupArg(args)
 
   console.log('🔄 Fetching MSW fixtures from staging gateway...')
   console.log(`   Gateway: ${GATEWAY_URL}`)
 
   if (safeArg) {
     await fetchSingleSafe(safeArg)
+  } else if (groupArg) {
+    await fetchGroup(groupArg)
   } else {
     await fetchAllFixtures()
   }

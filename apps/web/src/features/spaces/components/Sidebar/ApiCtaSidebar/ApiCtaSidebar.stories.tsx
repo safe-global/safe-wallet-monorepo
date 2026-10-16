@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties } from 'react'
 import { SidebarProvider, Sidebar, SidebarFooter, SidebarMenu } from '@safe-global/views/components/ui/sidebar'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import { ApiCtaSidebar } from './ApiCtaSidebar'
 
 const SidebarWrapper = ({ children }: { children: React.ReactNode }) => (
