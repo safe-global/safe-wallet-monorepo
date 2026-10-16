@@ -1,0 +1,68 @@
+name: Design scope
+
+# Checks whether a pull request only changes styling, copy and presentational markup.
+# Opt-in: the check must pass only when the author marks the pull request as design-only (label `design-only`,
+# or a ticked "- [x] Design-only" line in the description). For the design team it otherwise only reports.
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review]
+  # Spike only: pull_request_target runs only once this file is on the default branch, so pull_request lets
+  # the check be tried before that. Remove before merging: under pull_request a PR can edit this file.
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  design-scope:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # The checker and its rules come from the base branch, so a pull request cannot change the rules
+      # it is checked against. The pull request's code is only read, never run.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the pull request head
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: git fetch --no-tags origin "pull/${PR_NUMBER}/head"
+
+      - name: Install the TypeScript parser
+        run: npm install --prefix "$RUNNER_TEMP/design-check" --no-save --ignore-scripts --no-audit --no-fund typescript@5.9.2
+
+      - name: Check the design scope
+        env:
+          NODE_PATH: ${{ runner.temp }}/design-check/node_modules
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ ! -f scripts/design-check/index.cjs ]; then
+            echo "The design scope check is not on the base branch yet."
+            exit 0
+          fi
+          mode=$(node scripts/design-check/is-design-pr.cjs)
+          if [ "$mode" = "skip" ]; then
+            echo "Not marked as a design-only pull request; nothing to check."
+            exit 0
+          fi
+          set +e
+          node scripts/design-check/index.cjs --base "$BASE_SHA" --head "$HEAD_SHA" --summary "$GITHUB_STEP_SUMMARY"
+          result=$?
+          set -e
+          if [ "$mode" = "enforce" ]; then
+            exit "$result"
+          fi
+          echo "Not marked as design-only, so the result above is for information only. Add the design-only label to enforce it."
