@@ -11,7 +11,7 @@ const TARGET = { chainId: '11155111', safeAddress: faker.finance.ethereumAddress
 
 const read = (result: Partial<UsePolicyGuardResult>) => {
   const refetch = jest.fn()
-  mockUsePolicyGuard.mockReturnValue({ isLoading: false, refetch, ...result })
+  mockUsePolicyGuard.mockReturnValue({ isLoading: false, isRetrying: false, refetch, ...result })
   return refetch
 }
 
@@ -52,6 +52,14 @@ describe('useGuardStatus', () => {
 
     expect(result.current.guard).toEqual({ status: 'error' })
     expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the check as loading again while a failed read is retried', () => {
+    read({ error: new Error('rpc down'), isRetrying: true })
+
+    const { result } = renderHook(() => useGuardStatus(TARGET))
+
+    expect(result.current.guard).toEqual({ status: 'loading' })
   })
 
   it('keeps a state already read when a later read fails', () => {

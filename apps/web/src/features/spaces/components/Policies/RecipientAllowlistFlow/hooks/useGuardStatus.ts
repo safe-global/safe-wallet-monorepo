@@ -4,11 +4,11 @@ import type { GuardStatus } from '@safe-global/views/features/spaces/components/
 
 /** The policy guard read of the picked Safe as one banner state; none until a Safe is picked. */
 export const useGuardStatus = (target?: PolicyGuardTarget): { guard?: GuardStatus; retry: () => void } => {
-  const { state, isLoading, error, refetch } = usePolicyGuard(target)
+  const { state, isLoading, isRetrying, error, refetch } = usePolicyGuard(target)
 
   if (!target) return { retry: refetch }
   if (state) return { guard: state, retry: refetch }
-  if (error) return { guard: { status: 'error' }, retry: refetch }
+  if (error) return { guard: { status: isRetrying ? 'loading' : 'error' }, retry: refetch }
   if (isLoading) return { guard: { status: 'loading' }, retry: refetch }
   // A settled read with nothing to show means CGW has no such Safe: it is counterfactual
   return { guard: { status: 'not-activated' }, retry: refetch }

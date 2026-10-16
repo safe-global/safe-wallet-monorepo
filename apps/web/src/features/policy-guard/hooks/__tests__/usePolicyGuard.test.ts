@@ -80,6 +80,7 @@ describe('usePolicyGuard', () => {
       state: expected,
       isLoading: false,
       error: undefined,
+      isRetrying: false,
       refetch: expect.any(Function),
     })
   })
@@ -118,6 +119,7 @@ describe('usePolicyGuard', () => {
       state: undefined,
       isLoading: true,
       error: undefined,
+      isRetrying: false,
       refetch: expect.any(Function),
     })
   })
@@ -139,11 +141,12 @@ describe('usePolicyGuard', () => {
       state: undefined,
       isLoading: false,
       error: rpcError,
+      isRetrying: false,
       refetch: expect.any(Function),
     })
   })
 
-  it('keeps the error while a retry is in flight', () => {
+  it('keeps the error, and reports the retry, while a retry is in flight', () => {
     mockSafe()
     const rpcError = new Error('rpc down')
     mockModuleGuard({ currentData: undefined, isError: false, isFetching: true, error: rpcError })
@@ -152,6 +155,7 @@ describe('usePolicyGuard', () => {
       state: undefined,
       isLoading: false,
       error: rpcError,
+      isRetrying: true,
       refetch: expect.any(Function),
     })
   })
@@ -164,6 +168,7 @@ describe('usePolicyGuard', () => {
       state: { status: 'none' },
       isLoading: false,
       error: undefined,
+      isRetrying: false,
       refetch: expect.any(Function),
     })
   })
@@ -181,6 +186,7 @@ describe('usePolicyGuard', () => {
       state: undefined,
       isLoading: false,
       error: undefined,
+      isRetrying: false,
       refetch: expect.any(Function),
     })
     expect(query).toHaveBeenCalledWith(skipToken)
@@ -373,6 +379,7 @@ describe('usePolicyGuard', () => {
         state: undefined,
         isLoading: false,
         error: undefined,
+        isRetrying: false,
         refetch: expect.any(Function),
       })
       expect(query).toHaveBeenCalledWith(skipToken)

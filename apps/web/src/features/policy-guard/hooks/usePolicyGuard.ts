@@ -15,6 +15,8 @@ import { useCappedReread } from './useCappedReread'
 export type UsePolicyGuardResult = {
   state?: PolicyGuardState
   isLoading: boolean
+  /** A failed read is being read again; `error` stays set until it settles. */
+  isRetrying: boolean
   error?: Error
   refetch: () => void
 }
@@ -64,6 +66,7 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   return {
     state,
     isLoading: safeLoading || (shouldRead && !moduleGuard && !readError),
+    isRetrying: !!readError && moduleGuardQuery.isFetching,
     error: safeError ?? readError,
     refetch,
   }
