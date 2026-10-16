@@ -11,9 +11,10 @@ import type {
   QueuedItemPage,
   Transaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type PendingTx } from '@/store/pendingTxsSlice'
+import { faker } from '@faker-js/faker'
+import { PendingStatus, type PendingTx, type PendingTxCommonProps } from '@/store/pendingTxsSlice'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { act, renderHook } from '@/tests/test-utils'
+import { act, fakerChecksummedAddress, renderHook } from '@/tests/test-utils'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { filterUntrustedQueue, getNextTransactions, useHasPendingTxs, usePendingTxsQueue } from '../usePendingTxs'
 import { isLabelListItem, isTransactionQueuedItem } from '@/utils/transaction-guards'
@@ -400,46 +401,65 @@ describe('usePendingTxsQueue', () => {
 })
 
 describe('useHasPendingTxs', () => {
+  const chainId = faker.string.numeric(3)
+  const safeAddress = fakerChecksummedAddress()
+  const safeNonce = faker.number.int({ min: 1, max: 1000 })
+
+  const indexingTx = (overrides: Partial<PendingTxCommonProps> = {}): PendingTx => ({
+    chainId,
+    safeAddress,
+    nonce: safeNonce,
+    status: PendingStatus.INDEXING,
+    ...overrides,
+  })
+
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
+
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+      safe: { ...extendedSafeInfoBuilder().build(), chainId, nonce: safeNonce },
+      safeAddress,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    }))
   })
 
-  it('should return true if there are pending txs', () => {
+  it('returns true for a pending tx at the current nonce of the Safe', () => {
+    const { result } = renderHook(() => useHasPendingTxs(), {
+      initialReduxState: { pendingTxs: { [faker.string.uuid()]: indexingTx() } },
+    })
+
+    expect(result.current).toBe(true)
+  })
+
+  it('returns true for a pending tx queued at a later nonce', () => {
+    const { result } = renderHook(() => useHasPendingTxs(), {
+      initialReduxState: { pendingTxs: { [faker.string.uuid()]: indexingTx({ nonce: safeNonce + 1 }) } },
+    })
+
+    expect(result.current).toBe(true)
+  })
+
+  it('returns false for a pending tx whose nonce the Safe has already used', () => {
+    const { result } = renderHook(() => useHasPendingTxs(), {
+      initialReduxState: { pendingTxs: { [faker.string.uuid()]: indexingTx({ nonce: safeNonce - 1 }) } },
+    })
+
+    expect(result.current).toBe(false)
+  })
+
+  it('returns false if the pending txs belong to another chain or Safe', () => {
     const { result } = renderHook(() => useHasPendingTxs(), {
       initialReduxState: {
         pendingTxs: {
-          multisig_123: {
-            chainId: '5',
-            safeAddress: '0x0000000000000000000000000000000000000001',
-            txHash: 'tx123',
-          } as PendingTx,
-
-          multisig_456: {
-            chainId: '5',
-            safeAddress: '0x0000000000000000000000000000000000000002',
-            txHash: 'tx456',
-          } as PendingTx,
+          [faker.string.uuid()]: indexingTx({ chainId: `${chainId}1` }),
+          [faker.string.uuid()]: indexingTx({ safeAddress: fakerChecksummedAddress() }),
         },
       },
     })
 
-    expect(result?.current).toBe(true)
-  })
-
-  it('should return falseif there are no pending txs for the current chain', () => {
-    const { result } = renderHook(() => useHasPendingTxs(), {
-      initialReduxState: {
-        pendingTxs: {
-          multisig_789: {
-            chainId: '1',
-            safeAddress: '0x0000000000000000000000000000000000000001',
-            txHash: 'tx789',
-          } as PendingTx,
-        },
-      },
-    })
-
-    expect(result?.current).toBe(false)
+    expect(result.current).toBe(false)
   })
 })
