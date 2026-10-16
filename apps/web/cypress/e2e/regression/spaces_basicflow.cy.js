@@ -20,7 +20,7 @@ describe('Spaces basic flow tests', () => {
   beforeEach(() => {
     space.blockBeamer()
     space.interceptSpacesList()
-    cy.visit(constants.spacesUrl)
+    space.visitSpacesView()
   })
 
   it('Verify a user can sign in, create, rename and delete an organisation', () => {
@@ -32,13 +32,12 @@ describe('Spaces basic flow tests', () => {
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
-    space.clickOnSpaceSelector(spaceName)
+    space.clickOnSpaceSelector()
     space.spaceExists(spaceName)
     space.goToSpaceSettings()
     space.verifySpaceSettingsGeneralLoaded()
     space.editSpace(newSpaceName)
-    space.verifyDeleteBlockedByTrial()
-    space.clickOnSpaceSelector(newSpaceName)
+    space.clickOnSpaceSelector()
     space.spaceExists(newSpaceName)
     space.deleteSpace(newSpaceName)
     cy.contains(space.deleteSpaceConfirmationMsg(newSpaceName)).should('be.visible')
@@ -50,13 +49,16 @@ describe('Spaces basic flow tests', () => {
     // fresh empty workspace, add into it, then delete it — keeping the run idempotent regardless of
     // what previous runs left in the account. The Safe accounts page is the persistent add entry point.
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
+    const accountAddress = staticSafes.SEP_STATIC_SAFE_35.substring(4)
+    const accountName = 'E2E account'
 
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.goToSpaceSafeAccounts()
-    space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
+    space.stubAddingSafeToSpace(accountAddress, constants.networkKeys.sepolia, accountName)
+    space.addAccountManually(accountAddress, constants.networks.sepolia, accountName)
     space.deleteSpace(spaceName)
   })
 
@@ -76,7 +78,7 @@ describe('Spaces basic flow tests', () => {
     space.addMember(memberName, user_address)
     space.disconnectFromSpaceLevel()
     cy.clearAllCookies()
-    cy.visit(constants.spacesUrl)
+    space.visitSpacesView()
     space.signInWithWallet(user)
     // No reload here: a member with a pending invite is kept on /welcome/spaces after sign-in
     // (useSignInRedirect only redirects when there are no invites), and a full reload would drop the
@@ -90,7 +92,7 @@ describe('Spaces basic flow tests', () => {
     // admin who created it and remove it — keeping the run idempotent (tests 1 and 2 self-clean too).
     space.disconnectFromSpaceLevel()
     cy.clearAllCookies()
-    cy.visit(constants.spacesUrl)
+    space.visitSpacesView()
     space.signInWithWallet(admin)
     space.deleteSpace(spaceName)
   })

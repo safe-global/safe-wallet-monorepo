@@ -121,12 +121,11 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 
 export const usersEndpoint = '**/v1/users'
 export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
-export const spacesEndpoint = '**/**/spaces*'
+export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
 export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
-export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
@@ -145,7 +144,7 @@ export const portfolioEndpoint = '**/v1/portfolio/**'
 export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
 export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
 export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
-export const delegatesEndpoint = '**/v2/chains/*/delegates*'
+export const delegatesEndpoint = /\/v[23]\/chains\/\d+\/delegates\?/
 
 export const indexStatusUrl = 'https://status.safe.global'
 

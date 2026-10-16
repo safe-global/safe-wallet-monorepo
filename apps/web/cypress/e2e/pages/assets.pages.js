@@ -58,6 +58,7 @@ const tokenSymbol = '[data-testid="token-symbol"]'
 const tokenBalanceCell = '[data-testid="token-balance"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
+export const shortAddressRegex = /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/
 
 // The switch is a Base UI control: the test id sits on the `role="switch"` element itself and the
 // state lives in `aria-checked`. It renders a native `input[type="checkbox"]` only when given a
@@ -131,9 +132,7 @@ export const currencyDaiBalance = '82'
 
 export function checkNftAddressFormat() {
   cy.get(nftsRow).each(($el) => {
-    cy.wrap($el)
-      .invoke('text')
-      .should('match', /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/)
+    cy.wrap($el).invoke('text').should('match', shortAddressRegex)
   })
 }
 
@@ -200,7 +199,7 @@ export function clickOnSendBtnAssetsTable(index) {
     .eq(index)
     .find(assetsTableActionsCell)
     .within(() => {
-      cy.get(sendBtn).should('be.visible').click()
+      cy.get(sendBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click()
     })
 }
 

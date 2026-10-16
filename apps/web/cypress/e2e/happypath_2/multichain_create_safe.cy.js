@@ -65,7 +65,7 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
     cy.url().then((currentUrl) => {
       const safe = `sep:${main.getSafeAddressFromUrl(currentUrl)}`
       createwallet.clickOnActivateAccountBtn(0)
-      createwallet.selectPayNowOption()
+      tx.selectConnectedWalletIfOffered()
       createwallet.clickOnFinalActivateAccountBtn()
       createwallet.clickOnLetsGoBtn()
       cy.visit(constants.setupUrl + safe)

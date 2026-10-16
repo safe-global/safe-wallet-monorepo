@@ -1,9 +1,8 @@
 import { useContext, useMemo } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
-import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import TxSubmitError from '@/components/tx/TxSubmitError'
 import { TxFlowContext } from '../TxFlowProvider'
+import SubmitErrors from './SubmitErrors'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { SafeTxContext } from '../SafeTxProvider'
@@ -27,7 +26,7 @@ const resolveSlotId = (slotIds: string[], storedAction: string | undefined): str
 }
 
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
-  const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
+  const { txId } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const slotIds = useSlotIds(SlotName.ComboSubmit)
@@ -57,17 +56,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
   return (
     <>
-      {submitError && (
-        <div className="mt-2">
-          <TxSubmitError error={submitError} context="execution" />
-        </div>
-      )}
-
-      {isRejectedByUser && (
-        <div className="mt-2">
-          <WalletRejectionError />
-        </div>
-      )}
+      <SubmitErrors />
 
       {validationError !== undefined && <ErrorMessage error={validationError}>{validationError.message}</ErrorMessage>}
 

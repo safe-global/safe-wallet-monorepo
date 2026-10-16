@@ -13,7 +13,7 @@ import {
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 
@@ -35,7 +35,6 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
-    if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
     setIsMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
@@ -79,13 +78,15 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
           </Tooltip>
 
           {isAdmin && (
-            <DropdownMenuItem
-              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
-              onSelect={(e) => e.stopPropagation()}
-            >
-              <LogOut className="size-4 text-muted-foreground" />
-              <span>Remove from Workspace</span>
-            </DropdownMenuItem>
+            <Track {...SPACE_EVENTS.DELETE_ACCOUNT_MODAL}>
+              <DropdownMenuItem
+                onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
+                onSelect={(e) => e.stopPropagation()}
+              >
+                <LogOut className="size-4 text-muted-foreground" />
+                <span>Remove from Workspace</span>
+              </DropdownMenuItem>
+            </Track>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

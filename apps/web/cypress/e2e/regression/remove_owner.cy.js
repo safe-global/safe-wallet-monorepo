@@ -55,6 +55,8 @@ describe('Remove Owners tests', () => {
 
     // Added to prod
     it('Verify owner deletion transaction has been created', () => {
+      createTx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_13, signer)
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
       owner.waitForConnectionStatus()
       owner.openRemoveOwnerWindow(1)
       createwallet.clickOnNextBtn()
@@ -64,7 +66,6 @@ describe('Remove Owners tests', () => {
       createTx.changeNonce(10)
       createTx.clickOnContinueSignTransactionBtn()
       createTx.clickOnSignTransactionBtn()
-      createTx.waitForProposeRequest()
       createTx.clickViewTransaction()
       createTx.clickOnTransactionItemByName('removeOwner')
       createTx.verifyTxDestinationAddress('@removedAddress')

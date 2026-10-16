@@ -328,13 +328,6 @@ const AddAccounts = ({
             setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
             return
           }
-
-          safesToAdd.forEach(({ chainId, address }) => {
-            trackEvent(
-              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-            )
-          })
         }
 
         // Remove unchecked safes
@@ -351,13 +344,6 @@ const AddAccounts = ({
             )
             return
           }
-
-          safesToRemove.forEach(({ chainId, address }) => {
-            trackEvent(
-              { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
-              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-            )
-          })
         }
 
         // Show success notification
@@ -441,29 +427,29 @@ const AddAccounts = ({
   return (
     <>
       {externalOpen === undefined && (
-        <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
-          <Button
-            size="lg"
-            className="font-normal"
-            variant={buttonVariant}
-            disabled={!isAdmin}
-            onClick={() => {
-              trackEvent(
-                { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
-                { workspace_id: spaceId, entry_point: 'dashboard' },
-              )
-              setOpen(true)
-            }}
-            data-testid="add-space-account-button"
-          >
-            <Plus
-              className={cn('size-4', {
-                'text-green-500': buttonVariant === 'default',
-              })}
-            />
-            {buttonLabel}
-          </Button>
-        </AdminOnlyWorkspaceTooltip>
+        <Track
+          {...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED}
+          label={spaceId}
+          mixpanelParams={{ workspace_id: spaceId, entry_point: 'dashboard' }}
+        >
+          <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
+            <Button
+              size="lg"
+              className="font-normal"
+              variant={buttonVariant}
+              disabled={!isAdmin}
+              onClick={() => setOpen(true)}
+              data-testid="add-space-account-button"
+            >
+              <Plus
+                className={cn('size-4', {
+                  'text-green-500': buttonVariant === 'default',
+                })}
+              />
+              {buttonLabel}
+            </Button>
+          </AdminOnlyWorkspaceTooltip>
+        </Track>
       )}
 
       <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>

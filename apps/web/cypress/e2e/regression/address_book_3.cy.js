@@ -4,6 +4,7 @@ import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { walletCredentials } from '../../support/credentials.js'
+import { mockEnsName } from '../../support/utils/ethers.js'
 
 let staticSafes = []
 
@@ -72,8 +73,9 @@ describe('Address book tests - 3', () => {
     })
 
     it('Verify an entry can be added by ENS name', () => {
+      mockEnsName(constants.ENS_TEST_SEPOLIA, staticSafes.SEP_STATIC_SAFE_6)
       addressBook.clickOnCreateEntryBtn()
-      addressBook.addEntryByENS(NAME_2, constants.ENS_TEST_SEPOLIA)
+      addressBook.addEntryByENS(NAME_2, constants.ENS_TEST_SEPOLIA, staticSafes.SEP_STATIC_SAFE_6)
     })
   })
 

@@ -2,8 +2,6 @@ import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
 import { type InviteUsersDto, useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
@@ -111,18 +109,6 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void, nextS
         setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
         return
       }
-
-      result.data?.forEach((invitation) => {
-        trackEvent(
-          { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: spaceId },
-          {
-            workspace_id: spaceId,
-            user_id: invitation.userId,
-            role: invitation.role.toLowerCase(),
-            batch_size: validMembers.length,
-          },
-        )
-      })
 
       succeeded = true
       onSuccess()
