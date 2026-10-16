@@ -7393,6 +7393,57 @@
           "notifications"
         ]
       }
+    },
+    "/v1/spaces/{spaceId}/transactions/queued": {
+      "get": {
+        "description": "Retrieves the pending transactions of every Safe in a Space, across chains, ordered by nonce. Results come in runs of one Safe each; a page never ends inside a nonce.",
+        "operationId": "spaceTransactionsGetTransactionQueueV1",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor from the `next` URL of a previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated queue of the Safes in the Space",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceQueuedItemPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Not a member of this Space"
+          }
+        },
+        "summary": "Get the transaction queue of a Space",
+        "tags": [
+          "transactions"
+        ]
+      }
     }
   },
   "info": {
@@ -18064,6 +18115,88 @@
         },
         "required": [
           "subscriptions"
+        ]
+      },
+      "SpaceQueuedItemPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "description": "Consecutive runs of queued items of one Safe, in nonce order. A Safe can appear in several runs, and a run can continue on the next page.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueSafeItems"
+            }
+          },
+          "unavailableSafes": {
+            "description": "Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueSafe"
+            }
+          }
+        },
+        "required": [
+          "results",
+          "unavailableSafes"
+        ]
+      },
+      "SpaceQueueSafeItems": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ConflictHeaderQueuedItem"
+                },
+                {
+                  "$ref": "#/components/schemas/LabelQueuedItem"
+                },
+                {
+                  "$ref": "#/components/schemas/TransactionQueuedItem"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress",
+          "items"
+        ]
+      },
+      "SpaceQueueSafe": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress"
         ]
       }
     }

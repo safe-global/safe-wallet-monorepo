@@ -13,6 +13,10 @@ import {
 import TxSummary from '@/components/transactions/TxSummary/index'
 import * as pending from '@/hooks/useIsPending'
 import { render } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { TxRowSafeContext } from '@/components/transactions/TxSummary/TxRowSafeContext'
 
 const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
@@ -69,6 +73,23 @@ const mockSignMessageLibTxInHistory = {
 }
 
 describe('TxSummary', () => {
+  it('should not show a Safe cell outside a list that mixes Safes', () => {
+    const { queryByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+
+    expect(queryByTestId('tx-safe')).not.toBeInTheDocument()
+  })
+
+  it('should name the Safe of the row inside a list that mixes Safes', () => {
+    const safeAddress = checksumAddress(faker.finance.ethereumAddress())
+    const { getByTestId } = render(
+      <TxRowSafeContext.Provider value={{ chainId: '1', safeAddress }}>
+        <TxSummary item={mockTransaction} isConflictGroup={false} />
+      </TxRowSafeContext.Provider>,
+    )
+
+    expect(getByTestId('tx-safe')).toHaveTextContent(shortenAddress(safeAddress))
+  })
+
   it('should display a nonce if transaction is not grouped', () => {
     const { getByText } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
