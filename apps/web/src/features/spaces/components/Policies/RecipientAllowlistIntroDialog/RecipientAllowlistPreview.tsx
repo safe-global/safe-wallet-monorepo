@@ -28,9 +28,9 @@ const RecipientAllowlistPreview = (): ReactElement => (
   <div
     aria-hidden
     data-testid="recipient-allowlist-preview"
-    className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken"
+    className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken px-4"
   >
-    <div className="flex w-[300px] flex-col gap-1.5 rounded-md bg-card p-3 shadow-lg">
+    <div className="flex w-full max-w-[300px] flex-col gap-1.5 rounded-md bg-card p-3 shadow-lg">
       <Typography variant="paragraph-mini-medium">Allowed recipients</Typography>
       {ALLOWED_RECIPIENTS.map((address) => (
         <PreviewRow key={address} address={address} />
