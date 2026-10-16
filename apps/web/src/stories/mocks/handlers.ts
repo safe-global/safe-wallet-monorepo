@@ -17,6 +17,7 @@ import {
 } from '../../../../../config/test/msw/fixtures'
 import { createChainData, createChainsPageData, createChainsPageDataV2 } from './chains'
 import type { FeatureFlags, MockStoryConfig } from './types'
+import { MOCK_SPACE_ID } from './ids'
 
 /**
  * Core chain configuration handlers
@@ -452,7 +453,7 @@ export const mockSafeOverviews = [
 /**
  * Mock space data for spaces feature
  */
-export function createMockSpace(spaceId: string = 'uuid-1') {
+export function createMockSpace(spaceId: string = MOCK_SPACE_ID) {
   return {
     uuid: spaceId,
     name: 'Test Space',
@@ -486,11 +487,11 @@ export function spacesHandlers(): RequestHandler[] {
     http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
       const pathParts = url.pathname.split('/')
-      const spaceId = pathParts[pathParts.length - 1] || 'uuid-1'
+      const spaceId = pathParts[pathParts.length - 1] || MOCK_SPACE_ID
       return HttpResponse.json(createMockSpace(spaceId))
     }),
     // List all spaces for user
-    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace('uuid-1')])),
+    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(MOCK_SPACE_ID)])),
     // Get space safes
     http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} })),
     // Get all safes owned by address (used by useOwnedSafesGrouped)
