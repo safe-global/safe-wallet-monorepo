@@ -21,9 +21,9 @@ jobs:
     # shard it the way ./.github/actions/cypress does: a matrix plus an integer index
     # input used for the artifact name (Playwright takes `--shard=<index>/<total>`).
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: ./.github/actions/playwright
+      - uses: $/.github/actions/playwright
         with:
           grep: '@regression|@smoke|@api'
           name: regression
