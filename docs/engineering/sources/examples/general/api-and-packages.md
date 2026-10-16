@@ -379,3 +379,36 @@ submit(data)
 ### Why
 
 Guards that only stop or redirect the submit read as flat early returns; nesting them in if/else makes the reader track which branch falls through to the main path.
+
+## OBS-01 — Track an impression once and only when shown
+
+Source: PR #8905 (RL-20261007-001)
+
+### Avoid
+
+```tsx
+const Banner = ({ location }: Props) => {
+  useEffect(() => {
+    trackEvent(EVENTS.BANNER_VIEWED, { [Params.LOCATION]: location })
+  }, [location])
+  // ...
+}
+```
+
+### Prefer
+
+```tsx
+const Banner = ({ location, isShown }: Props) => {
+  const hasTrackedView = useRef(false)
+  useEffect(() => {
+    if (!isShown || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(EVENTS.BANNER_VIEWED, { [Params.LOCATION]: location })
+  }, [isShown, location])
+  // ...
+}
+```
+
+### Why
+
+A mount effect re-fires when its deps change and also runs while a parent keeps the UI mounted but hidden, which inflates reach and lowers click-through. The ref limits each mount to one event, and the visibility flag ties it to a real impression.

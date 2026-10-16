@@ -42,8 +42,8 @@
     "project": "web",
     "area": "abstractions",
     "title": "Extract shared UI only when behavior is actually shared",
-    "rule": "When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations.",
-    "check": "Did this add a component that mirrors an existing workflow? If yes, can the existing component accept the small differences as props?",
+    "rule": "When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`.",
+    "check": "Did this add a component that mirrors an existing workflow, or logic another call site or app already has? If yes, can the existing component accept the small differences as props, or the logic move into a shared hook or package?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#shared-form-components",
       "web/examples/feature-boundaries.md#code-01-fold-near-duplicate-sign-in-buttons-into-one-configurable-component",
@@ -71,7 +71,8 @@
       "RL-20260828-003",
       "RL-20260911-003",
       "RL-20260916-004",
-      "RL-20260930-002"
+      "RL-20260930-002",
+      "RL-20261008-003"
     ]
   },
   {
@@ -151,7 +152,8 @@
       "RL-20260820-007",
       "RL-20260921-002",
       "RL-20260930-009",
-      "RL-20260929-005"
+      "RL-20260929-005",
+      "RL-20261008-008"
     ]
   },
   {
@@ -290,8 +292,8 @@
     "project": "general",
     "area": "data",
     "title": "Use the canonical helper, predicate, or constant",
-    "rule": "Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify. Search for an existing utility, constant, or route builder before adding one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`), and have every consumer of a shared check (submit gate, builder, summary) call the one predicate.",
-    "check": "Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate, and does an existing utility already do what any new helper does?",
+    "rule": "Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify. Search for an existing utility, constant, or route builder before adding one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`), and have every consumer of a shared check (submit gate, builder, summary) call the one predicate. A call site that must bypass a shared helper keeps the helper's fallbacks.",
+    "check": "Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate, does an existing utility already do what any new helper does, and does a call site that bypasses one keep its fallbacks?",
     "exampleRefs": [
       "examples/general/chain-contracts.md#normalize-versions-and-origin",
       "examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting"
@@ -311,7 +313,8 @@
       "RL-20260713-004",
       "RL-20260722-002",
       "RL-20260812-001",
-      "RL-20260930-001"
+      "RL-20260930-001",
+      "RL-20261008-002"
     ]
   },
   {
@@ -442,7 +445,8 @@
       "RL-20260820-008",
       "RL-20260826-002",
       "RL-20260911-002",
-      "RL-20260925-002"
+      "RL-20260925-002",
+      "RL-20261002-003"
     ]
   },
   {
@@ -477,7 +481,8 @@
       "RL-20260820-006",
       "RL-20260909-003",
       "RL-20260921-005",
-      "RL-20261001-002"
+      "RL-20261001-002",
+      "RL-20261002-003"
     ]
   },
   {
@@ -558,7 +563,8 @@
       "RL-20260828-004",
       "RL-20260909-005",
       "RL-20260921-003",
-      "RL-20261001-005"
+      "RL-20261001-005",
+      "RL-20261008-007"
     ]
   },
   {
@@ -576,9 +582,12 @@
     "project": "web",
     "area": "observability",
     "title": "Promote telemetry only when user impact justifies it",
-    "rule": "Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label, which collapses distinct funnels and mis-attributes events.",
-    "check": "Did this change logging/RUM/error classification, or fire an analytics event from a shared/reused component? If yes, is the level justified by user impact and duplication risk, and is the event attributed to the actual entry point rather than a hardcoded/reused label?",
-    "exampleRefs": ["examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key"],
+    "rule": "Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label, which collapses distinct funnels and mis-attributes events. An impression event fires once per mount and only while its UI is actually shown, session-wide properties are registered globally, and a refactor keeps an existing event’s properties and values.",
+    "check": "Did this change logging/RUM/error classification, or fire an analytics event from a shared/reused component? If yes, is the level justified by user impact and duplication risk, and is the event attributed to the actual entry point rather than a hardcoded/reused label, do impression events fire once and only when visible, and do existing events keep their properties?",
+    "exampleRefs": [
+      "examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key",
+      "examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown"
+    ],
     "reviewLearningIds": [
       "RL-20260319-001",
       "RL-20260417-003",
@@ -588,7 +597,8 @@
       "RL-20260729-005",
       "RL-20260824-002",
       "RL-20260914-002",
-      "RL-20260921-007"
+      "RL-20260921-007",
+      "RL-20261007-001"
     ]
   },
   {
@@ -652,7 +662,8 @@
       "RL-20260825-001",
       "RL-20260909-002",
       "RL-20260921-001",
-      "RL-20261001-001"
+      "RL-20261001-001",
+      "RL-20261008-006"
     ]
   },
   {
@@ -673,7 +684,7 @@
     "rule": "Changes to visible balances, disabled actions, labels, or available flows should cite product/design intent when the behavior is not mechanically implied by the code change.",
     "check": "Did this alter visible product behavior? If yes, is the product/design decision explicit?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260420-004", "RL-20260619-002", "RL-20260930-008"]
+    "reviewLearningIds": ["RL-20260420-004", "RL-20260619-002", "RL-20260930-008", "RL-20261002-006"]
   },
   {
     "id": "WEB-04",
@@ -787,11 +798,11 @@
     "id": "CONFIG-01",
     "project": "web",
     "area": "config",
-    "title": "Match env-var default values to consumer parsers",
-    "rule": "Default values for env-var-driven config must satisfy the same parser or strict check the runtime applies to non-default values. For origin allowlists, omit trailing slashes since browser-supplied origins are slashless.",
-    "check": "Did this introduce or change an env-var default? If yes, run the default through the consuming check; would the strict path accept it without normalization?",
+    "title": "Add env vars only for new values; match defaults to parsers",
+    "rule": "Add an env var only for a value no existing source provides: the config service already serves per-chain data such as `rpcUri`, and a value fixed for the app is a constant. Default values for env-var-driven config must satisfy the same parser or strict check the runtime applies to non-default values. For origin allowlists, omit trailing slashes since browser-supplied origins are slashless.",
+    "check": "Did this introduce an env var or change its default? If yes, does the config service or a constant already provide the value? Run the default through the consuming check; would the strict path accept it without normalization?",
     "exampleRefs": ["web/examples/config-and-env.md#config-01-match-env-var-defaults-to-consumer-parsers"],
-    "reviewLearningIds": ["RL-20260326-005"]
+    "reviewLearningIds": ["RL-20260326-005", "RL-20261008-004"]
   },
   {
     "id": "UX-03",
@@ -837,7 +848,8 @@
       "RL-20260907-003",
       "RL-20260909-009",
       "RL-20260921-011",
-      "RL-20261001-003"
+      "RL-20261001-003",
+      "RL-20261002-007"
     ],
     "project": "general"
   },
@@ -899,7 +911,8 @@
       "RL-20260710-001",
       "RL-20260716-005",
       "RL-20260806-005",
-      "RL-20260911-001"
+      "RL-20260911-001",
+      "RL-20261002-005"
     ],
     "project": "general"
   },
@@ -930,7 +943,8 @@
       "RL-20260612-008",
       "RL-20260909-004",
       "RL-20260930-011",
-      "RL-20260929-001"
+      "RL-20260929-001",
+      "RL-20261008-005"
     ],
     "project": "general"
   },
@@ -958,17 +972,19 @@
     "id": "TX-03",
     "area": "transactions",
     "title": "Gate submit on readiness of the data that decides it",
-    "rule": "Block submission until data that affects the on-chain amount or decides whether the action is disabled or needs a warning (token decimals, tx details) is loaded. A `!!data && condition` gate reads as enabled while loading. Never let the UI fall back to a default that silently corrupts the value.",
-    "check": "Did this submit path depend on token metadata or other loaded data? If yes, is submission disabled until that data is confirmed loaded?",
+    "rule": "Block submission until data that affects the on-chain amount or decides whether the action is disabled or needs a warning (token decimals, tx details) is loaded. A `!!data && condition` gate reads as enabled while loading. Never let the UI fall back to a default that silently corrupts the value. Gate only on data that decides the action; a check the flow doesn't need only blocks it. A scoped flow whose SDK or provider is missing throws instead of falling back to the app-wide one.",
+    "check": "Did this submit path depend on token metadata or other loaded data? If yes, is submission disabled until that data is confirmed loaded, does every gate decide this action, and does a missing scoped dependency throw instead of falling back?",
     "exampleRefs": [
-      "examples/general/transactions.md#gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals"
+      "examples/general/transactions.md#gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals",
+      "examples/general/transactions.md#tx-03-throw-when-a-scoped-dependency-is-missing"
     ],
     "reviewLearningIds": [
       "RL-20260303-002",
       "RL-20260608-011",
       "RL-20260713-002",
       "RL-20260714-001",
-      "RL-20260928-003"
+      "RL-20260928-003",
+      "RL-20261002-002"
     ],
     "project": "web"
   },
@@ -1006,7 +1022,8 @@
       "RL-20260720-002",
       "RL-20260824-001",
       "RL-20260918-002",
-      "RL-20260924-001"
+      "RL-20260924-001",
+      "RL-20261002-001"
     ],
     "project": "general"
   },
@@ -1279,7 +1296,8 @@
       "RL-20260731-003",
       "RL-20260811-006",
       "RL-20260828-002",
-      "RL-20261001-004"
+      "RL-20261001-004",
+      "RL-20261002-004"
     ]
   },
   {
@@ -1287,9 +1305,12 @@
     "project": "general",
     "area": "state",
     "title": "Scope hook dependencies to the real trigger with stable references",
-    "rule": "Effect and memo dependencies name the value that should trigger the work, not a whole collection it iterates or fast-changing overlay state (selection, hover) of an expensive memo; split a structural memo from a cheap overlay memo. Callbacks, fallbacks, and context values passed into deps or providers are referentially stable: `useCallback`/`useMemo` in the parent, and empty fallbacks (`?? []`, `?? {}`) as module-level constants.",
-    "check": "Did this add or change `useEffect`/`useMemo`/`useCallback` dependencies (including under a suppressed `exhaustive-deps`), or pass a callback or `??` fallback into them? If yes, is every retriggering value listed, and does each dep change only when the work should re-run?",
-    "exampleRefs": ["examples/general/data-integrity.md#stabilize-callbacks-passed-into-child-effect-deps"],
+    "rule": "Effect and memo dependencies name the value that should trigger the work, not a whole collection it iterates, a stand-in such as its `length` that misses same-size changes, or fast-changing overlay state (selection, hover) of an expensive memo; split a structural memo from a cheap overlay memo. Callbacks, fallbacks, and context values passed into deps or providers are referentially stable: `useCallback`/`useMemo` in the parent, and empty fallbacks (`?? []`, `?? {}`) as module-level constants.",
+    "check": "Did this add or change `useEffect`/`useMemo`/`useCallback` dependencies (including under a suppressed `exhaustive-deps`), or pass a callback or `??` fallback into them? If yes, is every retriggering value listed, and does each dep change exactly when the work should re-run?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#stabilize-callbacks-passed-into-child-effect-deps",
+      "examples/general/data-integrity.md#hook-01-key-effect-deps-on-identifying-values-not-a-count"
+    ],
     "reviewLearningIds": [
       "RL-20260605-010",
       "RL-20260615-006",
@@ -1299,7 +1320,8 @@
       "RL-20260716-004",
       "RL-20260813-001",
       "RL-20260908-001",
-      "RL-20260930-007"
+      "RL-20260930-007",
+      "RL-20261008-001"
     ]
   },
   {
@@ -1357,10 +1379,10 @@
     "project": "general",
     "area": "performance",
     "title": "Bound request fan-out and polling",
-    "rule": "A list must not fire one query per row or per Workspace on render: fetch per item when its menu or detail opens, or use a narrower lookup, and an error fallback must not send more requests than the happy path. Polling stops once its result settles or times out; a polled query shares its cache key, so polling it re-polls for every subscriber.",
-    "check": "Did this put a query in a list row or loop, fan requests out per entity, or poll? If yes, is the request count bounded by what the user opened, and does polling stop?",
+    "rule": "A list must not fire one query per row or per Workspace on render: fetch per item when its menu or detail opens, or use a narrower lookup, and an error fallback must not send more requests than the happy path. Polling stops once its result settles or times out; a polled query shares its cache key, so polling it re-polls for every subscriber, and rows sharing it read their slice through `selectFromResult` so a poll does not re-render every row.",
+    "check": "Did this put a query in a list row or loop, fan requests out per entity, or poll? If yes, is the request count bounded by what the user opened, does polling stop, and does each row subscribe only to its slice?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260930-006"]
+    "reviewLearningIds": ["RL-20260930-006", "RL-20261002-008"]
   },
   {
     "id": "CODE-07",

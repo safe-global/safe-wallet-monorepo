@@ -51,7 +51,7 @@
 | [`UI-01`](#ui-01)         | Use theme tokens and hosted assets                                                         | general / ui            |
 | [`CI-02`](#ci-02)         | Release workflows must compute against the pre-change state                                | general / ci            |
 | [`MOB-05`](#mob-05)       | Configure mobile providers from app state and supported config                             | mobile / providers      |
-| [`CONFIG-01`](#config-01) | Match env-var default values to consumer parsers                                           | web / config            |
+| [`CONFIG-01`](#config-01) | Add env vars only for new values; match defaults to parsers                                | web / config            |
 | [`UX-03`](#ux-03)         | Replacements must port over user-relied UX features                                        | web / ui                |
 | [`PKG-01`](#pkg-01)       | Do not duplicate shared package files in app source                                        | general / packages      |
 | [`UI-02`](#ui-02)         | Pick z-index from a documented layer scale                                                 | web / ui                |
@@ -203,14 +203,14 @@ need before other features depend on them.
 
 ### `CODE-01` Extract shared UI only when behavior is actually shared
 
-> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002`
+> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003`
 
 **📜 Rule**\
-When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations.
+When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`.
 
 **✅ Check**\
 
-> Did this add a component that mirrors an existing workflow? If yes, can the existing component accept the small differences as props?
+> Did this add a component that mirrors an existing workflow, or logic another call site or app already has? If yes, can the existing component accept the small differences as props, or the logic move into a shared hook or package?
 
 <details>
 <summary><strong>💡 Example 1 of 4</strong> — <code>web/examples/feature-boundaries.md</code> § <em>shared-form-components</em></summary>
@@ -761,7 +761,7 @@ unauthenticated so they re-login.
 
 ### `API-01` Search consumers when removing or changing public exports
 
-> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005`
+> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008`
 
 **📜 Rule**\
 Removing or changing a public export, hook return field, endpoint, compatibility API, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
@@ -1534,14 +1534,14 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 
 ### `DATA-04` Use the canonical helper, predicate, or constant
 
-> **general** · data · 2 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001`
+> **general** · data · 2 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002`
 
 **📜 Rule**\
-Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify. Search for an existing utility, constant, or route builder before adding one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`), and have every consumer of a shared check (submit gate, builder, summary) call the one predicate.
+Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify. Search for an existing utility, constant, or route builder before adding one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`), and have every consumer of a shared check (submit gate, builder, summary) call the one predicate. A call site that must bypass a shared helper keeps the helper's fallbacks.
 
 **✅ Check**\
 
-> Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate, and does an existing utility already do what any new helper does?
+> Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate, does an existing utility already do what any new helper does, and does a call site that bypasses one keep its fallbacks?
 
 <details>
 <summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/chain-contracts.md</code> § <em>normalize-versions-and-origin</em></summary>
@@ -1982,7 +1982,7 @@ correct, so the helper produces false negatives whenever it is used.
 
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
-> **general** · testing · 5 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002`
+> **general** · testing · 5 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003`
 
 **📜 Rule**\
 Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears.
@@ -2206,7 +2206,7 @@ If the helper writes the whole key (not a merge), any state the app would popula
 
 ### `TEST-02` New branch logic needs branch-specific tests
 
-> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002`
+> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003`
 
 **📜 Rule**\
 New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.
@@ -2407,7 +2407,7 @@ Tx-flow submit options must not auto-register or set global state in a way that 
 
 ### `UX-01` Constrained text must truncate or wrap intentionally
 
-> **web** · ui · ↩ `RL-20260217-005` · `RL-20260219-002` · `RL-20260506-001` · `RL-20260612-006` · `RL-20260828-004` · `RL-20260909-005` · `RL-20260921-003` · `RL-20261001-005`
+> **web** · ui · ↩ `RL-20260217-005` · `RL-20260219-002` · `RL-20260506-001` · `RL-20260612-006` · `RL-20260828-004` · `RL-20260909-005` · `RL-20260921-003` · `RL-20261001-005` · `RL-20261008-007`
 
 **📜 Rule**\
 Long user-provided identifiers such as email addresses and names must fit constrained UI the same way wallet addresses do.
@@ -2488,17 +2488,17 @@ server-side store before exposing the action.
 
 ### `OBS-01` Promote telemetry only when user impact justifies it
 
-> **web** · observability · 1 example · ↩ `RL-20260319-001` · `RL-20260417-003` · `RL-20260601-002` · `RL-20260625-002` · `RL-20260720-005` · `RL-20260729-005` · `RL-20260824-002` · `RL-20260914-002` · `RL-20260921-007`
+> **web** · observability · 2 examples · ↩ `RL-20260319-001` · `RL-20260417-003` · `RL-20260601-002` · `RL-20260625-002` · `RL-20260720-005` · `RL-20260729-005` · `RL-20260824-002` · `RL-20260914-002` · `RL-20260921-007` · `RL-20261007-001`
 
 **📜 Rule**\
-Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label, which collapses distinct funnels and mis-attributes events.
+Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label, which collapses distinct funnels and mis-attributes events. An impression event fires once per mount and only while its UI is actually shown, session-wide properties are registered globally, and a refactor keeps an existing event’s properties and values.
 
 **✅ Check**\
 
-> Did this change logging/RUM/error classification, or fire an analytics event from a shared/reused component? If yes, is the level justified by user impact and duplication risk, and is the event attributed to the actual entry point rather than a hardcoded/reused label?
+> Did this change logging/RUM/error classification, or fire an analytics event from a shared/reused component? If yes, is the level justified by user impact and duplication risk, and is the event attributed to the actual entry point rather than a hardcoded/reused label, do impression events fire once and only when visible, and do existing events keep their properties?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-use-the-shared-analytics-param-key</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-use-the-shared-analytics-param-key</em></summary>
 
 <br>
 
@@ -2527,6 +2527,48 @@ trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
 Free-form keys split a single dimension across multiple property names in Mixpanel; using the shared enum keeps a stable schema for downstream queries.
 
 <sub>Source: <a href="examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key">examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-track-an-impression-once-and-only-when-shown</em></summary>
+
+<br>
+
+**OBS-01 — Track an impression once and only when shown**
+
+Source: PR #8905 (RL-20261007-001)
+
+### Avoid
+
+```tsx
+const Banner = ({ location }: Props) => {
+  useEffect(() => {
+    trackEvent(EVENTS.BANNER_VIEWED, { [Params.LOCATION]: location })
+  }, [location])
+  // ...
+}
+```
+
+### Prefer
+
+```tsx
+const Banner = ({ location, isShown }: Props) => {
+  const hasTrackedView = useRef(false)
+  useEffect(() => {
+    if (!isShown || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(EVENTS.BANNER_VIEWED, { [Params.LOCATION]: location })
+  }, [isShown, location])
+  // ...
+}
+```
+
+### Why
+
+A mount effect re-fires when its deps change and also runs while a parent keeps the UI mounted but hidden, which inflates reach and lowers click-through. The ref limits each mount to one event, and the visibility flag ties it to a real impression.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown">examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown</a></sub>
 
 </details>
 
@@ -2624,7 +2666,7 @@ User-controlled strings used as map keys must not index inherited object propert
 
 ### `DOC-01` Keep docs and comments true to the code
 
-> **general** · docs · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001`
+> **general** · docs · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006`
 
 **📜 Rule**\
 When splitting or moving agent/developer docs, every removed section must be moved, intentionally superseded, or called out for review. Comments and JSDoc next to a changed condition or contract are updated in the same change, and state the non-obvious why rather than restating the code or narrating decision history, in one line with no ticket or decision IDs; a test's regression intent goes in its name, not a comment above it.
@@ -2656,7 +2698,7 @@ Release and operational docs should describe actual branch names, generated bran
 
 ### `PROD-01` Product behavior changes need explicit confirmation
 
-> **general** · product · ↩ `RL-20260420-004` · `RL-20260619-002` · `RL-20260930-008`
+> **general** · product · ↩ `RL-20260420-004` · `RL-20260619-002` · `RL-20260930-008` · `RL-20261002-006`
 
 **📜 Rule**\
 Changes to visible balances, disabled actions, labels, or available flows should cite product/design intent when the behavior is not mechanically implied by the code change.
@@ -3261,16 +3303,16 @@ Author's response: 'Doesn't matter as I can't manipulate them in production. We 
 
 <a id="config-01"></a>
 
-### `CONFIG-01` Match env-var default values to consumer parsers
+### `CONFIG-01` Add env vars only for new values; match defaults to parsers
 
-> **web** · config · 1 example · ↩ `RL-20260326-005`
+> **web** · config · 1 example · ↩ `RL-20260326-005` · `RL-20261008-004`
 
 **📜 Rule**\
-Default values for env-var-driven config must satisfy the same parser or strict check the runtime applies to non-default values. For origin allowlists, omit trailing slashes since browser-supplied origins are slashless.
+Add an env var only for a value no existing source provides: the config service already serves per-chain data such as `rpcUri`, and a value fixed for the app is a constant. Default values for env-var-driven config must satisfy the same parser or strict check the runtime applies to non-default values. For origin allowlists, omit trailing slashes since browser-supplied origins are slashless.
 
 **✅ Check**\
 
-> Did this introduce or change an env-var default? If yes, run the default through the consuming check; would the strict path accept it without normalization?
+> Did this introduce an env var or change its default? If yes, does the config service or a constant already provide the value? Run the default through the consuming check; would the strict path accept it without normalization?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>web/examples/config-and-env.md</code> § <em>config-01-match-env-var-defaults-to-consumer-parsers</em></summary>
@@ -3415,7 +3457,7 @@ When introducing or adjusting a z-index, place it on a documented scale of exist
 
 ### `REVIEW-01` Keep each PR to one stated scope
 
-> **general** · review · ↩ `RL-20260318-004` · `RL-20260603-002` · `RL-20260818-001` · `RL-20260907-003` · `RL-20260909-009` · `RL-20260921-011` · `RL-20261001-003`
+> **general** · review · ↩ `RL-20260318-004` · `RL-20260603-002` · `RL-20260818-001` · `RL-20260907-003` · `RL-20260909-009` · `RL-20260921-011` · `RL-20261001-003` · `RL-20261002-007`
 
 **📜 Rule**\
 A PR carries one ticket's worth of change: CI, tooling, or test-infrastructure PRs do not also contain unrelated production refactors, and a critical fix is not bundled with unrelated UI changes, so each can be reviewed, verified, and reverted alone. AI working docs and review screenshots stay out of the diff. Port/restore PRs keep behaviour parity and route pre-existing bugs to a separate fix.
@@ -3608,7 +3650,7 @@ Reviewer flagged six positional args as a refactor smell. The signature obscures
 
 ### `CODE-04` Compute once per render before the JSX, not inside it
 
-> **general** · abstractions · 1 example · ↩ `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001`
+> **general** · abstractions · 1 example · ↩ `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005`
 
 **📜 Rule**\
 Pure derivations from props or state — especially ones reused across multiple JSX nodes — should be assigned to a local `const` (or `useMemo` if expensive) above the `return`, not inlined into JSX attributes.
@@ -3737,7 +3779,7 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 
 ### `CODE-05` Name compound conditions instead of inlining them
 
-> **general** · abstractions · 2 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001`
+> **general** · abstractions · 2 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005`
 
 **📜 Rule**\
 Three or more `value !== 'literal'` checks on one variable become `!DISALLOWED.includes(value)` against a named const. A conjunction reused across conditions, and each branch of a multi-way ternary in JSX, get a named boolean computed before the return. Guard branches return early instead of nesting the main path, type guards list the members they accept rather than negating one, and names say what a value means at the call site (`pendingActions`, `mustUpgradeToSafePro`, positively framed flags such as `signersOnly`).
@@ -3918,17 +3960,17 @@ Without the reset, RUM events after the user wipes their last Safe still carry t
 
 ### `TX-03` Gate submit on readiness of the data that decides it
 
-> **web** · transactions · 1 example · ↩ `RL-20260303-002` · `RL-20260608-011` · `RL-20260713-002` · `RL-20260714-001` · `RL-20260928-003`
+> **web** · transactions · 2 examples · ↩ `RL-20260303-002` · `RL-20260608-011` · `RL-20260713-002` · `RL-20260714-001` · `RL-20260928-003` · `RL-20261002-002`
 
 **📜 Rule**\
-Block submission until data that affects the on-chain amount or decides whether the action is disabled or needs a warning (token decimals, tx details) is loaded. A `!!data && condition` gate reads as enabled while loading. Never let the UI fall back to a default that silently corrupts the value.
+Block submission until data that affects the on-chain amount or decides whether the action is disabled or needs a warning (token decimals, tx details) is loaded. A `!!data && condition` gate reads as enabled while loading. Never let the UI fall back to a default that silently corrupts the value. Gate only on data that decides the action; a check the flow doesn't need only blocks it. A scoped flow whose SDK or provider is missing throws instead of falling back to the app-wide one.
 
 **✅ Check**\
 
-> Did this submit path depend on token metadata or other loaded data? If yes, is submission disabled until that data is confirmed loaded?
+> Did this submit path depend on token metadata or other loaded data? If yes, is submission disabled until that data is confirmed loaded, does every gate decide this action, and does a missing scoped dependency throw instead of falling back?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/transactions.md</code> § <em>gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/transactions.md</code> § <em>gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals</em></summary>
 
 <br>
 
@@ -3970,6 +4012,45 @@ const isValid = baseValid && isTokenDataReady // disables Review until known
 Defaulting to 18 silently encodes the wrong unit scale; gating on the explicit ready flag prevents users from signing or proposing a transaction with the wrong amount.
 
 <sub>Source: <a href="examples/general/transactions.md#gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals">examples/general/transactions.md#gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/transactions.md</code> § <em>tx-03-throw-when-a-scoped-dependency-is-missing</em></summary>
+
+<br>
+
+**TX-03 — Throw when a scoped dependency is missing**
+
+Source: PR #8874 (RL-20261002-002)
+
+### Avoid
+
+```ts
+const getLatestBlockGasLimit = async (scope?: Scope) => {
+  const provider = scope?.provider ?? getAppProvider()
+  const block = await provider?.getBlock('latest')
+  // ...
+}
+```
+
+### Prefer
+
+```ts
+const getLatestBlockGasLimit = async (scope?: Scope) => {
+  if (scope && !scope.provider) {
+    throw Error('The provider for the selected Safe account is not initialized yet.')
+  }
+  const provider = scope?.provider ?? getAppProvider()
+  // ...
+}
+```
+
+### Why
+
+While the scoped provider is reset, the fallback silently reads the URL chain instead of the scoped Safe's chain. Falling back only when no scope exists keeps Safe-level flows unchanged and turns the scoped gap into a loud error.
+
+<sub>Source: <a href="examples/general/transactions.md#tx-03-throw-when-a-scoped-dependency-is-missing">examples/general/transactions.md#tx-03-throw-when-a-scoped-dependency-is-missing</a></sub>
 
 </details>
 
@@ -4098,7 +4179,7 @@ JS `toString()` switches to exponent form below ~1e-6. Token amount parsers do n
 
 ### `STATE-03` Async attempts start clean and recover on every exit
 
-> **general** · state · 1 example · ↩ `RL-20260306-006` · `RL-20260605-011` · `RL-20260609-008` · `RL-20260720-002` · `RL-20260824-001` · `RL-20260918-002` · `RL-20260924-001`
+> **general** · state · 1 example · ↩ `RL-20260306-006` · `RL-20260605-011` · `RL-20260609-008` · `RL-20260720-002` · `RL-20260824-001` · `RL-20260918-002` · `RL-20260924-001` · `RL-20261002-001`
 
 **📜 Rule**\
 When a retry, submit, or new user input (a re-upload, a file drop) issues async work, reset the prior result and error synchronously before the call, and surface rejected input instead of dropping it silently. Set the in-flight flag after early returns or clear it in `finally`; a dialog that shows its own error closes only on success. In a multi-step submit, order writes so one failure cannot skip another, make a retry redo what is still owed, and drop a built result when a blocker appears.
@@ -4977,7 +5058,7 @@ A compromised or misconfigured backend could otherwise redirect funds through a 
 
 ### `TYPE-01` Keep types honest instead of casting
 
-> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004`
+> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004` · `RL-20261002-004`
 
 **📜 Rule**\
 Narrow unknown or wider values with a type predicate (`(x: unknown): x is T`), a guard, or a correctly typed source instead of `as T` casts or `@ts-ignore`; a cast silences the checker exactly where the value is unverified. Signatures state what they need: required inputs are not optional, and parameters are typed by the fields they read (`Pick<T, …>`). Branches on a discriminant end in a `never` check so a new kind fails to compile.
@@ -5029,17 +5110,17 @@ return new CodedError(code, message)
 
 ### `HOOK-01` Scope hook dependencies to the real trigger with stable references
 
-> **general** · state · 1 example · ↩ `RL-20260605-010` · `RL-20260615-006` · `RL-20260611-008` · `RL-20260624-011` · `RL-20260701-001` · `RL-20260716-004` · `RL-20260813-001` · `RL-20260908-001` · `RL-20260930-007`
+> **general** · state · 2 examples · ↩ `RL-20260605-010` · `RL-20260615-006` · `RL-20260611-008` · `RL-20260624-011` · `RL-20260701-001` · `RL-20260716-004` · `RL-20260813-001` · `RL-20260908-001` · `RL-20260930-007` · `RL-20261008-001`
 
 **📜 Rule**\
-Effect and memo dependencies name the value that should trigger the work, not a whole collection it iterates or fast-changing overlay state (selection, hover) of an expensive memo; split a structural memo from a cheap overlay memo. Callbacks, fallbacks, and context values passed into deps or providers are referentially stable: `useCallback`/`useMemo` in the parent, and empty fallbacks (`?? []`, `?? {}`) as module-level constants.
+Effect and memo dependencies name the value that should trigger the work, not a whole collection it iterates, a stand-in such as its `length` that misses same-size changes, or fast-changing overlay state (selection, hover) of an expensive memo; split a structural memo from a cheap overlay memo. Callbacks, fallbacks, and context values passed into deps or providers are referentially stable: `useCallback`/`useMemo` in the parent, and empty fallbacks (`?? []`, `?? {}`) as module-level constants.
 
 **✅ Check**\
 
-> Did this add or change `useEffect`/`useMemo`/`useCallback` dependencies (including under a suppressed `exhaustive-deps`), or pass a callback or `??` fallback into them? If yes, is every retriggering value listed, and does each dep change only when the work should re-run?
+> Did this add or change `useEffect`/`useMemo`/`useCallback` dependencies (including under a suppressed `exhaustive-deps`), or pass a callback or `??` fallback into them? If yes, is every retriggering value listed, and does each dep change exactly when the work should re-run?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/data-integrity.md</code> § <em>stabilize-callbacks-passed-into-child-effect-deps</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>stabilize-callbacks-passed-into-child-effect-deps</em></summary>
 
 <br>
 
@@ -5084,6 +5165,45 @@ const handleSelect = useCallback(
 An inline callback is a new reference on every parent render, so the child's effect, and any `setValue`/validation it triggers, re-runs each time.
 
 <sub>Source: <a href="examples/general/data-integrity.md#stabilize-callbacks-passed-into-child-effect-deps">examples/general/data-integrity.md#stabilize-callbacks-passed-into-child-effect-deps</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>hook-01-key-effect-deps-on-identifying-values-not-a-count</em></summary>
+
+<br>
+
+**HOOK-01 — Key effect deps on identifying values, not a count**
+
+Source: PR #8981 (RL-20261008-001)
+
+### Avoid
+
+```tsx
+const items = scope?.entity?.items // new array on every poll
+
+useEffect(() => {
+  // rebuild when the items change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [sdk, items?.length])
+```
+
+### Prefer
+
+```tsx
+const itemsKey = items?.map((item) => item.value.toLowerCase()).join(',')
+
+useEffect(() => {
+  // rebuild when the items change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [sdk, itemsKey])
+```
+
+### Why
+
+A length stands in for the collection only until one entry is swapped for another; the count stays the same and the effect never re-runs. A key built from the identifying values stays stable across polls and changes exactly when the content does.
+
+<sub>Source: <a href="examples/general/data-integrity.md#hook-01-key-effect-deps-on-identifying-values-not-a-count">examples/general/data-integrity.md#hook-01-key-effect-deps-on-identifying-values-not-a-count</a></sub>
 
 </details>
 
@@ -5213,14 +5333,14 @@ A new visible component or state, and every visual or layout bug fix, gets a Sto
 
 ### `PERF-02` Bound request fan-out and polling
 
-> **general** · performance · ↩ `RL-20260930-006`
+> **general** · performance · ↩ `RL-20260930-006` · `RL-20261002-008`
 
 **📜 Rule**\
-A list must not fire one query per row or per Workspace on render: fetch per item when its menu or detail opens, or use a narrower lookup, and an error fallback must not send more requests than the happy path. Polling stops once its result settles or times out; a polled query shares its cache key, so polling it re-polls for every subscriber.
+A list must not fire one query per row or per Workspace on render: fetch per item when its menu or detail opens, or use a narrower lookup, and an error fallback must not send more requests than the happy path. Polling stops once its result settles or times out; a polled query shares its cache key, so polling it re-polls for every subscriber, and rows sharing it read their slice through `selectFromResult` so a poll does not re-render every row.
 
 **✅ Check**\
 
-> Did this put a query in a list row or loop, fan requests out per entity, or poll? If yes, is the request count bounded by what the user opened, and does polling stop?
+> Did this put a query in a list row or loop, fan requests out per entity, or poll? If yes, is the request count bounded by what the user opened, does polling stop, and does each row subscribe only to its slice?
 
 ---
 

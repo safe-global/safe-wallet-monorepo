@@ -3,18 +3,18 @@
   "state": "closed",
   "coveredClosedAtRange": {
     "start": "2026-02-17T00:00:00Z",
-    "end": "2026-10-02T00:00:00Z"
+    "end": "2026-10-09T00:00:00Z"
   },
   "overlapHours": 2,
   "lastRun": {
     "mode": "compound",
     "repo": "safe-global/safe-wallet-monorepo",
-    "sourceWindowId": "CLOSED-20260921-20261002",
-    "since": "2026-09-21T22:00:00Z",
-    "until": "2026-10-02T00:00:00Z",
-    "prs": 96,
-    "comments": 602,
-    "learnings": 31,
-    "fetchedAt": "2026-10-16T14:10:31Z"
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "since": "2026-10-01T22:00:00Z",
+    "until": "2026-10-09T00:00:00Z",
+    "prs": 51,
+    "comments": 215,
+    "learnings": 17,
+    "fetchedAt": "2026-10-16T14:35:34Z"
   }
 }

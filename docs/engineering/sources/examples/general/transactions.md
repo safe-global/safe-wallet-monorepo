@@ -102,3 +102,33 @@ return mergeIntoSafeTx(tx, { refundReceiver, ...fees })
 ### Why
 
 A compromised or misconfigured backend could otherwise redirect funds through a value every signer approves without seeing; telemetry surfaces a rotated collector address.
+
+## TX-03 — Throw when a scoped dependency is missing
+
+Source: PR #8874 (RL-20261002-002)
+
+### Avoid
+
+```ts
+const getLatestBlockGasLimit = async (scope?: Scope) => {
+  const provider = scope?.provider ?? getAppProvider()
+  const block = await provider?.getBlock('latest')
+  // ...
+}
+```
+
+### Prefer
+
+```ts
+const getLatestBlockGasLimit = async (scope?: Scope) => {
+  if (scope && !scope.provider) {
+    throw Error('The provider for the selected Safe account is not initialized yet.')
+  }
+  const provider = scope?.provider ?? getAppProvider()
+  // ...
+}
+```
+
+### Why
+
+While the scoped provider is reset, the fallback silently reads the URL chain instead of the scoped Safe's chain. Falling back only when no scope exists keeps Safe-level flows unchanged and turns the scoped gap into a loud error.

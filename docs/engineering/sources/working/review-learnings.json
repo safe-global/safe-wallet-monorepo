@@ -9532,5 +9532,404 @@
     "ruleIds": [
       "UX-01"
     ]
+  },
+  {
+    "id": "RL-20261002-001",
+    "title": "Step-up continuation recorded when the rejected request was not the last write",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8884
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4156699456,
+      4158846338
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Onboarding recorded its next-step URL on every elevation-required error. When removing a swapped-out Safe was the rejected request, the replay ran only that removal and moved on to Invite members without ever adding the replacement Safe. Set a continuation after a replayed request only when that request is the last write still owed (a plain add); otherwise return the user to the step that still has work.",
+    "ruleIds": [
+      "STATE-03"
+    ]
+  },
+  {
+    "id": "RL-20261002-002",
+    "title": "Submit gated on a check the flow does not need, and a scoped flow falling back to the app-wide provider",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8873,
+      8874
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4157366301,
+      4157371130,
+      4157969301,
+      4158196722
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5931909502,
+      5932254820
+    ],
+    "learning": "The proposer and spending-limit forms blocked submit on an RPC wallet check (`isCheckingWallet`) that neither flow depends on, so a slow RPC only disabled the button; the checks were removed. In the simulation, `scope?.web3ReadOnly ?? getWeb3ReadOnly()` fell back to the app-wide provider for the render in which the scoped provider was reset, reading the gas limit of the URL chain instead of the scoped Safe; it now throws when a scope is present without its provider. Gate on what decides the action, and fail loudly instead of substituting an app-wide dependency.",
+    "ruleIds": [
+      "TX-03"
+    ]
+  },
+  {
+    "id": "RL-20261002-003",
+    "title": "Tests that infer an invariant indirectly or skip the transition and branches they guard",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8912,
+      8911,
+      8888,
+      8874
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4159939635,
+      4164449981
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5954625861,
+      5955605464,
+      5954623956,
+      5955577202,
+      5931909502,
+      5932254820
+    ],
+    "learning": "A guard test inferred that no rebuild happened from the absence of an error; it now spies on `createTx` and asserts it was not called. The tests rendered with the SDK already present, so the 'SDK arrives later' sequence the guard exists for went untested; a rerender from no SDK to SDK now expects exactly one rebuild. A scoped tx-queue fix gained a test for switching the Safe mid-flow, the simulation gained tests for scope-without-provider and no-scope, and a shared mock that gave queued allowances a `createdAt` the real mapper never sets was trimmed so the status-gate test still fails on regression.",
+    "ruleIds": [
+      "TEST-01",
+      "TEST-02"
+    ]
+  },
+  {
+    "id": "RL-20261002-004",
+    "title": "Formatter typed by the whole entity when it reads one field",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8888
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4159939639,
+      4164454154
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`formatLastUpdated` took full `PolicySpender[]` but reads only `allowances[].createdAt`. Typing it as `{ allowances: Pick<PolicyAllowance, 'createdAt'>[] }[]`, like the sibling `remainingPercent`, states the dependency and lets tests skip unrelated setup.",
+    "ruleIds": [
+      "TYPE-01"
+    ]
+  },
+  {
+    "id": "RL-20261002-005",
+    "title": "useMemo around a cheap primitive derivation",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8888
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5935715185,
+      5936121786
+    ],
+    "learning": "A `useMemo` around `formatLastUpdated`, a cheap pure function returning a string, added a dependency array and nothing else; it went back to a plain `const`. Memoize only when the work is expensive or a consumer needs a stable reference.",
+    "ruleIds": [
+      "CODE-04"
+    ]
+  },
+  {
+    "id": "RL-20261002-006",
+    "title": "Copy that departs from the design file without citing the product request",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8878
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4160466802,
+      4163561386
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A tooltip moved away from the Figma wording ('Business covers 20 Safe accounts') to 'Your Business plan covers…', and the reviewer could not tell whether that was intended until the author linked the product copy ticket. Visible copy that departs from the design cites its product request in the PR.",
+    "ruleIds": [
+      "PROD-01"
+    ]
+  },
+  {
+    "id": "RL-20261002-007",
+    "title": "Button restyle carried in a wording PR",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8878
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4160398448,
+      4163565858
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A PR meant to align copy also restyled the plan cards’ subscribe buttons with a trailing arrow; the reviewer caught the design change and it was reverted so the PR stayed on wording.",
+    "ruleIds": [
+      "REVIEW-01"
+    ]
+  },
+  {
+    "id": "RL-20261002-008",
+    "title": "Every row subscribed to a polled query re-renders on each poll",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8911
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5954623956,
+      5955577202
+    ],
+    "learning": "Each nonce option in the picker called the scoped tx-queue hook. RTK Query deduped the request, but every option was its own subscriber and re-rendered on every poll. The options now read only their slice through `selectFromResult`.",
+    "ruleIds": [
+      "PERF-02"
+    ]
+  },
+  {
+    "id": "RL-20261007-001",
+    "title": "Impression events re-firing or firing while hidden, session properties set by hand, labels lost in a refactor",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8905,
+      8769
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4183985251,
+      4183997300,
+      4184003309,
+      4185231935,
+      4185343001,
+      4185272669,
+      4185484253,
+      4196722139,
+      4205218420
+    ],
+    "reviewIds": [
+      5414537253
+    ],
+    "issueCommentIds": [],
+    "learning": "'Viewed' events fired from a mount effect without a guard, so a parent re-render could send them again; reviewers asked for a `hasTrackedView` ref so each mount tracks once. A banner kept mounted but hidden behind the 2FA card fired 'viewed' on every page load; it now tracks only when shown. Plan status, tier and role were set by hand on three events, so most events could not be split by plan; session-wide properties are registered globally, as Workspace ID is. A batching refactor dropped an event's `label` by accident; it was restored with the same values (`Transfer`, `Custom`, …) because dashboards depend on them, instead of a calldata heuristic that would have changed them.",
+    "ruleIds": [
+      "OBS-01"
+    ]
+  },
+  {
+    "id": "RL-20261008-001",
+    "title": "Effect keyed on a collection length that misses same-size swaps",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8981
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6044341558,
+      6044895137
+    ],
+    "learning": "An effect that rebuilds an `enableModule` transaction depended on `modules?.length` because `modules` is a new array on every poll. Swapping one module for another of the same count did not re-run the 'already enabled' check. Key the dependency on the identifying values (the joined, lower-cased module addresses), not on a length or count.",
+    "ruleIds": [
+      "HOOK-01"
+    ]
+  },
+  {
+    "id": "RL-20261008-002",
+    "title": "Hand-rolled values next to existing helpers, bare enum numbers, and a bypassed helper losing its fallback",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8913,
+      8915,
+      8911,
+      8925,
+      8950,
+      7980
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4182601007,
+      4183381415,
+      4167314268,
+      4167316204,
+      4178455512,
+      4178455851,
+      4184426487,
+      4184502546,
+      4208152881,
+      4195880008,
+      4195882155,
+      4196005353,
+      4196005756,
+      4205821662,
+      4206976836
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5954623956,
+      5955577202
+    ],
+    "learning": "A decimal-separator fix hardcoded `,` instead of using `getLocalDecimalSeparator`. A new recovery-period formatter showed a different value than the settings page until it moved to `packages/utils` as `getDetailedPeriod` and both surfaces used it. An RTK error was narrowed by hand instead of going through `getRtkQueryErrorMessage`. Dispute outcomes were compared as bare `4` and `[5, 6]` (the latter wrong) until a named `DisputeOutcome` enum mirrored the contract. A 'Safes removed' note and the seat counter counted removals differently. A call site that must bypass a shared helper (raw `eth_signTypedData_v4` for a non-standard domain) keeps the helper's fallbacks; here it lost the `eth_signTypedData` retry for Ledger until it was added back.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261008-003",
+    "title": "Signing and endpoint routing copied between mobile call sites and web",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      7980
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4205077934,
+      4205096999,
+      4205691403,
+      4205691654,
+      4205701894
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Two mobile hooks each signed the delegate digest with the same inline code, and each re-implemented the v3/v2 endpoint choice the web app also made. Both moved into `packages/utils` (`signDelegateTypedDataWithKey`, `useDelegateMutations`), and web and mobile now share them. Logic copied between call sites or platforms lives once in the shared package.",
+    "ruleIds": [
+      "CODE-01"
+    ]
+  },
+  {
+    "id": "RL-20261008-004",
+    "title": "Env vars added for values the config service already serves",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8950
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4193432550,
+      4193438573,
+      4194394446,
+      4194394606,
+      4193583792,
+      4194395035
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "New env vars pinned the Safenet RPC URL and chain ID, although the config service already serves every chain’s `rpcUri` (through the app’s RPC proxy, with failover and the same rate limits) and Safenet runs on one chain. Both were replaced by the config-service RPC and a constant, and release-workflow lines forwarding secrets that did not exist were removed. Add an env var only for a value no existing source provides.",
+    "ruleIds": [
+      "CONFIG-01"
+    ]
+  },
+  {
+    "id": "RL-20261008-005",
+    "title": "Names a reader could attach to the wrong thing",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8913,
+      8950,
+      8958
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4182658284,
+      4183382387,
+      4193459381,
+      4194394806,
+      4196438460,
+      4196932032
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`disabledReason` next to a selector-wide `disabled` flag became `disabledAddressReason`, `visible` became `visibleTokens`, and a test block named 'upgraded Gnosis' (Safenet, Gnosis Chain or Gnosis Safe?) became 'Safenet deployment on Gnosis Chain' across tests, fixture and PR title.",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20261008-006",
+    "title": "Comments promising behaviour the code lacks, narrating, or leaving a deliberate asymmetry unexplained",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8888,
+      7980,
+      8874,
+      8887
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4159939612,
+      4164434129,
+      3346510863,
+      3347965151
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5931909502,
+      5932254820,
+      5935247339,
+      5935761628
+    ],
+    "learning": "A type comment promised that pending edits keep `createdAt`, which the mapper does not do, and a JSDoc pointed callers at a `signDelegateTypedData` helper that does not exist; both were corrected. A comment narrating what the next line does was removed. Where two links are deliberately built differently (the copied link leaves the Space out), a one-line why plus a test pins the asymmetry so a later refactor does not 'fix' it.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261008-007",
+    "title": "Email shortened in one place and not another",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      8978
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5455999100
+    ],
+    "issueCommentIds": [
+      6060182103
+    ],
+    "learning": "The signed-in email was shortened in one spot of the profile UI and not in another; truncation was applied everywhere the email appears. A long identifier is handled the same way at every spot that shows it.",
+    "ruleIds": [
+      "UX-01"
+    ]
+  },
+  {
+    "id": "RL-20261008-008",
+    "title": "Endpoint migration that left a reader and signing paths on the old service",
+    "sourceWindowId": "CLOSED-20261001-20261009",
+    "prNumbers": [
+      7980
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4205848256,
+      4206977241,
+      4207416513
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6036023070,
+      6036251000
+    ],
+    "learning": "A migration of delegate reads and writes to the v3 endpoints left `getProposerSafes` listing from v2 and the eth_sign add and delete paths writing to v1, so on queue-service chains new proposers were missing from the Spaces lists. When an endpoint moves, every consumer and signing path moves in the same change.",
+    "ruleIds": [
+      "API-01"
+    ]
   }
 ]

@@ -699,3 +699,33 @@ if (isLoading || isError) return { error: SOURCE_UNAVAILABLE }
 ### Why
 
 A loading, failed or skipped read and a config that has not arrived all look like "empty". When a write replaces a field wholesale, merging against that empty result silently erases what was stored. Keep stored values while the source is unknown, and refuse the write in the shared hook rather than relying on each button to disable itself.
+
+## HOOK-01 — Key effect deps on identifying values, not a count
+
+Source: PR #8981 (RL-20261008-001)
+
+### Avoid
+
+```tsx
+const items = scope?.entity?.items // new array on every poll
+
+useEffect(() => {
+  // rebuild when the items change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [sdk, items?.length])
+```
+
+### Prefer
+
+```tsx
+const itemsKey = items?.map((item) => item.value.toLowerCase()).join(',')
+
+useEffect(() => {
+  // rebuild when the items change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [sdk, itemsKey])
+```
+
+### Why
+
+A length stands in for the collection only until one entry is swapped for another; the count stays the same and the effect never re-runs. A key built from the identifying values stays stable across polls and changes exactly when the content does.
