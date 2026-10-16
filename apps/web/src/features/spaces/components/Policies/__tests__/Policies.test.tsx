@@ -371,6 +371,15 @@ describe('Policies', () => {
       expect(mockSetHasSeenAllowlistIntro).toHaveBeenCalledWith(true)
     })
 
+    it('can be set up from the catalogue when the Space has no policies yet', async () => {
+      mockIsAllowlistAvailable = true
+      const { user } = renderWithUserEvent(<Policies policies={[]} />)
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Recipient allowlist' }))
+
+      expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
+    })
+
     it('opens the flow directly once the intro has been seen', async () => {
       mockIsAllowlistAvailable = true
       mockHasSeenAllowlistIntro = true

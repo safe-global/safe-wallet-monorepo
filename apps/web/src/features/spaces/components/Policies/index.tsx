@@ -287,7 +287,7 @@ const Policies = ({
               onSelectPolicy={onSelectPolicy ?? selectPolicy}
             />
           ) : (
-            <PolicyCatalogue onSelect={handleSelect} locked={locked} />
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={isAllowlistAvailable} />
           )}
         </>
       )}
