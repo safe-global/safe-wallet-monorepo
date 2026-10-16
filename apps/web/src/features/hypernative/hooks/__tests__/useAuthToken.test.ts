@@ -1,6 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useAuthToken } from '../useAuthToken'
 import * as cookieStorage from '../../store/cookieStorage'
+import { getStoreInstance } from '@/store'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 
 // Mock cookieStorage module
 jest.mock('../../store/cookieStorage', () => ({
@@ -9,11 +11,32 @@ jest.mock('../../store/cookieStorage', () => ({
   clearAuthCookie: jest.fn(),
 }))
 
+// Mock the store's imperative accessor (used outside React components) rather than the whole
+// store module, so this test doesn't have to boot the real app store
+jest.mock('@/store', () => ({
+  getStoreInstance: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
+  hypernativeApi: {
+    endpoints: {
+      refreshToken: {
+        initiate: jest.fn(),
+      },
+    },
+  },
+}))
+
 const mockGetAuthCookieData = cookieStorage.getAuthCookieData as jest.MockedFunction<
   typeof cookieStorage.getAuthCookieData
 >
 const mockSetAuthCookie = cookieStorage.setAuthCookie as jest.MockedFunction<typeof cookieStorage.setAuthCookie>
 const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction<typeof cookieStorage.clearAuthCookie>
+const mockGetStoreInstance = getStoreInstance as jest.MockedFunction<typeof getStoreInstance>
+const mockInitiate = hypernativeApi.endpoints.refreshToken.initiate as jest.Mock
+
+/** Mirrors REFRESH_RETRY_DELAYS_MS in the hook - the number of retries before a token is left alone */
+const REFRESH_RETRY_ATTEMPTS = 4
 
 describe('useAuthToken', () => {
   const originalDateNow = Date.now
@@ -27,12 +50,17 @@ describe('useAuthToken', () => {
     Date.now = originalDateNow
     mockGetAuthCookieData.mockReturnValue(undefined)
 
-    // Mock storage event listeners
+    // Capture window listeners by event name. This used to record only 'storage' and silently
+    // drop everything else, which meant a listener the hook registers for any other event was
+    // never actually attached and could not be exercised - a test for one would fail against
+    // working code.
+    const windowListeners: Record<string, Array<() => void>> = {}
     const storageListeners: Array<() => void> = []
     window.addEventListener = jest.fn((event: string, listener: () => void) => {
       if (event === 'storage') {
         storageListeners.push(listener)
       }
+      ;(windowListeners[event] ||= []).push(listener)
     }) as unknown as typeof window.addEventListener
 
     window.removeEventListener = jest.fn((event: string, listener: () => void) => {
@@ -48,6 +76,9 @@ describe('useAuthToken', () => {
     ;(window as { triggerStorageEvent?: () => void }).triggerStorageEvent = () => {
       storageListeners.forEach((listener) => listener())
     }
+    ;(window as { triggerWindowEvent?: (event: string) => void }).triggerWindowEvent = (event: string) => {
+      ;(windowListeners[event] || []).forEach((listener) => listener())
+    }
   })
 
   afterEach(() => {
@@ -57,6 +88,7 @@ describe('useAuthToken', () => {
     window.addEventListener = originalAddEventListener
     window.removeEventListener = originalRemoveEventListener
     delete (window as { triggerStorageEvent?: () => void }).triggerStorageEvent
+    delete (window as { triggerWindowEvent?: (event: string) => void }).triggerWindowEvent
   })
 
   describe('initial state', () => {
@@ -182,7 +214,7 @@ describe('useAuthToken', () => {
         // Let's trigger it again to simulate the effect
       })
 
-      expect(mockSetAuthCookie).toHaveBeenCalledWith('new-token', 'Bearer', 3600)
+      expect(mockSetAuthCookie).toHaveBeenCalledWith('new-token', 'Bearer', 3600, undefined, undefined)
     })
 
     it('should handle different token types', () => {
@@ -192,7 +224,7 @@ describe('useAuthToken', () => {
         result.current[1]('custom-token', 'Custom', 7200)
       })
 
-      expect(mockSetAuthCookie).toHaveBeenCalledWith('custom-token', 'Custom', 7200)
+      expect(mockSetAuthCookie).toHaveBeenCalledWith('custom-token', 'Custom', 7200, undefined, undefined)
     })
 
     it('should update state immediately after setting token', () => {
@@ -531,7 +563,8 @@ describe('useAuthToken', () => {
       const { result } = renderHook(() => useAuthToken())
 
       expect(typeof result.current[1]).toBe('function')
-      expect(result.current[1].length).toBe(3) // Function expects 3 parameters
+      // token, tokenType, expiresIn, refreshToken?, refreshExpiresIn?
+      expect(result.current[1].length).toBe(5)
     })
 
     it('should return clearToken function as third element', () => {
@@ -539,6 +572,275 @@ describe('useAuthToken', () => {
 
       expect(typeof result.current[2]).toBe('function')
       expect(result.current[2].length).toBe(0) // Function expects 0 parameters
+    })
+  })
+
+  describe('silent refresh', () => {
+    // Minimal in-memory stand-in for the cookie, wired through the mocked cookieStorage module,
+    // so a refresh (mockSetAuthCookie) is actually observable on the next mockGetAuthCookieData read
+    let fakeCookie: ReturnType<typeof cookieStorage.getAuthCookieData>
+
+    const REFRESHED_RESPONSE = {
+      access_token: 'refreshed-token',
+      token_type: 'Bearer',
+      expires_in: 300,
+      refresh_token: 'rotated-refresh-token',
+      refresh_expires_in: 2591700,
+    }
+
+    beforeEach(() => {
+      fakeCookie = undefined
+
+      mockGetAuthCookieData.mockImplementation(() => fakeCookie)
+      mockSetAuthCookie.mockImplementation((token, tokenType, expiresIn, refreshToken, refreshExpiresIn) => {
+        fakeCookie = {
+          token,
+          tokenType,
+          expiry: Date.now() + expiresIn * 1000,
+          ...(refreshToken &&
+            refreshExpiresIn !== undefined && {
+              refreshToken,
+              refreshExpiry: Date.now() + refreshExpiresIn * 1000,
+            }),
+        }
+      })
+      mockClearAuthCookie.mockImplementation(() => {
+        fakeCookie = undefined
+      })
+
+      mockGetStoreInstance.mockReturnValue({
+        dispatch: jest.fn((action: unknown) => action),
+      } as unknown as ReturnType<typeof getStoreInstance>)
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
+    })
+
+    it('degrades gracefully for a legacy cookie with no refreshToken (no crash, no refresh attempted)', async () => {
+      fakeCookie = { token: 'legacy-token', tokenType: 'Bearer', expiry: Date.now() + 3600000 }
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      expect(result.current[0].isAuthenticated).toBe(true)
+      expect(result.current[0].isExpired).toBe(false)
+      expect(mockGetStoreInstance).not.toHaveBeenCalled()
+      expect(mockInitiate).not.toHaveBeenCalled()
+
+      unmount()
+    })
+
+    it('refreshes the access token once the refresh margin is reached and rotates the refresh token', async () => {
+      fakeCookie = {
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() - 1, // already past the refresh margin
+        refreshToken: 'current-refresh-token',
+        refreshExpiry: Date.now() + 2592000000,
+      }
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockInitiate).toHaveBeenCalledWith({
+          grant_type: 'refresh_token',
+          client_id: expect.any(String),
+          refresh_token: 'current-refresh-token',
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current[0].token).toBe('Bearer refreshed-token')
+        expect(result.current[0].isExpired).toBe(false)
+      })
+
+      expect(fakeCookie?.refreshToken).toBe('rotated-refresh-token')
+
+      unmount()
+    })
+
+    /** The shape the API actually rejects with: the RFC 6749 §5.2 body inside the standard
+     * envelope, so the code sits at `error.error`. A bare `Error` never reaches this path. */
+    const oauthRejection = (code: string) => ({
+      unwrap: () =>
+        Promise.reject({
+          success: false,
+          data: null,
+          error: { error: code, error_description: `stubbed ${code}` },
+        }),
+    })
+
+    const staleCookie = (refreshToken = 'current-refresh-token') => ({
+      token: 'stale-token',
+      tokenType: 'Bearer',
+      expiry: Date.now() - 1,
+      refreshToken,
+      refreshExpiry: Date.now() + 2592000000,
+    })
+
+    it.each(['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request'])(
+      'clears all auth state on %s instead of retrying',
+      async (code) => {
+        mockInitiate.mockReturnValue(oauthRejection(code))
+        fakeCookie = staleCookie('dead-refresh-token')
+
+        const { result, unmount } = renderHook(() => useAuthToken())
+
+        await waitFor(() => {
+          expect(mockClearAuthCookie).toHaveBeenCalled()
+          expect(result.current[0].isAuthenticated).toBe(false)
+        })
+
+        expect(mockInitiate).toHaveBeenCalledTimes(1)
+
+        unmount()
+      },
+    )
+
+    /**
+     * The case that matters most: a refresh can fail without the chain being dead. Logging the
+     * user out on a dropped connection would turn a blip into a re-login, and the access token is
+     * still valid for another minute at this point.
+     */
+    it.each([
+      // The shape RTK Query actually rejects with when the server is unreachable, confirmed
+      // against a dead port with the real store and baseQuery rather than assumed.
+      ['an unreachable server', { message: 'Rejected' }],
+      ['a transport failure with no body', undefined],
+      ['a gateway error with no OAuth code', { success: false, data: null }],
+      ['a 5xx envelope carrying an unrelated error', { success: false, data: null, error: { error: 'server_error' } }],
+    ])('keeps the session on %s', async (_label, rejection) => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(rejection) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockInitiate).toHaveBeenCalled()
+      })
+
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      expect(result.current[0].isAuthenticated).toBe(true)
+      expect(result.current[0].token).toBe('Bearer stale-token')
+
+      unmount()
+    })
+
+    it('recovers without a logout when a transient failure is followed by a success', async () => {
+      mockInitiate
+        .mockReturnValueOnce({ unwrap: () => Promise.reject(undefined) })
+        .mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(
+        () => {
+          expect(result.current[0].token).toBe('Bearer refreshed-token')
+        },
+        { timeout: 5000 },
+      )
+
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      expect(mockInitiate.mock.calls.length).toBeGreaterThanOrEqual(2)
+
+      unmount()
+    })
+
+    /**
+     * Retries stay inside the server's reuse grace window, where re-presenting the same token is
+     * idempotent. Once they are spent the token is left alone rather than presented again later,
+     * which would read as a replay and revoke the family.
+     */
+    /**
+     * CDP's offline emulation does not fire the `online` event, so this path cannot be checked in
+     * a driven browser - a real connectivity change does fire it, so it is asserted here instead.
+     */
+    it('retries again when connectivity returns after the retries were spent', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject({ message: 'Rejected' }) })
+      fakeCookie = staleCookie()
+
+      const { unmount } = renderHook(() => useAuthToken())
+
+      // Wait for the backoff schedule to be genuinely exhausted - the last step is 8s, so a
+      // shorter settle window would call it spent while a retry was still pending, and the extra
+      // call below could then be that retry rather than the online event.
+      await waitFor(() => expect(mockInitiate).toHaveBeenCalledTimes(REFRESH_RETRY_ATTEMPTS + 1), {
+        timeout: 25_000,
+        interval: 250,
+      })
+
+      const callsBeforeOnline = mockInitiate.mock.calls.length
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
+
+      await act(async () => {
+        ;(window as unknown as { triggerWindowEvent: (event: string) => void }).triggerWindowEvent('online')
+      })
+
+      await waitFor(
+        () => {
+          expect(mockInitiate.mock.calls.length).toBeGreaterThan(callsBeforeOnline)
+        },
+        { timeout: 15_000, interval: 250 },
+      )
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+
+      unmount()
+    }, 40_000)
+
+    it('stops presenting a token once its retries are spent, without logging out', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(undefined) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockInitiate).toHaveBeenCalled()
+      })
+
+      const callsAfterFirstFailure = mockInitiate.mock.calls.length
+      expect(callsAfterFirstFailure).toBeLessThanOrEqual(REFRESH_RETRY_ATTEMPTS + 1)
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      expect(result.current[0].isAuthenticated).toBe(true)
+
+      unmount()
+    })
+
+    it('yields a single rotation when two tabs race to refresh the same token', async () => {
+      // navigator.locks isn't implemented in jsdom - stub a real FIFO queue so this exercises the
+      // actual serialisation + re-read-inside-the-lock logic, not just a trivial always-resolve mock
+      let lockChain: Promise<unknown> = Promise.resolve()
+      const lockRequest = jest.fn((_name: string, callback: () => Promise<unknown>) => {
+        const run = lockChain.then(callback)
+        lockChain = run.catch(() => undefined)
+        return run
+      })
+      Object.defineProperty(global.navigator, 'locks', {
+        value: { request: lockRequest },
+        configurable: true,
+      })
+
+      fakeCookie = {
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() - 1,
+        refreshToken: 'current-refresh-token',
+        refreshExpiry: Date.now() + 2592000000,
+      }
+
+      // Two "tabs" sharing the same cookie racing to refresh at the same instant
+      const tabA = renderHook(() => useAuthToken())
+      const tabB = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(tabA.result.current[0].token).toBe('Bearer refreshed-token')
+        expect(tabB.result.current[0].token).toBe('Bearer refreshed-token')
+      })
+
+      expect(mockInitiate).toHaveBeenCalledTimes(1)
+      expect(fakeCookie?.refreshToken).toBe('rotated-refresh-token')
+
+      tabA.unmount()
+      tabB.unmount()
+
+      delete (global.navigator as { locks?: unknown }).locks
     })
   })
 })
