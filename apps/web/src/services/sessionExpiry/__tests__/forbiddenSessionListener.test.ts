@@ -203,12 +203,12 @@ describe('forbiddenSessionListener', () => {
     ['the route is not credentialed', { signedIn: true, options: { url: `${GATEWAY}/v1/chains/1/relay/0xabc` } }],
     ['the rejection comes from /v1/auth/me itself', { signedIn: true, options: { endpointName: 'authGetMeV1' } }],
     [
-      'the Safenet check request is refused for a Safe without an eligible Workspace',
+      'the Safenet check request is refused for a Safe the Workspace cannot check',
       {
         signedIn: true,
         options: {
-          endpointName: 'safenetChecksRequestCheck',
-          url: `${GATEWAY}/v1/chains/1/safes/${faker.finance.ethereumAddress()}/safenet/checks`,
+          endpointName: 'safenetChecksRequestCheckV1',
+          url: `${GATEWAY}/v1/spaces/${faker.string.uuid()}/chains/1/safes/${faker.finance.ethereumAddress()}/safenet/checks`,
         },
       },
     ],
