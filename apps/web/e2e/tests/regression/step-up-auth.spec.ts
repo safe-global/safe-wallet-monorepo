@@ -63,6 +63,7 @@ const SPACE = {
   name: 'Step-up Test Workspace',
   memberCount: 1,
   safeCount: 1,
+  experimentalFeatures: [],
   members: [
     { role: 'ADMIN', name: 'Admin', status: 'ACTIVE', invitedBy: null, inviteExpiresAt: null, user: { id: 1 } },
   ],
