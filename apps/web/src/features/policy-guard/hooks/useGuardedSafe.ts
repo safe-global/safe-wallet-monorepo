@@ -46,7 +46,8 @@ export const useGuardedSafe = (target?: PolicyGuardTarget): UseGuardedSafeResult
   }
 
   const safeLoaded = !!targetQuery.currentData
-  const safeLoading = !safeLoaded && targetQuery.isFetching
+  // isLoading covers only the first fetch, so a 404 or failing target doesn't flicker on every poll
+  const safeLoading = targetQuery.isLoading
   return {
     safe: targetQuery.currentData ?? { chainId: target.chainId, version: null, guard: null, txHistoryTag: null },
     safeAddress: target.safeAddress,

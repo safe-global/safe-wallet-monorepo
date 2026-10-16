@@ -272,7 +272,7 @@ describe('usePolicyGuard', () => {
 
     it('is loading while the target Safe loads', () => {
       mockSafe()
-      mockTargetQuery({ currentData: undefined, isFetching: true })
+      mockTargetQuery({ currentData: undefined, isLoading: true, isFetching: true })
       mockModuleGuard({})
       const { result } = renderHook(() => usePolicyGuard(TARGET))
       expect(result.current.isLoading).toBe(true)

@@ -30,9 +30,13 @@ const mockOpenSafe = (info: Partial<ReturnType<typeof useSafeInfo.default>> = {}
 }
 
 const mockTargetQuery = (result: Partial<SafeQuery> = {}) =>
-  jest
-    .spyOn(safesQueries, 'useSafesGetSafeV1Query')
-    .mockReturnValue({ refetch: jest.fn(), currentData: undefined, isFetching: false, ...result } as SafeQuery)
+  jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
+    refetch: jest.fn(),
+    currentData: undefined,
+    isLoading: false,
+    isFetching: false,
+    ...result,
+  } as SafeQuery)
 
 describe('useGuardedSafe', () => {
   beforeEach(() => jest.restoreAllMocks())
@@ -94,7 +98,7 @@ describe('useGuardedSafe', () => {
 
     it("is loading on the target's chain while the target loads", () => {
       mockOpenSafe()
-      mockTargetQuery({ isFetching: true })
+      mockTargetQuery({ isLoading: true, isFetching: true })
       const { result } = renderHook(() => useGuardedSafe(TARGET))
       expect(result.current).toEqual({
         safe: { chainId: TARGET.chainId, version: null, guard: null, txHistoryTag: null },
@@ -131,11 +135,20 @@ describe('useGuardedSafe', () => {
       expect(result.current.error).toBe(firstError)
     })
 
-    it('returns no error while a failed target loads again', () => {
+    it('keeps the error, without loading, while a failed target is polled again', () => {
       mockOpenSafe()
-      mockTargetQuery({ isFetching: true, isError: true, error: { status: 500, data: 'Server error' } })
+      const rtkError = { status: 500, data: 'Server error' }
+      mockTargetQuery({ isFetching: true, error: rtkError })
       const { result } = renderHook(() => useGuardedSafe(TARGET))
-      expect(result.current).toMatchObject({ safeLoading: true, error: undefined })
+      expect(result.current.safeLoading).toBe(false)
+      expect(result.current.error?.cause).toBe(rtkError)
+    })
+
+    it('is not loading while a target CGW does not know is polled again', () => {
+      mockOpenSafe()
+      mockTargetQuery({ isFetching: true, error: { status: 404, data: 'Not found' } })
+      const { result } = renderHook(() => useGuardedSafe(TARGET))
+      expect(result.current).toMatchObject({ safeLoaded: false, safeLoading: false, error: undefined })
     })
   })
 })
