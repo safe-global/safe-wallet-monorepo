@@ -174,7 +174,7 @@ returns 200 to the SPA but never propagates the IdP-side session clear, so
 OIDC users get auto-signed-in on the next attempt. Removing the form
 synchronously can also cancel the POST before it reaches the gateway.
 
-## WEB-03 — Force unauthenticated on transient reconcile errors
+## WEB-01 — Force unauthenticated on transient reconcile errors
 
 Source: PR #7560 (RL-20260407-005)
 

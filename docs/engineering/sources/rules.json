@@ -3,28 +3,22 @@
     "id": "FEAT-01",
     "project": "web",
     "area": "features",
-    "title": "Use feature public APIs across boundaries",
-    "rule": "Feature code must import another feature through its public API, not through deep internal component, hook, service, data, or generated paths. The exception is a lint-permitted deep import of a pure helper from a boot path, where the barrel would eagerly pull components into that module graph.",
-    "check": "Did this change cross a feature boundary? If yes, are imports going through the target feature's public API?",
-    "exampleRefs": ["web/examples/feature-boundaries.md#feature-public-api"],
+    "title": "Keep feature boundaries: public API outside, direct imports inside",
+    "rule": "Outside a web feature, use only its public API (barrel, contract, `useLoadFeature` handle), never deep component, hook, service, data, utils, or generated paths; a lint-permitted deep import of a pure helper from a boot path is the exception. Inside a feature, import siblings directly, never the feature's own barrel or lazy handle. A new feature ships that boundary (barrel, contract typed to the component's current props, public types, hooks exported without lazy-loading calls) and owns its flag and availability gating; consumers mount it bare unless the flag also drives their own layout.",
+    "check": "Did this add, expand, or import across or within a feature? If yes, do outside consumers use only its public API, do files inside avoid its own barrel, and does a new feature expose the standard boundary with its gating inside?",
+    "exampleRefs": [
+      "web/examples/feature-boundaries.md#feature-public-api",
+      "web/examples/feature-boundaries.md#place-feature-subfolders-next-to-their-consumers",
+      "web/examples/feature-boundaries.md#use-relative-imports-inside-a-feature-export-only-the-public-surface",
+      "web/examples/feature-boundaries.md#sibling-files-inside-a-feature-use-relative-imports"
+    ],
     "reviewLearningIds": [
       "RL-20260225-001",
       "RL-20260318-006",
       "RL-20260326-001",
       "RL-20260605-003",
       "RL-20260917-002",
-      "RL-20260930-010"
-    ]
-  },
-  {
-    "id": "FEAT-02",
-    "project": "web",
-    "area": "features",
-    "title": "Give new features the standard boundary",
-    "rule": "New web features need an explicit boundary: public barrel, feature contract or handle where applicable, public types, and hooks exported without lazy-loading hook calls. Flag and availability gating live inside the feature (registry stub or its own hook); consumers mount it bare unless the flag also drives the consumer's own layout.",
-    "check": "Did this add or expand a feature? If yes, does it have the expected public API boundary instead of making consumers import internals?",
-    "exampleRefs": ["web/examples/feature-boundaries.md#feature-public-api"],
-    "reviewLearningIds": [
+      "RL-20260930-010",
       "RL-20260227-001",
       "RL-20260327-004",
       "RL-20260609-003",
@@ -34,7 +28,9 @@
       "RL-20260911-004",
       "RL-20260911-006",
       "RL-20260916-002",
-      "RL-20260930-010"
+      "RL-20260220-002",
+      "RL-20260309-001",
+      "RL-20260309-005"
     ]
   },
   {
@@ -102,34 +98,25 @@
     "id": "WEB-01",
     "project": "web",
     "area": "auth",
-    "title": "Make auth/session effects hydration-aware",
-    "rule": "Effects that depend on persisted auth state must observe hydration or the relevant hydrated value instead of capturing initial empty state forever.",
-    "check": "Did this effect read persisted auth/session state? If yes, does it re-run after hydration or depend on the hydrated value?",
-    "exampleRefs": ["examples/general/gateway-hooks.md#hydration-aware-effects"],
-    "reviewLearningIds": ["RL-20260420-002", "RL-20260504-001", "RL-20260506-002", "RL-20260520-001"]
-  },
-  {
-    "id": "WEB-02",
-    "project": "web",
-    "area": "auth",
-    "title": "Keep deliberate logout distinct from session expiry",
-    "rule": "Logout flows must clear client auth state before navigation or otherwise suppress session-expired handling while logout is in flight.",
-    "check": "Did this change logout, auth hydration, or credentialed 403 handling? If yes, can a deliberate logout race show a session-expired toast?",
-    "exampleRefs": ["examples/general/gateway-hooks.md#logout-session-races"],
-    "reviewLearningIds": ["RL-20260506-004"]
-  },
-  {
-    "id": "WEB-03",
-    "project": "web",
-    "area": "auth",
-    "title": "Use fresh server probes for auth transitions",
-    "rule": "Auth reconciliation and login/logout callbacks must not rely on cached RTK Query data when the backend cookie state is the source of truth.",
-    "check": "Did this check current auth after a login/logout/callback transition? If yes, does it force a fresh backend probe and avoid a lingering subscription?",
+    "title": "Read auth state after hydration and from the backend",
+    "rule": "Effects that read persisted auth/session state depend on hydration or the hydrated value, not the initial empty state. Login, logout, and callback reconciliation mark the client authenticated only after a fresh backend probe (no cached RTK data or lingering subscription) and treat a transient reconcile error as unauthenticated. Logout clears client auth before navigating, or suppresses session-expired handling while it runs.",
+    "check": "Did this read persisted auth state, handle a login/logout/callback transition, or change credentialed 403 handling? If yes, does it wait for hydration, probe the backend fresh, end unauthenticated on reconcile errors, and keep a deliberate logout from showing a session-expired toast?",
     "exampleRefs": [
+      "examples/general/gateway-hooks.md#hydration-aware-effects",
+      "examples/general/gateway-hooks.md#logout-session-races",
       "examples/general/gateway-hooks.md#fresh-auth-probes",
-      "examples/general/gateway-hooks.md#web-03-force-unauthenticated-on-transient-reconcile-errors"
+      "examples/general/gateway-hooks.md#web-01-force-unauthenticated-on-transient-reconcile-errors"
     ],
-    "reviewLearningIds": ["RL-20260324-001", "RL-20260407-005", "RL-20260413-001"]
+    "reviewLearningIds": [
+      "RL-20260420-002",
+      "RL-20260504-001",
+      "RL-20260506-002",
+      "RL-20260520-001",
+      "RL-20260506-004",
+      "RL-20260324-001",
+      "RL-20260407-005",
+      "RL-20260413-001"
+    ]
   },
   {
     "id": "API-01",
@@ -192,7 +179,7 @@
     "project": "general",
     "area": "state",
     "title": "Handle RTK mutation results explicitly",
-    "rule": "RTK Query mutation triggers resolve with a result object; use `.unwrap()` or inspect `result.error` before updating success UI or local state. After a successful mutation, do not recompute derived `dirty`/`can-submit` state from the server cache until its refetch settles — the cache still holds the pre-mutation value in that window, which can re-enable a duplicate submit. Track a local saved-baseline or an `awaitingCacheSync` flag instead.",
+    "rule": "RTK mutation triggers resolve with a result object: `.unwrap()` or check `result.error` before showing success or updating local state. Until the post-mutation refetch settles the cache still holds the old value, so derive `dirty`/can-submit from a local saved baseline or an `awaitingCacheSync` flag, not the cache, or a duplicate submit re-enables.",
     "check": "Did this call an RTK mutation? If yes, does success state happen only after confirmed success, and is derived dirty/can-submit state protected from re-enabling during the post-mutation refetch window?",
     "exampleRefs": [
       "examples/general/data-integrity.md#rtk-mutation-results",
@@ -212,8 +199,8 @@
     "project": "general",
     "area": "state",
     "title": "Choose RTK Query read state by UX meaning",
-    "rule": "`isLoading` represents the first load; `isFetching` also covers refetches. Use the flag that matches whether existing data should remain visible; keep a load-more control mounted and disabled while the next page fetches. A failed refetch keeps the last `data`, so access-derived hooks inspect `error` and drop data on 403/404; any other `isError` with data still cached is transient and keeps the last data instead of blocking. `isLoading` stays false when the args change, so a new arg's load shows as `currentData === undefined`, and a failed dependency query renders as an error, not as empty.",
-    "check": "Did this show a spinner or content from RTK Query state? If yes, should refetch hide existing content or only the initial load, can a failed refetch leave stale data on screen, and can an arg change or failed dependency read as a confident empty or negative answer?",
+    "rule": "Pick the flag by whether existing data should stay visible: `isLoading` is the first load only, `isFetching` includes refetches, and a load-more control stays mounted and disabled while the next page fetches. A failed refetch keeps the last `data`: access-derived hooks drop it on 403/404, other errors keep it as transient. A new arg's load shows as `currentData === undefined` (`isLoading` stays false), and a failed dependency query renders as an error, not as empty.",
+    "check": "Did this render from RTK Query state? If yes, does a refetch hide content only when it should, can a failed refetch leave stale or forbidden data on screen, and can an arg change or failed dependency read as a confident empty answer?",
     "exampleRefs": [
       "examples/general/data-integrity.md#loading-vs-fetching",
       "examples/general/data-integrity.md#rtk-02-skip-queries-until-the-resource-id-is-resolved"
@@ -292,8 +279,8 @@
     "project": "general",
     "area": "data",
     "title": "Use the canonical helper, predicate, or constant",
-    "rule": "Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify. Search for an existing utility, constant, or route builder before adding one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`), and have every consumer of a shared check (submit gate, builder, summary) call the one predicate. A call site that must bypass a shared helper keeps the helper's fallbacks.",
-    "check": "Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate, does an existing utility already do what any new helper does, and does a call site that bypasses one keep its fallbacks?",
+    "rule": "Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`) and use it. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.",
+    "check": "Did this add a helper or constant, or create, parse, or classify a formatted value or domain state? If yes, does an existing helper, constant, or predicate already do it, and does any call site that bypasses one keep its fallbacks?",
     "exampleRefs": [
       "examples/general/chain-contracts.md#normalize-versions-and-origin",
       "examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting"
@@ -322,8 +309,8 @@
     "project": "general",
     "area": "chain",
     "title": "Resolve contracts from actual deployment data",
-    "rule": "Contract and chain compatibility logic should derive from Safe version, master copy, chain ID, and safe-deployments data rather than broad chain flags or naive set differences.",
-    "check": "Did this choose a contract address or available chain? If yes, is it based on actual deployment/compatibility data and covered for both web and mobile callers?",
+    "rule": "Contract and chain compatibility logic derives from Safe version, master copy, chain ID, and safe-deployments data rather than broad chain flags or naive set differences. Version-dependent lookups go through chain-aware helpers that use the chain's recommended version and canonical-fallback order, never a global latest version or a hard-coded index.",
+    "check": "Did this choose a contract address, Safe version, or available chain? If yes, is it based on actual deployment data and the chain's own recommended version, and covered for both web and mobile callers?",
     "exampleRefs": ["examples/general/chain-contracts.md#deployment-data-not-chain-flags"],
     "reviewLearningIds": [
       "RL-20260423-001",
@@ -332,7 +319,9 @@
       "RL-20260624-007",
       "RL-20260727-002",
       "RL-20260730-002",
-      "RL-20260811-001"
+      "RL-20260811-001",
+      "RL-20260218-003",
+      "RL-20260727-001"
     ]
   },
   {
@@ -359,31 +348,14 @@
     "id": "MOB-01",
     "project": "mobile",
     "area": "permissions",
-    "title": "Open system settings only from explicit controls",
-    "rule": "Permission-denied flows must open system Settings only from a clearly labeled user-tapped control, not from wrapper taps or automatic denial handling.",
-    "check": "Did this permission flow call `Linking.openSettings` or an equivalent API? If yes, is that path reachable only from the explicit Settings button?",
-    "exampleRefs": ["mobile/examples/permissions.md#explicit-settings-navigation"],
-    "reviewLearningIds": ["RL-20260505-006", "RL-20260506-001"]
-  },
-  {
-    "id": "MOB-02",
-    "project": "mobile",
-    "area": "permissions",
-    "title": "Branch permission UX on the actual permission outcome",
-    "rule": "Permission-denied explainers must run only for actual denial/restriction outcomes, not for unrelated registration or network failures.",
-    "check": "Did this permission request have multiple failure modes? If yes, does the Settings explainer branch on a permission result rather than any caught error?",
-    "exampleRefs": ["mobile/examples/permissions.md#permission-denial-branches"],
-    "reviewLearningIds": ["RL-20260505-001"]
-  },
-  {
-    "id": "MOB-03",
-    "project": "mobile",
-    "area": "dependencies",
-    "title": "Use the React Native package entrypoint",
-    "rule": "Mobile overrides of third-party UI must import from the same React Native module tree as the provider to avoid duplicate contexts or theme state.",
-    "check": "Did this import from a package internals path? If yes, does it match the React Native entrypoint used by the provider?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260413-006"]
+    "title": "Branch permission UX on real denials; open Settings only on tap",
+    "rule": "Permission-denied explainers run only for actual denial or restriction outcomes, not registration or network failures, and open system Settings only from a clearly labeled user-tapped control, never from wrapper taps or automatic denial handling.",
+    "check": "Did this permission flow show a denial explainer or call `Linking.openSettings`? If yes, does it branch on the permission result rather than any caught error, and is Settings reachable only from the explicit button?",
+    "exampleRefs": [
+      "mobile/examples/permissions.md#explicit-settings-navigation",
+      "mobile/examples/permissions.md#permission-denial-branches"
+    ],
+    "reviewLearningIds": ["RL-20260505-006", "RL-20260505-001"]
   },
   {
     "id": "E2E-01",
@@ -582,8 +554,8 @@
     "project": "web",
     "area": "observability",
     "title": "Promote telemetry only when user impact justifies it",
-    "rule": "Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label, which collapses distinct funnels and mis-attributes events. An impression event fires once per mount and only while its UI is actually shown, session-wide properties are registered globally, and a refactor keeps an existing event’s properties and values.",
-    "check": "Did this change logging/RUM/error classification, or fire an analytics event from a shared/reused component? If yes, is the level justified by user impact and duplication risk, and is the event attributed to the actual entry point rather than a hardcoded/reused label, do impression events fire once and only when visible, and do existing events keep their properties?",
+    "rule": "Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.",
+    "check": "Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point, do impressions fire once and only when visible, and do existing events keep their properties?",
     "exampleRefs": [
       "examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key",
       "examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown"
@@ -642,9 +614,9 @@
     "id": "DOC-01",
     "project": "general",
     "area": "docs",
-    "title": "Keep docs and comments true to the code",
-    "rule": "When splitting or moving agent/developer docs, every removed section must be moved, intentionally superseded, or called out for review. Comments and JSDoc next to a changed condition or contract are updated in the same change, and state the non-obvious why rather than restating the code or narrating decision history, in one line with no ticket or decision IDs; a test's regression intent goes in its name, not a comment above it.",
-    "check": "Did this split, delete, or move docs, add a comment, or change logic an adjacent comment describes? If yes, is every removed section accounted for, is each new comment one line of why, and does every nearby comment still match the code?",
+    "title": "Keep docs, comments, and agent guidance true to the code",
+    "rule": "Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs; a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.",
+    "check": "Did this move docs, add a comment, change logic a comment describes, or change a runbook, disclosure, framework, script, or tool? If yes, is every removed section accounted for, is each comment one line of why that matches the code, and do runbooks, disclosures, and AGENTS.md match the real setup?",
     "exampleRefs": [],
     "reviewLearningIds": [
       "RL-20260303-008",
@@ -663,28 +635,11 @@
       "RL-20260909-002",
       "RL-20260921-001",
       "RL-20261001-001",
-      "RL-20261008-006"
+      "RL-20261008-006",
+      "RL-20260415-001",
+      "RL-20260615-007",
+      "RL-20260928-001"
     ]
-  },
-  {
-    "id": "DOC-02",
-    "project": "general",
-    "area": "docs",
-    "title": "Operational and policy docs must match the real setup",
-    "rule": "Release and operational docs should describe actual branch names, generated branch patterns, and fallback actions rather than placeholders that look literal. Privacy/legal disclosures of third-party processors match what the clients actually integrate. A change to a framework version, workspace script, or verification tool updates the nearest AGENTS.md in the same change with the constraints it introduces, describing how the tool really behaves.",
-    "check": "Did this edit release/runbook instructions or a processor disclosure, or change a framework, script, or tool agents run? If yes, does it match the real branches, fallback commands, integrated SDKs, and tool behaviour, and is the nearest AGENTS.md updated?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260415-001", "RL-20260615-007", "RL-20260928-001"]
-  },
-  {
-    "id": "PROD-01",
-    "project": "general",
-    "area": "product",
-    "title": "Product behavior changes need explicit confirmation",
-    "rule": "Changes to visible balances, disabled actions, labels, or available flows should cite product/design intent when the behavior is not mechanically implied by the code change.",
-    "check": "Did this alter visible product behavior? If yes, is the product/design decision explicit?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260420-004", "RL-20260619-002", "RL-20260930-008", "RL-20261002-006"]
   },
   {
     "id": "WEB-04",
@@ -730,21 +685,6 @@
       "web/examples/feature-boundaries.md#validate-safe-app-urls-before-postmessage-origin-checks"
     ],
     "reviewLearningIds": ["RL-20260220-001", "RL-20260312-004", "RL-20260325-001", "RL-20260407-003"]
-  },
-  {
-    "id": "FEAT-03",
-    "project": "web",
-    "area": "features",
-    "title": "Do not self-import feature barrels",
-    "rule": "Code inside a web feature must not import the feature barrel or lazy feature handle when a direct hook, constant, or feature flag check avoids a circular dependency.",
-    "check": "Did this code inside `features/<name>` import from that feature barrel? If yes, can it import the direct module or shared hook instead?",
-    "exampleRefs": [
-      "web/examples/feature-boundaries.md#feature-public-api",
-      "web/examples/feature-boundaries.md#place-feature-subfolders-next-to-their-consumers",
-      "web/examples/feature-boundaries.md#use-relative-imports-inside-a-feature-export-only-the-public-surface",
-      "web/examples/feature-boundaries.md#sibling-files-inside-a-feature-use-relative-imports"
-    ],
-    "reviewLearningIds": ["RL-20260220-002", "RL-20260309-001", "RL-20260309-005", "RL-20260326-001"]
   },
   {
     "id": "UI-01",
@@ -806,13 +746,23 @@
   },
   {
     "id": "UX-03",
-    "project": "web",
+    "project": "general",
     "area": "ui",
-    "title": "Replacements must port over user-relied UX features",
-    "rule": "When replacing a shared shell component (topbar, sidebar, layout, navigation chrome) or an existing input or control, do an explicit feature delta against the previous version. Carry forward icons, indicators, shortcuts, entry points, and input behaviour users have come to rely on; if you intentionally drop one, document the decision before merge.",
-    "check": "Did this replace shared shell/chrome or an existing input/control? If yes, can you list every feature/icon/control that disappeared, and is each removal a deliberate UX call?",
+    "title": "Visible behaviour changes are deliberate and confirmed",
+    "rule": "A visible change the code does not mechanically imply (balances, disabled actions, copy, navigation, flows) cites the product or design decision, including copy that departs from the design file. Replacing shared chrome (topbar, sidebar, layout) or an existing input or control starts from a feature delta against the old one: carry forward the icons, indicators, entry points, row actions, test IDs, and input behaviour users rely on, and document each deliberate removal.",
+    "check": "Did this alter visible behaviour or replace shared chrome or an existing control? If yes, is the product/design decision explicit, and is every feature that disappeared a deliberate, documented call?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260302-003", "RL-20260318-010", "RL-20260410-004", "RL-20260604-004", "RL-20260908-002"]
+    "reviewLearningIds": [
+      "RL-20260302-003",
+      "RL-20260318-010",
+      "RL-20260410-004",
+      "RL-20260604-004",
+      "RL-20260908-002",
+      "RL-20260420-004",
+      "RL-20260619-002",
+      "RL-20260930-008",
+      "RL-20261002-006"
+    ]
   },
   {
     "id": "PKG-01",
@@ -838,7 +788,7 @@
     "id": "REVIEW-01",
     "area": "review",
     "title": "Keep each PR to one stated scope",
-    "rule": "A PR carries one ticket's worth of change: CI, tooling, or test-infrastructure PRs do not also contain unrelated production refactors, and a critical fix is not bundled with unrelated UI changes, so each can be reviewed, verified, and reverted alone. AI working docs and review screenshots stay out of the diff. Port/restore PRs keep behaviour parity and route pre-existing bugs to a separate fix.",
+    "rule": "A PR carries one ticket's worth of change so it can be reviewed, verified, and reverted alone: no unrelated production refactors in CI, tooling, or test-infrastructure PRs, no unrelated UI in a critical fix, and no AI working docs or review screenshots. Port and restore PRs keep behaviour parity and send pre-existing bugs to a separate fix.",
     "check": "Does this PR contain changes outside its stated scope, or scratch files and review assets? If yes, split or remove them.",
     "exampleRefs": [],
     "reviewLearningIds": [
@@ -857,16 +807,20 @@
     "id": "STATE-02",
     "area": "state",
     "title": "Reset context state when its precondition flips",
-    "rule": "When an effect writes derived values into a context based on a boolean precondition, the false branch must explicitly reset those values; do not rely on the next true branch to overwrite them.",
-    "check": "Does this conditional context write also clear the values when the condition becomes false, so downstream consumers never see stale data?",
-    "exampleRefs": ["examples/general/data-integrity.md#state-02-reset-context-state-when-its-precondition-flips"],
+    "rule": "When an effect writes derived values into a context based on a precondition, the false branch explicitly resets them; do not rely on the next true branch to overwrite them. Telemetry user context (`setUser`, `addUserExtraInfo`, `identify`) is cleared the same way when its entity becomes absent.",
+    "check": "Does this conditional context or telemetry-context write also clear its values when the condition turns false or the entity disappears, so consumers never see stale data?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#state-02-reset-context-state-when-its-precondition-flips",
+      "mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null"
+    ],
     "reviewLearningIds": [
       "RL-20260318-007",
       "RL-20260605-005",
       "RL-20260713-006",
       "RL-20260716-006",
       "RL-20260820-002",
-      "RL-20260916-005"
+      "RL-20260916-005",
+      "RL-20260311-013"
     ],
     "project": "general"
   },
@@ -891,29 +845,11 @@
   {
     "id": "CODE-03",
     "area": "abstractions",
-    "title": "Cap positional parameters; close over shared hook state",
-    "rule": "Helper functions called from inside a hook should not take more than 4 positional parameters. When all extra args come from the same hook scope, prefer a local closure (`const buildItem = (chainId, address) => _buildSafeItem(chainId, address, ...deps)`) or a single `deps` object so call sites stay readable.",
-    "check": "Static check: helpers invoked inside `useMemo`/`useCallback` with ≥5 positional args are flagged for review.",
+    "title": "Split multi-job code; close over shared arguments",
+    "rule": "A hook, handler, or component that does several things (fetch, resolve, and map; a multi-case switch; a long try/finally) splits into named hooks, functions, or one component per case. Helpers take at most 4 positional parameters: close over shared hook state in a local builder or pass one `deps` object, and group props that travel together into one object.",
+    "check": "Did this add or grow a hook, handler, or component a reviewer must read top to bottom, or a helper with 5+ positional args? If yes, can its steps become named units and its arguments a closure or one object?",
     "exampleRefs": ["examples/general/api-and-packages.md#close-over-hook-deps-instead-of-threading-6-args"],
     "reviewLearningIds": ["RL-20260311-005", "RL-20260929-002"],
-    "project": "general"
-  },
-  {
-    "id": "CODE-04",
-    "area": "abstractions",
-    "title": "Compute once per render before the JSX, not inside it",
-    "rule": "Pure derivations from props or state — especially ones reused across multiple JSX nodes — should be assigned to a local `const` (or `useMemo` if expensive) above the `return`, not inlined into JSX attributes.",
-    "check": "Lint review: flag identical pure-function calls appearing in multiple JSX `style`/attribute expressions within the same return.",
-    "exampleRefs": ["web/examples/feature-boundaries.md#hoist-derived-values-out-of-jsx"],
-    "reviewLearningIds": [
-      "RL-20260310-006",
-      "RL-20260604-005",
-      "RL-20260710-001",
-      "RL-20260716-005",
-      "RL-20260806-005",
-      "RL-20260911-001",
-      "RL-20261002-005"
-    ],
     "project": "general"
   },
   {
@@ -929,12 +865,13 @@
   {
     "id": "CODE-05",
     "area": "abstractions",
-    "title": "Name compound conditions instead of inlining them",
-    "rule": "Three or more `value !== 'literal'` checks on one variable become `!DISALLOWED.includes(value)` against a named const. A conjunction reused across conditions, and each branch of a multi-way ternary in JSX, get a named boolean computed before the return. Guard branches return early instead of nesting the main path, type guards list the members they accept rather than negating one, and names say what a value means at the call site (`pendingActions`, `mustUpgradeToSafePro`, positively framed flags such as `signersOnly`).",
-    "check": "Did this add a long `!==` chain, a repeated `a && b && !c` group, a nested ternary or if/else guard, or new identifiers? If yes, is each condition named once before use, do guards return early, and does each name say what it holds?",
+    "title": "Compute and name derived values before the return",
+    "rule": "Derive values once before the return, not inline in JSX: a pure helper that reads no hook state lives at module scope, and `useMemo` (above every early return) is for expensive work or identity a consumer needs, not cheap primitives. Three or more `!==` checks on one value become `!DISALLOWED.includes(value)`, and reused conjunctions and multi-way JSX branches become named booleans. Guards return early, type guards list the members they accept, and names say what a value means at the call site (`pendingActions`, positively framed `signersOnly`).",
+    "check": "Did this add a derived value, condition, guard, or identifier in a component or hook? If yes, is it computed and named once before the return, memoized only when expensive or identity matters, do guards return early, and does each name say what it holds?",
     "exampleRefs": [
       "mobile/examples/permissions.md#name-the-warning-condition-do-not-chain",
-      "examples/general/api-and-packages.md#code-05-return-early-from-guard-branches"
+      "examples/general/api-and-packages.md#code-05-return-early-from-guard-branches",
+      "web/examples/feature-boundaries.md#hoist-derived-values-out-of-jsx"
     ],
     "reviewLearningIds": [
       "RL-20260312-008",
@@ -944,7 +881,14 @@
       "RL-20260909-004",
       "RL-20260930-011",
       "RL-20260929-001",
-      "RL-20261008-005"
+      "RL-20261008-005",
+      "RL-20260310-006",
+      "RL-20260604-005",
+      "RL-20260710-001",
+      "RL-20260716-005",
+      "RL-20260806-005",
+      "RL-20260911-001",
+      "RL-20261002-005"
     ],
     "project": "general"
   },
@@ -959,20 +903,10 @@
     "project": "web"
   },
   {
-    "id": "OBS-02",
-    "area": "observability",
-    "title": "Telemetry user-context effects must handle the empty branch",
-    "rule": "Any effect that writes user/account context to a telemetry SDK must also clear or overwrite that context when the underlying entity becomes absent. The effect's dependency array must include the absence case, and the effect body must branch on it.",
-    "check": "Review: `useEffect` calls that read `activeSafe?.address` to call `addUserExtraInfo`/`setUser`/`identify` should also call the corresponding reset API in the falsy branch.",
-    "exampleRefs": ["mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null"],
-    "reviewLearningIds": ["RL-20260311-013"],
-    "project": "general"
-  },
-  {
     "id": "TX-03",
     "area": "transactions",
     "title": "Gate submit on readiness of the data that decides it",
-    "rule": "Block submission until data that affects the on-chain amount or decides whether the action is disabled or needs a warning (token decimals, tx details) is loaded. A `!!data && condition` gate reads as enabled while loading. Never let the UI fall back to a default that silently corrupts the value. Gate only on data that decides the action; a check the flow doesn't need only blocks it. A scoped flow whose SDK or provider is missing throws instead of falling back to the app-wide one.",
+    "rule": "Block submit until data that sets the on-chain amount or decides whether the action is disabled or warned (token decimals, tx details) has loaded; a `!!data && condition` gate reads as enabled while loading, and a default value silently corrupts the amount. Gate only on data that decides the action. A scoped flow whose SDK or provider is missing throws rather than falling back to the app-wide one.",
     "check": "Did this submit path depend on token metadata or other loaded data? If yes, is submission disabled until that data is confirmed loaded, does every gate decide this action, and does a missing scoped dependency throw instead of falling back?",
     "exampleRefs": [
       "examples/general/transactions.md#gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals",
@@ -989,16 +923,6 @@
     "project": "web"
   },
   {
-    "id": "TX-04",
-    "area": "transactions",
-    "title": "Guard transaction submission with a synchronous ref",
-    "rule": "Use a synchronous ref (not a state flag) to prevent double-submission in transaction send flows. State updates are async and can race when the user double-clicks or presses Enter while a request is in flight.",
-    "check": "Does this submit handler rely only on a state flag? If yes, switch to a useRef guard set/checked synchronously.",
-    "exampleRefs": ["examples/general/transactions.md#synchronous-ref-guard-against-double-submit"],
-    "reviewLearningIds": ["RL-20260303-003"],
-    "project": "web"
-  },
-  {
     "id": "NUM-01",
     "area": "numerics",
     "title": "Serialize numbers for on-chain and signing use exactly",
@@ -1011,10 +935,13 @@
   {
     "id": "STATE-03",
     "area": "state",
-    "title": "Async attempts start clean and recover on every exit",
-    "rule": "When a retry, submit, or new user input (a re-upload, a file drop) issues async work, reset the prior result and error synchronously before the call, and surface rejected input instead of dropping it silently. Set the in-flight flag after early returns or clear it in `finally`; a dialog that shows its own error closes only on success. In a multi-step submit, order writes so one failure cannot skip another, make a retry redo what is still owed, and drop a built result when a blocker appears.",
-    "check": "Does this retry, submit, or re-trigger path clear the previous result and error first, leave no exit path with the in-flight flag stuck or its error hidden, and can a partial failure or retry skip a step or keep a stale result?",
-    "exampleRefs": ["examples/general/data-integrity.md#reset-error-state-in-retry-handlers"],
+    "title": "Async attempts start clean, run once, and recover on every exit",
+    "rule": "Before a retry, submit, or new input (re-upload, file drop) starts async work, synchronously clear the prior result and error, and surface rejected input. Guard against double-submit with a ref set synchronously, not a state flag; set in-flight state after early returns or clear it in `finally`, and close a dialog that shows its own error only on success. In a multi-step submit, order writes so one failure cannot skip another, let a retry redo what is still owed, and drop a built result when a blocker appears.",
+    "check": "Does this retry, submit, or re-trigger path clear the previous result and error first, block a double-submit synchronously, leave no exit with the in-flight flag stuck or its error hidden, and stop a partial failure or retry from skipping a step or keeping a stale result?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#reset-error-state-in-retry-handlers",
+      "examples/general/transactions.md#synchronous-ref-guard-against-double-submit"
+    ],
     "reviewLearningIds": [
       "RL-20260306-006",
       "RL-20260605-011",
@@ -1023,23 +950,8 @@
       "RL-20260824-001",
       "RL-20260918-002",
       "RL-20260924-001",
-      "RL-20261002-001"
-    ],
-    "project": "general"
-  },
-  {
-    "id": "DATA-05",
-    "area": "data",
-    "title": "Compare addresses with the shared sameAddress helper",
-    "rule": "Use the repo's `sameAddress(a, b)` helper for any address equality check. Direct string comparison silently fails on case/checksum differences; the helper normalizes both sides. Normalize for comparison and keys only: render the user-supplied casing where users compare characters by eye (poisoning or look-alike highlights).",
-    "check": "Did this introduce a `===` or `!==` between two address values? If yes, switch to `sameAddress`.",
-    "exampleRefs": ["examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase"],
-    "reviewLearningIds": [
-      "RL-20260309-007",
-      "RL-20260709-002",
-      "RL-20260716-002",
-      "RL-20260716-003",
-      "RL-20260930-001"
+      "RL-20261002-001",
+      "RL-20260303-003"
     ],
     "project": "general"
   },
@@ -1062,16 +974,6 @@
     "exampleRefs": [],
     "reviewLearningIds": ["RL-20260307-011"],
     "project": "web"
-  },
-  {
-    "id": "RTK-03",
-    "area": "state",
-    "title": "Match RTK Query cache-key strings to the serialized form",
-    "rule": "Persisted RTK Query cache keys must be derived from the same serialization the runtime uses. Mismatched keys silently miss cache hits and refetch on every page load.",
-    "check": "Does this code persist or restore an RTK cache key? If yes, does it use the same `serializeQueryArgs`/default key serializer the runtime uses?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260302-001"],
-    "project": "general"
   },
   {
     "id": "WEB-06",
@@ -1106,10 +1008,13 @@
   {
     "id": "DATA-06",
     "area": "data",
-    "title": "Build shared values and keys consistently and completely",
-    "rule": "When multiple consumers (selector, hook, persistence layer, form validator, submit guard, payload) read the same identifier or input, they must normalize it identically (e.g. `getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit then rejects. A cache or dedup key includes every input that changes the value, and consumers meant to share one cached result pass identical query args.",
-    "check": "Did this add a consumer of an address, identifier, or user input, or build a cache/dedup key or query args? If yes, does it normalize like every existing consumer, and does the key cover every input that changes the value?",
-    "exampleRefs": ["examples/general/data-integrity.md#normalize-rtk-query-cache-keys-at-one-place"],
+    "title": "Normalize shared identifiers and keys one way",
+    "rule": "Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache or dedup key covers every input that changes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.",
+    "check": "Did this compare or consume an address, identifier, or user input, or build a cache/dedup key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#normalize-rtk-query-cache-keys-at-one-place",
+      "examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase"
+    ],
     "reviewLearningIds": [
       "RL-20260218-002",
       "RL-20260604-001",
@@ -1120,18 +1025,14 @@
       "RL-20260707-003",
       "RL-20260716-010",
       "RL-20260818-005",
-      "RL-20260916-001"
+      "RL-20260916-001",
+      "RL-20260309-007",
+      "RL-20260709-002",
+      "RL-20260716-002",
+      "RL-20260716-003",
+      "RL-20260930-001",
+      "RL-20260302-001"
     ],
-    "project": "general"
-  },
-  {
-    "id": "CHAIN-03",
-    "area": "chain",
-    "title": "Pass canonical Safe versions through chain-aware deployment helpers",
-    "rule": "When resolving Safe contract metadata for a transaction, route the lookup through a chain-aware helper that respects canonical-fallback ordering. Hard-coding latest-version indices skips chains pinned to older releases.",
-    "check": "Does this code resolve a Safe contract address/version? If yes, is it going through the canonical-version helper rather than picking from a flat list?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260218-003", "RL-20260727-001"],
     "project": "general"
   },
   {
@@ -1148,8 +1049,8 @@
     "id": "WEB-07",
     "area": "auth",
     "title": "Handle the loading tri-state of feature-flag hooks",
-    "rule": "Feature-flag/gate hooks that return `boolean | undefined` (undefined while config loads) must not be coerced with `?? false`. Treat `undefined` as \"still resolving\" — wait, render a loader, or allow until known — and branch routing/gating/no-header decisions on `=== true` / `=== false`. A gate opt-in or escape hatch must also re-check `isAuthenticated` so it can't bypass the gate after sign-in. Callers consume the gate's loading state, the flag-off path returns the pre-feature behaviour instead of granting the feature, and every visible change of an unlaunched feature sits behind that feature's own flag.",
-    "check": "Did this read a flag/gate hook that can be `undefined` while loading? If yes, is the undefined state handled explicitly instead of coerced to false, and would a premature decision lose `next`/flash the wrong UI/bypass the gate, and is every visible change of an unlaunched feature behind its flag with the flag-off path unchanged?",
+    "rule": "Flag and gate hooks return `undefined` while config loads; never coerce it with `?? false`. Treat it as still resolving (wait, show a loader, or allow until known), branch on `=== true`/`=== false`, and have callers consume the loading state. A gate escape hatch re-checks `isAuthenticated` so it cannot bypass the gate after sign-in. The flag-off path keeps pre-feature behaviour, and every visible change of an unlaunched feature sits behind its own flag.",
+    "check": "Did this read a flag or gate hook? If yes, is `undefined` handled as loading rather than false, can a premature decision lose `next`, flash the wrong UI, or bypass the gate, and is every visible change behind the flag with the flag-off path unchanged?",
     "exampleRefs": ["examples/general/gateway-hooks.md#web-07-handle-the-loading-tri-state-of-feature-flags"],
     "reviewLearningIds": [
       "RL-20260521-001",
@@ -1166,7 +1067,7 @@
     "id": "CODE-06",
     "area": "abstractions",
     "title": "Own the lifecycle of async work",
-    "rule": "Any async call that is not awaited in a normal control-flow path — an `onClick={asyncFn}` handler, a cleanup/bail-out `disconnect()`, a background effect, a device read such as the clipboard — must either be awaited inside a `try/catch` or wrapped in an awaited IIFE that handles rejection, even when a user-facing error state already renders. Timers and awaited calls that set state afterwards are cleared or guarded on unmount. Don't wrap a callee whose contract already catches and logs.",
+    "rule": "An async call outside normal awaited control flow (an `onClick={asyncFn}`, a cleanup `disconnect()`, a background effect, a clipboard read) is awaited in a `try/catch` or an IIFE that handles rejection, even when an error state already renders, unless the callee already catches and logs. Timers and awaited calls that set state afterwards are cleared or guarded on unmount.",
     "check": "Did this add an async call, timer, or awaited state update in a handler, effect, or hook? If yes, is rejection handled, and is it cleared or guarded on unmount?",
     "exampleRefs": ["examples/general/gateway-hooks.md#code-06-await-or-catch-fire-and-forget-async"],
     "reviewLearningIds": [
@@ -1184,7 +1085,7 @@
     "id": "NUM-02",
     "area": "numerics",
     "title": "Validate numeric coercion of external string inputs",
-    "rule": "`Number(x)` on an external/string value silently yields `0` for `''`/whitespace and `NaN` for non-numeric input. Parse such values through a guarded helper (reject null/undefined, trim, treat empty as unknown, `Number.isFinite` the result) before using them as API args, aggregates, or status decisions, and keep \"known zero\" distinct from \"unknown/unloaded\". When a value has a known valid floor, use the exact comparison (`=== 1`) rather than an over-broad bound (`<= 1`) so malformed inputs surface.",
+    "rule": "`Number(x)` turns `''` and whitespace into `0` and junk into `NaN`. Parse external strings through a guarded helper (reject nullish, trim, treat empty as unknown, `Number.isFinite` the result) before using them as API args, aggregates, or status decisions, keeping known zero distinct from unknown. Where the valid floor is known, compare exactly (`=== 1`, not `<= 1`) so malformed input surfaces.",
     "check": "Did this coerce an external string to a number (id, balance, threshold)? If yes, is empty/whitespace/non-finite handled explicitly instead of trusting raw `Number()`, and do bounds use exact comparisons where the floor is known?",
     "exampleRefs": ["examples/general/data-integrity.md#num-02-guard-numeric-coercion-of-external-strings"],
     "reviewLearningIds": [
@@ -1214,8 +1115,8 @@
     "id": "SEC-02",
     "area": "security",
     "title": "Gate destructive operations on a confirmed cause",
-    "rule": "Irreversible operations (deleting a key, wiping a signer, removing persisted data) must run only on the specific confirmed condition that warrants them — not on any falsy/ambiguous result or any caught error. A function that returns `undefined` for cancelled/transient failures as well as true loss must distinguish them and preserve the prior error path for the ambiguous case. Never delete existing data before its replacement is durably stored. A loading, failed, or skipped read (an empty config list, a `''` chainId) is unknown, not empty: wholesale-replacing writes and removals wait for a successful read, enforced in the shared write hook, and a terminal status (deleted) needs its definitive signal.",
-    "check": "Did this add a destructive/irreversible action? If yes, does it fire only on the specific confirmed cause (not a generic falsy/error result), is existing data preserved until its replacement is committed, and does it wait for a successful read instead of treating an unknown result as empty?",
+    "rule": "Irreversible operations (deleting a key, wiping a signer, removing persisted data) run only on their specific confirmed cause, never on a falsy result or any caught error; a helper that returns `undefined` for both cancellation and true loss distinguishes them and keeps the error path for the ambiguous case. Existing data stays until its replacement is durably stored. A loading, failed, or skipped read (an empty config list, a `''` chainId) is unknown, not empty: wholesale writes and removals wait for a successful read, enforced in the shared write hook, and a terminal status (deleted) needs its definitive signal.",
+    "check": "Did this add a destructive or wholesale-replacing write? If yes, does it fire only on its confirmed cause, keep existing data until the replacement is committed, and wait for a successful read rather than treating unknown as empty?",
     "exampleRefs": [
       "examples/general/data-integrity.md#sec-02-gate-destructive-operations-on-a-confirmed-cause",
       "examples/general/data-integrity.md#sec-02-treat-an-unread-source-as-unknown-before-a-wholesale-write"
@@ -1248,8 +1149,8 @@
     "project": "web",
     "area": "ui",
     "title": "Keep interactive elements operable, unnested, and truly disabled",
-    "rule": "Clickable elements must be keyboard-operable: a `<button type=\"button\">`, or `role` + `tabIndex` + an Enter/Space handler, and never nested inside another interactive element. A disabled state on a primitive that can render as a link or custom element, or on a control that must stay focusable for nested actions, uses `aria-disabled` (plus blocked pointer events where anchors would ignore `disabled`). Repeated controls and indicators get accessible names that include their item, and a clickable row keeps its row role with a real button for focus while its key handler ignores events bubbled from nested controls.",
-    "check": "Did this add or change a clickable element or a shared interactive primitive? If yes, can it be activated from the keyboard, is it free of nested interactive elements, does its disabled state actually block and announce, and does each repeated control have a distinct accessible name?",
+    "rule": "Clickable elements are keyboard-operable (`<button type=\"button\">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls.",
+    "check": "Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested, does its disabled state block and announce, and does each repeated control have a distinct accessible name?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#disable-link-rendered-buttons-with-aria-disabled",
       "web/examples/feature-boundaries.md#a11y-01-name-repeated-controls-after-their-item"
@@ -1338,11 +1239,18 @@
     "id": "PKG-02",
     "project": "general",
     "area": "packages",
-    "title": "Import only declared dependencies and the established library per concern",
-    "rule": "App code imports only packages declared in its own `package.json`, and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. Adding a new package needs a reason the existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
-    "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, and is it the library the repo already uses for that job?",
+    "title": "Import only declared dependencies, through their public entrypoint",
+    "rule": "App code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
+    "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260610-001", "RL-20260618-001", "RL-20260629-001", "RL-20260708-001", "RL-20260729-001"]
+    "reviewLearningIds": [
+      "RL-20260610-001",
+      "RL-20260618-001",
+      "RL-20260629-001",
+      "RL-20260708-001",
+      "RL-20260729-001",
+      "RL-20260413-006"
+    ]
   },
   {
     "id": "SEC-04",
@@ -1359,8 +1267,8 @@
     "project": "general",
     "area": "forms",
     "title": "Form values track what inputs show and what they depend on",
-    "rule": "An unfinished or invalid entry never maps to the same form value as empty; store an invalid sentinel or set a field error so validity blocks submit. When a value a field depends on changes (a selected token, a signer list), clear the dependent field explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. Reactions to user edits (open suggestions, focus) live in change handlers, because effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails when the lookup misses, and an edit form's options include every value already stored.",
-    "check": "Did this add or change a form field, a field that depends on another value, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, does a lookup-based validator fail on a miss, and do edit options include the stored values?",
+    "rule": "An unfinished or invalid entry never maps to the empty form value; store an invalid sentinel or set a field error so submit stays blocked. When a field's dependency changes (selected token, signer list), clear it explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. React to user edits in change handlers, since effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails on a miss, and edit-form options include every stored value.",
+    "check": "Did this add or change a form field, a dependent field, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, and do lookup validators fail on a miss and edit options include stored values?",
     "exampleRefs": ["examples/general/data-integrity.md#clear-dependent-form-fields-with-setvalue-not-resetfield"],
     "reviewLearningIds": ["RL-20260821-001", "RL-20260818-004", "RL-20260907-001", "RL-20260930-007"]
   },
@@ -1379,20 +1287,10 @@
     "project": "general",
     "area": "performance",
     "title": "Bound request fan-out and polling",
-    "rule": "A list must not fire one query per row or per Workspace on render: fetch per item when its menu or detail opens, or use a narrower lookup, and an error fallback must not send more requests than the happy path. Polling stops once its result settles or times out; a polled query shares its cache key, so polling it re-polls for every subscriber, and rows sharing it read their slice through `selectFromResult` so a poll does not re-render every row.",
+    "rule": "A list does not fire one query per row or Workspace on render: fetch when the item's menu or detail opens, or use a narrower lookup, and error fallbacks send no more requests than the happy path. Polling stops once the result settles or times out; polling a shared cache key re-polls for every subscriber, so rows read their slice through `selectFromResult`.",
     "check": "Did this put a query in a list row or loop, fan requests out per entity, or poll? If yes, is the request count bounded by what the user opened, does polling stop, and does each row subscribe only to its slice?",
     "exampleRefs": [],
     "reviewLearningIds": ["RL-20260930-006", "RL-20261002-008"]
-  },
-  {
-    "id": "CODE-07",
-    "project": "general",
-    "area": "abstractions",
-    "title": "Split code that carries several jobs into named units",
-    "rule": "When a hook, handler, or component does several things (fetch, resolve, and map; a multi-case action switch; a long try/finally), split it into named hooks, functions, or one component per case so each part reads in one pass.",
-    "check": "Did this add or grow a hook, handler, or component a reviewer must read top to bottom to follow? If yes, can its steps or cases become named hooks, functions, or components?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260929-002"]
   },
   {
     "id": "SEC-05",

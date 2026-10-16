@@ -157,7 +157,7 @@
     ],
     "learning": "Login/logout auth reconciliation that reads `/auth/me` must force a fresh request and avoid keeping a long-lived subscription, otherwise cached authenticated data can override the backend cookie state.",
     "ruleIds": [
-      "WEB-03"
+      "WEB-01"
     ]
   },
   {
@@ -216,7 +216,7 @@
     "issueCommentIds": [],
     "learning": "Importing a React Native UI hook from a package internals path can bypass the entrypoint used by the provider and create a separate context instance.",
     "ruleIds": [
-      "MOB-03"
+      "PKG-02"
     ]
   },
   {
@@ -253,7 +253,7 @@
     "issueCommentIds": [],
     "learning": "Fallback release instructions should not use placeholder-looking branch names. They need the real branch or generated branch pattern so operators do not create the wrong PR.",
     "ruleIds": [
-      "DOC-02"
+      "DOC-01"
     ]
   },
   {
@@ -406,7 +406,7 @@
     "issueCommentIds": [],
     "learning": "Changing a visible balance from all-chain sum to current-chain value is a product behavior change and should be explicitly confirmed or documented.",
     "ruleIds": [
-      "PROD-01"
+      "UX-03"
     ]
   },
   {
@@ -677,7 +677,7 @@
     "issueCommentIds": [],
     "learning": "Permission request flows can fail because registration or network work failed after permission was granted. Only actual denial/restriction should show the user a Settings explainer.",
     "ruleIds": [
-      "MOB-02"
+      "MOB-01"
     ]
   },
   {
@@ -790,8 +790,7 @@
     ],
     "learning": "Long authenticated emails and names can overflow constrained sidebar profile UI. Treat them like wallet addresses: truncate or wrap intentionally.",
     "ruleIds": [
-      "UX-01",
-      "MOB-01"
+      "UX-01"
     ]
   },
   {
@@ -849,7 +848,7 @@
     "issueCommentIds": [],
     "learning": "Deliberate logout can race credentialed 403 handling after reload if persisted auth state is still present. Clear client auth before navigation or suppress session-expired handling during logout.",
     "ruleIds": [
-      "WEB-02"
+      "WEB-01"
     ]
   },
   {
@@ -984,7 +983,7 @@
     ],
     "learning": "Email/OIDC callbacks should mark the client authenticated only after a server-verified session signal succeeds, not from pending client flags alone.",
     "ruleIds": [
-      "WEB-03",
+      "WEB-01",
       "TEST-02"
     ]
   },
@@ -1022,7 +1021,6 @@
     "issueCommentIds": [],
     "learning": "Feature-internal hooks should import direct feature flags, constants, or sibling modules instead of importing the feature barrel that exports the same hook and can create a circular dependency.",
     "ruleIds": [
-      "FEAT-03",
       "FEAT-01"
     ]
   },
@@ -1150,7 +1148,7 @@
     "issueCommentIds": [],
     "learning": "When lazy feature components can render null while loading, surrounding chrome such as dividers must be gated on readiness too so users never see partial standalone UI.",
     "ruleIds": [
-      "FEAT-02",
+      "FEAT-01",
       "TEST-02"
     ]
   },
@@ -1323,7 +1321,7 @@
     "issueCommentIds": [],
     "learning": "If the post-logout reconciliation request fails transiently (5xx, network), only logging the error and clearing the in-progress flag leaves Redux marked authenticated forever; route guards then keep the UI in a signed-in state with no retry. Treat a transient reconcile error the same as 'authenticated reconciliation' for the deliberate-logout path: force the user to unauthenticated so they re-login.",
     "ruleIds": [
-      "WEB-03"
+      "WEB-01"
     ]
   },
   {
@@ -2032,7 +2030,7 @@
     "issueCommentIds": [],
     "learning": "Computations whose inputs are stable for the lifetime of a render (e.g. `getAvatarColor(selectedSpace.id)`) should be assigned once before the JSX, not inlined into each element's `style` prop. This makes diffs cleaner, avoids recomputing per render slot, and surfaces dependency tracking when the value is later memoized.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -2179,7 +2177,7 @@
     "issueCommentIds": [],
     "learning": "Effects that write Safe-scoped context to a telemetry SDK (`DdSdkReactNative.addUserExtraInfo({ safeAddress, chainId })`) must also clear that context when the active Safe becomes null — e.g. after the user removes the last account. Otherwise subsequent RUM events stay tagged with the previous Safe and misattribute analytics.",
     "ruleIds": [
-      "OBS-02"
+      "STATE-02"
     ]
   },
   {
@@ -2201,7 +2199,7 @@
     "issueCommentIds": [],
     "learning": "When a hook or helper is only consumed inside one component within a feature, colocate it in a subfolder of that component (e.g. SpaceSafeBar/hooks/) rather than scattering it elsewhere; same applies to inner sub-components of a flow.",
     "ruleIds": [
-      "FEAT-03"
+      "FEAT-01"
     ]
   },
   {
@@ -2241,7 +2239,7 @@
     ],
     "learning": "Submission guards based on `isSubmitting` state can be entered twice within a single render cycle (rapid taps). Use a `useRef` flag that is set synchronously before any await, and clear it only after completion, to make handlers re-entrant-safe.",
     "ruleIds": [
-      "TX-04"
+      "STATE-03"
     ]
   },
   {
@@ -2285,7 +2283,7 @@
     ],
     "learning": "A feature's own components must not import from the feature's public barrel (`@/features/<name>`) — that creates a circular import and forces the eager bundle to include lazy chunks. Use relative paths (`../hooks/...`, `../store/...`) for in-feature imports.",
     "ruleIds": [
-      "FEAT-03"
+      "FEAT-01"
     ]
   },
   {
@@ -2325,7 +2323,7 @@
     "issueCommentIds": [],
     "learning": "Inline `.toLowerCase()` comparisons for Ethereum addresses are fragile: they assume a particular checksum convention and miss the existing utility. Always import and use `sameAddress` from the utils package for owner/recipient/token-address matching.",
     "ruleIds": [
-      "DATA-05"
+      "DATA-06"
     ]
   },
   {
@@ -2424,7 +2422,7 @@
     "issueCommentIds": [],
     "learning": "Persistence transforms or store filters that read into RTK Query's `queries` slice must use the exact serialized cache key, including the surrounding quotes that RTK Query adds for string arguments. Switching an endpoint from `getX(undefined)` to `getX(arg)` changes the key to `getX(\"arg\")`, and template literals like `getX(${KEY})` produce `getX(KEY)` (no quotes), so `lodash.get` paths and store-query keys silently miss the entry.",
     "ruleIds": [
-      "RTK-03"
+      "DATA-06"
     ]
   },
   {
@@ -2548,7 +2546,7 @@
     "issueCommentIds": [],
     "learning": "New widgets or list components belong inside an existing top-level feature folder (`features/transactions/components/PendingTxList`, `features/assets/components/AssetsList`) rather than getting their own feature for each component. Promote a folder to a feature only when it owns a contract or page boundary; otherwise the feature graph fragments.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -2693,7 +2691,7 @@
     ],
     "learning": "Internal feature files must use relative imports (./hooks/useFoo) for siblings; importing from the feature's own barrel (@/features/spaces) creates circular dependencies that work today but break under different bundlers/test runners and re-export ordering changes.",
     "ruleIds": [
-      "FEAT-03"
+      "FEAT-01"
     ]
   },
   {
@@ -2806,7 +2804,7 @@
     "issueCommentIds": [],
     "learning": "Deployment matching that hardcodes one zkSync chain id, treats canonical address as deployed on every chain, and forwards version metadata into deployment lookups misses canonical Safes on sibling zkSync networks and on +L2-tagged versions.",
     "ruleIds": [
-      "CHAIN-03"
+      "CHAIN-01"
     ]
   },
   {
@@ -3735,7 +3733,7 @@
     "issueCommentIds": [],
     "learning": "Normalize an input (trim, lowercase) once and reuse the named result instead of re-applying it at each use; collapse duplicate predicate checks into one const. Hoist error messages repeated across branches into named constants and branch once per input type.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -4087,7 +4085,7 @@
     ],
     "learning": "Before changing a published privacy or legal disclosure of third-party processors (error reporting, analytics, auth), check it against what the clients actually integrate (grep the SDK/factory). Disclosing a processor that isn't wired up, or omitting one that is, makes the policy wrong.",
     "ruleIds": [
-      "DOC-02"
+      "DOC-01"
     ]
   },
   {
@@ -4384,7 +4382,7 @@
     ],
     "learning": "When a component's props change, update the prop interface exported from the feature contract in the same change. A contract type that omits or renames props the component actually accepts mistypes every external consumer.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -4909,7 +4907,7 @@
     ],
     "learning": "Changes that add or reword user-visible flows need product/design sign-off; reviewers may block on it. Once product has decided copy in the ticket, reviewer copy suggestions defer to that decision.",
     "ruleIds": [
-      "PROD-01"
+      "UX-03"
     ]
   },
   {
@@ -5532,7 +5530,7 @@
     "issueCommentIds": [],
     "learning": "A helper that reads no hook state, props, or closure values belongs at module scope, not inside the hook body or a useEffect. Declaring it inline re-creates it every run and hides that it is a pure function that can be tested on its own.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -5593,7 +5591,7 @@
     ],
     "learning": "Matching addresses from two sources, such as imported signers and CGW owners, must not rely on object-key or string equality, because the two sides can differ in checksum casing. Normalize both sides or use sameAddress, and add a test with mixed-case inputs.",
     "ruleIds": [
-      "DATA-05"
+      "DATA-06"
     ]
   },
   {
@@ -5946,7 +5944,7 @@
     "issueCommentIds": [],
     "learning": "Address equality and dedupe checks should go through sameAddress (or normalizeAddress for keys), not hand-written `a.toLowerCase() === b.toLowerCase()` or `Object.keys(x).some(k => k.toLowerCase() === …)`.",
     "ruleIds": [
-      "DATA-05"
+      "DATA-06"
     ]
   },
   {
@@ -5967,7 +5965,7 @@
     "issueCommentIds": [],
     "learning": "Normalize addresses for comparison and keys, but render the user-supplied casing wherever users compare characters by eye (poisoning or look-alike highlights). Normalizing for display removes the checksum casing that helps users tell look-alikes apart.",
     "ruleIds": [
-      "DATA-05"
+      "DATA-06"
     ]
   },
   {
@@ -6013,7 +6011,7 @@
     "issueCommentIds": [],
     "learning": "Do not wrap cheap, bounded computations, such as slicing a 40-character address, in useMemo. The memo bookkeeping costs more than the work. Keep useMemo for derivations that are expensive or whose reference identity feeds other hooks.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -6211,7 +6209,7 @@
     "issueCommentIds": [],
     "learning": "Chain-dependent contract decisions, such as migration targets or offering in-app migration versus the CLI, must use the active chain's recommended or capped Safe version. Do not fall back to a global LATEST_SAFE_VERSION default. Otherwise web and mobile disagree about eligibility on chains whose recommendation differs.",
     "ruleIds": [
-      "CHAIN-03"
+      "CHAIN-01"
     ]
   },
   {
@@ -6666,7 +6664,7 @@
     "issueCommentIds": [],
     "learning": "Do not wrap a component in `next/dynamic` inside a feature that is already reached through feature-level lazy loading. The extra chunk renders an empty loading state on first client render, so the component (and any children passed to it) flashes out; export it directly through the feature's public API.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -6761,7 +6759,7 @@
     "issueCommentIds": [],
     "learning": "Wrap a derived filter/map passed as props (e.g. Autocomplete options) in `useMemo`. A new array identity every render churns the consumer and re-runs its filtering.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -7264,7 +7262,7 @@
     "issueCommentIds": [],
     "learning": "When the feature registry already stubs disabled lazy features to render null, mount the feature component bare; don't repeat the flag check at the call site. Fold availability states (e.g. UNAVAILABLE -> null) into the feature's own hook or component instead of checking them in each consumer.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -7302,7 +7300,7 @@
     "issueCommentIds": [],
     "learning": "Moving a feature-flag check into the child component is the default, but keep it in the parent when the same flag also controls the parent's own layout (a grid column or class the child cannot set on an ancestor).",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -7888,7 +7886,7 @@
     "issueCommentIds": [],
     "learning": "Memoize filtered/derived lists with useMemo on their real inputs, and place the hook above every early return so hook order is identical between renders. A memo added at the point of use below conditional returns breaks the rules of hooks.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -8010,7 +8008,7 @@
     ],
     "learning": "A component behind its own feature flag loads through the feature handle and contract (`useLoadFeature`), not a direct barrel export, and a barrel that light hooks are imported from must not re-export a heavy provider (ethers, protocol-kit); import it from its own path at the single mount site so consumers don't start deep-importing to dodge it.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -8100,7 +8098,7 @@
     ],
     "learning": "Place a module next to what consumes it, not next to the feature that motivated it. Infrastructure read by core hooks (safe info, chain id, SDK, read-only provider) stays in the shared location even when the first entry point is feature-specific.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -8581,7 +8579,7 @@
     "issueCommentIds": [],
     "learning": "Before adding a dynamic import() to keep a module out of the initial bundle, check whether it is already statically reachable from the entry graph (and read the bundle report). Lazy-loading an already-loaded module adds async loading states to every consumer for no size win.",
     "ruleIds": [
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -8815,7 +8813,7 @@
     "issueCommentIds": [],
     "learning": "A change to a test framework version, a workspace script or the compiler updates the nearest AGENTS.md (the root one when it applies to every workspace) in the same change with the constraints it introduces, such as Jest 30's non-configurable `window.location`. Guidance about a tool states how it actually behaves: `verify` snapshots the changed-file list when it starts, so only a run started after the last edit counts.",
     "ruleIds": [
-      "DOC-02"
+      "DOC-01"
     ]
   },
   {
@@ -8914,7 +8912,6 @@
     "issueCommentIds": [],
     "learning": "Reviewers ask to split code they cannot follow in one pass: a submit callback with a long try/finally becomes smaller named functions, a hook that fetches, resolves tokens and maps rows hands the token lookup to its own hook, drawer data is aggregated in a hook rather than the component, and a `switch` over actions renders one component per case. Props that travel together through components are grouped into one object (five `accounts*` props became one `safeAccounts`); a context is only worth it when the data is many levels away.",
     "ruleIds": [
-      "CODE-07",
       "CODE-03"
     ]
   },
@@ -9042,7 +9039,7 @@
     "learning": "Before writing a helper, use the one the repo already has: `uniqWith(list, sameAddress)` and `lodash/chunk` instead of a new dedupe or chunk function, `maybePlural` instead of a local plural, the existing href builder or `filterSpacesByStatus` instead of a near copy, `ROUTES` and named constants (`SECONDS_PER_DAY`) instead of literals, and `sameAddress` against `ZERO_ADDRESS`. A check several places need (the spending-limit pair match, `isSameAllowance`) lives once, and the submit gate, transaction builder and summary all call it, so a weaker copy cannot let through a change the builder then rejects.",
     "ruleIds": [
       "DATA-04",
-      "DATA-05"
+      "DATA-06"
     ]
   },
   {
@@ -9248,7 +9245,7 @@
     "issueCommentIds": [],
     "learning": "When a change decides user-visible navigation the spec does not settle (sending `/spaces` to the last-used Workspace, where an \"Enforced by\" row links), reviewers ask for the product decision before merge, since it can make two URLs land on the same page. Leave the behaviour mocked or ask in the design file rather than picking one.",
     "ruleIds": [
-      "PROD-01"
+      "UX-03"
     ]
   },
   {
@@ -9295,8 +9292,7 @@
     "issueCommentIds": [],
     "learning": "A shared hook kept in `hooks/` so the accounts table avoids the heavy feature barrel must not then import that barrel or a deep `features/<name>/utils` path: it brings back the cycle, and ESLint does not catch the deep utils import. A pure helper a hook needs lives in `utils/`, not exported from a component file. Components that outlive an announcement (the Safe Pro modals) do not live inside the short-lived announcement feature whose flag will be removed.",
     "ruleIds": [
-      "FEAT-01",
-      "FEAT-02"
+      "FEAT-01"
     ]
   },
   {
@@ -9642,7 +9638,7 @@
     ],
     "learning": "A `useMemo` around `formatLastUpdated`, a cheap pure function returning a string, added a dependency array and nothing else; it went back to a plain `const`. Memoize only when the work is expensive or a consumer needs a stable reference.",
     "ruleIds": [
-      "CODE-04"
+      "CODE-05"
     ]
   },
   {
@@ -9661,7 +9657,7 @@
     "issueCommentIds": [],
     "learning": "A tooltip moved away from the Figma wording ('Business covers 20 Safe accounts') to 'Your Business plan covers…', and the reviewer could not tell whether that was intended until the author linked the product copy ticket. Visible copy that departs from the design cites its product request in the PR.",
     "ruleIds": [
-      "PROD-01"
+      "UX-03"
     ]
   },
   {

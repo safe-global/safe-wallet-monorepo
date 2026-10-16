@@ -99,7 +99,7 @@ Question: inside one web feature, should a file import a sibling module through
 the `@/features/<name>/...` alias or through a relative path? On #7980 a
 reviewer asked to keep `@/features/proposers/hooks/...` instead of `../hooks/...`,
 and a later commit in the same PR imported `useDelegateMutations` relatively
-"inside the feature". The FEAT-03 example "Sibling files inside a feature use
+"inside the feature". The FEAT-01 example "Sibling files inside a feature use
 relative imports" (RL-20260220-002) prefers relative paths, though its point is
 avoiding the barrel self-import.
 
@@ -118,7 +118,7 @@ Option B — relative path for anything inside the same feature:
 import { useParentSafeThreshold } from '../hooks/useParentSafeThreshold'
 ```
 
-Decision Needed: pick A or B, then update the FEAT-03 example to state it.
+Decision Needed: pick A or B, then update the FEAT-01 example to state it.
 
 ### OQ-FLAG-01 — Legacy path while a feature flag is still loading
 
