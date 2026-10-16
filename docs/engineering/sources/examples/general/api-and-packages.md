@@ -344,3 +344,38 @@ jobs:
 ### Why
 
 A top-level `permissions: {}` removes the inherited `contents: read` scope, so every job that runs `actions/checkout` fails with an insufficient-token-scope error until it re-declares the minimal permission. Add an explicit `permissions:` block (including `contents: read`) to each checkout job rather than widening the workflow-level scope back up.
+
+## CODE-05 — Return early from guard branches
+
+Source: PR #8759 (RL-20260929-001)
+
+### Avoid
+
+```ts
+if (step === 'select') {
+  if (itemsToName.length > 0) {
+    setStep('name')
+    return
+  }
+} else if (!hasAllNames(data.names, itemsToName)) {
+  return
+}
+submit(data)
+```
+
+### Prefer
+
+```ts
+if (step === 'name' && !hasAllNames(data.names, itemsToName)) return
+
+if (step === 'select' && itemsToName.length > 0) {
+  setStep('name')
+  return
+}
+
+submit(data)
+```
+
+### Why
+
+Guards that only stop or redirect the submit read as flat early returns; nesting them in if/else makes the reader track which branch falls through to the main path.

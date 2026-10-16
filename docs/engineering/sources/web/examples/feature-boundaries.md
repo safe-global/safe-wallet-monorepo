@@ -708,3 +708,31 @@ const buttonVariants = cva(
 ### Why
 
 Anchors ignore the `disabled` attribute, so a button rendered as a link looks disabled but still navigates unless `aria-disabled` blocks pointer events.
+
+## A11Y-01 — Name repeated controls after their item
+
+Source: PR #8611, #8735 (RL-20260929-003)
+
+### Avoid
+
+```tsx
+getRowAriaLabel: ({ item }) => `Open ${item.type} details`
+
+<Button variant="outline" onClick={onClick}>
+  Set policy
+</Button>
+```
+
+### Prefer
+
+```tsx
+getRowAriaLabel: ({ item }) => `Open ${getItemLabel(item)} for ${shortenAddress(item.address)}`
+
+<Button variant="outline" onClick={onClick} aria-label={`Set policy for ${title}`}>
+  Set policy
+</Button>
+```
+
+### Why
+
+A screen reader that lists controls by name cannot tell apart rows or tiles that all announce the same text. Put the item into the accessible name of every repeated control or indicator.

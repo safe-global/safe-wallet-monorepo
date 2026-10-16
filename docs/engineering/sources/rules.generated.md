@@ -93,6 +93,9 @@
 | [`SEC-04`](#sec-04)       | Keep secrets and raw identifiers out of logs and telemetry                                 | general / security      |
 | [`FORM-01`](#form-01)     | Form values track what inputs show and what they depend on                                 | general / forms         |
 | [`TEST-07`](#test-07)     | Visual changes get a Storybook state                                                       | web / testing           |
+| [`PERF-02`](#perf-02)     | Bound request fan-out and polling                                                          | general / performance   |
+| [`CODE-07`](#code-07)     | Split code that carries several jobs into named units                                      | general / abstractions  |
+| [`SEC-05`](#sec-05)       | Gate actions on the identity the backend authorizes                                        | general / security      |
 
 ---
 
@@ -102,7 +105,7 @@
 
 ### `FEAT-01` Use feature public APIs across boundaries
 
-> **web** · features · 1 example · ↩ `RL-20260225-001` · `RL-20260318-006` · `RL-20260326-001` · `RL-20260605-003` · `RL-20260917-002`
+> **web** · features · 1 example · ↩ `RL-20260225-001` · `RL-20260318-006` · `RL-20260326-001` · `RL-20260605-003` · `RL-20260917-002` · `RL-20260930-010`
 
 **📜 Rule**\
 Feature code must import another feature through its public API, not through deep internal component, hook, service, data, or generated paths. The exception is a lint-permitted deep import of a pure helper from a boot path, where the barrel would eagerly pull components into that module graph.
@@ -150,7 +153,7 @@ need before other features depend on them.
 
 ### `FEAT-02` Give new features the standard boundary
 
-> **web** · features · 1 example · ↩ `RL-20260227-001` · `RL-20260327-004` · `RL-20260609-003` · `RL-20260805-002` · `RL-20260818-002` · `RL-20260820-005` · `RL-20260911-004` · `RL-20260911-006` · `RL-20260916-002`
+> **web** · features · 1 example · ↩ `RL-20260227-001` · `RL-20260327-004` · `RL-20260609-003` · `RL-20260805-002` · `RL-20260818-002` · `RL-20260820-005` · `RL-20260911-004` · `RL-20260911-006` · `RL-20260916-002` · `RL-20260930-010`
 
 **📜 Rule**\
 New web features need an explicit boundary: public barrel, feature contract or handle where applicable, public types, and hooks exported without lazy-loading hook calls. Flag and availability gating live inside the feature (registry stub or its own hook); consumers mount it bare unless the flag also drives the consumer's own layout.
@@ -200,7 +203,7 @@ need before other features depend on them.
 
 ### `CODE-01` Extract shared UI only when behavior is actually shared
 
-> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004`
+> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002`
 
 **📜 Rule**\
 When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations.
@@ -758,14 +761,14 @@ unauthenticated so they re-login.
 
 ### `API-01` Search consumers when removing or changing public exports
 
-> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002`
+> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005`
 
 **📜 Rule**\
-Removing or changing a public export, hook return field, endpoint, or compatibility API requires updating all tests and consumers in the same change.
+Removing or changing a public export, hook return field, endpoint, compatibility API, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
 
 **✅ Check**\
 
-> Did this remove, rename, or change what an exported API or shared hook returns? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, and does each consumer's gating purpose still hold?
+> Did this remove, rename, or change what an exported API or shared hook returns? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>api-01-drop-in-replacements-preserve-the-original-prop-surface</em></summary>
@@ -981,7 +984,7 @@ Hand-edited generated types vanish on the next codegen run, breaking every consu
 
 ### `RTK-01` Handle RTK mutation results explicitly
 
-> **general** · state · 2 examples · ↩ `RL-20260407-004` · `RL-20260505-004` · `RL-20260527-001` · `RL-20260611-001` · `RL-20260909-007`
+> **general** · state · 2 examples · ↩ `RL-20260407-004` · `RL-20260505-004` · `RL-20260527-001` · `RL-20260611-001` · `RL-20260909-007` · `RL-20260925-003`
 
 **📜 Rule**\
 RTK Query mutation triggers resolve with a result object; use `.unwrap()` or inspect `result.error` before updating success UI or local state. After a successful mutation, do not recompute derived `dirty`/`can-submit` state from the server cache until its refetch settles — the cache still holds the pre-mutation value in that window, which can re-enable a duplicate submit. Track a local saved-baseline or an `awaitingCacheSync` flag instead.
@@ -1086,14 +1089,14 @@ failure.
 
 ### `RTK-02` Choose RTK Query read state by UX meaning
 
-> **general** · state · 2 examples · ↩ `RL-20260302-005` · `RL-20260415-006` · `RL-20260420-001` · `RL-20260615-001` · `RL-20260615-010` · `RL-20260609-010`
+> **general** · state · 2 examples · ↩ `RL-20260302-005` · `RL-20260415-006` · `RL-20260420-001` · `RL-20260615-001` · `RL-20260615-010` · `RL-20260609-010` · `RL-20260930-003`
 
 **📜 Rule**\
-`isLoading` represents the first load; `isFetching` also covers refetches. Use the flag that matches whether existing data should remain visible; keep a load-more control mounted and disabled while the next page fetches. A failed refetch keeps the last `data`, so access-derived hooks inspect `error` and drop data on 403/404.
+`isLoading` represents the first load; `isFetching` also covers refetches. Use the flag that matches whether existing data should remain visible; keep a load-more control mounted and disabled while the next page fetches. A failed refetch keeps the last `data`, so access-derived hooks inspect `error` and drop data on 403/404; any other `isError` with data still cached is transient and keeps the last data instead of blocking. `isLoading` stays false when the args change, so a new arg's load shows as `currentData === undefined`, and a failed dependency query renders as an error, not as empty.
 
 **✅ Check**\
 
-> Did this show a spinner or content from RTK Query state? If yes, should refetch hide existing content or only the initial load, and can a failed refetch leave stale data on screen?
+> Did this show a spinner or content from RTK Query state? If yes, should refetch hide existing content or only the initial load, can a failed refetch leave stale data on screen, and can an arg change or failed dependency read as a confident empty or negative answer?
 
 <details>
 <summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>loading-vs-fetching</em></summary>
@@ -1182,7 +1185,7 @@ Add a validity guard on the ID itself to the `skip` predicate.
 
 ### `DATA-01` Preserve chain scope in address-like merges
 
-> **general** · data · 2 examples · ↩ `RL-20260223-001` · `RL-20260313-010` · `RL-20260323-001` · `RL-20260415-003` · `RL-20260505-002` · `RL-20260505-005` · `RL-20260720-004` · `RL-20260909-006`
+> **general** · data · 2 examples · ↩ `RL-20260223-001` · `RL-20260313-010` · `RL-20260323-001` · `RL-20260415-003` · `RL-20260505-002` · `RL-20260505-005` · `RL-20260720-004` · `RL-20260909-006` · `RL-20260922-001`
 
 **📜 Rule**\
 Address-book and Safe-like merge logic must compare entries at the relevant identity granularity, usually address plus chain ID.
@@ -1531,14 +1534,14 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 
 ### `DATA-04` Use the canonical helper, predicate, or constant
 
-> **general** · data · 2 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001`
+> **general** · data · 2 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001`
 
 **📜 Rule**\
-Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify.
+Values with established length, version, encoding, or format (tx origin, Safe version, `chainId:address`) go through the existing helper rather than duplicating raw serialization or parsing. Domain classifications with a canonical predicate call it rather than re-inlining it or approximating it by field presence; legacy records carry defaults (zero address, 0) that presence checks misclassify. Search for an existing utility, constant, or route builder before adding one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`), and have every consumer of a shared check (submit gate, builder, summary) call the one predicate.
 
 **✅ Check**\
 
-> Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate?
+> Did this create, parse, or classify a bounded value, known format, or domain state? If yes, did it use the canonical helper or predicate, and does an existing utility already do what any new helper does?
 
 <details>
 <summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/chain-contracts.md</code> § <em>normalize-versions-and-origin</em></summary>
@@ -1979,7 +1982,7 @@ correct, so the helper produces false negatives whenever it is used.
 
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
-> **general** · testing · 5 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002`
+> **general** · testing · 5 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002`
 
 **📜 Rule**\
 Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears.
@@ -2203,7 +2206,7 @@ If the helper writes the whole key (not a merge), any state the app would popula
 
 ### `TEST-02` New branch logic needs branch-specific tests
 
-> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005`
+> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002`
 
 **📜 Rule**\
 New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.
@@ -2355,7 +2358,7 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 
 ### `TEST-04` Moved behavior needs replacement coverage and matching mocks
 
-> **general** · testing · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010`
+> **general** · testing · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002`
 
 **📜 Rule**\
 When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed.
@@ -2404,7 +2407,7 @@ Tx-flow submit options must not auto-register or set global state in a way that 
 
 ### `UX-01` Constrained text must truncate or wrap intentionally
 
-> **web** · ui · ↩ `RL-20260217-005` · `RL-20260219-002` · `RL-20260506-001` · `RL-20260612-006` · `RL-20260828-004` · `RL-20260909-005` · `RL-20260921-003`
+> **web** · ui · ↩ `RL-20260217-005` · `RL-20260219-002` · `RL-20260506-001` · `RL-20260612-006` · `RL-20260828-004` · `RL-20260909-005` · `RL-20260921-003` · `RL-20261001-005`
 
 **📜 Rule**\
 Long user-provided identifiers such as email addresses and names must fit constrained UI the same way wallet addresses do.
@@ -2621,14 +2624,14 @@ User-controlled strings used as map keys must not index inherited object propert
 
 ### `DOC-01` Keep docs and comments true to the code
 
-> **general** · docs · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001`
+> **general** · docs · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001`
 
 **📜 Rule**\
-When splitting or moving agent/developer docs, every removed section must be moved, intentionally superseded, or called out for review. Comments and JSDoc next to a changed condition or contract are updated in the same change, and state the non-obvious why rather than restating the code or narrating decision history.
+When splitting or moving agent/developer docs, every removed section must be moved, intentionally superseded, or called out for review. Comments and JSDoc next to a changed condition or contract are updated in the same change, and state the non-obvious why rather than restating the code or narrating decision history, in one line with no ticket or decision IDs; a test's regression intent goes in its name, not a comment above it.
 
 **✅ Check**\
 
-> Did this split, delete, or move docs, or change logic an adjacent comment describes? If yes, is every removed section accounted for, and does every nearby comment still match the code?
+> Did this split, delete, or move docs, add a comment, or change logic an adjacent comment describes? If yes, is every removed section accounted for, is each new comment one line of why, and does every nearby comment still match the code?
 
 ---
 
@@ -2636,14 +2639,14 @@ When splitting or moving agent/developer docs, every removed section must be mov
 
 ### `DOC-02` Operational and policy docs must match the real setup
 
-> **general** · docs · ↩ `RL-20260415-001` · `RL-20260615-007`
+> **general** · docs · ↩ `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001`
 
 **📜 Rule**\
-Release and operational docs should describe actual branch names, generated branch patterns, and fallback actions rather than placeholders that look literal. Privacy/legal disclosures of third-party processors match what the clients actually integrate.
+Release and operational docs should describe actual branch names, generated branch patterns, and fallback actions rather than placeholders that look literal. Privacy/legal disclosures of third-party processors match what the clients actually integrate. A change to a framework version, workspace script, or verification tool updates the nearest AGENTS.md in the same change with the constraints it introduces, describing how the tool really behaves.
 
 **✅ Check**\
 
-> Did this edit release/runbook instructions or a processor disclosure? If yes, does it match the real branches, fallback commands, and integrated SDKs?
+> Did this edit release/runbook instructions or a processor disclosure, or change a framework, script, or tool agents run? If yes, does it match the real branches, fallback commands, integrated SDKs, and tool behaviour, and is the nearest AGENTS.md updated?
 
 ---
 
@@ -2653,7 +2656,7 @@ Release and operational docs should describe actual branch names, generated bran
 
 ### `PROD-01` Product behavior changes need explicit confirmation
 
-> **general** · product · ↩ `RL-20260420-004` · `RL-20260619-002`
+> **general** · product · ↩ `RL-20260420-004` · `RL-20260619-002` · `RL-20260930-008`
 
 **📜 Rule**\
 Changes to visible balances, disabled actions, labels, or available flows should cite product/design intent when the behavior is not mechanically implied by the code change.
@@ -3412,7 +3415,7 @@ When introducing or adjusting a z-index, place it on a documented scale of exist
 
 ### `REVIEW-01` Keep each PR to one stated scope
 
-> **general** · review · ↩ `RL-20260318-004` · `RL-20260603-002` · `RL-20260818-001` · `RL-20260907-003` · `RL-20260909-009` · `RL-20260921-011`
+> **general** · review · ↩ `RL-20260318-004` · `RL-20260603-002` · `RL-20260818-001` · `RL-20260907-003` · `RL-20260909-009` · `RL-20260921-011` · `RL-20261001-003`
 
 **📜 Rule**\
 A PR carries one ticket's worth of change: CI, tooling, or test-infrastructure PRs do not also contain unrelated production refactors, and a critical fix is not bundled with unrelated UI changes, so each can be reviewed, verified, and reverted alone. AI working docs and review screenshots stay out of the diff. Port/restore PRs keep behaviour parity and route pre-existing bugs to a separate fix.
@@ -3545,7 +3548,7 @@ MSW fixtures are scenario-shaped real responses tied to specific Safes. They are
 
 ### `CODE-03` Cap positional parameters; close over shared hook state
 
-> **general** · abstractions · 1 example · ↩ `RL-20260311-005`
+> **general** · abstractions · 1 example · ↩ `RL-20260311-005` · `RL-20260929-002`
 
 **📜 Rule**\
 Helper functions called from inside a hook should not take more than 4 positional parameters. When all extra args come from the same hook scope, prefer a local closure (`const buildItem = (chainId, address) => _buildSafeItem(chainId, address, ...deps)`) or a single `deps` object so call sites stay readable.
@@ -3734,17 +3737,17 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 
 ### `CODE-05` Name compound conditions instead of inlining them
 
-> **general** · abstractions · 1 example · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004`
+> **general** · abstractions · 2 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001`
 
 **📜 Rule**\
-Three or more `value !== 'literal'` checks on one variable become `!DISALLOWED.includes(value)` against a named const. A conjunction reused across conditions, and each branch of a multi-way ternary in JSX, get a named boolean computed before the return.
+Three or more `value !== 'literal'` checks on one variable become `!DISALLOWED.includes(value)` against a named const. A conjunction reused across conditions, and each branch of a multi-way ternary in JSX, get a named boolean computed before the return. Guard branches return early instead of nesting the main path, type guards list the members they accept rather than negating one, and names say what a value means at the call site (`pendingActions`, `mustUpgradeToSafePro`, positively framed flags such as `signersOnly`).
 
 **✅ Check**\
 
-> Did this add a long `!==` chain, a repeated `a && b && !c` group, or a nested ternary in JSX? If yes, is each condition named once before use?
+> Did this add a long `!==` chain, a repeated `a && b && !c` group, a nested ternary or if/else guard, or new identifiers? If yes, is each condition named once before use, do guards return early, and does each name say what it holds?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>mobile/examples/permissions.md</code> § <em>name-the-warning-condition-do-not-chain</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>mobile/examples/permissions.md</code> § <em>name-the-warning-condition-do-not-chain</em></summary>
 
 <br>
 
@@ -3780,6 +3783,50 @@ const showWarning =
 Reviewers asked to extract this for readability and to centralize the disallowed list — every new validation state was forcing edits at every call site.
 
 <sub>Source: <a href="mobile/examples/permissions.md#name-the-warning-condition-do-not-chain">mobile/examples/permissions.md#name-the-warning-condition-do-not-chain</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>code-05-return-early-from-guard-branches</em></summary>
+
+<br>
+
+**CODE-05 — Return early from guard branches**
+
+Source: PR #8759 (RL-20260929-001)
+
+### Avoid
+
+```ts
+if (step === 'select') {
+  if (itemsToName.length > 0) {
+    setStep('name')
+    return
+  }
+} else if (!hasAllNames(data.names, itemsToName)) {
+  return
+}
+submit(data)
+```
+
+### Prefer
+
+```ts
+if (step === 'name' && !hasAllNames(data.names, itemsToName)) return
+
+if (step === 'select' && itemsToName.length > 0) {
+  setStep('name')
+  return
+}
+
+submit(data)
+```
+
+### Why
+
+Guards that only stop or redirect the submit read as flat early returns; nesting them in if/else makes the reader track which branch falls through to the main path.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#code-05-return-early-from-guard-branches">examples/general/api-and-packages.md#code-05-return-early-from-guard-branches</a></sub>
 
 </details>
 
@@ -3871,7 +3918,7 @@ Without the reset, RUM events after the user wipes their last Safe still carry t
 
 ### `TX-03` Gate submit on readiness of the data that decides it
 
-> **web** · transactions · 1 example · ↩ `RL-20260303-002` · `RL-20260608-011` · `RL-20260713-002` · `RL-20260714-001`
+> **web** · transactions · 1 example · ↩ `RL-20260303-002` · `RL-20260608-011` · `RL-20260713-002` · `RL-20260714-001` · `RL-20260928-003`
 
 **📜 Rule**\
 Block submission until data that affects the on-chain amount or decides whether the action is disabled or needs a warning (token decimals, tx details) is loaded. A `!!data && condition` gate reads as enabled while loading. Never let the UI fall back to a default that silently corrupts the value.
@@ -4051,14 +4098,14 @@ JS `toString()` switches to exponent form below ~1e-6. Token amount parsers do n
 
 ### `STATE-03` Async attempts start clean and recover on every exit
 
-> **general** · state · 1 example · ↩ `RL-20260306-006` · `RL-20260605-011` · `RL-20260609-008` · `RL-20260720-002` · `RL-20260824-001` · `RL-20260918-002`
+> **general** · state · 1 example · ↩ `RL-20260306-006` · `RL-20260605-011` · `RL-20260609-008` · `RL-20260720-002` · `RL-20260824-001` · `RL-20260918-002` · `RL-20260924-001`
 
 **📜 Rule**\
-When a retry, submit, or new user input (a re-upload, a file drop) issues async work, reset the prior result and error synchronously before the call, and surface rejected input instead of dropping it silently. Set the in-flight flag after early returns or clear it in `finally`; a dialog that shows its own error closes only on success.
+When a retry, submit, or new user input (a re-upload, a file drop) issues async work, reset the prior result and error synchronously before the call, and surface rejected input instead of dropping it silently. Set the in-flight flag after early returns or clear it in `finally`; a dialog that shows its own error closes only on success. In a multi-step submit, order writes so one failure cannot skip another, make a retry redo what is still owed, and drop a built result when a blocker appears.
 
 **✅ Check**\
 
-> Does this retry, submit, or re-trigger path clear the previous result and error first, and leave no exit path with the in-flight flag stuck or its error hidden?
+> Does this retry, submit, or re-trigger path clear the previous result and error first, leave no exit path with the in-flight flag stuck or its error hidden, and can a partial failure or retry skip a step or keep a stale result?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/data-integrity.md</code> § <em>reset-error-state-in-retry-handlers</em></summary>
@@ -4107,7 +4154,7 @@ UI components conditionally render error messages on the truthiness of `error`; 
 
 ### `DATA-05` Compare addresses with the shared sameAddress helper
 
-> **general** · data · 1 example · ↩ `RL-20260309-007` · `RL-20260709-002` · `RL-20260716-002` · `RL-20260716-003`
+> **general** · data · 1 example · ↩ `RL-20260309-007` · `RL-20260709-002` · `RL-20260716-002` · `RL-20260716-003` · `RL-20260930-001`
 
 **📜 Rule**\
 Use the repo's `sameAddress(a, b)` helper for any address equality check. Direct string comparison silently fails on case/checksum differences; the helper normalizes both sides. Normalize for comparison and keys only: render the user-supplied casing where users compare characters by eye (poisoning or look-alike highlights).
@@ -4216,14 +4263,14 @@ Persisted RTK Query cache keys must be derived from the same serialization the r
 
 ### `WEB-06` Derive reactive parent state from the store, not from child refs
 
-> **web** · state · ↩ `RL-20260302-004` · `RL-20260615-009`
+> **web** · state · ↩ `RL-20260302-004` · `RL-20260615-009` · `RL-20260929-004`
 
 **📜 Rule**\
-When a parent needs to react to changes inside a child component, drive that reactivity through Redux/store state rather than imperative refs. Refs don't trigger re-renders, so parent UI ends up stale.
+When a parent needs to react to changes inside a child component, drive that reactivity through Redux/store state rather than imperative refs. Refs don't trigger re-renders, so parent UI ends up stale. Likewise keep only a selected entity's id in state and read the entity from the live list each render, so refetches and removals reach the open view.
 
 **✅ Check**\
 
-> Does the parent compute layout/visibility from a child ref? If yes, lift the relevant value into the store and read it from a selector.
+> Does the parent compute layout/visibility from a child ref, or render a selected entity from a stored copy? If yes, lift the value into the store or keep the id and read the entity from its source each render.
 
 ---
 
@@ -4386,14 +4433,14 @@ Drift checks for generated code must (1) include `--include-untracked` so newly 
 
 ### `WEB-07` Handle the loading tri-state of feature-flag hooks
 
-> **web** · auth · 1 example · ↩ `RL-20260521-001` · `RL-20260522-001` · `RL-20260604-002` · `RL-20260609-004` · `RL-20260818-003` · `RL-20260909-008`
+> **web** · auth · 1 example · ↩ `RL-20260521-001` · `RL-20260522-001` · `RL-20260604-002` · `RL-20260609-004` · `RL-20260818-003` · `RL-20260909-008` · `RL-20260930-005`
 
 **📜 Rule**\
-Feature-flag/gate hooks that return `boolean | undefined` (undefined while config loads) must not be coerced with `?? false`. Treat `undefined` as "still resolving" — wait, render a loader, or allow until known — and branch routing/gating/no-header decisions on `=== true` / `=== false`. A gate opt-in or escape hatch must also re-check `isAuthenticated` so it can't bypass the gate after sign-in.
+Feature-flag/gate hooks that return `boolean | undefined` (undefined while config loads) must not be coerced with `?? false`. Treat `undefined` as "still resolving" — wait, render a loader, or allow until known — and branch routing/gating/no-header decisions on `=== true` / `=== false`. A gate opt-in or escape hatch must also re-check `isAuthenticated` so it can't bypass the gate after sign-in. Callers consume the gate's loading state, the flag-off path returns the pre-feature behaviour instead of granting the feature, and every visible change of an unlaunched feature sits behind that feature's own flag.
 
 **✅ Check**\
 
-> Did this read a flag/gate hook that can be `undefined` while loading? If yes, is the undefined state handled explicitly instead of coerced to false, and would a premature decision lose `next`/flash the wrong UI/bypass the gate?
+> Did this read a flag/gate hook that can be `undefined` while loading? If yes, is the undefined state handled explicitly instead of coerced to false, and would a premature decision lose `next`/flash the wrong UI/bypass the gate, and is every visible change of an unlaunched feature behind its flag with the flag-off path unchanged?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/gateway-hooks.md</code> § <em>web-07-handle-the-loading-tri-state-of-feature-flags</em></summary>
@@ -4508,7 +4555,7 @@ An `onClick={asyncFn}` handler and an un-awaited cleanup call both let a rejecte
 
 ### `NUM-02` Validate numeric coercion of external string inputs
 
-> **general** · numerics · 1 example · ↩ `RL-20260522-003` · `RL-20260526-002` · `RL-20260526-003` · `RL-20260615-011` · `RL-20260611-007` · `RL-20260626-001` · `RL-20260806-009` · `RL-20260921-009`
+> **general** · numerics · 1 example · ↩ `RL-20260522-003` · `RL-20260526-002` · `RL-20260526-003` · `RL-20260615-011` · `RL-20260611-007` · `RL-20260626-001` · `RL-20260806-009` · `RL-20260921-009` · `RL-20260925-001`
 
 **📜 Rule**\
 `Number(x)` on an external/string value silently yields `0` for `''`/whitespace and `NaN` for non-numeric input. Parse such values through a guarded helper (reject null/undefined, trim, treat empty as unknown, `Number.isFinite` the result) before using them as API args, aggregates, or status decisions, and keep "known zero" distinct from "unknown/unloaded". When a value has a known valid floor, use the exact comparison (`=== 1`) rather than an over-broad bound (`<= 1`) so malformed inputs surface.
@@ -4620,17 +4667,17 @@ A bare `['SafeOverviews']` tag matches every query of that type, so one mutation
 
 ### `SEC-02` Gate destructive operations on a confirmed cause
 
-> **general** · security · 1 example · ↩ `RL-20260528-001` · `RL-20260720-003` · `RL-20260730-001` · `RL-20260828-001` · `RL-20260917-001`
+> **general** · security · 2 examples · ↩ `RL-20260528-001` · `RL-20260720-003` · `RL-20260730-001` · `RL-20260828-001` · `RL-20260917-001` · `RL-20260930-004` · `RL-20260928-002`
 
 **📜 Rule**\
-Irreversible operations (deleting a key, wiping a signer, removing persisted data) must run only on the specific confirmed condition that warrants them — not on any falsy/ambiguous result or any caught error. A function that returns `undefined` for cancelled/transient failures as well as true loss must distinguish them and preserve the prior error path for the ambiguous case. Never delete existing data before its replacement is durably stored.
+Irreversible operations (deleting a key, wiping a signer, removing persisted data) must run only on the specific confirmed condition that warrants them — not on any falsy/ambiguous result or any caught error. A function that returns `undefined` for cancelled/transient failures as well as true loss must distinguish them and preserve the prior error path for the ambiguous case. Never delete existing data before its replacement is durably stored. A loading, failed, or skipped read (an empty config list, a `''` chainId) is unknown, not empty: wholesale-replacing writes and removals wait for a successful read, enforced in the shared write hook, and a terminal status (deleted) needs its definitive signal.
 
 **✅ Check**\
 
-> Did this add a destructive/irreversible action? If yes, does it fire only on the specific confirmed cause (not a generic falsy/error result), and is existing data preserved until its replacement is committed?
+> Did this add a destructive/irreversible action? If yes, does it fire only on the specific confirmed cause (not a generic falsy/error result), is existing data preserved until its replacement is committed, and does it wait for a successful read instead of treating an unknown result as empty?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/data-integrity.md</code> § <em>sec-02-gate-destructive-operations-on-a-confirmed-cause</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>sec-02-gate-destructive-operations-on-a-confirmed-cause</em></summary>
 
 <br>
 
@@ -4676,6 +4723,50 @@ if (!key) {
 A function that returns `undefined`/falsy for cancelled prompts and transient lockouts as well as true key loss must not treat every falsy result as license to perform an irreversible action — a user who cancels would silently lose their signer. Gate destructive operations on the specific confirmed cause, keep the prior error path for ambiguous failures, and never delete existing data before its replacement is durably stored.
 
 <sub>Source: <a href="examples/general/data-integrity.md#sec-02-gate-destructive-operations-on-a-confirmed-cause">examples/general/data-integrity.md#sec-02-gate-destructive-operations-on-a-confirmed-cause</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>sec-02-treat-an-unread-source-as-unknown-before-a-wholesale-write</em></summary>
+
+<br>
+
+**SEC-02 — Treat an unread source as unknown before a wholesale write**
+
+Source: PR #8709, #8759 (RL-20260930-004)
+
+### Avoid
+
+```ts
+return useMemo(() => {
+  if (!stored) return EMPTY
+  const chainIds = chains.map((chain) => chain.chainId) // [] while chains load or fail
+  return stored.data.map((item) => ({ ...item, chainIds }))
+}, [stored, chains])
+
+const { currentData } = useEntriesQuery(args) // a failed read looks like an empty list
+```
+
+### Prefer
+
+```ts
+return useMemo(() => {
+  if (!stored) return EMPTY
+  if (chains.length === 0) return stored.data // keep stored values until the config is known
+  const chainIds = chains.map((chain) => chain.chainId)
+  return stored.data.map((item) => ({ ...item, chainIds }))
+}, [stored, chains])
+
+// inside the shared write hook, so every caller is covered
+const { items, isLoading, isError } = useEntriesState()
+if (isLoading || isError) return { error: SOURCE_UNAVAILABLE }
+```
+
+### Why
+
+A loading, failed or skipped read and a config that has not arrived all look like "empty". When a write replaces a field wholesale, merging against that empty result silently erases what was stored. Keep stored values while the source is unknown, and refuse the write in the shared hook rather than relying on each button to disable itself.
+
+<sub>Source: <a href="examples/general/data-integrity.md#sec-02-treat-an-unread-source-as-unknown-before-a-wholesale-write">examples/general/data-integrity.md#sec-02-treat-an-unread-source-as-unknown-before-a-wholesale-write</a></sub>
 
 </details>
 
@@ -4747,17 +4838,17 @@ A top-level `permissions: {}` removes the inherited `contents: read` scope, so e
 
 ### `A11Y-01` Keep interactive elements operable, unnested, and truly disabled
 
-> **web** · ui · 1 example · ↩ `RL-20260605-002` · `RL-20260605-006` · `RL-20260624-002` · `RL-20260624-003` · `RL-20260729-003` · `RL-20260805-001` · `RL-20260811-003` · `RL-20260921-006`
+> **web** · ui · 2 examples · ↩ `RL-20260605-002` · `RL-20260605-006` · `RL-20260624-002` · `RL-20260624-003` · `RL-20260729-003` · `RL-20260805-001` · `RL-20260811-003` · `RL-20260921-006` · `RL-20260929-003`
 
 **📜 Rule**\
-Clickable elements must be keyboard-operable: a `<button type="button">`, or `role` + `tabIndex` + an Enter/Space handler, and never nested inside another interactive element. A disabled state on a primitive that can render as a link or custom element, or on a control that must stay focusable for nested actions, uses `aria-disabled` (plus blocked pointer events where anchors would ignore `disabled`).
+Clickable elements must be keyboard-operable: a `<button type="button">`, or `role` + `tabIndex` + an Enter/Space handler, and never nested inside another interactive element. A disabled state on a primitive that can render as a link or custom element, or on a control that must stay focusable for nested actions, uses `aria-disabled` (plus blocked pointer events where anchors would ignore `disabled`). Repeated controls and indicators get accessible names that include their item, and a clickable row keeps its row role with a real button for focus while its key handler ignores events bubbled from nested controls.
 
 **✅ Check**\
 
-> Did this add or change a clickable element or a shared interactive primitive? If yes, can it be activated from the keyboard, is it free of nested interactive elements, and does its disabled state actually block and announce?
+> Did this add or change a clickable element or a shared interactive primitive? If yes, can it be activated from the keyboard, is it free of nested interactive elements, does its disabled state actually block and announce, and does each repeated control have a distinct accessible name?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>web/examples/feature-boundaries.md</code> § <em>disable-link-rendered-buttons-with-aria-disabled</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>web/examples/feature-boundaries.md</code> § <em>disable-link-rendered-buttons-with-aria-disabled</em></summary>
 
 <br>
 
@@ -4786,6 +4877,43 @@ const buttonVariants = cva(
 Anchors ignore the `disabled` attribute, so a button rendered as a link looks disabled but still navigates unless `aria-disabled` blocks pointer events.
 
 <sub>Source: <a href="web/examples/feature-boundaries.md#disable-link-rendered-buttons-with-aria-disabled">web/examples/feature-boundaries.md#disable-link-rendered-buttons-with-aria-disabled</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>web/examples/feature-boundaries.md</code> § <em>a11y-01-name-repeated-controls-after-their-item</em></summary>
+
+<br>
+
+**A11Y-01 — Name repeated controls after their item**
+
+Source: PR #8611, #8735 (RL-20260929-003)
+
+### Avoid
+
+```tsx
+getRowAriaLabel: ({ item }) => `Open ${item.type} details`
+
+<Button variant="outline" onClick={onClick}>
+  Set policy
+</Button>
+```
+
+### Prefer
+
+```tsx
+getRowAriaLabel: ({ item }) => `Open ${getItemLabel(item)} for ${shortenAddress(item.address)}`
+
+<Button variant="outline" onClick={onClick} aria-label={`Set policy for ${title}`}>
+  Set policy
+</Button>
+```
+
+### Why
+
+A screen reader that lists controls by name cannot tell apart rows or tiles that all announce the same text. Put the item into the accessible name of every repeated control or indicator.
+
+<sub>Source: <a href="web/examples/feature-boundaries.md#a11y-01-name-repeated-controls-after-their-item">web/examples/feature-boundaries.md#a11y-01-name-repeated-controls-after-their-item</a></sub>
 
 </details>
 
@@ -4849,7 +4977,7 @@ A compromised or misconfigured backend could otherwise redirect funds through a 
 
 ### `TYPE-01` Keep types honest instead of casting
 
-> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002`
+> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004`
 
 **📜 Rule**\
 Narrow unknown or wider values with a type predicate (`(x: unknown): x is T`), a guard, or a correctly typed source instead of `as T` casts or `@ts-ignore`; a cast silences the checker exactly where the value is unverified. Signatures state what they need: required inputs are not optional, and parameters are typed by the fields they read (`Pick<T, …>`). Branches on a discriminant end in a `never` check so a new kind fails to compile.
@@ -4901,7 +5029,7 @@ return new CodedError(code, message)
 
 ### `HOOK-01` Scope hook dependencies to the real trigger with stable references
 
-> **general** · state · 1 example · ↩ `RL-20260605-010` · `RL-20260615-006` · `RL-20260611-008` · `RL-20260624-011` · `RL-20260701-001` · `RL-20260716-004` · `RL-20260813-001` · `RL-20260908-001`
+> **general** · state · 1 example · ↩ `RL-20260605-010` · `RL-20260615-006` · `RL-20260611-008` · `RL-20260624-011` · `RL-20260701-001` · `RL-20260716-004` · `RL-20260813-001` · `RL-20260908-001` · `RL-20260930-007`
 
 **📜 Rule**\
 Effect and memo dependencies name the value that should trigger the work, not a whole collection it iterates or fast-changing overlay state (selection, hover) of an expensive memo; split a structural memo from a cheap overlay memo. Callbacks, fallbacks, and context values passed into deps or providers are referentially stable: `useCallback`/`useMemo` in the parent, and empty fallbacks (`?? []`, `?? {}`) as module-level constants.
@@ -5018,14 +5146,14 @@ Logs, error reports, and telemetry never include raw URIs, deep links, or payloa
 
 ### `FORM-01` Form values track what inputs show and what they depend on
 
-> **general** · forms · 1 example · ↩ `RL-20260821-001` · `RL-20260818-004` · `RL-20260907-001`
+> **general** · forms · 1 example · ↩ `RL-20260821-001` · `RL-20260818-004` · `RL-20260907-001` · `RL-20260930-007`
 
 **📜 Rule**\
-An unfinished or invalid entry never maps to the same form value as empty; store an invalid sentinel or set a field error so validity blocks submit. When a value a field depends on changes (a selected token, a signer list), clear the dependent field explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. Reactions to user edits (open suggestions, focus) live in change handlers, because effects on a watched value also fire on `reset()`/`setValue`.
+An unfinished or invalid entry never maps to the same form value as empty; store an invalid sentinel or set a field error so validity blocks submit. When a value a field depends on changes (a selected token, a signer list), clear the dependent field explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. Reactions to user edits (open suggestions, focus) live in change handlers, because effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails when the lookup misses, and an edit form's options include every value already stored.
 
 **✅ Check**\
 
-> Did this add or change a form field, a field that depends on another value, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, and do edit reactions fire only on user input?
+> Did this add or change a form field, a field that depends on another value, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, does a lookup-based validator fail on a miss, and do edit options include the stored values?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/data-integrity.md</code> § <em>clear-dependent-form-fields-with-setvalue-not-resetfield</em></summary>
@@ -5068,13 +5196,64 @@ const onChangeToken = () => {
 
 ### `TEST-07` Visual changes get a Storybook state
 
-> **web** · testing · ↩ `RL-20260827-001` · `RL-20260911-005` · `RL-20260921-008`
+> **web** · testing · ↩ `RL-20260827-001` · `RL-20260911-005` · `RL-20260921-008` · `RL-20260930-012`
 
 **📜 Rule**\
-A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally.
+A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack).
 
 **✅ Check**\
 
-> Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state?
+> Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story?
+
+---
+
+## 🌐 general › performance
+
+<a id="perf-02"></a>
+
+### `PERF-02` Bound request fan-out and polling
+
+> **general** · performance · ↩ `RL-20260930-006`
+
+**📜 Rule**\
+A list must not fire one query per row or per Workspace on render: fetch per item when its menu or detail opens, or use a narrower lookup, and an error fallback must not send more requests than the happy path. Polling stops once its result settles or times out; a polled query shares its cache key, so polling it re-polls for every subscriber.
+
+**✅ Check**\
+
+> Did this put a query in a list row or loop, fan requests out per entity, or poll? If yes, is the request count bounded by what the user opened, and does polling stop?
+
+---
+
+## 🌐 general › abstractions
+
+<a id="code-07"></a>
+
+### `CODE-07` Split code that carries several jobs into named units
+
+> **general** · abstractions · ↩ `RL-20260929-002`
+
+**📜 Rule**\
+When a hook, handler, or component does several things (fetch, resolve, and map; a multi-case action switch; a long try/finally), split it into named hooks, functions, or one component per case so each part reads in one pass.
+
+**✅ Check**\
+
+> Did this add or grow a hook, handler, or component a reviewer must read top to bottom to follow? If yes, can its steps or cases become named hooks, functions, or components?
+
+---
+
+## 🌐 general › security
+
+<a id="sec-05"></a>
+
+### `SEC-05` Gate actions on the identity the backend authorizes
+
+> **general** · security · ↩ `RL-20260925-004`
+
+**📜 Rule**\
+Enable an action by the exact permission the backend enforces (the grant's delegator, not any owner of the Safe), and refuse when the acting identity's own record is missing instead of falling back to another entry (`list[0]`), which signs a request on someone else's behalf.
+
+**✅ Check**\
+
+> Does this enable an action or build a signed request for a specific identity? If yes, is it gated on the backend's exact permission, and does a missing record refuse rather than fall back?
 
 ---

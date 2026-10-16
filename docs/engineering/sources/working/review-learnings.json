@@ -8642,5 +8642,895 @@
     "ruleIds": [
       "STATE-02"
     ]
+  },
+  {
+    "id": "RL-20260922-001",
+    "title": "Rows grouped by Safe address without chain ID",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8611
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4060955033,
+      4062525165,
+      4061533309,
+      4062978608
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Grouping policies into one row per Safe address and type kept only the first chain's policy, so a policy with a different status on another chain was hidden behind a row whose status, tokens and click target belonged to the first chain. Key such rows by chain ID too: one row per Safe and chain.",
+    "ruleIds": [
+      "DATA-01"
+    ]
+  },
+  {
+    "id": "RL-20260924-001",
+    "title": "Multi-step submits that leave a stale result or skip a step on retry",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8759,
+      8771
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4073911091,
+      4075086244
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5772252542,
+      5773143573,
+      5774007433,
+      5774428298,
+      5778433563,
+      5779615216
+    ],
+    "learning": "In a submit made of several writes, order them so a failure in one cannot skip another (remove deselected Safes before writing names; trust added Safes right after the add, before the name write), and make a retry redo what is still owed: a name write nested in `if (safesToAdd.length > 0)` was skipped on retry because the Safes already existed, and the dialog closed with a false success. When a blocker appears after a build succeeded, drop the built transaction along with setting the error, or the user can act on a transaction that no longer matches its inputs.",
+    "ruleIds": [
+      "STATE-03"
+    ]
+  },
+  {
+    "id": "RL-20260925-001",
+    "title": "Placeholder values standing in for unknown limits and dates",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8717
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4092984188,
+      4102189931,
+      4105244305,
+      4105393398
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A seat limit fell back to the default 40 while entitlements loaded or failed, showing seats the backend would refuse, and a missing period end became `0`, rendering \"active until Jan 1, 1970\". Keep unknown distinct from a value: expose the loading or error state to callers that render the number, and leave out a date that is not known instead of formatting a fallback.",
+    "ruleIds": [
+      "NUM-02"
+    ]
+  },
+  {
+    "id": "RL-20260925-002",
+    "title": "Tests that could not fail on the regression they covered",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8786,
+      8759,
+      8709,
+      8428
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      3704804116,
+      4024699523,
+      4081266120,
+      4025492743,
+      4037689424
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5814840561,
+      5815682866,
+      5774431655,
+      5774917968
+    ],
+    "learning": "A count check of `>= 4` passed even if a merge dropped most of a 15-entry list; a focus test mocked the base-ui item as a plain div, so it could not see the focus loss it claimed to cover; a test edit passed without the code change and was reverted; and a test passed only through an incidental `isSubmitting` transition. Tighten bounds to the real data, keep the component whose behaviour regressed unmocked, and assert the state before the trigger as well as after.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20260925-003",
+    "title": "Mutation follow-ups: re-enabled submit, dirty state from refetched cache, unhandled 402",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8717,
+      8759
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4102825443,
+      4104582663,
+      4061590454,
+      4071836841,
+      4069673065
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Clearing `isSubmitting` right after a create call, while the next step still resolved before navigating, let a second click create a second Workspace. After a partly failed submit, the refetched server list made `isFormDirty` false and disabled the only button that could retry the failed write; the step's submit follows what it still owes. A mutation's known failure codes (402 quota exceeded) get their own message and refresh the cached meter they consumed rather than falling through as a generic failure.",
+    "ruleIds": [
+      "RTK-01"
+    ]
+  },
+  {
+    "id": "RL-20260925-004",
+    "title": "Removal enabled for any owner and signed with another owner's grant",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8768
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4094665196,
+      4095278844,
+      4094717793,
+      4095279307,
+      4094723605,
+      4095279499,
+      4094674428,
+      4095279096
+    ],
+    "reviewIds": [
+      5305702816
+    ],
+    "issueCommentIds": [],
+    "learning": "The proposer Remove action was enabled for every signer of the Safe, but only the owner who granted the role can remove it, so other owners hit a backend error; and when the connected wallet's grant was missing the code fell back to `delegatedBy[0]`, building an \"A removes P\" request signed by B. Enable an action by the exact permission the backend enforces, refuse when the acting identity's own record is missing, and name who can act in the disabled hint and the error.",
+    "ruleIds": [
+      "SEC-05"
+    ]
+  },
+  {
+    "id": "RL-20260928-001",
+    "title": "Tooling changes shipped without updating the agent guidance that describes them",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8816,
+      8742,
+      8739
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4119099268,
+      4119423969,
+      4119431300,
+      4047575004,
+      4048241196,
+      4046647234,
+      4046667076
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A change to a test framework version, a workspace script or the compiler updates the nearest AGENTS.md (the root one when it applies to every workspace) in the same change with the constraints it introduces, such as Jest 30's non-configurable `window.location`. Guidance about a tool states how it actually behaves: `verify` snapshots the changed-file list when it starts, so only a run started after the last edit counts.",
+    "ruleIds": [
+      "DOC-02"
+    ]
+  },
+  {
+    "id": "RL-20260928-002",
+    "title": "Destructive signer cleanup ran before authentication and hid skipped steps",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8737
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4082708013,
+      4082708028
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "In a multi-step signer removal, ask for biometric authentication before the first irreversible step: a second prompt after delegates and notification subscriptions were already removed left the signer in place, with its delegates gone, when the user cancelled. When a step is skipped (delegate cleanup for a key that could not be read), carry that status through the batch result so the Safe deletion that follows discloses it instead of reporting plain success.",
+    "ruleIds": [
+      "SEC-02"
+    ]
+  },
+  {
+    "id": "RL-20260928-003",
+    "title": "Sign and execute offered before the Safe SDK they need is ready",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8817
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4122128533
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "On mobile the confirmation form enabled signing as soon as the transaction loaded, while the Safe SDK the signing path now required was still initializing asynchronously, so an early tap threw. Gate sign and execute on the SDK being ready, with a loader until it is, rather than throwing inside the action.",
+    "ruleIds": [
+      "TX-03"
+    ]
+  },
+  {
+    "id": "RL-20260929-001",
+    "title": "Nested guard branches, chained validators and negated type guards",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8820,
+      8759,
+      8746
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4073874797,
+      4073881334,
+      4075085748,
+      4075085997,
+      4069700485,
+      4070653433,
+      4122310622,
+      4131712380
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5772252542,
+      5773143573,
+      5759378297,
+      5761599021
+    ],
+    "learning": "A branch that only guards the main path (a half-named step) returns early instead of wrapping the rest in if/else. A chain of validators joined with `??` and an `await` becomes a small function with plain `if` statements. A subtle sub-condition (`delegates !== undefined || delegatesError`) gets a name (`delegatesSettled`), a nested ternary becomes plain branches, and a type guard lists the members it accepts (`pending`, `activating`) rather than negating one (`!== 'active'`), which reads as \"anything else\".",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20260929-002",
+    "title": "Long hooks, handlers and render switches carrying several jobs",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8818,
+      8775,
+      8768,
+      8746
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4083140735,
+      4083628465,
+      4093780532,
+      4095280279,
+      4080579559,
+      4082187429,
+      4131210550,
+      4131894033,
+      4069681599,
+      4070651386
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Reviewers ask to split code they cannot follow in one pass: a submit callback with a long try/finally becomes smaller named functions, a hook that fetches, resolves tokens and maps rows hands the token lookup to its own hook, drawer data is aggregated in a hook rather than the component, and a `switch` over actions renders one component per case. Props that travel together through components are grouped into one object (five `accounts*` props became one `safeAccounts`); a context is only worth it when the data is many levels away.",
+    "ruleIds": [
+      "CODE-07",
+      "CODE-03"
+    ]
+  },
+  {
+    "id": "RL-20260929-003",
+    "title": "Repeated controls with identical accessible names and rows posing as buttons",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8735,
+      8780,
+      8611
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4046006600,
+      4046799687,
+      4061588968,
+      4062968730,
+      4061549144,
+      4063364556,
+      4060955066,
+      4062525674,
+      4095753264,
+      4103023835
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Each repeated control or indicator gets an accessible name that includes its item: three \"Set policy\" buttons, an \"Open policy details\" label on every row, or several unlabelled progress bars are indistinguishable to a screen reader. A clickable table row stays a row with a real button (the chevron) carrying focus and the name, rather than `role=\"button\"` on the `<tr>`, and the row key handler ignores Enter or Space bubbled from nested controls such as a copy button.",
+    "ruleIds": [
+      "A11Y-01"
+    ]
+  },
+  {
+    "id": "RL-20260929-004",
+    "title": "Open panel rendered from a stored snapshot of a polled entity",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8818
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5866979626,
+      5867362126
+    ],
+    "learning": "A side panel opened from a polled list kept the policy object captured at click time, so usage stayed frozen and a revoked policy kept its panel. Keep only the selected id in state and read the entity from the live list each render; the panel then follows refetches, closes when the entity leaves the response, and picks up a pending-to-active transition without extra code.",
+    "ruleIds": [
+      "WEB-06"
+    ]
+  },
+  {
+    "id": "RL-20260929-005",
+    "title": "Unused props, unreachable branches and commented-out entries left in the diff",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8820,
+      8759,
+      8756,
+      8717
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      4073746038,
+      4075085508,
+      4082047838,
+      4083389451,
+      4122289681,
+      4131698297,
+      4070105188,
+      4072246888
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Reviewers remove what nothing reaches: a new table prop no caller passes, a banner branch the parent's `canRelay` gate makes unreachable, a field nothing reads (whose doc comment had gone stale), and a catalogue entry commented out instead of deleted. Every prop, field, export or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20260930-001",
+    "title": "Hand-rolled helpers, magic numbers and duplicate predicates next to existing ones",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8855,
+      8844,
+      8827,
+      8780,
+      8771,
+      8768,
+      8741,
+      8709
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      4146504166,
+      4147476991,
+      4146750664,
+      4147477565,
+      4135226188,
+      4135276525,
+      4136054813,
+      4134212347,
+      4134515578,
+      4095433017,
+      4103022132,
+      4081455318,
+      4082320729,
+      4094705315,
+      4095279972,
+      4048270950,
+      4048374169,
+      4048450791,
+      4025743369,
+      4037685030
+    ],
+    "reviewIds": [
+      5289733284
+    ],
+    "issueCommentIds": [
+      5794666928,
+      5909357657,
+      5910085541
+    ],
+    "learning": "Before writing a helper, use the one the repo already has: `uniqWith(list, sameAddress)` and `lodash/chunk` instead of a new dedupe or chunk function, `maybePlural` instead of a local plural, the existing href builder or `filterSpacesByStatus` instead of a near copy, `ROUTES` and named constants (`SECONDS_PER_DAY`) instead of literals, and `sameAddress` against `ZERO_ADDRESS`. A check several places need (the spending-limit pair match, `isSameAllowance`) lives once, and the submit gate, transaction builder and summary all call it, so a weaker copy cannot let through a change the builder then rejects.",
+    "ruleIds": [
+      "DATA-04",
+      "DATA-05"
+    ]
+  },
+  {
+    "id": "RL-20260930-002",
+    "title": "Components, hooks and test utils rebuilt beside a shared one",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8841,
+      8818,
+      8783,
+      8780
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4131223397,
+      4131885477,
+      4132012579,
+      4132802542,
+      4095693453,
+      4103022852,
+      4095576506,
+      4103022406,
+      4134934788,
+      4142972719
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5816201261,
+      5817532702
+    ],
+    "learning": "When a drawer header, a status chip, a request-to-add flow or a clipboard mock already exists, reuse it or extend it with props rather than writing a sibling; the copy drifts (one drawer had no chip for a status the shared chip already rendered). A visual cue the app already uses for a state, such as the counterfactual Safe info icon, appears wherever that state does.",
+    "ruleIds": [
+      "CODE-01"
+    ]
+  },
+  {
+    "id": "RL-20260930-003",
+    "title": "RTK Query states read as confident answers during arg changes and failed refetches",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8827,
+      8717
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4134256868,
+      4134586593,
+      4135546045,
+      4135976703,
+      4102705256,
+      4104066487,
+      4081437738,
+      4082897751
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`isLoading` is only true for a hook's first fetch: when the args change (switching Workspace), `currentData` is undefined while `isLoading` is false, so a hook reading only `isLoading` reported a confident \"not sponsored\". A failed dependency query surfaces as an error, not as an empty column. Conversely, an `isError` from a background refetch that still has cached data is a transient blip: keep the last-known data instead of locking the Workspace, and offer a retry only when there is no data.",
+    "ruleIds": [
+      "RTK-02"
+    ]
+  },
+  {
+    "id": "RL-20260930-004",
+    "title": "Unknown read results treated as empty or as proof before overwriting or classifying",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8852,
+      8845,
+      8820,
+      8759,
+      8709
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      4069673075,
+      4014799646,
+      4134457604,
+      4146409571,
+      4147266361,
+      4122264623,
+      4131688762
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5774431655,
+      5774917968,
+      5679409189,
+      5695238596,
+      5696722877,
+      5696961675
+    ],
+    "learning": "A read that is loading, failed, skipped or waiting on config (an empty chain list, a `''` chainId, an unread address book) is unknown, not empty. A write that replaces a field wholesale (`chainIds`) or removes state (a `spaceId` from the URL) waits for a successful read, and the guard lives in the shared write hook so every caller is covered, not only the buttons that disable themselves. A terminal classification needs its definitive signal: only a 404 after the row has left the pending list marks a transaction deleted; any other error, or a first 404, is a failed load that keeps retrying.",
+    "ruleIds": [
+      "SEC-02"
+    ]
+  },
+  {
+    "id": "RL-20260930-005",
+    "title": "Gate and flag hooks: loading ignored, flag-off granting the feature, unlaunched UI ungated",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8843,
+      8717
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4135185595,
+      4135361328,
+      4081374522,
+      4082376852,
+      4102725415,
+      4104208486,
+      4102726586,
+      4104292135,
+      4102732071,
+      4104477011,
+      4102744030,
+      4104480624
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Callers consume a gate hook's loading state (a Safe Pro user briefly saw the non-Pro settings link while the plan loaded). With the feature flag off the hook returns the pre-feature behaviour instead of granting the feature to everyone, and every visible change of an unlaunched feature (relabelled nav entries, CTAs, logo links) sits behind that feature's own flag, not its announcement sibling, because merging to dev ships it in the next release.",
+    "ruleIds": [
+      "WEB-07"
+    ]
+  },
+  {
+    "id": "RL-20260930-006",
+    "title": "Per-row queries, fan-out on error paths and unbounded polling",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8861,
+      8827,
+      8717
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4145364907,
+      4145668071,
+      4134220398,
+      4134580598,
+      4142399968,
+      4142620112,
+      4102689808,
+      4104065507
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A query hook inside a list row sent one subscriptions request per Workspace on page load and again on every focus refetch; the rate-limited endpoint answered 429 and kept the row action disabled. Fetch per item only when its menu or detail opens. Do not fan out one request per Workspace, even with a concurrency cap, when a narrower lookup answers the question, and make sure an error fallback does not send more requests than the happy path. Polling stops when its result settles or times out, and since a polled query shares its cache key, polling it re-polls for every subscriber in the app.",
+    "ruleIds": [
+      "PERF-02"
+    ]
+  },
+  {
+    "id": "RL-20260930-007",
+    "title": "Validators that pass on a missed lookup and edit forms missing their stored values",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8855,
+      8841,
+      8783,
+      8771
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4094826422,
+      4095619065,
+      4094780936,
+      4095613039,
+      4147719646,
+      4147940816,
+      4133927554,
+      4134061565
+    ],
+    "reviewIds": [
+      5289733284
+    ],
+    "issueCommentIds": [
+      5794666928
+    ],
+    "learning": "A `validate` rule that looks the value up fails when the lookup misses: `!findSafeAccount(accounts, id)?.ineligibleReason` is true for an unknown id. An edit form seeds its options with every value already stored, or a prefilled row renders blank and every edit fails (a limit on a token outside the selector's options). When the selected Safe changes, the whole dependent row is cleared, not only its token. An autofill effect keys on the selected contact's identity rather than its derived name, since two contacts can share a name and the stale edited value then renames the wrong one.",
+    "ruleIds": [
+      "FORM-01",
+      "HOOK-01"
+    ]
+  },
+  {
+    "id": "RL-20260930-008",
+    "title": "Redirect and link behaviour decided without product input",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8845,
+      8749
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4063534722,
+      4069775567
+    ],
+    "reviewIds": [
+      5364074753
+    ],
+    "issueCommentIds": [],
+    "learning": "When a change decides user-visible navigation the spec does not settle (sending `/spaces` to the last-used Workspace, where an \"Enforced by\" row links), reviewers ask for the product decision before merge, since it can make two URLs land on the same page. Leave the behaviour mocked or ask in the design file rather than picking one.",
+    "ruleIds": [
+      "PROD-01"
+    ]
+  },
+  {
+    "id": "RL-20260930-009",
+    "title": "Copy and import-path changes left old consumers behind",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8827,
+      8670
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      3960433849,
+      3960433863,
+      4142389709,
+      4142619423
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Changing visible copy is an API change for every test and E2E helper that asserts the exact string: a Cypress page helper still expected \"Deleted workspace\", and several controls kept the old casing. Moving a function migrates its callers in the same change instead of leaving two import paths, and a loosened parameter type, with nothing saying which is canonical.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20260930-010",
+    "title": "Shared code reaching into feature internals, long-lived UI in a short-lived feature",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8827,
+      8717,
+      8611
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4135525383,
+      4135976250,
+      4061598218,
+      4062963185,
+      4081402437,
+      4082528186
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A shared hook kept in `hooks/` so the accounts table avoids the heavy feature barrel must not then import that barrel or a deep `features/<name>/utils` path: it brings back the cycle, and ESLint does not catch the deep utils import. A pure helper a hook needs lives in `utils/`, not exported from a component file. Components that outlive an announcement (the Safe Pro modals) do not live inside the short-lived announcement feature whose flag will be removed.",
+    "ruleIds": [
+      "FEAT-01",
+      "FEAT-02"
+    ]
+  },
+  {
+    "id": "RL-20260930-011",
+    "title": "Generic or negatively framed names",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8852,
+      8818,
+      8805,
+      8789,
+      8735
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4146324769,
+      4147252072,
+      4146348483,
+      4147254568,
+      4146381881,
+      4147259897,
+      4123938670,
+      4131303851,
+      4119798810,
+      4122595444,
+      4102661097,
+      4102812313,
+      4047451372,
+      4047644501
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Names are reviewed for what a reader infers at the call site: `pending` became `pendingActions`, `hasLeftQueue` became `isUnlisted`, `copy.ts` became `messages.ts`, a plan-gate object `gate` became the boolean `mustUpgradeToSafePro`, `lockedPlan` became `locked` with its meaning on the type, and a string option became a positively framed flag (`signersOnly: true` rather than `skipProposers: true`). Type guards follow the sibling pattern (`isSpendingLimitPolicy` next to `isProposerPolicy`).",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20260930-012",
+    "title": "Stories missing edge states, stacking decorators, or swallowing callbacks",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8612,
+      8749,
+      8735
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      3880937879,
+      3881012647,
+      4046006593,
+      4046800122
+    ],
+    "reviewIds": [
+      5268334447
+    ],
+    "issueCommentIds": [
+      5774183196
+    ],
+    "learning": "A new component gets stories for the states reviewers ask about (long names, no name, loading); in one drawer they surfaced two real bugs (a fixed label truncating instead of the name, an address rendered twice). Meta-level and story-level decorators stack, so a scenario decorator in both double-wraps the story; apply it once per story. Callback args use Storybook's `fn()` so clicks show in the Actions panel instead of a silent no-op.",
+    "ruleIds": [
+      "TEST-07"
+    ]
+  },
+  {
+    "id": "RL-20261001-001",
+    "title": "Comments that narrate, cite decisions, or run past one line",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8879,
+      8842,
+      8827,
+      8818,
+      8771,
+      8765,
+      8759,
+      8749,
+      8746,
+      8619
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4155969024,
+      4156006929,
+      4134162740,
+      4134243525,
+      4134066213,
+      4134514289,
+      4123948972,
+      4124149962,
+      4124182299,
+      4131311681,
+      4131316042,
+      4131317138,
+      4081405538,
+      4081408397,
+      4081428479,
+      4081431379,
+      4081434056,
+      4082318002,
+      4069946634,
+      4069946649,
+      4069946662,
+      4069946670,
+      4069946677,
+      4069946683,
+      4069946696,
+      4069946707,
+      4069946714,
+      4069673081,
+      4063665340,
+      4063674042,
+      4063730857,
+      4070198216
+    ],
+    "reviewIds": [
+      5363932414
+    ],
+    "issueCommentIds": [
+      5908104603,
+      5759378297,
+      5761599021
+    ],
+    "learning": "Reviewers keep cutting comments back to one line of non-obvious why: multi-line JSDoc that narrates what the code does, comments that cite a decision or ticket (`decision Q44`), and comments that explain a change to the reviewer are removed or condensed. The regression intent of a test moves into its test name instead of a comment above it. Ticket and decision traceability belongs in the PR description.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261001-002",
+    "title": "New branches and precedence rules without their own tests",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8872,
+      8830,
+      8818,
+      8771,
+      8611
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4060955051,
+      4062524853,
+      4132374537,
+      4132478654
+    ],
+    "reviewIds": [
+      5289733284
+    ],
+    "issueCommentIds": [
+      5866979626,
+      5867362126,
+      5794666928,
+      5930717126,
+      5931784282
+    ],
+    "learning": "Each new branch gets a test that would fail without it: the precedence between two helper texts, address-book name resolution, a new search hook beyond the one query a component test happens to use, a second consumer of a fixed hook, and a confirm step rendered with an existing transaction while an input is missing (the existing test only checked that the builder was not called). When a test is rewritten for new behaviour, a test for the scenario the old one covered stays or is tracked.",
+    "ruleIds": [
+      "TEST-02",
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261001-003",
+    "title": "Unrelated UI edits and shared-primitive tweaks carried in a feature PR",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8868,
+      8789
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4154519915,
+      4154793288
+    ],
+    "reviewIds": [
+      5315562819
+    ],
+    "issueCommentIds": [
+      5829600686,
+      5830509435
+    ],
+    "learning": "Edits to another surface whose design lands in a different PR (the policy catalogue tiles) are removed from a gating PR, and a tweak to a shared `ui/` primitive suggested in review (a muted description prop on `Alert`) goes into its own PR rather than the feature change that noticed it.",
+    "ruleIds": [
+      "REVIEW-01"
+    ]
+  },
+  {
+    "id": "RL-20261001-004",
+    "title": "Optional props guarded twice, redundant casts and prop types borrowed from children",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8882,
+      8855,
+      8735
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4047543573,
+      4047644133
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5934007756,
+      5934275179,
+      5909357657,
+      5910085541
+    ],
+    "learning": "A component whose only caller already checks for the value takes it as a required prop and drops its own unreachable `if (!token)` guard. A cast the surrounding guard already narrows (`limit.change as LimitChange`) is removed so the compiler checks new variants. A page prop type is a domain type in its own module that child components pick from, not an intersection of two child components' prop types.",
+    "ruleIds": [
+      "TYPE-01"
+    ]
+  },
+  {
+    "id": "RL-20261001-005",
+    "title": "Shortened addresses without a way to see or copy the full value",
+    "sourceWindowId": "CLOSED-20260921-20261002",
+    "prNumbers": [
+      8865,
+      8749
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4063508872,
+      4070196119
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5932686189,
+      5933276532
+    ],
+    "learning": "A shortened address gets the affordances it has elsewhere in the app: a tooltip with the full address on hover and a copy button beside it. A tooltip that repeats exactly the text already visible (an untruncated email) adds nothing and is removed.",
+    "ruleIds": [
+      "UX-01"
+    ]
   }
 ]

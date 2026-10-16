@@ -664,3 +664,38 @@ return new CodedError(code, message)
 ### Why
 
 `includes(x as T)` doesn't narrow `x`, so every later use needs another cast; the predicate narrows once and keeps the one unavoidable cast in a single place.
+
+## SEC-02 — Treat an unread source as unknown before a wholesale write
+
+Source: PR #8709, #8759 (RL-20260930-004)
+
+### Avoid
+
+```ts
+return useMemo(() => {
+  if (!stored) return EMPTY
+  const chainIds = chains.map((chain) => chain.chainId) // [] while chains load or fail
+  return stored.data.map((item) => ({ ...item, chainIds }))
+}, [stored, chains])
+
+const { currentData } = useEntriesQuery(args) // a failed read looks like an empty list
+```
+
+### Prefer
+
+```ts
+return useMemo(() => {
+  if (!stored) return EMPTY
+  if (chains.length === 0) return stored.data // keep stored values until the config is known
+  const chainIds = chains.map((chain) => chain.chainId)
+  return stored.data.map((item) => ({ ...item, chainIds }))
+}, [stored, chains])
+
+// inside the shared write hook, so every caller is covered
+const { items, isLoading, isError } = useEntriesState()
+if (isLoading || isError) return { error: SOURCE_UNAVAILABLE }
+```
+
+### Why
+
+A loading, failed or skipped read and a config that has not arrived all look like "empty". When a write replaces a field wholesale, merging against that empty result silently erases what was stored. Keep stored values while the source is unknown, and refuse the write in the shared hook rather than relying on each button to disable itself.
