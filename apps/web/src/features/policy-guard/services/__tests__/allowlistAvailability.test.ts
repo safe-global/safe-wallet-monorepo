@@ -1,6 +1,6 @@
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { isAllowlistEnabled, isSafeEligibleForAllowlist, isSafeVersionSupported } from '../allowlistAvailability'
+import { isAllowlistEnabled, isSafeEligibleForAllowlist } from '../allowlistAvailability'
 
 const sepolia = chainBuilder()
   .with({ chainId: '11155111', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
@@ -21,22 +21,6 @@ describe('isAllowlistEnabled', () => {
       .with({ chainId: '1', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
       .build()
     expect(isAllowlistEnabled(chain)).toBe(false)
-  })
-})
-
-describe('isSafeVersionSupported', () => {
-  it.each([
-    ['1.4.1', false],
-    ['1.5.0', true],
-    ['1.5.0+L2', true],
-    ['1.6.0', true],
-    ['1.3.0+L2', false],
-    ['not-a-version', false],
-    ['', false],
-    [null, false],
-    [undefined, false],
-  ])('%s → %s', (version, expected) => {
-    expect(isSafeVersionSupported(version)).toBe(expected)
   })
 })
 

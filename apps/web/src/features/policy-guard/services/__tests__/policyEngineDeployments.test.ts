@@ -1,4 +1,4 @@
-import { getPolicyEngineAddress, getPolicyGuardAddress } from '../policyEngineDeployments'
+import { getPolicyEngineAddress, getPolicyGuardAddress, isSafeVersionSupported } from '../policyEngineDeployments'
 
 describe('policyEngineDeployments', () => {
   it('returns the Sepolia policy guard', () => {
@@ -21,5 +21,21 @@ describe('policyEngineDeployments', () => {
   it('returns undefined for a chain without a deployment', () => {
     expect(getPolicyGuardAddress('1')).toBeUndefined()
     expect(getPolicyEngineAddress('1', 'AllowPolicy')).toBeUndefined()
+  })
+})
+
+describe('isSafeVersionSupported', () => {
+  it.each([
+    ['1.4.1', false],
+    ['1.5.0', true],
+    ['1.5.0+L2', true],
+    ['1.6.0', true],
+    ['1.3.0+L2', false],
+    ['not-a-version', false],
+    ['', false],
+    [null, false],
+    [undefined, false],
+  ])('%s → %s', (version, expected) => {
+    expect(isSafeVersionSupported(version)).toBe(expected)
   })
 })

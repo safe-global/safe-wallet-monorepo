@@ -1,7 +1,12 @@
+import semverSatisfies from 'semver/functions/satisfies'
+
 export type PolicyEngineContract =
   'SafePolicyGuard' | 'AllowPolicy' | 'DenyPolicy' | 'CoSignerPolicy' | 'ERC20TransferPolicy' | 'NativeTransferPolicy'
 
 type Deployment = { networkAddresses: Record<string, string> }
+
+// The guard needs the module guard slot, which Safe added in v1.5.0, so every policy shares this floor
+const MIN_POLICY_GUARD_SAFE_VERSION = '1.5.0'
 
 // The policy indexer's addresses: configurations against any other deployment are invisible to CGW
 const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
@@ -18,3 +23,6 @@ export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineCo
 
 export const getPolicyGuardAddress = (chainId: string): string | undefined =>
   getPolicyEngineAddress(chainId, 'SafePolicyGuard')
+
+export const isSafeVersionSupported = (version?: string | null): boolean =>
+  !!version && semverSatisfies(version, `>=${MIN_POLICY_GUARD_SAFE_VERSION}`)
