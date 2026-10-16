@@ -1,8 +1,8 @@
 import type { ReactElement, ReactNode } from 'react'
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X, type LucideIcon } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/utils/cn'
+import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { cn } from '@safe-global/views/utils/cn'
 
 // The new "Alert / Light" banner from Figma (Obra shadcn, node 273:27982), built on the app's Alert.
 

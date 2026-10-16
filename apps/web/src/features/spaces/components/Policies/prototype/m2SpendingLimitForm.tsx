@@ -23,11 +23,11 @@ import AddressBookInput from '@/components/common/AddressBookInput'
 import FiatValue from '@/components/common/FiatValue'
 import NumberField from '@/components/common/NumberField'
 import TokenIcon from '@/components/common/TokenIcon'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
 import { Combobox as ComboboxPrimitive } from '@base-ui/react'
-import { usePortalContainer } from '@/components/ui/ShadcnProvider'
+import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
 import {
   Combobox,
   ComboboxCollection,
@@ -38,31 +38,37 @@ import {
   ComboboxLabel,
   ComboboxList,
   useComboboxAnchor,
-} from '@/components/ui/combobox'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { InputGroupAddon } from '@/components/ui/input-group'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+} from '@safe-global/views/components/ui/combobox'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import { InputGroupAddon } from '@safe-global/views/components/ui/input-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { computeFiatValue } from '@/utils/fiat'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitFlow/CreateStep/SpendingLimitPolicyForm'
 import type { SpenderCardProps } from '../SpendingLimitFlow/CreateStep/SpenderCard'
 import type { TokenLimitCardProps } from '../SpendingLimitFlow/CreateStep/TokenLimitCard'
-import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
-import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../SafeAccountSelector/constants'
+import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope'
+import {
+  getNestedSafesNoticeText,
+  NESTED_SAFES_NOTICE_TITLE,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { AccountSelect } from './m2AccountSelect'
-import SpenderCallout from '../SpendingLimitFlow/CreateStep/SpenderCallout'
-import { useIsEditMode } from '../SpendingLimitFlow/EditFlow/EditModeContext'
-import PendingRemovalsCard from '../SpendingLimitFlow/EditFlow/PendingRemovalsCard'
+import SpenderCallout from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import PendingRemovalsCard from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/PendingRemovalsCard'
 import { useEditState } from '../SpendingLimitFlow/EditFlow/useEditState'
 import { useExistingSpendingLimits } from '../SpendingLimitFlow/ExistingSpendingLimitsProvider'
 import { useExistingLimitTokens } from '../SpendingLimitFlow/hooks/useExistingLimitTokens'
 import useSpendingLimitTokenOptions from '../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import type { TokenSelectorProps } from '../SpendingLimitFlow/TokenSelector'
 import DisabledTokenOption from '../SpendingLimitFlow/TokenSelector/DisabledTokenOption'
-import { TokenGroupError, TokenGroupLoading } from '../SpendingLimitFlow/TokenSelector/TokenGroupState'
+import {
+  TokenGroupError,
+  TokenGroupLoading,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
 import TokenOptionRow from '../SpendingLimitFlow/TokenSelector/TokenOptionRow'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -73,14 +79,14 @@ import {
   TOKEN_FIELD_ICON_SIZE,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
-} from '../SpendingLimitFlow/TokenSelector/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import {
   findTokenOption,
   tokenOptionLabel,
   type TokenOption,
   type TokenOptionGroup,
 } from '../SpendingLimitFlow/utils/tokenOptions'
-import { matchesTokenQuery } from '../SpendingLimitFlow/utils/tokenSearch'
+import { matchesTokenQuery } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import { describeResetPeriod } from '../SpendingLimitFlow/utils/resetPeriod'
 import {
   existingTokensForSpender,
@@ -97,7 +103,7 @@ import {
   limitsPath,
   spenderAddressPath,
   type SpendingLimitPolicyFormValues,
-} from '../SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   ADD_SPENDER_LABEL,
   ADD_TOKEN_LABEL,
@@ -113,7 +119,7 @@ import {
   SPENDER_LABEL,
   SPENDER_PLACEHOLDER,
   SPENDER_RESERVED_ERROR,
-} from '../SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 const ICON_STROKE_WIDTH = 1.5
 

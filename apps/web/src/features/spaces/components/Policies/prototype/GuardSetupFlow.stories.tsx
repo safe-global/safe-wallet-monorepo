@@ -16,8 +16,8 @@ import { Check, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import Notifications from '@/components/common/Notifications'
 import SafeLogo from '@/components/common/SafeLogo'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,21 +26,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Label } from '@/components/ui/label'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { Switch } from '@/components/ui/switch'
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Label } from '@safe-global/views/components/ui/label'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import { Switch } from '@safe-global/views/components/ui/switch'
 import { HeaderAccountInfo, HeaderNavigation } from '@/features/spaces'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { cn } from '@/utils/cn'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import AddPolicyOptionButton from '../AddPolicyDialog/AddPolicyOptionButton'
-import { ADD_POLICY_OPTIONS, type AddPolicyOption } from '../AddPolicyDialog/options'
+import { cn } from '@safe-global/views/utils/cn'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import AddPolicyOptionButton from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/AddPolicyOptionButton'
+import {
+  ADD_POLICY_OPTIONS,
+  type AddPolicyOption,
+} from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import { AccountPanel, type AccountDialog, type AccountState } from './m2AccountPanel'
 import {
   getAllowlistAccountKeys,

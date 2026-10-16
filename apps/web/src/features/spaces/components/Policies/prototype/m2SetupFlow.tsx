@@ -27,15 +27,20 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { BalanceChanges, FeesPreview, TxNote } from '@/components/tx-flow/features'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxContext'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { SlotProvider } from '@/components/tx-flow/slots'
 import TxFlowProvider, { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { Badge } from '@/components/ui/badge'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { ReviewTransactionContent } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
@@ -56,7 +61,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import {
   Combobox,
   ComboboxCollection,
@@ -67,27 +72,27 @@ import {
   ComboboxLabel,
   ComboboxList,
   useComboboxAnchor,
-} from '@/components/ui/combobox'
-import { InputGroupAddon } from '@/components/ui/input-group'
+} from '@safe-global/views/components/ui/combobox'
+import { InputGroupAddon } from '@safe-global/views/components/ui/input-group'
 import { BelowComboboxContent } from './m2SpendingLimitForm'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressInput from '@/components/common/AddressInput'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { SearchInput } from '@/components/ui/search-input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import ExternalLink from '@/components/common/ExternalLink'
+import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import Identicon from '@/components/common/Identicon'
 import TokenIcon from '@/components/common/TokenIcon'
-import TxModalDialog from '@/components/common/TxModalDialog'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxModalDialog from '@safe-global/views/components/common/TxModalDialog'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import classnames from 'classnames'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { TxLayoutHeader } from '@/components/tx-flow/common/TxLayoutBase'
 import layoutCss from '@/components/tx-flow/common/TxLayoutBase/styles.module.css'
 import statusCss from '@/components/tx-flow/common/TxStatusWidget/styles.module.css'
 import { TxInfoContext, TxInfoProvider } from '@/components/tx-flow/TxInfoProvider'
-import { ProgressBar } from '@/components/common/ProgressBar'
+import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { SafeShieldProvider, useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 // eslint-disable-next-line no-restricted-imports -- story-only prototype: the barrel's SafeShieldWidget hooks never settle in Storybook, so the display is fed mock analysis
@@ -106,21 +111,28 @@ import { getSimulationLink, type SimulationStatus } from '@safe-global/utils/com
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
-import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldContent, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { Typography } from '@/components/ui/typography'
+import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Field, FieldContent, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { AccountSelect } from './m2AccountSelect'
 import { M2Alert } from './m2Alert'
-import { INELIGIBILITY_TEXT, NESTED_SAFES_NOTICE_TITLE } from '../SafeAccountSelector/constants'
-import { EDIT_STEP_TITLE } from '../SpendingLimitFlow/constants'
-import { CHANGE_BADGE } from '../SpendingLimitFlow/Summary/constants'
-import { POLICY_ICONS } from '../utils/policyIcon'
-import type { SafeAccountEntry, SafeAccountIneligibility, SafeAccountOption } from '../SafeAccountSelector/types'
+import {
+  INELIGIBILITY_TEXT,
+  NESTED_SAFES_NOTICE_TITLE,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import { EDIT_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import { POLICY_ICONS } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
+import type {
+  SafeAccountEntry,
+  SafeAccountIneligibility,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { AccountBalance, toStatChains } from '../SafeAccountSelector/components/SafeAccountRow'
 import SafeRowStats from '../../SafeSelectorDropdown/components/SafeRowStats'
 import type { ActiveDetails } from './m2AccountPanel'

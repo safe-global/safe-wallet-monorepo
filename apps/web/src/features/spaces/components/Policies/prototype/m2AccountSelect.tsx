@@ -1,5 +1,5 @@
 import { useId, useMemo, type ReactElement, type ReactNode } from 'react'
-import { Label } from '@/components/ui/label'
+import { Label } from '@safe-global/views/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -8,21 +8,27 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+} from '@safe-global/views/components/ui/select'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import SafeRowStats from '../../SafeSelectorDropdown/components/SafeRowStats'
 import { AccountBalance, toStatChains } from '../SafeAccountSelector/components/SafeAccountRow'
-import type { SafeAccountGroup, SafeAccountOption } from '../SafeAccountSelector/types'
+import type {
+  SafeAccountGroup,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { SafeAddress } from './m2Prototype'
 import {
   getEligibilityCopy,
   INELIGIBILITY_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
-} from '../SafeAccountSelector/constants'
-import { isSafeAccountGroup, type SafeAccountEntry } from '../SafeAccountSelector/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import { M2Alert } from './m2Alert'
 

@@ -20,18 +20,22 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Badge, BadgeDot } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+} from '@safe-global/views/components/ui/alert-dialog'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { PolicyDrawerActions } from '../components/PolicyDrawerActions'
 import { asActivePolicy, MOCK_VIEWERS, mockSpendingLimitPolicy } from '../mocks/policies'
 import { SpendingLimitDrawer } from '../SpendingLimitDrawer'
 import AllowanceRow from '../SpendingLimitDrawer/components/SpendingLimits/AllowanceRow'
-import { formatSignedCount } from '../SpendingLimitDrawer/format'
-import type { PolicyAllowance, PolicySpender, PolicyTokenInfo } from '../types'
-import { Card } from '@/components/ui/card'
+import { formatSignedCount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
+import type {
+  PolicyAllowance,
+  PolicySpender,
+  PolicyTokenInfo,
+} from '@safe-global/views/features/spaces/components/Policies/types'
+import { Card } from '@safe-global/views/components/ui/card'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { M2Alert } from './m2Alert'
 import {

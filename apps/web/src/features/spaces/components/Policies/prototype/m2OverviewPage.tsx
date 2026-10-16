@@ -12,30 +12,30 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { ThresholdBadge } from '@/components/common/AccountBadges'
+import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import ExternalLink from '@/components/common/ExternalLink'
-import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
-import TableCard from '@/components/common/TableCard'
-import { Badge, BadgeDot, badgeVariants } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import TableCard from '@safe-global/views/components/common/TableCard'
+import { Badge, BadgeDot, badgeVariants } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/ui/popover'
-import { SearchInput } from '@/components/ui/search-input'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import PolicyStatusChip from '../components/PolicyStatusChip'
-import { PoliciesNoSearchResults } from '../PoliciesTable/components/PoliciesTableStates'
-import type { PolicyStatus } from '../types'
-import { POLICY_ICONS } from '../utils/policyIcon'
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@safe-global/views/components/ui/popover'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
+import { PoliciesNoSearchResults } from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
+import type { PolicyStatus } from '@safe-global/views/features/spaces/components/Policies/types'
+import { POLICY_ICONS } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import { NetworkLogosPill } from '@/features/multichain'
 import {
   getStatusPill,
