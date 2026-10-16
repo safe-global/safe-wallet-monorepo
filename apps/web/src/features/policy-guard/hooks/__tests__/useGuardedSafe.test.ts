@@ -52,6 +52,7 @@ describe('useGuardedSafe', () => {
         safeLoaded: true,
         safeLoading: false,
         error: undefined,
+        refetch: expect.any(Function),
       })
       expect(query).toHaveBeenCalledWith(skipToken, expect.anything())
     })
@@ -86,6 +87,7 @@ describe('useGuardedSafe', () => {
         safeLoaded: true,
         safeLoading: false,
         error: undefined,
+        refetch: expect.any(Function),
       })
     })
 
@@ -106,6 +108,7 @@ describe('useGuardedSafe', () => {
         safeLoaded: false,
         safeLoading: true,
         error: undefined,
+        refetch: expect.any(Function),
       })
     })
 
