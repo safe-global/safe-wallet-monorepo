@@ -30,15 +30,6 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
     batchTxs.forEach((item) => deleteTx(item.id))
   }, [deleteTx, batchTxs])
 
-  // Close confirmation flow when batch is empty
-  const isConfirmationFlow = txFlow?.type === ConfirmBatchFlow
-  const shouldExitFlow = isConfirmationFlow && batchTxs.length === 0
-  useEffect(() => {
-    if (shouldExitFlow) {
-      setTxFlow(undefined)
-    }
-  }, [setTxFlow, shouldExitFlow])
-
   const onAddClick = useCallback(
     (e: SyntheticEvent) => {
       e.preventDefault()
