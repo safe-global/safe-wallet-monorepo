@@ -260,13 +260,13 @@ External callers go through the public barrel; internals stay relative. Self-imp
 <a id="code-01"></a>
 ### `CODE-01` Extract shared UI only when behavior is actually shared
 
-> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003`
+> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003` · `RL-20261009-004`
 
 **📜 Rule**\
-When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`.
+When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`, and a helper peer modules share gets its own module rather than one peer importing it from another.
 
 **✅ Check**\
-> Did this add a component that mirrors an existing workflow, or logic another call site or app already has? If yes, can the existing component accept the small differences as props, or the logic move into a shared hook or package?
+> Did this add a component that mirrors an existing workflow, or logic another call site or app already has? If yes, can the existing component accept the small differences as props, or the logic move into a shared hook, package, or its own module?
 
 <details>
 <summary><strong>💡 Example 1 of 4</strong> — <code>web/examples/feature-boundaries.md</code> § <em>shared-form-components</em></summary>
@@ -486,13 +486,13 @@ The numeric comparison is non-obvious (lower number = higher severity), and inli
 <a id="code-02"></a>
 ### `CODE-02` Extract repeated styling into named structure
 
-> **web** · abstractions · 3 examples · ↩ `RL-20260316-001` · `RL-20260318-003` · `RL-20260413-003` · `RL-20260424-001` · `RL-20260608-002` · `RL-20260612-009` · `RL-20260623-001` · `RL-20260806-007`
+> **web** · abstractions · 3 examples · ↩ `RL-20260316-001` · `RL-20260318-003` · `RL-20260413-003` · `RL-20260424-001` · `RL-20260608-002` · `RL-20260612-009` · `RL-20260623-001` · `RL-20260806-007` · `RL-20261013-004`
 
 **📜 Rule**\
-Repeated or long styling patterns should move into a small component, class helper, or CSS module when that makes call sites readable and consistent.
+Repeated or long styling or wrapper-markup patterns should move into a small component, class helper, or CSS module when that makes call sites readable and consistent.
 
 **✅ Check**\
-> Did this repeat a long class list, shadow, or layout pattern? If yes, should it be named once and reused?
+> Did this repeat a long class list, shadow, layout, or wrapper-markup pattern? If yes, should it be named once and reused?
 
 <details>
 <summary><strong>💡 Example 1 of 3</strong> — <code>web/examples/feature-boundaries.md</code> § <em>repeated-style-shape</em></summary>
@@ -782,13 +782,13 @@ unauthenticated so they re-login.
 <a id="api-01"></a>
 ### `API-01` Search consumers when removing or changing public exports
 
-> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008`
+> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008` · `RL-20261009-003` · `RL-20261014-003`
 
 **📜 Rule**\
-Removing or changing a public export, hook return field, endpoint, compatibility API, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
+Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
 
 **✅ Check**\
-> Did this remove, rename, or change what an exported API or shared hook returns? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?
+> Did this remove, rename, or change what an exported API or shared hook returns, or move a URL-served asset? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>api-01-drop-in-replacements-preserve-the-original-prop-surface</em></summary>
@@ -1539,16 +1539,16 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 <a id="data-04"></a>
 ### `DATA-04` Use the canonical helper, predicate, or constant
 
-> **general** · data · 2 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002`
+> **general** · data · 3 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001`
 
 **📜 Rule**\
-Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`) and use it. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.
+Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`, E2E `TEST_ADDRESSES`/`CHAIN_IDS`) and use it; E2E helpers take hosts from the configured `baseURL`. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.
 
 **✅ Check**\
-> Did this add a helper or constant, or create, parse, or classify a formatted value or domain state? If yes, does an existing helper, constant, or predicate already do it, and does any call site that bypasses one keep its fallbacks?
+> Did this add a helper or constant, hardcode a test address, chain ID, or host, or create, parse, or classify a formatted value or domain state? If yes, does an existing helper, constant, or predicate already do it, and does any call site that bypasses one keep its fallbacks?
 
 <details>
-<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/chain-contracts.md</code> § <em>normalize-versions-and-origin</em></summary>
+<summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/chain-contracts.md</code> § <em>normalize-versions-and-origin</em></summary>
 
 <br>
 
@@ -1578,7 +1578,7 @@ length limits. Use the existing normalization helpers before lookup or encoding.
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/testing.md</code> § <em>match-real-gateway-response-shapes-when-intercepting</em></summary>
+<summary><strong>💡 Example 2 of 3</strong> — <code>examples/general/testing.md</code> § <em>match-real-gateway-response-shapes-when-intercepting</em></summary>
 
 <br>
 
@@ -1620,6 +1620,45 @@ cy.intercept('GET', constants.chainsListEndpoint, (req) => {
 If the URL pattern doesn't match the real call, or the mutated path doesn't exist on the response, the interceptor is a silent no-op and the test still depends on live backend state — the very thing the mock is supposed to remove.
 
 <sub>Source: <a href="examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting">examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 3 of 3</strong> — <code>examples/general/testing.md</code> § <em>data-04-read-e2e-test-data-and-hosts-from-shared-sources</em></summary>
+
+<br>
+
+**DATA-04 — Read E2E test data and hosts from shared sources**
+
+Source: PR #9075, #9065 (RL-20261014-001)
+
+### Avoid
+
+```ts
+const SEPOLIA = '11155111'
+const CONTACT = { name: 'Treasury contact', address: '0x1111111111111111111111111111111111111111' }
+
+await page.waitForURL((url) => url.hostname === 'localhost' && !url.pathname.startsWith('/cgw'))
+```
+
+### Prefer
+
+```ts
+import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
+
+const SEPOLIA = CHAIN_IDS.sepolia
+const CONTACT = { name: 'Treasury contact', address: TEST_ADDRESSES.NON_OWNER }
+
+const { baseURL } = test.info().project.use
+if (!baseURL) throw new Error('signInWithEmail needs the baseURL of the wallet')
+await page.waitForURL((url) => url.origin === new URL(baseURL).origin)
+```
+
+### Why
+
+A change to the shared test data reaches every spec only when the specs import it. A run whose wallet URL points at `127.0.0.1` or another port never matches a hardcoded `localhost`, so the wait times out before the test checks anything; the configured `baseURL` is the one source of the wallet's origin.
+
+<sub>Source: <a href="examples/general/testing.md#data-04-read-e2e-test-data-and-hosts-from-shared-sources">examples/general/testing.md#data-04-read-e2e-test-data-and-hosts-from-shared-sources</a></sub>
 
 </details>
 
@@ -1943,16 +1982,16 @@ correct, so the helper produces false negatives whenever it is used.
 <a id="test-01"></a>
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
-> **general** · testing · 5 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003`
+> **general** · testing · 6 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001`
 
 **📜 Rule**\
-Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears.
+Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E helpers assert what the user sees or the navigation that follows, not implementation details such as a link `href`.
 
 **✅ Check**\
-> Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished?
+> Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished, and keep passing through a refactor that keeps the behavior?
 
 <details>
-<summary><strong>💡 Example 1 of 5</strong> — <code>examples/general/testing.md</code> § <em>negative-assertions</em></summary>
+<summary><strong>💡 Example 1 of 6</strong> — <code>examples/general/testing.md</code> § <em>negative-assertions</em></summary>
 
 <br>
 
@@ -1983,7 +2022,7 @@ renders with the new text.
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-01-assert-the-specific-behavior-the-description-claims</em></summary>
+<summary><strong>💡 Example 2 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-assert-the-specific-behavior-the-description-claims</em></summary>
 
 <br>
 
@@ -2026,7 +2065,7 @@ the description.
 </details>
 
 <details>
-<summary><strong>💡 Example 3 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state</em></summary>
+<summary><strong>💡 Example 3 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state</em></summary>
 
 <br>
 
@@ -2079,7 +2118,7 @@ to lock in current behavior.
 </details>
 
 <details>
-<summary><strong>💡 Example 4 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-01-test-the-debounce-not-just-the-post-debounce-assertion</em></summary>
+<summary><strong>💡 Example 4 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-test-the-debounce-not-just-the-post-debounce-assertion</em></summary>
 
 <br>
 
@@ -2120,7 +2159,7 @@ An assertion that holds on render zero never exercises the debounced behavior, s
 </details>
 
 <details>
-<summary><strong>💡 Example 5 of 5</strong> — <code>examples/general/testing.md</code> § <em>overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries</em></summary>
+<summary><strong>💡 Example 5 of 6</strong> — <code>examples/general/testing.md</code> § <em>overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries</em></summary>
 
 <br>
 
@@ -2160,12 +2199,43 @@ If the helper writes the whole key (not a merge), any state the app would popula
 
 </details>
 
+<details>
+<summary><strong>💡 Example 6 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-click-links-without-asserting-their-href</em></summary>
+
+<br>
+
+**TEST-01 — Click links without asserting their href**
+
+Source: PR #9003 (RL-20261012-001)
+
+### Avoid
+
+```js
+const appLink = () => cy.get(`a[aria-label="Open ${app}"]`).first()
+appLink().should('have.attr', 'href').and('match', linkWithSafe)
+appLink().click()
+```
+
+### Prefer
+
+```js
+cy.get(`a[aria-label="Open ${app}"]`).first().click()
+```
+
+### Why
+
+The `href` check makes every spec that uses the helper depend on how the link encodes its target, so a valid move to client-side navigation fails them while clicking still opens the right app. The spec checks the app that opens. The `href` was only checked to wait for the router; the product now reads the Safe from the URL until the router is ready.
+
+<sub>Source: <a href="examples/general/testing.md#test-01-click-links-without-asserting-their-href">examples/general/testing.md#test-01-click-links-without-asserting-their-href</a></sub>
+
+</details>
+
 ---
 
 <a id="test-02"></a>
 ### `TEST-02` New branch logic needs branch-specific tests
 
-> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003`
+> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003` · `RL-20261013-001`
 
 **📜 Rule**\
 New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.
@@ -2313,13 +2383,51 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 <a id="test-04"></a>
 ### `TEST-04` Moved behavior needs replacement coverage and matching mocks
 
-> **general** · testing · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002`
+> **general** · testing · 1 example · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002`
 
 **📜 Rule**\
-When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed.
+When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. CI path filters and test or story discovery cover the new location.
 
 **✅ Check**\
-> Did this move or remove a return field, prop, branch, or dependency? If yes, did equivalent tests move to the new owner, and do the tests' mocks still match what the code imports?
+> Did this move or remove a return field, prop, branch, or dependency? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, and do CI triggers still run them?
+
+<details>
+<summary><strong>💡 Example</strong> — <code>examples/general/testing.md</code> § <em>test-04-extend-ci-path-filters-when-tests-or-stories-move</em></summary>
+
+<br>
+
+**TEST-04 — Extend CI path filters when tests or stories move**
+
+Source: PR #8988 (RL-20261009-002)
+
+### Avoid
+
+```yaml
+# Storybook now also loads packages/<new-package>/src/**/*.stories.tsx,
+# but the workflow that snapshots the stories still triggers only on the app
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+```
+
+### Prefer
+
+```yaml
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+      - packages/<new-package>/**
+```
+
+### Why
+
+A PR that changes only the moved files no longer triggers the run, so their tests or stories lose coverage without any failure. Every discovery glob that scans the old path (changed-story scripts, screenshot steps) needs the new location too.
+
+<sub>Source: <a href="examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move">examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move</a></sub>
+
+</details>
 
 ---
 
@@ -2433,16 +2541,16 @@ server-side store before exposing the action.
 <a id="obs-01"></a>
 ### `OBS-01` Promote telemetry only when user impact justifies it
 
-> **web** · observability · 2 examples · ↩ `RL-20260319-001` · `RL-20260417-003` · `RL-20260601-002` · `RL-20260625-002` · `RL-20260720-005` · `RL-20260729-005` · `RL-20260824-002` · `RL-20260914-002` · `RL-20260921-007` · `RL-20261007-001`
+> **web** · observability · 3 examples · ↩ `RL-20260319-001` · `RL-20260417-003` · `RL-20260601-002` · `RL-20260625-002` · `RL-20260720-005` · `RL-20260729-005` · `RL-20260824-002` · `RL-20260914-002` · `RL-20260921-007` · `RL-20261007-001` · `RL-20261013-003`
 
 **📜 Rule**\
-Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.
+Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one, and event properties come from the call that fires it, never from global state a caller must set first. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.
 
 **✅ Check**\
-> Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point, do impressions fire once and only when visible, and do existing events keep their properties?
+> Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point by the call that fires it, do impressions fire once and only when visible, and do existing events keep their properties?
 
 <details>
-<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-use-the-shared-analytics-param-key</em></summary>
+<summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-use-the-shared-analytics-param-key</em></summary>
 
 <br>
 
@@ -2475,7 +2583,7 @@ Free-form keys split a single dimension across multiple property names in Mixpan
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-track-an-impression-once-and-only-when-shown</em></summary>
+<summary><strong>💡 Example 2 of 3</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-track-an-impression-once-and-only-when-shown</em></summary>
 
 <br>
 
@@ -2513,6 +2621,48 @@ const Banner = ({ location, isShown }: Props) => {
 A mount effect re-fires when its deps change and also runs while a parent keeps the UI mounted but hidden, which inflates reach and lowers click-through. The ref limits each mount to one event, and the visibility flag ties it to a real impression.
 
 <sub>Source: <a href="examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown">examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 3 of 3</strong> — <code>examples/general/api-and-packages.md</code> § <em>obs-01-take-event-properties-from-the-call-that-fires-it</em></summary>
+
+<br>
+
+**OBS-01 — Take event properties from the call that fires it**
+
+Source: PR #9020 (RL-20261013-003)
+
+### Avoid
+
+```ts
+// Every caller has to remember this before it starts a checkout
+dispatch(checkoutEntrySet(entry))
+void checkout(paymentLinkId)
+
+// Listener on the checkout request
+trackEvent(EVENTS.CHECKOUT_STARTED, { ...plan, ...getState().checkoutEntry })
+```
+
+### Prefer
+
+```ts
+const startCheckout = useCallback(
+  async (paymentLinkId: string, props: CheckoutProps) => {
+    const result = await trigger({ spaceId, paymentLinkId, returnUrl })
+    if (!result.data) return
+    trackEvent(EVENTS.CHECKOUT_STARTED, props)
+    navigateTo(result.data.url)
+  },
+  [spaceId, returnUrl, trigger],
+)
+```
+
+### Why
+
+Nothing enforces the dispatch, so a caller that skips it sends the previous checkout's entry point, and the slice is never cleared. Passing the properties into the call that fires the event adds no global state and sends the event only after the request succeeds. The PR dropped the property instead, because the funnel reads the entry point from its first step; either way, no global slice.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#obs-01-take-event-properties-from-the-call-that-fires-it">examples/general/api-and-packages.md#obs-01-take-event-properties-from-the-call-that-fires-it</a></sub>
 
 </details>
 
@@ -2603,13 +2753,84 @@ User-controlled strings used as map keys must not index inherited object propert
 <a id="doc-01"></a>
 ### `DOC-01` Keep docs, comments, and agent guidance true to the code
 
-> **general** · docs · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006` · `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001`
+> **general** · docs · 2 examples · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006` · `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001` · `RL-20261013-002` · `RL-20261014-002` · `RL-20261015-001`
 
 **📜 Rule**\
 Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs; a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.
 
 **✅ Check**\
 > Did this move docs, add a comment, change logic a comment describes, or change a runbook, disclosure, framework, script, or tool? If yes, is every removed section accounted for, is each comment one line of why that matches the code, and do runbooks, disclosures, and AGENTS.md match the real setup?
+
+<details>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/comments-and-docs.md</code> § <em>doc-01-one-line-of-why-no-narration-or-ticket-ids</em></summary>
+
+<br>
+
+**DOC-01 — One line of why, no narration or ticket IDs**
+
+Source: PR #9093, #9075, #8980 (RL-20261015-001)
+
+### Avoid
+
+```ts
+/**
+ * Step-up authentication for the sensitive Workspace actions that start outside a Workspace: from a Safe page and
+ * from the Workspace creation wizard. These flows send the step-up back to their own page, not the page the user
+ * left, so that the replay can move the user on.
+ */
+```
+
+```ts
+// The user confirms this transaction with these critical findings. Analyses can deliver later or as new objects,
+// so only a change of the transaction or of the findings asks for the confirmation again.
+```
+
+### Prefer
+
+```ts
+// These flows start outside a Workspace and return the step-up to their own page, not the page the user left.
+```
+
+```ts
+// A confirmation covers one transaction with one set of critical findings; any change asks again.
+```
+
+### Why
+
+The multi-line versions narrate what the code and its names already say, and drift when the code changes. One line keeps only the invariant the code cannot show. Ticket IDs belong in the PR description, not in a comment.
+
+<sub>Source: <a href="examples/general/comments-and-docs.md#doc-01-one-line-of-why-no-narration-or-ticket-ids">examples/general/comments-and-docs.md#doc-01-one-line-of-why-no-narration-or-ticket-ids</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/comments-and-docs.md</code> § <em>doc-01-name-e2e-tests-with-should-and-when</em></summary>
+
+<br>
+
+**DOC-01 — Name E2E tests with should and when**
+
+Source: PR #9075 (RL-20261014-002)
+
+### Avoid
+
+```ts
+test('that a Safe is added to the Workspace after the code', async ({ safePage, safes }) => {
+```
+
+### Prefer
+
+```ts
+test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
+```
+
+### Why
+
+The E2E guidance requires `should [expected behavior] when [condition]`, so a CI failure names the broken behavior and the condition that triggers it.
+
+<sub>Source: <a href="examples/general/comments-and-docs.md#doc-01-name-e2e-tests-with-should-and-when">examples/general/comments-and-docs.md#doc-01-name-e2e-tests-with-should-and-when</a></sub>
+
+</details>
 
 ---
 
@@ -3182,16 +3403,16 @@ A PR carries one ticket's worth of change so it can be reviewed, verified, and r
 <a id="state-02"></a>
 ### `STATE-02` Reset context state when its precondition flips
 
-> **general** · state · 2 examples · ↩ `RL-20260318-007` · `RL-20260605-005` · `RL-20260713-006` · `RL-20260716-006` · `RL-20260820-002` · `RL-20260916-005` · `RL-20260311-013`
+> **general** · state · 3 examples · ↩ `RL-20260318-007` · `RL-20260605-005` · `RL-20260713-006` · `RL-20260716-006` · `RL-20260820-002` · `RL-20260916-005` · `RL-20260311-013` · `RL-20261015-002`
 
 **📜 Rule**\
-When an effect writes derived values into a context based on a precondition, the false branch explicitly resets them; do not rely on the next true branch to overwrite them. Telemetry user context (`setUser`, `addUserExtraInfo`, `identify`) is cleared the same way when its entity becomes absent.
+When an effect writes derived values into a context based on a precondition, the false branch explicitly resets them; do not rely on the next true branch to overwrite them. Telemetry user context (`setUser`, `addUserExtraInfo`, `identify`) is cleared the same way when its entity becomes absent. A component whose local state belongs to one entity remounts with `key={entityId}` or derives that state from the id it was set for, instead of resetting it in an effect.
 
 **✅ Check**\
-> Does this conditional context or telemetry-context write also clear its values when the condition turns false or the entity disappears, so consumers never see stale data?
+> Does this conditional context or telemetry-context write also clear its values when the condition turns false or the entity disappears, so consumers never see stale data, and does entity-scoped local state reset through a `key` or a stored id instead of an effect?
 
 <details>
-<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>state-02-reset-context-state-when-its-precondition-flips</em></summary>
+<summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>state-02-reset-context-state-when-its-precondition-flips</em></summary>
 
 <br>
 
@@ -3233,7 +3454,7 @@ Without the reset, downstream analysis keeps consuming the previously-decoded me
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 2</strong> — <code>mobile/examples/permissions.md</code> § <em>clear-telemetry-context-when-the-entity-becomes-null</em></summary>
+<summary><strong>💡 Example 2 of 3</strong> — <code>mobile/examples/permissions.md</code> § <em>clear-telemetry-context-when-the-entity-becomes-null</em></summary>
 
 <br>
 
@@ -3275,6 +3496,53 @@ useEffect(() => {
 Without the reset, RUM events after the user wipes their last Safe still carry the previous safeAddress/chainId, which silently corrupts attribution dashboards.
 
 <sub>Source: <a href="mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null">mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 3 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>state-02-reset-entity-scoped-state-with-a-key-not-an-effect</em></summary>
+
+<br>
+
+**STATE-02 — Reset entity-scoped state with a key, not an effect**
+
+Source: PR #8979, #9093 (RL-20261015-002)
+
+### Avoid
+
+```tsx
+const [answeredSafe, setAnsweredSafe] = useState<string>()
+if (!isChoosing || answeredSafe === safeKey) return null
+```
+
+```tsx
+const [isConfirmed, setIsConfirmed] = useState(false)
+const confirmationKey = JSON.stringify([txKey, criticalFindings])
+useEffect(() => {
+  setIsConfirmed(false)
+}, [confirmationKey])
+```
+
+### Prefer
+
+```tsx
+const ChooserDialog = (): ReactElement | null => {
+  const { safeKey, pick } = useSafePick()
+  return safeKey ? <Chooser key={safeKey} pick={pick} /> : null
+}
+```
+
+```tsx
+const riskKey = JSON.stringify([txKey, criticalFindings])
+const [confirmedRiskKey, setConfirmedRiskKey] = useState<string>()
+const isConfirmed = confirmedRiskKey === riskKey
+```
+
+### Why
+
+A stored id compared with the current one survives leaving and reopening the same entity, so the second visit to Safe A skips the question. Remounting with `key` starts each visit with fresh state. An effect reset runs only after the render with the new key, so for one render the old confirmation still counts; deriving the flag from the stored key is right in that same render.
+
+<sub>Source: <a href="examples/general/data-integrity.md#state-02-reset-entity-scoped-state-with-a-key-not-an-effect">examples/general/data-integrity.md#state-02-reset-entity-scoped-state-with-a-key-not-an-effect</a></sub>
 
 </details>
 
@@ -3462,7 +3730,7 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 <a id="code-05"></a>
 ### `CODE-05` Compute and name derived values before the return
 
-> **general** · abstractions · 3 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005` · `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005`
+> **general** · abstractions · 3 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005` · `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005` · `RL-20261014-005`
 
 **📜 Rule**\
 Derive values once before the return, not inline in JSX: a pure helper that reads no hook state lives at module scope, and `useMemo` (above every early return) is for expensive work or identity a consumer needs, not cheap primitives. Three or more `!==` checks on one value become `!DISALLOWED.includes(value)`, and reused conjunctions and multi-way JSX branches become named booleans. Guards return early, type guards list the members they accept, and names say what a value means at the call site (`pendingActions`, positively framed `signersOnly`).
@@ -3982,16 +4250,16 @@ Cypress retries the chained command using the preceding command's timeout. The t
 <a id="data-06"></a>
 ### `DATA-06` Normalize shared identifiers and keys one way
 
-> **general** · data · 2 examples · ↩ `RL-20260218-002` · `RL-20260604-001` · `RL-20260611-006` · `RL-20260702-001` · `RL-20260710-002` · `RL-20260713-001` · `RL-20260707-003` · `RL-20260716-010` · `RL-20260818-005` · `RL-20260916-001` · `RL-20260309-007` · `RL-20260709-002` · `RL-20260716-002` · `RL-20260716-003` · `RL-20260930-001` · `RL-20260302-001`
+> **general** · data · 3 examples · ↩ `RL-20260218-002` · `RL-20260604-001` · `RL-20260611-006` · `RL-20260702-001` · `RL-20260710-002` · `RL-20260713-001` · `RL-20260707-003` · `RL-20260716-010` · `RL-20260818-005` · `RL-20260916-001` · `RL-20260309-007` · `RL-20260709-002` · `RL-20260716-002` · `RL-20260716-003` · `RL-20260930-001` · `RL-20260302-001` · `RL-20261014-004`
 
 **📜 Rule**\
-Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache or dedup key covers every input that changes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.
+Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache, dedup, or list `key` covers every input that changes or distinguishes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.
 
 **✅ Check**\
-> Did this compare or consume an address, identifier, or user input, or build a cache/dedup key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?
+> Did this compare or consume an address, identifier, or user input, or build a cache, dedup, or list key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?
 
 <details>
-<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>normalize-rtk-query-cache-keys-at-one-place</em></summary>
+<summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>normalize-rtk-query-cache-keys-at-one-place</em></summary>
 
 <br>
 
@@ -4030,7 +4298,7 @@ RTK Query keys by argument value. Normalizing on read but not on invalidation me
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>compare-addresses-with-sameaddress-not-tolowercase</em></summary>
+<summary><strong>💡 Example 2 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>compare-addresses-with-sameaddress-not-tolowercase</em></summary>
 
 <br>
 
@@ -4067,6 +4335,35 @@ function projectRemove(currentOwners: string[], change: { ownerAddress: string }
 `sameAddress` already handles checksum-vs-lowercase, undefined inputs, and the 0x prefix. Inline `.toLowerCase()` reimplements it inconsistently and is easy to forget on one branch (e.g. swapOwner vs removeOwner).
 
 <sub>Source: <a href="examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase">examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 3 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>data-06-key-list-items-by-everything-that-distinguishes-them</em></summary>
+
+<br>
+
+**DATA-06 — Key list items by everything that distinguishes them**
+
+Source: PR #9027 (RL-20261014-004)
+
+### Avoid
+
+```tsx
+const rows = removedSpenders.map((spender) => <SpenderRow key={spender} spender={spender} />)
+```
+
+### Prefer
+
+```tsx
+const rows = removedSpenders.map((spender, index) => <SpenderRow key={`${spender}-${index}`} spender={spender} />)
+```
+
+### Why
+
+The usual flow removes each spender once, but the decoder accepts any batch, so a hand-built one can repeat a spender and two rows would share a key. A key stays unique for every input the parser accepts, not only for what the usual flow produces.
+
+<sub>Source: <a href="examples/general/data-integrity.md#data-06-key-list-items-by-everything-that-distinguishes-them">examples/general/data-integrity.md#data-06-key-list-items-by-everything-that-distinguishes-them</a></sub>
 
 </details>
 
@@ -4620,7 +4917,7 @@ A compromised or misconfigured backend could otherwise redirect funds through a 
 <a id="type-01"></a>
 ### `TYPE-01` Keep types honest instead of casting
 
-> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004` · `RL-20261002-004`
+> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004` · `RL-20261002-004` · `RL-20261009-005`
 
 **📜 Rule**\
 Narrow unknown or wider values with a type predicate (`(x: unknown): x is T`), a guard, or a correctly typed source instead of `as T` casts or `@ts-ignore`; a cast silences the checker exactly where the value is unverified. Signatures state what they need: required inputs are not optional, and parameters are typed by the fields they read (`Pick<T, …>`). Branches on a discriminant end in a `never` check so a new kind fails to compile.
@@ -4788,13 +5085,13 @@ Tests that assign to globals (`navigator`, `window`, `Date`, env) restore them, 
 <a id="pkg-02"></a>
 ### `PKG-02` Import only declared dependencies, through their public entrypoint
 
-> **general** · packages · ↩ `RL-20260610-001` · `RL-20260618-001` · `RL-20260629-001` · `RL-20260708-001` · `RL-20260729-001` · `RL-20260413-006`
+> **general** · packages · ↩ `RL-20260610-001` · `RL-20260618-001` · `RL-20260629-001` · `RL-20260708-001` · `RL-20260729-001` · `RL-20260413-006` · `RL-20261009-001`
 
 **📜 Rule**\
-App code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).
+App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).
 
 **✅ Check**\
-> Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses?
+> Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses, and does package code import nothing from an app?
 
 ---
 
