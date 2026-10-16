@@ -1,0 +1,133 @@
+import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { Builder } from '@/tests/Builder'
+import { chainBuilder } from '@/tests/builders/chains'
+import { getAddedByLabel, toLocalContacts, toWorkspaceContacts } from '../utils'
+
+const itemBuilder = () =>
+  Builder.new<SpaceAddressBookItemDto>().with({
+    name: faker.person.fullName(),
+    address: faker.finance.ethereumAddress(),
+    chainIds: ['1'],
+    createdBy: faker.internet.email(),
+    createdByUserId: faker.number.int(),
+    lastUpdatedBy: faker.internet.email(),
+    lastUpdatedByUserId: faker.number.int(),
+    createdAt: faker.date.past().toISOString(),
+    updatedAt: faker.date.recent().toISOString(),
+  })
+
+const mainnet = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png' }).build()
+const gnosis = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null }).build()
+const configs = [mainnet, gnosis]
+
+const noMember = () => undefined
+
+describe('getAddedByLabel', () => {
+  it('prefers the member name', () => {
+    expect(getAddedByLabel('alice@example.com', 'Alice')).toBe('Alice')
+  })
+
+  it('shortens a wallet address when the member is unknown', () => {
+    const address = faker.finance.ethereumAddress()
+
+    expect(getAddedByLabel(address, undefined)).toBe(shortenAddress(address))
+  })
+
+  it('falls back to the email the contact was added with', () => {
+    expect(getAddedByLabel('alice@example.com', undefined)).toBe('alice@example.com')
+  })
+
+  it('knows nobody when neither is set', () => {
+    expect(getAddedByLabel('', undefined)).toBeUndefined()
+  })
+})
+
+describe('toWorkspaceContacts', () => {
+  it('names each chain from the chain configs', () => {
+    const item = itemBuilder()
+      .with({ chainIds: ['1', '100'] })
+      .build()
+
+    const [contact] = toWorkspaceContacts([item], configs, noMember)
+
+    expect(contact.chains).toEqual([
+      { chainId: '1', name: 'Ethereum', logoUri: 'https://logo/1.png' },
+      { chainId: '100', name: 'Gnosis Chain', logoUri: undefined },
+    ])
+  })
+
+  it('names a chain missing from the configs by its id', () => {
+    const item = itemBuilder()
+      .with({ chainIds: ['999'] })
+      .build()
+
+    const [contact] = toWorkspaceContacts([item], configs, noMember)
+
+    expect(contact.chains).toEqual([{ chainId: '999', name: '999' }])
+  })
+
+  it('resolves who added the contact from its creator', () => {
+    const item = itemBuilder().with({ createdByUserId: 7 }).build()
+
+    const [contact] = toWorkspaceContacts([item], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
+
+    expect(contact).toEqual(expect.objectContaining({ name: item.name, address: item.address, addedBy: 'Maya Chen' }))
+  })
+})
+
+describe('toLocalContacts', () => {
+  const address = faker.finance.ethereumAddress()
+
+  it('merges a contact saved on several chains into one', () => {
+    const contacts = toLocalContacts(
+      { '1': { [address]: 'Hardware wallet' }, '100': { [address]: 'Hardware wallet' } },
+      [],
+      configs,
+    )
+
+    expect(contacts).toEqual([
+      {
+        address,
+        name: 'Hardware wallet',
+        chains: [
+          { chainId: '1', name: 'Ethereum', logoUri: 'https://logo/1.png' },
+          { chainId: '100', name: 'Gnosis Chain', logoUri: undefined },
+        ],
+        isLocal: true,
+        isShared: false,
+      },
+    ])
+  })
+
+  it('matches addresses across chains regardless of case', () => {
+    const contacts = toLocalContacts(
+      {
+        '1': { [address.toLowerCase()]: 'Hardware wallet' },
+        '100': { [address.toUpperCase().replace('0X', '0x')]: 'Hw' },
+      },
+      [],
+      configs,
+    )
+
+    expect(contacts).toHaveLength(1)
+    expect(contacts[0].chains.map((chain) => chain.chainId)).toEqual(['1', '100'])
+  })
+
+  it('marks contacts the workspace already has as shared and lists them last', () => {
+    const shared = faker.finance.ethereumAddress()
+    const workspaceItem = itemBuilder().with({ address: shared.toLowerCase() }).build()
+
+    const contacts = toLocalContacts(
+      { '1': { [shared]: 'Treasury', [address]: 'Hardware wallet' } },
+      [workspaceItem],
+      configs,
+    )
+
+    expect(contacts.map((contact) => [contact.name, contact.isShared])).toEqual([
+      ['Hardware wallet', false],
+      ['Treasury', true],
+    ])
+  })
+})
