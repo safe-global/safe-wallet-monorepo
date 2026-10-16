@@ -115,6 +115,7 @@ export const ROUTES = {
   welcomeSpaces: '/welcome/spaces',
   welcomeAccounts: '/welcome/accounts',
   balances: '/balances',
+  balancesNfts: '/balances/nfts',
   transactions: '/transactions',
   transactionsQueue: '/transactions/queue',
   transactionsHistory: '/transactions/history',

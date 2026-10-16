@@ -6,6 +6,7 @@
  */
 import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
+import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type {
   QueuedItemPage,
   TransactionDetails,
@@ -85,7 +86,7 @@ export class SafeApiClient {
   }
 
   /** Get collectibles (NFTs) */
-  async getCollectibles(safeAddress: string): Promise<unknown> {
+  async getCollectibles(safeAddress: string): Promise<CollectiblePage> {
     return this.get(`/v2/chains/${this.chainId}/safes/${safeAddress}/collectibles`)
   }
 
