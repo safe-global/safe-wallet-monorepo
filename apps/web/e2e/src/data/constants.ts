@@ -120,6 +120,7 @@ export const ROUTES = {
   transactionsQueue: '/transactions/queue',
   transactionsHistory: '/transactions/history',
   settings: '/settings',
+  settingsSetup: '/settings/setup',
   addressBook: '/address-book',
   apps: '/apps',
 } as const

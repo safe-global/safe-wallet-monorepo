@@ -16,6 +16,7 @@ export const playwrightSpecs = {
   'e2e/nft-transfer.spec.ts': {},
   'e2e/reject.spec.ts': {},
   'e2e/replace.spec.ts': {},
+  'e2e/spending-limit.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario', 'prepareProposersScenario'],

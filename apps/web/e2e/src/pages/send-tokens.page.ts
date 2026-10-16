@@ -24,6 +24,7 @@ export class SendTokensPage {
   readonly tokenSelector: Locator
   readonly addRecipientButton: Locator
   readonly nextButton: Locator
+  readonly spendingLimitOption: Locator
 
   constructor(readonly page: Page) {
     this.newTxButton = page.getByTestId('new-tx-btn')
@@ -43,6 +44,7 @@ export class SendTokensPage {
     this.tokenSelector = page.getByTestId('token-selector').getByRole('combobox')
     this.addRecipientButton = page.getByTestId('add-recipient-btn')
     this.nextButton = page.getByRole('button', { name: 'Next' })
+    this.spendingLimitOption = page.getByTestId('spending-limit-tx')
   }
 
   /** Open the send-tokens form from the dashboard. Returns once the recipient field is on screen. */
