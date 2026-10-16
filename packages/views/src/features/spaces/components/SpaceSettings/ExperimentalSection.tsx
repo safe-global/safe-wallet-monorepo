@@ -8,6 +8,7 @@ import SpaceSettingsSection, {
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 export const EXPERIMENTAL_ADMIN_ONLY_MESSAGE = 'Only admins can change experimental features for this Workspace'
+export const EXPERIMENTAL_EMPTY_MESSAGE = 'No experimental features are available for this Workspace yet.'
 
 export type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 
@@ -20,13 +21,16 @@ export const EXPERIMENTAL_FEATURES = [
 ] as const satisfies ReadonlyArray<{ key: ExperimentalFeature; label: string; description: string }>
 
 type ExperimentalSectionProps = {
+  available: ExperimentalFeature[]
   enabled: ExperimentalFeature[]
   onChange: (enabled: ExperimentalFeature[]) => void
   isAdmin: boolean
   isSaving?: boolean
 }
 
-const ExperimentalSection = ({ enabled, onChange, isAdmin, isSaving = false }: ExperimentalSectionProps) => {
+const ExperimentalSection = ({ available, enabled, onChange, isAdmin, isSaving = false }: ExperimentalSectionProps) => {
+  const features = EXPERIMENTAL_FEATURES.filter(({ key }) => available.includes(key))
+
   const handleToggle = (key: ExperimentalFeature, checked: boolean) => {
     onChange(checked ? [...enabled, key] : enabled.filter((enabledKey) => enabledKey !== key))
   }
@@ -35,7 +39,13 @@ const ExperimentalSection = ({ enabled, onChange, isAdmin, isSaving = false }: E
     <SpaceSettingsSection data-testid="settings-experimental-section">
       <SpaceSettingsSectionTitle>Experimental</SpaceSettingsSectionTitle>
 
-      {EXPERIMENTAL_FEATURES.map(({ key, label, description }) => {
+      {features.length === 0 && (
+        <p className="text-muted-foreground text-sm" data-testid="experimental-empty">
+          {EXPERIMENTAL_EMPTY_MESSAGE}
+        </p>
+      )}
+
+      {features.map(({ key, label, description }) => {
         const id = `experimental-${key}`
 
         return (
