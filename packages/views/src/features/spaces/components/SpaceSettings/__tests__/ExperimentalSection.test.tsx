@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import ExperimentalSection, { EXPERIMENTAL_ADMIN_ONLY_MESSAGE } from '../ExperimentalSection'
+import ExperimentalSection, { EXPERIMENTAL_ADMIN_ONLY_MESSAGE, type ExperimentalFeature } from '../ExperimentalSection'
 
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <div data-testid="tooltip">{children}</div>,
@@ -10,42 +10,44 @@ jest.mock('@safe-global/views/components/ui/tooltip', () => ({
 }))
 
 const renderSection = (props: Partial<Parameters<typeof ExperimentalSection>[0]> = {}) => {
-  const onRecipientAllowlistChange = jest.fn()
-  render(
-    <ExperimentalSection
-      isRecipientAllowlistEnabled={false}
-      onRecipientAllowlistChange={onRecipientAllowlistChange}
-      isAdmin
-      {...props}
-    />,
-  )
-  return { onRecipientAllowlistChange, toggle: screen.getByRole('switch', { name: 'Recipient allowlist' }) }
+  const onChange = jest.fn()
+  render(<ExperimentalSection enabled={[]} onChange={onChange} isAdmin {...props} />)
+  return { onChange, toggle: screen.getByRole('switch', { name: 'Recipient allowlist' }) }
 }
 
 describe('ExperimentalSection', () => {
   it('reflects the enabled state on the toggle', () => {
-    const { toggle } = renderSection({ isRecipientAllowlistEnabled: true })
+    const { toggle } = renderSection({ enabled: ['POLICY_RECIPIENT_ALLOWLIST'] })
 
     expect(toggle).toBeChecked()
   })
 
   it('lets an admin turn the recipient allowlist on', async () => {
-    const { toggle, onRecipientAllowlistChange } = renderSection()
+    const { toggle, onChange } = renderSection()
 
     await userEvent.click(toggle)
 
-    expect(onRecipientAllowlistChange).toHaveBeenCalledWith(true, expect.anything())
+    expect(onChange).toHaveBeenCalledWith(['POLICY_RECIPIENT_ALLOWLIST'])
+  })
+
+  it('keeps features it does not render when toggling one off', async () => {
+    const unknownFeature = 'SOME_FUTURE_FEATURE' as ExperimentalFeature
+    const { toggle, onChange } = renderSection({ enabled: [unknownFeature, 'POLICY_RECIPIENT_ALLOWLIST'] })
+
+    await userEvent.click(toggle)
+
+    expect(onChange).toHaveBeenCalledWith([unknownFeature])
   })
 
   it('disables the toggle and explains why for non-admins', async () => {
-    const { toggle, onRecipientAllowlistChange } = renderSection({ isAdmin: false })
+    const { toggle, onChange } = renderSection({ isAdmin: false })
 
     expect(toggle).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByTestId('tooltip-content')).toHaveTextContent(EXPERIMENTAL_ADMIN_ONLY_MESSAGE)
 
     await userEvent.click(toggle)
 
-    expect(onRecipientAllowlistChange).not.toHaveBeenCalled()
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('disables the toggle while saving', () => {

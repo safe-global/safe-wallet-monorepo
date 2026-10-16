@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useArgs } from 'storybook/preview-api'
 import { fn, userEvent, within } from 'storybook/test'
-import ExperimentalSection from './ExperimentalSection'
+import ExperimentalSection, { type ExperimentalFeature } from './ExperimentalSection'
 
 const meta = {
   title: 'Features/Spaces/SpaceSettings/ExperimentalSection',
@@ -10,22 +10,22 @@ const meta = {
     layout: 'padded',
   },
   args: {
-    isRecipientAllowlistEnabled: false,
-    onRecipientAllowlistChange: fn(),
+    enabled: [],
+    onChange: fn(),
     isAdmin: true,
     isSaving: false,
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs()
 
-    const handleChange = (enabled: boolean) => {
-      updateArgs({ isRecipientAllowlistEnabled: enabled })
-      args.onRecipientAllowlistChange(enabled)
+    const handleChange = (enabled: ExperimentalFeature[]) => {
+      updateArgs({ enabled })
+      args.onChange(enabled)
     }
 
     return (
       <div className="max-w-[720px]">
-        <ExperimentalSection {...args} onRecipientAllowlistChange={handleChange} />
+        <ExperimentalSection {...args} onChange={handleChange} />
       </div>
     )
   },
@@ -38,13 +38,13 @@ export const RecipientAllowlistOff: Story = {}
 
 export const RecipientAllowlistOn: Story = {
   args: {
-    isRecipientAllowlistEnabled: true,
+    enabled: ['POLICY_RECIPIENT_ALLOWLIST'],
   },
 }
 
 export const Saving: Story = {
   args: {
-    isRecipientAllowlistEnabled: true,
+    enabled: ['POLICY_RECIPIENT_ALLOWLIST'],
     isSaving: true,
   },
 }
@@ -52,11 +52,11 @@ export const Saving: Story = {
 export const NonAdmin: Story = {
   tags: ['skip-visual-test'],
   args: {
-    isRecipientAllowlistEnabled: true,
+    enabled: ['POLICY_RECIPIENT_ALLOWLIST'],
     isAdmin: false,
   },
   play: async ({ canvasElement }) => {
-    const toggle = within(canvasElement).getByTestId('recipient-allowlist-toggle')
+    const toggle = within(canvasElement).getByTestId('experimental-POLICY_RECIPIENT_ALLOWLIST-toggle')
     await userEvent.hover(toggle)
   },
 }
