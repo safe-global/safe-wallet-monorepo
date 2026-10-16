@@ -10,6 +10,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
 export type GuardSlotName = 'transaction' | 'module'
@@ -127,7 +128,7 @@ const GuardStatusBanner = ({ guard, safeName, settingsHref, onRetry }: GuardStat
     case 'unsupported':
       return (
         <Banner variant="destructive" title="This Safe account needs an update">
-          Recipient allowlists need Safe v1.5.0 or newer.
+          Recipient allowlists need Safe v{MIN_POLICY_GUARD_SAFE_VERSION} or newer.
         </Banner>
       )
 
