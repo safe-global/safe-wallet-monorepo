@@ -27,7 +27,6 @@ const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const recoveryModalTitle = 'How does recovery work'
 const RECOVERY_STATE_TIMEOUT_MS = 60000
 
 export const recoveryOptions = {
@@ -190,10 +189,6 @@ export function verifyRecoveryProposalDialog(option) {
 
 export function verifyRecoveryProposalCard() {
   cy.get(recoveryProposalCard).should('be.visible')
-}
-
-export function verifyRecoveryModalDisplayed() {
-  cy.contains(recoveryModalTitle).should('be.visible')
 }
 
 export function deleteRecoveryModule() {

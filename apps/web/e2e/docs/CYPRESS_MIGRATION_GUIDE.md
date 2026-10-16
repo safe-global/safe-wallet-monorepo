@@ -138,13 +138,13 @@ The same applies to `won't-migrate`: it is a legitimate and common outcome, but 
 
 Migration runs **one stage at a time**, easiest feature area first, and every stage lands as **two PRs**: a _migration PR_ that adds the Playwright specs, and a _deletion PR_ that removes the Cypress specs only after CI has run the new specs on `dev`. Do not open a PR that spans stages, and never delete Cypress specs in the PR that introduces their replacement.
 
-**Scope: 122 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
+**Scope: 117 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
 
 ### Why staged
 
 Three reasons, all of them load-bearing:
 
-- **Page objects are ported once per area, then reused.** Ordering by area rather than by spec size means `assets.pages.js` gets ported once and serves all 10 specs in Stage 2. Ordering strictly by size would force you to port a slice of many page objects up front and revisit each repeatedly.
+- **Page objects are ported once per area, then reused.** Ordering by area rather than by spec size means `assets.pages.js` gets ported once and serves all 9 specs in Stage 2. Ordering strictly by size would force you to port a slice of many page objects up front and revisit each repeatedly.
 - **Each stage is independently verifiable.** A stage lands green or it does not land.
 - **Both suites run in parallel throughout.** That is what makes deletion safe — see the loop below.
 
@@ -155,19 +155,19 @@ Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membershi
 | #   | Area                         | Specs | Why here                                                     | Main page object to port                   |
 | --- | ---------------------------- | ----- | ------------------------------------------------------------ | ------------------------------------------ |
 | 1   | **Pilot: landing**           | 1     | 7 lines, no page object, no wallet. Proves the loop.         | —                                          |
-| 2   | Assets & balances            | 10    | Mostly read-only; `balances.spec.ts` + `safeApiClient` exist | `assets.pages.js` (430)                    |
+| 2   | Assets & balances            | 9     | Mostly read-only; `balances.spec.ts` + `safeApiClient` exist | `assets.pages.js` (430)                    |
 | 3   | Tx history & details         | 14    | No wallet; `transactions.page.js` is only 96 lines           | `transactions.page.js` (96)                |
-| 4   | Safe loading & import/export | 7     | No wallet, localStorage-driven                               | `load_safe` (286), `import_export` (177)   |
-| 5   | Navigation & chrome          | 9     | Extends `home.page.ts`; closes the dashboard gap             | `sidebar` (740), `dashboard` (249)         |
+| 4   | Safe loading & import/export | 6     | No wallet, localStorage-driven                               | `load_safe` (286), `import_export` (177)   |
+| 5   | Navigation & chrome          | 8     | Extends `home.page.ts`; closes the dashboard gap             | `sidebar` (740), `dashboard` (249)         |
 | 6   | Address book & recipients    | 4     | Partly adjacent to the 3 `recipient-dropdown-*` specs        | `address_book.page.js` (243)               |
 | 7   | Owner management             | 6     | First heavily wallet-gated stage; tag `@critical`            | `owners.pages.js` (292)                    |
 | 8   | Tx creation & queue          | 15    | Largest page object in the repo; tag `@critical`             | `create_tx.pages.js` (1,236)               |
-| 9   | Permissions & messages       | 11    | Role-dependent; tag `@permissions`                           | `spending_limits` (246), `proposers` (145) |
+| 9   | Permissions & messages       | 10    | Role-dependent; tag `@permissions`                           | `spending_limits` (246), `proposers` (145) |
 | 10  | Recovery & nested safes      | 9     | Multi-step flows                                             | `recovery` (201), `nestedsafes` (389)      |
 | 11  | Multichain & safe creation   | 14    | Cross-chain + counterfactual state                           | `create_wallet.pages.js` (436)             |
 | 12  | Swaps / CoW widget           | 11    | Third-party iframe                                           | `swaps.pages.js` (846)                     |
 | 13  | Safe Apps & tx-builder       | 7     | Iframe-heavy, most complex                                   | `safeapps` (378), `copilot` (371)          |
-| 14  | Spaces & remainder           | 4     | Members table is covered in Jest, not Playwright             | `spaces.page.js` (731)                     |
+| 14  | Spaces & remainder           | 3     | Members table is covered in Jest, not Playwright             | `spaces.page.js` (731)                     |
 
 ### The per-stage loop
 

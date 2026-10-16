@@ -79,6 +79,12 @@ export const LockedTrialEnded: Story = {
   ),
 }
 
+/** A Workspace that never had a plan: locked until an admin picks one. */
+export const LockedNoPlan: Story = {
+  parameters: withBilling([]),
+  render: () => <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={null} onBack={() => {}} />,
+}
+
 /** The last payment failed: the Workspace is locked until billing is fixed or another plan is picked. */
 export const LockedPaymentFailed: Story = {
   parameters: withBilling([subscription({ status: 'past_due', hasPaymentMethod: true })]),

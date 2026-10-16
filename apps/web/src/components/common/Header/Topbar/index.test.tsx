@@ -4,6 +4,7 @@ import Topbar, {
   SEARCH_CONTEXT_HEIGHT,
   SEARCH_CONTEXT_WRAP,
 } from './index'
+import type { ReactNode } from 'react'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -12,6 +13,9 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import walletConnectFeature from '@/features/walletconnect/feature'
+import { wcPopupStore } from '@/features/walletconnect/store'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -46,8 +50,16 @@ jest.mock('@/features/walletconnect', () => ({
   WalletConnectFeature: { name: 'walletconnect' },
 }))
 
+jest.mock('@walletconnect/core', () => ({ Core: jest.fn() }))
+jest.mock('@reown/walletkit', () => ({
+  WalletKit: {
+    init: () => Promise.resolve({ getActiveSessions: () => ({}), on: jest.fn(), off: jest.fn() }),
+  },
+}))
+
 jest.mock('@/features/batching', () => ({
   useDraftBatch: () => [],
+  BatchTooltip: ({ children }: { children: ReactNode }) => children,
 }))
 
 const mockUseSafeAddress = jest.fn<string, []>(() => '')
@@ -158,6 +170,48 @@ describe('Topbar', () => {
   it('renders the wallet address in HeaderNavigation', () => {
     render(<Topbar />)
     expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
+  })
+
+  describe('on a Safe page', () => {
+    const safeInfo = extendedSafeInfoBuilder().build()
+    const PAIRING_PROMPT = /paste the pairing code/i
+
+    const renderOnSafePage = () =>
+      render(<Topbar />, {
+        initialReduxState: { safeInfo: { data: safeInfo, loading: false, loaded: true } },
+      })
+
+    beforeEach(() => {
+      wcPopupStore.setStore(false)
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUseSafeAddress.mockReturnValue(safeInfo.address.value)
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: () => null,
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => null,
+        WalletConnectWidget: walletConnectFeature.WalletConnectWidget,
+      })
+    })
+
+    it('opens the notifications popover when the notifications button is clicked', async () => {
+      const user = userEvent.setup()
+      renderOnSafePage()
+      expect(screen.queryByTestId('notifications-title')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Notifications' }))
+
+      expect(screen.getByTestId('notifications-title')).toBeInTheDocument()
+    })
+
+    it('opens the WalletConnect pairing popup when the WalletConnect button is clicked', async () => {
+      const user = userEvent.setup()
+      renderOnSafePage()
+      expect(screen.queryByText(PAIRING_PROMPT)).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'WalletConnect' }))
+
+      expect(await screen.findByText(PAIRING_PROMPT)).toBeInTheDocument()
+    })
   })
 
   it('renders notification badge when there are unread notifications', () => {
