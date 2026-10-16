@@ -122,21 +122,21 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it.each<[GuardStatus, boolean]>([
-    [{ status: 'loading' }, false],
-    [{ status: 'error' }, false],
-    [{ status: 'none' }, true],
-    [{ status: 'known' }, true],
-    [{ status: 'partial', missingSlot: 'module' }, false],
-    [{ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] }, false],
-    [{ status: 'unsupported' }, false],
-  ])('enables Next for %o: %s', (status, enabled) => {
+  it.each<GuardStatus>([
+    { status: 'loading' },
+    { status: 'error' },
+    { status: 'none' },
+    { status: 'known' },
+    { status: 'partial', missingSlot: 'module' },
+    { status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] },
+    { status: 'unsupported' },
+    { status: 'not-activated' },
+  ])('keeps Next disabled until the allowlist form exists, with guard state %o', (status) => {
     accounts([option(SAFE_A)])
     guard(status)
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    if (enabled) expect(screen.getByTestId('next-btn')).toBeEnabled()
-    else expect(screen.getByTestId('next-btn')).toBeDisabled()
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
   it('links to the Safe settings in the current Workspace', () => {

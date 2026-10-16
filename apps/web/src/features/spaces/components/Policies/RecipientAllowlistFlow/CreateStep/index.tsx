@@ -10,9 +10,7 @@ import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
-import GuardStatusBanner, {
-  isGuardReady,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
+import GuardStatusBanner from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 import {
   NESTED_SAFES_NOTICE_TITLE,
   getNestedSafesNoticeText,
@@ -84,8 +82,8 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
         )}
 
         <TxCardActions>
-          {/* WA-3079 submits the allowlist form here */}
-          <Button type="button" size="submit" disabled={!guard || !isGuardReady(guard)} data-testid="next-btn">
+          {/* WA-3079 enables it, for the none and known guard states, once the allowlist form exists */}
+          <Button type="button" size="submit" disabled data-testid="next-btn">
             {NEXT_LABEL}
           </Button>
         </TxCardActions>

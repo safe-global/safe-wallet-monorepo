@@ -38,9 +38,6 @@ const SLOT_LABELS: Record<GuardSlotName, string> = {
   module: 'Module guard',
 }
 
-/** Next is only enabled once the read shows the allowlist can be set up. */
-export const isGuardReady = (guard: GuardStatus): boolean => guard.status === 'none' || guard.status === 'known'
-
 const OTHER_SLOT: Record<GuardSlotName, GuardSlotName> = { transaction: 'module', module: 'transaction' }
 
 /** The settings page can only remove a transaction guard; a module guard needs a transaction of its own. */

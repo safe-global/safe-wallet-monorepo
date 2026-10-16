@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import GuardStatusBanner, { isGuardReady, type GuardStatus } from '../GuardStatusBanner'
+import GuardStatusBanner, { type GuardStatus } from '../GuardStatusBanner'
 
 const FOREIGN_GUARD = faker.finance.ethereumAddress()
 const SETTINGS_HREF = `/settings/modules?safe=sep:${faker.finance.ethereumAddress()}`
@@ -103,20 +103,5 @@ describe('GuardStatusBanner', () => {
     await user.click(screen.getByRole('button', { name: 'Retry' }))
 
     expect(onRetry).toHaveBeenCalledTimes(1)
-  })
-})
-
-describe('isGuardReady', () => {
-  it.each<[GuardStatus, boolean]>([
-    [{ status: 'loading' }, false],
-    [{ status: 'error' }, false],
-    [{ status: 'none' }, true],
-    [{ status: 'known' }, true],
-    [{ status: 'partial', missingSlot: 'module' }, false],
-    [{ status: 'unknown', foreignGuards: [] }, false],
-    [{ status: 'unsupported' }, false],
-    [{ status: 'not-activated' }, false],
-  ])('%o → %s', (guard, ready) => {
-    expect(isGuardReady(guard)).toBe(ready)
   })
 })
