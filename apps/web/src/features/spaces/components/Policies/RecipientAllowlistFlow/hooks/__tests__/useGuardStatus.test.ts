@@ -61,4 +61,12 @@ describe('useGuardStatus', () => {
 
     expect(result.current.guard).toEqual({ status: 'known' })
   })
+
+  it('reports a Safe CGW does not know as not activated', () => {
+    read({})
+
+    const { result } = renderHook(() => useGuardStatus(TARGET))
+
+    expect(result.current.guard).toEqual({ status: 'not-activated' })
+  })
 })

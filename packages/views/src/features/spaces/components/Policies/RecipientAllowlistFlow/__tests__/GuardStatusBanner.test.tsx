@@ -58,6 +58,12 @@ describe('GuardStatusBanner', () => {
     expect(screen.getByText('Recipient allowlists need Safe v1.5.0 or newer.')).toBeInTheDocument()
   })
 
+  it('says a Safe that is not deployed yet needs activating', () => {
+    renderBanner({ status: 'not-activated' })
+
+    expect(screen.getByText("This Safe account isn't activated yet")).toBeInTheDocument()
+  })
+
   it('retries a failed check', async () => {
     const onRetry = jest.fn()
     const { user } = renderWithUserEvent(
@@ -80,6 +86,7 @@ describe('isGuardReady', () => {
     [{ status: 'partial', missingSlot: 'module' }, false],
     [{ status: 'unknown', foreignGuards: [] }, false],
     [{ status: 'unsupported' }, false],
+    [{ status: 'not-activated' }, false],
   ])('%o → %s', (guard, ready) => {
     expect(isGuardReady(guard)).toBe(ready)
   })

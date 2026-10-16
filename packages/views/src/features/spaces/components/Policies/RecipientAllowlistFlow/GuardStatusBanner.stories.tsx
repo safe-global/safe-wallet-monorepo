@@ -54,4 +54,6 @@ export const PartlyEnabled: Story = { args: { guard: { status: 'partial', missin
 
 export const Unsupported: Story = { args: { guard: { status: 'unsupported' } } }
 
+export const NotActivated: Story = { args: { guard: { status: 'not-activated' } } }
+
 export const ReadFailed: Story = { args: { guard: { status: 'error' } } }

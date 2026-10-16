@@ -14,7 +14,7 @@ import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/componen
 
 export type GuardSlotName = 'transaction' | 'module'
 
-/** The policy guard states, plus the two a read adds: still reading, and failed to read. */
+/** The policy guard states, plus what a read adds: still reading, failed, or a Safe CGW doesn't know yet. */
 export type GuardStatus =
   | { status: 'loading' }
   | { status: 'error' }
@@ -23,6 +23,7 @@ export type GuardStatus =
   | { status: 'partial'; missingSlot: GuardSlotName }
   | { status: 'unknown'; foreignGuards: { slot: GuardSlotName; address: string }[] }
   | { status: 'unsupported' }
+  | { status: 'not-activated' }
 
 export type GuardStatusBannerProps = {
   guard: GuardStatus
@@ -121,6 +122,13 @@ const GuardStatusBanner = ({ guard, safeName, settingsHref, onRetry }: GuardStat
       return (
         <Banner variant="destructive" title="This Safe account needs an update">
           Recipient allowlists need Safe v1.5.0 or newer.
+        </Banner>
+      )
+
+    case 'not-activated':
+      return (
+        <Banner variant="destructive" title="This Safe account isn't activated yet">
+          Activate it with its first transaction, then set up the recipient allowlist.
         </Banner>
       )
 

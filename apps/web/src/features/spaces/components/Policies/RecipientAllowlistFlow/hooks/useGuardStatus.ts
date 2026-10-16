@@ -10,5 +10,6 @@ export const useGuardStatus = (target?: PolicyGuardTarget): { guard?: GuardStatu
   if (state) return { guard: state, retry: refetch }
   if (error) return { guard: { status: 'error' }, retry: refetch }
   if (isLoading) return { guard: { status: 'loading' }, retry: refetch }
-  return { retry: refetch }
+  // A settled read with nothing to show means CGW has no such Safe: it is counterfactual
+  return { guard: { status: 'not-activated' }, retry: refetch }
 }
