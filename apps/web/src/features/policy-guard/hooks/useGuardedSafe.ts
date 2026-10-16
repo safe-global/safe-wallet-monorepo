@@ -54,8 +54,10 @@ export const useGuardedSafe = (target?: PolicyGuardTarget): UseGuardedSafeResult
   }
 
   const safeLoaded = !!targetQuery.currentData
+  // A switch to another target keeps the previous `data`, so only `currentData` shows the new one is still loading
+  const isSwitching = targetQuery.isFetching && !!targetQuery.data && !targetQuery.currentData && !targetQuery.error
   // isLoading covers only the first fetch, so a 404 or failing target doesn't flicker on every poll
-  const safeLoading = targetQuery.isLoading
+  const safeLoading = targetQuery.isLoading || isSwitching
   return {
     safe: targetQuery.currentData ?? { chainId: target.chainId, version: null, guard: null, txHistoryTag: null },
     safeAddress: target.safeAddress,
