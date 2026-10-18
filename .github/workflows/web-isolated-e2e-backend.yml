@@ -179,7 +179,7 @@ jobs:
           exit 1
 
       - name: Download builds
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           name: isolated-e2e-builds
           path: apps
