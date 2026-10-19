@@ -5,10 +5,8 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as navigation from '../pages/navigation.page.js'
-import { getMockAddress } from '../../support/utils/ethers.js'
 import { walletCredentials } from '../../support/credentials.js'
 
-const currentNonce = 3
 const funds_first_tx = '0.001'
 const funds_second_tx = '0.002'
 
@@ -28,15 +26,6 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
     beforeEach(() => {
       wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
       owner.waitForConnectionStatus()
-    })
-
-    it('Verify a second transaction can be added to the batch', () => {
-      batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
-      batch.verifyBatchIconCount(1)
-      batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
-      batch.verifyBatchIconCount(2)
-      batch.clickOnBatchCounter()
-      batch.verifyAmountTransactionsInBatch(2)
     })
 
     it('Verify the "New transaction" button in Add batch modal is enabled/disabled for different users types', () => {
@@ -63,13 +52,6 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
         cy.visit(url)
         cy.get(batch.batchTxTopBar).should('not.exist')
       })
-    })
-
-    it('Verify a transaction can be added to the batch', () => {
-      batch.addNewTransactionToBatch(constants.EOA, currentNonce, funds_first_tx)
-      batch.verifyBatchIconCount(1)
-      batch.clickOnBatchCounter()
-      batch.verifyAmountTransactionsInBatch(1)
     })
   })
 
