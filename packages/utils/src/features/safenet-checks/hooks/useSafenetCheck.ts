@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
-import { selectPinnedVerdict, type SafenetCheckPartialState } from '@safe-global/store/safenet/safenetCheckSlice'
+import {
+  selectCheckRequestedAtMs,
+  selectPinnedVerdict,
+  type SafenetCheckPartialState,
+} from '@safe-global/store/safenet/safenetCheckSlice'
 import { recordAim } from '@safe-global/store/safenet/safenetAimRegistry'
 import { POLL_INTERVAL_FAST_MS, POLL_INTERVAL_LATE_MS } from '../constants'
 import { CheckStatus, toPublicStatus, type PublicCheckStatus, type UnavailableReason } from '../types/status'
@@ -86,6 +90,9 @@ export const useSafenetCheck = (
   const pinned = useSelector((state: SafenetCheckPartialState) =>
     safeTxHash && !skip ? selectPinnedVerdict(state, { safeTxHash, ...target }) : undefined,
   )
+  const requestedAtMs = useSelector((state: SafenetCheckPartialState) =>
+    safeTxHash && !skip ? selectCheckRequestedAtMs(state, { safeTxHash, ...target }) : undefined,
+  )
 
   const snapshot = query.data
   const hasData = snapshot !== undefined
@@ -121,6 +128,7 @@ export const useSafenetCheck = (
         headBlock: snapshot?.headBlock ?? null,
         deadlineBlock: snapshot?.deadlineBlock ?? null,
         submittedAtMs: aim,
+        requestedAtMs,
         attestedAtMs: snapshot?.attestedAtMs ?? null,
         nowMs: Date.now(),
       }),
@@ -133,6 +141,7 @@ export const useSafenetCheck = (
     snapshot?.deadlineBlock,
     snapshot?.attestedAtMs,
     aim,
+    requestedAtMs,
     fulfilledAt,
   ])
 
