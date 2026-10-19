@@ -8,23 +8,26 @@
  * Scenarios register replayed settlements (`register-settlement <tx hash> <order uid>...`), because
  * the gateway looks up the orders of a settlement by its local transaction hash.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { request as httpsRequest } from 'node:https'
-import { isMain, json, readText, serveTls } from './http.ts'
+import { isMain, json, localRequest, readText, serveTls } from './http.ts'
 import type { MockRequest, Reply } from './http.ts'
 
 const ORDERS_FILE = new URL('./cow-api-orders.json', import.meta.url)
 const UPSTREAM = 'api.cow.fi'
 const PORT = 443
 export const PREFIX = '/sepolia/api/v1'
-const SETTLEMENTS_DIR = '/tmp/settlements'
+const SETTLEMENTS_PATH = '/__test/settlements'
 const UID = /^0x[0-9a-f]{112}$/
 const TX_HASH = /^0x[0-9a-f]{64}$/
 const UPSTREAM_TIMEOUT_MS = 30_000
 
 type Order = { uid: string; owner: string } & Record<string, unknown>
 export type Fixtures = { orders: Map<string, Order>; appData: Record<string, unknown> }
+export type Settlements = Map<string, string[]>
 export type Upstream = (path: string) => Promise<Reply>
+
+class InvalidSettlement extends Error {}
 
 export function loadFixtures(file: URL = ORDERS_FILE): Fixtures {
   const data = JSON.parse(readFileSync(file, 'utf8')) as { orders: Order[]; appData: Record<string, unknown> }
@@ -41,28 +44,26 @@ function orderFor(fixtures: Fixtures, uid: string): Order | undefined {
   return { ...order, uid }
 }
 
-/** Stores the orders of a replayed settlement in `directory`; throws for a malformed hash or UID. */
-export function registerSettlement(txHash: string, uids: string[], directory = SETTLEMENTS_DIR): void {
+/** Stores the orders of a replayed settlement; throws InvalidSettlement for a malformed hash or UID. */
+export function registerSettlement(settlements: Settlements, txHash: string, uids: string[]): void {
   const hash = txHash.toLowerCase()
   const orders = uids.map((uid) => uid.toLowerCase())
   if (!TX_HASH.test(hash) || orders.length === 0 || !orders.every((uid) => UID.test(uid))) {
-    throw new Error('Usage: register-settlement <transaction hash> <order uid>...')
+    throw new InvalidSettlement('Usage: register-settlement <transaction hash> <order uid>...')
   }
-  mkdirSync(directory, { recursive: true })
-  writeFileSync(`${directory}/${hash}.json`, JSON.stringify(orders))
+  settlements.set(hash, orders)
 }
 
-function settlementOrders(fixtures: Fixtures, settlementsDir: string, txHash: string): Reply | undefined {
-  const file = `${settlementsDir}/${txHash}.json`
-  if (!TX_HASH.test(txHash) || !existsSync(file)) return undefined
-  const uids = JSON.parse(readFileSync(file, 'utf8')) as string[]
+function settlementOrders(fixtures: Fixtures, settlements: Settlements, txHash: string): Reply | undefined {
+  const uids = settlements.get(txHash)
+  if (uids === undefined) return undefined
   const orders = uids.map((uid) => orderFor(fixtures, uid))
   if (orders.includes(undefined)) throw new Error(`Settlement ${txHash} references an unrecorded order`)
   return json(200, orders)
 }
 
 /** Returns the recorded response, or undefined when the request has no recording. */
-export function recordedReply(fixtures: Fixtures, settlementsDir: string, path: string): Reply | undefined {
+export function recordedReply(fixtures: Fixtures, settlements: Settlements, path: string): Reply | undefined {
   if (path === '/health') return json(200, { ready: true })
   if (!path.startsWith(`${PREFIX}/`)) return undefined
   const rest = path.slice(PREFIX.length + 1).toLowerCase()
@@ -74,7 +75,7 @@ export function recordedReply(fixtures: Fixtures, settlementsDir: string, path: 
   }
   if (resource === 'app_data' && value in fixtures.appData) return json(200, fixtures.appData[value])
   if (resource === 'transactions' && value.endsWith('/orders')) {
-    return settlementOrders(fixtures, settlementsDir, value.slice(0, -'/orders'.length))
+    return settlementOrders(fixtures, settlements, value.slice(0, -'/orders'.length))
   }
   return undefined
 }
@@ -112,28 +113,46 @@ const realApi: Upstream = async (path) => {
   }
 }
 
-type CowOptions = { fixtures: Fixtures; settlementsDir: string; offline: boolean; upstream?: Upstream }
+type CowOptions = { fixtures: Fixtures; settlements: Settlements; offline: boolean; upstream?: Upstream }
+
+function storeSettlement(settlements: Settlements, body: string): Reply {
+  const { txHash, uids } = JSON.parse(body || '{}') as { txHash?: string; uids?: string[] }
+  try {
+    registerSettlement(settlements, txHash ?? '', uids ?? [])
+    return json(200, { txHash, uids })
+  } catch (error) {
+    if (error instanceof InvalidSettlement) return json(400, { message: error.message })
+    throw error
+  }
+}
 
 export async function dispatch(
-  { path, query }: Pick<MockRequest, 'path' | 'query'>,
-  { fixtures, settlementsDir, offline, upstream = realApi }: CowOptions,
+  { method, path, query, body }: Pick<MockRequest, 'method' | 'path' | 'query' | 'body'>,
+  { fixtures, settlements, offline, upstream = realApi }: CowOptions,
 ): Promise<Reply> {
-  const recorded = recordedReply(fixtures, settlementsDir, path)
+  if (method === 'POST' && path === SETTLEMENTS_PATH) return storeSettlement(settlements, body)
+  const recorded = recordedReply(fixtures, settlements, path)
   if (recorded) return recorded
   const fullPath = query.size ? `${path}?${query}` : path
   if (offline) return json(404, { errorType: 'NotFound', description: `No recorded response for ${fullPath}` })
   return upstream(fullPath)
 }
 
+async function registerWithServer(txHash: string, uids: string[]): Promise<void> {
+  const body = JSON.stringify({ txHash, uids })
+  const reply = await localRequest(PORT, SETTLEMENTS_PATH, { method: 'POST', body, servername: UPSTREAM })
+  if (reply.status !== 200) throw new Error(`The CoW API mock refused the settlement: ${reply.body}`)
+}
+
 if (isMain(import.meta.url)) {
   const [command, ...args] = process.argv.slice(2)
   if (command === 'register-settlement') {
     const [txHash, ...uids] = args
-    registerSettlement(txHash, uids)
+    await registerWithServer(txHash, uids)
   } else {
     const options = {
       fixtures: loadFixtures(),
-      settlementsDir: SETTLEMENTS_DIR,
+      settlements: new Map(),
       offline: process.env.COW_API_OFFLINE === 'true',
     }
     serveTls(PORT, (request) => dispatch(request, options))
