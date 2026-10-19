@@ -93,16 +93,17 @@ test.describe('Feature name', { tag: '@smoke' }, () => { ... })
 
 Use categories intentionally:
 
-| Tag            | Purpose                           | Rules                                                                                       |
-| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `@smoke`       | Critical path — runs every PR     | Must be small and stable. If it flakes, fix immediately or demote.                          |
-| `@regression`  | Feature-specific — runs on-demand | Can be broader but must still provide clear value.                                          |
-| `@api`         | Pure API tests — no browser       | Fast, stable, run every PR alongside smoke.                                                 |
-| `@ui`          | UI-specific rendering checks      | Only for things that require visual/browser verification.                                   |
-| `@critical`    | High-risk business flows          | Transaction creation, signing, owner changes — financial impact.                            |
-| `@permissions` | Role-based access tests           | Owner vs non-owner, proposer, threshold-dependent flows.                                    |
-| `@flaky`       | Quarantined flaky tests           | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently. |
-| `@migration`   | Migrated from Cypress             | Tracks migration progress. Remove tag once test is stable in Playwright.                    |
+| Tag              | Purpose                             | Rules                                                                                            |
+| ---------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `@smoke`         | Critical path — runs every PR       | Must be small and stable. If it flakes, fix immediately or demote.                               |
+| `@regression`    | Feature-specific — runs on-demand   | Can be broader but must still provide clear value.                                               |
+| `@api`           | Pure API tests — no browser         | Fast, stable, run every PR alongside smoke.                                                      |
+| `@ui`            | UI-specific rendering checks        | Only for things that require visual/browser verification.                                        |
+| `@critical`      | High-risk business flows            | Transaction creation, signing, owner changes — financial impact.                                 |
+| `@permissions`   | Role-based access tests             | Owner vs non-owner, proposer, threshold-dependent flows.                                         |
+| `@flaky`         | Quarantined flaky tests             | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently.      |
+| `@migration`     | Migrated from Cypress               | Tracks migration progress. Remove tag once test is stable in Playwright.                         |
+| `@walletconnect` | Uses the hosted WalletConnect relay | Isolated CI runs it nightly and on pull requests that change WalletConnect code or SDK versions. |
 
 **Tag must match directory.** A `@smoke` test lives in `tests/smoke/`, a `@api` test in `tests/api/`, etc. If unsure, default to `tests/regression/` — promotion to `tests/smoke/` is a deliberate decision after the test proves stable.
 

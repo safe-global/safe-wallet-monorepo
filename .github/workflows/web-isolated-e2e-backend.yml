@@ -28,6 +28,9 @@ on:
       - 'yarn.lock'
       - '.yarnrc.yml'
       - '.yarn/patches/**'
+  # Nightly: the pull request selection plus the WalletConnect spec, which depends on the hosted relay.
+  schedule:
+    - cron: '0 3 * * *'
 
 permissions:
   contents: read
@@ -44,16 +47,19 @@ jobs:
   plan:
     # A label event only matters when it adds the full-run label.
     if: >-
-      (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
       && (github.event.action != 'labeled' || github.event.label.name == 'isolated-e2e-full')
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
+      walletconnect: ${{ steps.walletconnect.outputs.run }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+          # The pull request merge commit and its base, to diff them.
+          fetch-depth: 2
       - name: Plan shards
         id: plan
         env:
@@ -65,11 +71,26 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" = pull_request ] && [ "$FULL_RUN_LABEL" = true ]; then
             export SAFE_E2E_SPECS='' SAFE_E2E_SHARDS=6
-          elif [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+          elif [ "$GITHUB_EVENT_NAME" = pull_request ] || [ "$GITHUB_EVENT_NAME" = schedule ]; then
             export SAFE_E2E_SPECS=$PULL_REQUEST_SPECS SAFE_E2E_SHARDS=1
           fi
           [ -n "$SAFE_E2E_SPECS" ] || unset SAFE_E2E_SPECS
           echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
+      - name: Decide whether the WalletConnect spec runs
+        id: walletconnect
+        env:
+          FULL_RUN_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'isolated-e2e-full') }}
+        # A relay outage must not block every pull request; lockfile-only updates change the resolved SDK too.
+        run: |
+          code='^apps/web/(src/features/walletconnect|src/services/safe-wallet-provider|e2e/.*walletconnect)'
+          sdk='^[-+].*@(reown/walletkit|walletconnect/)'
+          if [ "$GITHUB_EVENT_NAME" != pull_request ] || [ "$FULL_RUN_LABEL" = true ] ||
+            git diff --name-only HEAD^1 HEAD | grep -qE "$code" ||
+            git diff HEAD^1 HEAD -- apps/web/package.json yarn.lock | grep -qE "$sdk"; then
+            echo run=true >> "$GITHUB_OUTPUT"
+          else
+            echo run=false >> "$GITHUB_OUTPUT"
+          fi
 
   build:
     needs: plan
@@ -224,6 +245,7 @@ jobs:
           REVERSE_PROXY_UI_PORT: '8080'
           # The WalletConnect spec's dApp uses the wallet's project ID to reach the relay.
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+          SAFE_E2E_GREP_INVERT: ${{ needs.plan.outputs.walletconnect != 'true' && '@walletconnect' || '' }}
         run: |
           nohup yarn serve > "$RUNNER_TEMP/wallet.log" 2>&1 &
           timeout 120 bash -c 'until curl -sf http://localhost:8080 > /dev/null; do sleep 2; done'

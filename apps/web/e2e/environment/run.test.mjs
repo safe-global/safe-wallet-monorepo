@@ -156,6 +156,17 @@ test('runs every isolated Playwright spec unless SAFE_E2E_SPECS names some', () 
   assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: 'dashboard, owners' }), [...config, 'dashboard', 'owners'])
 })
 
+test('skips the Playwright tests that SAFE_E2E_GREP_INVERT matches', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_GREP_INVERT: '' }), config)
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_GREP_INVERT: '@walletconnect', SAFE_E2E_SPECS: 'dashboard' }), [
+    ...config,
+    '--grep-invert',
+    '@walletconnect',
+    'dashboard',
+  ])
+})
+
 test('gives both runners the local service URLs and the running forks', () => {
   const stack = { ...manifest, transactionServiceUrl: 'http://localhost:8000/txs', rpcUrl: 'http://localhost:8545' }
   const chains = { 137: { rpcUrl: 'http://localhost:8548' } }

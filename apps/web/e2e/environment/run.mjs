@@ -173,10 +173,14 @@ export function cypressOpenArguments(specs, env = process.env) {
   ]
 }
 
-/** `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all. */
+/**
+ * `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all. `SAFE_E2E_GREP_INVERT`
+ * skips the tests whose title or tag matches it, such as `@walletconnect`.
+ */
 export function playwrightRunArguments(env = process.env) {
   const filters = env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : []
-  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...filters]
+  const skipped = env.SAFE_E2E_GREP_INVERT ? ['--grep-invert', env.SAFE_E2E_GREP_INVERT] : []
+  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...skipped, ...filters]
 }
 
 /** What both runners pass to their specs: the wallet environment plus the stack's service URLs. */
