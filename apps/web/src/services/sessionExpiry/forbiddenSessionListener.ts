@@ -10,8 +10,7 @@ import { expireSession, isForbidden } from './expireSession'
 const CGW_ACTION_PREFIX = `${cgwClient.reducerPath}/`
 const AUTH_ME_ENDPOINT: keyof typeof authApi.endpoints = 'authGetMeV1'
 const SAFENET_CHECK_REQUEST_ENDPOINT: keyof typeof safenetApi.endpoints = 'safenetChecksRequestCheckV1'
-// Their 403 is no sign of a lost session: /me is the probe, and the Safenet route also answers it
-// when the Workspace in the URL cannot check the Safe
+// Their 403 is no sign of a lost session: /me is the probe, and the Safenet route answers it for a refused Workspace
 const NON_SESSION_FORBIDDEN: Record<string, true> = { [AUTH_ME_ENDPOINT]: true, [SAFENET_CHECK_REQUEST_ENDPOINT]: true }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null

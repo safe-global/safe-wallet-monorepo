@@ -8,10 +8,8 @@ import { getLocationSpaceId, isLegacySpaceId, parseSpaceId } from '@/hooks/useUr
 import { getStoreInstance, type RootState } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 
-// 402: the Workspace plan does not include checks. 403: this Workspace cannot check the Safe.
-// 501: CGW's chain config does not offer checks yet, while this tab's config still does.
-// None is a fault.
-const EXPECTED_REFUSALS: ReadonlyArray<number | undefined> = [402, 403, 501]
+// Refusals, not faults: 403 Workspace refused, 429 daily limit, 501 chain off
+const EXPECTED_REFUSALS: ReadonlyArray<number | undefined> = [403, 429, 501]
 
 // Reads the loaded chain config only; it never starts a fetch
 const isEnabledOnChain = (state: RootState, chainId: string): boolean => {
@@ -20,10 +18,7 @@ const isEnabledOnChain = (state: RootState, chainId: string): boolean => {
   return chain !== undefined && hasFeature(chain, FEATURES.SAFENET_CHECKS)
 }
 
-/**
- * Asks CGW to start a check that the Workspace in the page URL sponsors, as for relay; outside a
- * Workspace nothing is sent. Never rejects, so a failure cannot affect the signing flow.
- */
+/** Asks CGW to start a check paid by the Workspace in the page URL. Never rejects: signing must not depend on it. */
 export const requestSafenetCheck = async ({
   chainId,
   safeAddress,

@@ -109,8 +109,8 @@ describe('requestSafenetCheck', () => {
   })
 
   it.each([
-    ['refuses a Workspace whose plan does not include checks', 402],
-    ['refuses the Safe for this Workspace', 403],
+    ['refuses the Workspace (membership, Safe or plan)', 403],
+    ['reports the Workspace daily limit as used', 429],
     ['does not offer checks on the chain', 501],
   ])('resolves without logging when CGW %s', async (_title, status) => {
     const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
