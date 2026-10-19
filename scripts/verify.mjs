@@ -14,8 +14,10 @@
 
 import { spawn, execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { createInterface } from 'node:readline'
+import { DEFAULT_SLOT_DIR, checkSlotDir, getJestWorkers, getSlotCount, joinQueue } from './lib/verify-slots.mjs'
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -61,7 +63,8 @@ function gitDiff(...diffArgs) {
 }
 
 function getMergeBase() {
-  const targets = ['dev', 'origin/dev', 'main']
+  // origin/dev first: a stale local dev turns every --changed run into a full run
+  const targets = ['origin/dev', 'dev', 'main']
   for (const target of targets) {
     try {
       return execFileSync('git', ['merge-base', 'HEAD', target], {
@@ -108,6 +111,17 @@ const WORKSPACE_NAMES = {
 }
 
 const workspacePkg = WORKSPACE_NAMES[workspace] ?? `@safe-global/${workspace}`
+
+// ---------------------------------------------------------------------------
+// Machine resource budget
+// ---------------------------------------------------------------------------
+
+const slotCount = getSlotCount(os.totalmem(), process.env.VERIFY_MAX_PARALLEL)
+const JEST_RESOURCE_ARGS = [
+  `--maxWorkers=${getJestWorkers(os.availableParallelism(), slotCount)}`,
+  '--workerIdleMemoryLimit=1GB',
+  '--coverage=false',
+]
 
 // ---------------------------------------------------------------------------
 // Missing test detection
@@ -221,6 +235,7 @@ function buildChecks() {
           ...testableFiles,
           '--watchAll=false',
           '--passWithNoTests',
+          ...JEST_RESOURCE_ARGS,
         ],
       })
     }
@@ -251,7 +266,7 @@ function buildFullChecks() {
     {
       label: 'tests',
       cmd: 'yarn',
-      args: ['workspace', workspacePkg, 'test', '--watchAll=false'],
+      args: ['workspace', workspacePkg, 'test', '--watchAll=false', ...JEST_RESOURCE_ARGS],
     },
   ]
 }
@@ -259,13 +274,56 @@ function buildFullChecks() {
 const { checks, changedFiles } = buildChecks()
 
 // ---------------------------------------------------------------------------
+// Child process and slot cleanup
+// ---------------------------------------------------------------------------
+
+const children = new Set()
+let releaseSlot = () => {}
+
+function stopChildren(signal) {
+  for (const child of children) {
+    try {
+      // Each child leads its own process group, so this also stops yarn's jest/tsc/eslint descendants
+      if (process.platform === 'win32') child.kill(signal)
+      else process.kill(-child.pid, signal)
+    } catch (err) {
+      if (err.code !== 'ESRCH') console.error(`verify: failed to stop pid ${child.pid}: ${err.message}`)
+    }
+  }
+}
+
+process.on('exit', () => releaseSlot())
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(signal, () => {
+    stopChildren(signal)
+    process.exit(128 + os.constants.signals[signal])
+  })
+}
+
+async function waitForSlot() {
+  const unsafeReason = checkSlotDir(DEFAULT_SLOT_DIR)
+  if (unsafeReason) {
+    console.warn(`verify: running without the parallel-run limit — ${unsafeReason}`)
+    return
+  }
+  const ticket = joinQueue({
+    dir: DEFAULT_SLOT_DIR,
+    slots: slotCount,
+    info: { cwd: process.cwd(), workspace },
+  })
+  releaseSlot = ticket.release
+  await ticket.waitForTurn()
+}
+
+// ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
 
 function runCheck(check) {
   return new Promise((resolve) => {
-    const stdio = isCompact ? ['ignore', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe']
-    const child = spawn(check.cmd, check.args, { stdio })
+    const stdio = ['ignore', 'pipe', 'pipe']
+    const child = spawn(check.cmd, check.args, { stdio, detached: process.platform !== 'win32' })
+    children.add(child)
 
     const chunks = []
 
@@ -289,6 +347,7 @@ function runCheck(check) {
     }
 
     child.on('close', (code) => {
+      children.delete(child)
       resolve({
         label: check.label,
         code: code ?? 1,
@@ -299,6 +358,7 @@ function runCheck(check) {
 }
 
 async function main() {
+  await waitForSlot()
   const results = await Promise.all(checks.map(runCheck))
 
   const failed = results.filter((r) => r.code !== 0)
@@ -355,4 +415,7 @@ async function main() {
   process.exit(allPassed ? 0 : 1)
 }
 
-main()
+main().catch((err) => {
+  console.error(err.message)
+  process.exit(1)
+})
