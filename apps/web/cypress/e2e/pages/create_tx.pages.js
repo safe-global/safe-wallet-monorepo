@@ -112,7 +112,6 @@ const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
-export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
 const noTxFoundStr = (type) => `0 ${type} transactions found`
 const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
@@ -457,14 +456,6 @@ export function clickOnTransactionItemByName(name, token) {
   matches.first().scrollIntoView().click({ force: true })
 }
 
-export function clickOnTransactionItemByIndex(index) {
-  cy.get(messageItem)
-    .eq(index)
-    .then(($elements) => {
-      cy.wrap($elements).click({ force: true })
-    })
-}
-
 export function scrollToBottom() {
   cy.scrollTo('bottom').wait(500)
 }
@@ -677,23 +668,6 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
     }
   })
 }
-export function verifySummaryByIndex(index, data, alt) {
-  cy.get(messageItem)
-    .eq(index)
-    .then(($elements) => {
-      cy.wrap($elements).then(($element) => {
-        if (Array.isArray(data)) {
-          data.forEach((text) => {
-            cy.wrap($element).contains(text).should('be.visible')
-          })
-        } else {
-          cy.wrap($element).contains(data).should('be.visible')
-        }
-        if (alt) cy.wrap($element).find('img').eq(0).should('have.attr', 'alt', alt).should('be.visible')
-      })
-    })
-}
-
 export function clickOnTransactionItem(item) {
   cy.get(transactionItem).eq(item).scrollIntoView().click({ force: true })
 }
