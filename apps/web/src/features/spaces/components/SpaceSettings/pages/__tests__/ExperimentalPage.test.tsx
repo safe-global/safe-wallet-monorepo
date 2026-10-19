@@ -99,6 +99,37 @@ describe('ExperimentalPage', () => {
     expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
   })
 
+  it('hands over to the server value once the refetch after the update lands', async () => {
+    const { rerender } = render(<ExperimentalPage />)
+
+    await userEvent.click(getToggle())
+    mockSpaceQuery(optedOutSpace, true)
+    rerender(<ExperimentalPage />)
+
+    expect(getToggle()).toBeChecked()
+    expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
+
+    mockSpaceQuery(optedInSpace)
+    rerender(<ExperimentalPage />)
+
+    expect(getToggle()).toBeChecked()
+    expect(getToggle()).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('keeps the optimistic value when an unrelated refetch finishes while the update is in flight', async () => {
+    mockUnwrap.mockReturnValue(new Promise(() => {}))
+    mockSpaceQuery(optedOutSpace, true)
+    const { rerender } = render(<ExperimentalPage />)
+
+    await userEvent.click(getToggle())
+    mockUseSpacesUpdateV1Mutation.mockReturnValue([mockUpdateSpace, { isLoading: true }])
+    mockSpaceQuery(optedOutSpace)
+    rerender(<ExperimentalPage />)
+
+    expect(getToggle()).toBeChecked()
+    expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
+  })
+
   it('reverts the switch and shows an error notification when the update fails', async () => {
     mockUnwrap.mockRejectedValue({ status: 500, data: { message: 'Boom' } })
     jest.spyOn(console, 'error').mockImplementation(() => {})
@@ -138,11 +169,15 @@ describe('ExperimentalPage', () => {
     expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
   })
 
-  it('disables the switch while the space is loading', () => {
+  it('disables the switch and ignores clicks while the space is loading', async () => {
     mockSpaceQuery(undefined)
     render(<ExperimentalPage />)
 
     expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
+
+    await userEvent.click(getToggle())
+
+    expect(mockUpdateSpace).not.toHaveBeenCalled()
   })
 
   it('skips the space query when signed out', () => {

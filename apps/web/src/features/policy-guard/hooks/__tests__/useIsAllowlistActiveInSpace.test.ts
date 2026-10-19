@@ -43,7 +43,7 @@ describe('useIsAllowlistActiveInSpace', () => {
     mockIsAuthenticated.mockReturnValue(true)
     mockChains([sepolia])
     mockFlag(true)
-    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: optedIn, isLoading: false })
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: optedIn, isFetching: false })
   })
 
   it('is true when the flag is on, the allowlist is available and the space opted in', () => {
@@ -56,8 +56,25 @@ describe('useIsAllowlistActiveInSpace', () => {
   })
 
   it('is undefined while the space is loading', () => {
-    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, isLoading: true })
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, isFetching: true })
     expect(renderHook(() => useIsAllowlistActiveInSpace()).result.current).toBeUndefined()
+  })
+
+  it('is undefined while another space is being fetched after the id changes', () => {
+    const { result, rerender } = renderHook(({ id }) => useIsAllowlistActiveInSpace(id), {
+      initialProps: { id: CURRENT_SPACE_ID },
+    })
+    expect(result.current).toBe(true)
+
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, isFetching: true })
+    rerender({ id: 'other-space' })
+
+    expect(result.current).toBeUndefined()
+  })
+
+  it('keeps the current value while the space is refetched in the background', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: optedIn, isFetching: true })
+    expect(renderHook(() => useIsAllowlistActiveInSpace()).result.current).toBe(true)
   })
 
   it('is false when the workspace flag is off', () => {
@@ -71,13 +88,13 @@ describe('useIsAllowlistActiveInSpace', () => {
   })
 
   it('is false when the space has not opted in', () => {
-    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: optedOut, isLoading: false })
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: optedOut, isFetching: false })
     expect(renderHook(() => useIsAllowlistActiveInSpace()).result.current).toBe(false)
   })
 
   it('skips the query and is false while signed out', () => {
     mockIsAuthenticated.mockReturnValue(false)
-    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, isLoading: false })
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, isFetching: false })
 
     expect(renderHook(() => useIsAllowlistActiveInSpace()).result.current).toBe(false)
     expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: CURRENT_SPACE_ID }, { skip: true })

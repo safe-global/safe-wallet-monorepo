@@ -166,6 +166,14 @@ describe('workspaceTrackingListener', () => {
     expect(trackEvent).not.toHaveBeenCalled()
   })
 
+  it('tracks an experimental features update once when the rejected request is replayed after step-up', () => {
+    const originalArgs = { id: spaceId, updateSpaceDto: { experimentalFeatures: ['POLICY_RECIPIENT_ALLOWLIST'] } }
+    run(mutation('spacesUpdateV1', originalArgs, { status: 403 }, 'rejected'))
+    run(mutation('spacesUpdateV1', originalArgs, { uuid: spaceId }))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+  })
+
   it('does not track a workspace update that only changes the name', () => {
     run(mutation('spacesUpdateV1', { id: spaceId, updateSpaceDto: { name: 'B' } }, { uuid: spaceId }))
 

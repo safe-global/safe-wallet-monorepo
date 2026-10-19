@@ -30,8 +30,8 @@ const ExperimentalPage = () => {
   const serverFeatures = space?.experimentalFeatures
 
   useEffect(() => {
-    if (!isFetching) setPending(undefined)
-  }, [serverFeatures, isFetching])
+    if (!isFetching && !isSaving) setPending(undefined)
+  }, [serverFeatures, isFetching, isSaving])
 
   const available: ExperimentalFeature[] = isAllowlistAvailable ? ['POLICY_RECIPIENT_ALLOWLIST'] : []
 
