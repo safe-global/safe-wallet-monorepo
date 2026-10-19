@@ -33,6 +33,7 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: ArrowRightLeft,
     label: 'Transactions',
     href: AppRoutes.spaces.transactions,
+    activeMemberOnly: true,
   },
   {
     icon: WalletCards,

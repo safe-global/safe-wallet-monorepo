@@ -16,6 +16,7 @@ jest.mock('@/features/__core__', () => ({
 
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: 'SpacesFeature',
+  useCurrentSpaceId: jest.fn(),
   useFeatureFlagRedirect: jest.fn(),
   useFeatureRedirect: jest.fn(),
 }))
@@ -28,6 +29,7 @@ const SpaceTransactionsPageMock = ({ spaceId }: { spaceId: string }) => (
 
 const setup = ({ isReady = true, spaceId = SPACE_ID }: { isReady?: boolean; spaceId?: string } = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ isReady, query: spaceId ? { spaceId } : {} })
+  ;(spacesFeature.useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId || null)
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceTransactionsPage: SpaceTransactionsPageMock })
 }
 
