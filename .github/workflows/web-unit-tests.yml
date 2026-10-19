@@ -8,6 +8,8 @@ on:
       - package.json
       - .yarnrc.yml
       - .yarn/patches/**
+      - .github/workflows/web-unit-tests.yml
+      - scripts/merge-jest-reports.mjs
 
   push:
     branches:
