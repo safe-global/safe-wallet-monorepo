@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as nfts from '../pages/nfts.pages'
 import * as navigation from '../pages/navigation.page'
-import * as createTx from '../pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
@@ -10,7 +9,6 @@ import { walletCredentials } from '../../support/credentials.js'
 const singleNFT = ['safeTransferFrom']
 const multipleNFT = ['multiSend']
 const multipleNFTAction = 'safeTransferFrom'
-const NFTSentName = 'GTT #22'
 
 let nftsSafes,
   staticSafes = []
@@ -85,23 +83,5 @@ describe('NFTs tests', () => {
     navigation.clickOnDisconnectBtn()
     nfts.selectNFTs(1)
     nfts.verifySendNFTBtnDisabled()
-  })
-
-  // Added to prod
-  it('Verify Send NFT transaction has been created', () => {
-    createTx.cleanTransactionQueue(nftsSafes.SEP_NFT_SAFE_1, signer)
-    wallet.connectSignerViaStorage(signer, constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
-    nfts.verifyInitialNFTData()
-    nfts.selectNFTs(1)
-    nfts.sendNFT()
-    nfts.typeRecipientAddress(staticSafes.SEP_STATIC_SAFE_1)
-    createTx.changeNonce(2)
-    nfts.clikOnNextBtn()
-    createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnSignTransactionBtn()
-    createTx.clickViewTransaction()
-    createTx.verifySingleTxPage()
-    createTx.verifyQueueLabel()
-    createTx.verifyTransactionStrExists(NFTSentName)
   })
 })

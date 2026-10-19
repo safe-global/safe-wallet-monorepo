@@ -968,10 +968,6 @@ export function verifyStatus(status) {
   cy.contains('div', status).should('exist')
 }
 
-export function verifyTransactionStrExists(str) {
-  cy.contains(str).should('exist')
-}
-
 export function verifyTransactionStrNotVible(str) {
   cy.contains(str).should('not.be.visible')
 }
