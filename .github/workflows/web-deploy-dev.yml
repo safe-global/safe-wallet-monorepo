@@ -99,7 +99,7 @@ jobs:
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
 
       - name: Upload app build
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: web-out
           path: apps/web/out
@@ -123,7 +123,7 @@ jobs:
           NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
 
       - name: Upload Storybook build
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: web-storybook
           path: apps/web/out/storybook
@@ -151,12 +151,12 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: web-out
           path: apps/web/out
 
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: web-storybook
           path: apps/web/out/storybook

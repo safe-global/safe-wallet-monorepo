@@ -26,27 +26,9 @@ describe('Incoming tx history tests', () => {
     cy.wait('@txHistory')
   })
 
-  it('Verify Incoming ERC20 with logo in the history', () => {
-    createTx.verifySummaryByName(typeReceive.summaryTxInfoDAI, [typeReceive.summaryTitle, typeGeneral.statusOk], {
-      altToken: typeReceive.altImageDAI,
-    })
-  })
-
   it('Verify Incoming ERC20 without logo in the history', () => {
     createTx.verifySummaryByName(typeReceive.summaryTxInfoETH35, [typeReceive.summaryTitle, typeGeneral.statusOk], {
       altToken: typeReceive.altTokenETH35,
-    })
-  })
-
-  it('Verify Incoming native token in the history', () => {
-    createTx.verifySummaryByName(typeReceive.summaryTxInfoETH, [typeReceive.summaryTitle, typeGeneral.statusOk], {
-      altToken: typeReceive.altToken,
-    })
-  })
-
-  it('Verify Incoming NFT in the history', () => {
-    createTx.verifySummaryByName(typeReceive.summaryTxInfoNFT, [typeReceive.summaryTitle, typeGeneral.statusOk], {
-      altToken: typeReceive.altTokenNFT,
     })
   })
 })

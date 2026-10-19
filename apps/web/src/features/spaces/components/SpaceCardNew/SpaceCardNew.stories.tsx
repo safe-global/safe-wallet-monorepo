@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SpaceCardNew from './index'
 import { MemberRole, MemberStatus } from '../../hooks/useSpaceMembers'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 
 const meta: Meta<typeof SpaceCardNew> = {
   title: 'Features/Spaces/SpaceCardNew',

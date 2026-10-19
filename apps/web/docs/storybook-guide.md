@@ -25,7 +25,7 @@ Rules:
 ## Choosing a mock setup
 
 1. **No store/API needs** → plain `Meta`/`StoryObj` with an explicit `meta.title`.
-2. **Redux hooks only** (`useAppSelector`, `useDispatch`) → `decorators: [withMockProvider()]` from `@/storybook/preview`.
+2. **Redux hooks only** (`useAppSelector`, `useDispatch`) → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
 3. **Pages/widgets needing API mocks** → **`createMockStory` from `@/stories/mocks` — the canonical factory. Do NOT hand-roll `StoreDecorator` + provider stacks + MSW handlers**; that is exactly what the factory replaces.
 
 ```typescript
@@ -71,7 +71,7 @@ export const Default: Story = {}
 
 - **`mswLoader` is registered globally** — do NOT add `loaders: [mswLoader]` at meta or story level. (~110 story files still cargo-cult it; don't copy them.)
 - `ShadcnProvider` + light/dark theme sync decorators, viewport presets, and the sidebar `storySort`.
-- `withMockProvider` is re-exported from `@/storybook/preview`.
+- Nothing app-heavy: every story downloads what `preview.tsx` imports, so the store-backed `withMockProvider` is imported per story from `@/storybook/decorators`.
 
 ## MSW patterns
 

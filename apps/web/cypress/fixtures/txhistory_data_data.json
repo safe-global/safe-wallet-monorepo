@@ -6,8 +6,6 @@
     },
     "sideActions": {
       "created": "Created",
-      "signedOneOfTwo": "Signed (1/2)",
-      "signedTwoOfTwo": "Signed (2/2)",
       "executedBy": "Executed"
     },
     "accountCreation": {
@@ -37,7 +35,6 @@
       "summaryTitle": "Received",
       "summaryTxInfoDAI": "25.50103 DAI",
       "summaryTxInfoETH35": "ETH35.com",
-      "summaryTxInfoETH": "0.018 ETH",
       "summaryTxInfoETH_2": "1 ETH",
       "summaryTxInfoNFT": "1 FLOWER #6188",
       "summaryTxInfo": "1,000 QTRUST",
@@ -81,7 +78,6 @@
       "title": "On-chain rejection",
       "summaryTime": "11:17 AM",
       "altImage": "On-chain rejection",
-      "description": "This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 16.",
       "transactionHash": "0x4fbf...067d",
       "transactionHash2": "0x636e...0524",
       "safeTxHash": "0x1303...0fe2"
@@ -92,63 +88,9 @@
       "summaryTime": "11:24 AM",
       "description": "Batch transaction with 2 actions",
       "altImage": "Batch",
-      "contractTitle": "Safe: MultiSendCallOnly 1.3.0",
       "contractAddress": "sep:0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
       "transactionHash": "0xa5dd...b064",
       "safeTxHash": "0x4dd0...b2b8"
-    },
-    "addOwner": {
-      "title": "addOwnerWithThreshold",
-      "summaryTime": "11:27 AM",
-      "description": "Add signer",
-      "altImage": "addOwnerWithThreshold",
-      "requiredConfirmationsTitle": "Required confirmations for new transactions",
-      "ownerAddress": "sep:0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
-      "transactionHash": "0xfcad...ab35",
-      "safeTxHash": "0x8583...3d2d"
-    },
-    "removeOwner": {
-      "title": "removeOwner",
-      "summaryTime": "11:46 AM",
-      "description": "Remove signer",
-      "altImage": "removeOwner",
-      "requiredConfirmationsTitle": "Required confirmations for new transactions",
-      "ownerAddress": "sep:0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
-      "transactionHash": "0xac66...a4b8",
-      "safeTxHash": "0xafd5...7929"
-    },
-    "disableModule": {
-      "title": "disableModule",
-      "summaryTime": "7:37 AM",
-      "description": "Disable module",
-      "altImage": "disableModule",
-      "address": "sep:0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
-      "transactionHash": "0x8b39...adeb",
-      "safeTxHash": "0xb820...bc4a"
-    },
-    "changeThreshold": {
-      "title": "changeThreshold",
-      "summaryTime": "8:36 AM",
-      "altImage": "changeThreshold",
-      "requiredConfirmationsTitle": "Required confirmations for new transactions",
-      "transactionHash": "0xf3d2...26df",
-      "safeTxHash": "0x46eb...e7d5"
-    },
-    "swapOwner": {
-      "title": "swapOwner",
-      "summaryTime": "11:45 AM",
-      "description": "Swap signer",
-      "altImage": "swapOwner",
-      "transactionHash": "0x8cf9...2f17",
-      "safeTxHash": "0xd7a2...af6f",
-      "newOwner": {
-        "actionTitile": "New signer",
-        "ownerAddress": "sep:0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E"
-      },
-      "oldOwner": {
-        "actionTitile": "Old signer",
-        "ownerAddress": "sep:0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f"
-      }
     },
     "deleteSpendingLimit": {
       "title": "AllowanceModule",
@@ -207,7 +149,6 @@
       "summaryTitle": "Received",
       "summaryTxInfo": "5 TTONE",
       "receivedFrom": "",
-      "senderAddress": "sep:0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
       "transactionHash": "0x54e7...2a7c",
       "transactionHashCopied": "0x54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c",
       "altImage": "Received",

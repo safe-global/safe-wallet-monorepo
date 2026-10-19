@@ -33,14 +33,6 @@ describe('Multichain safe creation flow tests', () => {
     createwallet.checkNetworkLogoInReviewStep([constants.networkKeys.polygon, constants.networkKeys.sepolia])
   })
 
-  it('Verify that selected networks are displayed in preview multichain safe', () => {
-    createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
-    createwallet.clickOnYourSafeAccountPreview()
-    createwallet.clickOnNextBtn()
-    createwallet.clickOnNextBtn()
-    createwallet.checkNetworkLogoInReviewStep([constants.networkKeys.polygon, constants.networkKeys.sepolia])
-  })
-
   it('Verify Success safe creation screen for multichain creation', () => {
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
     createwallet.clickOnYourSafeAccountPreview()

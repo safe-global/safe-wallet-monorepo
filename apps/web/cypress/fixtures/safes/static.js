@@ -76,7 +76,7 @@ export default {
   ZKSYNC_STATIC_SAFE_22: 'zksync:0x49136c0270c5682FFbb38Cb29Ecf0563b2E1F9f6',
 
   // More Sepolia Safes
-  /** Transaction history, NFTs, messages, and spending limits testing - Used in: tx_history.cy.js, nfts.cy.js, messages_offchain.cy.js, spending_limits.cy.js */
+  /** Transaction history, messages, and spending limits testing - Used in: tx_history.cy.js, msg_details.cy.js, spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
   /** Add owner testing - Used in: add_owner.cy.js (happypath_2) */
   SEP_STATIC_SAFE_24: 'sep:0x49DC5764961DA4864DC5469f16BC68a0F765f2F2',

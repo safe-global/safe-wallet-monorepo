@@ -14,7 +14,7 @@ import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, toCurrentPlan } from './planTiers'
+import { buildPlanTiers, pickSeatOption, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -22,7 +22,7 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
-import type { PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
+import type { CurrentPlan, PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
@@ -32,10 +32,9 @@ const PlansSkeleton = () => (
 )
 
 /** The seats the recommended card opens on, the same option its card picks first. */
-const defaultSeats = (tiers: PlanTier[]): number | undefined => {
+const defaultSeats = (tiers: PlanTier[], currentPlan: CurrentPlan | undefined): number | undefined => {
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN && candidate.billingCycle !== 'year')
-  const option = tier?.options.find((candidate) => candidate.priceId === tier.currentPriceId) ?? tier?.options[0]
-  return option?.seats ?? undefined
+  return (tier && pickSeatOption(tier, currentPlan)?.seats) ?? undefined
 }
 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
@@ -73,7 +72,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
     SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED,
     {
       ...entry,
-      [MixpanelEventParams.DEFAULT_SEATS]: defaultSeats(tiers),
+      [MixpanelEventParams.DEFAULT_SEATS]: defaultSeats(tiers, currentPlan),
       [MixpanelEventParams.DEFAULT_BILLING_PERIOD]: BillingPeriod.MONTHLY,
       [MixpanelEventParams.PLAN_LIMIT]: seats?.quota ?? undefined,
       [MixpanelEventParams.SPONSORED_REMAINING]:
