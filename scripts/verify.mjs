@@ -17,7 +17,7 @@ import { existsSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { createInterface } from 'node:readline'
-import { DEFAULT_SLOT_DIR, checkSlotDir, getJestWorkers, getSlotCount, joinQueue } from './lib/verify-slots.mjs'
+import { DEFAULT_SLOT_DIR, acquireSlot, checkSlotDir, getJestWorkers, getSlotCount } from './lib/verify-slots.mjs'
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -306,13 +306,11 @@ async function waitForSlot() {
     console.warn(`verify: running without the parallel-run limit — ${unsafeReason}`)
     return
   }
-  const ticket = joinQueue({
+  releaseSlot = await acquireSlot({
     dir: DEFAULT_SLOT_DIR,
     slots: slotCount,
     info: { cwd: process.cwd(), workspace },
   })
-  releaseSlot = ticket.release
-  await ticket.waitForTurn()
 }
 
 // ---------------------------------------------------------------------------

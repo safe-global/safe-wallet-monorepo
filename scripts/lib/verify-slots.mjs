@@ -6,7 +6,8 @@ import { setTimeout as sleepMs } from 'node:timers/promises'
 const GIB = 1024 ** 3
 const MEMORY_PER_SLOT_GIB = 16
 const MAX_DEFAULT_SLOTS = 4
-const STALE_AFTER_MS = 30 * 60 * 1000
+const HEARTBEAT_MS = 15 * 1000
+const STALE_AFTER_MS = 2 * 60 * 1000
 const MAX_WAIT_MS = 20 * 60 * 1000
 const POLL_MS = 2000
 
@@ -70,62 +71,111 @@ export function checkSlotDir(dir) {
   return null
 }
 
-function parseEntry(content) {
+function ignoreMissing(action) {
+  try {
+    return action()
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+    return null
+  }
+}
+
+function parseHolder(content) {
   try {
     const data = JSON.parse(content)
-    if (!Number.isInteger(data.pid) || data.pid < 1 || typeof data.startedAt !== 'number') return null
-    return {
-      pid: data.pid,
-      startedAt: data.startedAt,
-      cwd: String(data.cwd ?? ''),
-      workspace: String(data.workspace ?? ''),
-    }
+    if (!Number.isInteger(data.pid) || data.pid < 1) return null
+    return { pid: data.pid, cwd: String(data.cwd ?? ''), workspace: String(data.workspace ?? '') }
   } catch {
     return null
   }
 }
 
-function readEntry(file) {
+/** Reads a slot file. Returns null when the slot is free. */
+function readSlot(file) {
+  return ignoreMissing(() => {
+    const { ino, mtimeMs } = fs.statSync(file)
+    return { ino, mtimeMs, holder: parseHolder(fs.readFileSync(file, 'utf-8')) }
+  })
+}
+
+/** Deletes the slot file only if it is still the one that was read, not a slot another run just took. */
+function removeIfSame(file, ino) {
+  ignoreMissing(() => {
+    if (fs.statSync(file).ino === ino) fs.rmSync(file, { force: true })
+  })
+}
+
+function touch(file, timeMs) {
+  const time = timeMs / 1000
+  fs.utimesSync(file, time, time)
+}
+
+/** Takes the slot atomically: link() fails with EEXIST when another run holds it. */
+function tryTake(file, ticket) {
   try {
-    return { content: fs.readFileSync(file, 'utf-8') }
+    fs.linkSync(ticket, file)
+    return true
   } catch (err) {
-    if (err.code === 'ENOENT') return null
+    if (err.code === 'EEXIST') return false
     throw err
   }
 }
 
-/** Reads the queue, deletes entries of dead or old runs, and returns the rest in start order. */
-export function readQueue(dir, { now, isAlive, staleAfterMs }) {
-  const queue = []
-  for (const name of fs.readdirSync(dir)) {
-    if (!name.endsWith('.json')) continue
-    const file = path.join(dir, name)
-    const raw = readEntry(file)
-    if (!raw) continue
+function holdSlot(file, { now, heartbeatMs }) {
+  touch(file, now())
+  const { ino } = fs.statSync(file)
+  const isOurs = () => ignoreMissing(() => fs.statSync(file).ino === ino)
 
-    const entry = parseEntry(raw.content)
-    const isStale = !entry || !isAlive(entry.pid) || now() - entry.startedAt > staleAfterMs
-    if (isStale) {
-      fs.rmSync(file, { force: true })
-      continue
-    }
-    queue.push(entry)
+  const heartbeat = setInterval(() => {
+    if (isOurs()) touch(file, now())
+  }, heartbeatMs)
+  heartbeat.unref()
+
+  return () => {
+    clearInterval(heartbeat)
+    removeIfSame(file, ino)
   }
-  return queue.sort((a, b) => a.startedAt - b.startedAt || a.pid - b.pid)
 }
 
 function sanitize(text) {
-  // Lock files are untrusted: strip terminal escape codes before printing
+  // Slot files are untrusted: strip terminal escape codes before printing
   return text.replace(/[\u0000-\u001f\u007f]/g, '')
 }
 
-function describeQueue(queue) {
-  return queue.map((e) => `pid ${e.pid} ${sanitize(e.workspace)} in ${sanitize(e.cwd)}`).join(', ')
+function describe(holders) {
+  return holders.map((h) => `pid ${h.pid} ${sanitize(h.workspace)} in ${sanitize(h.cwd)}`).join(', ')
 }
 
 /**
- * Adds this process to the queue. The caller gets `release` at once, so that a signal
- * during the wait can still remove the entry.
+ * One synchronous pass over all slots. No signal handler can run inside it, so the ticket never stays behind.
+ *
+ * Returns:
+ *   { release } when a slot was taken, otherwise { holders } of the slots in use.
+ */
+function tryAllSlots({ dir, slots, pid, info, now, isAlive, staleAfterMs, heartbeatMs }) {
+  const ticket = path.join(dir, `.${pid}.ticket`)
+  fs.writeFileSync(ticket, JSON.stringify({ pid, ...info }), { mode: 0o600 })
+  try {
+    const holders = []
+    for (let n = 0; n < slots; n++) {
+      const file = path.join(dir, `slot-${n}.json`)
+      if (tryTake(file, ticket)) return { release: holdSlot(file, { now, heartbeatMs }) }
+
+      const slot = readSlot(file)
+      if (!slot) continue
+      const isStale = !slot.holder || !isAlive(slot.holder.pid) || now() - slot.mtimeMs > staleAfterMs
+      if (isStale) removeIfSame(file, slot.ino)
+      else holders.push(slot.holder)
+    }
+    return { holders }
+  } finally {
+    fs.rmSync(ticket, { force: true })
+  }
+}
+
+/**
+ * Waits for a free slot and takes it. A slot is free when its file is missing, its holder is dead,
+ * or its holder stopped the heartbeat (a dead process whose PID the system reused).
  *
  * Args:
  *   options.dir: Slot directory; must pass checkSlotDir().
@@ -134,53 +184,44 @@ function describeQueue(queue) {
  *   options.now, options.sleep, options.isAlive, options.log, options.pid: Overrides for tests.
  *
  * Returns:
- *   { release, waitForTurn }. `release` is safe to call more than once. `waitForTurn` resolves
- *   when this process is among the first `slots` runs, and rejects (after release) when no
- *   slot becomes free within the maximum wait time.
+ *   A release function. It is safe to call more than once.
+ *
+ * Throws:
+ *   When no slot becomes free within the maximum wait time.
  */
-export function joinQueue(options) {
-  const {
-    dir,
-    slots,
-    info,
-    now = Date.now,
-    sleep = sleepMs,
-    isAlive = isProcessAlive,
-    log = console.log,
-    pid = process.pid,
-    maxWaitMs = MAX_WAIT_MS,
-    staleAfterMs = STALE_AFTER_MS,
-    pollMs = POLL_MS,
-  } = options
-
-  const ownFile = path.join(dir, `${pid}.json`)
-  const startedAt = now()
-  // A file with our own PID can only come from a dead process with a reused PID
-  fs.rmSync(ownFile, { force: true })
-  fs.writeFileSync(ownFile, JSON.stringify({ pid, startedAt, ...info }), { flag: 'wx', mode: 0o600 })
-  const release = () => fs.rmSync(ownFile, { force: true })
-
-  const waitForTurn = async () => {
-    let hasAnnounced = false
-    while (true) {
-      const queue = readQueue(dir, { now, isAlive, staleAfterMs })
-      const ahead = queue.filter((e) => e.startedAt < startedAt || (e.startedAt === startedAt && e.pid < pid))
-      if (ahead.length < slots) return
-
-      if (now() - startedAt > maxWaitMs) {
-        release()
-        throw new Error(
-          `verify: no free slot after ${Math.round(maxWaitMs / 60000)} min. Runs ahead: ${describeQueue(ahead)}. ` +
-            `If these runs are gone, delete ${dir}. Set VERIFY_MAX_PARALLEL to change the limit (now ${slots}).`,
-        )
-      }
-      if (!hasAnnounced) {
-        log(`verify: waiting for a free slot (${slots} allowed; ahead: ${describeQueue(ahead)})`)
-        hasAnnounced = true
-      }
-      await sleep(pollMs)
-    }
+export async function acquireSlot(options) {
+  const context = {
+    now: Date.now,
+    sleep: sleepMs,
+    isAlive: isProcessAlive,
+    log: console.log,
+    pid: process.pid,
+    maxWaitMs: MAX_WAIT_MS,
+    staleAfterMs: STALE_AFTER_MS,
+    heartbeatMs: HEARTBEAT_MS,
+    pollMs: POLL_MS,
+    ...options,
   }
+  const { dir, slots, now, sleep, log, maxWaitMs, pollMs } = context
+  const waitStart = now()
+  let hasAnnounced = false
 
-  return { release, waitForTurn }
+  while (true) {
+    const { release, holders } = tryAllSlots(context)
+    if (release) return release
+    // A stale slot was cleared during the pass: try again at once
+    if (holders.length < slots) continue
+
+    if (now() - waitStart > maxWaitMs) {
+      throw new Error(
+        `verify: no free slot after ${Math.round(maxWaitMs / 60000)} min. In use: ${describe(holders)}. ` +
+          `If these runs are gone, delete ${dir}. Set VERIFY_MAX_PARALLEL to change the limit (now ${slots}).`,
+      )
+    }
+    if (!hasAnnounced) {
+      log(`verify: waiting for a free slot (${slots} in use: ${describe(holders)})`)
+      hasAnnounced = true
+    }
+    await sleep(pollMs)
+  }
 }

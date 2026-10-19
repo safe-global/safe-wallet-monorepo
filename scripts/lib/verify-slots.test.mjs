@@ -3,10 +3,12 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { checkSlotDir, getJestWorkers, getSlotCount, isProcessAlive, joinQueue, readQueue } from './verify-slots.mjs'
+import { setTimeout as sleepMs } from 'node:timers/promises'
+import { acquireSlot, checkSlotDir, getJestWorkers, getSlotCount, isProcessAlive } from './verify-slots.mjs'
 
 const GIB = 1024 ** 3
 const isPosix = process.platform !== 'win32'
+const START = 1_000_000_000
 
 let baseDir
 let dir
@@ -20,15 +22,19 @@ afterEach(() => {
   fs.rmSync(baseDir, { recursive: true, force: true })
 })
 
-function writeEntry(pid, startedAt, extra = {}) {
-  fs.writeFileSync(
-    path.join(dir, `${pid}.json`),
-    JSON.stringify({ pid, startedAt, cwd: '/repo', workspace: 'web', ...extra }),
-  )
+const slotFile = (n) => path.join(dir, `slot-${n}.json`)
+
+function touch(file, timeMs) {
+  fs.utimesSync(file, timeMs / 1000, timeMs / 1000)
 }
 
-function fakeClock(start = 1_000_000) {
-  let time = start
+function writeSlot(n, pid, heartbeatAt, extra = {}) {
+  fs.writeFileSync(slotFile(n), JSON.stringify({ pid, cwd: '/repo', workspace: 'web', ...extra }))
+  touch(slotFile(n), heartbeatAt)
+}
+
+function fakeClock() {
+  let time = START
   return {
     now: () => time,
     sleep: async (ms) => {
@@ -105,58 +111,10 @@ describe('checkSlotDir', () => {
   })
 })
 
-describe('readQueue', () => {
-  const options = (overrides = {}) => ({ now: () => 2000, isAlive: () => true, staleAfterMs: 10_000, ...overrides })
-
+describe('acquireSlot', () => {
   beforeEach(() => fs.mkdirSync(dir))
 
-  it('returns live entries in start order', () => {
-    writeEntry(30, 1500)
-    writeEntry(20, 1000)
-    writeEntry(10, 1000)
-    assert.deepEqual(
-      readQueue(dir, options()).map((e) => e.pid),
-      [10, 20, 30],
-    )
-  })
-
-  it('deletes entries of dead processes', () => {
-    writeEntry(10, 1000)
-    writeEntry(20, 1000)
-    const queue = readQueue(dir, options({ isAlive: (pid) => pid !== 10 }))
-    assert.deepEqual(
-      queue.map((e) => e.pid),
-      [20],
-    )
-    assert.equal(fs.existsSync(path.join(dir, '10.json')), false)
-  })
-
-  it('deletes entries older than the stale limit', () => {
-    writeEntry(10, 0)
-    assert.deepEqual(readQueue(dir, options({ now: () => 20_000 })), [])
-    assert.equal(fs.existsSync(path.join(dir, '10.json')), false)
-  })
-
-  it('deletes entries that do not parse or have an invalid pid', () => {
-    fs.writeFileSync(path.join(dir, '1.json'), 'not json')
-    fs.writeFileSync(path.join(dir, '2.json'), JSON.stringify({ pid: '2; rm -rf /', startedAt: 1000 }))
-    fs.writeFileSync(path.join(dir, '3.json'), JSON.stringify({ pid: -1, startedAt: 1000 }))
-    fs.writeFileSync(path.join(dir, '4.json'), JSON.stringify({ pid: 4 }))
-    assert.deepEqual(readQueue(dir, options()), [])
-    assert.deepEqual(fs.readdirSync(dir), [])
-  })
-
-  it('ignores files that are not queue entries', () => {
-    fs.writeFileSync(path.join(dir, 'notes.txt'), 'x')
-    assert.deepEqual(readQueue(dir, options()), [])
-    assert.deepEqual(fs.readdirSync(dir), ['notes.txt'])
-  })
-})
-
-describe('joinQueue', () => {
-  beforeEach(() => fs.mkdirSync(dir))
-
-  const baseOptions = (overrides = {}) => ({
+  const options = (overrides = {}) => ({
     dir,
     slots: 2,
     info: { cwd: '/repo', workspace: 'web' },
@@ -167,107 +125,134 @@ describe('joinQueue', () => {
     ...overrides,
   })
 
-  const acquire = async (options) => {
-    const ticket = joinQueue(options)
-    await ticket.waitForTurn()
-    return ticket.release
-  }
+  it('takes a free slot at once, leaves no ticket, and releases the slot', async () => {
+    const release = await acquireSlot(options())
+    assert.deepEqual(fs.readdirSync(dir), ['slot-0.json'])
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(0), 'utf-8')).pid, 99)
 
-  it('adds its entry before the wait starts, so a release during the wait removes it', async () => {
-    writeEntry(10, 1)
-    writeEntry(20, 2)
-    const ticket = joinQueue(baseOptions())
-    assert.equal(fs.existsSync(path.join(dir, '99.json')), true)
-    ticket.release()
-    assert.equal(fs.existsSync(path.join(dir, '99.json')), false)
-  })
-
-  it('takes a free slot at once and releases it', async () => {
-    const release = await acquire(baseOptions())
-    assert.deepEqual(fs.readdirSync(dir), ['99.json'])
     release()
     release()
     assert.deepEqual(fs.readdirSync(dir), [])
   })
 
-  it('replaces a leftover entry with its own pid', async () => {
-    writeEntry(99, 0)
-    const release = await acquire(baseOptions())
-    const entry = JSON.parse(fs.readFileSync(path.join(dir, '99.json'), 'utf-8'))
-    assert.equal(entry.startedAt, 1_000_000)
-    release()
+  it('never gives one slot to two runs', async () => {
+    const releaseFirst = await acquireSlot(options({ slots: 1, pid: 1 }))
+    await assert.rejects(acquireSlot(options({ slots: 1, pid: 2, maxWaitMs: 0 })), /no free slot/)
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(0), 'utf-8')).pid, 1)
+    releaseFirst()
   })
 
-  it('waits while the slots are full and starts when one is released', async () => {
-    writeEntry(10, 1)
-    writeEntry(20, 2)
+  it('waits while all slots are in use and takes the one that is released', async () => {
+    writeSlot(0, 10, START)
+    writeSlot(1, 20, START)
     const clock = fakeClock()
     const messages = []
     let polls = 0
-    const release = await acquire(
-      baseOptions({
+    const release = await acquireSlot(
+      options({
         ...clock,
         log: (message) => messages.push(message),
         sleep: async (ms) => {
           polls += 1
-          if (polls === 3) fs.rmSync(path.join(dir, '10.json'))
+          if (polls === 3) fs.rmSync(slotFile(1))
           await clock.sleep(ms)
         },
       }),
     )
     assert.equal(polls, 3)
-    assert.equal(messages.length, 1)
-    assert.match(messages[0], /waiting for a free slot \(2 allowed; ahead: pid 10 web in \/repo, pid 20 web/)
+    assert.deepEqual(messages, ['verify: waiting for a free slot (2 in use: pid 10 web in /repo, pid 20 web in /repo)'])
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(1), 'utf-8')).pid, 99)
     release()
   })
 
   it('takes the slot of a dead process without waiting', async () => {
-    writeEntry(10, 1)
-    writeEntry(20, 2)
-    let polls = 0
-    const release = await acquire(
-      baseOptions({
-        isAlive: (pid) => pid !== 10,
-        sleep: async () => {
-          polls += 1
-        },
-      }),
+    writeSlot(0, 10, START)
+    writeSlot(1, 20, START)
+    const release = await acquireSlot(options({ isAlive: (pid) => pid !== 10, sleep: () => assert.fail('waited') }))
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(0), 'utf-8')).pid, 99)
+    release()
+  })
+
+  it('keeps the slot of a live run that keeps its heartbeat, however long it runs', async () => {
+    writeSlot(0, 10, START)
+    const clock = fakeClock()
+    await assert.rejects(
+      acquireSlot(
+        options({
+          ...clock,
+          slots: 1,
+          staleAfterMs: 60_000,
+          maxWaitMs: 10 * 60_000,
+          sleep: async (ms) => {
+            await clock.sleep(ms)
+            touch(slotFile(0), clock.now())
+          },
+        }),
+      ),
+      /no free slot after 10 min/,
     )
-    assert.equal(polls, 0)
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(0), 'utf-8')).pid, 10)
+  })
+
+  it('takes a slot whose heartbeat stopped, even when its PID is in use again', async () => {
+    writeSlot(0, 10, START - 3 * 60_000)
+    const release = await acquireSlot(options({ slots: 1, staleAfterMs: 2 * 60_000 }))
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(0), 'utf-8')).pid, 99)
     release()
   })
 
-  it('does not count runs that started later', async () => {
-    writeEntry(10, 1)
-    writeEntry(20, 2_000_000)
-    writeEntry(30, 2_000_001)
-    const release = await acquire(baseOptions())
+  it('takes a slot whose file does not parse or has an invalid pid', async () => {
+    fs.writeFileSync(slotFile(0), 'not json')
+    fs.writeFileSync(slotFile(1), JSON.stringify({ pid: '1; rm -rf /' }))
+    const releaseA = await acquireSlot(options({ pid: 1 }))
+    const releaseB = await acquireSlot(options({ pid: 2 }))
+    assert.deepEqual([0, 1].map((n) => JSON.parse(fs.readFileSync(slotFile(n), 'utf-8')).pid).sort(), [1, 2])
+    releaseA()
+    releaseB()
+  })
+
+  it('updates the heartbeat while it holds the slot', async () => {
+    const clock = fakeClock()
+    const release = await acquireSlot(options({ ...clock, heartbeatMs: 5 }))
+    await clock.sleep(30_000)
+    await sleepMs(50)
+    assert.equal(Math.round(fs.statSync(slotFile(0)).mtimeMs), START + 30_000)
     release()
   })
 
-  it('fails with the queue and a fix when the wait is too long, and removes its entry', async () => {
-    writeEntry(10, 1)
-    writeEntry(20, 2)
-    await assert.rejects(acquire(baseOptions({ maxWaitMs: 5000, pollMs: 2000, staleAfterMs: 10 ** 9 })), (err) => {
+  it('does not release or refresh a slot that another run took over', async () => {
+    const clock = fakeClock()
+    const release = await acquireSlot(options({ ...clock, slots: 1, heartbeatMs: 5 }))
+    fs.rmSync(slotFile(0))
+    writeSlot(0, 10, START)
+
+    await clock.sleep(30_000)
+    await sleepMs(50)
+    assert.equal(Math.round(fs.statSync(slotFile(0)).mtimeMs), START)
+
+    release()
+    assert.equal(JSON.parse(fs.readFileSync(slotFile(0), 'utf-8')).pid, 10)
+  })
+
+  it('fails with the holders and a fix when the wait is too long, and leaves no ticket', async () => {
+    writeSlot(0, 10, START)
+    writeSlot(1, 20, START)
+    await assert.rejects(acquireSlot(options({ maxWaitMs: 5000 })), (err) => {
       assert.match(err.message, /no free slot after 0 min/)
-      assert.match(err.message, /pid 10 web in \/repo/)
+      assert.match(err.message, /pid 10 web in \/repo, pid 20 web in \/repo/)
       assert.match(err.message, /delete .*slots/)
       assert.match(err.message, /VERIFY_MAX_PARALLEL/)
       return true
     })
-    assert.equal(fs.existsSync(path.join(dir, '99.json')), false)
+    assert.deepEqual(fs.readdirSync(dir).sort(), ['slot-0.json', 'slot-1.json'])
   })
 
-  it('strips control characters from entries shown to the user', async () => {
-    writeEntry(10, 1, { cwd: '/repo\u001b[2J\u0007' })
-    const messages = []
-    await assert.rejects(
-      acquire(baseOptions({ slots: 1, maxWaitMs: 0, staleAfterMs: 10 ** 9, log: (message) => messages.push(message) })),
-      (err) => {
-        assert.doesNotMatch(err.message, /[\u0000-\u001f]/)
-        assert.match(err.message, /in \/repo\[2J/)
-        return true
-      },
-    )
+  it('strips control characters from slot files shown to the user', async () => {
+    writeSlot(0, 10, START, { cwd: '/repo\u001b[2J\u0007' })
+    await assert.rejects(acquireSlot(options({ slots: 1, maxWaitMs: 0 })), (err) => {
+      assert.doesNotMatch(err.message, /[\u0000-\u001f]/)
+      assert.match(err.message, /in \/repo\[2J/)
+      return true
+    })
   })
 })
