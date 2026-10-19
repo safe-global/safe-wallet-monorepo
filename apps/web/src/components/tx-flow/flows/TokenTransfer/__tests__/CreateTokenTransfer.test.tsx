@@ -20,6 +20,9 @@ import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { act, fireEvent, waitFor } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -160,6 +163,51 @@ describe('CreateTokenTransfer', () => {
 
   it('should not display a type selection if there is a txNonce', () => {
     const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
+
+    expect(queryByText('Send as')).not.toBeInTheDocument()
+  })
+
+  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', () => {
+    jest
+      .spyOn(tokenUtils, 'useTokenAmount')
+      .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      },
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+    const scope = safeScopeContextFor({
+      chainId: faker.string.numeric(5),
+      safeAddress: faker.finance.ethereumAddress(),
+    })
+
+    const { queryByText } = render(
+      <SafeScopeContext.Provider value={scope}>
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>
+      </SafeScopeContext.Provider>,
+    )
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
   })
