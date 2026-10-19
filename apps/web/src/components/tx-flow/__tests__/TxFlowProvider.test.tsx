@@ -10,6 +10,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import * as walletUtils from '@/utils/wallets'
+import { trackTxEvents } from '@/components/tx/shared/tracking'
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -48,6 +49,16 @@ jest.mock('@/components/tx/shared/hooks', () => ({
   useValidateNonce: jest.fn(() => true),
   useIsExecutionLoop: jest.fn(() => false),
   useTxActions: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/transactions'),
+  useLazyTransactionsGetTransactionByIdV1Query: jest.fn(() => [jest.fn().mockResolvedValue({ data: undefined })]),
+}))
+
+jest.mock('@/components/tx/shared/tracking', () => ({
+  __esModule: true,
+  trackTxEvents: jest.fn(),
 }))
 
 describe('TxFlowProvider', () => {
@@ -111,6 +122,43 @@ describe('TxFlowProvider', () => {
 
     expect(result.current.txId).toBe(existingTxId)
     expect(result.current.isCreation).toBe(false)
+  })
+
+  describe('trackTxEvent', () => {
+    const buildTxId = () => `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const isCreationArg = () => jest.mocked(trackTxEvents).mock.calls[0][1]
+
+    beforeEach(() => {
+      jest.mocked(trackTxEvents).mockClear()
+    })
+
+    it('tracks a new tx as a creation', async () => {
+      const { result } = renderContext({})
+
+      await act(() => result.current.trackTxEvent(buildTxId(), true))
+
+      expect(isCreationArg()).toBe(true)
+    })
+
+    it('does not track the execute step after signing a new tx as a second creation', async () => {
+      const signedTxId = buildTxId()
+      const { result } = renderContext({})
+
+      act(() => result.current.continueToExecute(signedTxId))
+      await act(() => result.current.trackTxEvent(signedTxId, true))
+
+      expect(isCreationArg()).toBe(false)
+      expect(result.current.isCreation).toBe(true)
+    })
+
+    it('does not track an existing tx as a creation', async () => {
+      const existingTxId = buildTxId()
+      const { result } = renderContext({ txId: existingTxId })
+
+      await act(() => result.current.trackTxEvent(existingTxId, true))
+
+      expect(isCreationArg()).toBe(false)
+    })
   })
 
   describe('with the in-app nested Safe signer', () => {
