@@ -2,7 +2,6 @@ import * as constants from '../../support/constants'
 import * as main from './main.page'
 import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelector } from './create_tx.pages'
 
-export const newTransactionBtn = '[data-testid="new-tx-btn"]'
 const sendTokensButn = 'Send tokens'
 export const addToBatchBtn = 'Add to batch'
 const confirmBatchBtn = 'Confirm batch'
@@ -71,10 +70,6 @@ export function openBatchtransactionsModal() {
   cy.contains(batchedTransactionsStr).should('be.visible')
 }
 
-export function closeBatchtransactionsModal() {
-  cy.get('aside').find('[aria-label="close"]').click()
-}
-
 export function openNewTransactionModal() {
   cy.get(addNewTxBatch).click()
   cy.contains(sendTokensButn).click()
@@ -108,10 +103,6 @@ export function clickOnBatchCounter() {
 
 export function verifyBatchIconCount(count) {
   cy.get(`[data-track="batching: Batch sidebar open"] [aria-label="${count} batched transactions"]`).should('exist')
-}
-
-export function verifyNewTxButtonStatus(param) {
-  cy.get(newTransactionBtn).should(param)
 }
 
 export function isTxExpanded(index, option) {

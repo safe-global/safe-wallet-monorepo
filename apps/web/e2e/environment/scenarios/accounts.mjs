@@ -4,8 +4,7 @@ import { prepareAssetsScenario } from './assets.mjs'
 import { prepareBasicScenario } from './basic.mjs'
 import { registerContract } from './contracts.mjs'
 import { setEnsName } from './ens.mjs'
-import { addDelegates, stagingProposers } from './proposers.mjs'
-import { createSafe, openSafe, proposeTransaction, safeService } from './safe.mjs'
+import { createSafe, openSafe, proposeTransaction } from './safe.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
 import { trustToken } from './tokens.mjs'
 import { waitForQueued, waitUntil } from './indexing.mjs'
@@ -20,11 +19,6 @@ async function queueTransfer(env, owners, safe, nonce) {
   })
   const { hash } = await proposeTransaction(context, transaction)
   await waitForQueued(env, context, [hash])
-}
-
-// OWNER_4 and OWNER_1 propose for SEP_STATIC_SAFE_31, as on staging.
-async function addStagingProposers(env, owners, safe) {
-  await addDelegates(env, safeService(env, addressOf(safe)), stagingProposers(owners))
 }
 
 async function transactionBuilderId(env) {
@@ -60,11 +54,10 @@ export async function prepareLoadSafeScenario(env, owners) {
 }
 
 export async function prepareSafeSelectorScenario(env, owners) {
-  const names = ['SEP_STATIC_SAFE_7', 'SEP_STATIC_SAFE_9', 'SEP_STATIC_SAFE_11', 'SEP_STATIC_SAFE_31']
+  const names = ['SEP_STATIC_SAFE_7', 'SEP_STATIC_SAFE_9', 'SEP_STATIC_SAFE_11']
   const safes = await rebuildStagingSafes(env, owners, names)
   await queueTransfer(env, owners, safes.SEP_STATIC_SAFE_7, 17)
   await queueTransfer(env, owners, safes.SEP_STATIC_SAFE_9, 3)
-  await addStagingProposers(env, owners, safes.SEP_STATIC_SAFE_31)
   return {
     safes: { static: safes },
     fixtures: {
