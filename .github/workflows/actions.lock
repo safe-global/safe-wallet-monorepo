@@ -22,7 +22,7 @@ workflows:
         - 'expo/expo-github-action@9.0.0'
     '.github/workflows/mobile-linear-release.yml':
         - 'actions/checkout@v7.0.1'
-        - 'linear/linear-release-action@v0.18.0'
+        - 'linear/linear-release-action@v0.18.1'
     '.github/workflows/mobile-storybook-screenshots.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -129,7 +129,7 @@ workflows:
         - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-linear-release.yml':
         - 'actions/checkout@v7.0.1'
-        - 'linear/linear-release-action@v0.18.0'
+        - 'linear/linear-release-action@v0.18.1'
     '.github/workflows/web-nextjs-bundle-analysis.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -150,7 +150,7 @@ workflows:
     '.github/workflows/web-release-start.yml':
         - 'actions/checkout@v7.0.1'
         - 'crazy-max/ghaction-import-gpg@v7.0.0'
-        - 'linear/linear-release-action@v0.18.0'
+        - 'linear/linear-release-action@v0.18.1'
     '.github/workflows/web-storybook-screenshots-build.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.1'
@@ -170,7 +170,7 @@ workflows:
         - 'actions/setup-node@v6.4.0'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'crazy-max/ghaction-import-gpg@v7.0.0'
-        - 'linear/linear-release-action@v0.18.0'
+        - 'linear/linear-release-action@v0.18.1'
         - 'shogo82148/actions-upload-release-asset@v1.10.6'
         - 'softprops/action-gh-release@v3.0.3'
     '.github/workflows/web-tanstack-checks.yml':
@@ -310,9 +310,9 @@ dependencies:
         commit: 'sha1-eab7a230208c952974db8c3245cfd78402c7b385'
         owner_id: 12504344
         repo_id: 161909611
-    'linear/linear-release-action@v0.18.0':
-        ref: 'v0.18.0'
-        commit: 'sha1-d4af10092984f9bc6d5efa075b242bdf01333463'
+    'linear/linear-release-action@v0.18.1':
+        ref: 'v0.18.1'
+        commit: 'sha1-30f9ae77461ec29f07fffe0c52edd1909bfbb6f5'
         owner_id: 46686594
         repo_id: 1150447766
     'marocchino/sticky-pull-request-comment@v3.0.5':
