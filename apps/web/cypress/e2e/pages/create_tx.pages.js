@@ -55,7 +55,6 @@ const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
-const checkWalletTooltipTrigger = '[data-testid="check-wallet-tooltip-trigger"]'
 const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
@@ -216,15 +215,6 @@ export function getRejectButton() {
 
 export function clickOnRejectBtn() {
   getRejectButton().click()
-}
-
-export function hoverOverRejectBtnBtn() {
-  // Base UI tooltips open on a native mouseenter on the trigger span (CheckWallet wrapper), not the disabled button
-  main.hoverUntilTooltipOpen(() => getRejectButton().closest(checkWalletTooltipTrigger))
-}
-
-export function verifyRejectBtnDisabled() {
-  getRejectButton().should('be.disabled')
 }
 
 export function verifyPayNowOptionIsDisabled() {

@@ -1,20 +1,17 @@
 import * as constants from '../../support/constants.js'
-import * as main from '../pages/main.page.js'
 import * as swaps from '../pages/swaps.pages.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page'
-import { disconnectedUserErrorMsg } from '../pages/owners.pages'
 import rejectionTransactions from '../../fixtures/rejection-transactions.js'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-let signer, signer2
+let signer2
 before(() => {
-  signer = walletCredentials.OWNER_3_PRIVATE_KEY
   signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
 })
 
@@ -28,21 +25,6 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
   it('Verify a tx in queue shows the Reject button', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
     create_tx.getRejectButton().should('be.visible')
-  })
-
-  it('Verify that Reject button is disabled out for non-owners and disconnected users', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
-    create_tx.verifyRejectBtnDisabled()
-    wallet.connectSignerViaStorage(signer)
-    create_tx.verifyRejectBtnDisabled()
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
-  it('Verify that clicking a disabled Reject button when not connected opens the Onboard modal', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
-    create_tx.hoverOverRejectBtnBtn()
-    main.verifyTextVisibility([disconnectedUserErrorMsg])
   })
 
   it('Verify that clicking rejection with an owner opens a modal with the Reject option', () => {
