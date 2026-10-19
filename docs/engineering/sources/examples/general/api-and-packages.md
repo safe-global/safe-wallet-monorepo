@@ -412,3 +412,36 @@ const Banner = ({ location, isShown }: Props) => {
 ### Why
 
 A mount effect re-fires when its deps change and also runs while a parent keeps the UI mounted but hidden, which inflates reach and lowers click-through. The ref limits each mount to one event, and the visibility flag ties it to a real impression.
+
+## OBS-01 — Take event properties from the call that fires it
+
+Source: PR #9020 (RL-20261013-003)
+
+### Avoid
+
+```ts
+// Every caller has to remember this before it starts a checkout
+dispatch(checkoutEntrySet(entry))
+void checkout(paymentLinkId)
+
+// Listener on the checkout request
+trackEvent(EVENTS.CHECKOUT_STARTED, { ...plan, ...getState().checkoutEntry })
+```
+
+### Prefer
+
+```ts
+const startCheckout = useCallback(
+  async (paymentLinkId: string, props: CheckoutProps) => {
+    const result = await trigger({ spaceId, paymentLinkId, returnUrl })
+    if (!result.data) return
+    trackEvent(EVENTS.CHECKOUT_STARTED, props)
+    navigateTo(result.data.url)
+  },
+  [spaceId, returnUrl, trigger],
+)
+```
+
+### Why
+
+Nothing enforces the dispatch, so a caller that skips it sends the previous checkout's entry point, and the slice is never cleared. Passing the properties into the call that fires the event adds no global state and sends the event only after the request succeeds. The PR dropped the property instead, because the funnel reads the entry point from its first step; either way, no global slice.

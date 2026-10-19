@@ -9927,5 +9927,344 @@
     "ruleIds": [
       "API-01"
     ]
+  },
+  {
+    "id": "RL-20261009-001",
+    "title": "Package tests and stories reaching into the app for test utils",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8988
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4229281756,
+      4229859099,
+      4230337270
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A new shared package kept tests and stories that import `@/tests/test-utils` and other app modules, so `apps/web/tsconfig.json` had to include the package sources for type-checking. A reviewer asked why `store` and `utils` need no such include and said the package needs its own test utils; the author agreed that is the clean version. A package imports nothing from an app, tests and stories included, so its own tsconfig checks all of it.",
+    "ruleIds": [
+      "PKG-02"
+    ]
+  },
+  {
+    "id": "RL-20261009-002",
+    "title": "Moved stories dropped out of the CI workflows that run them",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8988
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4230112355,
+      4230489182
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Stories moved into `packages/views` were added to the Storybook config, but the snapshot workflow triggered only on `apps/web/**` and the changed-story screenshot step only scanned `apps/web/src`, so changes to the package would run neither. The fix added the package to the workflow `paths` and to the story discovery. When code moves to a new location, its CI path filters and test or story discovery move with it.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261009-003",
+    "title": "Moving an asset into a package broke the public URL that code still emitted",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8988
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5470051305
+    ],
+    "issueCommentIds": [
+      6081664112
+    ],
+    "learning": "Moving `apps-icon.svg` into the views package removed `/images/apps/apps-icon.svg` from `apps/web/public`, while two consumers still emit that URL, so the fallback icon returned 404. The public copy was restored next to the package copy. A URL-served asset is a public contract like an export: before moving or deleting it, search for consumers that build its URL.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20261009-004",
+    "title": "One mapper importing a shared helper from its peer mapper",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8851
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6076477471,
+      6076648534
+    ],
+    "learning": "`mapPendingPolicies.ts` imported `toPolicyToken` from its peer `mapActivePolicies.ts`, coupling two files meant to be siblings. The helper and its fallback moved into `utils/toPolicyToken.ts`, which both mappers import. A helper that peer modules share gets its own module.",
+    "ruleIds": [
+      "CODE-01"
+    ]
+  },
+  {
+    "id": "RL-20261009-005",
+    "title": "Client type looser than the field the gateway guarantees",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8851
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6076477471,
+      6076648534
+    ],
+    "learning": "`PolicyTokenInfo.logoUri` was typed `?: string | null` although CGW now always returns a string and the only null comes from the local unknown-token fallback. It was narrowed to a required `string | null`. A type states what its source guarantees: a field that is always set is not optional.",
+    "ruleIds": [
+      "TYPE-01"
+    ]
+  },
+  {
+    "id": "RL-20261012-001",
+    "title": "Click helper asserting the link href before clicking",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9003
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4228119231
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A Cypress click helper asserted that the Safe App link `href` matched a Safe pattern before clicking, so every spec depended on how the link encodes its target and would fail on a valid move to client-side navigation. The merged change dropped the `href` checks and fixed the product to read the Safe from the URL until the router is ready. E2E helpers assert what the user sees or the navigation that follows, not implementation details such as a link `href`.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261013-001",
+    "title": "App bootstrap change without a test of the new mount gate",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9034
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4249282416,
+      4249473754
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Skipping the server render in `next dev` added a client mount gate to `_app` that changes how every page starts, with no test. The gate moved into a `RenderAfterMount` component with a test that server-renders it empty and hydrates without a hydration error. A new hydration or startup branch is extracted where a test can exercise it.",
+    "ruleIds": [
+      "TEST-02"
+    ]
+  },
+  {
+    "id": "RL-20261013-002",
+    "title": "Dev and build script changes not reflected in AGENTS.md",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9034
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4249282426,
+      4249474080
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The Next 16 upgrade added `--webpack` to the dev, start and build scripts and a dev-only server-render stub, but `apps/web/AGENTS.md` did not mention either, so a later change could drop them. Two pitfalls were added to that file. A change to scripts or the framework setup updates the nearest AGENTS.md in the same PR.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261013-003",
+    "title": "Analytics property carried through a global slice that callers must set first",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9020
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5490712338
+    ],
+    "issueCommentIds": [
+      6142295122
+    ],
+    "learning": "To put `entry_point` on \"Checkout started\", every place that starts a checkout dispatched `checkoutEntrySet` into a new slice that a listener read. Nothing enforced the dispatch, so a missed call sends the previous checkout's entry point, and the value was never cleared. The slice and the property were dropped, since the funnel takes the entry point from its first step. An event takes its properties from the call that fires it (the hook, after the request succeeds) or goes without them, never from global state a caller must set beforehand.",
+    "ruleIds": [
+      "OBS-01"
+    ]
+  },
+  {
+    "id": "RL-20261013-004",
+    "title": "Tooltip-wrapped addon button repeated instead of named once",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8990
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4257553463,
+      4258358231
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The Tenderly settings repeat an `InputGroupButton` wrapped in a `Tooltip` with a `TooltipContent` label, a pattern already used in several places. The reviewer suggested a component or a `tooltip` prop on the input group addon; the author agreed and deferred it because the pattern predates the PR. Repeated wrapper markup is named once, like repeated styling.",
+    "ruleIds": [
+      "CODE-02"
+    ]
+  },
+  {
+    "id": "RL-20261014-001",
+    "title": "E2E specs with inline test addresses, chain IDs and hostnames",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9075,
+      9065
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4261553698,
+      4262019094,
+      4258571152,
+      4260595985
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A Playwright spec declared its own contact address and Sepolia chain ID instead of `TEST_ADDRESSES` and `CHAIN_IDS` from the shared E2E data module, and a sign-in fixture waited for `url.hostname === 'localhost'`, which times out when `SAFE_E2E_WEB_URL` points at another host. Both now read the shared source: the constants module, and the origin of the configured Playwright `baseURL`.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261014-002",
+    "title": "E2E test names that do not follow the should-when pattern",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9075
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4261553679,
+      4262018740
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "New Playwright tests were named `that … after the code`. The E2E guidance requires `should [expected behavior] when [condition]` so a CI failure reads as the broken behavior; the 14 new tests were renamed.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261014-003",
+    "title": "Prop kept and made optional although nothing reads it",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9027
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4257016318,
+      4263337457
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The PR made `txInfo` optional on `SpendingLimits` instead of noticing that the component never reads it. The prop and the one place that passed it were removed. A prop the change touches that has no reader is deleted, not loosened.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20261014-004",
+    "title": "List key that two rendered rows can share",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9027
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4257044363,
+      4263337733
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Removed spenders rendered with `key={spender}`; the Policies flow cannot repeat a spender, but the decoder accepts any batch of Allowance module calls, so a hand-built batch can. The key became `${spender}-${index}`. A list key covers everything that distinguishes the rendered entries the input allows, not only the entries the usual flow produces.",
+    "ruleIds": [
+      "DATA-06"
+    ]
+  },
+  {
+    "id": "RL-20261014-005",
+    "title": "Type name kept after its use widened",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9076
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6165674918,
+      6166161410
+    ],
+    "learning": "The `GetSafeSecurityHref` callback type was reused for the Setup page link, so its name no longer described it; it was renamed `GetSafeHref`. When a type or function gains a broader use, its name follows.",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20261015-001",
+    "title": "Narrative and multi-line comments, and ticket references in comments",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      9093,
+      9075,
+      8980
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4282045011,
+      4282608792,
+      4261553656,
+      4262018454,
+      4229834092,
+      4229888490,
+      4230804296,
+      4230804555
+    ],
+    "reviewIds": [
+      5469694383
+    ],
+    "issueCommentIds": [],
+    "learning": "Reviewers again cut comments back to one line of non-obvious why: a two-line comment restating a reset effect, multi-paragraph spec headers, verbose comments across a nested-signer PR, and a JSDoc that cited a ticket (`PLA-1897`). Each was condensed to one line or removed, and the ticket reference was dropped.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261015-002",
+    "title": "Entity-scoped state reset by an effect or by comparing a stored id",
+    "sourceWindowId": "CLOSED-20261008-20261016",
+    "prNumbers": [
+      8979,
+      9093
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4208795693,
+      4282608792
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A chooser that asks once per visit to a Safe stored the answered Safe and compared it with the current one, so leaving and reopening the same Safe skipped the question; it now remounts per visit with `key={safeKey}`. A risk confirmation was reset by an effect keyed on the transaction and findings; the provider now stores the key of the confirmed risk and derives `isRiskConfirmed` from it. State that belongs to one entity resets by remounting on that entity or is derived from the id it was set for, not by an effect.",
+    "ruleIds": [
+      "STATE-02"
+    ]
   }
 ]

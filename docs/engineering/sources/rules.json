@@ -38,8 +38,8 @@
     "project": "web",
     "area": "abstractions",
     "title": "Extract shared UI only when behavior is actually shared",
-    "rule": "When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`.",
-    "check": "Did this add a component that mirrors an existing workflow, or logic another call site or app already has? If yes, can the existing component accept the small differences as props, or the logic move into a shared hook or package?",
+    "rule": "When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`, and a helper peer modules share gets its own module rather than one peer importing it from another.",
+    "check": "Did this add a component that mirrors an existing workflow, or logic another call site or app already has? If yes, can the existing component accept the small differences as props, or the logic move into a shared hook, package, or its own module?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#shared-form-components",
       "web/examples/feature-boundaries.md#code-01-fold-near-duplicate-sign-in-buttons-into-one-configurable-component",
@@ -68,7 +68,8 @@
       "RL-20260911-003",
       "RL-20260916-004",
       "RL-20260930-002",
-      "RL-20261008-003"
+      "RL-20261008-003",
+      "RL-20261009-004"
     ]
   },
   {
@@ -76,8 +77,8 @@
     "project": "web",
     "area": "abstractions",
     "title": "Extract repeated styling into named structure",
-    "rule": "Repeated or long styling patterns should move into a small component, class helper, or CSS module when that makes call sites readable and consistent.",
-    "check": "Did this repeat a long class list, shadow, or layout pattern? If yes, should it be named once and reused?",
+    "rule": "Repeated or long styling or wrapper-markup patterns should move into a small component, class helper, or CSS module when that makes call sites readable and consistent.",
+    "check": "Did this repeat a long class list, shadow, layout, or wrapper-markup pattern? If yes, should it be named once and reused?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#repeated-style-shape",
       "web/examples/feature-boundaries.md#code-02-move-heavy-tailwind-class-strings-into-css-modules",
@@ -91,7 +92,8 @@
       "RL-20260608-002",
       "RL-20260612-009",
       "RL-20260623-001",
-      "RL-20260806-007"
+      "RL-20260806-007",
+      "RL-20261013-004"
     ]
   },
   {
@@ -123,8 +125,8 @@
     "project": "general",
     "area": "api",
     "title": "Search consumers when removing or changing public exports",
-    "rule": "Removing or changing a public export, hook return field, endpoint, compatibility API, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.",
-    "check": "Did this remove, rename, or change what an exported API or shared hook returns? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?",
+    "rule": "Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.",
+    "check": "Did this remove, rename, or change what an exported API or shared hook returns, or move a URL-served asset? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?",
     "exampleRefs": [
       "examples/general/api-and-packages.md#api-01-drop-in-replacements-preserve-the-original-prop-surface"
     ],
@@ -140,7 +142,9 @@
       "RL-20260921-002",
       "RL-20260930-009",
       "RL-20260929-005",
-      "RL-20261008-008"
+      "RL-20261008-008",
+      "RL-20261009-003",
+      "RL-20261014-003"
     ]
   },
   {
@@ -279,11 +283,12 @@
     "project": "general",
     "area": "data",
     "title": "Use the canonical helper, predicate, or constant",
-    "rule": "Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`) and use it. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.",
-    "check": "Did this add a helper or constant, or create, parse, or classify a formatted value or domain state? If yes, does an existing helper, constant, or predicate already do it, and does any call site that bypasses one keep its fallbacks?",
+    "rule": "Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`, E2E `TEST_ADDRESSES`/`CHAIN_IDS`) and use it; E2E helpers take hosts from the configured `baseURL`. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.",
+    "check": "Did this add a helper or constant, hardcode a test address, chain ID, or host, or create, parse, or classify a formatted value or domain state? If yes, does an existing helper, constant, or predicate already do it, and does any call site that bypasses one keep its fallbacks?",
     "exampleRefs": [
       "examples/general/chain-contracts.md#normalize-versions-and-origin",
-      "examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting"
+      "examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting",
+      "examples/general/testing.md#data-04-read-e2e-test-data-and-hosts-from-shared-sources"
     ],
     "reviewLearningIds": [
       "RL-20260220-003",
@@ -301,7 +306,8 @@
       "RL-20260722-002",
       "RL-20260812-001",
       "RL-20260930-001",
-      "RL-20261008-002"
+      "RL-20261008-002",
+      "RL-20261014-001"
     ]
   },
   {
@@ -388,14 +394,15 @@
     "project": "general",
     "area": "testing",
     "title": "Assertions must fail on the regression they claim to cover",
-    "rule": "Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears.",
-    "check": "Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished?",
+    "rule": "Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E helpers assert what the user sees or the navigation that follows, not implementation details such as a link `href`.",
+    "check": "Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished, and keep passing through a refactor that keeps the behavior?",
     "exampleRefs": [
       "examples/general/testing.md#negative-assertions",
       "examples/general/testing.md#test-01-assert-the-specific-behavior-the-description-claims",
       "examples/general/testing.md#test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state",
       "examples/general/testing.md#test-01-test-the-debounce-not-just-the-post-debounce-assertion",
-      "examples/general/testing.md#overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries"
+      "examples/general/testing.md#overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries",
+      "examples/general/testing.md#test-01-click-links-without-asserting-their-href"
     ],
     "reviewLearningIds": [
       "RL-20260217-001",
@@ -418,7 +425,8 @@
       "RL-20260826-002",
       "RL-20260911-002",
       "RL-20260925-002",
-      "RL-20261002-003"
+      "RL-20261002-003",
+      "RL-20261012-001"
     ]
   },
   {
@@ -454,7 +462,8 @@
       "RL-20260909-003",
       "RL-20260921-005",
       "RL-20261001-002",
-      "RL-20261002-003"
+      "RL-20261002-003",
+      "RL-20261013-001"
     ]
   },
   {
@@ -482,9 +491,9 @@
     "project": "general",
     "area": "testing",
     "title": "Moved behavior needs replacement coverage and matching mocks",
-    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed.",
-    "check": "Did this move or remove a return field, prop, branch, or dependency? If yes, did equivalent tests move to the new owner, and do the tests' mocks still match what the code imports?",
-    "exampleRefs": [],
+    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. CI path filters and test or story discovery cover the new location.",
+    "check": "Did this move or remove a return field, prop, branch, or dependency? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, and do CI triggers still run them?",
+    "exampleRefs": ["examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move"],
     "reviewLearningIds": [
       "RL-20260428-002",
       "RL-20260428-003",
@@ -496,7 +505,8 @@
       "RL-20260806-001",
       "RL-20260812-002",
       "RL-20260921-010",
-      "RL-20261001-002"
+      "RL-20261001-002",
+      "RL-20261009-002"
     ]
   },
   {
@@ -554,11 +564,12 @@
     "project": "web",
     "area": "observability",
     "title": "Promote telemetry only when user impact justifies it",
-    "rule": "Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.",
-    "check": "Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point, do impressions fire once and only when visible, and do existing events keep their properties?",
+    "rule": "Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one, and event properties come from the call that fires it, never from global state a caller must set first. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.",
+    "check": "Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point by the call that fires it, do impressions fire once and only when visible, and do existing events keep their properties?",
     "exampleRefs": [
       "examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key",
-      "examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown"
+      "examples/general/api-and-packages.md#obs-01-track-an-impression-once-and-only-when-shown",
+      "examples/general/api-and-packages.md#obs-01-take-event-properties-from-the-call-that-fires-it"
     ],
     "reviewLearningIds": [
       "RL-20260319-001",
@@ -570,7 +581,8 @@
       "RL-20260824-002",
       "RL-20260914-002",
       "RL-20260921-007",
-      "RL-20261007-001"
+      "RL-20261007-001",
+      "RL-20261013-003"
     ]
   },
   {
@@ -617,7 +629,10 @@
     "title": "Keep docs, comments, and agent guidance true to the code",
     "rule": "Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs; a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.",
     "check": "Did this move docs, add a comment, change logic a comment describes, or change a runbook, disclosure, framework, script, or tool? If yes, is every removed section accounted for, is each comment one line of why that matches the code, and do runbooks, disclosures, and AGENTS.md match the real setup?",
-    "exampleRefs": [],
+    "exampleRefs": [
+      "examples/general/comments-and-docs.md#doc-01-one-line-of-why-no-narration-or-ticket-ids",
+      "examples/general/comments-and-docs.md#doc-01-name-e2e-tests-with-should-and-when"
+    ],
     "reviewLearningIds": [
       "RL-20260303-008",
       "RL-20260318-012",
@@ -638,7 +653,10 @@
       "RL-20261008-006",
       "RL-20260415-001",
       "RL-20260615-007",
-      "RL-20260928-001"
+      "RL-20260928-001",
+      "RL-20261013-002",
+      "RL-20261014-002",
+      "RL-20261015-001"
     ]
   },
   {
@@ -807,11 +825,12 @@
     "id": "STATE-02",
     "area": "state",
     "title": "Reset context state when its precondition flips",
-    "rule": "When an effect writes derived values into a context based on a precondition, the false branch explicitly resets them; do not rely on the next true branch to overwrite them. Telemetry user context (`setUser`, `addUserExtraInfo`, `identify`) is cleared the same way when its entity becomes absent.",
-    "check": "Does this conditional context or telemetry-context write also clear its values when the condition turns false or the entity disappears, so consumers never see stale data?",
+    "rule": "When an effect writes derived values into a context based on a precondition, the false branch explicitly resets them; do not rely on the next true branch to overwrite them. Telemetry user context (`setUser`, `addUserExtraInfo`, `identify`) is cleared the same way when its entity becomes absent. A component whose local state belongs to one entity remounts with `key={entityId}` or derives that state from the id it was set for, instead of resetting it in an effect.",
+    "check": "Does this conditional context or telemetry-context write also clear its values when the condition turns false or the entity disappears, so consumers never see stale data, and does entity-scoped local state reset through a `key` or a stored id instead of an effect?",
     "exampleRefs": [
       "examples/general/data-integrity.md#state-02-reset-context-state-when-its-precondition-flips",
-      "mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null"
+      "mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null",
+      "examples/general/data-integrity.md#state-02-reset-entity-scoped-state-with-a-key-not-an-effect"
     ],
     "reviewLearningIds": [
       "RL-20260318-007",
@@ -820,7 +839,8 @@
       "RL-20260716-006",
       "RL-20260820-002",
       "RL-20260916-005",
-      "RL-20260311-013"
+      "RL-20260311-013",
+      "RL-20261015-002"
     ],
     "project": "general"
   },
@@ -888,7 +908,8 @@
       "RL-20260716-005",
       "RL-20260806-005",
       "RL-20260911-001",
-      "RL-20261002-005"
+      "RL-20261002-005",
+      "RL-20261014-005"
     ],
     "project": "general"
   },
@@ -1009,11 +1030,12 @@
     "id": "DATA-06",
     "area": "data",
     "title": "Normalize shared identifiers and keys one way",
-    "rule": "Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache or dedup key covers every input that changes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.",
-    "check": "Did this compare or consume an address, identifier, or user input, or build a cache/dedup key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?",
+    "rule": "Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache, dedup, or list `key` covers every input that changes or distinguishes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.",
+    "check": "Did this compare or consume an address, identifier, or user input, or build a cache, dedup, or list key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?",
     "exampleRefs": [
       "examples/general/data-integrity.md#normalize-rtk-query-cache-keys-at-one-place",
-      "examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase"
+      "examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase",
+      "examples/general/data-integrity.md#data-06-key-list-items-by-everything-that-distinguishes-them"
     ],
     "reviewLearningIds": [
       "RL-20260218-002",
@@ -1031,7 +1053,8 @@
       "RL-20260716-002",
       "RL-20260716-003",
       "RL-20260930-001",
-      "RL-20260302-001"
+      "RL-20260302-001",
+      "RL-20261014-004"
     ],
     "project": "general"
   },
@@ -1198,7 +1221,8 @@
       "RL-20260811-006",
       "RL-20260828-002",
       "RL-20261001-004",
-      "RL-20261002-004"
+      "RL-20261002-004",
+      "RL-20261009-005"
     ]
   },
   {
@@ -1240,8 +1264,8 @@
     "project": "general",
     "area": "packages",
     "title": "Import only declared dependencies, through their public entrypoint",
-    "rule": "App code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
-    "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses?",
+    "rule": "App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
+    "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses, and does package code import nothing from an app?",
     "exampleRefs": [],
     "reviewLearningIds": [
       "RL-20260610-001",
@@ -1249,7 +1273,8 @@
       "RL-20260629-001",
       "RL-20260708-001",
       "RL-20260729-001",
-      "RL-20260413-006"
+      "RL-20260413-006",
+      "RL-20261009-001"
     ]
   },
   {
