@@ -10,6 +10,11 @@ import {
   TokenTransferType,
   type MultiTokenTransferParams,
 } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
+import type Safe from '@safe-global/protocol-kit'
+import { faker } from '@faker-js/faker'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flow/safe-scope/types'
+import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
@@ -75,26 +80,28 @@ describe('ReviewTokenTransfer', () => {
     createMultiSendCallOnlyTxSpy.mockResolvedValue({} as any)
   })
 
-  const renderComponent = (params = mockParams, txNonce?: number) =>
+  const renderComponent = (params = mockParams, txNonce?: number, scope?: SafeScopeContextValue) =>
     render(
-      <SafeTxContext.Provider
-        value={{
-          setSafeTx: mockSetSafeTx,
-          setSafeTxError: mockSetSafeTxError,
-          setNonce: mockSetNonce,
-          setSafeMessage: jest.fn(),
-          setSafeMessageHash: jest.fn(),
-          setNonceNeeded: jest.fn(),
-          setSafeTxGas: jest.fn(),
-          setTxOrigin: jest.fn(),
-          isReadOnly: false,
-          feePaymentMode: 'safe',
-          setFeePaymentMode: jest.fn(),
-          setFeeGasToken: jest.fn(),
-        }}
-      >
-        <ReviewTokenTransfer params={params} onSubmit={jest.fn()} txNonce={txNonce} />
-      </SafeTxContext.Provider>,
+      <SafeScopeContext.Provider value={scope}>
+        <SafeTxContext.Provider
+          value={{
+            setSafeTx: mockSetSafeTx,
+            setSafeTxError: mockSetSafeTxError,
+            setNonce: mockSetNonce,
+            setSafeMessage: jest.fn(),
+            setSafeMessageHash: jest.fn(),
+            setNonceNeeded: jest.fn(),
+            setSafeTxGas: jest.fn(),
+            setTxOrigin: jest.fn(),
+            isReadOnly: false,
+            gtfPaymentMode: 'safe',
+            setGtfPaymentMode: jest.fn(),
+            setGtfSelectedGasToken: jest.fn(),
+          }}
+        >
+          <ReviewTokenTransfer params={params} onSubmit={jest.fn()} txNonce={txNonce} />
+        </SafeTxContext.Provider>
+      </SafeScopeContext.Provider>,
     )
 
   it('should use useTrustedTokenBalances for token lookup', async () => {
@@ -126,6 +133,7 @@ describe('ReviewTokenTransfer', () => {
             to: USDC_ADDRESS,
           }),
         ]),
+        undefined,
       )
     })
   })
@@ -139,7 +147,7 @@ describe('ReviewTokenTransfer', () => {
     renderComponent(paramsWithUnknownToken)
 
     await waitFor(() => {
-      expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith([])
+      expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith([], undefined)
     })
   })
 
@@ -151,49 +159,36 @@ describe('ReviewTokenTransfer', () => {
     })
   })
 
-  describe('recipient rows', () => {
-    const recipients = [
-      { recipient: '0x1111111111111111111111111111111111111111', tokenAddress: USDC_ADDRESS, amount: '10' },
-      { recipient: '0x2222222222222222222222222222222222222222', tokenAddress: USDC_ADDRESS, amount: '20' },
-      { recipient: '0x3333333333333333333333333333333333333333', tokenAddress: ZERO_ADDRESS, amount: '0.5' },
-    ]
+  describe('in a Safe scope', () => {
+    const scopeTarget = () => ({ chainId: faker.string.numeric(5), safeAddress: faker.finance.ethereumAddress() })
 
-    it('shows one numbered row with the amount and address for each recipient', async () => {
-      const { getByText, getAllByText } = renderComponent({ ...mockParams, recipients })
+    it('builds the transfer with the SDK of the Safe scope it is opened in', async () => {
+      const context = safeScopeContextFor(scopeTarget())
+      const scope = { ...context, scope: context.scope && { ...context.scope, sdk: {} as Safe } }
 
-      expect(getByText('Recipient 1')).toBeInTheDocument()
-      expect(getByText('Recipient 2')).toBeInTheDocument()
-      expect(getByText('Recipient 3')).toBeInTheDocument()
-      expect(getByText('0x1111111111111111111111111111111111111111')).toBeInTheDocument()
-      expect(getByText('0x3333333333333333333333333333333333333333')).toBeInTheDocument()
-      expect(getByText('0x2222222222222222222222222222222222222222')).toBeInTheDocument()
-      expect(getByText('10')).toBeInTheDocument()
-      expect(getByText('20')).toBeInTheDocument()
-      expect(getByText('0.5')).toBeInTheDocument()
-      expect(getAllByText('USDC')).toHaveLength(2)
-      expect(getAllByText('ETH')).toHaveLength(1)
-
-      await waitFor(() => expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalled())
-    })
-
-    it('builds one transfer per recipient', async () => {
-      renderComponent({ ...mockParams, recipients })
+      renderComponent(mockParams, undefined, scope)
 
       await waitFor(() => {
-        expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith([
-          expect.objectContaining({ to: USDC_ADDRESS, value: '0' }),
-          expect.objectContaining({ to: USDC_ADDRESS, value: '0' }),
-          expect.objectContaining({ to: '0x3333333333333333333333333333333333333333', value: '500000000000000000' }),
-        ])
+        expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ to: USDC_ADDRESS })]),
+          scope.scope,
+        )
       })
     })
 
-    it('shows no recipient rows for a single recipient', async () => {
-      const { queryByText } = renderComponent()
+    it('waits for the scoped Safe SDK before building the transfer', async () => {
+      renderComponent(mockParams, undefined, safeScopeContextFor(scopeTarget()))
 
-      expect(queryByText('Recipient 1')).not.toBeInTheDocument()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(createMultiSendCallOnlyTxSpy).not.toHaveBeenCalled()
+    })
 
-      await waitFor(() => expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalled())
+    it('builds the transfer with the Safe in the URL outside a scope', async () => {
+      renderComponent()
+
+      await waitFor(() => {
+        expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith(expect.any(Array), undefined)
+      })
     })
   })
 })

@@ -20,40 +20,10 @@ import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { act, fireEvent, waitFor, within } from '@testing-library/react'
-import userEvent, { type UserEvent } from '@testing-library/user-event'
-import type { ReactElement } from 'react'
-
-jest.mock('@/features/safe-shield/hooks', () => ({
-  __esModule: true,
-  ...jest.requireActual('@/features/safe-shield/hooks'),
-  useRecipientAnalysis: jest.fn(() => undefined),
-  useCounterpartyAnalysis: jest.fn(() => ({
-    recipient: [undefined, undefined, false],
-    contract: [undefined, undefined, false],
-    deadlock: [undefined, undefined, false],
-  })),
-  useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
-}))
-
-jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
-  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
-  useRoles: jest.fn(() => []),
-}))
-
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
-  useIsHypernativeEligible: jest.fn(() => ({
-    isHypernativeEligible: false,
-    isHypernativeGuard: false,
-    isAllowlistedSafe: false,
-    loading: false,
-  })),
-}))
-
-jest.mock('@/features/ledger', () => {
-  const actual = jest.requireActual('@/features/ledger')
-  return { __esModule: true, ...actual, LedgerFeature: { ...actual.LedgerFeature, useIsEnabled: () => false } }
-})
+import { act, fireEvent, waitFor } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -205,6 +175,51 @@ describe('CreateTokenTransfer', () => {
     mockSpendingLimitToken()
 
     const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
+
+    expect(queryByText('Send as')).not.toBeInTheDocument()
+  })
+
+  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', () => {
+    jest
+      .spyOn(tokenUtils, 'useTokenAmount')
+      .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      },
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+    const scope = safeScopeContextFor({
+      chainId: faker.string.numeric(5),
+      safeAddress: faker.finance.ethereumAddress(),
+    })
+
+    const { queryByText } = render(
+      <SafeScopeContext.Provider value={scope}>
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>
+      </SafeScopeContext.Provider>,
+    )
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
   })
