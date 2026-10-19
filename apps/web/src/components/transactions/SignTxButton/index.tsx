@@ -2,7 +2,7 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import { useIsExpiredSwap } from '@/features/swap'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import type { SyntheticEvent } from 'react'
-import { useContext, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 
@@ -12,12 +12,12 @@ import Track from '@/components/common/Track'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { TxModalContext } from '@/components/tx-flow'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 
 const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; compact?: boolean }): ReactElement => {
-  const { setTxFlow } = useContext(TxModalContext)
+  const setTxFlow = useSetScopedTxFlow()
   const wallet = useWallet()
   const nestedOwners = useNestedSafeOwners()
   const isSafeOwner = useIsSafeOwner()

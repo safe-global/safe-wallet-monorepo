@@ -13,7 +13,7 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { ReplaceTxHoverContext } from '../GroupedTxListItems/ReplaceTxHoverProvider'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { TxModalContext } from '@/components/tx-flow'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 
 const ExecuteTxButton = ({
@@ -23,7 +23,7 @@ const ExecuteTxButton = ({
   txSummary: Transaction
   compact?: boolean
 }): ReactElement => {
-  const { setTxFlow } = useContext(TxModalContext)
+  const setTxFlow = useSetScopedTxFlow()
   const { safe } = useSafeInfo()
   const txNonce = isMultisigExecutionInfo(txSummary.executionInfo) ? txSummary.executionInfo.nonce : undefined
   const isPending = useIsPending(txSummary.id)

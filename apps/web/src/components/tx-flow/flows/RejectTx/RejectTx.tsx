@@ -6,9 +6,11 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 const RejectTx = ({ onSubmit, children }: ReviewTransactionProps): ReactElement => {
   const { txNonce } = useContext(TxFlowContext)
+  const scope = useSafeScope()
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
 
   useEffect(() => {
@@ -16,8 +18,10 @@ const RejectTx = ({ onSubmit, children }: ReviewTransactionProps): ReactElement 
 
     setNonce(txNonce)
 
-    createRejectTx(txNonce).then(setSafeTx).catch(setSafeTxError)
-  }, [txNonce, setNonce, setSafeTx, setSafeTxError])
+    // A Space-level scope has no SDK until it is initialised; building without it fails.
+    if (scope && !scope.sdk) return
+    createRejectTx(txNonce, scope).then(setSafeTx).catch(setSafeTxError)
+  }, [txNonce, scope, setNonce, setSafeTx, setSafeTxError])
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>
