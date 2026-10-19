@@ -135,9 +135,9 @@ describe('TxFlowProvider', () => {
     it('tracks a new tx as a creation', async () => {
       const { result } = renderContext({})
 
-      await act(() => result.current.trackTxEvent(buildTxId(), true))
+      act(() => result.current.trackTxEvent(buildTxId(), true))
 
-      expect(isCreationArg()).toBe(true)
+      await waitFor(() => expect(isCreationArg()).toBe(true))
     })
 
     it('does not track the execute step after signing a new tx as a second creation', async () => {
@@ -145,9 +145,9 @@ describe('TxFlowProvider', () => {
       const { result } = renderContext({})
 
       act(() => result.current.continueToExecute(signedTxId))
-      await act(() => result.current.trackTxEvent(signedTxId, true))
+      act(() => result.current.trackTxEvent(signedTxId, true))
 
-      expect(isCreationArg()).toBe(false)
+      await waitFor(() => expect(isCreationArg()).toBe(false))
       expect(result.current.isCreation).toBe(true)
     })
 
@@ -155,9 +155,9 @@ describe('TxFlowProvider', () => {
       const existingTxId = buildTxId()
       const { result } = renderContext({ txId: existingTxId })
 
-      await act(() => result.current.trackTxEvent(existingTxId, true))
+      act(() => result.current.trackTxEvent(existingTxId, true))
 
-      expect(isCreationArg()).toBe(false)
+      await waitFor(() => expect(isCreationArg()).toBe(false))
     })
   })
 
