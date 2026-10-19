@@ -9,8 +9,6 @@ import sidebar from '../../fixtures/sidebar.js'
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
-const sidebarTopBar = '[data-testid="sidebar-top-bar"]'
-const sidebarTrigger = '[data-testid="sidebar-trigger"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
 export const copyAddressBtn = '[data-testid="copy-address-btn"]'
@@ -376,14 +374,6 @@ export function openSidebar() {
   cy.wait(500)
   showAllSafes()
   main.verifyElementsExist([sidebarSafeContainer])
-}
-
-export function collapseSidebar() {
-  cy.get(sidebarTrigger).click()
-}
-
-export function verifySidebarCollapsed() {
-  cy.get(sidebarTopBar).should('have.attr', 'data-sidebar-state', 'collapsed')
 }
 
 export function verifyAddedSafesExist(safes) {

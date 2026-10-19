@@ -40,14 +40,6 @@ export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
 export const spaceDashboardUrl = '/spaces?spaceId='
-export const spaceMembersUrl = '/spaces/members?spaceId='
-export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
-export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
-export const spaceSettingsGeneralUrl = '/spaces/settings/general?spaceId='
-export const spaceSettingsAccountUrl = '/spaces/settings/account?spaceId='
-export const spaceSettingsAboutUrl = '/spaces/settings/about?spaceId='
-export const spaceSecurityUrl = '/spaces/security?spaceId='
-export const spaceActivityUrl = '/spaces/activity?spaceId='
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
@@ -58,9 +50,6 @@ export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
 export const appsUrlGeneral = '/apps?safe='
-export const stakingUrl = '/stake?safe='
-export const earnUrl = '/earn?safe='
-export const bridgeUrl = '/bridge?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='
@@ -86,14 +75,11 @@ export const appsUrl = '/apps'
 export const requestPermissionsUrl = '/request-permissions'
 export const getPermissionsUrl = '/get-permissions'
 export const appSettingsUrl = '/settings/safe-apps'
-export const safeAppsSettingsUrl = '/settings/safe-apps?safe='
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
 export const securityUrl = '/settings/security?safe='
-export const cookiesUrl = '/settings/cookies?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
-export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = (
@@ -101,7 +87,6 @@ export const stagingTxServiceUrl = (
 ).replace(/\/$/, '')
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
-export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl =
   (Cypress.expose('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
@@ -122,11 +107,6 @@ export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
-export const messagesEndpoint = '**/v1/chains/**/safes/**/messages*'
-// Must stay scoped to the API path: a bare '**/collectibles*' also matches the Vite dev-server
-// module URL for store/gateway/AUTO_GENERATED/collectibles.ts, and fulfilling that with JSON
-// kills the whole app on load (module MIME type error).
-export const collectiblesEndpoint = '**/v2/**/safes/**/collectibles*'
 export const chainsEndpoint = '**/v2/chains'
 export const chainConfigEndpoint = '**/v2/chains/*'
 export const safeInfoEndpoint = '**/v1/chains/*/safes/*'
@@ -288,8 +268,6 @@ export const licensesUrl = '/licenses'
 export const imprintUrl = '/imprint'
 export const cookiePolicyUrl = '/cookie'
 export const safeLabsTermsUrl = '/safe-labs-terms'
-export const error403Url = '/403'
-export const error404Url = '/404'
 
 export const chainFeatures = {
   positions: 'POSITIONS',
