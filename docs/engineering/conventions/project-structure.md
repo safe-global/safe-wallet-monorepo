@@ -8,7 +8,8 @@ For app-specific guidance, read the relevant project guide:
 - Web — [web/project-structure.md](./web/project-structure.md)
 - Mobile — [mobile/project-structure.md](./mobile/project-structure.md)
 
-Pre-PR rules live in [rules.json](../sources/rules.json). Run
+Pre-PR rules live in [rules.json](../sources/rules.json), with a readable
+view in [rules.generated.md](../sources/rules.generated.md). Run
 `/safe-code-review` before opening or finishing a PR; it checks every rule.
 
 ## Workspaces

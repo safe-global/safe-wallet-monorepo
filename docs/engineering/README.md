@@ -10,7 +10,9 @@ and applies it lives in the
 - `conventions/` — the canonical, ordered docs. Read these when writing code.
 - `sources/` — what conventions are built from: the durable rule index
   (`rules.json`), the PR-sourced receipts (`examples/`, `web/examples/`,
-  `mobile/examples/`), and `working/` (maintenance-only inputs).
+  `mobile/examples/`), the readable rule view with examples inlined
+  (`rules.generated.md`, regenerated with every rules change), and `working/`
+  (maintenance-only inputs).
 
 ## How To Use
 
@@ -44,6 +46,7 @@ docs/engineering/
       project-structure.md          # mobile-specific structure
   sources/
     rules.json                      # canonical PR rule checklist
+    rules.generated.md              # generated readable view of rules.json
     examples/
       general/                      # cross-project examples
     web/
