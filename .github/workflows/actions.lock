@@ -126,7 +126,7 @@ workflows:
         - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@v6.4.0'
         - 'actions/upload-artifact@v7.0.1'
-        - 'cypress-io/github-action@v6.10.9'
+        - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-linear-release.yml':
         - 'actions/checkout@v7.0.1'
         - 'linear/linear-release-action@v0.18.0'
@@ -278,6 +278,11 @@ dependencies:
     'cypress-io/github-action@v6.10.9':
         ref: 'v6.10.9'
         commit: 'sha1-f790eee7a50d9505912f50c2095510be7de06aa7'
+        owner_id: 8908513
+        repo_id: 219649445
+    'cypress-io/github-action@v7.4.6':
+        ref: 'v7.4.6'
+        commit: 'sha1-c541a95ea92d9239347a2355f2e895cd4b3f8060'
         owner_id: 8908513
         repo_id: 219649445
     'docker/build-push-action@v7.4.0':
