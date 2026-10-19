@@ -4383,6 +4383,83 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/safenet/checks": {
+      "post": {
+        "description": "Queues a Safenet check of a pending Safe transaction that an owner has signed. Safe Labs pays the fee and counts the check against the workspace in the path. The caller must be an active member of that workspace, the workspace must hold the Safe and have a plan that includes Safenet checks, and the chain must list SAFENET_CHECKS.",
+        "operationId": "safenetChecksRequestCheckV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSafenetCheckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued, or already queued"
+          },
+          "400": {
+            "description": "Malformed workspace identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Not a member of the workspace, or the workspace does not hold the Safe or its plan does not include checks"
+          },
+          "404": {
+            "description": "Workspace not found, or no such transaction for this Safe"
+          },
+          "422": {
+            "description": "The Safe is older than 1.3.0, or the transaction is executed or stale, unsigned by an owner, or of another Safe"
+          },
+          "429": {
+            "description": "The workspace has used its daily limit of sponsored Safenet checks"
+          },
+          "501": {
+            "description": "Safenet checks are not available on this chain"
+          }
+        },
+        "summary": "Request a Safenet check at a workspace expense",
+        "tags": [
+          "safenet"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
       "get": {
         "description": "Retrieves a list of Safe addresses that are owned by the specified address on a specific chain.",
@@ -7321,7 +7398,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-4d7887e",
+    "version": "main-a0de2d2",
     "contact": {}
   },
   "tags": [],
@@ -13319,7 +13396,8 @@
           "safe_seats",
           "copilot_scans",
           "sponsored_transactions",
-          "policies"
+          "policies",
+          "safenet_checks"
         ],
         "description": "Feature key from the entitlements catalog."
       },
@@ -13611,6 +13689,18 @@
           "requested",
           "reason",
           "available"
+        ]
+      },
+      "CreateSafenetCheckDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash"
+          }
+        },
+        "required": [
+          "safeTxHash"
         ]
       },
       "SafeList": {
