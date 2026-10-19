@@ -34,9 +34,15 @@ describe('RecoveryListItem', () => {
   it('renders as a collapsed transaction list row', () => {
     const { getByTestId, getByText, queryByText } = render(<RecoveryListItem item={item} />)
 
-    expect(getByTestId('recovery-item')).toBeInTheDocument()
+    expect(getByTestId('recovery-item')).not.toHaveClass('listItemNested')
     expect(getByText('Account recovery')).toBeInTheDocument()
     expect(queryByText('Recovery details')).not.toBeInTheDocument()
+  })
+
+  it('renders as a nested row inside a group', () => {
+    const { getByTestId } = render(<RecoveryListItem item={item} isNested />)
+
+    expect(getByTestId('recovery-item')).toHaveClass('listItemNested')
   })
 
   it('expands and collapses when the row is clicked', async () => {
