@@ -221,16 +221,15 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
                 rules={{ validate: validateCustomDelay }}
                 render={({ field, fieldState }) => (
                   <div className="mt-3">
-                    <div className="flex items-center gap-2">
+                    <div className="w-[180px]">
                       <NumberField
                         error={!!fieldState.error}
                         {...field}
                         required
                         placeholder="E.g. 100"
                         maxLength={MAX_CUSTOM_DELAY_DIGITS}
-                        className="w-[140px]"
+                        endAdornment="days"
                       />
-                      <Typography>days</Typography>
                     </div>
                     <Typography
                       variant="paragraph-small"
