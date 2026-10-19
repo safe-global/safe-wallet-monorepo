@@ -7321,7 +7321,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-4d7887e",
+    "version": "main-a2ee9a3",
     "contact": {}
   },
   "tags": [],
@@ -13319,7 +13319,8 @@
           "safe_seats",
           "copilot_scans",
           "sponsored_transactions",
-          "policies"
+          "policies",
+          "safenet_checks"
         ],
         "description": "Feature key from the entitlements catalog."
       },
