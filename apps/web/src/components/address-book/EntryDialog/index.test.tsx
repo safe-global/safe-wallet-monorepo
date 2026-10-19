@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { getAddress } from 'ethers'
+import { fakerChecksummedAddress, fireEvent, render, screen, waitFor, within } from '@/tests/test-utils'
+import * as useChains from '@/hooks/useChains'
+import * as analytics from '@/services/analytics'
+import { ADDRESS_POISONING_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import type { RootState } from '@/store'
 import EntryDialog from './index'
 import { useUpsertWorkspaceSafeName } from '@/features/spaces'
 import * as addressBookSlice from '@/store/addressBookSlice'
@@ -127,5 +133,101 @@ describe('EntryDialog scope', () => {
     await save('  Treasury  ')
 
     await waitFor(() => expect(spy).toHaveBeenCalledWith(expect.objectContaining({ name: 'Treasury' })))
+  })
+})
+
+describe('EntryDialog look-alike warning', () => {
+  const contact = fakerChecksummedAddress()
+  const contactName = faker.person.fullName()
+  const lookalike = getAddress(
+    `0x${contact.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '' })}${contact.slice(-4)}`.toLowerCase(),
+  )
+  const initialReduxState = { addressBook: { '1': { [contact]: contactName } } } as Partial<RootState>
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // A saved look-alike is persisted and would be hydrated back as a saved address in the next test.
+    localStorage.clear()
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+  })
+
+  const renderDialog = (defaultValues: { name: string; address: string }) =>
+    render(<EntryDialog handleClose={jest.fn()} chainIds={['1']} defaultValues={defaultValues} disableAddressInput />, {
+      initialReduxState,
+    })
+
+  const save = async () => {
+    const field = screen.getByTestId('name-input')
+    const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'Treasury ops' } })
+    await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
+    fireEvent.click(screen.getByTestId('save-btn'))
+  }
+
+  const confirmDialog = () => screen.findByRole('dialog', { name: 'Similar address detected' })
+
+  it('says which saved contact the address looks like', () => {
+    renderDialog({ name: '', address: lookalike })
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      `This address is similar to ${contactName} in your address book.`,
+    )
+  })
+
+  it('saves a look-alike address only after the user confirms it', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    const dialog = await confirmDialog()
+    expect(spy).not.toHaveBeenCalled()
+
+    fireEvent.click(within(dialog).getByText(/I understand, continue anyway/))
+
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(expect.objectContaining({ address: lookalike })))
+  })
+
+  it('does not save when the user cancels the confirmation', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText('Cancel'))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Similar address detected' })).not.toBeInTheDocument(),
+    )
+    expect(spy).not.toHaveBeenCalled()
+    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+  })
+
+  it('does not warn when renaming a saved contact', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog({ name: contactName, address: contact })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    await save()
+    await waitFor(() => expect(spy).toHaveBeenCalled())
+  })
+
+  it('does not warn when the ADDRESS_POISONING_PROTECTION flag is off', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+
+    renderDialog({ name: '', address: lookalike })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('tracks the warning and the decision to continue', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    const params = { [MixpanelEventParams.LOCATION]: 'address_book_entry' }
+    renderDialog({ name: '', address: lookalike })
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, params))
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText(/I understand, continue anyway/))
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
   })
 })

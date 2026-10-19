@@ -111,4 +111,12 @@ describe('SimilarityConfirmDialog', () => {
     expect(screen.getByText(copy.hint)).toBeInTheDocument()
     expect(screen.queryByText('Selected safe')).not.toBeInTheDocument()
   })
+
+  it('routes the caller stacking classes to the popup and the backdrop', () => {
+    render(<SimilarityConfirmDialog {...defaultProps} className="popup-marker" overlayClassName="overlay-marker" />)
+
+    const overlays = Array.from(document.querySelectorAll('[data-slot="dialog-overlay"]'))
+    expect(screen.getByRole('dialog')).toHaveClass('popup-marker')
+    expect(overlays.some((overlay) => overlay.classList.contains('overlay-marker'))).toBe(true)
+  })
 })

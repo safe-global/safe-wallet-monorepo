@@ -5,6 +5,7 @@ import AddressInput from '@/components/common/AddressInput'
 import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
@@ -12,11 +13,21 @@ import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { useUpsertWorkspaceSafeName, useWorkspaceAddressBookLabel, type AddressBookWriteScope } from '@/features/spaces'
+import { SimilarSavedAddressNotice, useAddressPoisoningCheck } from '@/features/address-poisoning'
+import {
+  ADDRESS_POISONING_EVENTS,
+  LookalikeWarningLocation,
+  MixpanelEventParams,
+  trackEvent,
+} from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 
 export type AddressEntry = {
   name: string
   address: string
 }
+
+const LOOKALIKE_TRACKING = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_ENTRY }
 
 function EntryDialog({
   handleClose,
@@ -49,15 +60,21 @@ function EntryDialog({
   const workspaceLabel = useWorkspaceAddressBookLabel()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // A look-alike entry waiting for the user to confirm it in the similarity dialog.
+  const [pendingEntry, setPendingEntry] = useState<AddressEntry>()
 
   const methods = useForm<AddressEntry>({
     defaultValues,
     mode: 'onChange',
   })
 
-  const { handleSubmit, formState } = methods
+  const { handleSubmit, formState, watch } = methods
 
-  const submitCallback = handleSubmit(async (data: AddressEntry) => {
+  const address = watch('address')
+  const similar = useAddressPoisoningCheck(address)
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, LOOKALIKE_TRACKING, !!similar)
+
+  const save = async (data: AddressEntry) => {
     const targetChainIds = chainIds ?? [actualChainId]
     // Both address books store the same string, whichever branch runs.
     const entry = { ...data, name: sanitizeName(data.name) }
@@ -73,15 +90,29 @@ function EntryDialog({
     }
 
     handleClose()
+  }
+
+  // `save` is async, so a rejection would otherwise escape as an unhandled rejection.
+  const onSaveError = () => {
+    setIsSubmitting(false)
+    setError('Something went wrong. Please try again.')
+  }
+
+  const submitCallback = handleSubmit(async (data: AddressEntry) => {
+    if (similar) return setPendingEntry(data)
+    await save(data)
   })
 
   const onSubmit = (e: BaseSyntheticEvent) => {
     e.stopPropagation()
-    // `submitCallback` is async, so a rejection here would escape as an unhandled rejection.
-    submitCallback(e).catch(() => {
-      setIsSubmitting(false)
-      setError('Something went wrong. Please try again.')
-    })
+    submitCallback(e).catch(onSaveError)
+  }
+
+  const onConfirmLookalike = () => {
+    if (!pendingEntry) return
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, LOOKALIKE_TRACKING)
+    setPendingEntry(undefined)
+    save(pendingEntry).catch(onSaveError)
   }
 
   return (
@@ -124,6 +155,12 @@ function EntryDialog({
               />
             </div>
 
+            {similar && (
+              <div className="mt-4">
+                <SimilarSavedAddressNotice subject="This address" enteredAddress={address} similar={similar} />
+              </div>
+            )}
+
             {error && (
               <Alert variant="destructive" className="mt-4">
                 <AlertSeverityIcon variant="destructive" />
@@ -144,6 +181,18 @@ function EntryDialog({
           />
         </form>
       </FormProvider>
+
+      <SimilarityConfirmDialog
+        open={!!pendingEntry}
+        safe={{ address: pendingEntry?.address ?? address }}
+        description={`This address is similar to ${similar?.source === 'accounts' ? 'a Safe in your accounts' : 'an address in your address book'}. This could indicate an address poisoning attack.`}
+        addressLabel="Address"
+        hint="Verify the full address carefully. Continue only if you recognize this address."
+        onConfirm={onConfirmLookalike}
+        onCancel={() => setPendingEntry(undefined)}
+        className={className}
+        overlayClassName={overlayClassName}
+      />
     </ModalDialog>
   )
 }

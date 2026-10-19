@@ -5,11 +5,21 @@ import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
 import DialogActions from '@/components/common/DialogActions'
+import { SimilarAddressNotice } from '@/components/common/SimilarAddressNotice'
+import SelectAllConfirmDialog from '@/components/common/TrustedSafesModal/SelectAllConfirmDialog'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 
 import css from './styles.module.css'
-import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
+import {
+  trackEvent,
+  ADDRESS_BOOK_EVENTS,
+  ADDRESS_POISONING_EVENTS,
+  LookalikeWarningLocation,
+  MixpanelEventParams,
+} from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { useAddressPoisoningBatchCheck } from '@/features/address-poisoning'
 import { abCsvReaderValidator, abOnUploadValidator } from './validation'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'
@@ -33,10 +43,15 @@ const hasEntry = (entry: string[]) => {
   return entry.length === 3 && entry[0] && entry[1] && entry[2]
 }
 
+const LOOKALIKE_TRACKING = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_IMPORT }
+
+const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural)
+
 const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElement => {
   const [zoneHover, setZoneHover] = useState<boolean>(false)
   const [csvData, setCsvData] = useState<ParseResult<AddressBookCSVRow>>()
   const [error, setError] = useState<string>()
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   // Count how many entries are in the CSV file
   const [entryCount, chainCount] = useMemo(() => {
@@ -47,27 +62,57 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
     return [entryLen, chainLen]
   }, [csvData])
 
+  // Rows below the header; addresses that look like a saved one or like another row get flagged.
+  const entries = useMemo(() => csvData?.data.slice(1) ?? [], [csvData])
+  const addresses = useMemo(() => entries.map(([address]) => address.trim()), [entries])
+  const flagged = useAddressPoisoningBatchCheck(addresses)
+  const isFlagged = ([address]: AddressBookCSVRow) => flagged.has(address.trim().toLowerCase())
+
+  // One row per flagged address, even when the file lists it on several chains.
+  const flaggedEntries = useMemo(() => {
+    const byAddress = new Map<string, { address: string; name: string }>()
+    for (const [address, name] of entries) {
+      const key = address.trim().toLowerCase()
+      if (flagged.has(key) && !byAddress.has(key)) byAddress.set(key, { address: address.trim(), name })
+    }
+    return Array.from(byAddress.values())
+  }, [entries, flagged])
+
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, LOOKALIKE_TRACKING, flaggedEntries.length > 0)
+
   const dispatch = useAppDispatch()
   const { CSVReader } = useCSVReader()
+
+  const importEntries = (rows: AddressBookCSVRow[]) => {
+    // One id shared by all rows so the listener collapses them into a single toast.
+    const notifyBatchId = crypto.randomUUID()
+
+    for (const entry of rows) {
+      const [address, name, chainId] = entry
+      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()], notify: true, notifyBatchId }))
+    }
+
+    trackEvent({ ...ADDRESS_BOOK_EVENTS.IMPORT, label: rows.length })
+
+    handleClose()
+  }
 
   const handleImport = () => {
     if (!csvData) {
       return
     }
 
-    const [, ...entries] = csvData.data
-
-    // One id shared by all rows so the listener collapses them into a single toast.
-    const notifyBatchId = crypto.randomUUID()
-
-    for (const entry of entries) {
-      const [address, name, chainId] = entry
-      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()], notify: true, notifyBatchId }))
+    if (flaggedEntries.length > 0) {
+      setIsConfirmOpen(true)
+      return
     }
 
-    trackEvent({ ...ADDRESS_BOOK_EVENTS.IMPORT, label: entries.length })
+    importEntries(entries)
+  }
 
-    handleClose()
+  const onImportLookalikes = () => {
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, LOOKALIKE_TRACKING)
+    importEntries(entries)
   }
 
   return (
@@ -149,6 +194,15 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
           }}
         </CSVReader>
 
+        {flaggedEntries.length > 0 && (
+          <div className="mt-4">
+            <SimilarAddressNotice>
+              {flaggedEntries.length} {pluralize(flaggedEntries.length, 'address', 'addresses')} in this file{' '}
+              {pluralize(flaggedEntries.length, 'looks', 'look')} similar to other addresses.
+            </SimilarAddressNotice>
+          </div>
+        )}
+
         <div className={css.horizontalDivider} />
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -172,6 +226,17 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
         onConfirm={handleImport}
         confirmDisabled={!csvData || !!error}
         confirmTestId="import-btn"
+      />
+
+      <SelectAllConfirmDialog
+        open={isConfirmOpen}
+        similarAddresses={flaggedEntries}
+        description={`${flaggedEntries.length} ${pluralize(flaggedEntries.length, 'address', 'addresses')} in this file closely ${pluralize(flaggedEntries.length, 'resembles', 'resemble')} other addresses. Review them carefully before continuing.`}
+        question="Do you want to import these addresses?"
+        confirmLabel="Yes, import them anyway"
+        onConfirm={onImportLookalikes}
+        onSkip={() => importEntries(entries.filter((entry) => !isFlagged(entry)))}
+        onCancel={() => setIsConfirmOpen(false)}
       />
     </ModalDialog>
   )

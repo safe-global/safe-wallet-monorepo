@@ -109,6 +109,8 @@ export enum MixpanelEvent {
   FREE_ACCESS_REMINDER_VIEWED = 'Free Access Reminder Viewed',
   WORKSPACE_LOCKED_VIEWED = 'Workspace Locked Viewed',
   UPGRADE_PROMPT_VIEWED = 'Upgrade Prompt Viewed',
+  LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
+  LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -137,6 +139,13 @@ export enum UpgradeFeature {
   SAFE_SHIELD_CHECKS = 'safe_shield_checks',
   SPONSORED_TX = 'sponsored_tx',
   SAFE_ACCOUNTS_LIMIT = 'safe_accounts_limit',
+}
+
+/** Where a look-alike address warning was shown. */
+export enum LookalikeWarningLocation {
+  ADDRESS_BOOK_ENTRY = 'address_book_entry',
+  ADDRESS_BOOK_IMPORT = 'address_book_import',
+  ADD_SAFE = 'add_safe',
 }
 
 export enum UpgradeLocation {

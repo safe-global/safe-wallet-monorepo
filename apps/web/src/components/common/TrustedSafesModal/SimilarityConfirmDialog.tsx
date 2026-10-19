@@ -21,6 +21,9 @@ interface SimilarityConfirmDialogProps {
   description?: string
   addressLabel?: string
   hint?: string
+  /** Opened over a raised overlay? Pass that overlay's stacking classes, e.g. `z-[var(--z-nested-overlay)]`. */
+  className?: string
+  overlayClassName?: string
 }
 
 /**
@@ -35,14 +38,16 @@ const SimilarityConfirmDialog = ({
   description = 'This address is similar to another safe in your list. This could indicate an address poisoning attack.',
   addressLabel = 'Selected safe',
   hint = 'Verify the full address carefully. Continue only if you recognize this Safe.',
+  className,
+  overlayClassName,
 }: SimilarityConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
       {/* Opened from inside another dialog, where Base UI skips a nested backdrop — same approach as ModalDialog's forceBackdrop. */}
       <DialogPortal>
-        <DialogOverlay forceRender />
+        <DialogOverlay forceRender className={overlayClassName} />
       </DialogPortal>
-      <DialogContent size="sm" overlayClassName="hidden">
+      <DialogContent size="sm" className={className} overlayClassName="hidden">
         <DialogHeader>
           <DialogTitle>Similar address detected</DialogTitle>
         </DialogHeader>
