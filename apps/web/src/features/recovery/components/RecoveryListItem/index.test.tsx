@@ -34,6 +34,7 @@ describe('RecoveryListItem', () => {
   it('renders as a collapsed transaction list row', () => {
     const { getByTestId, getByText, queryByText } = render(<RecoveryListItem item={item} />)
 
+    expect(getByTestId('recovery-item')).toBeInTheDocument()
     expect(getByTestId('recovery-item')).not.toHaveClass('listItemNested')
     expect(getByText('Account recovery')).toBeInTheDocument()
     expect(queryByText('Recovery details')).not.toBeInTheDocument()
