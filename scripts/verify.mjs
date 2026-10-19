@@ -17,7 +17,6 @@ import { existsSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { createInterface } from 'node:readline'
-import { DEFAULT_SLOT_DIR, acquireSlot, checkSlotDir, getJestWorkers, getSlotCount } from './lib/verify-slots.mjs'
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -112,16 +111,8 @@ const WORKSPACE_NAMES = {
 
 const workspacePkg = WORKSPACE_NAMES[workspace] ?? `@safe-global/${workspace}`
 
-// ---------------------------------------------------------------------------
-// Machine resource budget
-// ---------------------------------------------------------------------------
-
-const slotCount = getSlotCount(os.totalmem(), process.env.VERIFY_MAX_PARALLEL)
-const JEST_RESOURCE_ARGS = [
-  `--maxWorkers=${getJestWorkers(os.availableParallelism(), slotCount)}`,
-  '--workerIdleMemoryLimit=1GB',
-  '--coverage=false',
-]
+// Jest defaults to cores - 1 workers, which is slower and runs out of memory when agents run verify in parallel
+const JEST_RESOURCE_ARGS = ['--maxWorkers=25%', '--workerIdleMemoryLimit=1GB', '--coverage=false']
 
 // ---------------------------------------------------------------------------
 // Missing test detection
@@ -274,11 +265,10 @@ function buildFullChecks() {
 const { checks, changedFiles } = buildChecks()
 
 // ---------------------------------------------------------------------------
-// Child process and slot cleanup
+// Child process cleanup
 // ---------------------------------------------------------------------------
 
 const children = new Set()
-let releaseSlot = () => {}
 
 function stopChildren(signal) {
   for (const child of children) {
@@ -292,24 +282,10 @@ function stopChildren(signal) {
   }
 }
 
-process.on('exit', () => releaseSlot())
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(signal, () => {
     stopChildren(signal)
     process.exit(128 + os.constants.signals[signal])
-  })
-}
-
-async function waitForSlot() {
-  const unsafeReason = checkSlotDir(DEFAULT_SLOT_DIR)
-  if (unsafeReason) {
-    console.warn(`verify: running without the parallel-run limit — ${unsafeReason}`)
-    return
-  }
-  releaseSlot = await acquireSlot({
-    dir: DEFAULT_SLOT_DIR,
-    slots: slotCount,
-    info: { cwd: process.cwd(), workspace },
   })
 }
 
@@ -356,7 +332,6 @@ function runCheck(check) {
 }
 
 async function main() {
-  await waitForSlot()
   const results = await Promise.all(checks.map(runCheck))
 
   const failed = results.filter((r) => r.code !== 0)
@@ -413,7 +388,4 @@ async function main() {
   process.exit(allPassed ? 0 : 1)
 }
 
-main().catch((err) => {
-  console.error(err.message)
-  process.exit(1)
-})
+main()
