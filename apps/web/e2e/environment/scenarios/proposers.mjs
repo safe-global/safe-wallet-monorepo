@@ -92,7 +92,6 @@ export async function prepareProposersScenario(env, owners) {
       fixtures: {
         'proposers.creator': `sep:${short(owners.owner4.address)}`,
         'proposers.delegate': short(owners.owner1.address),
-        'proposers.safeDelegate': short(proposals.safeAddress),
         'proposers.proposedTx': proposedTx,
         'proposers.addressBook': {
           [SEPOLIA]: { [owners.owner4.address]: 'AD Proposer1', [owners.owner1.address]: 'AD Proposer2' },
