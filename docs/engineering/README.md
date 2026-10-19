@@ -7,8 +7,7 @@ and applies it lives in the
 
 ## Layout
 
-- `conventions/` — the canonical, ordered docs. Read these when writing code.
-- `sources/` — what conventions are built from: the durable rule index
+- `sources/` — the durable rule index
   (`rules.json`), the PR-sourced receipts (`examples/`, `web/examples/`,
   `mobile/examples/`), the readable rule view with examples inlined
   (`rules.generated.md`, regenerated with every rules change), and `working/`
@@ -16,18 +15,11 @@ and applies it lives in the
 
 ## How To Use
 
-1. Before starting a coding task, read
-   [conventions/project-structure.md](./conventions/project-structure.md) for
-   repo-wide guidance. If the change touches `apps/web/**`, also read
-   [conventions/web/project-structure.md](./conventions/web/project-structure.md).
-   If it touches `apps/mobile/**`, also read
-   [conventions/mobile/project-structure.md](./conventions/mobile/project-structure.md).
-2. Before opening or finishing a PR, run `/safe-code-review` from the
+1. Before opening or finishing a PR, run `/safe-code-review` from the
    [safe-engineering-plugin](https://github.com/safe-global/safe-plugins-marketplace/tree/main/plugins/engineering/safe-engineering-plugin).
    Its team-rules pass checks the change against every rule in
    [sources/rules.json](./sources/rules.json).
-
-3. If a review comment surfaces a behavior the docs do not yet
+2. If a review comment surfaces a behavior the docs do not yet
    cover, nothing extra is needed: the weekly compound run reads every
    closed PR's review comments and picks it up.
 
@@ -38,12 +30,6 @@ Active docs read by normal coding agents:
 ```text
 docs/engineering/
   README.md
-  conventions/
-    project-structure.md            # repo-wide guidance
-    web/
-      project-structure.md          # web-specific structure
-    mobile/
-      project-structure.md          # mobile-specific structure
   sources/
     rules.json                      # canonical PR rule checklist
     rules.generated.md              # generated readable view of rules.json

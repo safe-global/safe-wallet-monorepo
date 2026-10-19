@@ -4,8 +4,7 @@ Snapshot of where to find canonical examples ("copy this") and known
 legacy / special-case areas ("don't copy this") in the monorepo, used
 by the convention skill to ground rule generalization.
 
-This is a maintenance document. Normal coding agents should read
-[../../conventions/project-structure.md](../../conventions/project-structure.md), not this file.
+This is a maintenance document, not routed to normal coding agents.
 
 ## Workspaces
 
