@@ -18,7 +18,7 @@ export type SafenetStatusPresentation = {
 
 /**
  * UNAVAILABLE has no verdict presentation — see {@link UNAVAILABLE_PRESENTATION},
- * which only the flow section renders.
+ * which the flow section renders; the details card and audit step render only READ_FAILED.
  */
 export const STATUS_PRESENTATION: Record<
   Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>,

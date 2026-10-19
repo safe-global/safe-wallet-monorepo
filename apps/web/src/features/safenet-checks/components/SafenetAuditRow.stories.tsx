@@ -87,5 +87,5 @@ export const Disputed = story(
 )
 export const TimedOut = story(
   timedOutDisputeSnapshot(),
-  'TIMED_OUT, example #8 after arbitration ended without a ruling. Loading and UNAVAILABLE render no row.',
+  'TIMED_OUT, example #8 after arbitration ended without a ruling. Loading, NO_CHECK and WINDOW_UNCERTAIN render no row.',
 )
