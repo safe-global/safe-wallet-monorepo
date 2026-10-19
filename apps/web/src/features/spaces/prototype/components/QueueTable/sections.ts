@@ -1,21 +1,24 @@
 import { clusterByNonce, getPrimaryStatus, getState } from '../../services/model'
 import type { Account, Direction, Filter, Persona, Proposal } from '../../types'
-import { STATUS_META, STATUS_ORDER, type GroupBy } from '../shared'
+import { CONFLICTING_META, STATUS_META, STATUS_ORDER, type GroupBy } from '../shared'
 import { inSelection } from '../QueueFilters/useQueueFilters'
+import { getStepKind, STEP_RANK } from '../../services/nextSteps'
 
 export type QueueSectionData = {
   id: string
-  category: 'safe' | 'all' | Filter
+  category: 'safe' | 'all' | Filter | 'conflicting'
   label: string
   account?: Account
   items: Proposal[]
+  // Next steps: rank of the most urgent step in this Safe. Lower is more urgent.
+  urgency?: number
 }
 
 const byNonce = (a: Proposal, b: Proposal) => a.nonce - b.nonce
 
-// Direction is the legacy A/B design switch: Safe queues keep nonce order, the action inbox sorts by what you can do.
+// Safe queues and next steps use nonce order. The action inbox sorts by what you can do.
 const orderForDirection = (visible: Proposal[], accounts: Account[], persona: Persona, direction: Direction) => {
-  if (direction === 'queues')
+  if (direction !== 'inbox')
     return accounts.flatMap((account) => visible.filter((tx) => tx.account === account.id).sort(byNonce))
   const state = (tx: Proposal) => getState(tx, persona)
   return [
@@ -41,6 +44,13 @@ export function buildSections({
   groupBy: GroupBy
 }): QueueSectionData[] {
   const ordered = orderForDirection(visible, accounts, persona, direction)
+  // Next steps: options at a conflicting nonce go to their own section.
+  const nonceKey = (tx: Proposal) => `${tx.account}:${tx.nonce}`
+  const conflictKeys = new Set(
+    visible.map(nonceKey).filter((key, index, keys) => keys.indexOf(key) !== keys.lastIndexOf(key)),
+  )
+  const isConflicting = (tx: Proposal) => direction === 'steps' && conflictKeys.has(nonceKey(tx))
+  const accountOrder = (tx: Proposal) => accounts.findIndex((account) => account.id === tx.account)
   const sections: QueueSectionData[] =
     groupBy === 'safe'
       ? accounts
@@ -54,23 +64,68 @@ export function buildSections({
           }))
       : groupBy === 'none'
         ? [{ id: 'ungrouped', category: 'all', label: 'Pending', items: ordered }]
-        : STATUS_ORDER.map((status) => ({
-            id: `status-${status}`,
-            category: status,
-            label: STATUS_META[status].label,
-            items: ordered.filter((tx) => getPrimaryStatus(tx, persona) === status),
-          }))
-  return sections.map((section) => ({ ...section, items: clusterByNonce(section.items) }))
+        : [
+            ...(direction === 'steps'
+              ? [
+                  {
+                    id: 'status-conflicting',
+                    category: 'conflicting' as const,
+                    label: CONFLICTING_META.label,
+                    items: visible
+                      .filter(isConflicting)
+                      .sort((a, b) => accountOrder(a) - accountOrder(b) || byNonce(a, b)),
+                  },
+                ]
+              : []),
+            ...STATUS_ORDER.map((status) => ({
+              id: `status-${status}`,
+              category: status,
+              label: STATUS_META[status].label,
+              items: ordered.filter((tx) => !isConflicting(tx) && getPrimaryStatus(tx, persona) === status),
+            })),
+          ]
+  const clustered = sections.map((section) => ({ ...section, items: clusterByNonce(section.items) }))
+  if (direction === 'steps' && groupBy === 'status') return clustered.filter((section) => section.items.length > 0)
+  if (direction !== 'steps' || groupBy !== 'safe') return clustered
+  // Safes that need you come first, by most urgent step. Other Safes keep their order.
+  const ranked = clustered.map((section) => ({ ...section, urgency: getUrgency(section.items, persona) }))
+  return ranked.sort((a, b) => (a.urgency ?? STEP_RANK.length) - (b.urgency ?? STEP_RANK.length))
 }
 
-export const getColumns = (groupBy: GroupBy, isWide: boolean) => [
-  'Type',
-  'Nonce',
+const getUrgency = (items: Proposal[], persona: Persona) => {
+  const ranks = items.flatMap((tx) => {
+    const kind = getStepKind(tx, persona)
+    return kind ? [STEP_RANK.indexOf(kind)] : []
+  })
+  return ranks.length ? Math.min(...ranks) : undefined
+}
+
+const safeColumns = (groupBy: GroupBy, isWide: boolean) => [
   ...(groupBy !== 'safe' ? ['Safe'] : []),
   ...(groupBy !== 'safe' && isWide ? ['Network'] : []),
-  'Signatures',
-  ...(isWide ? ['Note'] : []),
-  'Status',
-  'Proposed',
-  'Action',
 ]
+
+export const getColumns = (groupBy: GroupBy, isWide: boolean, steps = false) =>
+  steps
+    ? [
+        'Nonce',
+        'Transaction',
+        ...(groupBy !== 'safe' ? ['Safe'] : []),
+        'With',
+        'Chain',
+        'Proposed',
+        ...(isWide ? ['Note'] : []),
+        'Signatures',
+        'Status',
+        'Action',
+      ]
+    : [
+        'Type',
+        'Nonce',
+        ...safeColumns(groupBy, isWide),
+        'Signatures',
+        ...(isWide ? ['Note'] : []),
+        'Status',
+        'Proposed',
+        'Action',
+      ]

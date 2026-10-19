@@ -12,15 +12,24 @@ import {
   Clock3,
   Users,
   Layers,
+  Split,
   type LucideIcon,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import Identicon from '@/components/common/Identicon'
 import type { TypeLabel } from '../services/model'
 import type { Filter } from '../types'
 
 export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'awaiting', 'waiting']
 export const QUICK_FILTERS: Filter[] = ['sign', 'ready', 'waiting']
+// Next steps: conflicting transactions have their own section, above all statuses.
+export const CONFLICTING_META = {
+  label: 'Conflicting transactions',
+  short: 'Conflicting',
+  description: 'Proposals that share a nonce. Only one per nonce can execute',
+  icon: Split,
+}
 export const STATUS_META: Record<Filter, { label: string; description: string; icon: LucideIcon; tone: string }> = {
   ready: {
     label: 'Ready to execute',
@@ -59,6 +68,9 @@ export const TYPE_ICONS: Record<TypeLabel, LucideIcon> = {
   'On-chain rejection': CircleX,
 }
 
+// Next steps: recoveries are not proposals. They have their own Type filter label.
+export const RECOVERY_TYPE = 'Account recovery'
+
 export type GroupBy = 'none' | 'status' | 'safe'
 
 export const chainLogoUrl = (chainId: string | undefined) =>
@@ -69,11 +81,14 @@ export function SafeIdentity({
   size,
   className,
   children,
+  title,
 }: {
   address: string
   size: number
   className: string
   children: ReactNode
+  // Optional heading above the address.
+  title?: string
 }) {
   const avatarRef = useRef<HTMLSpanElement>(null)
   return (
@@ -84,9 +99,32 @@ export function SafeIdentity({
         </span>
         {children}
       </TooltipTrigger>
-      <TooltipContent anchor={avatarRef} className="break-all font-mono">
-        {address}
+      <TooltipContent anchor={avatarRef} className={title ? HINT_CLASS : 'break-all font-mono'}>
+        {title ? <HintContent title={title} body={<span className="break-all font-mono">{address}</span>} /> : address}
       </TooltipContent>
     </Tooltip>
+  )
+}
+
+// Icon tooltip: a short title, then one sentence.
+export function HintContent({ title, body }: { title: string; body?: ReactNode }) {
+  return (
+    <>
+      <p className="font-medium">{title}</p>
+      {body && <p className="mt-1 leading-relaxed">{body}</p>}
+    </>
+  )
+}
+export const HINT_CLASS = 'max-w-xs whitespace-normal'
+
+export type StatusTone = 'success' | 'warning' | 'destructive' | 'secondary'
+
+// The status pill for the page: a dot and a label, as in the Policies prototype.
+export function StatusChip({ tone, children }: { tone: StatusTone; children: ReactNode }) {
+  return (
+    <Badge variant={tone} size="status" shape="status">
+      <BadgeDot />
+      {children}
+    </Badge>
   )
 }

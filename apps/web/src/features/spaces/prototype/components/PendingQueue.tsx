@@ -29,6 +29,8 @@ import useMediaQuery from '@/hooks/useMediaQuery'
 import {
   accounts as fixtureAccounts,
   getAccount,
+  getOutstandingSigners,
+  getSignerName,
   getTransactionLabel,
   getTypeLabel,
   type RowSecondaryAction,
@@ -41,6 +43,8 @@ import {
   proposePreviewAlternative,
   type PreviewAction,
 } from '../services/queue'
+import type { MenuAction } from '../services/actions'
+import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
 import type { Direction, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { TYPE_ICONS, type GroupBy } from './shared'
@@ -53,6 +57,9 @@ import { BulkExecuteDrawer } from './BulkExecuteDrawer'
 import { SCENARIOS, ScenarioBar, type Hypernative } from './ScenarioBar'
 import { PinCommentLayer } from './PinComments/PinCommentLayer'
 import { CommentFab } from './PinComments/CommentFab'
+import { RecoveryPanel, useRecoveries } from './Recovery/RecoveryPanel'
+import { RecoveryDrawer } from './Recovery/RecoveryDrawer'
+import { QueueError, QueueSkeleton } from './QueueStates'
 import { PENDING_QUEUE_FEEDBACK } from './PinComments/linearIssue'
 
 const HISTORY_HOVER: Partial<Record<ReturnType<typeof getTypeLabel>, string>> = {
@@ -61,14 +68,16 @@ const HISTORY_HOVER: Partial<Record<ReturnType<typeof getTypeLabel>, string>> = 
 
 export default function PendingQueue() {
   const router = useRouter()
-  return <PendingQueueView key={String(router.query.scenario ?? 'everyday')} />
+  return <PendingQueueView key={`${router.query.scenario ?? 'everyday'}:${router.query.option ?? 'queues'}`} />
 }
 
 function PendingQueueView() {
   const router = useRouter()
   const isMobile = useIsMobile()
   const isWide = useMediaQuery('(min-width: 1280px)')
-  const direction: Direction = router.query.option === 'inbox' ? 'inbox' : 'queues'
+  const isExtraWide = useMediaQuery('(min-width: 2160px)')
+  const direction: Direction =
+    router.query.option === 'inbox' || router.query.option === 'steps' ? router.query.option : 'queues'
   const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? 'everyday'
   const persona: Persona = router.query.persona === 'observer' ? 'observer' : 'owner'
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
@@ -76,13 +85,25 @@ function PendingQueueView() {
   const [queue, setQueue] = useState(() => createPreviewQueue(scenario))
   const items = queue.items
   const accounts = fixtureAccounts.map((account) => ({ ...account, nextNonce: queue.nextNonces[account.id] }))
-  const filters = useQueueFilters(items, accounts, persona)
   const [pageTab, setPageTab] = useState('queue')
   const [groupBy, setGroupBy] = useState<GroupBy>(
-    router.query.groupBy === 'status' || router.query.groupBy === 'safe' ? router.query.groupBy : 'none',
+    router.query.groupBy === 'status' || router.query.groupBy === 'safe' || router.query.groupBy === 'none'
+      ? router.query.groupBy
+      : direction === 'steps'
+        ? 'status'
+        : 'none',
   )
+  const steps = direction === 'steps'
+  const unavailable = scenario === 'loading' || scenario === 'error'
   const [collapsedSections, setCollapsedSections] = useState<string[]>([])
   const [feedback, setFeedback] = useState('')
+  const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
+  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible)
+  const recoveries = {
+    ...allRecoveries,
+    visible: filters.visibleRecoveries,
+    forAccount: (accountId: string) => filters.visibleRecoveries.filter((item) => item.accountId === accountId),
+  }
   const [replaceHover, setReplaceHover] = useState<string | null>(null)
   const [commenting, setCommenting] = useState(false)
   const toggleCommenting = () => setCommenting(!commenting)
@@ -90,7 +111,8 @@ function PendingQueueView() {
   const [review, setReview] = useState<Proposal | null>(null)
   const [cursorId, setCursorId] = useState<string | null>(null)
   const [reviewSections, setReviewSections] = useState<string[]>([])
-  const [signersOpen, setSignersOpen] = useState(true)
+  const [signersOpen, setSignersOpen] = useState(direction !== 'steps')
+  const [showTechnical, setShowTechnical] = useState(false)
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
   const [replacement, setReplacement] = useState<Replacement | null>(null)
@@ -116,11 +138,55 @@ function PendingQueueView() {
     setReplacement(null)
     if (!keepLayout) {
       setReviewSections([])
-      setSignersOpen(true)
+      setSignersOpen(direction !== 'steps')
     }
     setFeedback('')
     setCursorId(tx.id)
     setReview(tx)
+  }
+
+  const [remindedIds, setRemindedIds] = useState<string[]>([])
+  // Remind and Delete ask for confirmation first.
+  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm | null>(null)
+  const remindSigners = (tx: Proposal) => setPendingConfirm({ kind: 'remind', tx })
+  const sendReminder = (tx: Proposal) => {
+    const names = getOutstandingSigners(tx)
+      .filter((name) => name !== 'Dev')
+      .map(getSignerName)
+    setRemindedIds((ids) => (ids.includes(tx.id) ? ids : [...ids, tx.id]))
+    setFeedback(
+      `Reminder sent to ${names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0]} in this preview.`,
+    )
+  }
+
+  // Next steps: Sign and Execute open the drawer confirm step. It replaces the production flow.
+  const startFlow = (tx: Proposal, flow: PreviewAction) => {
+    reviewTx(tx)
+    setPendingAction(flow)
+  }
+
+  const runMenuAction = (tx: Proposal, action: MenuAction) => {
+    if (action === 'remind') return remindSigners(tx)
+    if (action === 'replace' || action === 'reject') {
+      reviewTx(tx)
+      setReject(true)
+      setReviewSections(['cancel'])
+      setReplacement(action === 'replace' ? { recipient: tx.recipient, amount: tx.amount } : null)
+      return
+    }
+    if (action === 'delete') return setPendingConfirm({ kind: 'delete', tx })
+    const link = new URL(window.location.href)
+    link.searchParams.set('tx', tx.id)
+    void navigator.clipboard?.writeText(link.toString()).catch(() => undefined)
+    setFeedback('Link copied.')
+  }
+
+  const deleteTx = (tx: Proposal) => {
+    setQueue({ ...queue, items: queue.items.filter((item) => item.id !== tx.id) })
+    if (review?.id === tx.id) setReview(null)
+    setFeedback(
+      `${getTransactionLabel(tx)} deleted from the queue in this preview. Signatures already given stay valid.`,
+    )
   }
 
   const runSecondaryAction = (tx: Proposal, action: RowSecondaryAction) => {
@@ -171,6 +237,8 @@ function PendingQueueView() {
     )
   }
 
+  const filtering = filters.applied.length > 0 || filters.search.length > 0
+  // Next steps: while filtering, hide Safes with no matches.
   const sections = buildSections({
     visible: filters.visible,
     accounts,
@@ -178,8 +246,24 @@ function PendingQueueView() {
     persona,
     direction,
     groupBy,
-  })
+  }).filter(
+    (section) =>
+      !steps ||
+      !filtering ||
+      section.category !== 'safe' ||
+      section.items.length > 0 ||
+      recoveries.forAccount(section.account!.id).length > 0,
+  )
   const isCollapsed = (id: string) => groupBy !== 'none' && collapsedSections.includes(id)
+  // "Go to #N": open the section of the blocking transaction, then select it and open its review.
+  const goTo = (tx: Proposal) => {
+    const section = sections.find((candidate) => candidate.items.some((item) => item.id === tx.id))
+    if (section && isCollapsed(section.id))
+      setCollapsedSections((ids) =>
+        ids.includes(section.id) ? ids.filter((id) => id !== section.id) : [...ids, section.id],
+      )
+    reviewTx(tx)
+  }
   const reviewOrder = sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items)
   const reviewIndex = review ? reviewOrder.findIndex((tx) => tx.id === review.id) : -1
   const stepReview = (offset: number) => {
@@ -335,9 +419,13 @@ function PendingQueueView() {
                 hasItems={items.length > 0}
                 groupBy={groupBy}
                 onGroupByChange={setGroupBy}
+                groupingAsView={steps}
               />
-              <AppliedFilters filters={filters} groupBy={groupBy} onGroupByChange={setGroupBy} />
-              {!filters.visible.length && (
+              <AppliedFilters filters={filters} groupBy={groupBy} onGroupByChange={setGroupBy} groupingAsView={steps} />
+              {!(steps && groupBy === 'safe') && <RecoveryPanel controller={recoveries} isWide={isWide} />}
+              {scenario === 'loading' && <QueueSkeleton />}
+              {scenario === 'error' && <QueueError onRetry={() => setOption({ scenario: 'everyday' })} />}
+              {!unavailable && !filters.visible.length && !recoveries.visible.length && (
                 <Empty className="rounded-2xl border border-border bg-card">
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -361,7 +449,7 @@ function PendingQueueView() {
                   )}
                 </Empty>
               )}
-              {filters.visible.length > 0 && (
+              {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && (
                 <div className="flex flex-col gap-10">
                   {sections.map((section) => (
                     <QueueSection
@@ -370,11 +458,13 @@ function PendingQueueView() {
                       items={items}
                       persona={persona}
                       groupBy={groupBy}
+                      steps={steps}
                       isWide={isWide}
+                      showNoteText={steps && isExtraWide}
                       collapsed={isCollapsed(section.id)}
                       onToggle={() =>
                         setCollapsedSections(
-                          isCollapsed(section.id)
+                          collapsedSections.includes(section.id)
                             ? collapsedSections.filter((id) => id !== section.id)
                             : [...collapsedSections, section.id],
                         )
@@ -393,6 +483,12 @@ function PendingQueueView() {
                       onReplaceHover={setReplaceHover}
                       onReview={reviewTx}
                       onSecondaryAction={runSecondaryAction}
+                      remindedIds={remindedIds}
+                      onRemind={steps ? remindSigners : undefined}
+                      onGoTo={steps ? goTo : undefined}
+                      onStartFlow={steps ? startFlow : undefined}
+                      onMenuAction={steps ? runMenuAction : undefined}
+                      recoveries={steps ? recoveries : undefined}
                     />
                   ))}
                 </div>
@@ -494,6 +590,29 @@ function PendingQueueView() {
           onReview={reviewTx}
           onAction={performAction}
           onProposeAlternative={proposeAlternative}
+          steps={steps}
+          remindedIds={remindedIds}
+          onRemind={remindSigners}
+          onMenuAction={runMenuAction}
+          hypernative={hypernative}
+          showTechnical={showTechnical}
+          onToggleTechnical={() => setShowTechnical(!showTechnical)}
+        />
+        <RecoveryDrawer
+          recovery={recoveries.open}
+          primary={recoveries.open ? recoveries.getPrimary(recoveries.open) : undefined}
+          canCancel={recoveries.open ? recoveries.canCancel(recoveries.open) : false}
+          onCancel={() => recoveries.open && recoveries.cancel(recoveries.open)}
+          onClose={() => recoveries.setOpenId(null)}
+        />
+        <ConfirmActionDialog
+          confirm={pendingConfirm}
+          onCancel={() => setPendingConfirm(null)}
+          onConfirm={({ kind, tx }) => {
+            setPendingConfirm(null)
+            if (kind === 'delete') deleteTx(tx)
+            else sendReminder(tx)
+          }}
         />
         <BulkExecuteDrawer
           open={bulkScope !== null}

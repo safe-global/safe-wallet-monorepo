@@ -87,8 +87,8 @@ const proposals: Proposal[] = [
     signers: ['Ana', 'Max'],
     eligible: true,
     note: {
-      text: 'October salaries. Amounts match HR sheet v3. Please review all 14 recipients.',
-      author: 'Ana Reyes',
+      text: 'October salaries. Please review all 14 recipients.',
+      author: 'Ana',
       date: '8 Oct, 10:30',
     },
   },
@@ -96,7 +96,7 @@ const proposals: Proposal[] = [
     id: 'treasury-42',
     account: 'treasury',
     nonce: 42,
-    recipient: 'Bitwave Payroll · 0x1c9f…77aa',
+    recipient: 'Globex Payroll · 0x1c9f…77aa',
     amount: '48.5 ETH',
     fiat: '$155,200',
     kind: { type: 'transfer' },
@@ -104,8 +104,8 @@ const proposals: Proposal[] = [
     signers: ['Ana', 'Max'],
     eligible: true,
     note: {
-      text: 'September contractor payouts. Finance reference FIN-221. Confirm the recipient and amount against the invoice.',
-      author: 'Ana Reyes',
+      text: 'September contractor payouts. Confirm the recipient and amount against the invoice.',
+      author: 'Ana',
       date: '6 Oct, 09:15',
     },
   },
@@ -125,19 +125,19 @@ const proposals: Proposal[] = [
     id: 'treasury-44',
     account: 'treasury',
     nonce: 44,
-    recipient: 'Lightbridge Ltd · 0x4f2a…c81e',
+    recipient: 'Contoso Ltd · 0x4f2a…c81e',
     amount: '125,000 USDC',
     kind: { type: 'transfer' },
     age: '6h ago',
     signers: ['Ana'],
     eligible: true,
-    note: { text: 'Q4 vendor payment for invoice #4471.', author: 'Lena Okafor', date: '8 Oct, 14:20' },
+    note: { text: 'Q4 vendor payment.', author: 'Lena', date: '8 Oct, 14:20' },
   },
   {
     id: 'payroll-18',
     account: 'payroll',
     nonce: 18,
-    recipient: 'Deel · 0x90ab…12ef',
+    recipient: 'Fabrikam · 0x90ab…12ef',
     amount: '1,200 USDC',
     kind: { type: 'transfer' },
     age: '1h ago',
@@ -148,7 +148,7 @@ const proposals: Proposal[] = [
     id: 'grants-8',
     account: 'grants',
     nonce: 8,
-    recipient: 'Atlas Labs · 0x55c1…e3f0',
+    recipient: 'Tailspin Labs · 0x55c1…e3f0',
     amount: '25,000 ARB',
     fiat: '$20,000',
     kind: { type: 'transfer' },
@@ -156,13 +156,13 @@ const proposals: Proposal[] = [
     signers: ['Jonas'],
     eligible: false,
     note: {
-      text: 'Milestone 2 of Wave 4. Deliverables discussed on 1 October.',
-      author: 'Lena Okafor',
+      text: 'Grant milestone 2. Deliverables reviewed.',
+      author: 'Lena',
       date: '5 Oct, 16:00',
     },
   },
 ]
-// Mirrors a real test Safe queue: decoder gaps, delegate calls, competing sends and an unknown bridge network.
+// A realistic mix: decoder gaps, delegate calls, competing sends and an unknown bridge network.
 const realisticProposals: Proposal[] = [
   {
     id: 'treasury-45',
@@ -196,7 +196,7 @@ const realisticProposals: Proposal[] = [
     id: 'treasury-47',
     account: 'treasury',
     nonce: 47,
-    recipient: 'Kraken deposit · 0x2910…54fa',
+    recipient: 'Exchange deposit · 0x2910…54fa',
     amount: '10 ETH',
     fiat: '$32,000',
     kind: { type: 'transfer' },
@@ -208,7 +208,7 @@ const realisticProposals: Proposal[] = [
     id: 'treasury-47-alt',
     account: 'treasury',
     nonce: 47,
-    recipient: 'Kraken deposit · 0x2910…54fa',
+    recipient: 'Exchange deposit · 0x2910…54fa',
     amount: '1 ETH',
     fiat: '$3,200',
     kind: { type: 'transfer' },
@@ -290,7 +290,7 @@ const realisticProposals: Proposal[] = [
     id: 'grants-11',
     account: 'grants',
     nonce: 11,
-    recipient: 'Atlas Labs · 0x55c1…e3f0',
+    recipient: 'Tailspin Labs · 0x55c1…e3f0',
     amount: '5,000 ARB',
     fiat: '$4,000',
     kind: { type: 'transfer' },
@@ -327,7 +327,7 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
   }
 }
 export const getScenario = (scenario: Scenario): Proposal[] => {
-  if (scenario === 'empty') return []
+  if (scenario === 'empty' || scenario === 'loading' || scenario === 'error') return []
   const items = proposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))
   if (scenario === 'conflict')
     items.push({
@@ -385,6 +385,43 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
       },
     ]
   }
+  if (scenario === 'conflict-mixed')
+    return [
+      ...items.map((tx) => (tx.id === 'treasury-42' ? { ...tx, signers: ['Ana', 'Max', 'Jonas'] } : tx)),
+      {
+        id: 'treasury-42-swap',
+        account: 'treasury',
+        nonce: 42,
+        recipient: 'CoW Swap · USDC → ETH',
+        amount: '200,000 USDC',
+        kind: { type: 'swap', sell: '200,000 USDC', buy: '62.4 ETH', order: 'market', expiry: 'Expires in 18h' },
+        age: '2d ago',
+        signers: ['Max'],
+        eligible: true,
+      },
+      {
+        id: 'treasury-42-owner',
+        account: 'treasury',
+        nonce: 42,
+        recipient: 'Marco · 0x7d2e…41ab',
+        amount: '',
+        kind: { type: 'settings', change: { kind: 'addOwner', owner: 'Marco' } },
+        age: '1d ago',
+        signers: ['Dev', 'Lena'],
+        eligible: true,
+      },
+      {
+        id: 'treasury-43-threshold',
+        account: 'treasury',
+        nonce: 43,
+        recipient: 'Treasury Main policy',
+        amount: '',
+        kind: { type: 'settings', change: { kind: 'changeThreshold', threshold: 2 } },
+        age: '5h ago',
+        signers: ['Jonas'],
+        eligible: true,
+      },
+    ]
   if (scenario === 'realistic')
     return [...items, ...realisticProposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))]
   if (scenario === 'gap') return items.filter((tx) => tx.id !== 'treasury-42')

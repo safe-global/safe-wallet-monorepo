@@ -16,7 +16,7 @@ function Harness({ onRowClick = jest.fn(), startActive = true }: { onRowClick?: 
   return (
     <>
       <section data-prototype-element="Table">
-        <button aria-label="Open Send to Atlas Labs" onClick={onRowClick}>
+        <button aria-label="Open Send to Tailspin Labs" onClick={onRowClick}>
           Send
         </button>
       </section>
@@ -31,7 +31,7 @@ function Harness({ onRowClick = jest.fn(), startActive = true }: { onRowClick?: 
   )
 }
 
-const row = () => screen.getByRole('button', { name: 'Open Send to Atlas Labs' })
+const row = () => screen.getByRole('button', { name: 'Open Send to Tailspin Labs' })
 const commentBox = () => screen.getByRole('textbox', { name: 'Comment' })
 const writeComment = (text: string) => {
   fireEvent.click(row(), { clientX: 20, clientY: 10 })
@@ -67,7 +67,7 @@ describe('PinCommentLayer', () => {
 
     const url = new URL((open.mock.contexts[0] as HTMLAnchorElement).href)
     expect(url.searchParams.get('title')).toBe('[Feedback] DES-143: Show the recipient')
-    expect(url.searchParams.get('description')).toContain('**Where:** Table › "Open Send to Atlas Labs" button')
+    expect(url.searchParams.get('description')).toContain('**Where:** Table › "Open Send to Tailspin Labs" button')
     expect(screen.getByText('Commenting: true')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Comment 1' })).toBeInTheDocument()
   })

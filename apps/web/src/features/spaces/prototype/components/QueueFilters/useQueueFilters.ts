@@ -1,9 +1,17 @@
 import { useState } from 'react'
-import { getAccount, getTransactionLabel, getTypeLabel, matchesFilter } from '../../services/model'
+import {
+  accounts as allAccounts,
+  getAccount,
+  getConflicts,
+  getTransactionLabel,
+  getTypeLabel,
+  matchesFilter,
+} from '../../services/model'
 import type { Account, Filter, Persona, Proposal } from '../../types'
-import { STATUS_META } from '../shared'
+import { CONFLICTING_META, RECOVERY_TYPE, STATUS_META } from '../shared'
+import { getRecoveryHeadline, type Recovery } from '../Recovery/recoveryData'
 
-export type FilterSection = 'accounts' | 'networks' | 'types' | 'statuses'
+export type FilterSection = 'accounts' | 'networks' | 'types' | 'statuses' | 'conflicting'
 export type QueueFilterValues = {
   accounts: string[]
   networks: string[]
@@ -23,11 +31,13 @@ export function useQueueFilters(
   accounts: Account[],
   persona: Persona,
   initial: Partial<QueueFilterValues> = {},
+  recoveries: Recovery[] = [],
 ) {
   const [accountFilter, setAccountFilter] = useState<string[]>(initial.accounts ?? [])
   const [networkFilter, setNetworkFilter] = useState<string[]>(initial.networks ?? [])
   const [typeFilter, setTypeFilter] = useState<string[]>(initial.types ?? [])
   const [stateFilter, setStateFilter] = useState<Filter[]>(initial.statuses ?? [])
+  const [conflicting, setConflicting] = useState(false)
   const [search, setSearch] = useState(initial.search ?? '')
   const networks = [...new Set(accounts.map((account) => account.network))]
 
@@ -37,13 +47,32 @@ export function useQueueFilters(
     (skip === 'networks' || inSelection(networkFilter, getAccount(tx).network)) &&
     (skip === 'types' || inSelection(typeFilter, getTypeLabel(tx))) &&
     (skip === 'statuses' || !stateFilter.length || stateFilter.some((status) => matchesFilter(tx, status, persona))) &&
+    (skip === 'conflicting' || !conflicting || getConflicts(tx, items).length > 0) &&
     `${getTransactionLabel(tx)} ${tx.recipient} ${tx.amount} ${tx.nonce} ${getAccount(tx).name}`
       .toLowerCase()
       .includes(search.toLowerCase())
   const optionCount = (skip: FilterSection, match: (tx: Proposal) => boolean) =>
     items.filter((tx) => passes(tx, skip) && match(tx)).length
 
-  const statusLabels = stateFilter.map((status) => STATUS_META[status].label)
+  // Recoveries are outside the nonce queue. They match only Ready to execute, never Conflicting.
+  const recoveryPasses = (recovery: Recovery, skip?: FilterSection) => {
+    const account = allAccounts.find((candidate) => candidate.id === recovery.accountId)!
+    return (
+      (skip === 'accounts' || inSelection(accountFilter, account.id)) &&
+      (skip === 'networks' || inSelection(networkFilter, account.network)) &&
+      (skip === 'types' || inSelection(typeFilter, RECOVERY_TYPE)) &&
+      (skip === 'statuses' ||
+        !stateFilter.length ||
+        (stateFilter.includes('ready') && recovery.state === 'executable' && !recovery.malicious)) &&
+      !conflicting &&
+      `${getRecoveryHeadline(recovery)} account recovery ${account.name}`.toLowerCase().includes(search.toLowerCase())
+    )
+  }
+
+  const statusLabels = [
+    ...stateFilter.map((status) => STATUS_META[status].label),
+    ...(conflicting ? [CONFLICTING_META.short] : []),
+  ]
   const applied = [
     {
       section: 'accounts' as const,
@@ -53,7 +82,15 @@ export function useQueueFilters(
     },
     { section: 'networks' as const, title: 'Network', values: networkFilter, clear: () => setNetworkFilter([]) },
     { section: 'types' as const, title: 'Type', values: typeFilter, clear: () => setTypeFilter([]) },
-    { section: 'statuses' as const, title: 'Status', values: statusLabels, clear: () => setStateFilter([]) },
+    {
+      section: 'statuses' as const,
+      title: 'Status',
+      values: statusLabels,
+      clear: () => {
+        setStateFilter([])
+        setConflicting(false)
+      },
+    },
   ].filter((filter) => filter.values.length > 0)
 
   const reset = () => {
@@ -62,6 +99,7 @@ export function useQueueFilters(
     setTypeFilter([])
     setSearch('')
     setStateFilter([])
+    setConflicting(false)
   }
 
   return {
@@ -69,14 +107,19 @@ export function useQueueFilters(
     networkFilter,
     typeFilter,
     stateFilter,
+    conflicting,
     search,
     networks,
+    items,
     toggleAccount: (id: string) => setAccountFilter(toggled(accountFilter, id)),
     toggleNetwork: (network: string) => setNetworkFilter(toggled(networkFilter, network)),
     toggleType: (type: string) => setTypeFilter(toggled(typeFilter, type)),
     toggleStatus: (status: Filter) => setStateFilter(toggled(stateFilter, status)),
+    toggleConflicting: () => setConflicting(!conflicting),
     setSearch,
     visible: items.filter((tx) => passes(tx)),
+    visibleRecoveries: recoveries.filter((recovery) => recoveryPasses(recovery)),
+    recoveryCount: recoveries.filter((recovery) => recoveryPasses(recovery, 'types')).length,
     optionCount,
     applied,
     summaries: {

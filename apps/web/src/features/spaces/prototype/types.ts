@@ -1,5 +1,16 @@
-export type Scenario = 'everyday' | 'realistic' | 'conflict' | 'conflict-heavy' | 'gap' | 'partial' | 'empty'
-export type Direction = 'queues' | 'inbox'
+export type Scenario =
+  | 'everyday'
+  | 'realistic'
+  | 'conflict'
+  | 'conflict-heavy'
+  | 'conflict-mixed'
+  | 'gap'
+  | 'partial'
+  | 'recovery'
+  | 'loading'
+  | 'error'
+  | 'empty'
+export type Direction = 'queues' | 'inbox' | 'steps'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'observer'
 export type Account = {

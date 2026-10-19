@@ -8,10 +8,14 @@ import type { Direction, Persona, Scenario } from '../types'
 export const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: 'everyday', label: 'Everyday queue' },
   { value: 'realistic', label: 'Realistic mix' },
-  { value: 'conflict', label: 'Competing proposals' },
-  { value: 'conflict-heavy', label: 'Many competing' },
+  { value: 'conflict', label: 'Conflicting transactions' },
+  { value: 'conflict-heavy', label: 'Many conflicting' },
+  { value: 'conflict-mixed', label: 'Conflicts with mixed statuses' },
   { value: 'gap', label: 'Missing dependency' },
   { value: 'partial', label: 'Partial loading' },
+  { value: 'recovery', label: 'Account recovery' },
+  { value: 'loading', label: 'Loading' },
+  { value: 'error', label: 'Failed to load' },
   { value: 'empty', label: 'Empty workspace' },
 ]
 
@@ -42,6 +46,7 @@ export function ScenarioBar({
           <TabsList aria-label="Design direction">
             <TabsTrigger value="queues">A · Safe queues</TabsTrigger>
             <TabsTrigger value="inbox">B · Action inbox</TabsTrigger>
+            <TabsTrigger value="steps">C · Next steps</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -52,7 +57,7 @@ export function ScenarioBar({
             <SelectTrigger id="scenario" size="sm" variant="ghost" aria-label="Scenario">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-auto min-w-(--anchor-width)">
               {SCENARIOS.map((item) => (
                 <SelectItem key={item.value} value={item.value}>
                   {item.label}
@@ -75,7 +80,7 @@ export function ScenarioBar({
             <SelectTrigger id="hypernative" size="sm" variant="ghost" aria-label="Hypernative">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-auto min-w-(--anchor-width)">
               <SelectItem value="in">Hypernative · Connected</SelectItem>
               <SelectItem value="out">Hypernative · Not connected</SelectItem>
               <SelectItem value="none">Hypernative · Not eligible</SelectItem>
@@ -92,7 +97,7 @@ export function ScenarioBar({
             <SelectTrigger id="persona" size="sm" variant="ghost" aria-label="Preview as">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-auto min-w-(--anchor-width)">
               <SelectItem value="owner">Dev · Signer</SelectItem>
               <SelectItem value="observer">Alex · Non-owner</SelectItem>
             </SelectContent>

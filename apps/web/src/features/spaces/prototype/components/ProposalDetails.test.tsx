@@ -15,7 +15,7 @@ describe('proposal details preview', () => {
     expect(screen.getByText(/"calldata": null/)).toBeVisible()
   })
   it.each([
-    ['treasury-42', 'everyday', ['Bitwave Payroll', '0x1c9f…77aa', 'ETH']],
+    ['treasury-42', 'everyday', ['Globex Payroll', '0x1c9f…77aa', 'ETH']],
     ['treasury-43', 'everyday', ['Add signer', 'Priya', '3 (unchanged)']],
     ['payroll-17', 'everyday', ['All actions (14)', 'Total value']],
     ['treasury-45', 'realistic', ['Ethereum', 'Unknown network · chain 999', 'This Safe account', '0.0004 ETH']],

@@ -92,10 +92,10 @@ describe('prototype queue state', () => {
     const heavy = (id: string) => getScenario('conflict-heavy').find((tx) => tx.id === id)!
     const swap = getScenario('conflict').find((tx) => tx.id === 'treasury-42-swap')!
     expect([getTransactionLabel(proposal('treasury-42')), getAmountLabel(proposal('treasury-42'))]).toEqual([
-      'Send to Bitwave Payroll',
+      'Send to Globex Payroll',
       '48.5 ETH · $155,200',
     ])
-    expect(getTransactionLabel(proposal('treasury-42'), true)).toBe('Sent to Bitwave Payroll')
+    expect(getTransactionLabel(proposal('treasury-42'), true)).toBe('Sent to Globex Payroll')
     expect([getTransactionLabel(proposal('payroll-17')), getAmountLabel(proposal('payroll-17'))]).toEqual([
       'Batch · 14 actions',
       '14 actions · 32,400 USDC',
@@ -188,7 +188,7 @@ describe('prototype queue state', () => {
   })
   it('names the counterparty only for types that have one', () => {
     const real = (id: string) => getScenario('realistic').find((tx) => tx.id === id)!
-    expect(getCounterparty(proposal('treasury-42'))).toEqual({ label: 'To', value: 'Bitwave Payroll' })
+    expect(getCounterparty(proposal('treasury-42'))).toEqual({ label: 'To', value: 'Globex Payroll' })
     expect(getCounterparty(real('grants-10'))).toEqual({ label: 'To', value: 'This Safe account' })
     expect(getCounterparty(real('treasury-46'))).toEqual({ label: 'Contract', value: 'Uniswap Universal Router' })
     expect(getCounterparty(real('payroll-19'))).toEqual({ label: 'Contract', value: 'MultiSendCallOnly' })

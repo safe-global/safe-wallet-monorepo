@@ -56,7 +56,8 @@ const Code = ({ children }: { children: ReactNode }) => (
   <code className="rounded bg-background px-1 py-0.5 font-mono text-xs">{children}</code>
 )
 
-const getDetailItems = (proposal: Proposal): { label: string; content: ReactNode }[] => {
+// `extended` adds the fields of the production expanded view. Next steps drawer only.
+export const getDetailItems = (proposal: Proposal, extended = false): { label: string; content: ReactNode }[] => {
   const account = getAccount(proposal)
   const { kind, amount } = proposal
   const address = getRecipientAddress(proposal)
@@ -119,6 +120,22 @@ const getDetailItems = (proposal: Proposal): { label: string; content: ReactNode
         },
         { label: 'Expiry', content: kind.expiry },
         { label: 'Status', content: kind.expired ? 'Expired' : 'Open' },
+        ...(extended
+          ? [
+              { label: 'Filled', content: '0%' },
+              { label: 'Surplus', content: 'Shown once the order fills' },
+              { label: 'Total fees', content: 'Shown once the order fills' },
+              {
+                label: 'Order ID',
+                content: (
+                  <Address
+                    value={`0x${proposal.id.replace(/\W/g, '').padEnd(12, '0').slice(0, 12)}…`}
+                    label="order ID"
+                  />
+                ),
+              },
+            ]
+          : []),
       ]
     }
     case 'bridge':
@@ -135,10 +152,18 @@ const getDetailItems = (proposal: Proposal): { label: string; content: ReactNode
         return [
           { label: 'Add signer', content: getRecipientName(proposal) },
           ...addressItem,
-          { label: 'Required confirmations', content: `${account.threshold} (unchanged)` },
+          {
+            label: extended ? 'Required confirmations for new transactions' : 'Required confirmations',
+            content: `${account.threshold} (unchanged)`,
+          },
         ]
       if (change.kind === 'changeThreshold')
-        return [{ label: 'Required confirmations', content: `${account.threshold} → ${change.threshold}` }]
+        return [
+          {
+            label: extended ? 'Required confirmations for new transactions' : 'Required confirmations',
+            content: `${account.threshold} → ${change.threshold}`,
+          },
+        ]
       return [{ label: 'Change', content: getTransactionLabel(proposal) }, ...addressItem]
     }
     case 'nested':
@@ -196,7 +221,7 @@ export function ProposalDetails({ proposal }: { proposal: Proposal }) {
   )
 }
 
-function BatchActions({ actions }: { actions: BatchAction[] }) {
+export function BatchActions({ actions }: { actions: BatchAction[] }) {
   const [showAll, setShowAll] = useState(false)
   const [expanded, setExpanded] = useState<string[]>([])
   const shown = showAll ? actions : actions.slice(0, INITIAL_ACTIONS)

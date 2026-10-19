@@ -4,6 +4,12 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Input } from '@safe-global/views/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@safe-global/views/components/ui/dropdown-menu'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import {
   Accordion,
@@ -12,7 +18,6 @@ import {
   AccordionContent,
 } from '@safe-global/views/components/ui/accordion'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { formatDateTime } from '@safe-global/utils/utils/date'
@@ -38,9 +43,13 @@ import {
   WARNING_LABELS,
 } from '../../services/model'
 import type { PreviewAction } from '../../services/queue'
+import { getMenuActions, getPrimaryAction, getStatusHint, MENU_LABELS, type MenuAction } from '../../services/actions'
 import type { Persona, Proposal } from '../../types'
 import { CopyTransactionLink, ProposalAdvanced, ProposalDetails, SignerList } from '../ProposalDetails'
 import { TYPE_ICONS } from '../shared'
+import { StepButton } from './StepButton'
+import { StepsReviewDrawer } from './steps/StepsReviewDrawer'
+import type { Hypernative } from '../ScenarioBar'
 
 export type Replacement = { recipient: string; amount: string }
 
@@ -71,6 +80,15 @@ export type ReviewDrawerProps = {
   onReview: (tx: Proposal) => void
   onAction: (action: PreviewAction) => void
   onProposeAlternative: (kind: 'cancellation' | 'replacement') => void
+  // Next steps: the footer uses the same action rules as the queue row.
+  steps?: boolean
+  remindedIds?: string[]
+  onRemind?: (tx: Proposal) => void
+  onMenuAction?: (tx: Proposal, action: MenuAction) => void
+  hypernative?: Hypernative
+  // Next steps: technical data is collapsed by default. It keeps its state between transactions.
+  showTechnical?: boolean
+  onToggleTechnical?: () => void
 }
 
 function PanelSection({
@@ -99,7 +117,17 @@ function PanelSection({
   )
 }
 
-function ReviewSummary({ tx, items, persona }: { tx: Proposal; items: Proposal[]; persona: Persona }) {
+function ReviewSummary({
+  tx,
+  items,
+  persona,
+  steps,
+}: {
+  tx: Proposal
+  items: Proposal[]
+  persona: Persona
+  steps?: boolean
+}) {
   const counterparty = getCounterparty(tx)
   const state = getState(tx, persona)
   const account = getAccount(tx)
@@ -145,7 +173,16 @@ function ReviewSummary({ tx, items, persona }: { tx: Proposal; items: Proposal[]
             content: (
               <div className="flex flex-col md:items-end">
                 <div className="flex flex-wrap items-center gap-1.5 md:justify-end">
-                  <Badge variant={getStatusTone(tx, persona)}>{getStatusLabel(tx, persona)}</Badge>
+                  {steps ? (
+                    <Tooltip delay={150}>
+                      <TooltipTrigger render={<span />} aria-label={getStatusHint(tx, items, persona)}>
+                        <Badge variant={getStatusTone(tx, persona)}>{getStatusLabel(tx, persona)}</Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>{getStatusHint(tx, items, persona)}</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <Badge variant={getStatusTone(tx, persona)}>{getStatusLabel(tx, persona)}</Badge>
+                  )}
                   {conflicts.length > 0 && <Badge variant="warning">{conflicts.length + 1} competing proposals</Badge>}
                   {tx.proposedBy && tx.signers.length === 0 && <Badge variant="outline">Proposal</Badge>}
                 </div>
@@ -173,39 +210,11 @@ const getSignerFootnote = (tx: Proposal, persona: Persona) => {
   return missing ? 'Can be executed once the threshold is reached.' : undefined
 }
 
-function StepButton({
-  direction,
-  disabled,
-  onClick,
-}: {
-  direction: 'previous' | 'next'
-  disabled: boolean
-  onClick: () => void
-}) {
-  const previous = direction === 'previous'
-  return (
-    <Tooltip delay={150}>
-      <TooltipTrigger
-        render={
-          <Button
-            variant="surface"
-            size="icon"
-            aria-label={previous ? 'Previous transaction' : 'Next transaction'}
-            disabled={disabled}
-            onClick={onClick}
-          />
-        }
-      >
-        {previous ? <ChevronUp /> : <ChevronDown />}
-      </TooltipTrigger>
-      <TooltipContent>
-        {previous ? 'Previous' : 'Next'} <Kbd>{previous ? 'K' : 'J'}</Kbd>
-      </TooltipContent>
-    </Tooltip>
-  )
+export function ReviewDrawer(props: ReviewDrawerProps) {
+  return props.steps ? <StepsReviewDrawer {...props} /> : <ClassicReviewDrawer {...props} />
 }
 
-export function ReviewDrawer({
+function ClassicReviewDrawer({
   review,
   items,
   persona,
@@ -218,6 +227,10 @@ export function ReviewDrawer({
   onReview,
   onAction,
   onProposeAlternative,
+  steps,
+  remindedIds = [],
+  onRemind,
+  onMenuAction,
 }: ReviewDrawerProps) {
   const reviewState = review ? getState(review, persona) : undefined
   const conflicts = review ? getConflicts(review, items) : []
@@ -226,6 +239,14 @@ export function ReviewDrawer({
   const { pendingAction, replacement, reject } = layout
   const buttonSize = isMobile ? 'xl' : 'default'
   const canReplace = review ? persona === 'owner' && getAccount(review).owners.includes('Dev') : false
+  const stepsPrimary = steps && review ? getPrimaryAction(review, items, persona, remindedIds) : undefined
+  const menuActions = stepsPrimary && review ? getMenuActions(review, items, persona, stepsPrimary) : []
+  const runStepsPrimary = () => {
+    if (!stepsPrimary || !review) return
+    if (stepsPrimary.kind === 'flow') layout.setPendingAction(stepsPrimary.flow)
+    else if (stepsPrimary.kind === 'goTo') onReview(stepsPrimary.target)
+    else if (stepsPrimary.kind === 'remind') onRemind?.(stepsPrimary.target)
+  }
 
   return (
     <Drawer
@@ -284,7 +305,7 @@ export function ReviewDrawer({
             ))}
             <Accordion multiple value={layout.sections} onValueChange={layout.setSections}>
               <PanelSection value="summary" title="Transaction summary">
-                <ReviewSummary tx={review} items={items} persona={persona} />
+                <ReviewSummary tx={review} items={items} persona={persona} steps={steps} />
               </PanelSection>
               {review.note && (
                 <PanelSection value="note" title="Note">
@@ -354,27 +375,51 @@ export function ReviewDrawer({
                 <ProposalAdvanced key={review.id} proposal={review} />
               </PanelSection>
               {reject && (
-                <PanelSection value="cancel" title="Replace or cancel">
-                  <p className="text-sm text-muted-foreground">
-                    A replacement or cancellation uses the same nonce. It needs signatures and on-chain execution before
-                    the original proposal becomes invalid.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    disabled={!canReplace}
-                    onClick={() => layout.setReplacement({ recipient: review.recipient, amount: review.amount })}
-                  >
-                    Replace with another transaction
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    disabled={!canReplace}
-                    onClick={() => onProposeAlternative('cancellation')}
-                  >
-                    Propose on-chain cancellation
-                  </Button>
+                <PanelSection
+                  value="cancel"
+                  title={steps ? (replacement ? 'Replace with a transfer' : 'Reject') : 'Replace or cancel'}
+                >
+                  {steps && !replacement && (
+                    <>
+                      <p className="text-sm text-muted-foreground">
+                        Creates an on-chain rejection at nonce #{review.nonce}. It needs {getAccount(review).threshold}{' '}
+                        signatures and execution like any transaction. Once it executes, this proposal can&apos;t.
+                      </p>
+                      <Button className="w-full" onClick={() => onProposeAlternative('cancellation')}>
+                        Reject in preview
+                      </Button>
+                    </>
+                  )}
+                  {steps && replacement && (
+                    <p className="text-sm text-muted-foreground">
+                      Sends a transfer at nonce #{review.nonce} instead. It needs signatures and execution. Whichever
+                      executes first replaces the other.
+                    </p>
+                  )}
+                  {!steps && (
+                    <>
+                      <p className="text-sm text-muted-foreground">
+                        A replacement or cancellation uses the same nonce. It needs signatures and on-chain execution
+                        before the original proposal becomes invalid.
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={!canReplace}
+                        onClick={() => layout.setReplacement({ recipient: review.recipient, amount: review.amount })}
+                      >
+                        Replace with another transaction
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={!canReplace}
+                        onClick={() => onProposeAlternative('cancellation')}
+                      >
+                        Propose on-chain cancellation
+                      </Button>
+                    </>
+                  )}
                   {replacement && (
                     <div className="space-y-3 rounded-lg bg-muted p-3">
                       <p className="text-sm">
@@ -503,7 +548,44 @@ export function ReviewDrawer({
               </div>
             </div>
           )}
-          {review && reviewState && !pendingAction && (
+          {steps && review && reviewState && !pendingAction && (
+            <div className="space-y-2">
+              {stepsPrimary && 'hint' in stepsPrimary && stepsPrimary.hint && (
+                <p className="text-xs text-muted-foreground">{stepsPrimary.hint}</p>
+              )}
+              <div className="flex flex-col gap-2 md:flex-row @2xl:justify-end">
+                {menuActions.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={<Button variant="outline" size={buttonSize} className="w-full shrink-0 md:w-auto" />}
+                    >
+                      More actions
+                      <ChevronDown />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {menuActions.map((action) => (
+                        <DropdownMenuItem key={action} onClick={() => onMenuAction?.(review, action)}>
+                          {action === 'remind' && remindedIds.includes(review.id)
+                            ? 'Remind signers again'
+                            : MENU_LABELS[action]}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {stepsPrimary && stepsPrimary.kind !== 'review' && (
+                  <Button
+                    size={buttonSize}
+                    className="w-full shrink-0 md:w-auto md:flex-1 @2xl:min-w-56 @2xl:flex-none"
+                    onClick={runStepsPrimary}
+                  >
+                    {stepsPrimary.label}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+          {!steps && review && reviewState && !pendingAction && (
             <div className="flex flex-col gap-2 md:flex-row @2xl:justify-end">
               <Button
                 variant="outline"

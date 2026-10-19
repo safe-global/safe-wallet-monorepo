@@ -8,7 +8,7 @@ describe('buildFeedbackUrl', () => {
       ...PENDING_QUEUE_FEEDBACK,
       comment: 'The signer list should show who is next\nand why',
       where: 'Review drawer footer › "Signers" button',
-      transaction: 'Send to Bitwave Payroll · Treasury Main #42',
+      transaction: 'Send to Globex Payroll · Treasury Main #42',
       pinLink,
       viewport: '1440×900',
       theme: 'dark',
@@ -28,7 +28,7 @@ describe('buildFeedbackUrl', () => {
   it('puts the comment first, then where it was pinned', () => {
     expect(description.startsWith('The signer list should show who is next\nand why')).toBe(true)
     expect(description).toContain('**Where:** Review drawer footer › "Signers" button')
-    expect(description).toContain('**Transaction:** Send to Bitwave Payroll · Treasury Main #42')
+    expect(description).toContain('**Transaction:** Send to Globex Payroll · Treasury Main #42')
     expect(description).toContain(`**Pin link:** [Open pinned spot](${pinLink})`)
     expect(description).toContain('**Viewport:** 1440×900 · **Theme:** dark')
   })

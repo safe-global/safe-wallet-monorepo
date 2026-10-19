@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Check, ListFilter } from 'lucide-react'
+import { Check, LifeBuoy, ListFilter } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@safe-global/views/components/ui/avatar'
@@ -20,13 +20,27 @@ import { Chip } from '@safe-global/views/components/ui/chip'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
-import { getAccount, getTypeLabel, matchesFilter, TYPE_LABELS } from '../../services/model'
-import type { Account, Persona } from '../../types'
-import { chainLogoUrl, QUICK_FILTERS, STATUS_META, STATUS_ORDER, TYPE_ICONS, type GroupBy } from '../shared'
+import { getAccount, getConflicts, getTypeLabel, matchesFilter, TYPE_LABELS } from '../../services/model'
+import type { Account, Filter, Persona } from '../../types'
+import {
+  chainLogoUrl,
+  CONFLICTING_META,
+  QUICK_FILTERS,
+  RECOVERY_TYPE,
+  STATUS_META,
+  STATUS_ORDER,
+  TYPE_ICONS,
+  type GroupBy,
+} from '../shared'
 import type { QueueFilterState } from './useQueueFilters'
 
 const APPLIED_PILL = 'h-7 bg-card pr-2.5 pl-3 shadow-xs transition-colors hover:bg-muted'
 const GROUPING_LABELS: Record<Exclude<GroupBy, 'none'>, string> = { safe: 'Safe', status: 'Status' }
+const GROUPING_OPTIONS: { value: GroupBy; label: string; hint: string }[] = [
+  { value: 'status', label: 'Status', hint: 'What you can do now' },
+  { value: 'safe', label: 'Safe', hint: 'Each Safe in nonce order' },
+  { value: 'none', label: 'List', hint: 'Every proposal in one list' },
+]
 
 function FilterOption({
   label,
@@ -86,9 +100,63 @@ type QueueFiltersProps = {
   hasItems: boolean
   groupBy: GroupBy
   onGroupByChange: (groupBy: GroupBy) => void
+  // Next steps: grouping is a view setting, not a filter.
+  groupingAsView?: boolean
 }
 
-export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, onGroupByChange }: QueueFiltersProps) {
+// Next steps pills: all status groups, in priority order.
+const STEPS_PILLS: { status: Filter; label: string }[] = [
+  { status: 'ready', label: 'Execute' },
+  { status: 'sign', label: 'Sign' },
+  { status: 'awaiting', label: 'Waiting' },
+  { status: 'waiting', label: 'Blocked' },
+]
+
+const VIEWS = GROUPING_OPTIONS.filter((option) => option.value !== 'none')
+
+// Next steps: a switch between the two views.
+function ViewSwitch({ groupBy, onGroupByChange }: Pick<QueueFiltersProps, 'groupBy' | 'onGroupByChange'>) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="View"
+      className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-card p-[3px] shadow-xs"
+      data-prototype-element="View switch"
+    >
+      {VIEWS.map((option) => {
+        const active = groupBy === option.value
+        return (
+          <Tooltip key={option.value} delay={300}>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => onGroupByChange(option.value)}
+                  className={`h-full cursor-pointer rounded-[8px] px-3 text-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 ${active ? 'bg-muted font-medium text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                />
+              }
+            >
+              {option.label}
+            </TooltipTrigger>
+            <TooltipContent>{option.hint}</TooltipContent>
+          </Tooltip>
+        )
+      })}
+    </div>
+  )
+}
+
+export function QueueToolbar({
+  filters,
+  accounts,
+  persona,
+  hasItems,
+  groupBy,
+  onGroupByChange,
+  groupingAsView,
+}: QueueFiltersProps) {
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3" data-prototype-element="Filters">
       <SearchInput
@@ -99,9 +167,12 @@ export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, on
         onChange={(event) => filters.setSearch(event.target.value)}
         onClear={() => filters.setSearch('')}
       />
-      {hasItems && (
+      {hasItems && !(groupingAsView && groupBy === 'status') && (
         <div role="group" aria-label="Quick filters" className="flex flex-wrap items-center gap-2">
-          {QUICK_FILTERS.map((status) => {
+          {(groupingAsView
+            ? STEPS_PILLS
+            : QUICK_FILTERS.map((status) => ({ status, label: STATUS_META[status].label }))
+          ).map(({ status, label }) => {
             const meta = STATUS_META[status]
             const count = filters.optionCount('statuses', (tx) => matchesFilter(tx, status, persona))
             const pressed = filters.stateFilter.includes(status)
@@ -112,7 +183,7 @@ export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, on
                     <button
                       type="button"
                       aria-pressed={pressed}
-                      aria-label={`${meta.label}, ${count}`}
+                      aria-label={`${label}, ${count}`}
                       onClick={() => filters.toggleStatus(status)}
                       className={`flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border bg-card pr-3 pl-1.5 text-sm shadow-xs outline-none transition-colors hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 ${pressed ? 'border-foreground' : 'border-border'}`}
                     />
@@ -121,7 +192,7 @@ export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, on
                   <span className={`flex size-6 items-center justify-center rounded ${meta.tone}`} aria-hidden="true">
                     <meta.icon className="size-3.5" strokeWidth={ICON_STROKE} />
                   </span>
-                  {meta.label}
+                  {label}
                   <span className="tabular-nums text-muted-foreground">{count}</span>
                 </TooltipTrigger>
                 <TooltipContent>{meta.description}</TooltipContent>
@@ -130,6 +201,7 @@ export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, on
           })}
         </div>
       )}
+      {groupingAsView && <ViewSwitch groupBy={groupBy} onGroupByChange={onGroupByChange} />}
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="outline" />}>
           <ListFilter />
@@ -202,6 +274,15 @@ export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, on
                   />
                 )
               })}
+              {groupingAsView && (
+                <FilterOption
+                  label={RECOVERY_TYPE}
+                  checked={filters.typeFilter.includes(RECOVERY_TYPE)}
+                  count={filters.recoveryCount}
+                  icon={<LifeBuoy className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                  onToggle={() => filters.toggleType(RECOVERY_TYPE)}
+                />
+              )}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuSub>
@@ -222,24 +303,39 @@ export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, on
                   />
                 )
               })}
+              {groupingAsView && (
+                <>
+                  {/* Conflicting narrows the statuses above. It does not add to them. */}
+                  <DropdownMenuSeparator />
+                  <FilterOption
+                    label={CONFLICTING_META.short}
+                    checked={filters.conflicting}
+                    count={filters.optionCount('conflicting', (tx) => getConflicts(tx, filters.items).length > 0)}
+                    icon={<CONFLICTING_META.icon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                    onToggle={filters.toggleConflicting}
+                  />
+                </>
+              )}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuSeparator />
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <FilterSectionTitle
-                title="Group by"
-                summary={groupBy === 'none' ? undefined : GROUPING_LABELS[groupBy]}
-              />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-44">
-              <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupByChange(value as GroupBy)}>
-                <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="status">Status</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="safe">Safe</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
+          {!groupingAsView && <DropdownMenuSeparator />}
+          {!groupingAsView && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FilterSectionTitle
+                  title="Group by"
+                  summary={groupBy === 'none' ? undefined : GROUPING_LABELS[groupBy]}
+                />
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-44">
+                <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupByChange(value as GroupBy)}>
+                  <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="status">Status</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="safe">Safe</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <Button size="action" aria-label="New transaction">
@@ -253,10 +349,11 @@ export function AppliedFilters({
   filters,
   groupBy,
   onGroupByChange,
-}: Pick<QueueFiltersProps, 'filters' | 'groupBy' | 'onGroupByChange'>) {
+  groupingAsView,
+}: Pick<QueueFiltersProps, 'filters' | 'groupBy' | 'onGroupByChange' | 'groupingAsView'>) {
   const pills = [
     ...filters.applied,
-    ...(groupBy === 'none'
+    ...(groupBy === 'none' || groupingAsView
       ? []
       : [
           {
@@ -288,7 +385,7 @@ export function AppliedFilters({
         size="sm"
         onClick={() => {
           filters.reset()
-          onGroupByChange('none')
+          if (!groupingAsView) onGroupByChange('none')
         }}
       >
         Clear

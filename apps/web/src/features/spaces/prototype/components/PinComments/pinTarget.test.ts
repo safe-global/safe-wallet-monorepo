@@ -35,12 +35,12 @@ describe('describeTarget', () => {
   it('names the element area, the control and the row transaction', () => {
     render(`
       <section data-prototype-element="Table"><table><tbody><tr>
-        <td><button aria-label="Open Send to Atlas Labs">Send</button></td>
+        <td><button aria-label="Open Send to Tailspin Labs">Send</button></td>
         <td><span id="target">2/3</span></td>
       </tr></tbody></table></section>`)
     expect(describeTarget(document.getElementById('target')!)).toEqual({
       where: 'Table › "2/3" cell',
-      row: 'Send to Atlas Labs',
+      row: 'Send to Tailspin Labs',
     })
   })
 

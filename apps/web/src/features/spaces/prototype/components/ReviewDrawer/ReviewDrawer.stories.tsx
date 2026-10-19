@@ -12,11 +12,13 @@ function ReviewDrawerPreview({
   persona = 'owner',
   pick,
   sections = [],
+  steps = false,
 }: {
   scenario?: Scenario
   persona?: Persona
   pick: Selector
   sections?: string[]
+  steps?: boolean
 }) {
   const items = createPreviewQueue(scenario).items
   const order = items.filter((tx) => pick(tx, items, persona))
@@ -26,6 +28,7 @@ function ReviewDrawerPreview({
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
   const [replacement, setReplacement] = useState<Replacement | null>(null)
+  const [showTechnical, setShowTechnical] = useState(false)
   return (
     <ReviewDrawer
       review={order[index] ?? null}
@@ -51,6 +54,9 @@ function ReviewDrawerPreview({
       onReview={() => undefined}
       onAction={() => setPendingAction(null)}
       onProposeAlternative={() => undefined}
+      steps={steps}
+      showTechnical={showTechnical}
+      onToggleTechnical={() => setShowTechnical(!showTechnical)}
     />
   )
 }
@@ -83,3 +89,30 @@ export const Warnings: Story = {
   args: { scenario: 'realistic', pick: (tx) => getWarnings(tx).length > 0, sections: ['details'] },
 }
 export const NonOwner: Story = { args: { persona: 'observer', pick: () => true, sections: ['summary'] } }
+
+// Next steps (option C): the drawer shows the queue row in full.
+export const NextStepsReadyToSign: Story = {
+  args: { steps: true, pick: (tx, _items, persona) => getState(tx, persona).canSign },
+}
+export const NextStepsReadyToExecute: Story = {
+  args: { steps: true, pick: (tx, _items, persona) => getState(tx, persona).ready },
+}
+export const NextStepsBlocked: Story = {
+  args: { steps: true, pick: (tx, _items, persona) => getState(tx, persona).waiting && !getState(tx, persona).canSign },
+}
+export const NextStepsWaitingOnOthers: Story = {
+  args: {
+    steps: true,
+    pick: (tx, _items, persona) =>
+      !getState(tx, persona).canSign && !getState(tx, persona).waiting && !getState(tx, persona).ready,
+  },
+}
+export const NextStepsCompeting: Story = {
+  args: { steps: true, scenario: 'conflict-heavy', pick: (tx, items) => getConflicts(tx, items).length > 0 },
+}
+export const NextStepsWithWarnings: Story = {
+  args: { steps: true, scenario: 'realistic', pick: (tx) => getWarnings(tx).length > 0 },
+}
+export const NextStepsEveryType: Story = {
+  args: { steps: true, scenario: 'realistic', pick: () => true },
+}
