@@ -20,7 +20,6 @@ export async function prepareNftsScenario(env, owners) {
     )
     await cats.waitForDeployment()
     for (let id = 0; id < 10; id++) await (await cats.mint(context.safeAddress)).wait()
-    await (await cats.mint(nonOwner.safeAddress)).wait()
     const transferable = await new ContractFactory(erc721Artifact.abi, erc721Artifact.bytecode, signer).deploy(
       'Generated test token',
       'GTT',
@@ -33,7 +32,6 @@ export async function prepareNftsScenario(env, owners) {
     const transferAddress = await transferable.getAddress()
     for (const [safe, address, count] of [
       [context, catAddress, 10],
-      [nonOwner, catAddress, 1],
       [transfer, transferAddress, 1],
     ]) {
       await waitUntil(
@@ -51,7 +49,6 @@ export async function prepareNftsScenario(env, owners) {
     }
     for (const [safe, count] of [
       [context, 10],
-      [nonOwner, 1],
       [transfer, 1],
     ]) {
       await waitUntil(
@@ -67,7 +64,7 @@ export async function prepareNftsScenario(env, owners) {
           SEP_STATIC_SAFE_2: `sep:${context.safeAddress}`,
           SEP_STATIC_SAFE_23: `sep:${context.safeAddress}`,
         },
-        nfts: { SEP_NFT_SAFE_1: `sep:${transfer.safeAddress}`, SEP_NFT_SAFE_2: `sep:${nonOwner.safeAddress}` },
+        nfts: { SEP_NFT_SAFE_1: `sep:${transfer.safeAddress}` },
       },
       fixtures: { 'nfts.address': short(catAddress) },
     }

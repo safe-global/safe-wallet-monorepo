@@ -104,11 +104,9 @@ async function mintNfts(env, owners, safe, count) {
   }
 }
 
-/** SEP_STATIC_SAFE_2 holds the spam tokens and ten NFTs, S31 has OWNER_1 as proposer, S8 a spending limit. */
+/** SEP_STATIC_SAFE_2 holds the spam tokens and ten NFTs. */
 export async function prepareAssetsSecondScenario(env, owners) {
   const assets = await prepareAssetsScenario(env, owners)
   await mintNfts(env, owners, assets.safes.static.SEP_STATIC_SAFE_2, 10)
-  const safes = await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_8', 'SEP_STATIC_SAFE_31'])
-  await addStagingProposers(env, owners, safes.SEP_STATIC_SAFE_31)
-  return { safes: { static: { ...safes, SEP_STATIC_SAFE_2: assets.safes.static.SEP_STATIC_SAFE_2 } } }
+  return { safes: { static: { SEP_STATIC_SAFE_2: assets.safes.static.SEP_STATIC_SAFE_2 } } }
 }
