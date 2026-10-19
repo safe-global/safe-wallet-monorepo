@@ -109,6 +109,14 @@ export const Sections: Story = {
             <DrawerSection title="Details">
               <Typography variant="paragraph-small">A section with no trailing note.</Typography>
             </DrawerSection>
+            <DrawerSection collapsible title="Collapsible" rightNode="Starts open">
+              <div className="rounded-lg bg-muted p-3">
+                <Typography variant="paragraph-small">The title toggles this content.</Typography>
+              </div>
+            </DrawerSection>
+            <DrawerSection collapsible defaultOpen={false} title="Collapsed by default">
+              <Typography variant="paragraph-small">Hidden until the title is clicked.</Typography>
+            </DrawerSection>
           </div>
         </DrawerBody>
       </>
