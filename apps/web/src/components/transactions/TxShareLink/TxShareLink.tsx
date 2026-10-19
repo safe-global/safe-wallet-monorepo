@@ -8,6 +8,9 @@ import React from 'react'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import useOrigin from '@/hooks/useOrigin'
 import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { useCurrentChain } from '@/hooks/useChains'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 const TxShareLink = ({
   id,
@@ -18,8 +21,11 @@ const TxShareLink = ({
   children: ReactElement
   eventLabel: CopyDeeplinkLabels
 }): ReactElement => {
-  const router = useRouter()
-  const { safe = '' } = router.query
+  const { safe: urlSafe = '' } = useRouter().query
+  const scope = useSafeScope()
+  const chain = useCurrentChain()
+  const safeAddress = useSafeAddress()
+  const safe = scope ? (chain ? `${chain.shortName}:${safeAddress}` : '') : urlSafe
   const spaceId = useUrlSpaceId()
   const href = withSpaceIdInUrl(`${AppRoutes.transactions.tx}?safe=${safe}&id=${id}`, spaceId)
   const txUrl = useOrigin() + href

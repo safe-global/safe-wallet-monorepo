@@ -1,4 +1,4 @@
-import { type ReactNode, useContext, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { type NextRouter, useRouter } from 'next/router'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -10,7 +10,7 @@ import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
 
 import css from './styles.module.css'
-import { TxModalContext } from '../..'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 import TokenTransferFlow from '../TokenTransfer'
 import RejectTx from '../RejectTx'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
@@ -123,7 +123,7 @@ const ReplaceTxMenu = ({
   proposer?: string
 }) => {
   const wallet = useWallet()
-  const { setTxFlow } = useContext(TxModalContext)
+  const setTxFlow = useSetScopedTxFlow()
   const queuedTxsByNonce = useQueuedTxByNonce(txNonce)
   const canCancel = !queuedTxsByNonce?.some(
     (item) => isCustomTxInfo(item.transaction.txInfo) && item.transaction.txInfo.isCancellation,

@@ -111,6 +111,7 @@ export { useIsSafeInCurrentSpace } from './hooks/useIsSafeInCurrentSpace'
 
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'
+export { useSpaceQueuePolling } from './hooks/useSpaceQueuePolling'
 
 // Store exports (actions, selectors, types)
 export {

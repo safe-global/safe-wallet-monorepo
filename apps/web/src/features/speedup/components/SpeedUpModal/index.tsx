@@ -1,4 +1,5 @@
 import useGasPrice from '@/hooks/useGasPrice'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
@@ -57,10 +58,12 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const dispatch = useAppDispatch()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isDisabled = waitingForConfirmation || !wallet || !speedUpFee || !onboard
+  const scope = useSafeScope()
   const [safeTx] = useAsync(() => {
     if (!chainInfo?.chainId) return
-    return createExistingTx(chainInfo.chainId, txId)
-  }, [txId, chainInfo?.chainId])
+    if (scope && !scope.sdk) return
+    return createExistingTx(chainInfo.chainId, txId, undefined, scope)
+  }, [txId, chainInfo?.chainId, scope])
 
   const safeTxHasSignatures = !!safeTx?.signatures?.size ? true : false
 
