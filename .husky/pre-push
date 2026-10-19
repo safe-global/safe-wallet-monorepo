@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eu
+
+[ "${PRIVATE_DATA_CHECKED:-}" = "1" ] && exit 0
+
+commits=$(git log --oneline HEAD --not --remotes)
+[ -z "$commits" ] && exit 0
+
+echo "################################################################"
+echo "This repository is public. These commits become public with this push."
+echo "################################################################"
+echo ""
+echo "Have you checked every commit message and every change for private data:"
+echo "customer or user data, content from internal tools (Notion, Linear, Slack,"
+echo "call transcripts, support tickets), internal hostnames, credentials, and"
+echo "plans that are not public?"
+echo ""
+
+if { exec 3</dev/tty; } 2>/dev/null; then
+  printf "Do you confirm that these commits contain no private data? [y/N] "
+  read -r answer <&3
+  [ "$answer" = "y" ] && exit 0
+  echo "Push stopped."
+  exit 1
+fi
+
+echo "There is no terminal to answer in. Read the commits with 'git log -p <base>..HEAD'. If they are clean, push again with: PRIVATE_DATA_CHECKED=1 git push ..."
+exit 1
