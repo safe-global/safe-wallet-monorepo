@@ -441,6 +441,18 @@ const GEIST_MONO_URL = 'https://fonts.googleapis.com/css2?family=Geist+Mono:wght
 
 // The app loads no Geist Mono and EthHashInfo has no font prop, so the prototype sets the mono font for its pages.
 const PROTOTYPE_CSS = `
+/* Toasts sit beside an open side panel instead of over it: the floating Drawer is 440px (700px when lg) plus its 12px inset. */
+[data-m2-toasts] > div {
+  transition: right 200ms ease-in-out;
+}
+@media (min-width: 900px) {
+  body:has([data-slot='sheet-content'][data-side='right'][data-open]) [data-m2-toasts] > div {
+    right: 452px;
+  }
+  body:has([data-slot='sheet-content'][data-side='right'][data-open][class*='w-[700px]']) [data-m2-toasts] > div {
+    right: 712px;
+  }
+}
 :root {
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --m2-new-mark: #c026d3;
@@ -593,7 +605,11 @@ const withPrototypeChrome = (decorator: Decorator, notifications: boolean): Deco
         () => (
           <>
             <Story />
-            {notifications && <Notifications />}
+            {notifications && (
+              <div data-m2-toasts="">
+                <Notifications />
+              </div>
+            )}
           </>
         ),
         context,

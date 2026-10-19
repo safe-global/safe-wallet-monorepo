@@ -89,7 +89,7 @@ import {
 const ALLOWLIST_OPTION: AddPolicyOption = {
   id: 'recovery',
   title: 'Recipient allowlist',
-  description: 'Only let funds go to addresses you approve.',
+  description: 'Only addresses on your list can receive funds. Everything else is blocked.',
   Icon: ShieldCheck,
 }
 
@@ -299,7 +299,7 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
     heading: 'Create recipient allowlist',
     jumps: [
       { label: 'Create', state: { ...WIZARD, wizardStep: 0 } },
-      { label: 'Permissions', state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } },
+      { label: 'Policies', state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } },
       { label: 'Review', state: { ...WIZARD, wizardStep: REVIEW_STEP } },
       { label: 'Confirm', state: { ...WIZARD, wizardStep: CONFIRM_STEP } },
       { label: 'Execute', state: { ...WIZARD, wizardStep: EXECUTE_STEP, account: 'ready', ...FULLY_SIGNED } },
@@ -481,22 +481,22 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
     ],
   },
   {
-    title: 'Permissions',
+    title: 'Policies',
     frames: [
       { id: 'permissions', label: 'Payments', jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } } },
       {
         id: 'permissions-conflict-one',
-        label: 'Permissions · Spending limit conflict',
+        label: 'Policies · Spending limit conflict',
         jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE } },
       },
       {
         id: 'permissions-conflict-two',
-        label: 'Permissions · Spending limit conflict (2)',
+        label: 'Policies · Spending limit conflict (2)',
         jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_TWO } },
       },
       {
         id: 'permissions-spending-limits-exempt',
-        label: 'Permissions · Spending limits exempt',
+        label: 'Policies · Spending limits exempt',
         jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE_EXEMPT } },
       },
     ],
@@ -812,9 +812,10 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   }, [])
 
   // Back to where the flow started: the policy table in By policy, the Payments panel in By account.
+  // Back on the table with the new allowlist's side panel open, so its status is the first thing seen.
   const backToPaymentsPanel: Partial<PrototypeState> =
     view === 'by-policy'
-      ? { screen: 'overview', panelKey: null, policyId: null }
+      ? { screen: 'overview', panelKey: null, policyId: SETUP_ROW_ID, panelScenario: null }
       : { screen: 'overview', panelKey: PAYMENTS_KEY, policyId: null }
 
   /** Execute: back on the overview with the panel open, Executing until the transaction is "mined", then Active. */
@@ -859,7 +860,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     }
   })
 
-  // The edited row's panel stays as policyId while the wizard covers it: Close reopens it, signing closes it.
+  // The edited row's panel stays as policyId while the wizard covers it: Close and signing both reopen it.
   const isSetupRowEdit = state.policyId === SETUP_ROW_ID
 
   /** Sign in edit mode: the setup's allowlist keeps the new choices as a change pending; any other account is unchanged. */
@@ -868,7 +869,9 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     update({
       screen: 'overview',
       panelKey: null,
-      policyId: null,
+      // The edited allowlist's panel, now showing the pending change.
+      policyId: state.policyId,
+      panelScenario: null,
       ...EDIT_ENDED,
       ...(isSetupRowEdit ? { pendingChange: true } : (state.editRestore ?? {})),
     })
@@ -1091,11 +1094,17 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             initialChoices={state.editInitialChoices ?? undefined}
           />
           {/* The wizard layer covers the page's toasts, so it shows its own while it's open. */}
-          <Notifications />
+          <div data-m2-toasts="">
+            <Notifications />
+          </div>
         </FullScreenFlow>
       )}
 
-      {state.screen !== 'wizard' && <Notifications />}
+      {state.screen !== 'wizard' && (
+        <div data-m2-toasts="">
+          <Notifications />
+        </div>
+      )}
     </>
   )
 }

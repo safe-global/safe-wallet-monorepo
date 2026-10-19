@@ -6,8 +6,8 @@ import { Typography } from '@/components/ui/typography'
 import PolicyIntroDialog, { type PolicyIntroExplainer } from '../PolicyIntroDialog'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [
-  { Icon: UsersRound, text: 'Only addresses on the list can receive funds from this Safe account.' },
-  { Icon: ShieldCheck, text: 'Transfers to any other address are blocked.' },
+  { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },
+  { Icon: ShieldCheck, text: 'It is checked onchain, so a blocked transfer fails even if every signer approves it.' },
   {
     Icon: Clock,
     text: 'Setting it up, changing it or removing it requires a transaction. Every change waits 24 hours before it applies.',
@@ -66,7 +66,7 @@ export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: Allowlis
     onOpenChange={onOpenChange}
     onProceed={onProceed}
     title="Recipient allowlist"
-    description="Only let funds go to addresses you approve."
+    description="Only addresses on your list can receive funds. Everything else is blocked."
     helpArticle={HelpCenterArticle.POLICIES}
     helpLabel="Learn more about recipient allowlists"
     explainers={EXPLAINERS}

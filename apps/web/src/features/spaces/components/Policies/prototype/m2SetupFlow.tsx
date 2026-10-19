@@ -1,4 +1,6 @@
 import {
+  createContext,
+  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -56,7 +58,6 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Combobox,
   ComboboxCollection,
@@ -80,15 +81,16 @@ import ExternalLink from '@/components/common/ExternalLink'
 import Identicon from '@/components/common/Identicon'
 import TokenIcon from '@/components/common/TokenIcon'
 import TxModalDialog from '@/components/common/TxModalDialog'
+import txDialogCss from '@/components/common/TxModalDialog/styles.module.css'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { usePortalContainer } from '@/components/ui/ShadcnProvider'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import classnames from 'classnames'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { TxLayoutHeader } from '@/components/tx-flow/common/TxLayoutBase'
 import layoutCss from '@/components/tx-flow/common/TxLayoutBase/styles.module.css'
-import statusCss from '@/components/tx-flow/common/TxStatusWidget/styles.module.css'
 import { TxInfoContext, TxInfoProvider } from '@/components/tx-flow/TxInfoProvider'
-import { ProgressBar } from '@/components/common/ProgressBar'
-import { useDarkMode } from '@/hooks/useDarkMode'
+import { useChain } from '@/hooks/useChains'
 import { SafeShieldProvider, useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 // eslint-disable-next-line no-restricted-imports -- story-only prototype: the barrel's SafeShieldWidget hooks never settle in Storybook, so the display is fed mock analysis
 import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldDisplay'
@@ -103,14 +105,11 @@ import {
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { FETCH_STATUS } from '@safe-global/utils/components/tx/security/tenderly/types'
 import { getSimulationLink, type SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { useIsBelowMd } from '@/hooks/useMediaQuery'
-import CreatedIcon from '@/public/images/messages/created.svg'
-import SignedIcon from '@/public/images/messages/signed.svg'
 import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldContent, FieldLabel } from '@/components/ui/field'
+import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Typography } from '@/components/ui/typography'
@@ -145,10 +144,10 @@ import {
 } from './m2Prototype'
 
 /** One per stepper item; Permissions is skipped for an account that has none. */
-export const WIZARD_STEP_NAMES = ['Create', 'Permissions', 'Review', 'Confirm', 'Execute'] as const
+export const WIZARD_STEP_NAMES = ['Create', 'Policies', 'Review', 'Confirm', 'Execute'] as const
 
 export const CREATE_STEP = WIZARD_STEP_NAMES.indexOf('Create')
-export const PERMISSIONS_STEP = WIZARD_STEP_NAMES.indexOf('Permissions')
+export const PERMISSIONS_STEP = WIZARD_STEP_NAMES.indexOf('Policies')
 export const REVIEW_STEP = WIZARD_STEP_NAMES.indexOf('Review')
 export const CONFIRM_STEP = WIZARD_STEP_NAMES.indexOf('Confirm')
 export const EXECUTE_STEP = WIZARD_STEP_NAMES.indexOf('Execute')
@@ -156,7 +155,7 @@ export const EXECUTE_STEP = WIZARD_STEP_NAMES.indexOf('Execute')
 /** Page titles per screen, following M1: "Create new policy", "Confirm policy", then ConfirmTxReceipt's "Review details". */
 const STEP_TITLES = [
   'Create new policy',
-  'Existing permissions',
+  'Existing policies',
   'Confirm policy',
   'Review details',
   'Review details',
@@ -495,7 +494,7 @@ const GroupSurface = ({
   markNew: string
   children?: ReactNode
 }): ReactElement => (
-  <section ref={sectionRef} className="flex scroll-mt-4 flex-col gap-4 rounded-xl bg-muted p-4" data-m2-new={markNew}>
+  <section ref={sectionRef} className="flex scroll-mt-60 flex-col gap-4 rounded-xl bg-muted p-4" data-m2-new={markNew}>
     <div className="flex items-center justify-between gap-3">
       <div className="flex min-w-0 flex-col gap-1">
         <TxSectionTitle>{title}</TxSectionTitle>
@@ -639,12 +638,20 @@ type ChoiceHandlers = {
 }
 
 /** M1's dismissible "The spender can be anyone." banner (CreateStep/SpenderCallout), with the policies copy. */
-const PoliciesCallout = ({ onDismiss }: { onDismiss: () => void }): ReactElement => (
+const PoliciesCallout = ({
+  subject,
+  onDismiss,
+}: {
+  subject: 'tokens' | 'recipients'
+  onDismiss: () => void
+}): ReactElement => (
   <M2Alert
     tone="warning"
-    title="Funds can only be sent to the recipients you add below."
-    description="Transfers to any other address will be blocked. You can remove this policy later. It takes 24 hours to apply."
+    title={`Only transactions ${subject === 'tokens' ? 'of the tokens' : 'to the recipients'} selected below will be allowed.`}
+    description="Every other transaction will be blocked."
     onDismiss={onDismiss}
+    // Matches the gap above, where the subtitle's line height adds ~4px to the section's 16px gap.
+    className="mb-1"
   />
 )
 
@@ -1138,7 +1145,14 @@ const TokensGroup = ({
   choices,
   onChoicesChange,
   sectionRef,
-}: ChoiceHandlers & { account?: M2Account; sectionRef?: Ref<HTMLElement> }): ReactElement => {
+  callout,
+  isEditMode = false,
+}: ChoiceHandlers & {
+  account?: M2Account
+  sectionRef?: Ref<HTMLElement>
+  callout?: ReactNode
+  isEditMode?: boolean
+}): ReactElement => {
   const [isDrafting, setIsDrafting] = useState(false)
   const tokens = getFormTokens(choices, account)
   const addable = POPULAR_TOKENS.filter(({ symbol }) => !tokens.some((token) => token.symbol === symbol))
@@ -1167,11 +1181,14 @@ const TokensGroup = ({
       sectionRef={sectionRef}
       markNew="New · Token checklist"
       description={
-        account
-          ? 'Only the checked tokens can leave this account, and only to the recipients below.'
-          : 'Pick a Safe account to choose from its tokens.'
+        !account
+          ? 'Pick a Safe account to choose from its tokens.'
+          : isEditMode
+            ? 'These are the tokens the allowlist allows today. Add a token or deselect one to change it.'
+            : undefined
       }
     >
+      {callout}
       {tokens.length === 0 ? (
         <EmptyItem>Tokens in this account will show here.</EmptyItem>
       ) : (
@@ -1224,25 +1241,35 @@ const EmptyItem = ({ children }: { children: ReactNode }): ReactElement => (
   </ItemSurface>
 )
 
+/** Asks the layout for room below the page while the address book is open, so the page can scroll the list up. */
+const PageRoomContext = createContext<(isNeeded: boolean) => void>(() => {})
+
 /** Shown from the start, as M1's spender field is; picking the account brings in the suggested recipients. */
 const RecipientsGroup = ({
   account,
   choices,
   onChoicesChange,
   isEditMode = false,
-}: ChoiceHandlers & { account?: M2Account; isEditMode?: boolean }): ReactElement => {
+  callout,
+}: ChoiceHandlers & { account?: M2Account; isEditMode?: boolean; callout?: ReactNode }): ReactElement => {
   const [isBookOpen, setIsBookOpen] = useState(false)
   const [isDrafting, setIsDrafting] = useState(false)
+  const reservePageRoom = useContext(PageRoomContext)
   const recipients = getShownRecipients(choices, account)
+
+  useEffect(() => {
+    reservePageRoom(isBookOpen)
+    return () => reservePageRoom(false)
+  }, [isBookOpen, reservePageRoom])
   const listedAddresses = recipients.map(({ address }) => address.toLowerCase())
   const isEmpty = recipients.length === 0
   const hasPrefilled = recipients.some(({ history }) => history)
   const description = !account
     ? 'Pick a Safe account to see who it paid in the last 90 days, or add addresses yourself.'
     : hasPrefilled
-      ? 'We added everyone you’ve paid in the last 90 days. One address you paid once isn’t included.'
+      ? undefined
       : isEditMode
-        ? 'Everyone this allowlist lets the account pay today.'
+        ? 'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.'
         : 'No recent recipients. Add the addresses this account pays.'
 
   const toggle = (address: string) =>
@@ -1280,6 +1307,7 @@ const RecipientsGroup = ({
 
   return (
     <GroupSurface title="Who can receive funds" description={description} markNew="New · Recipient checklist">
+      {callout}
       {isEmpty && !isDrafting ? (
         !account && <EmptyItem>Recipients will show here.</EmptyItem>
       ) : (
@@ -1327,8 +1355,6 @@ const RecipientsGroup = ({
           onAdd={addFromBook}
         />
       </div>
-      {/* Room below the button while the popover is open, so the page can scroll it up and the list isn't squeezed. */}
-      {isBookOpen && <div aria-hidden className="h-96 shrink-0" />}
     </GroupSurface>
   )
 }
@@ -1353,13 +1379,13 @@ const PrimaryAction = ({
 /** One form, laid out like M1's SpendingLimitPolicyForm: blocks stacked with its `gap-5`, Next at the bottom. */
 const CreateStep = ({
   account,
-  onAccountChange,
-  accountEntries,
   choices,
   onChoicesChange,
   preflight,
   isCalloutDismissed,
   onDismissCallout,
+  isTokensCalloutDismissed,
+  onDismissTokensCallout,
   onNext,
   isEditMode = false,
   isUnchangedEdit = false,
@@ -1367,11 +1393,11 @@ const CreateStep = ({
   onScrolledToTokens,
 }: ChoiceHandlers & {
   account?: M2Account
-  onAccountChange: (account: M2Account) => void
-  accountEntries: SafeAccountEntry[]
   preflight: Preflight
   isCalloutDismissed: boolean
   onDismissCallout: () => void
+  isTokensCalloutDismissed: boolean
+  onDismissTokensCallout: () => void
   onNext: () => void
   /** M1's edit mode: no callout, the account fixed. */
   isEditMode?: boolean
@@ -1405,7 +1431,6 @@ const CreateStep = ({
   return (
     <TxCard>
       <div className="flex flex-col gap-5">
-        {!isEditMode && !isCalloutDismissed && <PoliciesCallout onDismiss={onDismissCallout} />}
         {/* M1's edit warning ("You are overwriting an existing spending limit."), in the allowlist's words. */}
         {isEditMode && (
           <M2Alert
@@ -1414,18 +1439,6 @@ const CreateStep = ({
             description="Once the change applies, funds can only be sent to the recipients and in the tokens you keep below."
           />
         )}
-
-        <AccountSelect
-          accounts={accountEntries}
-          value={account ? getAccountKey(account) : undefined}
-          onChange={(id) => {
-            const picked = findM2Account(id)
-            if (picked) onAccountChange(picked)
-          }}
-          notice={NESTED_SAFES_NOTICE}
-          id="recipient-allowlist-safe-account"
-          readOnly={isEditMode}
-        />
 
         {account && preflight !== 'ready' && <PreflightFailure preflight={preflight} />}
 
@@ -1438,12 +1451,28 @@ const CreateStep = ({
             isBlocked && 'pointer-events-none opacity-50',
           )}
         >
-          <TokensGroup account={account} choices={choices} onChoicesChange={onChoicesChange} sectionRef={tokensRef} />
+          <TokensGroup
+            account={account}
+            choices={choices}
+            onChoicesChange={onChoicesChange}
+            sectionRef={tokensRef}
+            isEditMode={isEditMode}
+            callout={
+              account &&
+              !isEditMode &&
+              !isTokensCalloutDismissed && <PoliciesCallout subject="tokens" onDismiss={onDismissTokensCallout} />
+            }
+          />
           <RecipientsGroup
             account={account}
             choices={choices}
             onChoicesChange={onChoicesChange}
             isEditMode={isEditMode}
+            callout={
+              account &&
+              !isEditMode &&
+              !isCalloutDismissed && <PoliciesCallout subject="recipients" onDismiss={onDismissCallout} />
+            }
           />
         </fieldset>
 
@@ -1475,19 +1504,12 @@ const PolicySummary = ({
 
   return (
     <div className="flex flex-col gap-3">
-      {initialChoices ? (
+      {/* Create needs no banner here: the summary banner above the step already says what this does. */}
+      {initialChoices && (
         <M2Alert
           tone="info"
           title={`You're changing the recipient allowlist for ${account.name} on ${network}.`}
           description="The new rules apply 24 hours after this executes. Any signer can cancel the change before then."
-        />
-      ) : (
-        <M2Alert
-          tone="warning"
-          title={`Every other transaction from ${account.name} on ${network} will be blocked.`}
-          description={`Once this executes, ${account.name} can only send allowed tokens to your ${selected.length} allowed recipient${
-            selected.length === 1 ? '' : 's'
-          }. You can change this later by editing the policy, but changes take 24 hours to apply.`}
         />
       )}
 
@@ -1527,45 +1549,59 @@ const getExistingPermissions = (account: M2Account): ExistingPermission[] =>
 /** Whether the flow shows the Permissions step for this account. */
 const hasExistingPermissions = (account: M2Account): boolean => getExistingPermissions(account).length > 0
 
-/** Who and what kind, then how much, or why the allowlist would block it. */
+/** What the switch does to one policy: follows the allowlist, blocked by it, or left outside it. */
+type PermissionStatus = 'covered' | 'blocked' | 'not-covered'
+
+const PERMISSION_STATUS_BADGE: Record<
+  PermissionStatus,
+  { label: string; variant: 'success' | 'warning'; Icon: LucideIcon }
+> = {
+  covered: { label: 'Follows the allowlist', variant: 'success', Icon: Check },
+  blocked: { label: 'Will be blocked', variant: 'warning', Icon: TriangleAlert },
+  'not-covered': { label: 'Not covered', variant: 'warning', Icon: TriangleAlert },
+}
+
+/** Who and what kind, then how much, or why the allowlist would block it, with what the switch does to it. */
 const PermissionRow = ({
   permission: { kind, holder, detail, token, Icon },
-  isBlocked,
+  status,
   onChangeTokens,
 }: {
   permission: ExistingPermission
-  isBlocked: boolean
+  status: PermissionStatus
   onChangeTokens?: () => void
-}): ReactElement => (
-  <div className="flex min-h-16 items-center gap-3 py-3">
-    <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card">
-      <Icon className="size-4 text-muted-foreground" aria-hidden />
-    </div>
+}): ReactElement => {
+  const badge = PERMISSION_STATUS_BADGE[status]
 
-    <div className="flex min-w-0 flex-1 flex-col">
-      <Typography variant="paragraph-small-medium" className="truncate">
-        {holder} · {kind}
-      </Typography>
-      <MutedLine>{isBlocked ? `${token} isn't an allowed token` : detail}</MutedLine>
-    </div>
+  return (
+    <ItemSurface>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+          <Icon className="size-4 text-muted-foreground" aria-hidden />
+        </div>
 
-    {isBlocked && (
-      <>
-        <Badge variant="warning" size="status" shape="status">
-          <TriangleAlert aria-hidden />
-          Will be blocked
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Typography variant="paragraph-small-medium" className="truncate">
+            {holder} · {kind}
+          </Typography>
+          <MutedLine>{status === 'blocked' ? `${token} isn't an allowed token` : detail}</MutedLine>
+        </div>
+
+        <Badge variant={badge.variant} size="status" shape="status">
+          <badge.Icon aria-hidden />
+          {badge.label}
         </Badge>
-        {onChangeTokens && (
+        {status === 'blocked' && onChangeTokens && (
           <Button variant="outline" size="sm" onClick={onChangeTokens}>
             Change tokens
           </Button>
         )}
-      </>
-    )}
-  </div>
-)
+      </div>
+    </ItemSurface>
+  )
+}
 
-/** Without onChoicesChange (the second signer) the switch only shows the choice. */
+/** The switch heads its own policies in one frame, each row showing what the switch does to it. Without onChoicesChange (the second signer) the switch only shows the choice. */
 const ExistingPermissions = ({
   account,
   choices,
@@ -1585,24 +1621,28 @@ const ExistingPermissions = ({
   const permissions = getExistingPermissions(account)
   // `applyToSpendingLimits` covers every existing permission; spending limits are the only kind so far.
   const isApplied = choices.applyToSpendingLimits
-  const blockedIds = isApplied
-    ? permissions.filter(({ token }) => choices.excludedTokens.includes(token)).map(({ id }) => id)
-    : []
-  // Starts open; collapsed, the header's "1 will be blocked" badge carries the warning.
-  const [isOpen, setIsOpen] = useState(true)
 
   if (permissions.length === 0) return null
 
   const count = permissions.length
+  const statusOf = ({ token }: ExistingPermission): PermissionStatus =>
+    !isApplied ? 'not-covered' : choices.excludedTokens.includes(token) ? 'blocked' : 'covered'
 
-  const content = (
-    <>
+  const frame = (
+    <div className="flex flex-col gap-4">
       <Field orientation="horizontal">
         <FieldContent>
-          <span className="flex items-center gap-2">
-            <FieldLabel htmlFor={switchId}>Apply the allowlist to existing permissions</FieldLabel>
+          <span className="flex flex-wrap items-center gap-2">
+            <FieldLabel htmlFor={switchId}>
+              Apply the allowlist to {count === 1 ? 'your spending limit' : `your ${count} spending limits`}
+            </FieldLabel>
             {isApplied && <Badge variant="positive">Recommended</Badge>}
           </span>
+          <FieldDescription>
+            {isApplied
+              ? 'They can only send allowed tokens to allowed recipients.'
+              : 'They keep working as they are, outside the allowlist.'}
+          </FieldDescription>
         </FieldContent>
         <Switch
           id={switchId}
@@ -1612,80 +1652,38 @@ const ExistingPermissions = ({
         />
       </Field>
 
-      {/* On is the protected state, so it reads as a good outcome; off says what's left exposed. */}
-      {isApplied ? (
-        <M2Alert
-          tone="success"
-          title="Only allowed recipients can receive funds"
-          description="Transfers to other addresses are blocked, and account settings can’t be changed. Changes take 24h."
-        />
-      ) : (
-        <M2Alert
-          tone="warning"
-          title="Your Safe account could be exposed"
-          description="These permissions can still send any token to any address. If one is compromised, funds could be sent outside your allowlist."
-        />
-      )}
-
-      <Separator />
-
-      {/* On the white card the list takes the muted fill, as the review's details card does. */}
-      <Collapsible
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        className={classnames('rounded-lg', surface === 'card' ? 'bg-muted' : 'bg-card')}
-      >
-        <CollapsibleTrigger
-          aria-label={isOpen ? 'Hide existing permissions' : 'Show existing permissions'}
-          className="group/permissions flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        >
-          <div className="flex min-w-0 flex-1 flex-col">
-            <Typography variant="paragraph-small-medium">
-              {count} {count === 1 ? 'permission' : 'permissions'}
-            </Typography>
-            <MutedLine>{joinList(permissions.map(({ holder }) => holder))}</MutedLine>
-          </div>
-          {/* Only while collapsed: once open, each blocked row carries its own badge. */}
-          {blockedIds.length > 0 && !isOpen && (
-            <Badge variant="warning" size="status" shape="status">
-              <TriangleAlert aria-hidden />
-              {blockedIds.length} will be blocked
-            </Badge>
-          )}
-          <ChevronDown
-            className={classnames(
-              'size-4 shrink-0 text-muted-foreground transition-[color,transform] group-hover/permissions:text-foreground',
-              isOpen && 'rotate-180',
-            )}
-            aria-hidden
+      <ItemList>
+        {permissions.map((permission) => (
+          <PermissionRow
+            key={permission.id}
+            permission={permission}
+            status={statusOf(permission)}
+            onChangeTokens={onChangeTokens}
           />
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
-          {/* Hairlines between the header and each row, inset to the content so they read as one list. */}
-          <div className="mx-3 flex flex-col divide-y divide-border/60 border-t border-border/60">
-            {permissions.map((permission) => (
-              <PermissionRow
-                key={permission.id}
-                permission={permission}
-                isBlocked={blockedIds.includes(permission.id)}
-                onChangeTokens={onChangeTokens}
-              />
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </>
+        ))}
+      </ItemList>
+    </div>
   )
 
-  // On its own step the page title already says "Existing permissions", so the card has no heading of its own.
+  // Only the risky choice gets a banner; the rows already show what "on" does.
+  const exposedWarning = !isApplied && (
+    <M2Alert
+      tone="warning"
+      title="Your Safe account could be exposed"
+      description="If a spending limit is compromised, funds could be sent outside your allowlist."
+    />
+  )
+
+  // On its own step the page title already says "Existing policies", so the frame has no heading of its own.
   return surface === 'card' ? (
-    <section className="flex flex-col gap-4" data-m2-new="New · Existing permissions">
-      {content}
+    <section className="flex flex-col gap-4" data-m2-new="New · Existing policies">
+      <div className="rounded-xl bg-muted p-4">{frame}</div>
+      {exposedWarning}
     </section>
   ) : (
-    <GroupSurface title="Existing permissions" markNew="New · Existing permissions">
-      {content}
+    <GroupSurface title="Existing policies" markNew="New · Existing policies">
+      {frame}
+      {exposedWarning}
     </GroupSurface>
   )
 }
@@ -1717,7 +1715,7 @@ const PermissionsStep = ({
           surface="card"
         />
       ) : (
-        <MutedLine>This account has no existing permissions.</MutedLine>
+        <MutedLine>This account has no existing policies.</MutedLine>
       )}
 
       <PrimaryAction label="Next" disabled={isUnchangedEdit} onClick={onNext} />
@@ -2535,44 +2533,227 @@ const ReceiptStep = ({
   </TxCard>
 )
 
+const describeTokens = (tokens: AccountToken[]): string =>
+  tokens.length > 3 ? `${tokens.length} tokens` : joinList(tokens.map(({ symbol }) => symbol))
+
+const describeRecipients = (recipients: Recipient[]): string =>
+  recipients.length === 1 ? recipients[0].name : `${recipients.length} recipients`
+
+/** The choices so far as one sentence, rebuilt on every change and shown on every step. */
+type SetupSummary = {
+  title: string
+  description: string
+  /** Behind the info icon at the end of the description. */
+  details?: string
+}
+
+const useSetupSummary = (
+  account: M2Account | undefined,
+  choices: SetupChoices,
+  /** From Review on, for an account that has spending limits. */
+  showPermissions: boolean,
+): SetupSummary => {
+  const chain = useChain(account?.chainId ?? '')
+  const tokens = getAllowedTokens(choices, account)
+  const recipients = getShownRecipients(choices, account).filter(({ selected }) => selected)
+
+  const who = account ? `${account.name}${chain ? ` on ${chain.chainName}` : ''}` : undefined
+  const isComplete = tokens.length > 0 && recipients.length > 0
+
+  const title = !who
+    ? 'Pick a Safe account to start.'
+    : isComplete
+      ? `${who} will only be able to send ${describeTokens(tokens)} to ${describeRecipients(recipients)}.`
+      : `${who} won't be able to send funds until you allow at least one token and one recipient.`
+  const permissions = choices.applyToSpendingLimits
+    ? 'Existing spending limits will follow the same rules. '
+    : "Existing spending limits won't be covered. "
+  const description = !who
+    ? 'Then choose which tokens it can send and who can receive them.'
+    : `${showPermissions ? permissions : ''}This takes effect as soon as this transaction is executed. Further changes will take 24 hours to apply.`
+
+  const details = who
+    ? `Every other transaction from ${who} will be blocked. You can change this later by editing the policy.`
+    : undefined
+
+  return { title, description, details }
+}
+
+const SetupSentence = ({ title, description, details }: SetupSummary): ReactElement => (
+  <div className="px-[var(--space-3)] pt-[var(--space-2)]" aria-live="polite" data-m2-new="New · Summary banner">
+    <M2Alert
+      tone="info"
+      title={title}
+      description={
+        <>
+          {description}
+          {details && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    aria-label="More about what this blocks"
+                    className="ml-1 inline-flex cursor-pointer align-[-2px] text-muted-foreground hover:text-foreground"
+                  />
+                }
+              >
+                <Info className="size-3.5" aria-hidden />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">{details}</TooltipContent>
+            </Tooltip>
+          )}
+        </>
+      }
+    />
+  </div>
+)
+
+/** The account a compact header names: identicon, name and network on one line. */
+const CompactAccount = ({ account }: { account: M2Account }): ReactElement => {
+  const chain = useChain(account.chainId)
+
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      <Identicon address={account.address} size={20} />
+      <Typography variant="paragraph-small-medium" className="truncate">
+        {account.name}
+      </Typography>
+      {chain && (
+        <Typography variant="paragraph-small" color="muted" className="shrink-0">
+          on {chain.chainName}
+        </Typography>
+      )}
+    </div>
+  )
+}
+
+/** A fixed title row, so everything pinned below it knows where the title ends. */
+const TITLE_ROW_HEIGHT = 'h-12'
+// The pinned title's 10px top padding, its row and its --space-2 bottom padding.
+const PINNED_TITLE_TOP = 'top-[calc(10px+3rem+var(--space-2))]'
+// The side frames start level with the card and pin there, beside the compact header.
+const SIDE_FRAME_OFFSET =
+  'min-[900px]:sticky min-[900px]:top-[calc(10px+3rem+var(--space-2))] min-[900px]:mt-[calc(10px+3rem+var(--space-2))]'
+
+/**
+ * Pinned under the title once the full header scrolls away: the compact tile as its own frame, a page-coloured gap,
+ * then a white rounded edge the content scrolls out from, so it reads as a second frame. Hidden, not unmounted, so it can fade.
+ */
+const CompactHeader = ({
+  account,
+  summary,
+  isVisible,
+}: {
+  account?: M2Account
+  summary: string
+  isVisible: boolean
+}): ReactElement => (
+  <div className={classnames('sticky z-10 h-0', PINNED_TITLE_TOP)}>
+    <div
+      aria-hidden={!isVisible}
+      className={classnames(
+        'absolute inset-x-0 top-0 transition-opacity duration-200',
+        isVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
+      )}
+    >
+      <div className="bg-[var(--color-background-main)] [[data-theme=dark]_&]:bg-background">
+        <CompactHeaderTile account={account} summary={summary} />
+        <div aria-hidden className="mt-4 h-4 rounded-t-xl bg-card" />
+      </div>
+      {/* A short white fade inside the frame's edge, so the content slides out from under it softly. */}
+      <div aria-hidden className="h-6 bg-linear-to-b from-card via-card/40 via-40% to-transparent" />
+    </div>
+  </div>
+)
+
+/** The policy, account and summary in one small frame. */
+const CompactHeaderTile = ({ account, summary }: { account?: M2Account; summary: string }): ReactElement => (
+  <div className="flex shrink-0 flex-col gap-3 rounded-xl bg-card p-4" data-m2-new="New · Compact header">
+    <div className="flex items-center gap-3">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border [&_svg]:size-4">
+        <ShieldIcon />
+      </span>
+      <Typography variant="paragraph-small-medium">
+        <FlowSubtitle />
+      </Typography>
+      <div className="ml-auto min-w-0">
+        {account ? (
+          <CompactAccount account={account} />
+        ) : (
+          <Typography variant="paragraph-small" color="muted">
+            No Safe account picked yet
+          </Typography>
+        )}
+      </div>
+    </div>
+    <M2Alert tone="info" title={<span className="block truncate">{summary}</span>} />
+  </div>
+)
+
 /** The card header's name, where M1 has "Spending limit"; M1's info link is left out for now. */
 const FlowSubtitle = (): ReactElement => <span>Recipient allowlist</span>
 
 /** The recipient allowlist's icon, as in the policy table and side panel. */
 const ShieldIcon = (): ReactElement => <Users aria-hidden />
 
-/** TxStatusWidget's label: icons only between 900px and 1200px, the text kept for screen readers. */
 const StepLabel = ({ children }: { children: ReactNode }): ReactElement => (
-  <span className="sr-only min-[1200px]:not-sr-only min-[1200px]:truncate text-xs leading-4 font-normal">
-    {children}
-  </span>
+  <span className="truncate text-sm leading-5 group-enabled:group-hover:underline">{children}</span>
 )
 
-/** TxStatusWidget's markup driven by the wizard step: the app's derives from a real transaction and has no Review. */
+/** A check once the step is done, a plus for the current and later steps; later steps are greyed. */
+const StepIcon = ({ isDone, isUpcoming }: { isDone: boolean; isUpcoming: boolean }): ReactElement => {
+  const Icon = isDone ? Check : Plus
+
+  return (
+    <span
+      className={classnames(
+        'flex size-5 shrink-0 items-center justify-center rounded-full text-card',
+        isUpcoming ? 'bg-muted-foreground/50' : 'bg-foreground',
+      )}
+    >
+      <Icon className="size-3" strokeWidth={3} aria-hidden />
+    </span>
+  )
+}
+
+/** The wizard's steps in a white frame like Safe Shield's; only completed steps jump back, since each step gates the next. */
 const PolicySetupStepper = ({
   steps,
   current,
   threshold,
+  onSelect,
 }: {
   /** WIZARD_STEP_NAMES indexes, without any step the flow skips. */
   steps: number[]
   current: number
   threshold: number
+  onSelect: (step: number) => void
 }): ReactElement => (
-  <div className="bg-transparent" data-m2-new="M1 copy · Status rail">
-    <ul className={statusCss.status}>
-      {steps.map((step) => (
-        <li
-          key={step}
-          className={classnames(statusCss.item, { [statusCss.incomplete]: step > current })}
+  <nav
+    aria-label="Steps"
+    className="flex w-fit flex-col items-start rounded-lg bg-card p-4"
+    data-m2-new="New · Clickable step rail"
+  >
+    {steps.map((step, index) => (
+      <Fragment key={step}>
+        {index > 0 && <span aria-hidden className="ml-[9px] h-6 w-0.5 bg-border" />}
+        <button
+          type="button"
+          onClick={() => onSelect(step)}
+          disabled={step >= current}
           aria-current={step === current ? 'step' : undefined}
+          className={classnames(
+            'group flex cursor-pointer items-center gap-3 text-left disabled:cursor-default',
+            step > current ? 'text-muted-foreground' : 'text-foreground',
+          )}
         >
-          <span className={statusCss.itemIcon}>{step < current ? <CreatedIcon /> : <SignedIcon />}</span>
+          <StepIcon isDone={step < current} isUpcoming={step > current} />
           <StepLabel>{step === CONFIRM_STEP ? `Confirm (0 of ${threshold})` : WIZARD_STEP_NAMES[step]}</StepLabel>
-        </li>
-      ))}
-    </ul>
-  </div>
+        </button>
+      </Fragment>
+    ))}
+  </nav>
 )
 
 /** TxLayoutBase's markup with PolicySetupStepper as the rail and SetupSafeShield in the Safe Shield column. */
@@ -2586,11 +2767,21 @@ const PolicySetupLayout = ({
   account,
   onNext,
   onBack,
+  onStepSelect,
   onClose,
+  summary,
+  summaryAccount,
+  belowSummary,
   children,
 }: {
   step: number
-  /** The steps that apply to the account, for the stepper and the progress bar; children stay one per step. */
+  /** The summary banner under the header on every step, and the compact header's line once it scrolls away. */
+  summary: SetupSummary
+  /** The account the summary describes, for the compact header; unset until one is picked. */
+  summaryAccount?: M2Account
+  /** In the header card under the summary, e.g. Create's account field. */
+  belowSummary?: ReactNode
+  /** The steps that apply to the account, for the stepper; children stay one per step. */
   visibleSteps: number[]
   title: string
   threshold: number
@@ -2599,18 +2790,35 @@ const PolicySetupLayout = ({
   account: M2Account
   onNext: () => void
   onBack: () => void
+  /** A click on a step in the rail. */
+  onStepSelect: (step: number) => void
   /** Create's Back: the first step has no step before it, so Back closes the flow. */
   onClose?: () => void
   children: ReactElement[]
 }): ReactElement => {
-  const isSmallScreen = useIsBelowMd()
-  const isDarkMode = useDarkMode()
   const safeTx = useMemo(
     () => (step >= REVIEW_STEP ? buildSetupTransaction({ choices, mode, account }).safeTx : undefined),
     [step, choices, mode, account],
   )
-  const progress = Math.round(((visibleSteps.indexOf(step) + 1) / visibleSteps.length) * 100)
   const rootRef = useRef<HTMLDivElement>(null)
+  const [needsPageRoom, setNeedsPageRoom] = useState(false)
+  const titleRowRef = useRef<HTMLDivElement>(null)
+  const policyRowRef = useRef<HTMLDivElement>(null)
+  const [isPolicyRowHidden, setIsPolicyRowHidden] = useState(false)
+
+  // Any scroll, captured, since the flow scrolls inside its dialog in the app and the window in a story.
+  useEffect(() => {
+    const titleRow = titleRowRef.current
+    const policyRow = policyRowRef.current
+    if (!titleRow || !policyRow) return
+
+    // Once the "Recipient allowlist" row has slid under the pinned title.
+    const update = () =>
+      setIsPolicyRowHidden(policyRow.getBoundingClientRect().bottom < titleRow.getBoundingClientRect().bottom)
+    update()
+    document.addEventListener('scroll', update, { capture: true, passive: true })
+    return () => document.removeEventListener('scroll', update, { capture: true })
+  }, [])
 
   // A frame later: the review's own content can pull the scroll down once it mounts.
   useEffect(() => {
@@ -2625,75 +2833,82 @@ const PolicySetupLayout = ({
 
   return (
     <MockFlowProviders step={step} safeTx={safeTx} choices={choices} onNext={onNext} onPrev={onBack}>
-      <div ref={rootRef} className="flex" data-m2-new="M1 copy · Flow layout (TxLayout)">
-        {!isSmallScreen && (
-          <div className="w-[88px] shrink-0 pt-10 pl-8 min-[1200px]:w-[232px]">
-            {/* pl-8: the full-screen layer has no dialog gutter, so the rail's fixed column would sit on the edge. */}
-            <aside>
-              <div className="fixed flex flex-col gap-6">
-                <PolicySetupStepper steps={visibleSteps} current={step} threshold={threshold} />
-              </div>
-            </aside>
-          </div>
-        )}
+      <PageRoomContext.Provider value={setNeedsPageRoom}>
+        <div ref={rootRef} className="px-[var(--space-3)]" data-m2-new="New · Centred flow layout">
+          {/* Wide enough for the steps, the card and Safe Shield side by side: 320 + 672 + 320 + two 24px gaps. */}
+          <div className="mx-auto w-full max-w-[1360px]">
+            {/* From 1200px a grid whose equal side columns keep the card centred whatever the steps' width. */}
+            <div className="flex flex-wrap justify-center gap-6 min-[900px]:flex-nowrap min-[1200px]:grid min-[1200px]:grid-cols-[minmax(0,1fr)_minmax(0,672px)_minmax(0,1fr)]">
+              {/* Below 1200px there's no room for three columns. */}
+              <aside className="hidden min-[1200px]:flex min-[1200px]:justify-end">
+                <div className={classnames('self-start', SIDE_FRAME_OFFSET)}>
+                  <PolicySetupStepper
+                    steps={visibleSteps}
+                    current={step}
+                    threshold={threshold}
+                    onSelect={onStepSelect}
+                  />
+                </div>
+              </aside>
 
-        <div className="min-w-0 flex-1">
-          <div className={classnames('flex flex-wrap', layoutCss.container)}>
-            <div className="w-full min-w-0 flex-grow min-[900px]:flex-1 min-[900px]:pl-4 min-[1200px]:pl-10">
-              <div className={classnames('mx-auto w-full max-w-[1200px]', layoutCss.contentContainer)}>
-                <div className="flex flex-wrap justify-center gap-6 min-[900px]:flex-nowrap">
-                  <div className="min-w-0 flex-grow min-[900px]:max-w-[672px]">
-                    <div className={layoutCss.titleWrapper}>
-                      <Typography
-                        data-testid="modal-title"
-                        variant="h3"
-                        className={classnames('font-bold', layoutCss.title)}
-                      >
-                        {title}
-                      </Typography>
-                    </div>
-
-                    <div
-                      data-testid="modal-header"
-                      className={classnames('overflow-hidden rounded-t-xl bg-card', layoutCss.header)}
+              <div className="min-w-0 flex-grow min-[900px]:max-w-[672px]">
+                {/* The title stays where it is; the page colour hides what scrolls behind it. */}
+                <div className="sticky top-0 z-20 bg-[var(--color-background-main)] pt-[10px] pb-[var(--space-2)] [[data-theme=dark]_&]:bg-background">
+                  <div ref={titleRowRef} className={classnames(TITLE_ROW_HEIGHT, 'mb-0!', layoutCss.titleWrapper)}>
+                    <Typography
+                      data-testid="modal-title"
+                      variant="h3"
+                      className={classnames('font-bold', layoutCss.title)}
                     >
-                      <div className={layoutCss.progressBar}>
-                        <ProgressBar value={progress} color={isDarkMode ? 'primary' : 'secondary'} />
-                      </div>
-                      <TxLayoutHeader subtitle={<FlowSubtitle />} icon={ShieldIcon} hideNonce={step < REVIEW_STEP} />
-                    </div>
-
-                    <div className={layoutCss.step}>
-                      {children[step]}
-                      {(step > 0 || onClose) && (
-                        <Button
-                          data-testid="modal-back-btn"
-                          variant="outline"
-                          onClick={step > 0 ? onBack : onClose}
-                          className={layoutCss.backButton}
-                        >
-                          Back
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div
-                    className={classnames(
-                      'w-full min-[900px]:w-[37.5%] min-[900px]:shrink-0 lg:w-[320px]',
-                      layoutCss.widget,
+                      {title}
+                    </Typography>
+                    {onClose && (
+                      <Button variant="surface" size="icon" aria-label="Close" onClick={onClose}>
+                        <X />
+                      </Button>
                     )}
-                  >
-                    <div className={layoutCss.sticky}>
-                      <SetupSafeShield step={step} safeTx={safeTx} />
-                    </div>
                   </div>
+                </div>
+
+                <CompactHeader account={summaryAccount} summary={summary.title} isVisible={isPolicyRowHidden} />
+
+                <div
+                  data-testid="modal-header"
+                  className={classnames('overflow-hidden rounded-t-xl bg-card', layoutCss.header)}
+                >
+                  <div ref={policyRowRef}>
+                    <TxLayoutHeader subtitle={<FlowSubtitle />} icon={ShieldIcon} hideNonce={step < REVIEW_STEP} />
+                  </div>
+                  <SetupSentence {...summary} />
+                  {belowSummary}
+                </div>
+
+                <div className={layoutCss.step}>
+                  {children[step]}
+                  {(step > 0 || onClose) && (
+                    <Button
+                      data-testid="modal-back-btn"
+                      variant="outline"
+                      onClick={step > 0 ? onBack : onClose}
+                      className={layoutCss.backButton}
+                    >
+                      Back
+                    </Button>
+                  )}
+                </div>
+                {/* Room below the step while the address book is open, so the page can scroll its list up. */}
+                {needsPageRoom && <div aria-hidden className="h-96" />}
+              </div>
+
+              <div className="w-full min-[900px]:w-[37.5%] min-[900px]:shrink-0 lg:w-[320px] min-[1200px]:max-w-full">
+                <div className={SIDE_FRAME_OFFSET}>
+                  <SetupSafeShield step={step} safeTx={safeTx} />
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </PageRoomContext.Provider>
     </MockFlowProviders>
   )
 }
@@ -2738,6 +2953,7 @@ export const SetUpPoliciesFlow = ({
 }: SetUpPoliciesFlowProps): ReactElement => {
   // Held here rather than in the step, as M1 does: the step unmounts on Next and would forget the dismissal on Back.
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(false)
+  const [isTokensCalloutDismissed, setIsTokensCalloutDismissed] = useState(false)
   // "Change tokens" on Permissions: Create scrolls to its tokens once it shows, then clears this.
   const [isTokensScrollPending, setIsTokensScrollPending] = useState(false)
   const clearTokensScroll = useCallback(() => setIsTokensScrollPending(false), [])
@@ -2759,6 +2975,14 @@ export const SetUpPoliciesFlow = ({
     [choices, mode, reviewedAccount],
   )
   const accountEntries = useMemo(() => getAccountEntries(disabledAccountKeys), [disabledAccountKeys])
+  // Past Create the steps show reviewedAccount, so the summary does too.
+  const summaryAccount = currentStep > CREATE_STEP ? reviewedAccount : account
+  const summary = useSetupSummary(
+    summaryAccount,
+    choices,
+    // From Review on: on the Policies step its own switch says this.
+    currentStep > PERMISSIONS_STEP && hasExistingPermissions(reviewedAccount),
+  )
 
   useEffect(() => {
     latestSetup.choices = choices
@@ -2782,19 +3006,40 @@ export const SetUpPoliciesFlow = ({
       account={reviewedAccount}
       onNext={next}
       onBack={back}
+      onStepSelect={onStepChange}
       onClose={onClose}
+      belowSummary={
+        currentStep === CREATE_STEP && (
+          // The card's own padding, which the field had inside Create's card.
+          <div className="px-[var(--space-3)] pt-[var(--space-3)]">
+            <AccountSelect
+              accounts={accountEntries}
+              value={account ? getAccountKey(account) : undefined}
+              onChange={(id) => {
+                const picked = findM2Account(id)
+                if (picked) onAccountChange(picked)
+              }}
+              notice={NESTED_SAFES_NOTICE}
+              id="recipient-allowlist-safe-account"
+              readOnly={isEditMode}
+            />
+          </div>
+        )
+      }
+      summary={summary}
+      summaryAccount={summaryAccount}
     >
       <CreateStep
         key="create"
         account={account}
-        onAccountChange={onAccountChange}
-        accountEntries={accountEntries}
         choices={choices}
         onChoicesChange={onChoicesChange}
         // The pre-setup checks passed when the allowlist was created.
         preflight={isEditMode ? 'ready' : preflight}
         isCalloutDismissed={isCalloutDismissed}
         onDismissCallout={() => setIsCalloutDismissed(true)}
+        isTokensCalloutDismissed={isTokensCalloutDismissed}
+        onDismissTokensCallout={() => setIsTokensCalloutDismissed(true)}
         onNext={next}
         isEditMode={isEditMode}
         // With a Permissions step, its switch can still change the edit, so the check waits for that step's Next.
@@ -2827,10 +3072,26 @@ export const SetUpPoliciesFlow = ({
 
   if (inline) return flow
 
+  return <M2FlowDialog onClose={onClose}>{flow}</M2FlowDialog>
+}
+
+/** TxModalDialog without its corner X or the right gutter kept for it: the flow draws its own X by the title. */
+const M2FlowDialog = ({ children, onClose }: { children: ReactNode; onClose?: () => void }): ReactElement => {
+  const portalContainer = usePortalContainer()
+
   return (
-    <TxModalDialog open fullWidth onClose={onClose}>
-      {flow}
-    </TxModalDialog>
+    <DialogPrimitive.Root open onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
+      <DialogPrimitive.Portal container={portalContainer}>
+        <DialogPrimitive.Popup
+          className={classnames(txDialogCss.dialog, txDialogCss.paper, txDialogCss.fullWidth)}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div tabIndex={-1} className="text-[var(--color-text-primary)]">
+            {children}
+          </div>
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
 

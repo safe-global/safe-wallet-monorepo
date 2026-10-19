@@ -40,7 +40,6 @@ const meta = {
     onRetryExecute: fn(),
     onCreateRejection: fn(),
     onCloseDialog: fn(),
-    onAddPolicy: fn(),
     onCancelChange: fn(),
   },
 } satisfies Meta<typeof PanelOverOverview>
