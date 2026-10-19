@@ -258,7 +258,7 @@ describe('signProposerDelegation', () => {
         const signer = createSigner()
         const send = jest.spyOn(signer.provider, 'send').mockResolvedValue(ownerSignatures)
 
-        const result = await sign(chain, signer)
+        const result = (await sign(chain, signer)).toLowerCase()
 
         const typedData = delegateUtils.normalizeDelegateTypedData(
           delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
