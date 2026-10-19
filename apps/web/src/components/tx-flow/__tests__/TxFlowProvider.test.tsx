@@ -135,7 +135,9 @@ describe('TxFlowProvider', () => {
     it('tracks a new tx as a creation', async () => {
       const { result } = renderContext({})
 
-      act(() => result.current.trackTxEvent(buildTxId(), true))
+      act(() => {
+        result.current.trackTxEvent(buildTxId(), true)
+      })
 
       await waitFor(() => expect(isCreationArg()).toBe(true))
     })
@@ -145,7 +147,9 @@ describe('TxFlowProvider', () => {
       const { result } = renderContext({})
 
       act(() => result.current.continueToExecute(signedTxId))
-      act(() => result.current.trackTxEvent(signedTxId, true))
+      act(() => {
+        result.current.trackTxEvent(signedTxId, true)
+      })
 
       await waitFor(() => expect(isCreationArg()).toBe(false))
       expect(result.current.isCreation).toBe(true)
@@ -155,7 +159,9 @@ describe('TxFlowProvider', () => {
       const existingTxId = buildTxId()
       const { result } = renderContext({ txId: existingTxId })
 
-      act(() => result.current.trackTxEvent(existingTxId, true))
+      act(() => {
+        result.current.trackTxEvent(existingTxId, true)
+      })
 
       await waitFor(() => expect(isCreationArg()).toBe(false))
     })
