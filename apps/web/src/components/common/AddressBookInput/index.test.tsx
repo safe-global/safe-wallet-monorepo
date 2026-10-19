@@ -12,6 +12,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useGetSpaceAddressBook } from '@/features/spaces'
+import { extendedSafeInfoBuilder, addressExBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
@@ -343,6 +344,37 @@ describe('AddressBookInput', () => {
     })
 
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
+  })
+
+  describe('when the address is a signer of the current Safe', () => {
+    const signer = checksumAddress(faker.finance.ethereumAddress())
+    const safe = extendedSafeInfoBuilder()
+      .with({ owners: [addressExBuilder().with({ value: signer }).build()] })
+      .build()
+
+    const renderWithSafeSigner = (addressBook: AddressBook) =>
+      render(<TestForm address={signer} canAdd />, {
+        initialReduxState: {
+          addressBook: { [mockChain.chainId]: addressBook },
+          safeInfo: { loading: false, error: undefined, data: safe, loaded: true },
+        },
+      })
+
+    it('should say it is a signer instead of an unknown address', async () => {
+      const utils = renderWithSafeSigner({})
+
+      await waitFor(() => expect(utils.getByText('This is a signer of this Safe', { exact: false })).toBeDefined())
+      expect(utils.queryByText('This is an unknown address', { exact: false })).toBeNull()
+      expect(utils.getByText('add it to your address book', { exact: false })).toBeDefined()
+    })
+
+    it('should show no hint when the signer is already in the address book', async () => {
+      const utils = renderWithSafeSigner({ [signer]: 'Alice' })
+
+      await waitFor(() => expect(utils.getByText('Alice', { exact: false })).toBeDefined())
+      expect(utils.queryByText('This is a signer of this Safe', { exact: false })).toBeNull()
+      expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull()
+    })
   })
 
   it('should group a server-stored (space) contact under the workspace header with the workspace icon', async () => {
