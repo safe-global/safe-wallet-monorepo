@@ -22,6 +22,8 @@ import SpaceAddressBookV2 from '../index'
 
 const SPACE_ID = '7'
 
+const mockIsMobile = jest.fn(() => false)
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(),
@@ -168,6 +170,7 @@ const openLocalTab = () => userEvent.click(screen.getByRole('tab', { name: /^Loc
 describe('SpaceAddressBookV2', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsMobile.mockReturnValue(false)
     mockRole('admin')
     mockPrivateAddressBook(true)
     mockWorkspaceBook()
@@ -402,6 +405,16 @@ describe('SpaceAddressBookV2', () => {
 
       expect(within(rowOf('Hardware wallet')).getByText('Already shared')).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /^Add Hardware wallet/ })).not.toBeInTheDocument()
+    })
+
+    it('says a contact is already shared in words in the compact layout', async () => {
+      mockIsMobile.mockReturnValue(true)
+      mockWorkspaceBook({ items: [itemBuilder().with({ address: hardwareWallet.toLowerCase() }).build()] })
+
+      renderAddressBook({ '1': { [hardwareWallet]: 'Hardware wallet' } })
+      await openLocalTab()
+
+      expect(within(rowOf('Hardware wallet')).getByText('Already shared')).toBeInTheDocument()
     })
 
     it('holds the share action back until the workspace book is read', async () => {

@@ -37,9 +37,12 @@ const chainIdsOf = (contact: AddressBookContact) => contact.chains.map((chain) =
 
 const AlreadyShared = ({ isCompact }: { isCompact: boolean }) => (
   <Tooltip>
-    <TooltipTrigger render={<span className="inline-flex" aria-label={isCompact ? 'Already shared' : undefined} />}>
+    <TooltipTrigger render={<span className="inline-flex" />}>
       {isCompact ? (
-        <Check className="text-muted-foreground size-4" />
+        <>
+          <Check aria-hidden="true" className="text-muted-foreground size-4" />
+          <span className="sr-only">Already shared</span>
+        </>
       ) : (
         <Badge variant="secondary">Already shared</Badge>
       )}
