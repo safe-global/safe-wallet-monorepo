@@ -12,6 +12,7 @@ export const playwrightSpecs = {
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
   'e2e/delete.spec.ts': {},
+  'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
   'e2e/reject.spec.ts': {},

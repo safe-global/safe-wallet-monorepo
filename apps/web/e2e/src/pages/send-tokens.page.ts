@@ -54,6 +54,12 @@ export class SendTokensPage {
     await this.recipientInput.waitFor({ state: 'visible' })
   }
 
+  /** Choose the token to send by its symbol */
+  async selectToken(symbol: string): Promise<void> {
+    await this.tokenSelector.click()
+    await this.page.getByRole('option').filter({ hasText: symbol }).click()
+  }
+
   /** Enter the recipient's address and an amount of the selected token */
   async fillTransfer({ recipient, amount }: { recipient: string; amount: string }): Promise<void> {
     await this.recipientInput.fill(recipient)

@@ -20,3 +20,20 @@ export function multiSendActionCounts(page: QueuedItemPage | TransactionItemPage
     .filter((transaction) => nonceOf(transaction) !== undefined)
     .map(({ txInfo }) => ('actionCount' in txInfo ? txInfo.actionCount : undefined))
 }
+
+/** The ERC-20 transfers on a history page, as CGW maps them. */
+export function erc20TransfersIn(
+  page: TransactionItemPage,
+): Array<{ tokenAddress: string; value: string; direction: string }> {
+  return transactionsIn(page).flatMap(({ txInfo }) =>
+    txInfo.type === 'Transfer' && txInfo.transferInfo.type === 'ERC20'
+      ? [
+          {
+            tokenAddress: txInfo.transferInfo.tokenAddress,
+            value: txInfo.transferInfo.value,
+            direction: txInfo.direction,
+          },
+        ]
+      : [],
+  )
+}
