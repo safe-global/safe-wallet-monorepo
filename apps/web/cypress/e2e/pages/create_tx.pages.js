@@ -56,9 +56,7 @@ export const addressItem = '[data-testid="address-book-input"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
 const checkWalletTooltipTrigger = '[data-testid="check-wallet-tooltip-trigger"]'
-const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
-export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
@@ -86,7 +84,6 @@ const gridViewBtn = '[data-testid="grid-view-btn"]'
 const txHexData = '[data-testid="tx-hex-data"]'
 const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
-const nonceFld = '[data-testid="nonce-fld"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
 const addrecipientBtn = '[data-testid="add-recipient-btn"]'
 const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
@@ -206,10 +203,6 @@ export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
 }
 
-export function verifyReplaceChoiceBtnVisible() {
-  cy.get(replaceChoiceBtn).find('button').should('be.visible')
-}
-
 export function getRejectButton() {
   return cy.get(rejectTxBtn)
 }
@@ -238,24 +231,6 @@ export function verifyTxRejectModalVisible() {
 
 export function clickOnRejectionChoiceBtn(choice) {
   cy.get(wallet.choiceBtn).eq(choice).click()
-}
-
-export function verifyTxNonceDisplayed(nonce) {
-  cy.get(nonceFld).should('include.text', nonce)
-}
-
-export function checkNonceIsReadOnly() {
-  cy.get(nonceFld).then(($el) => {
-    expect($el[0].nodeName).to.equal('DIV')
-  })
-}
-
-export function verifyRejecChoiceBtnStatus(option) {
-  cy.get(rejectChoiceBtn).find('button').should(option)
-}
-
-export function verifyDeleteChoiceBtnStatus(option) {
-  cy.get(deleteChoiceBtn).find('button').should(option)
 }
 
 export function typeNoteText(text) {
@@ -827,10 +802,6 @@ export function changeNonce(value) {
 
 export function hasNonce() {
   cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
-}
-
-export function verifyNonceInputValue(value) {
-  cy.get(nonceInput).should('have.value', value)
 }
 
 export function displayAdvancedDetails() {
