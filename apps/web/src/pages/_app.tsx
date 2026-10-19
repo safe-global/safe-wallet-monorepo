@@ -197,6 +197,9 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
       <AppProviders>
         <CaptchaProvider>
+          {/* Before InitApp and the page, so GA exists before their mount effects send events */}
+          <Analytics />
+
           <InitApp />
 
           <LazyWeb3Init />
@@ -218,8 +221,6 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <CounterfactualHooksLoader />
 
           <SpendingLimitsLoaderWrapper />
-
-          <Analytics />
 
           <PkModulePopup />
         </CaptchaProvider>
