@@ -220,4 +220,26 @@ describe('getBatchableTransactions', () => {
       mockTx19,
     ])
   })
+
+  it.each([
+    { signatures: [2, 2, 1], expectedNonces: [0, 1] },
+    { signatures: [2, 2, 1, 2], expectedNonces: [0, 1] },
+  ])(
+    'should stop at the first tx with missing signatures: $signatures of 2 → nonces $expectedNonces',
+    ({ signatures, expectedNonces }) => {
+      const txs = signatures.map((confirmationsSubmitted, nonce) => {
+        const tx = getMockTx({ nonce })
+        tx.transaction.executionInfo = {
+          ...tx.transaction.executionInfo,
+          confirmationsRequired: 2,
+          confirmationsSubmitted,
+        } as MultisigExecutionInfo
+        return tx
+      })
+
+      const result = getBatchableTransactions(txs, 0)
+
+      expect(result.map((tx) => (tx.transaction.executionInfo as MultisigExecutionInfo).nonce)).toEqual(expectedNonces)
+    },
+  )
 })
