@@ -1,8 +1,8 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
 import { ChevronDown, ChevronRight, ShieldCheck } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Typography } from '@/components/ui/typography'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import {
   Drawer,
@@ -13,22 +13,22 @@ import {
   DrawerSection,
   DrawerTitle,
 } from '@/components/common/Drawer'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Link } from '@/components/ui/link'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Link } from '@safe-global/views/components/ui/link'
 import { PolicyDrawerActions } from '../components/PolicyDrawerActions'
 import { MOCK_VIEWERS } from '../mocks/policies'
 import ProposerDrawer, { ProposerStatus } from '../ProposerDrawer'
 import { SpendingLimitDrawer } from '../SpendingLimitDrawer'
-import { CHANGE_BADGE } from '../SpendingLimitFlow/Summary/constants'
+import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { CopyTransactionLink } from '../SpendingLimitDrawer/components/CopyTransactionLink'
 import {
   ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
   connectHelper,
   PENDING_OUTCOME_TITLE,
-} from '../SpendingLimitDrawer/messages'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import { PAYMENTS_LIMIT } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
 import { BlockedSpendingLimitDrawer } from './m2BlockedSpendingLimitDrawer'

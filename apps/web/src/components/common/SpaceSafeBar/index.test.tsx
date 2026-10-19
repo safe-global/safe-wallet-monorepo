@@ -25,7 +25,8 @@ jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
   useCurrentSpaceId: () => undefined,
   useAddressBookWriteScope: () => ({ scope: 'local', canRename: true }),
-  matchesSafeSearch: jest.requireActual('@/features/spaces/components/SafeSelectorDropdown/utils').matchesSafeSearch,
+  matchesSafeSearch: jest.requireActual('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils')
+    .matchesSafeSearch,
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
   },

@@ -1,17 +1,18 @@
 import Image from 'next/image'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 
-import CheckIcon from '@/public/images/common/check.svg'
+import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import StarIcon from '@/public/images/common/star.svg'
 import EyeIcon from '@/public/images/common/eye.svg'
 import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
 import useBalances from '@/hooks/useBalances'
-import { EligibleEarnTokens, VaultAPYs } from '../../constants'
+import { VaultAPYs } from '../../constants'
+import { isEligibleEarnToken } from '../../services/utils'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -27,7 +28,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '../../constants'
 
 export const EarnPoweredBy = () => {
@@ -71,7 +72,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const chainId = useChainId()
   const router = useRouter()
 
-  const eligibleAssets = balances.items.filter((token) => EligibleEarnTokens[chainId].includes(token.tokenInfo.address))
+  const eligibleAssets = balances.items.filter((token) => isEligibleEarnToken(chainId, token.tokenInfo.address))
 
   return (
     <div className="m-6">

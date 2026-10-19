@@ -1,7 +1,7 @@
-import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import ExternalLink from '@/components/common/ExternalLink'
-import { cn } from '@/utils/cn'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { cn } from '@safe-global/views/utils/cn'
 
 interface SecurityBannerProps {
   title?: string

@@ -216,6 +216,7 @@
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;

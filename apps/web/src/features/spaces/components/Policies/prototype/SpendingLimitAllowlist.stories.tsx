@@ -7,13 +7,16 @@ import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERAT
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { balanceHandlers, createMockStory } from '@/stories/mocks'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { useSafeScope, useSafeScopeControls } from '@/components/tx-flow/safe-scope'
-import type { SafeScopeTarget } from '@/components/tx-flow/safe-scope'
-import { INELIGIBILITY_TEXT } from '../SafeAccountSelector/constants'
+import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
+import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../SafeAccountSelector/utils'
-import type { SafeAccountEntry, SafeAccountOption } from '../SafeAccountSelector/types'
+import type {
+  SafeAccountEntry,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitFlow/CreateStep/SpendingLimitPolicyForm'
-import { createDefaultFormValues } from '../SpendingLimitFlow/types'
+import { createDefaultFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { AllowlistSpendingLimitForm, AllowlistTokensContext, type AllowlistTokens } from './m2SpendingLimitForm'
 import { PAYMENTS, TREASURY } from './m2Prototype'
 

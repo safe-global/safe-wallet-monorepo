@@ -7,14 +7,14 @@ import {
 } from '@/hooks/safe-apps/permissions'
 import type { ReactElement } from 'react'
 import { useCallback, useMemo } from 'react'
-import type { AllowedFeatures } from '@/components/safe-apps/types'
-import { PermissionStatus } from '@/components/safe-apps/types'
+import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
+import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
-import PermissionsCheckbox from '@/components/safe-apps/PermissionCheckbox'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import PermissionsCheckbox from '@safe-global/views/components/safe-apps/PermissionCheckbox'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import SettingsCard from '@/components/settings/SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 const SafeAppsPermissions = (): ReactElement => {
   const { allSafeApps } = useSafeApps()

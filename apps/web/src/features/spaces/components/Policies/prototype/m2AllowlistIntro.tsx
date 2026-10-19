@@ -2,8 +2,10 @@ import type { ReactElement } from 'react'
 import { Ban, Check, Clock, ShieldCheck, UsersRound } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import Identicon from '@/components/common/Identicon'
-import { Typography } from '@/components/ui/typography'
-import PolicyIntroDialog, { type PolicyIntroExplainer } from '../PolicyIntroDialog'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import PolicyIntroDialog, {
+  type PolicyIntroExplainer,
+} from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [
   { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },

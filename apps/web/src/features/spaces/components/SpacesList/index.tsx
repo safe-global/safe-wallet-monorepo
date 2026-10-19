@@ -7,27 +7,27 @@ import WorkspaceBanner from '../WorkspaceBanner'
 import Image from 'next/image'
 import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
 import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
-import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeMarkIcon from '@safe-global/views/assets/images/logo-no-text.svg'
 import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { ArrowRight, Check, ExternalLink as ExternalLinkIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Spinner } from '@/components/ui/spinner'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
 import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
@@ -39,7 +39,7 @@ import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
@@ -242,17 +242,17 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
           <div className="flex flex-col items-center gap-4">
             <div className="h-12">
-              <AddSpaceButton
-                label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
-                icon="arrow"
-                disabled={isAtLimit}
-                link
-                onClick={() =>
-                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
-                    entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,
-                  })
-                }
-              />
+              <Track
+                {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+                mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE }}
+              >
+                <AddSpaceButton
+                  label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
+                  icon="arrow"
+                  disabled={isAtLimit}
+                  link
+                />
+              </Track>
             </div>
 
             <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
@@ -309,9 +309,6 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
-  const onAddSpaceBtnClick = () =>
-    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-
   const pendingInviteBanners =
     isUserSignedIn && pendingInvites.length > 0
       ? pendingInvites.map((invitingSpace: GetSpaceResponse) => (
@@ -348,13 +345,12 @@ const SpacesList = () => {
             {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             <WelcomeContentCard className="flex flex-col gap-4">
               <div className="flex justify-end">
-                <AddSpaceButton
-                  size="default"
-                  variant="outline"
-                  label="Create"
-                  disabled={isAtSpacesLimit}
-                  onClick={onAddSpaceBtnClick}
-                />
+                <Track
+                  {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+                  mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.WELCOME }}
+                >
+                  <AddSpaceButton size="default" variant="outline" label="Create" disabled={isAtSpacesLimit} />
+                </Track>
               </div>
 
               {pendingInviteBanners}

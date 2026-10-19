@@ -1,5 +1,5 @@
-import { renderHook, waitFor } from '@/tests/test-utils'
-import type { ReactNode } from 'react'
+import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
+import { useState, type ReactNode } from 'react'
 import {
   SafeShieldProvider,
   useSafeShield,
@@ -70,5 +70,41 @@ describe('useSafeShieldForAddressPoisoning: falsy filtering & value-keying', () 
     // Changing to a non-look-alike drops the entry.
     rerender({ addrs: [CLEAN] })
     await waitFor(() => expect(result.current[0]?.[LOOKALIKE]).toBeUndefined())
+  })
+})
+
+describe('useSafeShieldForAddressPoisoning: registration lifetime', () => {
+  const Registrar = () => {
+    useSafeShieldForAddressPoisoning([LOOKALIKE])
+    return <span data-testid="registrar" />
+  }
+
+  const PoisoningTitle = () => {
+    const [data] = useSafeShield().recipient
+    return <span data-testid="poisoning-title">{data?.[LOOKALIKE]?.[StatusGroup.ADDRESS_POISONING]?.[0]?.title}</span>
+  }
+
+  const TwoStepHarness = () => {
+    const [isFirstStep, setIsFirstStep] = useState(true)
+    return (
+      <SafeShieldProvider>
+        <PoisoningTitle />
+        {isFirstStep && <Registrar />}
+        <button onClick={() => setIsFirstStep(false)}>Next</button>
+      </SafeShieldProvider>
+    )
+  }
+
+  it('keeps the look-alike flagged after the registering component unmounts', async () => {
+    const { getByTestId, queryByTestId, getByRole } = render(<TwoStepHarness />, {
+      initialReduxState: addressBookState,
+    })
+
+    await waitFor(() => expect(getByTestId('poisoning-title')).toHaveTextContent('Potential address poisoning'))
+
+    fireEvent.click(getByRole('button', { name: 'Next' }))
+
+    expect(queryByTestId('registrar')).not.toBeInTheDocument()
+    expect(getByTestId('poisoning-title')).toHaveTextContent('Potential address poisoning')
   })
 })

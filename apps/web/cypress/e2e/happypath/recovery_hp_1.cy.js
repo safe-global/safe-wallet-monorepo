@@ -6,10 +6,13 @@ import * as tx from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createtx from '../pages/create_tx.pages.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let recoverySafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Recovery happy path tests 1', () => {
   before(async () => {
@@ -17,14 +20,11 @@ describe('Recovery happy path tests 1', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_1)
-    cy.clearLocalStorage()
-    main.acceptCookies()
+    wallet.connectSignerViaStorage(signer, constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_1)
   })
 
   // Check that recovery can be setup and removed
   it('Verify that recovery can be setup and removed', () => {
-    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     recovery.clearRecoverers()
     recovery.clickOnSetupRecoveryBtn()
@@ -33,9 +33,9 @@ describe('Recovery happy path tests 1', () => {
     recovery.agreeToTerms()
     recovery.clickOnNextBtn()
     main.verifyElementsCount(createtx.noteTextField, 1)
-    tx.executeFlow_1()
+    tx.signAndExecuteWithConnectedWallet()
     recovery.verifyRecovererAdded([constants.SEPOLIA_OWNER_2_SHORT])
     recovery.clearRecoverers()
-    recovery.getSetupRecoveryBtn()
+    recovery.verifySetupRecoveryBtnVisible()
   })
 })

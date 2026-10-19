@@ -25,10 +25,10 @@ const goToQueueBtn = '[data-testid="queue-btn"]'
 const executeBtn = '[data-testid="execute-btn"]'
 const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
-const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
 const recoveryModalTitle = 'How does recovery work'
+const RECOVERY_STATE_TIMEOUT_MS = 60000
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',
@@ -57,9 +57,6 @@ export function verifyRecovererConfirmationData(data) {
 
 export function verifyRecoveryTableDisplayed() {
   cy.get(tableContainer).should('be.visible')
-}
-export function clickOnExecuteRecoveryCancelBtn() {
-  cy.get(executeFormBtn).click()
 }
 export function cancelRecoveryTx() {
   cy.get(txDate).click()
@@ -135,8 +132,14 @@ export function agreeToTerms() {
   })
 }
 
-export function verifyRecovererAdded(address) {
-  main.verifyValuesExist(tableContainer, address)
+export function verifyRecovererAdded(addresses) {
+  addresses.forEach((address) => {
+    cy.get(tableContainer, { timeout: RECOVERY_STATE_TIMEOUT_MS }).should('contain', address)
+  })
+}
+
+export function verifySetupRecoveryBtnVisible() {
+  cy.get(setupRecoveryBtn, { timeout: RECOVERY_STATE_TIMEOUT_MS }).should('be.visible')
 }
 
 export function clearRecoverers() {
@@ -145,7 +148,7 @@ export function clearRecoverers() {
       cy.get(removeRecovererBtn).each(($btn) => {
         cy.wrap($btn).click()
         clickOnNextBtn()
-        tx.executeFlow_1()
+        tx.signAndExecuteWithConnectedWallet()
       })
     }
   })
@@ -163,15 +166,15 @@ export function enterOwnerAddress(address) {
   safe.inputOwnerAddress(0, address)
 }
 
+const RECOVERY_PROPOSAL_TIMEOUT_MS = 7000
+
+// The proposal modal shows once the recovery state loads, and only for a guardian who did not dismiss it.
 export function postponeRecovery() {
-  cy.wait(7000)
-  cy.get(postponeRecoveryBtn)
-    .should(() => {})
-    .then(($button) => {
-      if (!$button.length) {
-        return
-      }
-      cy.wrap($button).click()
+  main
+    .pollUntil(() => Cypress.$(postponeRecoveryBtn).length > 0, RECOVERY_PROPOSAL_TIMEOUT_MS)
+    .then((shown) => {
+      if (!shown) return
+      cy.get(postponeRecoveryBtn).click()
       cy.get(postponeRecoveryBtn).should('not.exist')
     })
 }
@@ -196,6 +199,5 @@ export function verifyRecoveryModalDisplayed() {
 export function deleteRecoveryModule() {
   cy.get(moduleRemoveIcon).click()
   main.acceptCookies()
-  clickOnNextBtn()
-  tx.executeFlow_1()
+  tx.signAndExecuteWithConnectedWallet()
 }

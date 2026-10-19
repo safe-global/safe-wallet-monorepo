@@ -2,7 +2,11 @@ import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { FlaskConical } from 'lucide-react'
 import { SidebarDeveloperItem } from '../SidebarDeveloperItem'
-import type { ResolvedSidebarItem, SidebarDeveloperItemConfig, SidebarDeveloperItemState } from '../../../types'
+import type {
+  ResolvedSidebarItem,
+  SidebarDeveloperItemConfig,
+  SidebarDeveloperItemState,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const mockNavItem = jest.fn()
 

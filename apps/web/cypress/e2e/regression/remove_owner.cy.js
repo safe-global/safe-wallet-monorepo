@@ -5,10 +5,13 @@ import * as createwallet from '../pages/create_wallet.pages'
 import * as createTx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Remove Owners tests', () => {
   before(async () => {
@@ -52,9 +55,10 @@ describe('Remove Owners tests', () => {
 
     // Added to prod
     it('Verify owner deletion transaction has been created', () => {
+      createTx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_13, signer)
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
       owner.waitForConnectionStatus()
       owner.openRemoveOwnerWindow(1)
-      cy.wait(3000)
       createwallet.clickOnNextBtn()
       //This method creates the @removedAddress alias
       owner.getAddressToBeRemoved()
@@ -62,7 +66,6 @@ describe('Remove Owners tests', () => {
       createTx.changeNonce(10)
       createTx.clickOnContinueSignTransactionBtn()
       createTx.clickOnSignTransactionBtn()
-      createTx.waitForProposeRequest()
       createTx.clickViewTransaction()
       createTx.clickOnTransactionItemByName('removeOwner')
       createTx.verifyTxDestinationAddress('@removedAddress')

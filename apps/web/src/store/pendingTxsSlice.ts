@@ -71,6 +71,10 @@ type PendingIndexingTx = PendingTxCommonProps & {
 type PendingNestedSigningTx = PendingTxCommonProps & {
   signerAddress: string
   txHashOrParentSafeTxHash: string
+  // false → `txHashOrParentSafeTxHash` is the executor Safe's safeTxHash
+  executed: boolean
+  // Which Safe method the signer Safe was asked to run (drives the success-screen label)
+  method: 'approveHash' | 'execTransaction'
   status: PendingStatus.NESTED_SIGNING
 }
 

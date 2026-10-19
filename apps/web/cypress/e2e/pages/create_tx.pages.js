@@ -6,6 +6,7 @@ import { dataRow } from '../pages/tables.page'
 import * as navigation from './navigation.page'
 import * as walletUtils from '../../support/utils/wallet.js'
 import * as owner from './owners.pages'
+import { ethers } from 'ethers'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
@@ -24,7 +25,6 @@ const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
-export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
@@ -66,6 +66,8 @@ const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
+const signedNotice = '[data-testid="signed-notice"]'
+const executeLaterBtn = '[data-testid="execute-later-btn"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -116,6 +118,7 @@ const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
 const noTxFoundStr = (type) => `0 ${type} transactions found`
+const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
 const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
 const bulkConfirmationText = (tx) =>
@@ -326,7 +329,12 @@ export function deleteTx() {
   cy.get(deleteTxModalBtn).click()
 }
 
+/** Deletes every queued transaction; call it on the queue page. */
 export function deleteAllTx() {
+  cy.get('body', { timeout: 30000 }).should(($body) => {
+    const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
+    expect(loaded, 'transaction queue loaded').to.be.true
+  })
   cy.get('body').then(($body) => {
     if ($body.find(transactionItem).length > 0) {
       cy.get(transactionItem).then(($items) => {
@@ -697,10 +705,9 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      cy.wait(3000)
       cy.get(selector)
         .first()
-        .then(($freshElement) => {
+        .should(($freshElement) => {
           verifyTokenSymbol($freshElement, altToken)
         })
     }
@@ -775,13 +782,6 @@ export function verifyAmountLargerThanCurrentBalance() {
 
 export function verifyTooltipMessage(message) {
   cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
-}
-
-export function selectCurrentWallet() {
-  cy.contains(estimatedFeeStr).should('be.visible')
-  // The option only renders once the relay quota has loaded — wait for it, then confirm it is selected.
-  cy.get(connectedWalletExecMethod, { timeout: 30000 }).click()
-  cy.get(connectedWalletExecMethod).find('[role="radio"]').should('have.attr', 'aria-checked', 'true')
 }
 
 export function verifyRelayerAttemptsAvailable() {
@@ -930,6 +930,17 @@ export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
 }
 
+// A 1/n Safe offers Execute only after the signature, on a step that reloads the tx from the gateway
+export function signAndOpenExecuteStep() {
+  cy.get(signBtn).click()
+  cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
+}
+
+export function clickOnExecuteLaterBtn() {
+  cy.get(executeLaterBtn).click()
+  cy.get(transactionItem, { timeout: 30000 }).should('be.visible')
+}
+
 export function clickOnProposeTransactionBtn() {
   cy.get(proposeTransactionBtn).click()
 }
@@ -960,21 +971,7 @@ export function clickOnConfirmBtn(index) {
 }
 
 export function clickOnExecuteBtn(index) {
-  cy.wait(2000)
-  cy.get(transactionItem)
-    .eq(index)
-    .within(() => {
-      cy.get('button')
-        .contains(executeBtnStr)
-        .then((elements) => {
-          cy.wrap(elements[0]).click()
-        })
-    })
-}
-
-export function waitForProposeRequest() {
-  cy.intercept('POST', constants.proposeEndpoint).as('ProposeTx')
-  cy.wait('@ProposeTx')
+  cy.get(transactionItem, { timeout: 30000 }).eq(index).find(executeTxBtn).should('be.enabled').click()
 }
 
 const submitTxErrorMsg = 'Could not submit the transaction. Try again.'
@@ -1080,7 +1077,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 
@@ -1184,11 +1181,59 @@ export function checkThatComboButtonOptionIsNotPresent(option) {
   })
 }
 //Functions for the happy path flow
-export function cleanTransactionQueue(safeAddress, signer) {
-  walletUtils.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAddress)
-  deleteAllTx()
-  navigation.clickOnWalletExpandMoreIcon()
-  navigation.clickOnDisconnectBtn()
+const deleteRequestDomainNames = ['Safe Queue Service', 'Safe Transaction Service']
+
+function getQueuedSafeTxHashes(url, safeTxHashes = []) {
+  return cy.request(url).then(({ body }) => {
+    const pageHashes = body.results
+      .filter((item) => item.type === 'TRANSACTION')
+      .map((item) => item.transaction.id.split('_').pop())
+    const allHashes = [...safeTxHashes, ...pageHashes]
+    if (!body.next) return allHashes
+    const { pathname, search } = new URL(body.next)
+    return getQueuedSafeTxHashes(`${constants.stagingCGWUrl}${pathname.slice(1)}${search}`, allHashes)
+  })
+}
+
+function deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer, domainNames = deleteRequestDomainNames) {
+  const [name, ...fallbackNames] = domainNames
+  const domain = { name, version: '1.0', chainId: Number(chainId), verifyingContract: safeAddress }
+  const types = {
+    DeleteRequest: [
+      { name: 'safeTxHash', type: 'bytes32' },
+      { name: 'totp', type: 'uint256' },
+    ],
+  }
+  const message = { safeTxHash, totp: Math.floor(Date.now() / 3600e3) }
+
+  cy.wrap(null)
+    .then(() => proposer.signTypedData(domain, types, message))
+    .then((signature) =>
+      cy.request({
+        method: 'DELETE',
+        url: `${constants.stagingCGWUrlv1}/chains/${chainId}/transactions/${safeTxHash}`,
+        body: { signature },
+        failOnStatusCode: false,
+      }),
+    )
+    .then(({ status }) => {
+      if (status < 300) return
+      expect(fallbackNames, `delete ${safeTxHash} (HTTP ${status})`).not.to.be.empty
+      deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer, fallbackNames)
+    })
+}
+
+/** Deletes every queued transaction of a Sepolia Safe through the API, signed by their proposer. */
+export function cleanTransactionQueue(prefixedSafeAddress, proposerPrivateKey) {
+  const chainId = constants.networkKeys.sepolia
+  const safeAddress = ethers.getAddress(prefixedSafeAddress.split(':').pop())
+  const proposer = new ethers.Wallet(proposerPrivateKey)
+
+  getQueuedSafeTxHashes(`${constants.stagingCGWUrlv1}/chains/${chainId}/safes/${safeAddress}/transactions/queued`).then(
+    (safeTxHashes) => {
+      safeTxHashes.reverse().forEach((safeTxHash) => deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer))
+    },
+  )
 }
 
 export function switchToSignerAndConfirm(signer) {
@@ -1197,8 +1242,8 @@ export function switchToSignerAndConfirm(signer) {
   walletUtils.connectSigner(signer)
   clickOnConfirmTransactionBtn()
   clickOnContinueSignTransactionBtn()
-  selectComboButtonOption('sign')
-  clickOnSignTransactionBtn()
+  signAndOpenExecuteStep()
+  clickOnExecuteLaterBtn()
 }
 
 export function deleteTransactionAndSwitchToSigner(signer) {
@@ -1215,7 +1260,6 @@ export function createAddOwnerTransaction(safeAddress, signer, ownerAddress, own
   owner.openManageSignersWindow()
   owner.clickOnAddSignerBtn()
   owner.typeOwnerAddressManage(ownerIndex, ownerAddress)
-  changeNonce(1)
   owner.clickOnNextBtnManage()
   owner.verifyConfirmTransactionWindowDisplayed()
   clickOnContinueSignTransactionBtn()

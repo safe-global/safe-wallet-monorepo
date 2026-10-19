@@ -11,7 +11,9 @@
  * | `dashboardWithSafes` | Populated Space — Accounts, Pending, sidebar |
  * | `emptyGettingStarted` | No Safes — Getting started |
  */
-export default {
+import { fixtureValue } from '../../support/fixture.js'
+
+const stagingSpaces = {
   dashboardWithSafes: {
     uuid: 'b0d9f2bd-48db-466e-95d0-a114a9e843e9',
     name: 'Automation Test Space',
@@ -58,5 +60,14 @@ export default {
   emptyGettingStarted: {
     uuid: 'ca3d2ede-3492-4799-a4e9-bf0dcdd0c52f',
     name: 'Automation Empty Space',
+  },
+}
+
+export default {
+  get dashboardWithSafes() {
+    return fixtureValue('spaces.dashboardWithSafes', stagingSpaces.dashboardWithSafes)
+  },
+  get emptyGettingStarted() {
+    return fixtureValue('spaces.emptyGettingStarted', stagingSpaces.emptyGettingStarted)
   },
 }

@@ -7,6 +7,7 @@ import { predictAddressBasedOnReplayData } from '../../utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 jest.mock('@/features/counterfactual/services', () => ({
   persistCounterfactualSafe: jest.fn(),
@@ -70,7 +71,10 @@ const safeCreationData = {
   safeAccountConfig: { owners: ['0xabc'], threshold: 1 },
 } as unknown as ReplayedSafeProps
 
-type RenderOptions = { initialReduxState?: typeof signedInState; urlSpaceId?: string }
+type RenderOptions = {
+  initialReduxState?: typeof signedInState
+  urlSpaceId?: string
+}
 
 const renderDialog = (onClose: () => void, { initialReduxState, urlSpaceId }: RenderOptions = {}) =>
   render(
@@ -96,6 +100,25 @@ describe('CreateSafeOnSpecificChain', () => {
     mockUseSpaceSafeCount.mockReturnValue(undefined)
     mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
     mockUseSpaceSafes.mockReturnValue({ currentData: undefined })
+  })
+
+  it('disables Add network while the Safe creation data is missing', async () => {
+    const dialog = (creationResult: AsyncResult<ReplayedSafeProps>) => (
+      <CreateSafeOnSpecificChain
+        safeAddress={SAFE_ADDRESS}
+        chain={chain}
+        currentName="My Safe"
+        open
+        onClose={jest.fn()}
+        safeCreationResult={creationResult}
+      />
+    )
+    const { rerender } = render(dialog([safeCreationData, undefined, false]))
+    await waitFor(() => expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled())
+
+    rerender(dialog([undefined, undefined, false]))
+
+    expect(screen.getByTestId('modal-add-network-btn')).toBeDisabled()
   })
 
   it('keeps the dialog open and shows the inline backend error when persisting fails', async () => {

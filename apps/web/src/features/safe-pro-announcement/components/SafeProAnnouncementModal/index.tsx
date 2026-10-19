@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import SafeProAnnouncement from '../SafeProAnnouncement'
 
 const SafeProAnnouncementModal = ({

@@ -9,16 +9,14 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-} from '@/components/ui/alert-dialog'
+} from '@safe-global/views/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
-import { Input } from '@/components/ui/input'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type Consequence = { variant: 'danger' | 'success'; text: string }
@@ -62,7 +60,6 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
       await deleteSpace({ id: space.uuid }).unwrap()
       onClose()
 
-      trackEvent({ ...SPACE_EVENTS.DELETE_SPACE })
       dispatch(
         showNotification({
           message: `Deleted Workspace ${space.name}.`,

@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useRef,
   useState,
@@ -55,6 +56,30 @@ type SafeShieldContextType = {
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
 
+const isCritical = <T extends { severity: Severity }>(result: T | null | undefined): result is T =>
+  isSeverityHigherOrEqual(result?.severity, Severity.CRITICAL)
+
+type RiskAnalyses = {
+  threat: ThreatAnalysisResults | undefined
+  deadlock: DeadlockAnalysisResults | undefined
+  hasPoisoning: boolean
+  safeAnalysis: SafeAnalysisResult | null
+}
+
+/** The findings that need the user's risk confirmation, as stable keys. */
+function criticalFindingsOf({ threat, deadlock, hasPoisoning, safeAnalysis }: RiskAnalyses): string[] {
+  const primaryThreat = getPrimaryResult(threat?.THREAT || [])
+  // Deadlock results are keyed by Safe address; the highest severity across all of them counts.
+  const primaryDeadlock = getPrimaryResult(Object.values(deadlock || {}).flatMap((safe) => safe.DEADLOCK || []))
+
+  const findings: string[] = []
+  if (isCritical(primaryThreat)) findings.push(`threat:${primaryThreat.type}`)
+  if (isCritical(primaryDeadlock)) findings.push(`deadlock:${primaryDeadlock.type}`)
+  if (hasPoisoning) findings.push('address-poisoning')
+  if (isCritical(safeAnalysis)) findings.push(`safe:${safeAnalysis.type}`)
+  return findings
+}
+
 export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const safeTxContext = useContext(SafeTxContext)
   const [recipientAddresses, setRecipientAddresses] = useState<string[] | undefined>(undefined)
@@ -89,37 +114,29 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
   const isOffchainMessage = !safeShieldTx && !!safeTxContext.safeMessage
+  const safeShieldTxKey = safeShieldTx ? JSON.stringify(safeShieldTx.data).toLowerCase() : undefined
 
   // Safe-level analysis: untrusted Safe check
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
 
-  const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
+  const criticalFindings = useMemo(
+    () => criticalFindingsOf({ threat: threatAnalysisResult, deadlock: deadlockResults, hasPoisoning, safeAnalysis }),
+    [threatAnalysisResult, deadlockResults, hasPoisoning, safeAnalysis],
+  )
+  const needsRiskConfirmation = criticalFindings.length > 0
 
-  const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
-    const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
-
-    const severity = primaryThreatResult?.severity
-    const hasCriticalThreat = isSeverityHigherOrEqual(severity, Severity.CRITICAL)
-
-    // Flatten address-keyed deadlock results to find the highest severity across all Safes
-    const allDeadlockResults = Object.values(deadlockResults || {}).flatMap((addr) => addr.DEADLOCK || [])
-    const primaryDeadlockResult = getPrimaryResult(allDeadlockResults)
-    const deadlockSeverity = primaryDeadlockResult?.severity
-    const hasCriticalDeadlock = isSeverityHigherOrEqual(deadlockSeverity, Severity.CRITICAL)
-
-    // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
-    const needsRiskConfirmation =
-      hasCriticalThreat || hasCriticalDeadlock || hasPoisoning || safeAnalysis?.severity === Severity.CRITICAL
-
-    return {
-      needsRiskConfirmation,
-      primaryThreatSeverity: severity,
-    }
-  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
-
-  useEffect(() => {
-    setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
+  // A confirmation covers one transaction with one set of critical findings; any change asks again.
+  const riskKey = JSON.stringify([safeShieldTxKey, criticalFindings])
+  const [confirmedRiskKey, setConfirmedRiskKey] = useState<string>()
+  const isRiskConfirmed = confirmedRiskKey === riskKey
+  const setIsRiskConfirmed = useCallback<Dispatch<SetStateAction<boolean>>>(
+    (value) =>
+      setConfirmedRiskKey((confirmedKey) => {
+        const confirmed = typeof value === 'function' ? value(confirmedKey === riskKey) : value
+        return confirmed ? riskKey : undefined
+      }),
+    [riskKey],
+  )
 
   return (
     <SafeShieldContext.Provider
@@ -176,9 +193,10 @@ export const useSafeShieldForRecipients = (recipientAddresses: string[]) => {
  * spending-limit beneficiary, signers, …): a matched address surfaces in the Copilot recipient
  * card with just the ADDRESS_POISONING state.
  *
- * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place, so a
- * value key is what makes the check re-trigger. (Do NOT key on the array reference / useMemoDeepCompare:
- * they compare by reference and would miss the in-place mutation.)
+ * The registration lives as long as the provider, i.e. the flow. It is not cleared on unmount:
+ * the registering step unmounts on Next, and the review step must keep the card.
+ *
+ * Keys on the joined VALUE, not array identity — RHF's watch() mutates its array in place.
  * @param addresses - Addresses to check against the user's trusted anchors (undefined entries are dropped)
  */
 export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undefined>) => {
@@ -188,10 +206,6 @@ export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undef
   useEffect(() => {
     setPoisoningAddresses(key ? key.split(',') : undefined)
   }, [key, setPoisoningAddresses])
-
-  // Clear the registration when the owning flow unmounts, so a stale look-alike card can't linger
-  // against addresses no current flow cares about if the provider outlives the flow.
-  useEffect(() => () => setPoisoningAddresses(undefined), [setPoisoningAddresses])
 
   return recipient
 }

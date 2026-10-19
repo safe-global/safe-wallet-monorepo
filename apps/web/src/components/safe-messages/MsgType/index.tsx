@@ -1,7 +1,7 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { FilePen as RequiredIcon } from 'lucide-react'
-import ImageFallback from '@/components/common/ImageFallback'
-import txTypeCss from '@/components/transactions/TxType/styles.module.css'
+import ImageFallback from '@safe-global/views/components/common/ImageFallback'
+import txTypeCss from '@safe-global/views/components/transactions/TxType/styles.module.css'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 const FALLBACK_LOGO_URI = '/images/transactions/custom.svg'

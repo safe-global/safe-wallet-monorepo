@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { HypernativeTooltip } from '../HypernativeTooltip'
 import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
 

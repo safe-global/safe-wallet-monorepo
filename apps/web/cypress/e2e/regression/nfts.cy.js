@@ -5,6 +5,7 @@ import * as createTx from '../pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 const singleNFT = ['safeTransferFrom']
 const multipleNFT = ['multiSend']
@@ -14,12 +15,14 @@ const NFTSentName = 'GTT #22'
 let nftsSafes,
   staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('NFTs tests', () => {
   before(() => {
-    getSafes(CATEGORIES.nfts)
+    return getSafes(CATEGORIES.nfts)
       .then((nfts) => {
         nftsSafes = nfts
         return getSafes(CATEGORIES.static)
@@ -86,6 +89,7 @@ describe('NFTs tests', () => {
 
   // Added to prod
   it('Verify Send NFT transaction has been created', () => {
+    createTx.cleanTransactionQueue(nftsSafes.SEP_NFT_SAFE_1, signer)
     wallet.connectSignerViaStorage(signer, constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
     nfts.verifyInitialNFTData()
     nfts.selectNFTs(1)
@@ -95,7 +99,6 @@ describe('NFTs tests', () => {
     nfts.clikOnNextBtn()
     createTx.clickOnContinueSignTransactionBtn()
     createTx.clickOnSignTransactionBtn()
-    createTx.waitForProposeRequest()
     createTx.clickViewTransaction()
     createTx.verifySingleTxPage()
     createTx.verifyQueueLabel()

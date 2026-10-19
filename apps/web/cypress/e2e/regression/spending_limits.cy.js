@@ -7,11 +7,14 @@ import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+let signer, signerAddress
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+})
 
 const tokenAmount = 0.1
 const newTokenAmount = 0.001
@@ -97,7 +100,7 @@ describe('Spending limits tests', () => {
 
     it('Verify that when replacing spending limit for the same owner, previous values are displayed in red', () => {
       spendinglimit.clickOnNewSpendingLimitBtn()
-      spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS)
+      spendinglimit.enterBeneficiaryAddress(constants.defaultOwnerAddress())
       spendinglimit.enterSpendingLimitAmount(newTokenAmount)
       spendinglimit.clickOnTimePeriodDropdown()
       spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.fiveMin)
@@ -172,8 +175,8 @@ describe('Spending limits tests', () => {
       })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       spendinglimit.clickOnNewSpendingLimitBtn()
-      spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS.substring(30))
-      spendinglimit.selectRecipient(constants.DEFAULT_OWNER_ADDRESS)
+      spendinglimit.enterBeneficiaryAddress(constants.defaultOwnerAddress().substring(30))
+      spendinglimit.selectRecipient(constants.defaultOwnerAddress())
     })
 
     it('Verify that the enableModule action shows the correct AllowanceModule address for Sepolia', () => {

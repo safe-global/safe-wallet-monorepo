@@ -526,6 +526,8 @@ export type GetSpaceResponse = {
   memberCount: number
   /** Total count of Safes in the space */
   safeCount: number
+  /** Experimental features this Workspace has opted into. */
+  experimentalFeatures: 'POLICY_RECIPIENT_ALLOWLIST'[]
 }
 export type UpdateSpaceResponse = {
   /** Space UUID */
@@ -534,6 +536,8 @@ export type UpdateSpaceResponse = {
 export type UpdateSpaceDto = {
   name?: string
   status?: 'ACTIVE'
+  /** Replaces the stored set; [] opts out of all. Omit to leave it unchanged. */
+  experimentalFeatures?: 'POLICY_RECIPIENT_ALLOWLIST'[]
 }
 export type SpaceAuditLogEntryDto = {
   /** Monotonic entry id (bigint serialized as string) */
@@ -690,9 +694,18 @@ export type GuardSlotsDto = {
   transactionGuard?: PolicyContractsDto
   moduleGuard?: PolicyContractsDto
 }
+export type PolicyAccessDto = {
+  /** The contract the governed calls target */
+  target: string
+  /** The 4-byte function selector of the governed calls */
+  selector: string
+  operation: 'CALL' | 'DELEGATECALL'
+}
 export type GuardEnforcementDto = {
   via: 'guard'
   guards: GuardSlotsDto
+  /** The calls the guard applies the policy to */
+  access: PolicyAccessDto
 }
 export type OffChainEnforcementDto = {
   /** Nothing on chain enforces the policy, so it is access rather than an audited restriction */
@@ -700,9 +713,40 @@ export type OffChainEnforcementDto = {
   /** Where the grant is held */
   source: 'delegates'
 }
+export type NativeTokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20TokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'ERC20'
+}
 export type SpendingLimitAllowanceDto = {
   /** The token the limit applies to; zero address for native */
   tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
   /** Per-window ceiling, in base units */
   amount: string
   /** Spent in the current window, in base units */
@@ -747,6 +791,22 @@ export type ProposerDto = {
 export type ProposerPolicyDataDto = {
   proposers: ProposerDto[]
 }
+export type Erc20TransferRecipientDto = {
+  /** An address the Safe can send this token to */
+  account: string
+  permission: 'ONCE' | 'ALWAYS'
+}
+export type Erc20TransferPolicyDataDto = {
+  /** The ERC20 token the allowlist applies to */
+  tokenAddress: string
+  /** The recipients of the token transfers the policy permits */
+  recipients: Erc20TransferRecipientDto[]
+}
+export type CosignerPolicyDataDto = {
+  /** The cosigner the policy enforces. */
+  cosignerAddress: string
+}
+export type StatelessPolicyDataDto = {}
 export type SafeRefDto = {
   chainId: string
   address: string
@@ -761,6 +821,7 @@ export type ActivePolicyDto = {
     | 'allow'
     | 'native-transfer'
     | 'deny'
+    | 'multisend'
   enforcement:
     | ({
         via: 'module'
@@ -773,7 +834,12 @@ export type ActivePolicyDto = {
       } & OffChainEnforcementDto)
   /** False when the policy is configured but not enforced */
   enabled: boolean
-  data: SpendingLimitPolicyDataDto | ProposerPolicyDataDto
+  data:
+    | SpendingLimitPolicyDataDto
+    | ProposerPolicyDataDto
+    | Erc20TransferPolicyDataDto
+    | CosignerPolicyDataDto
+    | StatelessPolicyDataDto
   /** The Safe the policy is in effect on */
   safe: SafeRefDto
 }
@@ -797,6 +863,17 @@ export type SetAllowanceChangeDto = {
   delegate: string
   /** The token the limit applies to; zero address for native */
   token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
   /** Per-window ceiling, in base units */
   amount: string
   /** Window length in minutes; 0 never resets */
@@ -806,11 +883,33 @@ export type ResetAllowanceChangeDto = {
   kind: 'reset-allowance'
   delegate: string
   token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
 }
 export type DeleteAllowanceChangeDto = {
   kind: 'delete-allowance'
   delegate: string
   token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
 }
 export type PendingSpendingLimitDataDto = {
   /** The AllowanceModule deployment holding this state */

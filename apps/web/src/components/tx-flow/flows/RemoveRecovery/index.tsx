@@ -1,5 +1,5 @@
 import { useCallback, type ReactElement } from 'react'
-import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
+import RecoveryPlus from '@safe-global/views/assets/images/common/recovery-plus.svg'
 import { RemoveRecoveryFlowOverview } from './RemoveRecoveryFlowOverview'
 import { RemoveRecoveryFlowReview } from './RemoveRecoveryFlowReview'
 import type { RecoveryStateItem } from '@/features/recovery'

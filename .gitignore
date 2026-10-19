@@ -133,3 +133,5 @@ todos/*
 # Claude Code worktrees
 .claude/worktrees/
 .claude/settings.local.json
+
+/apps/web/e2e/environment/artifacts/

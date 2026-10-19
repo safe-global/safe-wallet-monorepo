@@ -3,9 +3,12 @@ import * as main from '../pages/main.page.js'
 import * as createwallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Safe creation tests 3', () => {
   beforeEach(() => {

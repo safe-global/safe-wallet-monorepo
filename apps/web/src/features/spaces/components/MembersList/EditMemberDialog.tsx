@@ -1,7 +1,7 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import DialogActions from '@/components/common/DialogActions'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import {
   type MemberDto,
@@ -25,8 +25,6 @@ import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
 import MemberInfoForm from '../AddMemberModal/MemberInfoForm'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -106,25 +104,6 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
     } catch (e) {
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
       return
-    }
-
-    if (hasNameChanged) {
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_NAME_CHANGED, label: spaceId },
-        { workspace_id: spaceId, user_id: member.user.id },
-      )
-    }
-
-    if (hasRoleChanged) {
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
-        {
-          workspace_id: spaceId,
-          target_user_id: member.user.id,
-          from_role: member.role.toLowerCase(),
-          to_role: roleValue.toLowerCase(),
-        },
-      )
     }
 
     const roleLabel = capitalize(roleValue.toLowerCase())

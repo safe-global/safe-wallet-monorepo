@@ -2,10 +2,10 @@ import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useId, u
 import { createPortal } from 'react-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import css from './styles.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -18,7 +18,7 @@ import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
 import { useAnchoredList } from './useAnchoredList'
-import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
+import { usePortalContainerElement } from '@safe-global/views/components/ui/ShadcnProvider'
 
 type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
 

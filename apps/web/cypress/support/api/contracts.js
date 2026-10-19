@@ -4,4 +4,7 @@ export const contracts = {
 }
 
 export const abi_qtrust = ['function transfer(address to, uint amount) returns (bool)']
-export const abi_nft_pc2 = ['function safeTransferFrom(address from, address to, uint256 tokenId)']
+export const abi_nft_pc2 = [
+  'function safeTransferFrom(address from, address to, uint256 tokenId)',
+  'function ownerOf(uint256 tokenId) view returns (address)',
+]

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { Typography } from '@/components/ui/typography'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import fullFlow, { CANVAS_PARAM, CANVAS_ROWS, MARK_NEW_PARAM } from './GuardSetupFlow.stories'
 
 const FRAME_WIDTH = 1440

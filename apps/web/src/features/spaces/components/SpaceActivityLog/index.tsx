@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import useGetSpaceAuditLog, { type SpaceAuditLogQueryArgs } from '../../hooks/useGetSpaceAuditLog'
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuditEventRow from './AuditEventRow'
@@ -74,9 +75,7 @@ function SpaceActivityLog() {
   const [extraCursors, setExtraCursors] = useState<string[]>([])
   const [extraPages, setExtraPages] = useState<Record<number, SpaceAuditLogPage>>({})
 
-  useEffect(() => {
-    trackEvent(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
-  }, [])
+  useTrackOnce(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
 
   const handleFiltersChange = (next: ActivityLogFilterState) => {
     const changed = (Object.keys(FILTER_SOURCE) as Array<keyof ActivityLogFilterState>).find(

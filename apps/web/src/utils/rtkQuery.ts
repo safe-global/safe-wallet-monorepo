@@ -1,6 +1,7 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { getQuotaExceededMessage } from '@/utils/quotaMessage'
 
 const HTTP_TOO_MANY_REQUESTS = 429
 export const HTTP_UNAVAILABLE_FOR_LEGAL_REASONS = 451
@@ -23,7 +24,7 @@ export const SAFE_UNAVAILABLE_MESSAGE = 'This Safe account is unavailable.'
 export const getGenericErrorWithStatus = (status: number): string =>
   `Something went wrong (${status}). Please try again, or contact support if it persists.`
 
-// Backend error payloads are written for users, so their `message` is surfaced as-is.
+// Backend messages are written for users, except the typed CGW refusals translated earlier (elevation, quota).
 const getBackendMessage = (error: FetchBaseQueryError): string | undefined => {
   if (!('data' in error) || typeof error.data !== 'object' || !error.data) return undefined
   const { message } = error.data as Record<string, unknown>
@@ -45,7 +46,8 @@ export const getSafeUnavailableMessage = (
  * Extract a user-friendly error message from RTK Query errors.
  *
  * Backend error payloads with a `message` are surfaced as-is (they're written for users,
- * e.g. validation messages). Transport-level failures (network drop, timeout, a non-JSON
+ * e.g. validation messages), except the typed CGW refusals (elevation, quota), which get
+ * our own copy. Transport-level failures (network drop, timeout, a non-JSON
  * body such as a plain-text "Rate limit reached") are translated to friendly copy instead
  * of leaking the raw JS error string.
  */
@@ -63,6 +65,9 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
     }
 
     if (isElevationRequiredError(error)) return ELEVATION_REQUIRED_MESSAGE
+
+    const quotaMessage = getQuotaExceededMessage(error)
+    if (quotaMessage) return quotaMessage
 
     // HTTP error response: prefer the backend's own message when present.
     const backendMessage = getBackendMessage(error)

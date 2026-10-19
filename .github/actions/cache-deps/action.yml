@@ -28,7 +28,7 @@ runs:
     - name: Restore Yarn Cache
       if: ${{ inputs.mode == 'restore-yarn' }}
       id: restore
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/restore@v5.0.5
       with:
         path: |
           **/node_modules
@@ -36,7 +36,7 @@ runs:
           ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
-        key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
 
     - name: Set composite outputs yarn
       if: ${{ inputs.mode == 'restore-yarn' }}
@@ -47,7 +47,7 @@ runs:
 
     - name: Save Yarn Cache
       if: ${{ inputs.mode == 'save-yarn' }}
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/save@v5.0.5
       with:
         path: |
           **/node_modules
@@ -60,11 +60,11 @@ runs:
     - name: Restore Next.js
       if: ${{ inputs.mode == 'restore-nc' }}
       id: restore-nc
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/restore@v5.0.5
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
-        key: ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
 
     - name: Set composite outputs nc
       if: ${{ inputs.mode == 'restore-nc' }}
@@ -75,7 +75,7 @@ runs:
 
     - name: Save Next.js
       if: ${{ inputs.mode == 'save-nc' }}
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/save@v5.0.5
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache

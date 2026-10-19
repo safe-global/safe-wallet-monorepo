@@ -9,9 +9,12 @@ import { MOCK_VIEWERS } from '../mocks/policies'
 import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
 import { SpendingLimitActions } from '../SpendingLimitDrawer/components/SpendingLimitActions'
 import { SpendingLimits } from '../SpendingLimitDrawer/components/SpendingLimits'
-import { resolveSpendingLimitDrawerState, type SpendingLimitDrawerState } from '../SpendingLimitDrawer/resolveState'
-import { getPolicyIcon } from '../utils/policyIcon'
-import { getPolicyLabel } from '../utils/policyLabel'
+import {
+  resolveSpendingLimitDrawerState,
+  type SpendingLimitDrawerState,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
+import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import type { SpendingLimitMock } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
 import { RowStatusChip, type RowStatus } from './m2OverviewPage'
@@ -130,7 +133,7 @@ export const BlockedSpendingLimitDrawer = (props: BlockedSpendingLimitDrawerProp
               href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
             chainId={policy.safe.chainId}
-            enforcedByHref={enforcedByHref}
+            enforcedBy={{ label: overview.enforcedBy, href: enforcedByHref }}
           />
         </div>
       </DrawerBody>

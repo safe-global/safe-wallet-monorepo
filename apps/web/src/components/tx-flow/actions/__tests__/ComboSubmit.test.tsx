@@ -10,6 +10,8 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
+import { COULD_NOT_SUBMIT_RETRY_MESSAGE } from '@/components/tx/TxSubmitError'
+import { faker } from '@faker-js/faker'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/services/local-storage/useLocalStorage')
@@ -196,5 +198,35 @@ describe('ComboSubmit', () => {
     expect(container).toBeInTheDocument()
     // The submit action setter should not be called during loading
     expect(mockSetSubmitAction).not.toHaveBeenCalled()
+  })
+
+  it('shows the execution error', () => {
+    jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
+    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
+    mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
+
+    const { getByText } = render(
+      <ComboSubmit onSubmit={jest.fn()} slotId="" />,
+      { canExecute: true, submitError: new Error(faker.lorem.sentence()) },
+      { safeTx: safeTransaction },
+    )
+
+    expect(getByText(COULD_NOT_SUBMIT_RETRY_MESSAGE)).toBeInTheDocument()
+  })
+
+  it('shows a wallet rejection', () => {
+    jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
+    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
+    mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
+
+    const { getByText } = render(
+      <ComboSubmit onSubmit={jest.fn()} slotId="" />,
+      { canExecute: true, isRejectedByUser: true },
+      { safeTx: safeTransaction },
+    )
+
+    expect(getByText('User rejected signing.')).toBeInTheDocument()
   })
 })

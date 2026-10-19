@@ -5,6 +5,7 @@ import * as navigation from './navigation.page.js'
 import * as file from './import_export.pages.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
+import sidebar from '../../fixtures/sidebar.js'
 
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
@@ -34,7 +35,7 @@ const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const expandSafesList = '[data-testid="expand-safes-list"]'
 export const importBtn = '[data-testid="import-btn"]'
-export const pendingActivationIcon = '[data-testid="pending-activation-icon"]'
+export const pendingActivationIcon = '[data-testid="safe-selector-not-activated-icon"]'
 const safeItemMenuIcon = '[data-testid="MoreVertIcon"]'
 const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const addChainDialog = "[data-testid='add-chain-dialog']"
@@ -148,7 +149,9 @@ export const sideBarSafes = {
 // 0x926186108f74dB20BFeb2b6c888E523C78cb7E00
 export const sideBarSafesPendingActions = {
   safe1: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
-  safe1short: '0x5912...fFdb',
+  get safe1short() {
+    return sidebar.pendingSafeShort
+  },
 }
 const receiveAssetsStr = 'Receive assets'
 const emptyPinnedListStr = 'Watch any Safe account to keep an eye on its activity'

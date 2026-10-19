@@ -1,10 +1,17 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
-import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../../SafeAccountSelector/types'
-import type { SpendingLimitPolicyFormValues } from '../types'
+import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+  type SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
-import type { LimitSummaryToken, SpendingLimitSummaryModel } from './types'
+import type {
+  LimitSummaryToken,
+  SpendingLimitSummaryModel,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 export type PolicySummarySources = {
   /** The eligible accounts the step-1 selector offered (groups included). */
@@ -19,7 +26,7 @@ const flattenAccounts = (entries: readonly SafeAccountEntry[]): SafeAccountOptio
   entries.flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
 
 /** The selected option, or a minimal one from the scope key while the eligible list has not resolved it. */
-const resolveSafe = (safeId: string, accounts: readonly SafeAccountEntry[]): SafeAccountOption => {
+export const resolveSafe = (safeId: string, accounts: readonly SafeAccountEntry[]): SafeAccountOption => {
   const match = flattenAccounts(accounts).find((account) => account.id === safeId)
   if (match) return match
 
@@ -35,7 +42,7 @@ const resolveToken = (tokenAddress: string, tokens: readonly TokenOption[]): Lim
 }
 
 /** Address books are keyed by checksummed address; the form value may not be. */
-const resolveName = (address: string, names: Readonly<Record<string, string>>): string | undefined =>
+export const resolveName = (address: string, names: Readonly<Record<string, string>>): string | undefined =>
   Object.entries(names).find(([known]) => sameAddress(known, address))?.[1]
 
 /** Maps the step-1 form values onto what the summary renders. Pure, so the Review step can memoise it. */

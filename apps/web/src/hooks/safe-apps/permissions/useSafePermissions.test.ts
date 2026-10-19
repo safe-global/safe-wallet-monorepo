@@ -1,6 +1,6 @@
 import { renderHook, act } from '@/tests/test-utils'
 import { useSafePermissions } from './useSafePermissions'
-import { PermissionStatus } from '@/components/safe-apps/types'
+import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 
 const origin = 'https://app.url'
 const requestId = 'abc1234567'

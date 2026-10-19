@@ -1,3 +1,4 @@
+import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as addressBook from './address_book.page'
 import * as batch from './batches.pages'
@@ -5,6 +6,8 @@ import * as create_tx from './create_tx.pages'
 
 export const proposersSection = '[data-testid="proposer-section"]'
 const addProposerBtn = '[data-testid="add-proposer-btn"]'
+const safeProLock = '[data-testid="safe-pro-lock"]'
+const addingProposersLockedStr = 'Adding proposers requires Safe Pro'
 
 const deleteProposerBtn = '[data-testid="delete-proposer-btn"]'
 const editProposerBtn = '[data-testid="edit-proposer-btn"]'
@@ -55,6 +58,22 @@ export function verifyProposedTxMsgVisible() {
   cy.contains(proposedTxMessage).should('be.visible')
 }
 
+/**
+ * Without a Workspace plan that grants policies, Safe Pro replaces the "Add proposer" button. Specs that test
+ * proposers themselves turn that gate off; call it before the visit.
+ */
+export function disableProposerGating() {
+  main.injectChainFeature({
+    chainId: constants.networkKeys.sepolia,
+    removeFlag: constants.chainFeatures.proposerGating,
+  })
+}
+
+export function verifyAddProposerIsLocked() {
+  cy.get(safeProLock).should('be.visible').and('contain', addingProposersLockedStr)
+  cy.get(addProposerBtn).should('not.exist')
+}
+
 export function clickOnAddProposerBtn() {
   cy.get(addProposerBtn).click()
 }
@@ -95,19 +114,15 @@ export function confirmProposerDeletion(index) {
 }
 
 export function deleteAllProposers() {
-  cy.get('body').then(($body) => {
-    if ($body.find(deleteProposerBtn).length > 0) {
-      cy.get(deleteProposerBtn)
-        .should('be.enabled')
-        .then(($items) => {
-          for (let i = 0; i < $items.length; i++) {
-            cy.wrap($items[i]).click({ force: true })
-            confirmProposerDeletion(0)
-          }
-        })
+  getProposersSection().then(($section) => {
+    const count = $section.find(deleteProposerBtn).length
+    for (let i = 0; i < count; i++) {
+      getProposersSection().find(deleteProposerBtn).first().should('be.enabled').click()
+      confirmProposerDeletion(0)
+      cy.get(confrimDeleteProposerBtn).should('not.exist')
     }
-    main.verifyElementsCount(deleteProposerBtn, 0)
   })
+  main.verifyElementsCount(deleteProposerBtn, 0)
 }
 
 export function verifyAddProposerBtnIsDisabled() {
