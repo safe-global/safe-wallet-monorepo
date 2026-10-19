@@ -1,20 +1,24 @@
+# The TypeScript mocks and fork helpers in mocks/.
+x-mock: &mock
+  image: ${NODE_IMAGE:?Load test-images.env}
+  entrypoint:
+    - node
+  user: node
+  volumes:
+    - ./mocks:/mocks:ro
 x-fork-proxy-healthcheck: &fork-proxy-healthcheck
   test:
     - CMD
-    - python
-    - -c
-    - import urllib.request;
-      urllib.request.urlopen('http://localhost:8546/health')
+    - node
+    - /mocks/healthcheck.ts
+    - '8546'
   interval: 5s
   timeout: 5s
   retries: 5
 x-fork-upstream: &fork-upstream
-  image: ${TXS_IMAGE:?Load test-images.env}
-  entrypoint:
-    - python
-    - /fork_upstream.py
-  volumes:
-    - ./scripts/fork_upstream.py:/fork_upstream.py:ro
+  <<: *mock
+  command:
+    - /mocks/fork-upstream.ts
   healthcheck: *fork-proxy-healthcheck
 x-anvil: &anvil
   image: ${ANVIL_IMAGE:?Load test-images.env}
@@ -44,19 +48,13 @@ x-anvil-healthcheck-timing: &anvil-healthcheck-timing
   retries: 12
   start_period: 20s
 x-anvil-init: &anvil-init
-  image: ${TXS_IMAGE:?Load test-images.env}
-  entrypoint:
-    - python
-    - /align_fork_clock.py
-  volumes:
-    - ./scripts/align_fork_clock.py:/align_fork_clock.py:ro
+  <<: *mock
+  command:
+    - /mocks/align-fork-clock.ts
 x-fork-rpc: &fork-rpc
-  image: ${TXS_IMAGE:?Load test-images.env}
-  entrypoint:
-    - python
-    - /fork_rpc.py
-  volumes:
-    - ./scripts/fork_rpc.py:/fork_rpc.py:ro
+  <<: *mock
+  command:
+    - /mocks/fork-rpc.ts
   healthcheck: *fork-proxy-healthcheck
 x-txs-init: &txs-init
   image: ${TXS_IMAGE:?Load test-images.env}
@@ -149,19 +147,15 @@ volumes:
   mock-keys:
 services:
   price-fixtures:
-    image: ${TXS_IMAGE:?Load test-images.env}
-    entrypoint:
-      - python
-      - /price_fixtures.py
-    volumes:
-      - ./scripts/price_fixtures.py:/price_fixtures.py:ro
+    <<: *mock
+    command:
+      - /mocks/price-fixtures.ts
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import urllib.request;
-          urllib.request.urlopen('http://localhost:8091/health')
+        - node
+        - /mocks/healthcheck.ts
+        - '8091'
       interval: 5s
       timeout: 5s
       retries: 5
@@ -183,17 +177,15 @@ services:
     volumes:
       - mock-keys:/keys
   cow-api:
-    image: ${TXS_IMAGE:?Load test-images.env}
+    <<: *mock
+    command:
+      - /mocks/cow-api.ts
     # Binds port 443.
     user: root
-    entrypoint:
-      - python
-      - /cow_api.py
     environment:
       COW_API_OFFLINE: 'true'
     volumes:
-      - ./scripts/cow_api.py:/cow_api.py:ro
-      - ./scripts/cow_api_orders.json:/cow_api_orders.json:ro
+      - ./mocks:/mocks:ro
       - mock-keys:/keys:ro
     depends_on:
       mock-keys:
@@ -205,25 +197,23 @@ services:
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import ssl, urllib.request;
-          urllib.request.urlopen('https://localhost/health',
-          context=ssl._create_unverified_context())
+        - node
+        - /mocks/healthcheck.ts
+        - '443'
+        - api.cow.fi
       interval: 5s
       timeout: 5s
       retries: 5
   auth0-mock:
-    image: ${TXS_IMAGE:?Load test-images.env}
+    <<: *mock
+    command:
+      - /mocks/auth0-api.ts
     # Binds port 443: the gateway only calls https://AUTH0_DOMAIN, without a port.
     user: root
-    entrypoint:
-      - python
-      - /auth0_api.py
     environment:
       <<: *auth0-client
     volumes:
-      - ./scripts/auth0_api.py:/auth0_api.py:ro
+      - ./mocks:/mocks:ro
       - mock-keys:/keys:ro
     ports:
       - 127.0.0.1:${AUTH0_MOCK_PORT:-8443}:443
@@ -237,55 +227,46 @@ services:
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import ssl, urllib.request;
-          urllib.request.urlopen('https://localhost/health',
-          context=ssl._create_unverified_context())
+        - node
+        - /mocks/healthcheck.ts
+        - '443'
+        - auth.safe-e2e.test
       interval: 5s
       timeout: 5s
       retries: 5
   relay-api:
-    image: ${TXS_IMAGE:?Load test-images.env}
-    entrypoint:
-      - python
-      - /relay_api.py
+    <<: *mock
+    command:
+      - /mocks/relay-api.ts
     environment:
       RELAY_RPC_URLS: 11155111=http://anvil:${RPC_PORT:-8545},1=http://anvil-mainnet:8547,137=http://anvil-polygon:8548
-    volumes:
-      - ./scripts/relay_api.py:/relay_api.py:ro
     depends_on:
       anvil:
         condition: service_healthy
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import urllib.request;
-          urllib.request.urlopen('http://localhost:8092/health')
+        - node
+        - /mocks/healthcheck.ts
+        - '8092'
       interval: 5s
       timeout: 5s
       retries: 5
   billing-api:
-    image: ${TXS_IMAGE:?Load test-images.env}
-    entrypoint:
-      - python
-      - /billing_api.py
+    <<: *mock
+    command:
+      - /mocks/billing-api.ts
     environment:
       BILLING_WEBHOOK_URL: http://cgw-web:3000/v1/billing/webhooks
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       # Throwaway P-256 test key; its public half is BILLING_WEBHOOK_JWT_PUBLIC_KEY of cgw-web.
       BILLING_WEBHOOK_SIGNING_KEY: 9df1216f154fc36b2e5df222b08470df3cac20b9f5679328781f959373e2b23d
-    volumes:
-      - ./scripts/billing_api.py:/billing_api.py:ro
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import urllib.request;
-          urllib.request.urlopen('http://localhost:8093/health')
+        - node
+        - /mocks/healthcheck.ts
+        - '8093'
       interval: 5s
       timeout: 5s
       retries: 5
