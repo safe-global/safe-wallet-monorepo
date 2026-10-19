@@ -37,6 +37,19 @@ export const Default: Story = (() => {
 })()
 
 export const Experimental: Story = (() => {
+  const setup = createSettingsSetup('/spaces/settings/experimental', {
+    workspacesExperimentalFeatures: true,
+    policyRecipientAllowlist: true,
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+    render: () => <SpaceSettingsExperimental />,
+  }
+})()
+
+/** The page is on but no chain offers the allowlist, so the section only shows its empty message. */
+export const ExperimentalUnavailable: Story = (() => {
   const setup = createSettingsSetup('/spaces/settings/experimental', { workspacesExperimentalFeatures: true })
   return {
     parameters: { ...setup.parameters },

@@ -21,6 +21,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   safeStaking: false,
   safePro: false,
   workspacesExperimentalFeatures: false,
+  policyRecipientAllowlist: false,
 }
 
 /**
@@ -40,6 +41,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   safeStaking: 'SAFE_STAKING',
   safePro: 'SAFE_PRO',
   workspacesExperimentalFeatures: 'WORKSPACES_EXPERIMENTAL_FEATURES',
+  policyRecipientAllowlist: 'POLICY_RECIPIENT_ALLOWLIST',
 }
 
 /**
@@ -112,6 +114,14 @@ export function createChainsPageData(chainData: Chain) {
   }
 }
 
+const SEPOLIA_CHAIN_ID = '11155111'
+
+// The allowlist needs a policy guard deployment, which only Sepolia has.
+const withPolicyRecipientAllowlist = (chain: Chain): Chain =>
+  chain.chainId === SEPOLIA_CHAIN_ID && !chain.features.includes(FEATURE_MAP.policyRecipientAllowlist)
+    ? { ...chain, features: [...chain.features, FEATURE_MAP.policyRecipientAllowlist] }
+    : chain
+
 /**
  * Full chains page response with the story chain swapped in.
  *
@@ -119,8 +129,10 @@ export function createChainsPageData(chainData: Chain) {
  * testnet chain (Sepolia) or `useIsRequireLoginEnabled` never resolves and
  * PageLayout's auth gate renders nothing.
  */
-export function createChainsPageDataV2(chainData: Chain) {
-  const otherChains = chainFixtures.all.results.filter((chain) => chain.chainId !== chainData.chainId)
+export function createChainsPageDataV2(chainData: Chain, features: FeatureFlags = {}) {
+  const otherChains = chainFixtures.all.results
+    .filter((chain) => chain.chainId !== chainData.chainId)
+    .map((chain) => (features.policyRecipientAllowlist ? withPolicyRecipientAllowlist(chain) : chain))
   return {
     ...chainFixtures.all,
     results: [chainData, ...otherChains],

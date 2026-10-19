@@ -47,6 +47,8 @@ export interface FeatureFlags {
   safePro?: boolean
   /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
   workspacesExperimentalFeatures?: boolean
+  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
+  policyRecipientAllowlist?: boolean
 }
 
 /**
