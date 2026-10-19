@@ -1,10 +1,14 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AllowlistEligibility } from '../types'
 import { getPolicyGuardAddress, isSafeVersionSupported } from './policyEngineDeployments'
 
 export const isAllowlistEnabled = (chain: Pick<Chain, 'chainId' | 'features'>): boolean =>
   hasFeature(chain, FEATURES.POLICY_RECIPIENT_ALLOWLIST) && !!getPolicyGuardAddress(chain.chainId)
+
+export const isAllowlistOptedIn = (space: Pick<GetSpaceResponse, 'experimentalFeatures'> | undefined): boolean =>
+  space?.experimentalFeatures.includes('POLICY_RECIPIENT_ALLOWLIST') ?? false
 
 export const isSafeEligibleForAllowlist = (
   safe: { version?: string | null; deployed?: boolean },
