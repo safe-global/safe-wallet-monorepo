@@ -153,6 +153,10 @@ describe('SafenetChecksSection', () => {
     [CheckStatus.IN_PROGRESS, 'Safenet is simulating this transaction.'],
     [CheckStatus.BENIGN, 'Safenet found no issues'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this address/transaction as malicious'],
+    [
+      CheckStatus.DISPUTED,
+      'A sentinel flagged this transaction, and the dispute is open. Safenet will publish a final ruling.',
+    ],
     [CheckStatus.TIMED_OUT, 'Safenet check is unavailable. You can still continue.'],
   ])('renders %s copy', (status, copy) => {
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status })
@@ -193,6 +197,18 @@ describe('SafenetChecksSection', () => {
     const card = renderRisk([reason])
 
     expect((card.closest('[style]') as HTMLElement).style.borderLeftColor).toBe(color)
+  })
+
+  it('names an open dispute "Under review" and links the explorer', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.DISPUTED })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.DISPUTED, publicStatus: CheckStatus.DISPUTED }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    expect(screen.getByRole('status')).toHaveTextContent('Safenet: Under review')
+    expect(screen.getByTestId('safenet-explorer-link')).toBeInTheDocument()
   })
 
   it('pulses instead of showing a severity icon while the check runs', () => {

@@ -109,3 +109,9 @@ export const ARBITRATION_WINDOW_MS = 24 * 60 * 60_000
 
 /** Poll interval inside {@link ARBITRATION_WINDOW_MS}. */
 export const ARBITRATION_POLL_MS = 5 * 60_000
+
+/**
+ * Poll interval for an open dispute. Arbitration runs for about 28 days and
+ * its ruling lands in no log window, so only `getRequest` can show it.
+ */
+export const DISPUTED_POLL_MS = 5 * 60_000

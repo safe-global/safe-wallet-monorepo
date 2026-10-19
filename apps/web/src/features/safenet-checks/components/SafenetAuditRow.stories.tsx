@@ -16,7 +16,9 @@ import {
   STORY_SUBMITTED_AT,
   exampleSnapshot,
   inProgressWithDeadline,
+  openDisputeSnapshot,
   rejectedSnapshot,
+  timedOutDisputeSnapshot,
 } from './storyExamples'
 
 faker.seed(456)
@@ -79,7 +81,11 @@ export const MaliciousUnrecognised = story(
   rejectedSnapshot(SAFENET_EXAMPLE_VOTES.unrecognised),
   'MALICIOUS with an illustrative unknown code.',
 )
+export const Disputed = story(
+  openDisputeSnapshot(),
+  'DISPUTED, example #8: label is "Under review", "Safenet" links the explorer.',
+)
 export const TimedOut = story(
-  rejectedSnapshot(SAFENET_EXAMPLE_VOTES.openDispute, CheckStatus.TIMED_OUT),
-  'TIMED_OUT, example #8. Loading and UNAVAILABLE render no row.',
+  timedOutDisputeSnapshot(),
+  'TIMED_OUT, example #8 after arbitration ended without a ruling. Loading and UNAVAILABLE render no row.',
 )
