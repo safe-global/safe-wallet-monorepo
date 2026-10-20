@@ -22,6 +22,7 @@ import {
 import { QueueRow } from './QueueRow'
 import { getColumns, type QueueSectionData } from './sections'
 import { getOwnerWallet } from '../../services/nextSteps'
+import { isSignerOf } from '../../services/personas'
 import { SECTION_STYLES } from './NonceCell'
 import { RecoveryNoticeRow, RecoveryRow, type RecoveryController } from '../Recovery/RecoveryPanel'
 import { getPrimaryStatus } from '../../services/model'
@@ -132,7 +133,7 @@ function SectionHeader({
   'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'steps' | 'persona'
 > & { recoveryCount?: number }) {
   const safeAccount = section.account
-  const wallet = safeAccount && getOwnerWallet(safeAccount)
+  const wallet = safeAccount && isSignerOf(safeAccount, persona) ? getOwnerWallet(safeAccount) : undefined
   const conflicting = section.category === 'conflicting'
   const status = conflicting
     ? { ...CONFLICTING_META, tone: '' }

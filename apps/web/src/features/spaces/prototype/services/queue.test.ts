@@ -12,7 +12,7 @@ import type { Proposal } from '../types'
 describe('preview queue actions', () => {
   it('requires permission, rejects duplicate signatures, and allows blocked proposals to be signed only', () => {
     const queue = createPreviewQueue('everyday')
-    expect(applyPreviewAction(queue, 'treasury-44', 'observer', 'sign')).toBe(queue)
+    expect(applyPreviewAction(queue, 'treasury-44', 'member', 'sign')).toBe(queue)
     expect(applyPreviewAction(queue, 'grants-8', 'owner', 'sign')).toBe(queue)
     expect(applyPreviewAction(queue, 'treasury-43', 'owner', 'execute')).toBe(queue)
     const signed = applyPreviewAction(queue, 'treasury-44', 'owner', 'sign')
@@ -46,7 +46,7 @@ describe('preview queue actions', () => {
   })
   it('validates replacement fields and denies observers and non-owners alternative proposals', () => {
     const queue = createPreviewQueue('everyday')
-    expect(proposePreviewAlternative(queue, 'treasury-42', 'observer', 'cancellation').queue).toBe(queue)
+    expect(proposePreviewAlternative(queue, 'treasury-42', 'member', 'cancellation').queue).toBe(queue)
     expect(proposePreviewAlternative(queue, 'grants-8', 'owner', 'cancellation').queue).toBe(queue)
     expect(
       proposePreviewAlternative(queue, 'treasury-42', 'owner', 'replacement', {

@@ -1,5 +1,6 @@
 import { getAccount, getScenario, getScenarioAccounts, getState, knownAccounts } from './model'
 import type { Account, Persona, Proposal, Scenario } from '../types'
+import { getYou, isSignerOf } from './personas'
 
 export type PreviewQueue = {
   items: Proposal[]
@@ -28,7 +29,7 @@ export function applyPreviewAction(
   if (action === 'sign' && !state.canSign) return queue
   if (action === 'execute' && !state.ready) return queue
   if (action === 'signAndExecute' && !state.finalSignature) return queue
-  const signed = action === 'execute' ? proposal : { ...proposal, signers: [...proposal.signers, 'Dev'] }
+  const signed = action === 'execute' ? proposal : { ...proposal, signers: [...proposal.signers, getYou(persona)!] }
   if (action === 'sign') {
     return { ...queue, items: queue.items.map((item) => (item.id === id ? signed : item)) }
   }
@@ -51,7 +52,8 @@ export function proposePreviewAlternative(
   replacement?: { recipient: string; amount: string },
 ): { queue: PreviewQueue; proposal?: Proposal } {
   const original = queue.items.find((item) => item.id === id)
-  if (!original || persona !== 'owner' || !getAccount(original).owners.includes('Dev')) return { queue }
+  const you = getYou(persona)
+  if (!original || !you || !isSignerOf(getAccount(original), persona)) return { queue }
   if (kind === 'replacement' && (!replacement?.recipient.trim() || !replacement.amount.trim())) return { queue }
   const proposal: Proposal = {
     id: `${original.account}-${original.nonce}-${kind}-${queue.nextProposalId}`,
@@ -63,7 +65,7 @@ export function proposePreviewAlternative(
     recipient: kind === 'cancellation' ? 'This Safe account' : replacement!.recipient.trim(),
     amount: kind === 'cancellation' ? '0 ETH' : replacement!.amount.trim(),
     age: 'Just now',
-    signers: ['Dev'],
+    signers: [you],
     eligible: true,
   }
   return { queue: { ...queue, items: [...queue.items, proposal], nextProposalId: queue.nextProposalId + 1 }, proposal }

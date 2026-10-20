@@ -22,13 +22,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import {
-  getScenarioAccounts,
-  getOutstandingSigners,
-  getSignerName,
-  getTransactionLabel,
-  type RowSecondaryAction,
-} from '../services/model'
+import { getScenarioAccounts, getTransactionLabel, type RowSecondaryAction } from '../services/model'
 import {
   applyPreviewAction,
   createPreviewQueue,
@@ -37,7 +31,8 @@ import {
   proposePreviewAlternative,
   type PreviewAction,
 } from '../services/queue'
-import type { MenuAction } from '../services/actions'
+import { getOutsiders, getRemindable, type MenuAction } from '../services/actions'
+import { parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
 import type { Direction, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
@@ -66,7 +61,7 @@ function PendingQueueView() {
   const direction: Direction =
     router.query.option === 'inbox' || router.query.option === 'steps' ? router.query.option : 'queues'
   const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? 'everyday'
-  const persona: Persona = router.query.persona === 'observer' ? 'observer' : 'owner'
+  const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
 
   const [queue, setQueue] = useState(() => createPreviewQueue(scenario))
@@ -137,9 +132,7 @@ function PendingQueueView() {
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm | null>(null)
   const remindSigners = (tx: Proposal) => setPendingConfirm({ kind: 'remind', tx })
   const sendReminder = (tx: Proposal) => {
-    const names = getOutstandingSigners(tx)
-      .filter((name) => name !== 'Dev')
-      .map(getSignerName)
+    const names = getRemindable(tx, persona)
     setRemindedIds((ids) => (ids.includes(tx.id) ? ids : [...ids, tx.id]))
     setFeedback(
       `Reminder sent to ${names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0]} in this preview.`,
@@ -154,6 +147,10 @@ function PendingQueueView() {
 
   const runMenuAction = (tx: Proposal, action: MenuAction) => {
     if (action === 'remind') return remindSigners(tx)
+    if (action === 'invite') {
+      const names = getOutsiders(tx, persona)
+      return setFeedback(`Invite sent to ${names.join(', ')} in this preview. They get reminders once they join.`)
+    }
     if (action === 'replace' || action === 'reject') {
       reviewTx(tx)
       setReject(true)
@@ -510,6 +507,7 @@ function PendingQueueView() {
         />
         <ConfirmActionDialog
           confirm={pendingConfirm}
+          persona={persona}
           onCancel={() => setPendingConfirm(null)}
           onConfirm={({ kind, tx }) => {
             setPendingConfirm(null)

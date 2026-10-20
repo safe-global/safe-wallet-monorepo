@@ -1,5 +1,6 @@
 import type { Persona, Proposal } from '../types'
 import { getAccount, getSignedAt, getSignerIdentity, shortAddress } from './model'
+import { isSignerOf, isYou } from './personas'
 
 export type SignerRow = {
   id: string
@@ -22,7 +23,7 @@ export const getSignerRows = (tx: Proposal, persona: Persona): SignerRow[] => {
       id,
       name,
       address,
-      label: id === 'Dev' && persona === 'owner' ? 'You' : (name ?? shortAddress(address)),
+      label: isYou(id, persona) ? 'You' : (name ?? shortAddress(address)),
       signed: index !== undefined,
       signedAt: index !== undefined ? getSignedAt(tx, index) : undefined,
     }
@@ -42,5 +43,5 @@ export const getSignatureSummary = (tx: Proposal) => {
 // Explains a Waiting row when you cannot sign it.
 export const getNotSignerNote = (tx: Proposal, persona: Persona) => {
   const account = getAccount(tx)
-  return persona === 'owner' && account.owners.includes('Dev') ? undefined : `You aren't a signer of ${account.name}.`
+  return isSignerOf(account, persona) ? undefined : `You aren't a signer of ${account.name}.`
 }

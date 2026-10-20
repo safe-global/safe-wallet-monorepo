@@ -42,6 +42,7 @@ import {
   WARNING_DETAILS,
   WARNING_LABELS,
 } from '../../services/model'
+import { isSignerOf } from '../../services/personas'
 import type { PreviewAction } from '../../services/queue'
 import { getMenuActions, getPrimaryAction, getStatusHint, MENU_LABELS, type MenuAction } from '../../services/actions'
 import type { Persona, Proposal } from '../../types'
@@ -238,7 +239,7 @@ function ClassicReviewDrawer({
   const ReviewIcon = TYPE_ICONS[review ? getTypeLabel(review) : 'Send']
   const { pendingAction, replacement, reject } = layout
   const buttonSize = isMobile ? 'xl' : 'default'
-  const canReplace = review ? persona === 'owner' && getAccount(review).owners.includes('Dev') : false
+  const canReplace = review ? isSignerOf(getAccount(review), persona) : false
   const stepsPrimary = steps && review ? getPrimaryAction(review, items, persona, remindedIds) : undefined
   const menuActions = stepsPrimary && review ? getMenuActions(review, items, persona, stepsPrimary) : []
   const runStepsPrimary = () => {

@@ -88,7 +88,7 @@ export const CompetingProposals: Story = {
 export const Warnings: Story = {
   args: { scenario: 'realistic', pick: (tx) => getWarnings(tx).length > 0, sections: ['details'] },
 }
-export const NonOwner: Story = { args: { persona: 'observer', pick: () => true, sections: ['summary'] } }
+export const NonOwner: Story = { args: { persona: 'member', pick: () => true, sections: ['summary'] } }
 
 // Next steps (option C): the drawer shows the queue row in full.
 export const NextStepsReadyToSign: Story = {

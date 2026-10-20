@@ -9,6 +9,7 @@ import type {
   SettingsChange,
   TransactionKind,
 } from '../types'
+import { getYou, isSignerOf, isYou } from './personas'
 
 // Synthetic full addresses are used only to render fixture identicons; signer counts are sample configuration.
 // An owner nobody named in the address book, so the UI falls back to the address.
@@ -19,7 +20,11 @@ const SIGNER_ADDRESSES: Record<string, string> = {
   Max: '0x9A0b2C4d6E8f1A3b5C7d9E0f2A4b6C8d0E1f3A5b',
   Jonas: '0x2B4c6D8e0F1a3B5c7D9e1F2a4B6c8D0e2F3a5B7c',
   Lena: '0x4D6e8F0a2B3c5D7e9F1a2B4c6D8e0F1a3B5c7D9e',
+  Sam: '0x5a4d000000000000000000000000000000009e1f',
 }
+// Signers who aren't workspace members. Reminders can't reach them, so admins invite them instead.
+const OUTSIDE_WORKSPACE = [UNNAMED_SIGNER]
+export const isWorkspaceMember = (id: string) => !OUTSIDE_WORKSPACE.includes(id)
 const fixtureAddress = (seed: string) =>
   `0x${Array.from({ length: 40 }, (_, index) => ((seed.charCodeAt(index % seed.length) * (index + 7)) % 16).toString(16)).join('')}`
 export const getSignerIdentity = (id: string) => ({
@@ -50,7 +55,7 @@ export const accounts: Account[] = [
     chainId: '8453',
     address: '0x5afe…0b17',
     iconAddress: '0x5afe000000000000000000000000000000000b17',
-    owners: ['Dev', 'Ana', 'Max'],
+    owners: ['Dev', 'Ana', 'Max', 'Sam'],
     nextNonce: 17,
     threshold: 2,
   },
@@ -384,10 +389,9 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
   const waiting = tx.nonce > account.nextNonce
   const canSign =
     tx.nonce >= account.nextNonce &&
-    persona === 'owner' &&
-    account.owners.includes('Dev') &&
+    isSignerOf(account, persona) &&
     tx.eligible &&
-    !confirmations.includes('Dev') &&
+    !confirmations.includes(getYou(persona)!) &&
     missing > 0
   return {
     missing,
@@ -544,7 +548,7 @@ export const getRowAction = (tx: Proposal, persona: Persona) => {
 }
 export type RowSecondaryAction = 'replace' | 'reject'
 export const getSecondaryActions = (tx: Proposal, persona: Persona): RowSecondaryAction[] =>
-  persona === 'owner' && getAccount(tx).owners.includes('Dev') ? ['replace', 'reject'] : []
+  isSignerOf(getAccount(tx), persona) ? ['replace', 'reject'] : []
 export const getStatusLabel = (tx: Proposal, persona: Persona) => {
   const state = getState(tx, persona)
   if (state.ready) return 'Ready to execute'
@@ -739,13 +743,10 @@ export const getSignedAt = (tx: Proposal, index: number, now = Date.now()) => {
   return index === 0 ? created : created + Math.round(((now - created) * index) / (tx.signers.length + 1))
 }
 export const getCreator = (tx: Proposal) => tx.proposedBy ?? (tx.signers[0] ? getSignerName(tx.signers[0]) : undefined)
-// "Dev" is the signed-in owner in these fixtures.
 export const getSignerSummary = (tx: Proposal, persona: Persona) => {
   const { missing } = getState(tx, persona)
   if (!missing) return 'Threshold met'
-  const names = getOutstandingSigners(tx).map((name) =>
-    name === 'Dev' && persona === 'owner' ? 'you' : getSignerName(name),
-  )
+  const names = getOutstandingSigners(tx).map((name) => (isYou(name, persona) ? 'you' : getSignerName(name)))
   return `${missing} more from ${names.join(', ')}`
 }
 // Next steps: short chip labels that follow the section. `after`: a row you can sign behind an earlier nonce.

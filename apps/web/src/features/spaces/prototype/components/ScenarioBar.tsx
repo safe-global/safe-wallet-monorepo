@@ -4,6 +4,10 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import type { Direction, Persona, Scenario } from '../types'
+import { getPersonaLabel, PERSONAS } from '../services/personas'
+import { getScenarioAccounts, shortAddress } from '../services/model'
+import { PixelAvatar } from './PixelAvatar'
+import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../services/workspace'
 
 export const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: 'everyday', label: 'Everyday queue' },
@@ -21,6 +25,57 @@ export const SCENARIOS: { value: Scenario; label: string }[] = [
 ]
 
 export type Hypernative = 'in' | 'out' | 'none'
+
+const personas = Object.keys(PERSONAS) as Persona[]
+
+function WorkspaceHeader({ scenario }: { scenario: Scenario }) {
+  const { plan, safes, members, signers, outside } = getWorkspaceProfile(scenario)
+  return (
+    <div className="sticky top-0 z-10 border-b border-border bg-popover px-3 pt-2 pb-3">
+      <p className="text-sm font-medium text-foreground">Acme Inc · {plan.label}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        {plan.seats ? `${safes} of ${plan.seats} Safe seats` : `${safes} Safes`} · {members} members · {signers} signers
+        {outside ? `, ${outside} not in workspace` : ''}
+      </p>
+    </div>
+  )
+}
+
+function PersonaList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <span className="flex flex-col gap-1">
+      <span className="text-xs font-medium text-foreground">{title}</span>
+      <ul className="flex list-disc flex-col gap-1 pl-4 text-xs text-muted-foreground">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </span>
+  )
+}
+
+function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenario }) {
+  const { name, role, admin, workflow, jobs, pains } = PERSONAS[persona]
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-3 whitespace-normal">
+      <span className="flex items-center gap-3">
+        <PixelAvatar persona={persona} />
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <span className="font-medium">
+            {name} · {role}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {admin ? 'Admin' : 'Member'} · {getSignerStatus(persona, getScenarioAccounts(scenario))}
+          </span>
+          <span className="font-mono text-xs text-muted-foreground">{shortAddress(getPersonaAddress(persona))}</span>
+        </span>
+      </span>
+      <span className="text-xs">{workflow}</span>
+      <PersonaList title="Jobs to be done" items={jobs} />
+      <PersonaList title="Pain points" items={pains} />
+    </span>
+  )
+}
 
 export function ScenarioBar({
   direction,
@@ -92,15 +147,26 @@ export function ScenarioBar({
           </label>
           <Select
             value={persona}
-            items={{ owner: 'Dev · Signer', observer: 'Alex · Non-owner' }}
+            items={Object.fromEntries(personas.map((value) => [value, getPersonaLabel(value)]))}
             onValueChange={(value) => value && onChange({ persona: value })}
           >
             <SelectTrigger id="persona" size="sm" variant="ghost" aria-label="Preview as">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="w-auto min-w-(--anchor-width)">
-              <SelectItem value="owner">Dev · Signer</SelectItem>
-              <SelectItem value="observer">Alex · Non-owner</SelectItem>
+            <SelectContent
+              side="top"
+              align="end"
+              alignItemWithTrigger={false}
+              className="w-[44rem] max-w-[calc(100vw-2rem)]"
+            >
+              <WorkspaceHeader scenario={scenario} />
+              <div className="grid gap-1.5 pt-1.5 sm:grid-cols-2">
+                {personas.map((value) => (
+                  <SelectItem key={value} value={value} className="items-start rounded-md p-4 pr-8">
+                    <PersonaCard persona={value} scenario={scenario} />
+                  </SelectItem>
+                ))}
+              </div>
             </SelectContent>
           </Select>
           <Button

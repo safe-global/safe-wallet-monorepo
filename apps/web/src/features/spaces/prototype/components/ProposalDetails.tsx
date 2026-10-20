@@ -27,6 +27,7 @@ import {
   getTransactionLabel,
   shortAddress,
 } from '../services/model'
+import { getYou, isYou } from '../services/personas'
 import type { BatchAction, Persona, Proposal } from '../types'
 
 const INITIAL_ACTIONS = 10
@@ -336,8 +337,6 @@ export function ProposalAdvanced({ proposal }: { proposal: Proposal }) {
   )
 }
 
-const isYou = (name: string, persona: Persona) => name === 'Dev' && persona === 'owner'
-
 const getSigners = (proposal: Proposal, persona: Persona) => {
   const signed = proposal.signers.filter((name) => getAccount(proposal).owners.includes(name))
   return { signed, youNeedToSign: getState(proposal, persona).canSign }
@@ -400,7 +399,7 @@ export function SignerList({ proposal, persona }: { proposal: Proposal; persona:
       {youNeedToSign && (
         <li className="flex min-h-9 items-center gap-2">
           <div className="flex min-w-0 flex-1 opacity-50">
-            <SignerIdentity id="Dev" persona={persona} />
+            <SignerIdentity id={getYou(persona)!} persona={persona} />
           </div>
           <span className="shrink-0 text-xs text-muted-foreground">Your signature needed</span>
         </li>

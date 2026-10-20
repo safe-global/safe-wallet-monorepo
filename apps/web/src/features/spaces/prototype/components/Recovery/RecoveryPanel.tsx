@@ -18,6 +18,7 @@ import { formatDateTime } from '@safe-global/utils/utils/date'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import Identicon from '@/components/common/Identicon'
 import { accounts } from '../../services/model'
+import { isSignerOf } from '../../services/personas'
 import type { Persona } from '../../types'
 import { chainLogoUrl, HINT_CLASS, HintContent, SafeIdentity, StatusChip } from '../shared'
 import { getColumns } from '../QueueTable/sections'
@@ -294,7 +295,7 @@ export function useRecoveries({
     onFeedback(`Recovery executed for ${accountOf(recovery).name} in this preview. Its signers have changed.`)
   }
   const canCancel = (recovery: Recovery) => {
-    const owner = persona === 'owner' && accountOf(recovery).owners.includes('Dev')
+    const owner = isSignerOf(accountOf(recovery), persona)
     return recovery.state !== 'cancelling' && (owner || recovery.state === 'expired')
   }
   const getPrimary = (recovery: Recovery) =>

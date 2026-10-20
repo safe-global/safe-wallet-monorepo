@@ -49,4 +49,4 @@ export const AppliedFiltersRow: Story = {
   args: { initial: { statuses: ['sign', 'ready'], networks: ['Ethereum'], types: ['Send'] }, initialGroupBy: 'safe' },
 }
 export const Search: Story = { args: { initial: { search: 'payroll' } } }
-export const NonOwner: Story = { args: { persona: 'observer' } }
+export const NonOwner: Story = { args: { persona: 'member' } }

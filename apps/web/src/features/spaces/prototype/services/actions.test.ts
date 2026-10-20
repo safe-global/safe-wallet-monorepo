@@ -1,4 +1,4 @@
-import { getPrimaryAction } from './actions'
+import { getMenuActions, getPrimaryAction, getRemindable } from './actions'
 import { getScenario } from './model'
 import { getNotSignerNote, getSignatureSummary } from './signers'
 
@@ -17,8 +17,28 @@ describe('next steps actions for a waiting row', () => {
     expect(getPrimaryAction(proposal('grants-8'), items, 'owner', ['grants-8'], 'row').label).toBe('Reminded')
   })
 
-  it('offers no reminder to a view-only user', () => {
-    expect(getPrimaryAction(proposal('grants-8'), items, 'observer', [], 'row').kind).toBe('review')
+  it.each(['member', 'admin', 'single'] as const)('offers Remind to %s too', (persona) => {
+    expect(getPrimaryAction(proposal('grants-8'), items, persona, [], 'row').kind).toBe('remind')
+  })
+})
+
+describe('signers outside the workspace', () => {
+  it('leaves them out of the reminder', () => {
+    expect(getRemindable(proposal('grants-8'), 'member')).not.toContain('0x65F8…C7B0')
+  })
+
+  it('offers Invite to admins only', () => {
+    const tx = proposal('grants-8')
+    const primary = getPrimaryAction(tx, items, 'admin')
+    expect(getMenuActions(tx, items, 'admin', primary)).toContain('invite')
+    expect(getMenuActions(tx, items, 'member', getPrimaryAction(tx, items, 'member'))).not.toContain('invite')
+  })
+})
+
+describe('signer on one Safe', () => {
+  it('signs only in the Safe they own', () => {
+    expect(getPrimaryAction(proposal('payroll-18'), items, 'single').kind).toBe('flow')
+    expect(getPrimaryAction(proposal('treasury-42'), items, 'single').kind).not.toBe('flow')
   })
 })
 

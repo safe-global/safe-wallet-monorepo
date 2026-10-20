@@ -1,6 +1,15 @@
 import type { Persona, Proposal } from '../types'
 import type { PreviewAction } from './queue'
-import { getAccount, getConflicts, getCreator, getOutstandingSigners, getSignerName, getState } from './model'
+import {
+  getAccount,
+  getConflicts,
+  getCreator,
+  getOutstandingSigners,
+  getSignerName,
+  getState,
+  isWorkspaceMember,
+} from './model'
+import { canInvite, getYou, isSignerOf, isYou } from './personas'
 
 // Shared rules for the queue row and the drawer. The drawer confirm step replaces ConfirmTxFlow.
 
@@ -10,21 +19,29 @@ export type PrimaryAction =
   | { kind: 'remind'; label: string; target: Proposal; hint?: string }
   | { kind: 'review'; label: string; hint?: string }
 
-export type MenuAction = 'remind' | 'replace' | 'reject' | 'delete' | 'copyLink'
+export type MenuAction = 'remind' | 'invite' | 'replace' | 'reject' | 'delete' | 'copyLink'
 export const MENU_LABELS: Record<MenuAction, string> = {
   remind: 'Remind signers',
+  invite: 'Invite signers to workspace',
   replace: 'Replace with a transfer',
   reject: 'Reject',
   delete: 'Delete from queue',
   copyLink: 'Copy link',
 }
 
-const youOwn = (tx: Proposal, persona: Persona) => persona === 'owner' && getAccount(tx).owners.includes('Dev')
+const othersOutstanding = (tx: Proposal, persona: Persona) =>
+  getOutstandingSigners(tx).filter((id) => !isYou(id, persona))
 
-export const othersMissing = (tx: Proposal) =>
-  getOutstandingSigners(tx)
-    .filter((name) => name !== 'Dev')
+export const othersMissing = (tx: Proposal, persona: Persona) => othersOutstanding(tx, persona).map(getSignerName)
+// Any workspace member can remind. Only signers in the workspace get the reminder.
+export const getRemindable = (tx: Proposal, persona: Persona) =>
+  othersOutstanding(tx, persona).filter(isWorkspaceMember).map(getSignerName)
+export const getOutsiders = (tx: Proposal, persona: Persona) =>
+  othersOutstanding(tx, persona)
+    .filter((id) => !isWorkspaceMember(id))
     .map(getSignerName)
+const canRemind = (tx: Proposal, persona: Persona) =>
+  getState(tx, persona).missing > 0 && getRemindable(tx, persona).length > 0
 
 export const people = (names: string[]) => (names.length > 2 ? `${names.length} signers` : names.join(' and '))
 
@@ -37,9 +54,7 @@ export const getBlocker = (tx: Proposal, items: Proposal[], persona: Persona) =>
     const blockerState = getState(other, persona)
     return blockerState.canSign || blockerState.ready
   })
-  // Workspace members can remind signers. View-only users cannot.
-  const waiting =
-    !actionable && persona === 'owner' ? blockers.find((other) => getState(other, persona).missing > 0) : undefined
+  const waiting = actionable ? undefined : blockers.find((other) => canRemind(other, persona))
   return { nonce: nextNonce, actionable, waiting }
 }
 
@@ -53,7 +68,8 @@ export const getPrimaryAction = (
   const state = getState(tx, persona)
   if (state.ready) return { kind: 'flow', label: 'Execute', flow: 'execute' }
   // Only one conflicting option can execute. The row asks you to review before you sign a second one.
-  const signedOther = getConflicts(tx, items).some((other) => other.signers.includes('Dev'))
+  const you = getYou(persona)
+  const signedOther = !!you && getConflicts(tx, items).some((other) => other.signers.includes(you))
   if (state.canSign && signedOther) {
     const hint = `You signed another option at #${tx.nonce}. Only one can execute.`
     return surface === 'row'
@@ -82,25 +98,25 @@ export const getPrimaryAction = (
       kind: 'remind',
       label: remindedIds.includes(blocker.waiting.id) ? 'Reminded' : 'Remind',
       target: blocker.waiting,
-      hint: `#${blocker.nonce} is waiting on ${people(othersMissing(blocker.waiting))}.`,
+      hint: `#${blocker.nonce} is waiting on ${people(othersMissing(blocker.waiting, persona))}.`,
     }
-  if (persona === 'owner' && state.missing > 0 && !state.waiting)
+  if (!state.waiting && canRemind(tx, persona))
     return { kind: 'remind', label: remindedIds.includes(tx.id) ? 'Reminded' : 'Remind', target: tx }
   return { kind: 'review', label: 'Review' }
 }
 
 export const getMenuActions = (tx: Proposal, items: Proposal[], persona: Persona, primary: PrimaryAction) => {
-  const owner = youOwn(tx, persona)
-  const { missing } = getState(tx, persona)
+  const owner = isSignerOf(getAccount(tx), persona)
   const conflicts = getConflicts(tx, items)
   const lastInSafe = !items.some((other) => other.account === tx.account && other.nonce > tx.nonce)
   const rejectionExists = [tx, ...conflicts].some((other) => other.kind.type === 'rejection')
   return [
-    owner && missing > 0 && !(primary.kind === 'remind' && primary.target.id === tx.id) && 'remind',
+    canRemind(tx, persona) && !(primary.kind === 'remind' && primary.target.id === tx.id) && 'remind',
+    canInvite(persona) && getState(tx, persona).missing > 0 && getOutsiders(tx, persona).length > 0 && 'invite',
     owner && 'replace',
     owner && !rejectionExists && 'reject',
     // Production: only the proposer can delete, and only the last nonce or a duplicate.
-    getCreator(tx) === 'Dev' && (lastInSafe || conflicts.length > 0) && 'delete',
+    getCreator(tx) === getYou(persona) && (lastInSafe || conflicts.length > 0) && 'delete',
     'copyLink',
   ].filter((action): action is MenuAction => !!action)
 }
@@ -118,13 +134,13 @@ export const getStatusHint = (tx: Proposal, items: Proposal[], persona: Persona)
           ? `Sign #${blocker.nonce} first.`
           : `Execute #${blocker.nonce} first.`
         : blocker.waiting
-          ? `#${blocker.nonce} is waiting on ${people(othersMissing(blocker.waiting))}.`
+          ? `#${blocker.nonce} is waiting on ${people(othersMissing(blocker.waiting, persona))}.`
           : 'Nothing to do yet.'
     return `Executes after #${getAccount(tx).nextNonce}. ${next}`
   }
   if (state.canSign)
     return state.finalSignature ? 'Yours is the last signature needed.' : 'Needs your signature. Sign it.'
-  const names = othersMissing(tx)
+  const names = othersMissing(tx, persona)
   const who = state.missing < names.length ? `${state.missing} more from ${people(names)}` : people(names)
-  return `Waiting on ${who}.${persona === 'owner' ? ' Remind them.' : ''}`
+  return `Waiting on ${who}.${canRemind(tx, persona) ? ' Remind them.' : ''}`
 }

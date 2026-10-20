@@ -79,8 +79,8 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('A replacement or cancellation uses the same nonce')
     expect(screen.getByRole('dialog')).not.toHaveTextContent('Competing proposal created')
   })
-  it('opens review instead of offering signing to an observer', () => {
-    render(<PendingQueue />, { routerProps: { query: { persona: 'observer' } } })
+  it('opens review instead of offering signing to a member who does not sign', () => {
+    render(<PendingQueue />, { routerProps: { query: { persona: 'member' } } })
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.queryByRole('button', { name: 'Sign Send to Globex Payroll' })).not.toBeInTheDocument()
     expect(table.queryByRole('button', { name: 'Replace or cancel Send to Globex Payroll' })).not.toBeInTheDocument()
@@ -514,8 +514,8 @@ describe('queue design exploration', () => {
     expect(primary).not.toHaveClass('bg-primary')
     expect(row.className).not.toContain('focus-within')
   })
-  it('offers no replace or reject buttons to observers', () => {
-    render(<PendingQueue />, { routerProps: { query: { persona: 'observer' } } })
+  it('offers no replace or reject buttons to members who do not sign', () => {
+    render(<PendingQueue />, { routerProps: { query: { persona: 'member' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }).closest('tr')!
     expect(within(row).queryByRole('button', { name: /^(Replace|Reject) / })).not.toBeInTheDocument()
   })

@@ -24,7 +24,7 @@ const proposal = (id: string) => getScenario('everyday').find((tx) => tx.id === 
 
 describe('prototype queue state', () => {
   it('allows non-owners to review execution only after threshold is met at the current nonce', () => {
-    expect(getAction(proposal('payroll-17'), 'observer')).toBe('Review and execute')
+    expect(getAction(proposal('payroll-17'), 'member')).toBe('Review and execute')
   })
   it('allows a final signature and execution at the current nonce', () => {
     expect(getAction(proposal('treasury-42'), 'owner')).toBe('Review, sign and execute')
@@ -41,8 +41,8 @@ describe('prototype queue state', () => {
     expect(getPrimaryStatus(proposal('treasury-43'), 'owner')).toBe('waiting')
     expect(getPrimaryStatus(proposal('grants-8'), 'owner')).toBe('awaiting')
     expect(matchesFilter(proposal('grants-8'), 'awaiting', 'owner')).toBe(true)
-    expect(getPrimaryStatus(proposal('treasury-44'), 'observer')).toBe('waiting')
-    expect(getPrimaryStatus(proposal('treasury-42'), 'observer')).toBe('awaiting')
+    expect(getPrimaryStatus(proposal('treasury-44'), 'member')).toBe('waiting')
+    expect(getPrimaryStatus(proposal('treasury-42'), 'member')).toBe('awaiting')
   })
   it('does not offer execution or signing for a consumed nonce', () => {
     expect(getState({ ...proposal('payroll-17'), nonce: 16 })).toMatchObject({ ready: false, canSign: false })
@@ -60,7 +60,7 @@ describe('prototype queue state', () => {
   it('requires eligibility and current ownership to offer a signature', () => {
     expect(getState({ ...proposal('treasury-42'), eligible: false }).canSign).toBe(false)
     expect(getState({ ...proposal('grants-8'), eligible: true }).canSign).toBe(false)
-    expect(getState(proposal('treasury-42'), 'observer').canSign).toBe(false)
+    expect(getState(proposal('treasury-42'), 'member').canSign).toBe(false)
   })
   it('generates numbered batch actions and seeds a four-way conflict with a 46-action batch', () => {
     const actions = generateBatchActions(46)
@@ -158,7 +158,7 @@ describe('prototype queue state', () => {
   })
   it('names who still needs to sign', () => {
     expect(getSignerSummary(proposal('treasury-44'), 'owner')).toBe('2 more from you, Max, Jonas, Lena')
-    expect(getSignerSummary(proposal('treasury-44'), 'observer')).toBe('2 more from Dev, Max, Jonas, Lena')
+    expect(getSignerSummary(proposal('treasury-44'), 'member')).toBe('2 more from Dev, Max, Jonas, Lena')
     expect(getSignerSummary(proposal('treasury-43'), 'owner')).toBe('Threshold met')
   })
   it('explains in plain language whether a transaction can execute', () => {

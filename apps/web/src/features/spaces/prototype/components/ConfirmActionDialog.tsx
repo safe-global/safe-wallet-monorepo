@@ -8,9 +8,9 @@ import {
   AlertDialogTitle,
 } from '@safe-global/views/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
-import { othersMissing, people } from '../services/actions'
+import { getOutsiders, getRemindable, people } from '../services/actions'
 import { getTransactionLabel } from '../services/model'
-import type { Proposal } from '../types'
+import type { Persona, Proposal } from '../types'
 
 export type PendingConfirm = { kind: 'delete' | 'remind'; tx: Proposal }
 
@@ -20,17 +20,20 @@ const listNames = (names: string[]) =>
 // Delete copies the production DeleteTxModal. Remind is new and asks before it notifies signers.
 export function ConfirmActionDialog({
   confirm,
+  persona,
   onCancel,
   onConfirm,
 }: {
   confirm: PendingConfirm | null
+  persona: Persona
   onCancel: () => void
   onConfirm: (confirm: PendingConfirm) => void
 }) {
   if (!confirm) return null
   const { kind, tx } = confirm
   const label = `${getTransactionLabel(tx)} (#${tx.nonce})`
-  const names = othersMissing(tx)
+  const names = getRemindable(tx, persona)
+  const outsiders = getOutsiders(tx, persona)
   const isDelete = kind === 'delete'
   const Icon = isDelete ? Trash2 : Bell
   return (
@@ -46,7 +49,7 @@ export function ConfirmActionDialog({
           <AlertDialogDescription>
             {isDelete
               ? `${label} is removed from the queue. Signatures already given stay valid, so it could still be submitted on-chain later.`
-              : `${listNames(names)} will get a notification asking them to review and sign ${label}.`}
+              : `${listNames(names)} will get a notification asking them to review and sign ${label}.${outsiders.length ? ` ${listNames(outsiders)} ${outsiders.length === 1 ? "isn't" : "aren't"} in this workspace, so they won't get it.` : ''}`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

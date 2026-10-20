@@ -13,7 +13,7 @@ export type Scenario =
   | 'empty'
 export type Direction = 'queues' | 'inbox' | 'steps'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
-export type Persona = 'owner' | 'observer'
+export type Persona = 'owner' | 'single' | 'member' | 'admin'
 export type Account = {
   id: string
   name: string
