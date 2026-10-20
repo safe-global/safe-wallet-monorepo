@@ -1,6 +1,6 @@
 /**
- * WalletConnect Page Object — the header popover where the user pastes a dApp's pairing code and approves the
- * session proposal.
+ * WalletConnect Page Object — the header popover where the user pastes a dApp's pairing code, approves the
+ * session proposal and disconnects sessions.
  *
  * Rule: Page Objects hold locators and actions only. Assertions belong in the
  * test file, never here. Waiting (waitFor / waitForResponse) is allowed.
@@ -37,5 +37,10 @@ export class WalletConnectPage {
   /** Opens the popover, unless it is already open. */
   async open(): Promise<void> {
     if (!(await this.pairingInput.isVisible())) await this.headerButton.click()
+  }
+
+  async disconnect(dappName: string): Promise<void> {
+    await this.open()
+    await this.session(dappName).getByRole('button', { name: 'Disconnect' }).click()
   }
 }
