@@ -6,11 +6,8 @@ import {
   AccordionTrigger,
 } from '@safe-global/views/components/ui/accordion'
 import { Card } from '@safe-global/views/components/ui/card'
-import { Chip } from '@safe-global/views/components/ui/chip'
 import DateTime from '@/components/common/DateTime'
 import { cn } from '@safe-global/views/utils/cn'
-// eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import {
   CheckStatus,
   type PublicCheckStatus,
@@ -18,13 +15,14 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
-import { CHIP_VARIANT, STATUS_PRESENTATION } from '../statusPresentation'
+import { STATUS_PRESENTATION } from '../statusPresentation'
 import { explainFailure, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
-import { SafenetDetailsPanel, SafenetDetailsPanelStack, SafenetPulse } from './SafenetBlocks'
+import { SafenetDetailsPanel, SafenetDetailsPanelStack } from './SafenetBlocks'
+import { SafenetStatusChip } from './SafenetStatusChip'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -201,14 +199,7 @@ export const SafenetDetailsCardView = ({
           <AccordionTrigger className={cn(accordionCss.trigger, 'items-center px-4')}>
             <div className="flex w-full flex-row items-center justify-between gap-2">
               <SafenetLogo role="img" aria-label="Safenet check" className="h-3 w-auto text-foreground" />
-              <Chip variant={CHIP_VARIANT[publicStatus]}>
-                {isInFlight ? (
-                  <SafenetPulse size={12} />
-                ) : (
-                  <SeverityIcon severity={STATUS_PRESENTATION[publicStatus].severity} width={12} height={12} />
-                )}
-                {STATUS_PRESENTATION[publicStatus].label}
-              </Chip>
+              <SafenetStatusChip publicStatus={publicStatus} isInFlight={isInFlight} />
             </div>
           </AccordionTrigger>
 
