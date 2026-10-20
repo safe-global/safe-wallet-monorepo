@@ -10,11 +10,11 @@ import { useIsAllowlistAvailableInSpace, useIsAllowlistEnabled } from '../useAll
 const sepolia = chainBuilder()
   .with({ chainId: '11155111', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
   .build()
-const mainnetFlagged = chainBuilder()
-  .with({ chainId: '1', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
+const gnosisFlagged = chainBuilder()
+  .with({ chainId: '100', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
   .build()
 const sepoliaOff = chainBuilder().with({ chainId: '11155111', features: [] }).build()
-const mainnet = chainBuilder().with({ chainId: '1', features: [] }).build()
+const gnosis = chainBuilder().with({ chainId: '100', features: [] }).build()
 
 const mockChains = (configs: Chain[]) => jest.spyOn(useChains, 'default').mockReturnValue({ configs, loading: false })
 
@@ -22,12 +22,12 @@ describe('useIsAllowlistAvailableInSpace', () => {
   beforeEach(() => jest.restoreAllMocks())
 
   it('is true when at least one chain is enabled', () => {
-    mockChains([mainnetFlagged, sepolia])
+    mockChains([gnosisFlagged, sepolia])
     expect(renderHook(() => useIsAllowlistAvailableInSpace()).result.current).toBe(true)
   })
 
   it('is false when the only flagged chain has no deployment', () => {
-    mockChains([mainnetFlagged, sepoliaOff])
+    mockChains([gnosisFlagged, sepoliaOff])
     expect(renderHook(() => useIsAllowlistAvailableInSpace()).result.current).toBe(false)
   })
 
@@ -44,11 +44,11 @@ describe('useIsAllowlistEnabled', () => {
     jest.spyOn(useChainId, 'default').mockReturnValue(sepolia.chainId)
     jest.spyOn(gateway, 'useGetChainsConfigV2Query').mockReturnValue({
       data: {
-        ids: [sepolia.chainId, mainnet.chainId],
-        entities: { [sepolia.chainId]: sepolia, [mainnet.chainId]: mainnet },
+        ids: [sepolia.chainId, gnosis.chainId],
+        entities: { [sepolia.chainId]: sepolia, [gnosis.chainId]: gnosis },
       },
     } as unknown as ReturnType<typeof gateway.useGetChainsConfigV2Query>)
-    expect(renderHook(() => useIsAllowlistEnabled(mainnet.chainId)).result.current).toBe(false)
+    expect(renderHook(() => useIsAllowlistEnabled(gnosis.chainId)).result.current).toBe(false)
     expect(renderHook(() => useIsAllowlistEnabled(sepolia.chainId)).result.current).toBe(true)
   })
 
