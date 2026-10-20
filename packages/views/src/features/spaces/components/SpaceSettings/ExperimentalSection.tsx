@@ -1,4 +1,5 @@
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { SpaceExperimentalFeature } from '@safe-global/store/gateway/types'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Switch } from '@safe-global/views/components/ui/switch'
@@ -14,7 +15,7 @@ export type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][numbe
 
 export const EXPERIMENTAL_FEATURES = [
   {
-    key: 'POLICY_RECIPIENT_ALLOWLIST',
+    key: SpaceExperimentalFeature.POLICY_RECIPIENT_ALLOWLIST,
     label: 'Recipient allowlist',
     description: 'Sepolia testnet only. Try our new policy engine.',
   },

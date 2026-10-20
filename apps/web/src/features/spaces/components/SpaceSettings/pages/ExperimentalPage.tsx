@@ -9,6 +9,7 @@ import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
 import { useIsAllowlistAvailableInSpace } from '@/features/policy-guard'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { useSpacesGetOneV1Query, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { SpaceExperimentalFeature } from '@safe-global/store/gateway/types'
 import ExperimentalSection, {
   type ExperimentalFeature,
 } from '@safe-global/views/features/spaces/components/SpaceSettings/ExperimentalSection'
@@ -33,7 +34,9 @@ const ExperimentalPage = () => {
     if (!isFetching && !isSaving) setPending(undefined)
   }, [serverFeatures, isFetching, isSaving])
 
-  const available: ExperimentalFeature[] = isAllowlistAvailable ? ['POLICY_RECIPIENT_ALLOWLIST'] : []
+  const available: ExperimentalFeature[] = isAllowlistAvailable
+    ? [SpaceExperimentalFeature.POLICY_RECIPIENT_ALLOWLIST]
+    : []
 
   const handleChange = async (next: ExperimentalFeature[]) => {
     if (!space) return
