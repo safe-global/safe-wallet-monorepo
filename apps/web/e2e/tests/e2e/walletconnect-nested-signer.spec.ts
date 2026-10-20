@@ -6,6 +6,7 @@
  * connects no private key: it pairs through the onboard WalletConnect module.
  */
 import type { Page } from '@playwright/test'
+import { Wallet, parseEther } from 'ethers'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
@@ -14,6 +15,12 @@ import { short } from '../../environment/scenarios/chain.mjs'
 import { ROUTES } from '../../src/data/constants'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { WalletPage } from '../../src/pages/wallet.page'
+import { SendTokensPage } from '../../src/pages/send-tokens.page'
+import { TxReviewPage } from '../../src/pages/tx-review.page'
+import { TxQueuePage } from '../../src/pages/tx-queue.page'
+import { balanceOf } from '../../src/chain/balances'
+
+const AMOUNT = '0.01'
 
 type NestedSignerFixtures = {
   /** Wallet A: Safe{Wallet} in its own browser context, without a connected wallet */
@@ -71,5 +78,39 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     const parentWalletConnect = new WalletConnectPage(safePage)
     await parentWalletConnect.open()
     await expect(parentWalletConnect.sessions).toHaveCount(1)
+  })
+
+  test('should execute a transfer of the child Safe when the parent approves and executes it in its own wallet', async ({
+    safePage,
+    childPage,
+    safeApiClient,
+    journey,
+    pairing,
+  }) => {
+    const recipient = Wallet.createRandom().address
+    const parentReview = new TxReviewPage(safePage)
+    const childReview = new TxReviewPage(childPage)
+
+    const send = new SendTokensPage(childPage)
+    await send.open()
+    await send.fillTransfer({ recipient, amount: AMOUNT })
+    await send.nextButton.click()
+    // A Safe signs on chain: the child's signature asks the parent for an approveHash transaction.
+    await childReview.sign()
+    await parentReview.sign()
+    await parentReview.execute()
+    await parentReview.waitForExecution()
+
+    const queue = new TxQueuePage(childPage)
+    await queue.goto(pairing.child.prefixedAddress)
+    await expect(queue.transactionWithNonce(0)).toContainText('1/1')
+    await queue.execute(0)
+    await childReview.continueAndExecute()
+    await parentReview.sign()
+    await parentReview.execute()
+    await parentReview.waitForExecution()
+
+    await expect.poll(async () => (await safeApiClient.getSafeInfo(pairing.child.address)).nonce).toBe(1)
+    expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
   })
 })
