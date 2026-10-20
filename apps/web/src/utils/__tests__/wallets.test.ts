@@ -9,8 +9,11 @@ import {
   EIP_7702_DELEGATED_ACCOUNT_PREFIX,
   isWalletUnlocked,
   isWalletRejection,
+  isSafeSigner,
 } from '@/utils/wallets'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
+import type { SignerWallet } from '@/components/common/WalletProvider'
+import { fakerChecksummedAddress } from '@/tests/test-utils'
 
 describe('wallets', () => {
   const getCodeMock = jest.fn()
@@ -114,6 +117,36 @@ describe('wallets', () => {
 
     it('does not flag genuine failures that merely contain a capitalised "Rejected"', () => {
       expect(isWalletRejection(new Error('Transaction Rejected by guard'))).toBe(false)
+    })
+  })
+
+  describe('isSafeSigner', () => {
+    const signer = (flags: Pick<SignerWallet, 'isSafe' | 'isConnectedSafe'> = {}): SignerWallet => ({
+      provider: null,
+      address: fakerChecksummedAddress(),
+      chainId: '1',
+      ...flags,
+    })
+
+    it('is false for an EOA signer without Safe flags', () => {
+      expect(isSafeSigner(signer())).toBe(false)
+    })
+
+    it('is false when both Safe flags are explicitly false', () => {
+      expect(isSafeSigner(signer({ isSafe: false, isConnectedSafe: false }))).toBe(false)
+    })
+
+    it('is true for an in-app nested Safe signer', () => {
+      expect(isSafeSigner(signer({ isSafe: true }))).toBe(true)
+    })
+
+    it('is true for a Safe connected as the wallet, e.g. via WalletConnect', () => {
+      expect(isSafeSigner(signer({ isConnectedSafe: true }))).toBe(true)
+    })
+
+    it('is true when only one of the two flags is set and the other is false', () => {
+      expect(isSafeSigner(signer({ isSafe: false, isConnectedSafe: true }))).toBe(true)
+      expect(isSafeSigner(signer({ isSafe: true, isConnectedSafe: false }))).toBe(true)
     })
   })
 
