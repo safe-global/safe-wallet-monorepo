@@ -30,7 +30,7 @@ def manifest():
     }
 
 
-def fake_backend(failures=None):
+def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE")):
     """Answers readiness reads by RPC method or URL; `failures` lists errors to raise first."""
     responses = {
         "eth_chainId": {"result": "0xaa"},
@@ -39,7 +39,7 @@ def fake_backend(failures=None):
         f"{DECODER}/health/ready": {"ready": True},
         f"{GATEWAY}/v1/chains/170": {"chainId": 170},
         f"{GATEWAY}/v2/chains?serviceKey=WALLET_WEB": {
-            "results": [{"chainId": "170", "features": ["DELETE_TX"]}],
+            "results": [{"chainId": "170", "features": list(features)}],
         },
         f"{TXS}/v1/about/indexing/": {},
     }
@@ -83,6 +83,13 @@ class EnvironmentTests(unittest.TestCase):
         backend = fake_backend({f"{GATEWAY}/health/ready": refused})
         with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", FakeClock()):
             with self.assertRaisesRegex(RuntimeError, "after 6s.*URLError.*connection refused"):
+                wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_fails_when_the_chain_lacks_the_queue_service_feature(self, _docker):
+        backend = fake_backend(features=("DELETE_TX",))
+        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", FakeClock()):
+            with self.assertRaisesRegex(RuntimeError, "QUEUE_SERVICE"):
                 wait_ready([], manifest(), 6)
 
     def test_occupied_port_fails_before_starting_services(self):
@@ -169,7 +176,7 @@ class EnvironmentTests(unittest.TestCase):
             chain_public_config(self.chain_config(""), "mainnet")
 
     def test_chain_start_never_reruns_sepolia_jobs(self):
-        commands = chain_step_commands(["compose"], "polygon")
+        commands = chain_step_commands(["compose"], "polygon")[:-2]
         services = [command[-1] for command in commands]
         self.assertTrue(all("polygon" in " ".join(command[1:]) for command in commands))
         for command in commands:
@@ -180,6 +187,14 @@ class EnvironmentTests(unittest.TestCase):
             ["anvil-init-polygon", "txs-init-polygon", "cfg-chain-polygon", "decoder-chain-polygon"],
         )
         self.assertLess(services.index("anvil-init-polygon"), services.index("txs-init-polygon"))
+
+    def test_chain_start_restarts_queue_service_after_chain_registration(self):
+        commands = chain_step_commands(["compose"], "polygon")
+        registration = next(i for i, command in enumerate(commands) if "cfg-chain-polygon" in command)
+        restart, wait = commands[-2:]
+        self.assertGreater(len(commands) - 2, registration)
+        self.assertEqual(restart, ["compose", "restart", "queue-web", "queue-worker"])
+        self.assertEqual(wait[-3:], ["--wait", "queue-web", "queue-worker"])
 
     def test_logs_redact_every_fork_provider(self):
         config = {"services": {

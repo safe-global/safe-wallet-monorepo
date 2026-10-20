@@ -4,6 +4,7 @@ import Safe from '@safe-global/protocol-kit'
 import { Interface, toUtf8Bytes } from 'ethers'
 import { getSignMessageLibDeployment } from '@safe-global/safe-deployments'
 import { createSafe, executeTransaction, proposeTransaction } from './safe.mjs'
+import { addMessageToQueue, confirmInQueue } from './gateway.mjs'
 import { waitForQueued, waitUntil } from './indexing.mjs'
 
 export async function prepareOffchainMessagesScenario(env, owners) {
@@ -16,7 +17,7 @@ export async function prepareOffchainMessagesScenario(env, owners) {
     const messages = fixture.results.filter(({ type }) => type === 'MESSAGE').map(({ message }) => message)
     for (const message of [...messages].reverse()) {
       const signed = await context.safe.signMessage(context.safe.createMessage(message))
-      await context.api.addMessage(context.safeAddress, { message, signature: signed.encodedSignatures() })
+      await addMessageToQueue(context, message, signed.encodedSignatures())
     }
     await waitUntil(env, `${context.path}/messages`, (result) => {
       const actual = result.results.filter(({ type }) => type === 'MESSAGE')
@@ -33,7 +34,7 @@ export async function prepareOffchainMessagesScenario(env, owners) {
     unsigned = await createSafe(env, owners)
     const message = 'Test message 2 off-chain'
     const signed = await unsigned.safe.signMessage(unsigned.safe.createMessage(message))
-    await unsigned.api.addMessage(unsigned.safeAddress, { message, signature: signed.encodedSignatures() })
+    await addMessageToQueue(unsigned, message, signed.encodedSignatures())
     await waitUntil(env, `${unsigned.path}/messages`, (result) =>
       result.results.some((item) => item.message === message && item.confirmationsSubmitted === 1),
     )
@@ -82,7 +83,7 @@ export async function prepareOnchainMessagesScenario(env, owners) {
       )
       if (nonce === 0) {
         const signature = await other.signHash(proposed.hash)
-        await context.api.confirmTransaction(proposed.hash, signature.data)
+        await confirmInQueue(context, proposed.hash, signature.data)
         proposed.signed.addSignature(signature)
         await executeTransaction(context, proposed.signed)
       } else {
