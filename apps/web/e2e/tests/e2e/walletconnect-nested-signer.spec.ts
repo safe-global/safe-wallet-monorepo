@@ -19,6 +19,7 @@ import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { balanceOf } from '../../src/chain/balances'
+import { transactionsIn } from '../../src/api/transaction-items'
 
 const AMOUNT = '0.01'
 
@@ -112,5 +113,22 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
 
     await expect.poll(async () => (await safeApiClient.getSafeInfo(pairing.child.address)).nonce).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
+  })
+
+  test('should show a user rejection in the child Safe when the parent discards the request', async ({
+    safePage,
+    childPage,
+    safeApiClient,
+    pairing,
+  }) => {
+    const send = new SendTokensPage(childPage)
+    await send.open()
+    await send.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+    await send.nextButton.click()
+    await new TxReviewPage(childPage).sign()
+    await new TxReviewPage(safePage).discard()
+
+    await expect(childPage.getByText('User rejected signing.')).toBeVisible()
+    expect(transactionsIn(await safeApiClient.getQueuedTransactions(pairing.child.address))).toEqual([])
   })
 })
