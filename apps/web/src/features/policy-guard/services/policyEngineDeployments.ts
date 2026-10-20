@@ -1,21 +1,35 @@
 import semverSatisfies from 'semver/functions/satisfies'
 
-export type PolicyEngineContract =
-  'SafePolicyGuard' | 'AllowPolicy' | 'DenyPolicy' | 'CoSignerPolicy' | 'ERC20TransferPolicy' | 'NativeTransferPolicy'
+export type PolicyEngineContract = 'SafePolicyGuard' | 'ERC20ApprovePolicy' | 'ERC20TransferPolicy'
 
 type Deployment = { networkAddresses: Record<string, string> }
 
 // The guard needs the module guard slot, which Safe added in v1.5.0, so every policy shares this floor
 const MIN_POLICY_GUARD_SAFE_VERSION = '1.5.0'
 
+// Source: https://github.com/safe-global/policy-indexer/blob/main/config.yaml
+// One guard per root-activation delay, all with a 604800s expiry
+const POLICY_GUARD_BY_DELAY = {
+  '0s': '0x55c241591E12CE3c58491D02b737F12D3199ae95',
+  '60s': '0xC83bC185770ac0Da8A970f35695064eEe62e236c',
+  '600s': '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57',
+  '3600s': '0xd2fB492adADBa5BcFb7FeBE25746fd5FdE090b20',
+  '86400s': '0x2d4527fD0E79ca1e533E3C7BBEF7e0668b700aED',
+}
+
+const SAFE_POLICY_GUARD = POLICY_GUARD_BY_DELAY['60s']
+
+const INDEXED_CHAIN_IDS = ['1', '137', '11155111']
+
+const onIndexedChains = (address: string): Deployment => ({
+  networkAddresses: Object.fromEntries(INDEXED_CHAIN_IDS.map((chainId) => [chainId, address])),
+})
+
 // The policy indexer's addresses: configurations against any other deployment are invisible to CGW
 const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
-  SafePolicyGuard: { networkAddresses: { '11155111': '0x5202B1ebE100812437d47eae769e155945fbba6a' } },
-  AllowPolicy: { networkAddresses: { '11155111': '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2' } },
-  DenyPolicy: { networkAddresses: { '11155111': '0x348d9F0B2fECb0bF88655C74Ed3eFD5052A9E436' } },
-  CoSignerPolicy: { networkAddresses: { '11155111': '0xd9f2A31C5C68422a466754cd4F4965Be2b6024FB' } },
-  ERC20TransferPolicy: { networkAddresses: { '11155111': '0x25DDa3b8974a10E93ca188F9C149A42F938Bd187' } },
-  NativeTransferPolicy: { networkAddresses: { '11155111': '0x01b792988be451C5F6327b6e2D215Ff1d4cc7246' } },
+  SafePolicyGuard: onIndexedChains(SAFE_POLICY_GUARD),
+  ERC20ApprovePolicy: onIndexedChains('0xfF86DD4caf79672E55e0C3e3A5410746600d60F4'),
+  ERC20TransferPolicy: onIndexedChains('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187'),
 }
 
 export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineContract): string | undefined =>
