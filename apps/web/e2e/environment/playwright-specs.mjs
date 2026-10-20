@@ -50,4 +50,5 @@ export const playwrightSpecs = {
   },
   'smoke/dashboard.spec.ts': { scenarios: ['prepareBasicScenario'], safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' } },
   'smoke/landing.spec.ts': {},
+  'e2e/walletconnect.spec.ts': {},
 }

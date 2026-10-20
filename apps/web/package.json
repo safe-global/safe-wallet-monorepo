@@ -178,6 +178,7 @@
     "@types/semver": "^7.3.10",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^8.70.1",
+    "@walletconnect/sign-client": "2.21.10",
     "cheerio": "^1.2.0",
     "cross-env": "^7.0.3",
     "cypress": "^16.1.1",
