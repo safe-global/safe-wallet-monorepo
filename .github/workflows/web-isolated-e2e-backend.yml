@@ -81,6 +81,7 @@ jobs:
           NEXT_PUBLIC_GATEWAY_URL_STAGING: http://localhost:8000/cgw
           NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: http://localhost:8000/cgw
           NEXT_PUBLIC_LEDGER_EMULATOR_URL: http://localhost:9555
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
 
       - name: Build Transaction Builder for local CGW
         env:
