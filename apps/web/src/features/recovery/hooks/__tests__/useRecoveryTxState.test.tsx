@@ -103,6 +103,45 @@ describe('useRecoveryTxState', () => {
       })
     })
 
+    it('should keep a cooldown past the latest JS date waiting with a finite countdown (WA-3903)', () => {
+      jest.setSystemTime(0)
+
+      const delayModifierAddress = faker.finance.ethereumAddress()
+      const cooldownSeconds = BigInt(86_400_000_000_000)
+
+      const data = [
+        {
+          address: delayModifierAddress,
+          txNonce: BigInt(0),
+          queue: [
+            {
+              address: delayModifierAddress,
+              transactionHash: faker.string.hexadecimal({ length: 10 }),
+              validFrom: cooldownSeconds * BigInt(1_000),
+              expiresAt: null,
+              args: { queueNonce: BigInt(0) },
+            },
+          ],
+        },
+      ]
+
+      store.setStore({
+        state: [data],
+      } as unknown as Parameters<typeof store.setStore>[0])
+
+      const { result } = renderHook(() =>
+        useRecoveryTxState(data[0].queue[0] as unknown as Parameters<typeof useRecoveryTxState>[0]),
+      )
+
+      expect(result.current).toStrictEqual({
+        isExecutable: false,
+        remainingSeconds: Number(cooldownSeconds),
+        isExpired: false,
+        isNext: true,
+        isPending: false,
+      })
+    })
+
     it('should return correct values when validFrom is in the past and expiresAt is in the future', () => {
       jest.setSystemTime(1_000)
 

@@ -23,7 +23,7 @@ export const TRIAL_DISCLAIMER =
   "Your paid subscription only starts once you add a payment method. If you don't add it or choose another plan before your free access ends, your Workspace will be locked. Its data is kept for 90 days. Your Safe accounts remain available in My accounts."
 
 /** Zoho Bookings page the "Talk to sales" CTAs open in a new tab, to schedule a call with sales. */
-export const CONTACT_SALES_URL = 'http://zbooking.eu/3H4cf'
+export const CONTACT_SALES_URL = 'https://zbooking.eu/3H4cf'
 
 /** Proposer and contact confirmations carry more than a status, so they stay a little longer than the 5s default. */
 export const WORKSPACE_CONFIRMATION_HIDE_MS = 7000

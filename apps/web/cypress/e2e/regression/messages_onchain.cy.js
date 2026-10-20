@@ -41,7 +41,7 @@ describe('Onchain Messages tests', () => {
   it('Verify summary for signed on-chain message', () => {
     createTx.verifySummaryByName(
       typeMessagesOnchain.contractName,
-      [(typeMessagesOnchain.success, typeMessagesOnchain.signMessage)],
+      [typeMessagesOnchain.success, typeMessagesOnchain.signMessage],
       { alt: typeMessagesOnchain.altImage },
     )
   })

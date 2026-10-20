@@ -1,0 +1,114 @@
+{
+  "safeAddress": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+  "txId": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x46eb9b5370d38a676d0bc895dbd8e7e3c9544f121c7019bfb0e632597d7be7d5",
+  "executedAt": 1701851760000,
+  "txStatus": "SUCCESS",
+  "txInfo": {
+    "type": "SettingsChange",
+    "humanDescription": "Change threshold to 2",
+    "dataDecoded": {
+      "method": "changeThreshold",
+      "parameters": [
+        {
+          "name": "_threshold",
+          "type": "uint256",
+          "value": "2",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "settingsInfo": {
+      "type": "CHANGE_THRESHOLD",
+      "threshold": 2
+    }
+  },
+  "txData": {
+    "hexData": "0x694e80c30000000000000000000000000000000000000000000000000000000000000002",
+    "dataDecoded": {
+      "method": "changeThreshold",
+      "parameters": [
+        {
+          "name": "_threshold",
+          "type": "uint256",
+          "value": "2",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "to": {
+      "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+      "name": null,
+      "logoUri": null
+    },
+    "value": "0",
+    "operation": 0,
+    "trustedDelegateCallTarget": null,
+    "addressInfoIndex": null,
+    "tokenInfoIndex": null
+  },
+  "txHash": "0xf3d2062541580f5f1b2a0c9e587d4696bdeecbaaa8d92a413c750ea86aed26df",
+  "detailedExecutionInfo": {
+    "type": "MULTISIG",
+    "submittedAt": 1701851747287,
+    "nonce": 13,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "fee": "22401758413650",
+    "payment": "0",
+    "refundReceiver": {
+      "value": "0x0000000000000000000000000000000000000000",
+      "name": null,
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+    },
+    "safeTxHash": "0x46eb9b5370d38a676d0bc895dbd8e7e3c9544f121c7019bfb0e632597d7be7d5",
+    "executor": {
+      "value": "0x61d8838f9A00250C9AF13D622DA7c08c372ee587",
+      "name": null,
+      "logoUri": null
+    },
+    "signers": [
+      {
+        "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+        "name": null,
+        "logoUri": null
+      }
+    ],
+    "confirmationsRequired": 1,
+    "confirmations": [
+      {
+        "signer": {
+          "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+          "name": null,
+          "logoUri": null
+        },
+        "signature": "0x6fd1b0e59ac82ae79f0c4d463e151aed6069cc92f5504c6ac38caa013efb511b71f856c7127e601073ef326f2d3c02143515c6313d2f3d4f31172e4756cce5c61c",
+        "submittedAt": 1701851747316
+      }
+    ],
+    "rejectors": [],
+    "gasTokenInfo": null,
+    "trusted": true,
+    "proposer": {
+      "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+      "name": null,
+      "logoUri": null
+    },
+    "proposedByDelegate": null
+  },
+  "safeAppInfo": null,
+  "note": null
+}

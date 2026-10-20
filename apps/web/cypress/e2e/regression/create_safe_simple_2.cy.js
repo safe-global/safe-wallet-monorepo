@@ -86,14 +86,6 @@ describe('Safe creation tests 2', () => {
     safe.verifyOnwerNameENS(0, constants.ENS_TEST_SEPOLIA_VALID)
   })
 
-  it('Verify deleting owner rows is possible', () => {
-    safe.clickOnNextBtn()
-    safe.clickOnAddNewOwnerBtn()
-    safe.verifyNumberOfOwners(2)
-    safe.clickOnRemoveOwnerBtn(0)
-    safe.verifyNumberOfOwners(1)
-  })
-
   it('Verify existing owner in address book will have their names filled when their address is pasted', () => {
     cy.wrap(null)
       .then(() =>

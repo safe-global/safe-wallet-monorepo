@@ -1,6 +1,9 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, type SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
+import { BillingPeriod, MixpanelEventParams, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
+import { getPlanCardCopy } from '../../hooks/billing/paymentLinks'
 import {
   getSubscriptionFeatures,
   getSubscriptionPlanName,
@@ -26,6 +29,14 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
+
+export const plansClickParams = (label: SAFE_PRO_PLANS_LABELS, location: PlanLocation) => ({
+  [MixpanelEventParams.CTA]: label,
+  [MixpanelEventParams.LOCATION]: location,
+})
+
+export const trackPlansClick = (label: SAFE_PRO_PLANS_LABELS, location: PlanLocation) =>
+  trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label }, plansClickParams(label, location))
 
 /** The analytics properties naming a picked plan, shared by every event that records a plan choice. */
 export const pickProps = (pick: {
@@ -80,14 +91,19 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
   return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
 }
 
-/** Without a live plan, `recommended` names the tier that gets the primary "Continue with" button. */
-export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, recommended?: string): PlanCta => {
+const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
+  pick.tier.name === current.name &&
+  pick.tier.billingCycle !== null &&
+  pick.tier.billingCycle !== current.billingCycle &&
+  pick.option.label === current.seatsLabel
+
+export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
+    if (pick.tier.name === ENTERPRISE_TIER.name) return { kind: 'account-team', label: 'Change via your account team' }
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
-      if (!current?.isTrialing) return { kind: 'manage', label: 'Manage plan' }
-      return current.hasPaymentMethod
-        ? { kind: 'manage', label: 'Manage plan' }
-        : { kind: 'billing', label: 'Add payment method' }
+      return current?.isTrialing && !current.hasPaymentMethod
+        ? { kind: 'billing', label: 'Add payment method' }
+        : { kind: 'current', label: 'Current plan' }
     }
     // Another seat size of the same plan: a change, worded by seats rather than by plan name.
     const direction = getChangeDirection(current, pick)
@@ -98,15 +114,18 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, rec
     }
   }
   if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) {
-    return recommended && pick.tier.name !== recommended
-      ? { kind: 'change', direction: 'change', label: `Switch to ${pick.tier.name}` }
-      : { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
-  }
+  if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
 
+  const direction = getChangeDirection(current, pick)
+  if (isCycleSwitch(pick, current)) {
+    return {
+      kind: 'change',
+      direction,
+      label: pick.tier.billingCycle === 'year' ? 'Switch to yearly' : 'Switch to monthly',
+    }
+  }
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
   const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
-  const direction = getChangeDirection(current, pick)
   return {
     kind: 'change',
     direction,
@@ -149,6 +168,7 @@ export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
           billingCycle: cycle,
           options: offers.map((offer) => toOption(offer, monthlyBySeats.get(String(offer.seats)))),
           features: featuresOf(offers),
+          copy: offers[0].copy,
           trialPeriodDays: offers[0].trialPeriodDays,
         },
       ]
@@ -160,6 +180,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
   const name = getSubscriptionPlanName(subscription) ?? 'Safe Pro'
   const features = getSubscriptionFeatures(subscription)
   const seats = currentSeats(subscription, seatsQuota) ?? null
+  const isEnterpriseFallback = features.length === 0 && name === ENTERPRISE_TIER.name
 
   return {
     id: 'current',
@@ -177,7 +198,10 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
         features,
       },
     ],
-    features: features.length > 0 || name !== ENTERPRISE_TIER.name ? features : ENTERPRISE_TIER.features,
+    features: isEnterpriseFallback ? ENTERPRISE_TIER.features : features,
+    copy: isEnterpriseFallback
+      ? ENTERPRISE_TIER.copy
+      : getPlanCardCopy((subscription.metadata ?? {}) as Record<string, string | null | undefined>),
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }
@@ -201,7 +225,7 @@ const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] =>
 }
 
 const rank = (name: string): number => {
-  const index = PLAN_ORDER.indexOf(name)
+  const index = PLAN_ORDER.findIndex((plan) => plan === name)
   return index === -1 ? PLAN_ORDER.length : index
 }
 
@@ -217,9 +241,66 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
+export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
+  const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
+  return (
+    tier.options.find((candidate) => candidate.label === seatsLabel) ??
+    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
+    tier.options.find((candidate) => isCurrentPlan && candidate.label === currentPlan?.seatsLabel) ??
+    tier.options[0]
+  )
+}
+
+export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
+  tiers.filter((tier) => {
+    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
+    return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
+  })
+
 /** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */
 export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
   _offersToTiers(trialPlans)
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
+
+export const getCatalogTiers = (tiers: PlanTier[]): PlanTier[] => {
+  const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
+  return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers
+}
+
+export const getPlanPrice = (tier: PlanTier, option: PlanSeatOption): { headline: string; suffix: string } => {
+  if (option.price === null) {
+    return {
+      headline: 'Custom',
+      suffix: 'Annual term',
+    }
+  }
+  return {
+    headline: formatPlanPrice(option.price, tier.currency),
+    suffix: priceSuffix(tier.billingCycle),
+  }
+}
+
+const percentFormat = new Intl.NumberFormat('en', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+})
+
+export const getCardSaving = (
+  tier: PlanTier,
+  option: PlanSeatOption | undefined,
+  counterpartTier: PlanTier | undefined,
+): { amount: string; percent: string } | undefined => {
+  if (option?.price == null) return undefined
+  const counterpart = counterpartTier?.options.find((candidate) => candidate.label === option.label)?.price
+  const isYearly = tier.billingCycle === 'year'
+  const twelveMonths = isYearly
+    ? (option.originalPrice ?? (counterpart == null ? null : counterpart * 12))
+    : option.price * 12
+  const yearly = isYearly ? option.price : counterpart
+  if (twelveMonths == null || yearly == null || yearly >= twelveMonths) return undefined
+  const saved = twelveMonths - yearly
+  return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
+}

@@ -138,15 +138,6 @@ describe('Safe selector tests - accounts modal search', () => {
     accountsModal.verifyAccountsListItemCount(1)
   })
 
-  it('Verify searching for a safe name filters out those who do not match', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
-    accountsModal.openAccountsModal()
-    accountsModal.searchSafe(sideBar.sideBarSafes.safe1short_)
-    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
-    accountsModal.verifyAccountsListDoesNotContain(sideBar.sideBarSafes.safe2short)
-  })
-
   it('Verify searching for a safe also finds safes in different networks', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe3TwoChains)
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)

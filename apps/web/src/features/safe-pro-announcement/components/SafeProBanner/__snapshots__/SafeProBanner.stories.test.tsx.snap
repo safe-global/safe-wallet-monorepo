@@ -20,7 +20,7 @@ exports[`./SafeProBanner.stories Default 1`] = `
           data-slot="card"
           data-surface="default"
           data-variant="default"
-          href="https://safe.global/blog/safe-pro-early-partner-program"
+          href="https://safe.global/blog/introducing-safe-pro"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -70,7 +70,7 @@ exports[`./SafeProBanner.stories Default 1`] = `
                 data-slot="typography"
                 data-variant="paragraph-small-bold"
               >
-                Workspaces move to Safe Pro on Oct 6, 2026
+                Safe Pro: 30 days of Business free. No card.
               </span>
             </div>
             <span

@@ -5,6 +5,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import SignMessage from './SignMessage'
+import SignMessageFlow from '.'
 
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
@@ -165,6 +166,35 @@ describe('SignMessage', () => {
       fireEvent.click(getByTestId('message-details'))
 
       expect(await findByText('0x73d0948ac608c5d00a6dd26dd396cce79b459307ea365f5a5bd5d3119c2d9708')).toBeInTheDocument()
+    })
+
+    it.each([
+      {
+        origin: 'from a Safe App request',
+        requestId: '123',
+        nextStep:
+          'Keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.',
+      },
+      {
+        origin: 'without a Safe App request',
+        requestId: undefined,
+        nextStep: 'The signature will be submitted to the requesting app when the message is fully signed.',
+      },
+    ])('explains how confirmations are collected for a message $origin', async ({ requestId, nextStep }) => {
+      const { getByText, findByText } = renderWithSafeShield(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId={requestId} />,
+      )
+
+      expect(await findByText('Collect all the confirmations')).toBeInTheDocument()
+      expect(getByText(nextStep)).toBeInTheDocument()
+    })
+
+    it('titles the sign message flow "Confirm message"', async () => {
+      const { findByTestId } = render(
+        <SignMessageFlow logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
+      )
+
+      expect(await findByTestId('modal-title')).toHaveTextContent('Confirm message')
     })
   })
 
