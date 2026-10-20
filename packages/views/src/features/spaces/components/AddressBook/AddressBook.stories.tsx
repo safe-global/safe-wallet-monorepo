@@ -1,7 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import Identicon from '@/components/common/Identicon'
 import AddressBookDemo from './mocks/AddressBookDemo'
-import { ADDRESSES, LOCAL_CONTACTS, MISSING_SIGNERS, WORKSPACE_CONTACTS } from './mocks/fixtures'
+import PageBackground from './mocks/PageBackground'
+import {
+  ADDRESSES,
+  FREQUENT_SUGGESTIONS,
+  LOCAL_CONTACTS,
+  SUGGESTED_SIGNERS,
+  WORKSPACE_CONTACTS,
+} from './mocks/fixtures'
+import { SIGNER_TAG } from './tags/systemTags'
 import { ADMIN_PERMISSIONS, EMPTY_FILTERS, MEMBER_PERMISSIONS } from './types'
 
 /**
@@ -10,18 +18,20 @@ import { ADMIN_PERMISSIONS, EMPTY_FILTERS, MEMBER_PERMISSIONS } from './types'
  * change the story's own state; nothing is sent anywhere.
  *
  * Data: "Lumen Labs", a made-up company with four workspace Safes (Treasury, Payroll, Ops multisig,
- * Grants program), their signers, the DeFi contracts they use (real mainnet addresses), vendors,
- * contractors and two addresses nobody could place.
+ * Grants program), their signers, the DeFi contracts they use (real mainnet addresses), vendors and
+ * contractors. Workspace Safes and their signers carry the automatic "Workspace Safe" and "Signer
+ * of a Safe" tags, which nobody can edit or delete.
  */
 const meta = {
   title: 'Features/Spaces/AddressBook/Page',
   component: AddressBookDemo,
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'fullscreen' },
+  decorators: [(Story) => <PageBackground>{Story()}</PageBackground>],
   args: {
     contacts: WORKSPACE_CONTACTS,
     localContacts: LOCAL_CONTACTS,
     permissions: ADMIN_PERMISSIONS,
-    missingSigners: MISSING_SIGNERS,
+    suggestions: SUGGESTED_SIGNERS,
     renderAvatar: (address: string) => <Identicon address={address} size={24} />,
   },
 } satisfies Meta<typeof AddressBookDemo>
@@ -29,7 +39,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** An admin's view: every action, "Import signers (4)" in the button group, "Add contact" rightmost. */
+/** An admin's view: Import · Export in one group, "Add contact" rightmost, and a Suggested tab with 4 signers. */
 export const Admin: Story = {}
 
 /** A member: no Import, Add, Edit or Delete. Tags stay editable, row by row and in bulk. */
@@ -37,14 +47,32 @@ export const Member: Story = {
   args: { permissions: MEMBER_PERMISSIONS },
 }
 
-/** All signers already imported: the "Import signers" button disappears from the group. */
-export const NoMissingSigners: Story = {
-  args: { missingSigners: [] },
+/**
+ * The Suggested tab: signers of the workspace Safes that aren't in the book yet, each with why it's
+ * suggested and "Add to workspace". Tick several to add them in one go.
+ */
+export const Suggested: Story = {
+  args: { initialTab: 'suggested' },
 }
 
-/** Filters dropdown with Tags "Vendor" and Category "EOA" applied; the trigger shows the count. */
+/** Suggestions with both kinds of reason. */
+export const SuggestedWithFrequentAddresses: Story = {
+  args: { initialTab: 'suggested', suggestions: [...SUGGESTED_SIGNERS, ...FREQUENT_SUGGESTIONS] },
+}
+
+/** A member sees the suggestions but can't add them. */
+export const SuggestedAsMember: Story = {
+  args: { initialTab: 'suggested', permissions: MEMBER_PERMISSIONS },
+}
+
+/** Every signer is already in the book. */
+export const NoSuggestions: Story = {
+  args: { initialTab: 'suggested', suggestions: [] },
+}
+
+/** Filtered to the automatic "Signer of a Safe" tag: every signer of a workspace Safe. */
 export const Filtered: Story = {
-  args: { initialFilters: { ...EMPTY_FILTERS, tags: ['Vendor'], categories: ['eoa'] } },
+  args: { initialFilters: { ...EMPTY_FILTERS, tags: [SIGNER_TAG] } },
 }
 
 /** A search that matches nothing. */
@@ -54,16 +82,7 @@ export const NoResults: Story = {
 
 /** A brand-new workspace with no contacts. */
 export const Empty: Story = {
-  args: { contacts: [], localContacts: [], missingSigners: MISSING_SIGNERS },
-}
-
-/** Categories still resolving on chain: skeletons in the Category column. */
-export const ResolvingCategories: Story = {
-  args: {
-    contacts: WORKSPACE_CONTACTS.map((contact, index) =>
-      contact.category !== 'workspace-safe' && index % 3 === 0 ? { ...contact, category: 'loading' } : contact,
-    ),
-  },
+  args: { contacts: [], localContacts: [] },
 }
 
 /** Three rows selected: the bulk bar applies or removes tags on all of them, or exports them. */
@@ -100,5 +119,10 @@ export const DeleteContactOpen: Story = {
 }
 export const ImportOpen: Story = { args: { initialDialog: { kind: 'import' } } }
 export const ImportReviewOpen: Story = { args: { initialDialog: { kind: 'import', review: true } } }
-export const ImportSignersOpen: Story = { args: { initialDialog: { kind: 'signers' } } }
+export const AddSuggestionsOpen: Story = {
+  args: {
+    initialTab: 'suggested',
+    initialDialog: { kind: 'add-suggestions', addresses: SUGGESTED_SIGNERS.slice(0, 2).map((item) => item.address) },
+  },
+}
 export const ExportOpen: Story = { args: { initialDialog: { kind: 'export' } } }

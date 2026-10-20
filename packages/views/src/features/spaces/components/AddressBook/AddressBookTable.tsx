@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
-import CategoryCell from './CategoryCell'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
-import { categoryRank } from './filters'
+import { tagSortValue } from './filters'
+import { allTagsOf, systemTagTitles } from './tags/systemTags'
 import { TagChips } from './tags/TagChip'
 import type { AddressBookContact, AddressBookPermissions } from './types'
 
@@ -31,8 +31,9 @@ const AddedBy = ({ name }: { name?: string }) =>
 
 const Tags = ({ contact }: { contact: AddressBookContact }) => {
   if (contact.isLocal) return <span className="text-muted-foreground text-xs">Workspace only</span>
-  return contact.tags.length > 0 ? (
-    <TagChips tags={contact.tags} />
+  const tags = allTagsOf(contact)
+  return tags.length > 0 ? (
+    <TagChips tags={tags} titles={systemTagTitles(contact)} />
   ) : (
     <span className="text-muted-foreground text-xs">&mdash;</span>
   )
@@ -48,8 +49,6 @@ export type AddressBookTableProps = {
   onEdit?: (contact: AddressBookContact) => void
   onEditTags?: (contact: AddressBookContact) => void
   onDelete?: (contact: AddressBookContact) => void
-  /** "Check again" on a contact whose category could not be determined. */
-  onRetryCategory?: (contact: AddressBookContact) => void
   pageSize?: number
   /** Row checkboxes for the bulk bar. Selection is keyed by address and owned by the caller. */
   selectedAddresses?: ReadonlySet<string>
@@ -69,27 +68,18 @@ const AddressBookTable = ({
   onEdit,
   onEditTags,
   onDelete,
-  onRetryCategory,
   pageSize,
   selectedAddresses,
   onSelectionChange,
 }: AddressBookTableProps) => {
   const isWorkspace = book === 'workspace'
 
-  const renderCategory = (contact: AddressBookContact) => (
-    <CategoryCell
-      category={contact.category}
-      signerOf={contact.signerOf}
-      onRetry={onRetryCategory ? () => onRetryCategory(contact) : undefined}
-    />
-  )
-
   const columns: DataTableColumn<AddressBookContact>[] = [
     {
       id: 'contact',
       header: 'Contact',
       cellTestId: 'table-cell-contact',
-      width: isWorkspace ? '30%' : '40%',
+      width: isWorkspace ? '35%' : '40%',
       // The full address in monospace needs this much; below it the table goes compact.
       minWidth: 360,
       sortValue: (contact) => contact.name.toLowerCase(),
@@ -112,33 +102,22 @@ const AddressBookTable = ({
       sortValue: (contact) => contact.chains.length,
       cell: (contact) => <ChainLogos chains={contact.chains} />,
     },
-    {
-      id: 'category',
-      header: 'Category',
-      cellTestId: 'table-cell-category',
-      width: isWorkspace ? '15%' : '35%',
-      priority: 'secondary',
-      minWidth: 160,
-      sortValue: categoryRank,
-      cell: renderCategory,
-    },
     ...(isWorkspace
       ? ([
           {
             id: 'tags',
             header: 'Tags',
             cellTestId: 'table-cell-tags',
-            width: '30%',
+            width: '35%',
             priority: 'secondary',
-            minWidth: 200,
-            // First tag alphabetically, so contacts that share a tag group together. Untagged sort last.
-            sortValue: (contact) => contact.tags.map((tag) => tag.toLowerCase()).sort()[0] ?? null,
+            minWidth: 220,
+            sortValue: tagSortValue,
             cell: (contact) => <Tags contact={contact} />,
           },
           {
             id: 'added-by',
             header: 'Added by',
-            width: '10%',
+            width: '15%',
             priority: 'secondary',
             minWidth: 120,
             sortValue: (contact) => contact.addedBy?.toLowerCase() ?? null,
@@ -170,8 +149,6 @@ const AddressBookTable = ({
       <dd>
         <ChainLogos chains={contact.chains} />
       </dd>
-      <dt className="text-muted-foreground">Category</dt>
-      <dd>{renderCategory(contact)}</dd>
       {isWorkspace && (
         <>
           <dt className="text-muted-foreground">Tags</dt>

@@ -4,18 +4,25 @@ import { fn } from 'storybook/test'
 import Identicon from '@/components/common/Identicon'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import AddressBookTable from './AddressBookTable'
+import PageBackground from './mocks/PageBackground'
 import { LOCAL_CONTACTS, WORKSPACE_CONTACTS } from './mocks/fixtures'
 import { ADMIN_PERMISSIONS, MEMBER_PERMISSIONS } from './types'
 
 /**
- * Contact (name + full address) · Chains · Category · Tags · Added by · ⋮. Every column but the
+ * Contact (name + full address) · Chains · Tags · Added by · ⋮. Every column but the
  * menu sorts; the faint ⇅ shows which. Below the summed column minimums the table goes compact.
  */
 const meta = {
   title: 'Features/Spaces/AddressBook/AddressBookTable',
   component: AddressBookTable,
-  parameters: { layout: 'padded' },
-  decorators: [(Story) => <TableCard>{Story()}</TableCard>],
+  parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <PageBackground>
+        <TableCard>{Story()}</TableCard>
+      </PageBackground>
+    ),
+  ],
   args: {
     contacts: WORKSPACE_CONTACTS,
     permissions: ADMIN_PERMISSIONS,
@@ -23,7 +30,6 @@ const meta = {
     onEdit: fn(),
     onEditTags: fn(),
     onDelete: fn(),
-    onRetryCategory: fn(),
   },
 } satisfies Meta<typeof AddressBookTable>
 

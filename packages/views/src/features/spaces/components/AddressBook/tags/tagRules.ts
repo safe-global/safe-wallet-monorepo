@@ -1,3 +1,5 @@
+import { isSystemTag } from './systemTags'
+
 /**
  * Client-side mirror of the gateway's tag rules so the picker can reject a bad tag before the
  * request. The gateway remains the authority; these only shape the UI feedback.
@@ -13,6 +15,7 @@ export const TAGS_DISCLAIMER = 'Tags are labels your team writes. They are not a
 export const validateTag = (raw: string): string | undefined => {
   const tag = raw.trim()
   if (tag.length === 0) return 'Tags cannot be empty'
+  if (isSystemTag(tag)) return `‘${tag}’ is added automatically and can’t be used as a tag name`
   if (FORBIDDEN_PREFIX.test(tag)) return 'Tags cannot start with =, +, - or @'
   if (!ALLOWED_TAG.test(tag)) return 'Tags can only contain letters, numbers, spaces and the characters - _ & /'
   if ([...tag].length > TAG_MAX_LENGTH) return `Tags must be at most ${TAG_MAX_LENGTH} characters long`

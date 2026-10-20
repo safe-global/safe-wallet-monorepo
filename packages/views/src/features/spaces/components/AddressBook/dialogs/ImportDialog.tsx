@@ -8,9 +8,9 @@ import ImportReview, { type ImportDecision, type ImportReviewRow } from './Impor
 export const MAX_IMPORT_FILE_SIZE = 1024 * 1024
 
 type ImportDialogProps = {
-  /** Workspace signers not in the book yet; offers a shortcut to "Import signers". */
-  missingSignerCount?: number
-  onImportSigners?: () => void
+  /** Suggestions waiting in the Suggested tab; offers a shortcut there. */
+  suggestionCount?: number
+  onViewSuggestions?: () => void
   /** The app reads and classifies the file, then passes the rows back as `reviewRows`. */
   onFileSelected: (file: File) => void
   fileError?: string
@@ -26,8 +26,8 @@ type ImportDialogProps = {
 
 /** Import from a CSV: choose a file, then review every row before anything is written. */
 const ImportDialog = ({
-  missingSignerCount = 0,
-  onImportSigners,
+  suggestionCount = 0,
+  onViewSuggestions,
   onFileSelected,
   fileError,
   reviewRows,
@@ -63,16 +63,16 @@ const ImportDialog = ({
         ) : (
           <>
             <div className="flex flex-col gap-4 p-6">
-              {missingSignerCount > 0 && onImportSigners && (
+              {suggestionCount > 0 && onViewSuggestions && (
                 <Alert variant="info">
                   <AlertSeverityIcon variant="info" />
                   <AlertDescription>
-                    {missingSignerCount} {missingSignerCount === 1 ? 'signer' : 'signers'} of your workspace Safes{' '}
-                    {missingSignerCount === 1 ? 'is' : 'are'} not in the address book.
+                    {suggestionCount} suggested {suggestionCount === 1 ? 'contact is' : 'contacts are'} waiting in the
+                    Suggested tab, such as signers of your workspace Safes.
                   </AlertDescription>
                   <AlertAction>
-                    <Button variant="outline" size="sm" onClick={onImportSigners}>
-                      Import signers
+                    <Button variant="outline" size="sm" onClick={onViewSuggestions}>
+                      View suggestions
                     </Button>
                   </AlertAction>
                 </Alert>

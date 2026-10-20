@@ -11,15 +11,16 @@ import DeleteContactDialog from '../dialogs/DeleteContactDialog'
 import EditTagsDialog from '../dialogs/EditTagsDialog'
 import ExportDialog, { type ExportScope } from '../dialogs/ExportDialog'
 import ImportDialog from '../dialogs/ImportDialog'
-import ImportSignersDialog, { type ImportedSigner } from '../dialogs/ImportSignersDialog'
-import { countCategories, countTags, filterContacts } from '../filters'
+import AddSuggestionsDialog, { type AddedSuggestion } from '../dialogs/AddSuggestionsDialog'
+import SuggestedContacts from '../SuggestedContacts'
+import { countSystemTags, countTags, filterContacts } from '../filters'
 import { dedupeTags, hasTag, validateTag, withoutTags } from '../tags/tagRules'
 import {
   EMPTY_FILTERS,
   type AddressBookContact,
   type AddressBookPermissions,
   type ContactFilters,
-  type MissingSigner,
+  type SuggestedContact,
 } from '../types'
 import { ALL_CHAINS, IMPORT_REVIEW_ROWS, MEMBERS } from './fixtures'
 
@@ -29,49 +30,55 @@ export type DemoDialog =
   | { kind: 'tags'; address: string }
   | { kind: 'delete'; address: string }
   | { kind: 'import'; review?: boolean }
-  | { kind: 'signers' }
+  | { kind: 'add-suggestions'; addresses: string[] }
   | { kind: 'export'; scope?: ExportScope }
 
 export type AddressBookDemoProps = {
   contacts: AddressBookContact[]
   localContacts?: AddressBookContact[]
   permissions: AddressBookPermissions
-  missingSigners?: MissingSigner[]
+  suggestions?: SuggestedContact[]
   renderAvatar?: (address: string) => ReactNode
   initialFilters?: ContactFilters
   initialDialog?: DemoDialog
   initialSelection?: string[]
+  initialTab?: DemoTab
 }
 
+export type DemoTab = 'workspace' | 'suggested' | 'local'
+
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+
+const NO_CONTACTS: AddressBookContact[] = []
 
 /**
  * The whole workspace address book page, wired to in-memory state so every flow can be tried in
  * Storybook: search, filters, sorting, tag rename and delete, add, edit, tags, delete, bulk tags,
- * import with review, import signers and export. Writes only change this story's state.
+ * import with review, suggestions and export. Writes only change this story's state.
  */
 const AddressBookDemo = ({
   contacts: initialContacts,
   localContacts = [],
   permissions,
-  missingSigners: initialMissingSigners = [],
+  suggestions: initialSuggestions = [],
   renderAvatar,
   initialFilters = EMPTY_FILTERS,
   initialDialog,
   initialSelection = [],
+  initialTab = 'workspace',
 }: AddressBookDemoProps) => {
   const [contacts, setContacts] = useState(initialContacts)
-  const [missingSigners, setMissingSigners] = useState(initialMissingSigners)
-  const [tab, setTab] = useState<'workspace' | 'local'>('workspace')
+  const [suggestions, setSuggestions] = useState(initialSuggestions)
+  const [tab, setTab] = useState<DemoTab>(initialTab)
   const [filters, setFilters] = useState(initialFilters)
   const [selection, setSelection] = useState<Set<string>>(() => new Set(initialSelection))
   const [dialog, setDialog] = useState<DemoDialog | undefined>(initialDialog)
   const [notice, setNotice] = useState<string>()
 
-  const book = tab === 'workspace' ? contacts : localContacts
+  const book = tab === 'workspace' ? contacts : tab === 'local' ? localContacts : NO_CONTACTS
   const visible = useMemo(() => filterContacts(book, filters), [book, filters])
   const tagCounts = useMemo(() => countTags(contacts), [contacts])
-  const categoryCounts = useMemo(() => countCategories(book), [book])
+  const systemTagCounts = useMemo(() => countSystemTags(book), [book])
   const selected = contacts.filter((contact) => selection.has(contact.address))
   const find = (address: string) => contacts.find((contact) => same(contact.address, address))
   const close = () => setDialog(undefined)
@@ -90,7 +97,6 @@ const AddressBookDemo = ({
           address: values.address,
           name: values.name,
           chains: chainsFor(values.chainIds),
-          category: 'eoa',
           signerOf: [],
           tags: values.tags,
           addedBy: MEMBERS.maya,
@@ -129,25 +135,23 @@ const AddressBookDemo = ({
       ),
     )
 
-  const handleImportSigners = (signers: ImportedSigner[]) => {
+  const handleAddSuggestions = (added: AddedSuggestion[]) => {
     setContacts((prev) => [
-      ...signers.map((signer) => {
-        const source = missingSigners.find((missing) => same(missing.address, signer.address))
+      ...added.map((item) => {
+        const source = suggestions.find((suggestion) => same(suggestion.address, item.address))
         return {
-          address: signer.address,
-          name: signer.name,
-          chains: chainsFor(signer.chainIds),
-          category: 'eoa' as const,
-          signerOf: source?.safes ?? [],
-          tags: signer.tags,
+          address: item.address,
+          name: item.name,
+          chains: chainsFor(item.chainIds),
+          signerOf: source?.reason.kind === 'signer' ? source.reason.safes : [],
+          tags: [],
           addedBy: MEMBERS.maya,
         }
       }),
       ...prev,
     ])
-    setMissingSigners((prev) =>
-      prev.filter((missing) => !signers.some((signer) => same(signer.address, missing.address))),
-    )
+    setSuggestions((prev) => prev.filter((suggestion) => !added.some((item) => same(item.address, suggestion.address))))
+    setNotice(`Added ${added.length} ${added.length === 1 ? 'contact' : 'contacts'} to the workspace address book.`)
     close()
   }
 
@@ -162,13 +166,14 @@ const AddressBookDemo = ({
       <Tabs
         value={tab}
         onValueChange={(value) => {
-          setTab(value as 'workspace' | 'local')
+          setTab(value as DemoTab)
           setFilters(EMPTY_FILTERS)
           setSelection(new Set())
         }}
       >
         <TabsList variant="underline" className="mb-4">
           <TabsTrigger value="workspace">Workspace contacts ({contacts.length})</TabsTrigger>
+          <TabsTrigger value="suggested">Suggested ({suggestions.length})</TabsTrigger>
           {localContacts.length > 0 && <TabsTrigger value="local">Local contacts ({localContacts.length})</TabsTrigger>}
         </TabsList>
 
@@ -177,7 +182,7 @@ const AddressBookDemo = ({
             <AddressBookToolbar
               filters={filters}
               onFiltersChange={setFilters}
-              categoryCounts={categoryCounts}
+              systemTags={tab === 'workspace' ? systemTagCounts : []}
               tags={tab === 'workspace' ? tagCounts : []}
               tagEditing={
                 tab === 'workspace' && permissions.canEditTags
@@ -192,11 +197,9 @@ const AddressBookDemo = ({
                   : undefined
               }
               permissions={tab === 'workspace' ? permissions : { canAdd: false, canImport: false }}
-              missingSignerCount={tab === 'workspace' ? missingSigners.length : 0}
               onImport={() => setDialog({ kind: 'import' })}
               onExport={() => setDialog({ kind: 'export' })}
               exportDisabled={book.length === 0}
-              onImportSigners={() => setDialog({ kind: 'signers' })}
               onAddContact={() => setDialog({ kind: 'add' })}
             />
           )}
@@ -220,7 +223,16 @@ const AddressBookDemo = ({
 
           <TableCard>
             <TabsContent value={tab}>
-              {book.length === 0 ? (
+              {tab === 'suggested' ? (
+                <SuggestedContacts
+                  suggestions={suggestions}
+                  canAdd={permissions.canAdd}
+                  onAdd={(items) =>
+                    setDialog({ kind: 'add-suggestions', addresses: items.map((item) => item.address) })
+                  }
+                  renderAvatar={renderAvatar}
+                />
+              ) : book.length === 0 ? (
                 <AddressBookEmptyState
                   kind="empty"
                   canAdd={permissions.canAdd}
@@ -244,7 +256,6 @@ const AddressBookDemo = ({
                   onEdit={(contact) => setDialog({ kind: 'edit', address: contact.address })}
                   onEditTags={(contact) => setDialog({ kind: 'tags', address: contact.address })}
                   onDelete={(contact) => setDialog({ kind: 'delete', address: contact.address })}
-                  onRetryCategory={(contact) => updateContact(contact.address, { category: 'eoa' })}
                 />
               )}
             </TabsContent>
@@ -299,8 +310,11 @@ const AddressBookDemo = ({
       )}
       {dialog?.kind === 'import' && (
         <ImportDialog
-          missingSignerCount={missingSigners.length}
-          onImportSigners={() => setDialog({ kind: 'signers' })}
+          suggestionCount={suggestions.length}
+          onViewSuggestions={() => {
+            close()
+            setTab('suggested')
+          }}
           onFileSelected={() => setDialog({ kind: 'import', review: true })}
           reviewRows={dialog.review ? IMPORT_REVIEW_ROWS : undefined}
           onConfirm={(rows) => {
@@ -311,8 +325,12 @@ const AddressBookDemo = ({
           onClose={close}
         />
       )}
-      {dialog?.kind === 'signers' && (
-        <ImportSignersDialog signers={missingSigners} onImport={handleImportSigners} onClose={close} />
+      {dialog?.kind === 'add-suggestions' && (
+        <AddSuggestionsDialog
+          suggestions={suggestions.filter((item) => dialog.addresses.includes(item.address))}
+          onAdd={handleAddSuggestions}
+          onClose={close}
+        />
       )}
       {dialog?.kind === 'export' && (
         <ExportDialog

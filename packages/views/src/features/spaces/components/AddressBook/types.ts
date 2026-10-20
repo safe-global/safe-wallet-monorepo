@@ -1,6 +1,6 @@
 /**
  * View models for the workspace address book. The views only render these; the app derives them
- * from the address book, the workspace Safes and the resolved contact types.
+ * from the address book and the workspace Safes.
  */
 
 export type ChainInfo = {
@@ -9,39 +9,15 @@ export type ChainInfo = {
   logoUri?: string
 }
 
-/**
- * What an address is. `workspace-safe` is one of this workspace's Safes; the rest come from the
- * on-chain lookup. `unknown` means the lookup found nothing; `loading` means it has not finished.
- */
-export type ContactCategory = 'workspace-safe' | 'safe' | 'contract' | 'eoa' | 'unknown' | 'loading'
-
-export const CATEGORY_LABELS: Record<Exclude<ContactCategory, 'unknown' | 'loading'>, string> = {
-  'workspace-safe': 'Workspace Safe',
-  safe: 'Safe account',
-  contract: 'Contract',
-  eoa: 'EOA',
-}
-
-/** Values of the Category filter. `signer` matches contacts that sign a workspace Safe. */
-export type CategoryFilterValue = Exclude<ContactCategory, 'loading'> | 'signer'
-
-export const CATEGORY_FILTER_OPTIONS: { value: CategoryFilterValue; label: string }[] = [
-  { value: 'workspace-safe', label: 'Workspace Safe' },
-  { value: 'safe', label: 'Safe account' },
-  { value: 'contract', label: 'Contract' },
-  { value: 'eoa', label: 'EOA' },
-  { value: 'signer', label: 'Signer' },
-  { value: 'unknown', label: 'Not sure' },
-]
-
 export type AddressBookContact = {
   address: string
   name: string
   chains: ChainInfo[]
-  category: ContactCategory
-  /** Names of the workspace Safes this address signs for. Empty when it signs none. */
+  /** One of this workspace's Safes. Adds the automatic "Workspace Safe" tag. */
+  isWorkspaceSafe?: boolean
+  /** Names of the workspace Safes this address signs for. Non-empty adds the automatic "Signer of a Safe" tag. */
   signerOf: string[]
-  /** Team-written labels. Local contacts have none. */
+  /** Team-written labels, without the automatic ones. Local contacts have none. */
   tags: string[]
   /** Display name of the member who added the contact. */
   addedBy?: string
@@ -76,20 +52,27 @@ export const MEMBER_PERMISSIONS: AddressBookPermissions = {
 
 export type ContactFilters = {
   query: string
-  categories: CategoryFilterValue[]
+  /** Team-written and automatic tags alike; a contact must carry every one. */
   tags: string[]
 }
 
-export const EMPTY_FILTERS: ContactFilters = { query: '', categories: [], tags: [] }
+export const EMPTY_FILTERS: ContactFilters = { query: '', tags: [] }
 
-/** A workspace signer that is not in the address book yet. */
-export type MissingSigner = {
+/** Why an address is suggested. */
+export type SuggestionReason = { kind: 'signer'; safes: string[] } | { kind: 'frequent'; transactions: number }
+
+/** An address worth adding to the workspace book that isn't in it yet. */
+export type SuggestedContact = {
   address: string
   chains: ChainInfo[]
-  /** Names of the workspace Safes it signs for. */
-  safes: string[]
   /** Saved when the name is left empty, e.g. "Treasury signer 2". */
-  placeholder: string
+  suggestedName: string
+  reason: SuggestionReason
 }
+
+export const describeSuggestion = (reason: SuggestionReason): string =>
+  reason.kind === 'signer'
+    ? `Signer of ${reason.safes.join(', ')}`
+    : `${reason.transactions} ${reason.transactions === 1 ? 'transaction' : 'transactions'} with your Safes`
 
 export type TagCount = { tag: string; count: number }

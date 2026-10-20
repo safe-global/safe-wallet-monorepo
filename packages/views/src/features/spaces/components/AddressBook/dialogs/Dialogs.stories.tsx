@@ -6,7 +6,8 @@ import {
   ALL_CHAINS,
   CHAINS,
   IMPORT_REVIEW_ROWS,
-  MISSING_SIGNERS,
+  FREQUENT_SUGGESTIONS,
+  SUGGESTED_SIGNERS,
   WORKSPACE_CONTACTS,
 } from '../mocks/fixtures'
 import ContactFormDialog from './ContactFormDialog'
@@ -14,7 +15,7 @@ import DeleteContactDialog from './DeleteContactDialog'
 import EditTagsDialog from './EditTagsDialog'
 import ExportDialog from './ExportDialog'
 import ImportDialog from './ImportDialog'
-import ImportSignersDialog from './ImportSignersDialog'
+import AddSuggestionsDialog from './AddSuggestionsDialog'
 
 /**
  * Every address book dialog on its own, with the callbacks logged in the Actions panel. The Page
@@ -31,6 +32,7 @@ type Story = StoryObj<typeof meta>
 const tagOptions = countTags(WORKSPACE_CONTACTS)
 const otcDesk = WORKSPACE_CONTACTS.find((contact) => contact.address === ADDRESSES.otcDesk)!
 const amara = WORKSPACE_CONTACTS.find((contact) => contact.address === ADDRESSES.amara)!
+const maya = WORKSPACE_CONTACTS.find((contact) => contact.address === ADDRESSES.maya)!
 
 /** Address, name, networks and tags. The address preview groups the characters once it is valid. */
 export const AddContact: Story = {
@@ -78,16 +80,21 @@ export const EditTags: Story = {
   render: () => <EditTagsDialog contact={amara} tagOptions={tagOptions} onSave={fn()} onClose={fn()} />,
 }
 
+/** A signer: "Signer of a Safe" is shown above the picker and can't be removed. */
+export const EditTagsOfSigner: Story = {
+  render: () => <EditTagsDialog contact={maya} tagOptions={tagOptions} onSave={fn()} onClose={fn()} />,
+}
+
 export const DeleteContact: Story = {
   render: () => <DeleteContactDialog contact={otcDesk} onConfirm={fn()} onClose={fn()} />,
 }
 
-/** Step one: the CSV drop zone, with the "Import signers" shortcut while signers are missing. */
+/** Step one: the CSV drop zone, with a shortcut to the Suggested tab while it has suggestions. */
 export const Import: Story = {
   render: () => (
     <ImportDialog
-      missingSignerCount={MISSING_SIGNERS.length}
-      onImportSigners={fn()}
+      suggestionCount={SUGGESTED_SIGNERS.length}
+      onViewSuggestions={fn()}
       onFileSelected={fn()}
       onConfirm={fn()}
       onBack={fn()}
@@ -119,22 +126,28 @@ export const ImportReview: Story = {
   ),
 }
 
-/** Four signers of the workspace Safes that are not in the book. Empty names save the suggestion. */
-export const ImportSigners: Story = {
-  render: () => <ImportSignersDialog signers={MISSING_SIGNERS} onImport={fn()} onClose={fn()} />,
+/** Naming chosen suggestions before they join the workspace book. Empty names keep the suggestion. */
+export const AddSuggestions: Story = {
+  render: () => (
+    <AddSuggestionsDialog
+      suggestions={[...SUGGESTED_SIGNERS.slice(0, 2), FREQUENT_SUGGESTIONS[0]]}
+      onAdd={fn()}
+      onClose={fn()}
+    />
+  ),
 }
 
 /** A long list scrolls inside the dialog instead of growing it. */
-export const ImportManySigners: Story = {
+export const AddManySuggestions: Story = {
   render: () => (
-    <ImportSignersDialog
-      signers={Array.from({ length: 14 }, (_, index) => ({
-        ...MISSING_SIGNERS[index % MISSING_SIGNERS.length],
-        address: `0x${(index + 1).toString(16).padStart(4, '0')}${MISSING_SIGNERS[index % MISSING_SIGNERS.length].address.slice(6)}`,
-        placeholder: `Treasury signer ${index + 5}`,
+    <AddSuggestionsDialog
+      suggestions={Array.from({ length: 14 }, (_, index) => ({
+        ...SUGGESTED_SIGNERS[index % SUGGESTED_SIGNERS.length],
+        address: `0x${(index + 1).toString(16).padStart(4, '0')}${SUGGESTED_SIGNERS[index % SUGGESTED_SIGNERS.length].address.slice(6)}`,
+        suggestedName: `Treasury signer ${index + 5}`,
         chains: [CHAINS.ethereum],
       }))}
-      onImport={fn()}
+      onAdd={fn()}
       onClose={fn()}
     />
   ),

@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
-import { categoryValues, countCategories, countTags, filterContacts } from '../filters'
+import { countSystemTags, countTags, filterContacts, tagSortValue } from '../filters'
+import { SIGNER_TAG, WORKSPACE_SAFE_TAG } from '../tags/systemTags'
 import { EMPTY_FILTERS, type AddressBookContact, type ContactFilters } from '../types'
 
 const buildContact = (fields: Partial<AddressBookContact> = {}): AddressBookContact => ({
   address: faker.finance.ethereumAddress(),
   name: faker.company.name(),
   chains: [{ chainId: '1', name: 'Ethereum' }],
-  category: 'eoa',
   signerOf: [],
   tags: [],
   ...fields,
@@ -34,22 +34,21 @@ describe('filters', () => {
       expect(filterContacts(contacts, withFilters({ query: 'payroll' }))).toEqual([byTag])
     })
 
-    it('ORs the selected categories', () => {
-      const safe = buildContact({ category: 'safe' })
-      const contract = buildContact({ category: 'contract' })
-      const eoa = buildContact({ category: 'eoa' })
+    it('finds signers by searching for the automatic tag', () => {
+      const signer = buildContact({ name: 'Maya', signerOf: ['Treasury'] })
+      const other = buildContact({ name: 'Atlas' })
 
-      expect(filterContacts([safe, contract, eoa], withFilters({ categories: ['safe', 'contract'] }))).toEqual([
-        safe,
-        contract,
-      ])
+      expect(filterContacts([signer, other], withFilters({ query: 'signer' }))).toEqual([signer])
     })
 
-    it('matches the signer category for contacts that sign a workspace Safe', () => {
-      const signer = buildContact({ category: 'eoa', signerOf: ['Treasury'] })
-      const eoa = buildContact({ category: 'eoa' })
+    it('matches an automatic tag filter, ignoring case', () => {
+      const safe = buildContact({ isWorkspaceSafe: true })
+      const signer = buildContact({ signerOf: ['Treasury'] })
+      const plain = buildContact({ tags: ['Vendor'] })
+      const contacts = [safe, signer, plain]
 
-      expect(filterContacts([signer, eoa], withFilters({ categories: ['signer'] }))).toEqual([signer])
+      expect(filterContacts(contacts, withFilters({ tags: [WORKSPACE_SAFE_TAG] }))).toEqual([safe])
+      expect(filterContacts(contacts, withFilters({ tags: [SIGNER_TAG.toLowerCase()] }))).toEqual([signer])
     })
 
     it('requires every selected tag, ignoring case', () => {
@@ -59,29 +58,14 @@ describe('filters', () => {
       expect(filterContacts([both, one], withFilters({ tags: ['vendor', 'eu'] }))).toEqual([both])
     })
 
-    it('ANDs search, category and tags', () => {
-      const match = buildContact({ name: 'Atlas Audits', category: 'contract', tags: ['Vendor'] })
-      const wrongCategory = buildContact({ name: 'Atlas Labs', category: 'eoa', tags: ['Vendor'] })
-      const wrongTag = buildContact({ name: 'Atlas Ops', category: 'contract', tags: ['Legal'] })
+    it('ANDs search, automatic tags and team tags', () => {
+      const match = buildContact({ name: 'Atlas Audits', signerOf: ['Treasury'], tags: ['Vendor'] })
+      const notSigner = buildContact({ name: 'Atlas Labs', tags: ['Vendor'] })
+      const wrongTag = buildContact({ name: 'Atlas Ops', signerOf: ['Treasury'], tags: ['Legal'] })
 
-      const filters = withFilters({ query: 'atlas', categories: ['contract'], tags: ['Vendor'] })
+      const filters = withFilters({ query: 'atlas', tags: [SIGNER_TAG, 'Vendor'] })
 
-      expect(filterContacts([match, wrongCategory, wrongTag], filters)).toEqual([match])
-    })
-  })
-
-  describe('categoryValues', () => {
-    it('returns the category alone for a non-signer', () => {
-      expect(categoryValues(buildContact({ category: 'contract' }))).toEqual(['contract'])
-    })
-
-    it('adds signer when the contact signs a workspace Safe', () => {
-      expect(categoryValues(buildContact({ category: 'eoa', signerOf: ['Payroll'] }))).toEqual(['eoa', 'signer'])
-    })
-
-    it('leaves out a category that is still loading', () => {
-      expect(categoryValues(buildContact({ category: 'loading' }))).toEqual([])
-      expect(categoryValues(buildContact({ category: 'loading', signerOf: ['Ops'] }))).toEqual(['signer'])
+      expect(filterContacts([match, notSigner, wrongTag], filters)).toEqual([match])
     })
   })
 
@@ -107,28 +91,57 @@ describe('filters', () => {
       expect(countTags(contacts)).toEqual([{ tag: 'Vendor', count: 2 }])
     })
 
+    it('leaves out the automatic tags', () => {
+      const contacts = [buildContact({ isWorkspaceSafe: true, signerOf: ['Treasury'], tags: ['Vendor'] })]
+
+      expect(countTags(contacts)).toEqual([{ tag: 'Vendor', count: 1 }])
+    })
+
     it('returns no tags for an empty book', () => {
       expect(countTags([])).toEqual([])
     })
   })
 
-  describe('countCategories', () => {
-    it('counts each category and signers on top of their category', () => {
+  describe('countSystemTags', () => {
+    it('counts the automatic tags in their fixed order', () => {
       const contacts = [
-        buildContact({ category: 'eoa', signerOf: ['Treasury'] }),
-        buildContact({ category: 'eoa' }),
-        buildContact({ category: 'safe' }),
-        buildContact({ category: 'unknown' }),
-        buildContact({ category: 'loading' }),
+        buildContact({ signerOf: ['Treasury'] }),
+        buildContact({ signerOf: ['Payroll', 'Ops'] }),
+        buildContact({ isWorkspaceSafe: true }),
+        buildContact(),
       ]
 
-      const counts = countCategories(contacts)
+      expect(countSystemTags(contacts)).toEqual([
+        { tag: WORKSPACE_SAFE_TAG, count: 1 },
+        { tag: SIGNER_TAG, count: 2 },
+      ])
+    })
 
-      expect(counts.get('eoa')).toBe(2)
-      expect(counts.get('signer')).toBe(1)
-      expect(counts.get('safe')).toBe(1)
-      expect(counts.get('unknown')).toBe(1)
-      expect(counts.has('contract')).toBe(false)
+    it('leaves out an automatic tag no contact carries', () => {
+      expect(countSystemTags([buildContact({ signerOf: ['Treasury'] }), buildContact()])).toEqual([
+        { tag: SIGNER_TAG, count: 1 },
+      ])
+      expect(countSystemTags([buildContact({ tags: ['Vendor'] })])).toEqual([])
+    })
+  })
+
+  describe('tagSortValue', () => {
+    it('sorts workspace Safes, then signers, then team tags', () => {
+      const safe = buildContact({ isWorkspaceSafe: true, tags: ['Audit'] })
+      const signer = buildContact({ signerOf: ['Treasury'], tags: ['Audit'] })
+      const tagged = buildContact({ tags: ['Audit'] })
+      const values = [safe, signer, tagged].map(tagSortValue)
+
+      expect(values).not.toContain(null)
+      expect([...values].sort()).toEqual(values)
+    })
+
+    it('returns no value for an untagged contact so it sorts last', () => {
+      expect(tagSortValue(buildContact())).toBeNull()
+    })
+
+    it('sorts team tags case-insensitively', () => {
+      expect(tagSortValue(buildContact({ tags: ['Vendor'] }))).toBe(tagSortValue(buildContact({ tags: ['vendor'] })))
     })
   })
 })

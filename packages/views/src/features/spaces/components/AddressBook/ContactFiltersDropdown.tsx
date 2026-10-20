@@ -10,15 +10,16 @@ import {
 } from '@safe-global/views/components/common/FacetFilter'
 import { activeFilterCount } from './filters'
 import { TagChip } from './tags/TagChip'
-import { CATEGORY_FILTER_OPTIONS, type CategoryFilterValue, type ContactFilters, type TagCount } from './types'
+import type { ContactFilters, TagCount } from './types'
 
 type TagEditing = Pick<FacetOptionListProps, 'onRenameOption' | 'onDeleteOption' | 'deleteConfirmation'>
 
 export type ContactFiltersDropdownProps = {
   filters: ContactFilters
   onFiltersChange: (filters: ContactFilters) => void
-  categoryCounts: ReadonlyMap<CategoryFilterValue, number>
-  /** Distinct tags in the book. The Tags section is hidden when there are none. */
+  /** Automatic tags in the book (Workspace Safe, Signer of a Safe), listed first and locked. */
+  systemTags: TagCount[]
+  /** Distinct team-written tags in the book. */
   tags: TagCount[]
   /** Rename and delete a tag across the whole book, from the filter list. */
   tagEditing?: TagEditing
@@ -28,33 +29,32 @@ const SectionHeading = ({ children }: { children: string }) => (
   <p className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">{children}</p>
 )
 
-/** One "Filters" dropdown: Tags (searchable, renamable, deletable) on top, Category below. */
+/** One "Filters" dropdown of tags: the automatic ones first, then the team's, which can be renamed or deleted. */
 const ContactFiltersDropdown = ({
   filters,
   onFiltersChange,
-  categoryCounts,
+  systemTags,
   tags,
   tagEditing,
 }: ContactFiltersDropdownProps) => {
   const [open, setOpen] = useState(false)
   const activeCount = activeFilterCount(filters)
 
-  const tagOptions: FacetOption[] = tags.map(({ tag, count }) => ({
-    value: tag,
-    label: <TagChip tag={tag} />,
-    searchText: tag,
-    count,
-  }))
-
-  const categoryOptions: FacetOption<CategoryFilterValue>[] = CATEGORY_FILTER_OPTIONS.map((option) => ({
-    ...option,
-    count: categoryCounts.get(option.value) ?? 0,
-  }))
+  const tagOptions: FacetOption[] = [
+    ...systemTags.map(({ tag, count }) => ({
+      value: tag,
+      label: <TagChip tag={tag} />,
+      searchText: tag,
+      count,
+      locked: true,
+    })),
+    ...tags.map(({ tag, count }) => ({ value: tag, label: <TagChip tag={tag} />, searchText: tag, count })),
+  ]
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        render={<Button variant="outline" size="sm" data-testid="filters-dropdown" />}
+        render={<Button variant="outline" size="lg" data-testid="filters-dropdown" />}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
@@ -69,29 +69,16 @@ const ContactFiltersDropdown = ({
       </PopoverTrigger>
 
       <PopoverContent align="start" sideOffset={4} className="flex w-72 flex-col gap-1 p-1">
-        {tagOptions.length > 0 && (
-          <>
-            <SectionHeading>Tags</SectionHeading>
-            <FacetOptionList
-              label="Tags"
-              options={tagOptions}
-              value={filters.tags}
-              onChange={(next) => onFiltersChange({ ...filters, tags: next })}
-              searchable
-              searchPlaceholder="Search tags"
-              {...tagEditing}
-            />
-            <div className="border-border my-1 border-t" />
-          </>
-        )}
-
-        <SectionHeading>Category</SectionHeading>
+        <SectionHeading>Tags</SectionHeading>
         <FacetOptionList
-          label="Category"
-          options={categoryOptions}
-          value={filters.categories}
-          onChange={(next) => onFiltersChange({ ...filters, categories: next })}
-          searchable={false}
+          label="Tags"
+          options={tagOptions}
+          value={filters.tags}
+          onChange={(next) => onFiltersChange({ ...filters, tags: next })}
+          searchable
+          searchPlaceholder="Search tags"
+          emptyText="No tags yet"
+          {...tagEditing}
         />
 
         {activeCount > 0 && (
@@ -100,7 +87,7 @@ const ContactFiltersDropdown = ({
               variant="ghost"
               size="sm"
               className="w-full"
-              onClick={() => onFiltersChange({ ...filters, categories: [], tags: [] })}
+              onClick={() => onFiltersChange({ ...filters, tags: [] })}
             >
               Clear filters
             </Button>

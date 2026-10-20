@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from 'storybook/test'
 import Identicon from '@/components/common/Identicon'
-import CategoryCell from './CategoryCell'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import GroupedAddress from './GroupedAddress'
@@ -22,40 +20,6 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
     <div className="min-w-0">{children}</div>
   </div>
 )
-
-/** Category chip, with "Signer of …" underneath for signers. A long list truncates; hover for all. */
-export const Category: Story = {
-  render: () => (
-    <div className="max-w-xl">
-      <Row label="Workspace Safe">
-        <CategoryCell category="workspace-safe" />
-      </Row>
-      <Row label="Safe account">
-        <CategoryCell category="safe" />
-      </Row>
-      <Row label="Safe account, signer">
-        <CategoryCell category="safe" signerOf={['Treasury']} />
-      </Row>
-      <Row label="Contract">
-        <CategoryCell category="contract" />
-      </Row>
-      <Row label="EOA">
-        <CategoryCell category="eoa" />
-      </Row>
-      <Row label="EOA, signer of four">
-        <div className="w-40">
-          <CategoryCell category="eoa" signerOf={['Ops multisig', 'Grants program', 'Treasury', 'Payroll']} />
-        </div>
-      </Row>
-      <Row label="Not sure (hover: Check again)">
-        <CategoryCell category="unknown" onRetry={fn()} />
-      </Row>
-      <Row label="Resolving">
-        <CategoryCell category="loading" />
-      </Row>
-    </div>
-  ),
-}
 
 /** Name, full grouped address and copy. Never shortened. */
 export const Contact: Story = {

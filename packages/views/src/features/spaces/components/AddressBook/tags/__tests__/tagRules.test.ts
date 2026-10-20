@@ -20,6 +20,13 @@ describe('validateTag', () => {
     expect(validateTag(tag)).toMatch(/can only contain/)
   })
 
+  it.each(['Workspace Safe', 'workspace safe', 'Signer of a Safe', 'SIGNER OF A SAFE', ' signer of a safe '])(
+    'rejects the automatic tag name %s',
+    (tag) => {
+      expect(validateTag(tag)).toMatch(/is added automatically/)
+    },
+  )
+
   it('allows a dash inside the tag', () => {
     expect(validateTag('pre-sale')).toBeUndefined()
   })

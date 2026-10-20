@@ -1,11 +1,10 @@
 /**
  * Story fixtures for the workspace address book: a fictional company, "Lumen Labs", with four
- * workspace Safes, their signers, the DeFi contracts they use, vendors, contractors and a few
- * addresses nobody could place. Contract addresses are the real mainnet deployments; every
- * person, vendor and Safe is made up.
+ * workspace Safes, their signers, the DeFi contracts they use, vendors and contractors. Contract
+ * addresses are the real mainnet deployments; every person, vendor and Safe is made up.
  */
 import type { ImportReviewRow } from '../dialogs/ImportReview'
-import type { AddressBookContact, ChainInfo, MissingSigner } from '../types'
+import type { AddressBookContact, ChainInfo, SuggestedContact } from '../types'
 
 const logo = (chainId: string) => `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
 
@@ -66,7 +65,6 @@ export const ADDRESSES = {
 
 const contact = (fields: Partial<AddressBookContact> & Pick<AddressBookContact, 'address' | 'name'>) => ({
   chains: [ethereum],
-  category: 'eoa' as const,
   signerOf: [],
   tags: [],
   addedBy: MEMBERS.maya,
@@ -79,30 +77,30 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     address: ADDRESSES.treasury,
     name: 'Treasury',
     chains: [ethereum, arbitrum, optimism],
-    category: 'workspace-safe',
-    tags: ['Internal', 'Treasury'],
+    isWorkspaceSafe: true,
+    tags: ['Treasury'],
   }),
   contact({
     address: ADDRESSES.payroll,
     name: 'Payroll',
     chains: [base, ethereum],
-    category: 'workspace-safe',
-    tags: ['Internal', 'Payroll'],
+    isWorkspaceSafe: true,
+    tags: ['Payroll'],
   }),
   contact({
     address: ADDRESSES.ops,
     name: 'Ops multisig',
     chains: [gnosis],
-    category: 'workspace-safe',
-    tags: ['Internal', 'Ops'],
+    isWorkspaceSafe: true,
+    tags: ['Ops'],
     addedBy: MEMBERS.jonas,
   }),
   contact({
     address: ADDRESSES.grants,
     name: 'Grants program',
     chains: [optimism, arbitrum],
-    category: 'workspace-safe',
-    tags: ['Internal', 'Grants'],
+    isWorkspaceSafe: true,
+    tags: ['Grants'],
     addedBy: MEMBERS.lena,
   }),
 
@@ -112,14 +110,14 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     name: 'Maya Chen (CFO)',
     chains: [ethereum, arbitrum, optimism, base],
     signerOf: ['Treasury', 'Payroll', 'Grants program'],
-    tags: ['Internal', 'Finance'],
+    tags: ['Finance'],
   }),
   contact({
     address: ADDRESSES.jonas,
     name: 'Jonas Weber',
     chains: [ethereum, gnosis],
     signerOf: ['Treasury', 'Ops multisig'],
-    tags: ['Internal'],
+    tags: [],
     addedBy: MEMBERS.jonas,
   }),
   contact({
@@ -127,14 +125,14 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     name: 'Priya Raman',
     chains: [base, ethereum],
     signerOf: ['Payroll'],
-    tags: ['Internal', 'Finance'],
+    tags: ['Finance'],
     addedBy: MEMBERS.priya,
   }),
   contact({
     address: ADDRESSES.tom,
     name: 'Tom Okafor · Ledger',
     signerOf: ['Treasury'],
-    tags: ['Internal', 'Hardware wallet'],
+    tags: ['Hardware wallet'],
     addedBy: MEMBERS.jonas,
   }),
   contact({
@@ -142,16 +140,15 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     name: 'Lena Fischer',
     chains: [ethereum, gnosis, optimism, arbitrum, base],
     signerOf: ['Ops multisig', 'Grants program', 'Treasury', 'Payroll'],
-    tags: ['Internal', 'Ops'],
+    tags: ['Ops'],
     addedBy: MEMBERS.lena,
   }),
   contact({
     address: ADDRESSES.securityCouncil,
     name: 'Security council',
     chains: [ethereum, arbitrum],
-    category: 'safe',
     signerOf: ['Treasury'],
-    tags: ['Internal', 'Security'],
+    tags: ['Security'],
   }),
 
   // Contracts
@@ -159,14 +156,12 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     address: ADDRESSES.universalRouter,
     name: 'Uniswap Universal Router',
     chains: [ethereum],
-    category: 'contract',
     tags: ['DeFi'],
     addedBy: MEMBERS.jonas,
   }),
   contact({
     address: ADDRESSES.aavePool,
     name: 'Aave V3 Pool',
-    category: 'contract',
     tags: ['DeFi', 'Lending'],
     addedBy: MEMBERS.jonas,
   }),
@@ -174,32 +169,28 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     address: ADDRESSES.cowSettlement,
     name: 'CoW Protocol settlement',
     chains: [ethereum, gnosis, arbitrum, base],
-    category: 'contract',
     tags: ['DeFi'],
     addedBy: MEMBERS.jonas,
   }),
   contact({
     address: ADDRESSES.steth,
     name: 'Lido stETH',
-    category: 'contract',
     tags: ['DeFi', 'Staking'],
     addedBy: MEMBERS.priya,
   }),
   contact({
     address: ADDRESSES.usdc,
     name: 'USDC',
-    category: 'contract',
     tags: ['Stablecoin'],
     addedBy: MEMBERS.priya,
   }),
-  contact({ address: ADDRESSES.safeToken, name: 'SAFE token', category: 'contract', addedBy: MEMBERS.lena }),
+  contact({ address: ADDRESSES.safeToken, name: 'SAFE token', addedBy: MEMBERS.lena }),
 
   // Other Safes
   contact({
     address: ADDRESSES.partnerDao,
     name: 'Partner DAO treasury',
     chains: [optimism],
-    category: 'safe',
     tags: ['Partner', 'Grants'],
     addedBy: MEMBERS.lena,
   }),
@@ -207,7 +198,6 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
     address: ADDRESSES.lighthouse,
     name: 'Lighthouse Ventures Fund II strategic multisig (Series A lead)',
     chains: [ethereum, base],
-    category: 'safe',
     tags: ['Investor'],
   }),
 
@@ -261,15 +251,14 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
   }),
   contact({ address: ADDRESSES.sam, name: 'Sam Rivera (starts Nov)', chains: [base], tags: ['Payroll'] }),
 
-  // Nobody could place these
+  // Untagged
   contact({
     address: ADDRESSES.oldVendor,
     name: 'Old vendor wallet',
-    category: 'unknown',
     tags: ['Vendor'],
     addedBy: MEMBERS.lena,
   }),
-  contact({ address: ADDRESSES.hackathon, name: 'Hackathon prize winner', chains: [polygon], category: 'unknown' }),
+  contact({ address: ADDRESSES.hackathon, name: 'Hackathon prize winner', chains: [polygon] }),
 ]
 
 export const LOCAL_CONTACTS: AddressBookContact[] = [
@@ -289,36 +278,58 @@ export const LOCAL_CONTACTS: AddressBookContact[] = [
   contact({
     address: ADDRESSES.aavePool,
     name: 'Aave pool',
-    category: 'contract',
     isLocal: true,
     addedBy: undefined,
   }),
 ]
 
-export const MISSING_SIGNERS: MissingSigner[] = [
+/** Signers of the workspace Safes that are not in the book: the Suggested tab today. */
+export const SUGGESTED_SIGNERS: SuggestedContact[] = [
   {
     address: '0x60E543e244f513795d6a7fbCf0479A4DBA950a9A',
     chains: [ethereum, arbitrum, optimism],
-    safes: ['Treasury'],
-    placeholder: 'Treasury signer 4',
+    suggestedName: 'Treasury signer 4',
+    reason: { kind: 'signer', safes: ['Treasury'] },
   },
   {
     address: '0xFf23675C1fc258d5DB60fd1A6259d2209255221D',
     chains: [base, ethereum],
-    safes: ['Payroll'],
-    placeholder: 'Payroll signer 3',
+    suggestedName: 'Payroll signer 3',
+    reason: { kind: 'signer', safes: ['Payroll'] },
   },
   {
     address: '0x834984C04f21A982f8BfC1f18157087E5B52B21C',
     chains: [gnosis, optimism, arbitrum],
-    safes: ['Ops multisig', 'Grants program'],
-    placeholder: 'Ops multisig signer 2',
+    suggestedName: 'Ops multisig signer 2',
+    reason: { kind: 'signer', safes: ['Ops multisig', 'Grants program'] },
   },
   {
     address: '0x19cc57aF6C4bcd078b72522c3ef6B6705c6d1d22',
     chains: [optimism, arbitrum],
-    safes: ['Grants program'],
-    placeholder: 'Grants program signer 3',
+    suggestedName: 'Grants program signer 3',
+    reason: { kind: 'signer', safes: ['Grants program'] },
+  },
+]
+
+/** Suggestions with a transaction-count reason. */
+export const FREQUENT_SUGGESTIONS: SuggestedContact[] = [
+  {
+    address: '0xF921Ff74Ae82745576557496E1FD271f47f81310',
+    chains: [base],
+    suggestedName: 'Frequent recipient 1',
+    reason: { kind: 'frequent', transactions: 24 },
+  },
+  {
+    address: '0x50718f37C022885Ab36f03D2951aDD16cDE1a32b',
+    chains: [ethereum, arbitrum],
+    suggestedName: 'Frequent recipient 2',
+    reason: { kind: 'frequent', transactions: 11 },
+  },
+  {
+    address: '0x2Af9edFE200E1E4ec357424596fC4871F21eA7F2',
+    chains: [ethereum],
+    suggestedName: 'Frequent recipient 3',
+    reason: { kind: 'frequent', transactions: 3 },
   },
 ]
 

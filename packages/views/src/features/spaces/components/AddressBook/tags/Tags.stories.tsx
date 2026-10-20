@@ -5,6 +5,7 @@ import { WORKSPACE_CONTACTS } from '../mocks/fixtures'
 import { TagChip, TagChips } from './TagChip'
 import TagPicker from './TagPicker'
 import { TAG_PALETTE, tagColorIndex } from './tagColor'
+import { SIGNER_TAG, WORKSPACE_SAFE_TAG } from './systemTags'
 
 /**
  * Tags are team-written labels: a colour dot on a soft fill, square corners, so they never read as a
@@ -19,6 +20,23 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const SAMPLE = ['Internal', 'Vendor', 'Payroll', 'DeFi', 'Exchange', 'Investor', 'Grants', 'Legal', 'Security', 'EU']
+
+/**
+ * The two automatic tags. The app adds them from workspace data: "Workspace Safe" on the
+ * workspace's own Safes, "Signer of a Safe" on anyone who signs one. An icon replaces the colour
+ * dot, hover explains why, and nobody can edit, rename or delete them.
+ */
+export const Automatic: Story = {
+  render: () => (
+    <TagChips
+      tags={[WORKSPACE_SAFE_TAG, SIGNER_TAG, 'Treasury']}
+      titles={{
+        [WORKSPACE_SAFE_TAG]: 'One of this workspace’s Safes. Added automatically.',
+        [SIGNER_TAG]: 'Signer of Treasury, Payroll. Added automatically.',
+      }}
+    />
+  ),
+}
 
 /** The ten colours, one tag per colour. */
 export const Palette: Story = {
