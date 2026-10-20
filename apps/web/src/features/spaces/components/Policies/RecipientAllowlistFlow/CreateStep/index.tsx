@@ -26,7 +26,6 @@ import {
 
 const renderGuardAddress = (address: string) => <AccountIdentity address={address} showCopyButton />
 
-/** Step 1: picks the Safe and checks its guards. The allowlist form itself comes with WA-3079. */
 const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
   const { setScope } = useSafeScopeControls()
@@ -93,7 +92,6 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
         )}
 
         <TxCardActions>
-          {/* WA-3079 enables it, for the none and known guard states, once the allowlist form exists */}
           <Button type="button" size="submit" disabled data-testid="next-btn">
             {NEXT_LABEL}
           </Button>
