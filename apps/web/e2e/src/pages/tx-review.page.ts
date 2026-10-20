@@ -12,6 +12,8 @@ export class TxReviewPage {
   readonly signButton: Locator
   readonly connectedWalletMethod: Locator
   readonly executeButton: Locator
+  /** The spending-limit review has no signing step, only this button */
+  readonly spendingLimitExecuteButton: Locator
   /** The success screen's status: "processed" once mined, "successful" once indexed */
   readonly status: Locator
   readonly submitActions: Locator
@@ -26,6 +28,7 @@ export class TxReviewPage {
     this.signButton = page.getByTestId('combo-submit-sign')
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
     this.executeButton = page.getByTestId('combo-submit-execute')
+    this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
     this.submitActions = page.getByTestId('combo-submit-dropdown')
     this.addToBatchChoice = page.getByRole('menuitem', { name: 'Add to batch' })

@@ -24,6 +24,7 @@ export class SendTokensPage {
   readonly tokenSelector: Locator
   readonly addRecipientButton: Locator
   readonly nextButton: Locator
+  readonly spendingLimitOption: Locator
 
   constructor(readonly page: Page) {
     this.newTxButton = page.getByTestId('new-tx-btn')
@@ -43,6 +44,7 @@ export class SendTokensPage {
     this.tokenSelector = page.getByTestId('token-selector').getByRole('combobox')
     this.addRecipientButton = page.getByTestId('add-recipient-btn')
     this.nextButton = page.getByRole('button', { name: 'Next' })
+    this.spendingLimitOption = page.getByTestId('spending-limit-tx')
   }
 
   /** Open the send-tokens form from the dashboard. Returns once the recipient field is on screen. */
@@ -50,6 +52,12 @@ export class SendTokensPage {
     await this.newTxButton.click()
     await this.sendTokensButton.click()
     await this.recipientInput.waitFor({ state: 'visible' })
+  }
+
+  /** Choose the token to send by its symbol */
+  async selectToken(symbol: string): Promise<void> {
+    await this.tokenSelector.click()
+    await this.page.getByRole('option').filter({ hasText: symbol }).click()
   }
 
   /** Enter the recipient's address and an amount of the selected token */
@@ -61,5 +69,11 @@ export class SendTokensPage {
   /** A single suggestion, matched by the contact name or address it renders. */
   suggestion(text: string): Locator {
     return this.suggestions.filter({ hasText: text })
+  }
+
+  /** Enter the recipient's address and amount in the recipient row at `row`, counted from 0 */
+  async fillTransferAt(row: number, { recipient, amount }: { recipient: string; amount: string }): Promise<void> {
+    await this.page.getByTestId('address-book-input').nth(row).getByRole('combobox').fill(recipient)
+    await this.amountField.nth(row).fill(amount)
   }
 }
