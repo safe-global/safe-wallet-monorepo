@@ -93,7 +93,6 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
     </Track>
   )
 
-  // Admins and members export; invited people only preview the book.
   const exportButton = (
     <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK}>
       <Button variant="outline" size="action" onClick={handleExport}>
