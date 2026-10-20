@@ -153,7 +153,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/tx_history_filter.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_notes.cy.js': { scenario: 'prepareNotesScenario' },
-  'cypress/e2e/regression/tx_queue_delete_btn.cy.js': { scenario: 'prepareDeletionScenario' },
   'cypress/e2e/regression/tx_queue_reject_btn.cy.js': { scenario: 'prepareRejectionScenario' },
   'cypress/e2e/regression/tx_queue_replace_btn.cy.js': { scenario: 'prepareReplacementScenario' },
   'cypress/e2e/regression/tx_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
