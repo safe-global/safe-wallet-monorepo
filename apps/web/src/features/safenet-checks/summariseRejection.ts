@@ -1,3 +1,4 @@
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   AttestationVerificationStatus,
   CheckEventType,
@@ -66,6 +67,12 @@ export const summariseRejection = (events: ReadonlyArray<NormalizedCheckEvent>):
 /** "3 of 4 sentinels flagged this." — null when no sentinel revealed a vote. */
 export const formatFlaggedCount = ({ flagged, revealed }: RejectionSummary): string | null =>
   revealed > 0 ? `${flagged} of ${revealed} ${revealed === 1 ? 'sentinel' : 'sentinels'} flagged this.` : null
+
+/** A warning only when every reason is a known warning rule; an unknown or missing reason stays a threat. */
+export const rejectionSeverity = ({ rules, unrecognised }: RejectionSummary): Severity.WARN | Severity.CRITICAL =>
+  rules.length > 0 && !unrecognised && rules.every((rule) => rule.severity === Severity.WARN)
+    ? Severity.WARN
+    : Severity.CRITICAL
 
 /** Checked in order: the furthest step a failed check reached names what was missing. */
 const FAILURE_REASONS: ReadonlyArray<[ReadonlyArray<CheckEventType>, string]> = [

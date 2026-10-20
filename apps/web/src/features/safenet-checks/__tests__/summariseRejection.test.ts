@@ -1,3 +1,4 @@
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   AttestationVerificationStatus,
   CheckEventType,
@@ -11,7 +12,7 @@ import {
   sentinelCommittedEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
-import { explainFailure, formatFlaggedCount, summariseRejection } from '../summariseRejection'
+import { explainFailure, formatFlaggedCount, rejectionSeverity, summariseRejection } from '../summariseRejection'
 
 const SENTINELS = ['0x01', '0x02', '0x03', '0x04'].map((s) => s.padEnd(42, '0'))
 
@@ -86,5 +87,16 @@ describe('explainFailure', () => {
     expect(explainFailure({ events: [oracleResultEvent(), attestedEvent()], attestation })).toBe(
       "The validators' signature could not be verified.",
     )
+  })
+})
+
+describe('rejectionSeverity', () => {
+  it.each<[string, NormalizedCheckEvent[], Severity]>([
+    ['warns when every cited rule is a warning rule', [vote(0, 'R-4.1'), vote(1, 'R-4.5')], Severity.WARN],
+    ['stays a threat when a known-malicious address is cited', [vote(0, 'R-4.1'), vote(1, 'R-4.6')], Severity.CRITICAL],
+    ['stays a threat when a sentinel gives an unknown reason', [vote(0, 'R-4.3'), vote(1, 'R-9.9')], Severity.CRITICAL],
+    ['stays a threat when no sentinel revealed a reason', [], Severity.CRITICAL],
+  ])('%s', (_, events, severity) => {
+    expect(rejectionSeverity(summariseRejection(events))).toBe(severity)
   })
 })
