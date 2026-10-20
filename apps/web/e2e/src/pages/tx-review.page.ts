@@ -14,6 +14,11 @@ export class TxReviewPage {
   readonly executeButton: Locator
   /** The success screen's status: "processed" once mined, "successful" once indexed */
   readonly status: Locator
+  readonly submitActions: Locator
+  readonly addToBatchChoice: Locator
+  readonly addToBatchButton: Locator
+  /** Submits a bulk execution, which has no sign step */
+  readonly submitButton: Locator
 
   constructor(page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -22,6 +27,10 @@ export class TxReviewPage {
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.status = page.getByTestId('transaction-status')
+    this.submitActions = page.getByTestId('combo-submit-dropdown')
+    this.addToBatchChoice = page.getByRole('menuitem', { name: 'Add to batch' })
+    this.addToBatchButton = page.getByTestId('combo-submit-batching')
+    this.submitButton = page.getByRole('button', { name: 'Submit', exact: true })
   }
 
   /** Confirm the risk, continue from the review and sign with the connected wallet */
@@ -35,6 +44,22 @@ export class TxReviewPage {
   async execute(): Promise<void> {
     await this.connectedWalletMethod.click()
     await this.executeButton.click()
+  }
+
+  /** Confirm the risk, continue from the review and add the transaction to the batch instead of signing it */
+  async addToBatch(): Promise<void> {
+    await this.confirmRisk()
+    await this.continueButton.click()
+    await this.submitActions.click()
+    await this.addToBatchChoice.click()
+    await this.addToBatchButton.click()
+  }
+
+  /** Confirm the risk and execute the reviewed bulk with the connected wallet, not the relay */
+  async executeBulk(): Promise<void> {
+    await this.confirmRisk()
+    await this.connectedWalletMethod.click()
+    await this.submitButton.click()
   }
 
   /** Wait until the success screen reports the transaction as mined; the indexer may still be behind */
