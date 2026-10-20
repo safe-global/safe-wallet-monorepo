@@ -54,15 +54,15 @@ export const Default: Story = {}
 
 ### createMockStory options
 
-| Option     | Type                                                                                                           | Default                                             | Description                                   |
-| ---------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
-| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`                                        | `'efSafe'`                                          | Data fixture scenario                         |
-| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                                                       | `'disconnected'`                                    | Wallet connection state                       |
-| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces?, oidcAuth?, switchAuthenticator? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
-| `layout`   | `'none' \| 'paper' \| 'withSidebar' \| 'fullPage'`                                                             | `'none'`                                            | Layout wrapper                                |
-| `store`    | `object`                                                                                                       | `{}`                                                | Redux store overrides                         |
-| `handlers` | `RequestHandler[]`                                                                                             | `[]`                                                | Additional MSW handlers                       |
-| `pathname` | `string`                                                                                                       | `'/home'`                                           | Router pathname                               |
+| Option     | Type                                                                                                                           | Default                                             | Description                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | --------------------------------------------- |
+| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`                                                        | `'efSafe'`                                          | Data fixture scenario                         |
+| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                                                                       | `'disconnected'`                                    | Wallet connection state                       |
+| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces?, oidcAuth?, switchAuthenticator?, spaceAuditLog? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
+| `layout`   | `'none' \| 'paper' \| 'withSidebar' \| 'fullPage'`                                                                             | `'none'`                                            | Layout wrapper                                |
+| `store`    | `object`                                                                                                                       | `{}`                                                | Redux store overrides                         |
+| `handlers` | `RequestHandler[]`                                                                                                             | `[]`                                                | Additional MSW handlers                       |
+| `pathname` | `string`                                                                                                                       | `'/home'`                                           | Router pathname                               |
 
 - **Do not override feature flags** unless testing a specific disabled state (e.g. `features: { swaps: false }`).
 - Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (all from `@/stories/mocks`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
