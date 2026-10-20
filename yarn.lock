@@ -14119,6 +14119,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.6.0"
     "@typescript-eslint/parser": "npm:^8.70.1"
     "@walletconnect/core": "npm:^2.21.10"
+    "@walletconnect/sign-client": "npm:2.21.10"
     "@walletconnect/utils": "npm:^2.21.10"
     "@web3-onboard/coinbase": "npm:^2.4.2"
     "@web3-onboard/core": "patch:@web3-onboard/core@npm%3A2.24.1#~/.yarn/patches/@web3-onboard-core-npm-2.24.1-56d6bba493.patch"
