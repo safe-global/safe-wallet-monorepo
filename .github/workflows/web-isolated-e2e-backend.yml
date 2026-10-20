@@ -12,7 +12,7 @@ on:
         required: false
         default: '6'
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened]
     paths:
       - '.github/workflows/web-isolated-e2e-backend.yml'
       - '.github/actions/isolated-e2e-backend/**'
@@ -32,20 +32,13 @@ on:
 permissions:
   contents: read
 
-# Only the full-run label replaces a running run; other label events get their own group and skip.
 concurrency:
-  group: >-
-    ${{ github.workflow }}-${{ github.ref }}${{
-    github.event.action == 'labeled' && github.event.label.name != 'isolated-e2e-full'
-    && format('-label-{0}', github.event.label.name) || '' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   plan:
-    # A label event only matters when it adds the full-run label.
-    if: >-
-      (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
-      && (github.event.action != 'labeled' || github.event.label.name == 'isolated-e2e-full')
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     outputs:
@@ -57,17 +50,10 @@ jobs:
       - name: Plan shards
         id: plan
         env:
-          PULL_REQUEST_SPECS: regression/assets,regression/spaces_basicflow,regression/tx_queue_reject_btn
-          FULL_RUN_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'isolated-e2e-full') }}
           SAFE_E2E_SPECS: ${{ inputs.specs }}
-          SAFE_E2E_SHARDS: ${{ inputs.shards }}
-        # Pull requests run a short selection unless labelled isolated-e2e-full; empty specs run every spec.
+          SAFE_E2E_SHARDS: ${{ inputs.shards || '6' }}
+        # Pull requests have no inputs, so they run every registered spec.
         run: |
-          if [ "$GITHUB_EVENT_NAME" = pull_request ] && [ "$FULL_RUN_LABEL" = true ]; then
-            export SAFE_E2E_SPECS='' SAFE_E2E_SHARDS=6
-          elif [ "$GITHUB_EVENT_NAME" = pull_request ]; then
-            export SAFE_E2E_SPECS=$PULL_REQUEST_SPECS SAFE_E2E_SHARDS=1
-          fi
           [ -n "$SAFE_E2E_SPECS" ] || unset SAFE_E2E_SPECS
           echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
 
