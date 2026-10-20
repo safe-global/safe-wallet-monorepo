@@ -4,6 +4,7 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { workspaceTrackingListener } from '../workspaceTrackingListener'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
@@ -47,6 +48,24 @@ describe('workspaceTrackingListener', () => {
       [[{ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId }]],
     ],
     ['spacesDeleteV1', mutation('spacesDeleteV1', { id: spaceId }), [[{ ...SPACE_EVENTS.DELETE_SPACE }]]],
+    [
+      'spacesUpdateV1',
+      mutation(
+        'spacesUpdateV1',
+        { id: spaceId, updateSpaceDto: { experimentalFeatures: ['POLICY_RECIPIENT_ALLOWLIST'] } },
+        { uuid: spaceId },
+      ),
+      [
+        [
+          { ...SPACE_EVENTS.WORKSPACE_UPDATED, label: spaceId },
+          {
+            [MixpanelEventParams.SOURCE]: 'experimental_features',
+            workspace_id: spaceId,
+            experimental_features: 'POLICY_RECIPIENT_ALLOWLIST',
+          },
+        ],
+      ],
+    ],
     ['membersSelfRemoveV1', mutation('membersSelfRemoveV1', { spaceId }), [[{ ...SPACE_EVENTS.LEAVE_SPACE }]]],
     [
       'membersInviteUserV1',
@@ -143,6 +162,20 @@ describe('workspaceTrackingListener', () => {
 
   it('does not track a failed request', () => {
     run(mutation('spacesDeleteV1', { id: spaceId }, undefined, 'rejected'))
+
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('tracks an experimental features update once when the rejected request is replayed after step-up', () => {
+    const originalArgs = { id: spaceId, updateSpaceDto: { experimentalFeatures: ['POLICY_RECIPIENT_ALLOWLIST'] } }
+    run(mutation('spacesUpdateV1', originalArgs, { status: 403 }, 'rejected'))
+    run(mutation('spacesUpdateV1', originalArgs, { uuid: spaceId }))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not track a workspace update that only changes the name', () => {
+    run(mutation('spacesUpdateV1', { id: spaceId, updateSpaceDto: { name: 'B' } }, { uuid: spaceId }))
 
     expect(trackEvent).not.toHaveBeenCalled()
   })
