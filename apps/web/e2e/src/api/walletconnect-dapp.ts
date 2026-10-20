@@ -64,6 +64,7 @@ export class WalletConnectDapp {
   readonly log: string[] = []
   private session: SessionTypes.Struct | undefined
   private approval: (() => Promise<SessionTypes.Struct>) | undefined
+  private deleted: Promise<void> | undefined
 
   private constructor(
     private readonly client: SignClientInstance,
@@ -99,6 +100,11 @@ export class WalletConnectDapp {
     if (!this.approval) throw new Error('Call connect() before waitForSession()')
     const session = await this.approval()
     this.session = session
+    this.deleted = new Promise((resolve) => {
+      this.client.on('session_delete', ({ topic }) => {
+        if (topic === session.topic) resolve()
+      })
+    })
     this.log.push(`session ${JSON.stringify(session.namespaces)}`)
     return session
   }
@@ -126,6 +132,12 @@ export class WalletConnectDapp {
     }
     this.log.push(`response ${method} ${JSON.stringify(response)}`)
     return response
+  }
+
+  /** Resolves when the wallet ends the session. */
+  waitForSessionDelete(): Promise<void> {
+    if (!this.deleted) throw new Error('No session to wait for; wait for the session first')
+    return this.deleted
   }
 
   /** Ends the session if it is still open and closes the relay connection. */

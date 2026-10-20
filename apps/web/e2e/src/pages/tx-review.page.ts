@@ -21,6 +21,11 @@ export class TxReviewPage {
   readonly addToBatchButton: Locator
   /** Submits a bulk execution, which has no sign step */
   readonly submitButton: Locator
+  readonly closeButton: Locator
+  readonly discardButton: Locator
+  readonly signMessageButton: Locator
+  /** Shown once a message has all its signatures; it hands the signature to the app that asked for it */
+  readonly signedMessageContinueButton: Locator
 
   constructor(page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -34,6 +39,10 @@ export class TxReviewPage {
     this.addToBatchChoice = page.getByRole('menuitem', { name: 'Add to batch' })
     this.addToBatchButton = page.getByTestId('combo-submit-batching')
     this.submitButton = page.getByRole('button', { name: 'Submit', exact: true })
+    this.closeButton = page.getByRole('dialog').getByRole('button', { name: 'close' })
+    this.discardButton = page.getByRole('alertdialog').getByRole('button', { name: 'Discard' })
+    this.signMessageButton = page.getByRole('button', { name: 'Sign', exact: true })
+    this.signedMessageContinueButton = page.getByRole('button', { name: 'Continue', exact: true })
   }
 
   /** Confirm the risk, continue from the review and sign with the connected wallet */
@@ -63,6 +72,19 @@ export class TxReviewPage {
     await this.confirmRisk()
     await this.connectedWalletMethod.click()
     await this.submitButton.click()
+  }
+
+  /** Close the flow and confirm "Discard this transaction?"; an app that asked for it gets a rejection */
+  async discard(): Promise<void> {
+    await this.closeButton.click()
+    await this.discardButton.click()
+  }
+
+  /** Confirm the risk and sign a message of a 1/n Safe, then hand the signature to the app that asked for it */
+  async signMessage(): Promise<void> {
+    await this.confirmRisk()
+    await this.signMessageButton.click()
+    await this.signedMessageContinueButton.click()
   }
 
   /** Wait until the success screen reports the transaction as mined; the indexer may still be behind */
