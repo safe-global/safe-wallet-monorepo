@@ -12,6 +12,7 @@ import { type ListTableItem } from '../../ListTable'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/getTotalBridgeFee'
 import { ActionsRow } from '@/src/components/ActionsRow'
 
 interface BridgeTransactionProps {
@@ -130,16 +131,19 @@ export function BridgeTransaction({ txId, txInfo, decodedData }: BridgeTransacti
     })
 
     // Fees
-    const totalFee = formatUnits(
-      BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n),
-      txInfo.fromToken.decimals,
-    )
+    const totalFee = getTotalBridgeFee(txInfo.fees)
 
     items.push({
       label: 'Fees',
       render: () => (
         <Text>
-          {Number(totalFee).toFixed(6)} {txInfo.fromToken.symbol}
+          {totalFee === null ? (
+            'Unknown'
+          ) : (
+            <>
+              {Number(formatUnits(totalFee, txInfo.fromToken.decimals)).toFixed(6)} {txInfo.fromToken.symbol}
+            </>
+          )}
         </Text>
       ),
     })
