@@ -483,6 +483,12 @@ export function spacesHandlers(): RequestHandler[] {
   return [
     // User with wallets endpoint
     http.get(/\/v1\/users$/, () => HttpResponse.json(mockUser)),
+    // Session probe: a 403 here makes useSessionExpiryGuard sign the story out, leaving AuthState on its spinner
+    http.get(/\/v1\/auth\/me$/, () =>
+      HttpResponse.json({ id: String(mockUser.id), authMethod: 'siwe', signerAddress: mockUser.wallets[0].address }),
+    ),
+    // The caller's own membership (useCurrentMemberProfile)
+    http.get(/\/v1\/spaces\/[^/]+\/membership$/, () => HttpResponse.json(createMockSpace().members[0])),
     // Get space by ID
     http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
@@ -494,6 +500,8 @@ export function spacesHandlers(): RequestHandler[] {
     http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(MOCK_SPACE_ID)])),
     // Get space safes
     http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} })),
+    // A 403 on a Workspace route starts a session check that remounts the page and refetches it, in a loop
+    http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () => HttpResponse.json({ spaceUuid: MOCK_SPACE_ID, data: [] })),
     // Get all safes owned by address (used by useOwnedSafesGrouped)
     http.get(/\/v2\/owners\/0x[a-fA-F0-9]+\/safes$/, () => HttpResponse.json(mockOwnedSafes)),
     // Safe overviews v1 (batch endpoint for safe card data)
