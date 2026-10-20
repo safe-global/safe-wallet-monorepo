@@ -7,6 +7,7 @@ type Deployment = { networkAddresses: Record<string, string> }
 // The guard needs the module guard slot, which Safe added in v1.5.0, so every policy shares this floor
 const MIN_POLICY_GUARD_SAFE_VERSION = '1.5.0'
 
+// Source: https://github.com/safe-global/policy-indexer/blob/main/config.yaml
 // One guard per root-activation delay, all with a 604800s expiry; swap the uncommented line to change the delay
 // const SAFE_POLICY_GUARD = '0x55c241591E12CE3c58491D02b737F12D3199ae95' // 0s delay
 const SAFE_POLICY_GUARD = '0xC83bC185770ac0Da8A970f35695064eEe62e236c' // 60s delay
