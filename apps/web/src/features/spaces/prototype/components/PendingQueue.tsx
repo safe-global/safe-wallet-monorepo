@@ -450,7 +450,7 @@ function PendingQueueView() {
                 </Empty>
               )}
               {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && (
-                <div className="flex flex-col gap-10">
+                <div className={`flex flex-col ${steps ? 'gap-6' : 'gap-10'}`}>
                   {sections.map((section) => (
                     <QueueSection
                       key={section.id}

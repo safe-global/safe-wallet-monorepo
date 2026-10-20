@@ -1,7 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { getAccount, getState } from '../../services/model'
+import { getAccount, getState, getStatusTone } from '../../services/model'
 import type { Filter, Persona, Proposal } from '../../types'
-import { HINT_CLASS, HintContent } from '../shared'
+import { HINT_CLASS, HintContent, type StatusTone } from '../shared'
 
 export type NonceState = 'now' | 'sign' | 'waiting' | 'blocked'
 
@@ -12,22 +12,33 @@ export const getNonceState = (tx: Proposal, persona: Persona): NonceState => {
   return state.waiting ? 'blocked' : 'waiting'
 }
 
-// All next steps row icons are 24px, so they align.
-const CIRCLE =
-  'flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-[3px] font-mono text-[11px] tabular-nums'
-// Green fill: ready to execute. Green ring: needs your signature. Dashed: waiting on others. Grey: blocked.
-export const NONCE_STYLES: Record<NonceState, string> = {
-  now: 'border-[1.5px] border-success-strong bg-success-muted/70 text-success-strong dark:bg-success-subtle',
-  sign: 'border-[1.5px] border-success-strong bg-card font-medium text-success-strong',
-  waiting: 'border-[1.5px] border-dashed border-muted-foreground/50 bg-card text-muted-foreground',
-  blocked: 'border-[1.5px] border-border bg-muted text-muted-foreground',
+// Status dot colours match the status chips. Conflicts are amber.
+const DOT: Record<StatusTone | 'conflict', string> = {
+  success: 'bg-badge-dot-success',
+  warning: 'bg-badge-dot-warning',
+  destructive: 'bg-destructive',
+  secondary: 'bg-muted-foreground',
+  conflict: 'bg-badge-dot-warning',
 }
-// Status section headers use the same circle as their nonces.
-export const STATUS_NONCE_STATE: Record<Filter, NonceState> = {
-  ready: 'now',
-  sign: 'sign',
-  awaiting: 'waiting',
-  waiting: 'blocked',
+// Grey by default. Dark when the row is hovered or selected.
+const LABEL = 'flex h-6 shrink-0 items-center gap-1.5 text-sm tabular-nums transition-colors'
+const ROW_COLOR =
+  'text-muted-foreground group-hover/transaction:text-foreground group-data-[state=selected]/transaction:text-foreground'
+
+// Section header icon: a 32px square, the size of the collapse button. Its left edge aligns with the nonce dots.
+const SQUARE = 'ml-2 flex size-8 shrink-0 items-center justify-center rounded-md border'
+// Three tones. Green: you can act. Amber: needs a decision. Grey: not your turn yet.
+const SECTION_TONES = {
+  green: `${SQUARE} border-success-strong/40 bg-success-muted/70 text-success-strong dark:bg-success-subtle`,
+  amber: `${SQUARE} border-(--warning-accent)/40 bg-warning-subtle text-warning-strong`,
+  grey: `${SQUARE} border-muted-foreground/40 bg-foreground/[0.05] text-muted-foreground`,
+}
+export const SECTION_STYLES: Record<Filter | 'conflicting', string> = {
+  ready: SECTION_TONES.green,
+  sign: SECTION_TONES.green,
+  conflicting: SECTION_TONES.amber,
+  awaiting: SECTION_TONES.grey,
+  waiting: SECTION_TONES.grey,
 }
 const STATE_LABELS: Record<NonceState, string> = {
   now: 'Ready to execute',
@@ -35,7 +46,6 @@ const STATE_LABELS: Record<NonceState, string> = {
   waiting: 'Waiting on others',
   blocked: 'Blocked',
 }
-export const COMPETING = 'border-[1.5px] border-[var(--warning-accent)] bg-card text-warning-strong'
 
 const hint = (tx: Proposal, state: NonceState, competing: number) => {
   const { nextNonce } = getAccount(tx)
@@ -53,7 +63,11 @@ const hint = (tx: Proposal, state: NonceState, competing: number) => {
   return competing ? `${base} ${competing + 1} conflicting transactions share this nonce; only one can execute.` : base
 }
 
-export function NonceCircle({ tx, persona, competing }: { tx: Proposal; persona: Persona; competing: number }) {
+const Dot = ({ tone }: { tone: StatusTone | 'conflict' }) => (
+  <span className={`size-1.5 shrink-0 rounded-full ${DOT[tone]}`} aria-hidden="true" />
+)
+
+export function NonceLabel({ tx, persona, competing }: { tx: Proposal; persona: Persona; competing: number }) {
   const state = getNonceState(tx, persona)
   const text = hint(tx, state, competing)
   return (
@@ -61,13 +75,14 @@ export function NonceCircle({ tx, persona, competing }: { tx: Proposal; persona:
       <TooltipTrigger
         aria-label={`Nonce ${tx.nonce}. ${text}`}
         onClick={(event) => event.stopPropagation()}
-        className={`${CIRCLE} ${competing && state !== 'now' ? COMPETING : NONCE_STYLES[state]}`}
+        className={`${LABEL} ${ROW_COLOR}`}
       >
+        <Dot tone={competing ? 'conflict' : getStatusTone(tx, persona)} />
         {tx.nonce}
       </TooltipTrigger>
       <TooltipContent className={HINT_CLASS}>
         <HintContent
-          title={`Nonce ${tx.nonce} · ${competing && state !== 'now' ? 'Conflicting transaction' : STATE_LABELS[state]}`}
+          title={`Nonce ${tx.nonce} · ${competing ? 'Conflicting transaction' : STATE_LABELS[state]}`}
           body={`${text} Each Safe runs its nonces in order, one at a time.`}
         />
       </TooltipContent>
@@ -75,26 +90,24 @@ export function NonceCircle({ tx, persona, competing }: { tx: Proposal; persona:
   )
 }
 
-// NonceCircle without a tooltip, for use inside buttons and headers.
-// `group`: a conflict group. It stays amber when one option is ready.
+// NonceLabel without a tooltip, for use inside buttons and headers.
+// `group`: a conflict group. Its dot is amber. `active`: one of its options is hovered.
 export function NonceMark({
   tx,
   persona,
   competing = 0,
   group = false,
+  active = false,
 }: {
   tx: Proposal
   persona: Persona
   competing?: number
   group?: boolean
+  active?: boolean
 }) {
-  const state = getNonceState(tx, persona)
   return (
-    <span
-      className={`${CIRCLE} ${group || (competing && state !== 'now') ? COMPETING : NONCE_STYLES[state]}`}
-      aria-label={`Nonce ${tx.nonce}`}
-      role="img"
-    >
+    <span className={`${LABEL} ${active ? 'text-foreground' : ROW_COLOR}`} aria-label={`Nonce ${tx.nonce}`} role="img">
+      <Dot tone={group || competing ? 'conflict' : getStatusTone(tx, persona)} />
       {tx.nonce}
     </span>
   )

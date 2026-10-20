@@ -36,7 +36,7 @@ import {
 } from '../../services/model'
 import type { Persona, Proposal } from '../../types'
 import { SignatureGauge } from './SignatureGauge'
-import { NonceCircle, NonceMark } from './NonceCell'
+import { NonceLabel, NonceMark } from './NonceCell'
 import { SignerList } from './SignerList'
 import { getMenuActions, getPrimaryAction, getStatusHint, MENU_LABELS, type MenuAction } from '../../services/actions'
 import type { PreviewAction } from '../../services/queue'
@@ -70,6 +70,9 @@ export type QueueRowProps = {
   // Next steps: Sign and Execute start a flow. Menu items run immediately.
   onStartFlow?: (tx: Proposal, flow: PreviewAction) => void
   onMenuAction?: (tx: Proposal, action: MenuAction) => void
+  // Next steps: the hovered conflict group, as `account:nonce`.
+  conflictHover?: string | null
+  onConflictHover?: (key: string | null) => void
 }
 
 const SECONDARY_ACTIONS: Record<RowSecondaryAction, string> = { replace: 'Replace', reject: 'Reject' }
@@ -95,6 +98,8 @@ export function QueueRow({
   onGoTo,
   onStartFlow,
   onMenuAction,
+  conflictHover,
+  onConflictHover,
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
   // The drawer covers the row, so mouseleave does not fire. mousemove resets the hover.
@@ -189,17 +194,17 @@ export function QueueRow({
           >
             <span
               aria-hidden="true"
-              className={`absolute left-[27px] w-3 border-l-[1.5px] border-[var(--warning-accent)] ${isLastOption ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]' : optionIndex === 1 ? 'top-[-14px] bottom-[-8px]' : 'top-[-30px] bottom-[-8px]'}`}
+              className={`absolute left-[18px] w-3 border-l-[1.5px] border-[var(--warning-accent)] ${isLastOption ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]' : optionIndex === 1 ? 'top-[-22px] bottom-[-8px]' : 'top-[-30px] bottom-[-8px]'}`}
             />
             {!isLastOption && (
               <span
                 aria-hidden="true"
-                className="absolute top-1/2 left-[27px] w-3 border-b-[1.5px] border-[var(--warning-accent)]"
+                className="absolute top-1/2 left-[18px] w-3 border-b-[1.5px] border-[var(--warning-accent)]"
               />
             )}
           </span>
         ) : (
-          <NonceCircle tx={tx} persona={persona} competing={conflicts.length} />
+          <NonceLabel tx={tx} persona={persona} competing={conflicts.length} />
         )}
       </TableCell>
     ) : (
@@ -232,7 +237,7 @@ export function QueueRow({
                   <TooltipTrigger
                     render={
                       <span
-                        className="flex size-6 shrink-0 items-center justify-center rounded-[4px] border border-border bg-card text-foreground"
+                        className="flex size-6 shrink-0 items-center justify-center rounded-[4px] bg-muted group-hover/transaction:bg-card group-data-[state=selected]/transaction:bg-card text-foreground"
                         role="img"
                         aria-label={`${transactionType}. ${TYPE_HINTS[transactionType]}`}
                       />
@@ -556,7 +561,7 @@ export function QueueRow({
             <div className="flex w-max flex-wrap items-center gap-x-2 gap-y-1 text-xs max-md:sticky max-md:left-4 max-md:w-[calc(100vw-5rem)] max-md:whitespace-normal">
               {steps ? (
                 <>
-                  <NonceMark tx={tx} persona={persona} group />
+                  <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
                   <span className="font-medium">
                     {columns.includes('Safe') ? account.name : `${groupSize} options`}
                   </span>
@@ -590,7 +595,11 @@ export function QueueRow({
         data-conflict-group={groupSize > 1 || undefined}
         onClick={() => onReview(tx)}
         onMouseMove={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={() => groupSize > 1 && onConflictHover?.(`${tx.account}:${tx.nonce}`)}
+        onMouseLeave={() => {
+          setHovered(false)
+          if (groupSize > 1) onConflictHover?.(null)
+        }}
         className={`group/transaction relative h-14 cursor-pointer data-[state=selected]:bg-transparent [&:has(:focus-visible)>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted || cursor ? '[&>td]:bg-muted' : ''}`}
       >
         {columns.map((label) => (

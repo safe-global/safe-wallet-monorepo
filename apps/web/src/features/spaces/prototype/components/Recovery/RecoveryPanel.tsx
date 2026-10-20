@@ -89,7 +89,7 @@ export function RecoveryRow({
     Transaction: (
       <TableCell className="py-2">
         <span className="flex min-w-0 items-center gap-3 text-sm">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-[4px] border border-border bg-card">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-[4px] bg-muted group-hover/transaction:bg-card group-data-[state=selected]/transaction:bg-card">
             <LifeBuoy className="size-3.5" strokeWidth={ICON_STROKE} aria-hidden="true" />
           </span>
           <span className="min-w-0">
@@ -243,7 +243,7 @@ export function RecoveryRow({
     ),
   }
   return (
-    <TableRow className="h-14 cursor-pointer" onClick={() => setOpenId(recovery.id)}>
+    <TableRow className="group/transaction h-14 cursor-pointer" onClick={() => setOpenId(recovery.id)}>
       {columns.map((label) => (
         <Fragment key={label}>{cells[label]}</Fragment>
       ))}
@@ -325,7 +325,7 @@ export function RecoveryPanel({ controller, isWide }: { controller: RecoveryCont
   const columns = getColumns('status', isWide, true)
   if (!visible.length) return null
   return (
-    <section className="mb-10 flex flex-col gap-2" data-prototype-element="Account recovery">
+    <section className="mb-6 flex flex-col gap-2" data-prototype-element="Account recovery">
       <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium">
         <RecoveryMark />
         Account recovery

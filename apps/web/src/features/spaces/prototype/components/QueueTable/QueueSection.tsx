@@ -22,7 +22,7 @@ import {
 import { QueueRow } from './QueueRow'
 import { getColumns, type QueueSectionData } from './sections'
 import { getOwnerWallet } from '../../services/nextSteps'
-import { COMPETING, NONCE_STYLES, STATUS_NONCE_STATE } from './NonceCell'
+import { SECTION_STYLES } from './NonceCell'
 import { RecoveryNoticeRow, RecoveryRow, type RecoveryController } from '../Recovery/RecoveryPanel'
 import { getPrimaryStatus } from '../../services/model'
 
@@ -174,7 +174,7 @@ function SectionHeader({
                   <span
                     className={
                       steps
-                        ? `flex size-6 shrink-0 items-center justify-center rounded-full ${conflicting ? COMPETING : NONCE_STYLES[STATUS_NONCE_STATE[section.category as Filter]]}`
+                        ? SECTION_STYLES[section.category as Filter | 'conflicting']
                         : `flex size-6 shrink-0 items-center justify-center rounded-md ${status.tone}`
                     }
                   />
@@ -184,7 +184,7 @@ function SectionHeader({
                 {steps && section.category === 'ready' ? (
                   <Check className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
                 ) : (
-                  <status.icon className={steps ? 'size-3.5' : 'size-4'} strokeWidth={ICON_STROKE} aria-hidden="true" />
+                  <status.icon className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
                 )}
               </TooltipTrigger>
               <TooltipContent className={HINT_CLASS}>
@@ -267,6 +267,7 @@ export function QueueSection({
   // When the note text shows, the note column fills the extra width.
   const widths = showNoteText ? { ...columnWidths(isWide, steps), Note: undefined } : columnWidths(isWide, steps)
   const scroller = useRef<HTMLDivElement>(null)
+  const [conflictHover, setConflictHover] = useState<string | null>(null)
   const [overflowing, setOverflowing] = useState(false)
   // The pinned Action column shows its shadow only when content scrolls under it.
   useEffect(() => {
@@ -282,132 +283,169 @@ export function QueueSection({
       container.removeEventListener('scroll', update)
     }
   }, [steps, collapsed])
+  // Next steps: the header moves into its card after the collapse animation ends.
+  const [headerInCard, setHeaderInCard] = useState(collapsed)
+  useEffect(() => {
+    if (!collapsed) return setHeaderInCard(false)
+    const timer = setTimeout(() => setHeaderInCard(true), 200)
+    return () => clearTimeout(timer)
+  }, [collapsed])
+  const header = (
+    <SectionHeader
+      section={section}
+      collapsed={collapsed}
+      onToggle={onToggle}
+      safeBatch={safeBatch}
+      onBulkExecute={onBulkExecute}
+      steps={steps}
+      persona={persona}
+      recoveryCount={safeRecoveries.length}
+    />
+  )
   return (
-    <section className="flex flex-col gap-2" data-prototype-element={grouped ? `Table (${section.label})` : 'Table'}>
-      {grouped && (
-        <SectionHeader
-          section={section}
-          collapsed={collapsed}
-          onToggle={onToggle}
-          safeBatch={safeBatch}
-          onBulkExecute={onBulkExecute}
-          steps={steps}
-          persona={persona}
-          recoveryCount={safeRecoveries.length}
-        />
-      )}
-      <div id={`section-${section.id}`} hidden={collapsed}>
-        <Card radius="xl" size="none">
-          <CardContent>
-            <div ref={scroller} className="group/queue relative" data-overflow={overflowing || undefined}>
-              <Table
-                aria-label={grouped ? `${section.label} transactions` : 'Pending transactions'}
-                variant="panel"
-                className={`table-fixed ${steps ? 'min-w-[1080px] [&_td]:px-4 [&_th]:px-4' : 'min-w-[920px]'}`}
-              >
-                <colgroup>
-                  {columns.map((label) => (
-                    <col key={label} className={widths[label]} />
-                  ))}
-                </colgroup>
-                <TableHeader>
-                  <TableRow data-no-hover>
-                    {columns.map((label, index) => {
-                      // Next steps: the view switch sets grouping. Column headers do not.
-                      const groupTarget = steps
-                        ? null
-                        : label === 'Safe' && groupBy !== 'safe'
-                          ? 'safe'
-                          : label === 'Status' && !grouped
-                            ? 'status'
-                            : null
-                      return (
-                        <TableHead
-                          key={label}
-                          scope="col"
-                          className={`text-xs text-muted-foreground ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
-                        >
-                          {label === 'Action' ? (
-                            <span className="sr-only">{label}</span>
-                          ) : groupTarget ? (
-                            <span className="flex items-center gap-1">
-                              {label}
-                              <Tooltip delay={150}>
-                                <TooltipTrigger
-                                  render={
-                                    <Button
-                                      size="icon-xs"
-                                      variant="ghost-muted"
-                                      aria-label={`Group by ${groupTarget === 'safe' ? 'Safe' : 'status'}`}
-                                      onClick={() => onGroupByChange(groupTarget)}
-                                    />
-                                  }
-                                >
-                                  <ListTree />
-                                </TooltipTrigger>
-                                <TooltipContent>Group by {groupTarget === 'safe' ? 'Safe' : 'status'}</TooltipContent>
-                              </Tooltip>
-                            </span>
-                          ) : (
-                            label
-                          )}
-                        </TableHead>
-                      )
-                    })}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {safeRecoveries.length > 0 && recoveries && (
-                    <>
-                      <RecoveryNoticeRow columnCount={columns.length} count={safeRecoveries.length} />
-                      {safeRecoveries.map((recovery) => (
-                        <RecoveryRow key={recovery.id} recovery={recovery} columns={columns} controller={recoveries} />
-                      ))}
-                    </>
-                  )}
-                  {section.items.map((tx) => (
-                    <QueueRow
-                      key={tx.id}
-                      tx={tx}
-                      sectionItems={section.items}
-                      items={items}
-                      persona={persona}
-                      steps={steps}
-                      isWide={isWide}
-                      showNoteText={showNoteText}
-                      columns={columns}
-                      selected={reviewId === tx.id}
-                      cursor={cursorId === tx.id}
-                      highlighted={bulkHover.includes(tx.id)}
-                      replaceHover={replaceHover}
-                      onReplaceHover={onReplaceHover}
-                      onReview={onReview}
-                      onSecondaryAction={onSecondaryAction}
-                      remindedIds={remindedIds}
-                      onRemind={onRemind}
-                      onGoTo={onGoTo}
-                      onStartFlow={onStartFlow}
-                      onMenuAction={onMenuAction}
-                    />
-                  ))}
-                  {!section.items.length && !safeRecoveries.length && (
-                    <TableRow data-no-hover data-no-divider>
-                      <TableCell colSpan={columns.length} className="py-6 text-center text-muted-foreground">
-                        No matching proposals
-                      </TableCell>
+    <section
+      className={`flex flex-col ${steps ? '' : 'gap-2'}`}
+      data-prototype-element={grouped ? `Table (${section.label})` : 'Table'}
+    >
+      {grouped &&
+        // Next steps: a collapsed section keeps the card of the expanded table.
+        (steps && headerInCard ? (
+          <Card radius="xl" size="none" className="overflow-hidden">
+            {header}
+          </Card>
+        ) : (
+          header
+        ))}
+      <div
+        id={`section-${section.id}`}
+        hidden={!steps && collapsed}
+        inert={collapsed}
+        className={
+          steps
+            ? `grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none ${collapsed ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'}`
+            : undefined
+        }
+      >
+        <div className={steps ? 'min-h-0 overflow-hidden pt-2' : undefined}>
+          <Card radius="xl" size="none">
+            <CardContent>
+              <div ref={scroller} className="group/queue relative" data-overflow={overflowing || undefined}>
+                <Table
+                  aria-label={grouped ? `${section.label} transactions` : 'Pending transactions'}
+                  variant="panel"
+                  className={`table-fixed ${steps ? 'min-w-[1080px] [&_td]:px-4 [&_th]:px-4' : 'min-w-[920px]'}`}
+                >
+                  <colgroup>
+                    {columns.map((label) => (
+                      <col key={label} className={widths[label]} />
+                    ))}
+                  </colgroup>
+                  <TableHeader>
+                    <TableRow data-no-hover>
+                      {columns.map((label, index) => {
+                        // Next steps: the view switch sets grouping. Column headers do not.
+                        const groupTarget = steps
+                          ? null
+                          : label === 'Safe' && groupBy !== 'safe'
+                            ? 'safe'
+                            : label === 'Status' && !grouped
+                              ? 'status'
+                              : null
+                        return (
+                          <TableHead
+                            key={label}
+                            scope="col"
+                            className={`text-xs text-muted-foreground ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
+                          >
+                            {label === 'Action' ? (
+                              <span className="sr-only">{label}</span>
+                            ) : groupTarget ? (
+                              <span className="flex items-center gap-1">
+                                {label}
+                                <Tooltip delay={150}>
+                                  <TooltipTrigger
+                                    render={
+                                      <Button
+                                        size="icon-xs"
+                                        variant="ghost-muted"
+                                        aria-label={`Group by ${groupTarget === 'safe' ? 'Safe' : 'status'}`}
+                                        onClick={() => onGroupByChange(groupTarget)}
+                                      />
+                                    }
+                                  >
+                                    <ListTree />
+                                  </TooltipTrigger>
+                                  <TooltipContent>Group by {groupTarget === 'safe' ? 'Safe' : 'status'}</TooltipContent>
+                                </Tooltip>
+                              </span>
+                            ) : (
+                              label
+                            )}
+                          </TableHead>
+                        )
+                      })}
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              {!steps && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-card to-transparent md:hidden"
-                />
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {safeRecoveries.length > 0 && recoveries && (
+                      <>
+                        <RecoveryNoticeRow columnCount={columns.length} count={safeRecoveries.length} />
+                        {safeRecoveries.map((recovery) => (
+                          <RecoveryRow
+                            key={recovery.id}
+                            recovery={recovery}
+                            columns={columns}
+                            controller={recoveries}
+                          />
+                        ))}
+                      </>
+                    )}
+                    {section.items.map((tx) => (
+                      <QueueRow
+                        key={tx.id}
+                        conflictHover={conflictHover}
+                        onConflictHover={setConflictHover}
+                        tx={tx}
+                        sectionItems={section.items}
+                        items={items}
+                        persona={persona}
+                        steps={steps}
+                        isWide={isWide}
+                        showNoteText={showNoteText}
+                        columns={columns}
+                        selected={reviewId === tx.id}
+                        cursor={cursorId === tx.id}
+                        highlighted={bulkHover.includes(tx.id)}
+                        replaceHover={replaceHover}
+                        onReplaceHover={onReplaceHover}
+                        onReview={onReview}
+                        onSecondaryAction={onSecondaryAction}
+                        remindedIds={remindedIds}
+                        onRemind={onRemind}
+                        onGoTo={onGoTo}
+                        onStartFlow={onStartFlow}
+                        onMenuAction={onMenuAction}
+                      />
+                    ))}
+                    {!section.items.length && !safeRecoveries.length && (
+                      <TableRow data-no-hover data-no-divider>
+                        <TableCell colSpan={columns.length} className="py-6 text-center text-muted-foreground">
+                          No matching proposals
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+                {!steps && (
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-card to-transparent md:hidden"
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </section>
   )
