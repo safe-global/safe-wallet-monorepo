@@ -14,7 +14,10 @@ export const useIsAllowlistActiveInSpace = (spaceId?: string): boolean | undefin
   const urlSpaceId = useUrlSpaceId()
   const isSignedIn = useAppSelector(isAuthenticated)
   const id = spaceId ?? urlSpaceId ?? ''
-  const { currentData: space, isFetching } = useSpacesGetOneV1Query({ id }, { skip: !isSignedIn || !id })
+  const { currentData: space, isFetching } = useSpacesGetOneV1Query(
+    { id },
+    { skip: !isSignedIn || !id || hasExperimentalFlag === false },
+  )
 
   if (hasExperimentalFlag === undefined || (isFetching && space === undefined)) return undefined
 

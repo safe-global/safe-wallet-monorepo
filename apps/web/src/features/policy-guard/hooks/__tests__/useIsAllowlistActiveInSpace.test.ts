@@ -77,9 +77,26 @@ describe('useIsAllowlistActiveInSpace', () => {
     expect(renderHook(() => useIsAllowlistActiveInSpace()).result.current).toBe(true)
   })
 
-  it('is false when the workspace flag is off', () => {
+  it('skips the query and is false when the workspace flag is off', () => {
     mockFlag(false)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, isFetching: false })
+
     expect(renderHook(() => useIsAllowlistActiveInSpace()).result.current).toBe(false)
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: CURRENT_SPACE_ID }, { skip: true })
+  })
+
+  it('fetches the space while the workspace flag is still loading', () => {
+    mockFlag(undefined)
+    renderHook(() => useIsAllowlistActiveInSpace())
+
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: CURRENT_SPACE_ID }, { skip: false })
+  })
+
+  it('fetches the space even when no chain has the allowlist deployed', () => {
+    mockChains([sepoliaOff])
+    renderHook(() => useIsAllowlistActiveInSpace())
+
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: CURRENT_SPACE_ID }, { skip: false })
   })
 
   it('is false when no chain has the allowlist deployed', () => {
