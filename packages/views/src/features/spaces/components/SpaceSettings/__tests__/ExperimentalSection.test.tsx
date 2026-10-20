@@ -82,4 +82,15 @@ describe('ExperimentalSection', () => {
     expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
   })
+
+  it('disables the toggle without a spinner when disabled', async () => {
+    const { toggle, onChange } = renderSection({ disabled: true })
+
+    expect(toggle).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument()
+
+    await userEvent.click(toggle!)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })

@@ -26,9 +26,17 @@ type ExperimentalSectionProps = {
   onChange: (enabled: ExperimentalFeature[]) => void
   isAdmin: boolean
   isSaving?: boolean
+  disabled?: boolean
 }
 
-const ExperimentalSection = ({ available, enabled, onChange, isAdmin, isSaving = false }: ExperimentalSectionProps) => {
+const ExperimentalSection = ({
+  available,
+  enabled,
+  onChange,
+  isAdmin,
+  isSaving = false,
+  disabled = false,
+}: ExperimentalSectionProps) => {
   const features = EXPERIMENTAL_FEATURES.filter(({ key }) => available.includes(key))
 
   const handleToggle = (key: ExperimentalFeature, checked: boolean) => {
@@ -64,7 +72,7 @@ const ExperimentalSection = ({ available, enabled, onChange, isAdmin, isSaving =
                   aria-labelledby={`${id}-label`}
                   checked={enabled.includes(key)}
                   onCheckedChange={(checked) => handleToggle(key, checked)}
-                  disabled={!isAdmin || isSaving}
+                  disabled={!isAdmin || isSaving || disabled}
                   data-testid={`${id}-toggle`}
                 />
               </AdminOnlyWorkspaceTooltip>

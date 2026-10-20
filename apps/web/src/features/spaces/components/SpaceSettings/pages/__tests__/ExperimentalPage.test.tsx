@@ -170,14 +170,23 @@ describe('ExperimentalPage', () => {
   })
 
   it('disables the switch and ignores clicks while the space is loading', async () => {
-    mockSpaceQuery(undefined)
+    mockSpaceQuery(undefined, true)
     render(<ExperimentalPage />)
 
     expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
 
     await userEvent.click(getToggle())
 
     expect(mockUpdateSpace).not.toHaveBeenCalled()
+  })
+
+  it('disables the switch without a spinner when the space failed to load', () => {
+    mockSpaceQuery(undefined)
+    render(<ExperimentalPage />)
+
+    expect(getToggle()).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument()
   })
 
   it('skips the space query when signed out', () => {

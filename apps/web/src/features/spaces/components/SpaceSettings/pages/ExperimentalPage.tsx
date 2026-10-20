@@ -62,7 +62,8 @@ const ExperimentalPage = () => {
         enabled={pending ?? serverFeatures ?? []}
         onChange={handleChange}
         isAdmin={isAdmin}
-        isSaving={isSaving || pending !== undefined || !space}
+        isSaving={isSaving || pending !== undefined || (!space && isFetching)}
+        disabled={!space}
       />
     </div>
   )
