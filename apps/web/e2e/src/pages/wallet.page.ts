@@ -19,6 +19,7 @@ export class WalletPage {
   readonly pkConnectBtn: Locator
   readonly accountCenter: Locator
   readonly siweContinueBtn: Locator
+  readonly disconnectBtn: Locator
 
   constructor(private readonly page: Page) {
     // On /welcome/accounts there are several visible connect affordances (a
@@ -38,6 +39,7 @@ export class WalletPage {
     this.pkConnectBtn = page.getByTestId('pk-connect-btn')
     this.accountCenter = page.getByTestId('open-account-center')
     this.siweContinueBtn = page.getByTestId('continue-with-wallet-btn')
+    this.disconnectBtn = page.getByRole('button', { name: 'Disconnect' })
   }
 
   /**
@@ -92,5 +94,12 @@ export class WalletPage {
     )
     await this.siweContinueBtn.click()
     await verify
+  }
+
+  /** Disconnect the connected wallet from the account center; returns once the connect button is back */
+  async disconnect(): Promise<void> {
+    await this.accountCenter.click()
+    await this.disconnectBtn.click()
+    await this.connectWalletBtn.filter({ visible: true }).first().waitFor({ state: 'visible' })
   }
 }
