@@ -23,7 +23,7 @@ export default {
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
   /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, mass_payouts.cy.js, spending_limits.cy.js */
   SEP_STATIC_SAFE_6: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
-  /** Queue delete/reject testing - Used in: tx_queue_delete_btn.cy.js, tx_queue_reject_btn.cy.js */
+  /** Queue replace testing - Used in: tx_queue_replace_btn.cy.js */
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js, mass_payouts.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
@@ -111,8 +111,6 @@ export default {
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
   /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
   SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
-  /** Queue reject testing - Used in: tx_queue_reject_btn.cy.js */
-  SEP_STATIC_SAFE_37: 'sep:0x4B8A8Ca9F0002a850CB2c81b205a6D7429a22DEe',
   /** Transaction history filter testing - Used in: tx_history_filter_2.cy.js */
   SEP_STATIC_SAFE_38: 'sep:0x30aeC11779d29dB096C434D4e72E77276EB01BdE',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */

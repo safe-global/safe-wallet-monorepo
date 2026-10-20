@@ -8,7 +8,6 @@ import * as counterfactual from './counterfactual.mjs'
 import * as cow from './cow.mjs'
 import * as creation from './creation.mjs'
 import * as dashboard from './dashboard.mjs'
-import * as deletion from './deletion.mjs'
 import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as happypath from './happypath.mjs'
 import * as history from './history.mjs'
@@ -42,7 +41,6 @@ const modules = [
   cow,
   creation,
   dashboard,
-  deletion,
   fallbackHandlers,
   happypath,
   history,

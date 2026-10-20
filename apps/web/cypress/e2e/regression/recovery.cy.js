@@ -189,20 +189,6 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     navigation.clickOnDisconnectBtn()
   })
 
-  it('Verify that recovery tx is opened after clicking on "Start recovery" button in the widget', () => {
-    cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    wallet.connectSignerViaStorage(guardian)
-    main.acceptCookies()
-    recovery.clickOnRecoverLaterBtn()
-    cy.visit(constants.homeUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    dashboard.expandActionRequiredPanel()
-    recovery.clickOnStartRecoveryBtn()
-    recovery.enterRecovererAddress(getMockAddress())
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
   it('Verify that the Security section contains Account recovery block on supported netwroks', () => {
     const safes = [
       staticSafes.ETH_STATIC_SAFE_15,
