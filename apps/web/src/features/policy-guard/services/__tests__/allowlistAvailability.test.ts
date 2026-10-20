@@ -19,7 +19,7 @@ describe('isAllowlistEnabled', () => {
 
   it('is false when the flag is on but the chain has no deployment', () => {
     const chain = chainBuilder()
-      .with({ chainId: '1', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
+      .with({ chainId: '999999', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
       .build()
     expect(isAllowlistEnabled(chain)).toBe(false)
   })
@@ -60,7 +60,7 @@ describe('isSafeEligibleForAllowlist', () => {
   })
 
   it('reports chain-not-enabled first when both checks fail', () => {
-    const chain = chainBuilder().with({ chainId: '1', features: [] }).build()
+    const chain = chainBuilder().with({ chainId: '999999', features: [] }).build()
     expect(isSafeEligibleForAllowlist({ version: '1.4.1' }, chain)).toEqual({
       eligible: false,
       reason: 'chain-not-enabled',
