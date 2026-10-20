@@ -755,7 +755,7 @@ const ExplorerAddressIcon = ({ address, chainId }: { address: string; chainId: s
   )
 }
 
-const FullAddress = ({ address, chainId }: { address: string; chainId: string }): ReactElement => (
+export const FullAddress = ({ address, chainId }: { address: string; chainId: string }): ReactElement => (
   <span className="flex items-center gap-1 whitespace-nowrap font-mono">
     {checksumAddress(address)}
     <CopyAddressIcon address={checksumAddress(address)} />
