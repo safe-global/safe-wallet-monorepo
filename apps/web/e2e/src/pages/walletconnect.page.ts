@@ -11,11 +11,14 @@ export class WalletConnectPage {
   readonly headerButton: Locator
   readonly pairingInput: Locator
   readonly approveButton: Locator
+  /** The connected dApps in the popover */
+  readonly sessions: Locator
 
   constructor(private readonly page: Page) {
     this.headerButton = page.getByRole('button', { name: 'WalletConnect' })
     this.pairingInput = page.getByTestId('wc-input')
     this.approveButton = page.getByRole('button', { name: 'Approve' })
+    this.sessions = page.getByRole('listitem').filter({ has: page.getByRole('button', { name: 'Disconnect' }) })
   }
 
   /** The proposal's "<name> wants to connect" heading. */

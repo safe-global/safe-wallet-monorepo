@@ -74,6 +74,13 @@ export class TxReviewPage {
     await this.submitButton.click()
   }
 
+  /** Confirm the risk, continue from the review and execute a fully signed transaction with the connected wallet */
+  async continueAndExecute(): Promise<void> {
+    await this.confirmRisk()
+    await this.continueButton.click()
+    await this.execute()
+  }
+
   /** Close the flow and confirm "Discard this transaction?"; an app that asked for it gets a rejection */
   async discard(): Promise<void> {
     await this.closeButton.click()

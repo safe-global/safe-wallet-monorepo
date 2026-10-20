@@ -89,7 +89,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/nested_safes_fund_asset.cy.js': { scenario: 'prepareNestedFundingScenario' },
   'cypress/e2e/regression/nested_safes_review.cy.js': { scenario: 'prepareNestedFundingScenario' },
   'cypress/e2e/regression/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
-  'cypress/e2e/regression/nfts_2.cy.js': { scenario: 'prepareNftsScenario' },
   'cypress/e2e/regression/nfts.cy.js': { scenario: 'prepareNftsScenario' },
   'cypress/e2e/regression/portfolio.cy.js': {
     scenario: 'preparePortfolioScenario',
