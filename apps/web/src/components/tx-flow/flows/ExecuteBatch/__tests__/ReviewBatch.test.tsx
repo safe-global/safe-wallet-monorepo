@@ -41,12 +41,14 @@ jest.mock('@safe-global/store/gateway/transactions', () => ({
   }),
 }))
 
-jest.mock('../useMultiSendContract', () => ({
-  useMultiSendContract: () => ({
-    multiSendContract: {},
-    multiSendContractAddress: '0x0000000000000000000000000000000000000003',
-  }),
-}))
+const MULTI_SEND = { multiSendContract: {}, multiSendContractAddress: '0x0000000000000000000000000000000000000003' }
+const mockUseMultiSendContract = jest.fn<{ multiSendContract?: object; multiSendContractAddress: string }, []>(
+  () => MULTI_SEND,
+)
+jest.mock('../useMultiSendContract', () => ({ useMultiSendContract: () => mockUseMultiSendContract() }))
+
+const mockUseSafeSDK = jest.fn<object | undefined, []>(() => ({}))
+jest.mock('@/hooks/coreSDK/safeCoreSDK', () => ({ getSafeSDK: jest.fn(), useSafeSDK: () => mockUseSafeSDK() }))
 
 jest.mock('../DecodedTxs', () => ({ __esModule: true, default: () => null }))
 
@@ -55,7 +57,11 @@ jest.mock('@/hooks/useGasPrice', () => ({
   default: () => [{ maxFeePerGas: BigInt(1), maxPriorityFeePerGas: BigInt(1) }, undefined, false],
 }))
 
-jest.mock('@/components/tx/AdvancedParams/useUserNonce', () => ({ __esModule: true, default: () => 1 }))
+const mockUseUserNonce = jest.fn<number | undefined, []>(() => 1)
+jest.mock('@/components/tx/AdvancedParams/useUserNonce', () => ({
+  __esModule: true,
+  default: () => mockUseUserNonce(),
+}))
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/wallets/useOnboard', () => ({ __esModule: true, default: () => ({}) }))
@@ -135,6 +141,9 @@ const submit = async () => {
 describe('ReviewBatch', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseUserNonce.mockReturnValue(1)
+    mockUseSafeSDK.mockReturnValue({})
+    mockUseMultiSendContract.mockReturnValue(MULTI_SEND)
     mockUseSafeShield.mockReturnValue(NO_RISK)
     mockSafeInfo({ version: '1.4.1' })
     const chain = mockCurrentChain()
@@ -188,6 +197,25 @@ describe('ReviewBatch', () => {
       await screen.findByText('Data')
       expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    })
+
+    it('builds the MultiSend transaction once the Safe SDK is ready', async () => {
+      mockRiskState(false)
+      mockUseSafeSDK.mockReturnValue(undefined)
+      const review = <ReviewBatch params={{ txs: [getMockTx({ nonce: 1 }), getMockTx({ nonce: 2 })] }} />
+      const { rerender } = render(review)
+
+      await screen.findByText('Data')
+      expect(mockCreateMultiSendCallOnlyTx).not.toHaveBeenCalled()
+      expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
+
+      mockUseSafeSDK.mockReturnValue({})
+      rerender(review)
+
+      expect(
+        await screen.findByText('I understand the risks and would like to proceed with this transaction.'),
+      ).toBeInTheDocument()
+      expect(mockCreateMultiSendCallOnlyTx).toHaveBeenCalledTimes(1)
     })
 
     it('shows the risk checkbox when the MultiSend transaction cannot be built', async () => {
@@ -248,6 +276,42 @@ describe('ReviewBatch', () => {
     await submit()
 
     await waitFor(() => expect(mockDispatchBatchExecution).toHaveBeenCalledTimes(1))
+    expect(mockDispatchBatchExecutionRelay).not.toHaveBeenCalled()
+  })
+
+  it('executes through a connected wallet that has sent no transaction yet', async () => {
+    mockGasPaymentOptions({ offer: null, showsProUpsell: false })
+    mockUseUserNonce.mockReturnValue(0)
+    renderReviewBatch()
+
+    await submit()
+
+    await waitFor(() => expect(mockDispatchBatchExecution).toHaveBeenCalledTimes(1))
+    expect(mockDispatchBatchExecution.mock.calls[0][7]).toEqual(expect.objectContaining({ nonce: 0 }))
+  })
+
+  it('keeps Submit disabled and sends nothing while the connected wallet has no nonce', async () => {
+    mockGasPaymentOptions({ offer: null, showsProUpsell: false })
+    mockUseUserNonce.mockReturnValue(undefined)
+    renderReviewBatch()
+
+    await screen.findByText('Data')
+    const button = screen.getByRole('button', { name: 'Submit' })
+    expect(button).toBeDisabled()
+
+    fireEvent.click(button)
+    expect(mockDispatchBatchExecution).not.toHaveBeenCalled()
+  })
+
+  it('keeps Submit disabled and relays nothing while the MultiSend contract is missing', async () => {
+    mockUseMultiSendContract.mockReturnValue({ ...MULTI_SEND, multiSendContract: undefined })
+    renderReviewBatch()
+
+    await screen.findByText('Data')
+    const button = screen.getByRole('button', { name: 'Submit' })
+    expect(button).toBeDisabled()
+
+    fireEvent.click(button)
     expect(mockDispatchBatchExecutionRelay).not.toHaveBeenCalled()
   })
 

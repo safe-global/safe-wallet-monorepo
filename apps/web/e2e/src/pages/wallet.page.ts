@@ -1,9 +1,10 @@
 /**
- * Wallet Page Object — connecting a private-key or Ledger wallet and SiWE login.
+ * Wallet Page Object — connecting a private-key, Ledger or WalletConnect wallet and SiWE login.
  *
  * Drives the app's always-registered web3-onboard "Private key" module (backed
  * by an ethers Wallet, no mocks), the Ledger module (on the isolated stack it
- * talks to the Speculos emulator) and the Spaces Sign-In With Ethereum flow.
+ * talks to the Speculos emulator), the WalletConnect module and the Spaces
+ * Sign-In With Ethereum flow.
  *
  * Rule: Page Objects hold locators and actions only. Assertions belong in the
  * test file, never here. Waiting (waitFor / waitForResponse) is allowed.
@@ -19,6 +20,9 @@ export class WalletPage {
   readonly ledgerOption: Locator
   /** web3-onboard's hardware account picker — another custom element with a shadow DOM */
   readonly ledgerAccountSelect: Locator
+  readonly walletConnectOption: Locator
+  /** The WalletConnect modal's QR code; its `uri` attribute holds the pairing URI */
+  readonly walletConnectQrCode: Locator
   readonly privateKeyInput: Locator
   readonly pkConnectBtn: Locator
   readonly accountCenter: Locator
@@ -40,6 +44,8 @@ export class WalletPage {
     this.privateKeyOption = this.onboardModal.getByRole('button', { name: 'Private key' })
     this.ledgerOption = this.onboardModal.getByRole('button', { name: 'Ledger' })
     this.ledgerAccountSelect = page.locator('account-select')
+    this.walletConnectOption = this.onboardModal.getByRole('button', { name: 'WalletConnect' })
+    this.walletConnectQrCode = page.locator('wcm-qrcode')
     // The testid sits on the <input> itself (shadcn/Base UI), not on a wrapper.
     this.privateKeyInput = page.getByTestId('private-key-input')
     this.pkConnectBtn = page.getByTestId('pk-connect-btn')
@@ -59,6 +65,18 @@ export class WalletPage {
     await this.pkConnectBtn.click()
 
     await this.accountCenter.waitFor({ state: 'visible' })
+  }
+
+  /**
+   * Start connecting a wallet over WalletConnect and return the pairing URI that the other wallet needs.
+   * The account center appears once the other wallet approves the session.
+   */
+  async startWalletConnectPairing(): Promise<string> {
+    await this.openWalletOption(this.walletConnectOption)
+    await this.walletConnectQrCode.waitFor({ state: 'attached' })
+    const uri = await this.walletConnectQrCode.getAttribute('uri')
+    if (!uri?.startsWith('wc:')) throw new Error(`The WalletConnect modal shows no pairing URI: ${uri}`)
+    return uri
   }
 
   /**

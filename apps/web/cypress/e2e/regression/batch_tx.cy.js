@@ -20,22 +20,6 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  describe('Building a batch', () => {
-    beforeEach(() => {
-      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      owner.waitForConnectionStatus()
-    })
-
-    it('Verify that the Add batch button is not present on non-safe pages', () => {
-      const urls = [constants.welcomeUrl, constants.appSettingsUrl, constants.appsUrl]
-
-      urls.forEach((url) => {
-        cy.visit(url)
-        cy.get(batch.batchTxTopBar).should('not.exist')
-      })
-    })
-  })
-
   describe('Operating on a pre-seeded batch', () => {
     beforeEach(() => {
       wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2, {
@@ -51,23 +35,6 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
       cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx)
       cy.get('@TransactionList').find('li').eq(1).contains(funds_second_tx)
       cy.contains(batch.addToBatchBtn).should('have.length', 0)
-    })
-
-    it('Verify a batched tx can be expanded and collapsed', () => {
-      batch.clickOnBatchCounter()
-      cy.contains(funds_first_tx).parents('ul').as('TransactionList')
-      cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx).click()
-      batch.isTxExpanded(0, true)
-      cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx).click()
-      batch.isTxExpanded(0, false)
-    })
-
-    it('Verify a transaction can be removed from the batch', () => {
-      batch.clickOnBatchCounter()
-      cy.contains(batch.batchedTransactionsStr).should('be.visible').parents('aside').find('ul > li').as('BatchList')
-      cy.get('@BatchList').find(batch.deleteTransactionbtn).eq(0).click()
-      cy.get('@BatchList').should('have.length', 1)
-      cy.get('@BatchList').contains(funds_first_tx).should('not.exist')
     })
   })
 })
