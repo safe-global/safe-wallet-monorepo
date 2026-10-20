@@ -4,11 +4,13 @@
  * The test plays the dApp with a real WalletConnect client in the Playwright process, so it reads the responses
  * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of OWNER_4.
  */
-import { Wallet, parseEther, toQuantity } from 'ethers'
+import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedSafe, type SeededSafe } from '../../src/seed/safe'
 import { balanceOf } from '../../src/chain/balances'
+import { isValidSafeSignature } from '../../src/chain/signatures'
+import { transactionsIn } from '../../src/api/transaction-items'
 import { CHAIN_IDS, ROUTES } from '../../src/data/constants'
 import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
@@ -98,5 +100,47 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     await expect.poll(async () => (await receiptOf(dapp, hash))?.status, { timeout: 60_000 }).toBe('0x1')
 
     expect(await balanceOf(journey.env, recipient)).toBe(value)
+  })
+
+  test('should give the dApp a signature that the Safe contract accepts when the owner signs its message', async ({
+    safePage,
+    safe,
+    dapp,
+    journey,
+  }) => {
+    const message = `Safe E2E WalletConnect message ${Date.now()}`
+
+    const response = dapp.request('personal_sign', [message, safe.address])
+    await new TxReviewPage(safePage).signMessage()
+
+    const answer = await response
+    expect(answer).toEqual({ result: expect.stringMatching(/^0x[0-9a-f]+$/) })
+    const { result: signature } = answer as { result: string }
+    expect(
+      await isValidSafeSignature(journey.env, { safeAddress: safe.address, hash: hashMessage(message), signature }),
+    ).toBe(true)
+  })
+
+  test('should return a user rejection to the dApp when the owner discards its transaction', async ({
+    safePage,
+    safeApiClient,
+    safe,
+    dapp,
+  }) => {
+    const response = dapp.request('eth_sendTransaction', [
+      { from: safe.address, to: Wallet.createRandom().address, value: '0x1', data: '0x' },
+    ])
+    await new TxReviewPage(safePage).discard()
+
+    expect(await response).toEqual({ error: { code: 4001, message: expect.any(String) } })
+    expect(transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))).toEqual([])
+  })
+
+  test('should end the dApp session when the owner disconnects it', async ({ safePage, dapp }) => {
+    const walletConnect = new WalletConnectPage(safePage)
+    await walletConnect.disconnect(DAPP_NAME)
+
+    await dapp.waitForSessionDelete()
+    await expect(walletConnect.session(DAPP_NAME)).toHaveCount(0)
   })
 })
