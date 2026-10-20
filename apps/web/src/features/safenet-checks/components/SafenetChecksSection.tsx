@@ -174,9 +174,12 @@ type ProofLink = { href: string; testId: string; label: string }
 
 const EXPLORER_UNAVAILABLE_REASONS: ReadonlyArray<UnavailableReason | undefined> = ['READ_FAILED', 'WINDOW_UNCERTAIN']
 
-/** A risk, or a check that could not be read, points at the explorer once there is a transaction to look up. */
+/** A risk, an open dispute or an unreadable check points at the explorer once there is a transaction to look up. */
 const hasExplorerPage = ({ publicStatus, unavailableReason }: SectionCheck, safeTxHash: string | undefined): boolean =>
-  !!safeTxHash && (publicStatus === CheckStatus.MALICIOUS || EXPLORER_UNAVAILABLE_REASONS.includes(unavailableReason))
+  !!safeTxHash &&
+  (publicStatus === CheckStatus.MALICIOUS ||
+    publicStatus === CheckStatus.DISPUTED ||
+    EXPLORER_UNAVAILABLE_REASONS.includes(unavailableReason))
 
 /** A verified BENIGN links its attestation; the explorer page is the fallback where it applies. */
 const proofLinkFor = (check: SectionCheck, safeTxHash: string | undefined, links: SafenetLinks): ProofLink | null => {

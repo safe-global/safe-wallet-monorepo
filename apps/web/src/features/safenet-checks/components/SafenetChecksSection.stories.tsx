@@ -19,7 +19,9 @@ import {
   STORY_SUBMITTED_AT,
   exampleSnapshot,
   inProgressWithDeadline,
+  openDisputeSnapshot,
   rejectedSnapshot,
+  timedOutDisputeSnapshot,
 } from './storyExamples'
 
 faker.seed(456)
@@ -190,6 +192,5 @@ export const NoIssuesFound = viewStory(verdict(exampleSnapshot(CheckStatus.BENIG
 export const RiskDetected = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.approvalAndSpender)))
 export const RiskSettingsChange = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.settingsChange)))
 export const RiskMaliciousAddress = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.blocklisted)))
-export const CheckFailed = viewStory(
-  verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.openDispute, CheckStatus.TIMED_OUT)),
-)
+export const UnderReview = viewStory(verdict(openDisputeSnapshot()))
+export const CheckFailed = viewStory(verdict(timedOutDisputeSnapshot()))

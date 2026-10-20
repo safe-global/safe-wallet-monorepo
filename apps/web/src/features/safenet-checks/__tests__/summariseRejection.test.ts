@@ -6,7 +6,10 @@ import {
   type NormalizedCheckEvent,
 } from '@safe-global/utils/features/safenet-checks'
 import {
+  arbitrationTimedOutEvent,
   attestedEvent,
+  disputeResolvedEvent,
+  disputeTriggeredEvent,
   oracleResultEvent,
   requestCreatedEvent,
   sentinelCommittedEvent,
@@ -76,6 +79,21 @@ describe('explainFailure', () => {
       'an out-of-scope ruling',
       [sentinelRevealedEvent(), outOfScope],
       'Safenet gave no ruling because this transaction is out of scope.',
+    ],
+    [
+      'an open dispute',
+      [sentinelRevealedEvent(), disputeTriggeredEvent()],
+      'Sentinels disagreed. The dispute is open.',
+    ],
+    [
+      'a dispute whose arbitration got no ruling',
+      [sentinelRevealedEvent(), disputeTriggeredEvent(), arbitrationTimedOutEvent()],
+      'Sentinels disagreed, and the dispute got no final ruling.',
+    ],
+    [
+      'a dispute approved but not yet signed',
+      [sentinelRevealedEvent(), disputeTriggeredEvent(), disputeResolvedEvent()],
+      'Sentinels voted, but the validators did not sign the result in time.',
     ],
   ])('explains %s', (_, events, reason) => {
     expect(explainFailure({ events, attestation: UNVERIFIED_ATTESTATION })).toBe(reason)
