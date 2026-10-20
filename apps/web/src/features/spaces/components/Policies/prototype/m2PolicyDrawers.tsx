@@ -46,6 +46,7 @@ import {
 } from './m2OverviewPage'
 import {
   getAccountKey,
+  getAccountSpendingLimits,
   getAllowlistSettings,
   PAYMENTS,
   SafeAddress,
@@ -60,7 +61,7 @@ const NADIA_ADDRESS = '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F'
 
 /** The setup's fake guard contract, as in m2SetupFlow's transaction. */
 const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
-const ENFORCED_BY = 'Safe policy guard'
+const ENFORCED_BY = 'Safe policy contract'
 
 /** M1's PolicyDrawerHeader markup; its chip only knows M1's statuses, so this one also shows "Change pending". */
 const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | null }): ReactElement => {
@@ -290,17 +291,48 @@ const TokenList = ({
   )
 }
 
+/** Whether the account's spending limits follow the allowlist: the setup's "Apply the allowlist to existing policies" switch. */
+const ExistingPoliciesSection = ({ count, isApplied }: { count: number; isApplied: boolean }): ReactElement => {
+  const Icon = POLICY_TYPES['spending-limit'].Icon
+
+  return (
+    <DrawerSection title="Existing policies">
+      <Card variant="muted" size="none" radius="lg" data-m2-new="New · Existing policies coverage">
+        <div className="flex flex-col gap-1 p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+              <Icon className="size-4 text-muted-foreground" aria-hidden />
+            </div>
+            <Typography variant="paragraph-small-medium" className="min-w-0 flex-1 truncate">
+              {count} {count === 1 ? 'spending limit' : 'spending limits'}
+            </Typography>
+            <Badge variant={isApplied ? 'success' : 'warning'} size="status" shape="status">
+              {isApplied ? 'Follow the allowlist' : 'Not covered'}
+            </Badge>
+          </div>
+          {/* A choice made at setup, so it reads as information, not a warning to act on. */}
+          {!isApplied && (
+            <Typography variant="paragraph-small" color="muted" className="pl-11">
+              They can still send any token to any address. Edit the allowlist to include them.
+            </Typography>
+          )}
+        </div>
+      </Card>
+    </DrawerSection>
+  )
+}
+
 /** What became of a queued transaction that left the queue (M1's PendingTxOutcome). */
 export type PanelOutcome = 'executed' | 'failed' | 'replaced' | 'deleted'
 
 /** A side panel state picked from the prototype bar. Without one, the panel follows the prototype's own state. */
 export type AllowlistPanelScenario = { viewer: PanelViewer; operation?: PanelOperation; outcome?: PanelOutcome }
 
-// M1's SpendingLimitDrawer copy (SpendingLimitDrawer/messages.ts), worded for the recipient allowlist.
+// M1's SpendingLimitDrawer copy (SpendingLimitDrawer/messages.ts), worded for the allowlist.
 const PENDING_TITLE: Record<PanelOperation, string> = {
-  create: 'The recipient allowlist is not active as the transaction is not yet executed.',
+  create: 'The allowlist is not active as the transaction is not yet executed.',
   update: 'The current recipients still apply until the change is executed.',
-  remove: 'This recipient allowlist is still active until the removal is executed.',
+  remove: 'This allowlist is still active until the removal is executed.',
 }
 
 const OPERATION_TAIL: Record<PanelOperation, string> = {
@@ -311,12 +343,12 @@ const OPERATION_TAIL: Record<PanelOperation, string> = {
 
 // Every change to the allowlist waits out the guard's 24‑hour delay after execution.
 const EXECUTED_LINE: Record<PanelOperation, string> = {
-  create: 'The recipient allowlist applies after the 24‑hour delay.',
+  create: 'The allowlist applies after the 24‑hour delay.',
   update: 'The new recipients apply after the 24‑hour delay.',
-  remove: 'The recipient allowlist is removed after the 24‑hour delay.',
+  remove: 'The allowlist is removed after the 24‑hour delay.',
 }
 
-const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this recipient allowlist.'
+const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this allowlist.'
 
 type PanelState =
   | { kind: 'live'; action: 'manage' | 'connect' | 'not-signer' }
@@ -534,13 +566,14 @@ const M2DrawerActions = ({
   }
 }
 
-/** The recipient allowlist in M1's drawer: header with status, the pending state, the recipients, then the overview. */
+/** The allowlist in M1's drawer: header with status, the pending state, the recipients, then the overview. */
 const AllowlistDrawer = ({
   open,
   row,
   viewerHasSigned,
   scenario,
   excludedTokens,
+  appliesToSpendingLimits,
   onClose,
   ...handlers
 }: M2DrawerHandlers & {
@@ -550,6 +583,8 @@ const AllowlistDrawer = ({
   scenario?: AllowlistPanelScenario
   /** Symbols of the account's tokens the allowlist leaves out. */
   excludedTokens: string[]
+  /** Whether the account's spending limits follow the allowlist too. */
+  appliesToSpendingLimits: boolean
   onClose: () => void
 }): ReactElement => {
   // A signer already in the transaction's signatures has signed, whichever state was picked.
@@ -560,6 +595,7 @@ const AllowlistDrawer = ({
   )
   const isRemoved = (state.kind === 'pending' || state.kind === 'closed') && state.operation === 'remove'
   const tokens = getAccountTokens(row.account).filter(({ symbol }) => !excludedTokens.includes(symbol))
+  const spendingLimitCount = getAccountSpendingLimits(row.account).length
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={POLICY_ROW_LABELS[row.type]}>
@@ -570,6 +606,9 @@ const AllowlistDrawer = ({
           <StatusSection row={row} state={state} />
           <RecipientList recipients={row.people} isRemoved={isRemoved} />
           <TokenList tokens={tokens} isRemoved={isRemoved} />
+          {spendingLimitCount > 0 && !isRemoved && (
+            <ExistingPoliciesSection count={spendingLimitCount} isApplied={appliesToSpendingLimits} />
+          )}
           {/* Last in every state, as in SpendingLimitDrawer. */}
           <PolicyOverviewSection account={row.account} lastUpdated={row.lastUpdated} />
         </div>
@@ -585,13 +624,15 @@ export type PolicyDrawerProps = M2DrawerHandlers & {
   row?: PolicyRow
   /** The prototype's viewer has already signed this row's pending setup. */
   viewerHasSigned?: boolean
-  /** Recipient allowlist only: a state picked from the prototype bar. */
+  /** Allowlist only: a state picked from the prototype bar. */
   scenario?: AllowlistPanelScenario
   /** Payments' spending limit only: tokens its setup's allowlist blocks; other rows carry their own. */
   spendingLimitBlockedTokens?: string[]
-  /** Recipient allowlist on Payments only: the tokens unchecked in its setup. Other accounts use their own settings. */
+  /** Allowlist on Payments only: the tokens unchecked in its setup. Other accounts use their own settings. */
   paymentsExcludedTokens?: string[]
-  /** A blocked spending limit's "See policy here": opens the recipient allowlist on that account. */
+  /** Allowlist on Payments only: its setup's "Apply the allowlist to existing policies" switch. */
+  paymentsAppliesToSpendingLimits?: boolean
+  /** A blocked spending limit's "See policy here": opens the allowlist on that account. */
   onOpenAllowlist?: (account: M2Account) => void
   onClose: () => void
 }
@@ -604,6 +645,7 @@ export const PolicyDrawer = ({
   scenario,
   spendingLimitBlockedTokens = [],
   paymentsExcludedTokens = [],
+  paymentsAppliesToSpendingLimits = true,
   onOpenAllowlist,
   onClose,
   ...handlers
@@ -676,6 +718,11 @@ export const PolicyDrawer = ({
             getAccountKey(row.account) === getAccountKey(PAYMENTS)
               ? paymentsExcludedTokens
               : getAllowlistSettings(row.account).excludedTokens
+          }
+          appliesToSpendingLimits={
+            getAccountKey(row.account) === getAccountKey(PAYMENTS)
+              ? paymentsAppliesToSpendingLimits
+              : getAllowlistSettings(row.account).applyToSpendingLimits
           }
           onClose={onClose}
           {...handlers}

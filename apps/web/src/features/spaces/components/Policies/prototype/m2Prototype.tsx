@@ -100,7 +100,7 @@ export const TREASURY_BASE: M2Account = { ...TREASURY, chainId: '8453' }
 
 export const getAccountKey = ({ chainId, address }: M2Account): string => `${chainId}:${address}`
 
-/** An account's existing spending limit, as the recipient allowlist's token check sees it. */
+/** An account's existing spending limit, as the allowlist's token check sees it. */
 export type AccountSpendingLimit = {
   spender: string
   /** The token the limit sends, by symbol. */
@@ -123,7 +123,7 @@ const ACCOUNT_SPENDING_LIMITS: Record<string, AccountSpendingLimit[]> = {
 export const getAccountSpendingLimits = (account?: M2Account): AccountSpendingLimit[] =>
   account ? (ACCOUNT_SPENDING_LIMITS[getAccountKey(account)] ?? []) : []
 
-/** A live recipient allowlist's token and existing-permissions choices, as its Create form left them. */
+/** A live allowlist's token and existing-permissions choices, as its Create form left them. */
 export type AllowlistSettings = {
   /** Symbols of the account's tokens the allowlist leaves out. */
   excludedTokens: string[]
@@ -722,7 +722,7 @@ const CopyAddressIcon = ({ address }: { address: string }): ReactElement => {
 }
 
 /** AccountIdentity's address style (12px, mono, muted), with Figma's normal line height. */
-const ShortAddress = ({ address }: { address: string }): ReactElement => (
+export const ShortAddress = ({ address }: { address: string }): ReactElement => (
   <Typography variant="paragraph-mini" color="muted" className="font-mono leading-[normal]">
     {/* In a mono font each dot of "..." takes a full slot, so two of them are drawn closer. */}
     {shortenAddress(address).slice(0, 6)}
@@ -827,6 +827,49 @@ export const SafeAddress = ({
         </span>
       </div>
     </div>
+  )
+}
+
+/** The same address tooltip as SafeAddress's (full address, copy, explorer) around any element, e.g. a chip. */
+export const AddressHoverTooltip = ({
+  address,
+  chainId = '1',
+  note,
+  className = 'inline-flex',
+  children,
+}: {
+  address: string
+  chainId?: string
+  /** A muted line above the address, e.g. the payment history. */
+  note?: string
+  /** The trigger's classes, e.g. to fill a grid cell. */
+  className?: string
+  children: ReactNode
+}): ReactElement => {
+  const [isOpen, setIsOpen] = useState(false)
+  const closeTimer = useRef<number>(undefined)
+
+  const show = () => {
+    window.clearTimeout(closeTimer.current)
+    setIsOpen(true)
+  }
+  const hide = () => {
+    window.clearTimeout(closeTimer.current)
+    closeTimer.current = window.setTimeout(() => setIsOpen(false), TOOLTIP_CLOSE_DELAY_MS)
+  }
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), [])
+
+  return (
+    <Tooltip open={isOpen} onOpenChange={(next) => (next ? show() : hide())}>
+      <TooltipTrigger render={<span className={className} />}>{children}</TooltipTrigger>
+      <TooltipContent side="top" className="max-w-none" onMouseEnter={show} onMouseLeave={hide}>
+        <span className="flex flex-col gap-0.5">
+          {note && <span className="opacity-70">{note}</span>}
+          <FullAddress address={address} chainId={chainId} />
+        </span>
+      </TooltipContent>
+    </Tooltip>
   )
 }
 

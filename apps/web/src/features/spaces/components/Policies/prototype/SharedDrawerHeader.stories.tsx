@@ -242,7 +242,7 @@ export const SecurityHubVariants: Story = {
   args: { view: 'security' },
 }
 
-/** Every Policies state from the M2 prototype: recipient allowlist, spending limit, proposer and account panel. */
+/** Every Policies state from the M2 prototype: allowlist, spending limit, proposer and account panel. */
 export const PoliciesVariants: Story = {
   args: { view: 'policies' },
 }

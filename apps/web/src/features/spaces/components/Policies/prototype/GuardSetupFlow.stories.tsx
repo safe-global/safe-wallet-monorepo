@@ -59,6 +59,7 @@ import {
 import { AllowlistIntroDialog } from './m2AllowlistIntro'
 import { PolicyDrawer, type AllowlistPanelScenario } from './m2PolicyDrawers'
 import {
+  ADDRESS_BOOK,
   createPoliciesM2Story,
   getAccountKey,
   getAllowlistSettings,
@@ -73,17 +74,21 @@ import {
   type SignerId,
 } from './m2Prototype'
 import {
+  ACCOUNT_SETTING_GROUPS,
   CONFIRM_STEP,
   DEFAULT_CHOICES,
   EXECUTE_STEP,
   findM2Account,
   getActiveDetails,
   PERMISSIONS_STEP,
+  POPULAR_TOKENS,
+  SETTINGS_STEP,
   REVIEW_STEP,
   SETUP_PREVIEW_HANDLERS,
   SetUpPoliciesFlow,
   WIZARD_STORE,
   type Preflight,
+  type Recipient,
   type SetupChoices,
   type WizardMode,
 } from './m2SetupFlow'
@@ -91,7 +96,7 @@ import {
 // AddPolicyDialog only takes its own policy ids, so the new tile borrows `recovery`, which M1 doesn't offer yet.
 const ALLOWLIST_OPTION: AddPolicyOption = {
   id: 'recovery',
-  title: 'Recipient allowlist',
+  title: 'Allowlist',
   description: 'Only addresses on your list can receive funds. Everything else is blocked.',
   Icon: ShieldCheck,
 }
@@ -135,14 +140,14 @@ type PrototypeState = {
   panelKey: string | null
   /** The policy row whose drawer is open over the By policy view. */
   policyId: string | null
-  /** A Recipient allowlist side panel state picked in Jump to; null follows the prototype's own state. */
+  /** An allowlist side panel state picked in Jump to; null follows the prototype's own state. */
   panelScenario: AllowlistPanelScenario | null
   /** The Ops bot's spending limit next to the Payments allowlist; set by the All states canvas only. */
   spendingLimitState: SpendingLimitState
   addPolicyOpen: boolean
-  /** The recipient allowlist's intro dialog, between Add policy and the create flow. */
+  /** The allowlist's intro dialog, between Add policy and the create flow. */
   introOpen: boolean
-  /** The account the new recipient allowlist is for (getAccountKey); null until picked on Create. */
+  /** The account the new allowlist is for (getAccountKey); null until picked on Create. */
   setupAccountKey: string | null
   /** The prototype follows one setup at a time. */
   account: AccountState
@@ -218,6 +223,51 @@ const WIZARD: Partial<PrototypeState> = {
 }
 
 // Payments' spending limits send USDC (Ops bot) and ETH (Payroll bot): unchecking those tokens puts them in conflict.
+/** Fake vendors for the 20-recipient case; addresses are made up but well-formed. */
+const VENDOR_NAMES = [
+  'Design studio',
+  'Audit firm',
+  'Cloud hosting',
+  'Market maker',
+  'Exchange desk',
+  'Grants multisig',
+  'Office lease',
+  'Recruiting agency',
+  'Bug bounty',
+  'Data provider',
+  'Translation service',
+  'Event venue',
+  'Insurance broker',
+  'Tax advisor',
+  'Security council',
+]
+
+// A small linear congruential generator, so each fake address (and its identicon) looks different.
+const fakeAddress = (seed: number): string => {
+  let value = seed * 2654435761
+  const digits = Array.from({ length: 40 }, () => {
+    value = (value * 1103515245 + 12345) % 2147483648
+    return (value % 16).toString(16)
+  })
+  return `0x${digits.join('')}`
+}
+
+/** 20 recipients: the 5 address book contacts, then 15 typed in. */
+const MANY_RECIPIENTS: Recipient[] = [
+  ...ADDRESS_BOOK.map(({ name, address }) => ({ name, address, source: 'address-book' as const, selected: true })),
+  ...VENDOR_NAMES.map((name, index) => ({ name, address: fakeAddress(index + 1), selected: true })),
+]
+
+/** Payments' 3 tokens plus 17 added: 20 chips. */
+const MANY_TOKENS_CHOICES: SetupChoices = {
+  ...DEFAULT_CHOICES,
+  excludedTokens: [],
+  addedTokens: POPULAR_TOKENS.map(({ symbol }) => symbol),
+  recipients: MANY_RECIPIENTS,
+}
+
+// A new setup starts with no recipients; later steps keep the prefilled ones so they have something to show.
+const FRESH_CHOICES: SetupChoices = { ...DEFAULT_CHOICES, recipients: [] }
 const CONFLICT_ONE: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC'] }
 const CONFLICT_TWO: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC', 'ETH'] }
 const CONFLICT_ONE_EXEMPT: SetupChoices = { ...CONFLICT_ONE, applyToSpendingLimits: false }
@@ -299,20 +349,49 @@ const OTHER_ACCOUNTS: { account: M2Account; state: AccountState }[] = [
 
 const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
   {
-    heading: 'Create recipient allowlist',
+    heading: 'Create allowlist',
     jumps: [
-      { label: 'Create', state: { ...WIZARD, wizardStep: 0 } },
+      { label: 'Create', state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES } },
+      { label: 'Create · 20 tokens, 20 recipients', state: { ...WIZARD, wizardStep: 0, choices: MANY_TOKENS_CHOICES } },
       { label: 'Policies', state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } },
+      { label: 'Safe account settings', state: { ...WIZARD, wizardStep: SETTINGS_STEP } },
       { label: 'Review', state: { ...WIZARD, wizardStep: REVIEW_STEP } },
       { label: 'Confirm', state: { ...WIZARD, wizardStep: CONFIRM_STEP } },
       { label: 'Execute', state: { ...WIZARD, wizardStep: EXECUTE_STEP, account: 'ready', ...FULLY_SIGNED } },
     ],
   },
   {
+    // Create with the account failing one of its pre-setup checks.
+    heading: 'Create · account checks',
+    jumps: [
+      {
+        label: 'Unknown policy installed',
+        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'other-guard' },
+      },
+      {
+        label: 'Allowlist already installed',
+        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'policy-guard' },
+      },
+      {
+        label: 'Safe account needs an update',
+        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'old-version' },
+      },
+      {
+        label: 'Pending transactions',
+        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'pending-transactions' },
+      },
+    ],
+  },
+  {
     // The same states as M1's SpendingLimitDrawer stories, on the new allowlist (Payments).
-    heading: 'Recipient allowlist side panel',
+    heading: 'Allowlist side panel',
     jumps: [
       allowlistPanel('Active · signer', LIVE_SETUP, { viewer: 'signer' }),
+      allowlistPanel(
+        'Active · spending limits not covered',
+        { ...LIVE_SETUP, choices: { ...DEFAULT_CHOICES, applyToSpendingLimits: false } },
+        { viewer: 'signer' },
+      ),
       allowlistPanel('Active · no wallet', LIVE_SETUP, { viewer: 'disconnected' }),
       allowlistPanel('Active · not a signer', LIVE_SETUP, { viewer: 'non-signer' }),
       allowlistPanel('Pending · already signed', PENDING_SETUP, { viewer: 'signer-signed' }),
@@ -351,7 +430,7 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
       { id: 'policy-table', label: 'Default', jump: { view: BY_POLICY, state: PENDING_TABLE } },
       {
         id: 'policy-table-filtered',
-        label: 'Filtered: Recipient allowlist',
+        label: 'Filtered: Allowlist',
         jump: { view: BY_POLICY, state: PENDING_TABLE },
         policyFilters: { types: ['allowlist'] },
       },
@@ -380,20 +459,34 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
     frames: [
       {
         id: 'drawer-allowlist-active',
-        label: 'Recipient allowlist · Active',
+        label: 'Allowlist · Active',
         jump: {
           view: BY_POLICY,
           state: { ...POLICY_TABLE, policyId: SETUP_ROW_ID, account: 'enforcing', ...FULLY_SIGNED },
         },
       },
       {
+        id: 'drawer-allowlist-not-covered',
+        label: 'Allowlist · Active, spending limits not covered',
+        jump: {
+          view: BY_POLICY,
+          state: {
+            ...POLICY_TABLE,
+            policyId: SETUP_ROW_ID,
+            account: 'enforcing',
+            ...FULLY_SIGNED,
+            choices: { ...DEFAULT_CHOICES, applyToSpendingLimits: false },
+          },
+        },
+      },
+      {
         id: 'drawer-allowlist-pending',
-        label: 'Recipient allowlist · Pending',
+        label: 'Allowlist · Pending',
         jump: { view: BY_POLICY, state: { ...PENDING_TABLE, policyId: SETUP_ROW_ID } },
       },
       {
         id: 'drawer-allowlist-change-pending',
-        label: 'Recipient allowlist · Change pending',
+        label: 'Allowlist · Change pending',
         jump: {
           view: BY_POLICY,
           state: {
@@ -453,33 +546,47 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
       {
         id: 'create-no-account',
         label: 'No account',
-        jump: { state: { ...WIZARD, wizardStep: 0, setupAccountKey: null } },
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: null } },
       },
-      { id: 'create-payments', label: 'Payments', jump: { state: { ...WIZARD, wizardStep: 0 } } },
+      {
+        id: 'create-payments',
+        label: 'Payments',
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES } },
+      },
+      {
+        id: 'create-many',
+        label: '20 tokens, 20 recipients',
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: MANY_TOKENS_CHOICES } },
+      },
       {
         id: 'create-treasury',
         label: 'Treasury',
-        jump: { state: { ...WIZARD, wizardStep: 0, setupAccountKey: getAccountKey(TREASURY) } },
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: getAccountKey(TREASURY) } },
       },
       {
         id: 'create-vault-3',
         label: 'Vault 3',
-        jump: { state: { ...WIZARD, wizardStep: 0, setupAccountKey: getAccountKey(VAULT_3) } },
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: getAccountKey(VAULT_3) } },
       },
       {
         id: 'create-old-version',
         label: 'Failure · Old version',
-        jump: { state: { ...WIZARD, wizardStep: 0, preflight: 'old-version' } },
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'old-version' } },
       },
       {
         id: 'create-other-guard',
-        label: 'Failure · Another guard',
-        jump: { state: { ...WIZARD, wizardStep: 0, preflight: 'other-guard' } },
+        label: 'Failure · Unknown policy installed',
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'other-guard' } },
+      },
+      {
+        id: 'create-policy-guard',
+        label: 'Failure · Allowlist already installed',
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'policy-guard' } },
       },
       {
         id: 'create-pending-transactions',
         label: 'Failure · Pending transactions',
-        jump: { state: { ...WIZARD, wizardStep: 0, preflight: 'pending-transactions' } },
+        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'pending-transactions' } },
       },
     ],
   },
@@ -501,6 +608,26 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
         id: 'permissions-spending-limits-exempt',
         label: 'Policies · Spending limits exempt',
         jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE_EXEMPT } },
+      },
+    ],
+  },
+  {
+    title: 'Safe account settings',
+    frames: [
+      { id: 'settings', label: 'All allowed', jump: { state: { ...WIZARD, wizardStep: SETTINGS_STEP } } },
+      {
+        id: 'settings-none',
+        label: 'None allowed',
+        jump: {
+          state: {
+            ...WIZARD,
+            wizardStep: SETTINGS_STEP,
+            choices: {
+              ...DEFAULT_CHOICES,
+              blockedSettings: ACCOUNT_SETTING_GROUPS.flatMap(({ settings }) => settings.map(({ id }) => id)),
+            },
+          },
+        },
       },
     ],
   },
@@ -732,11 +859,31 @@ header[class*="@container"] {
 }
 `
 
+/** The flow's logo and wallet bar; passed into the flow so it scrolls away with the page and the title can pin at the top. */
+const FlowTopBar = (): ReactElement => {
+  const wallet = useWallet()
+  const walletName = useWalletName(wallet)
+
+  return (
+    <div className="flex h-[var(--topbar-height)] items-center px-6 pt-6 pb-4" data-m2-new="M1 copy · Flow top bar">
+      <SafeLogo />
+      <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        <HeaderNavigation
+          walletAddress={wallet?.address ?? ''}
+          walletEns={walletName}
+          isConnected={Boolean(wallet)}
+          walletIcon={wallet?.icon}
+          walletLabel={wallet?.label}
+        />
+        <HeaderAccountInfo />
+      </div>
+    </div>
+  )
+}
+
 /** The story shell mocks TxModalContext with no flow, so the app can't hide its sidebar; this layer covers it instead. */
 const FullScreenFlow = ({ children }: { children: ReactNode }): ReactElement | null => {
   const isDarkMode = useDarkMode()
-  const wallet = useWallet()
-  const walletName = useWalletName(wallet)
   const { isBarExpanded } = usePrototypeFrame()
 
   useEffect(() => {
@@ -760,20 +907,6 @@ const FullScreenFlow = ({ children }: { children: ReactNode }): ReactElement | n
       )}
     >
       <div className="absolute inset-0" style={{ backgroundColor: 'var(--color-background-main)' }}>
-        <div className="flex h-[var(--topbar-height)] items-center px-6 pt-6 pb-4" data-m2-new="M1 copy · Flow top bar">
-          <SafeLogo />
-          <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
-            <HeaderNavigation
-              walletAddress={wallet?.address ?? ''}
-              walletEns={walletName}
-              isConnected={Boolean(wallet)}
-              walletIcon={wallet?.icon}
-              walletLabel={wallet?.label}
-            />
-            <HeaderAccountInfo />
-          </div>
-        </div>
-
         {children}
       </div>
     </ShadcnProvider>,
@@ -894,6 +1027,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             recipients: row.people.map(({ name, address }) => ({ name, address, selected: true })),
             addedTokens: [],
             keptConflicts: [],
+            blockedSettings: [],
             ...getAllowlistSettings(row.account),
           }
 
@@ -965,10 +1099,11 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   // Only the allowlist panel's Edit is wired; M1's spending limit and proposer panels keep theirs unset.
   const openAllowlistRow = openRow?.type === 'allowlist' ? openRow : undefined
 
-  /** "Recipient allowlist" in Add policy: a fresh setup, starting with the account dropdown. */
+  /** "Allowlist" in Add policy: a fresh setup, starting with the account dropdown. */
   const startAllowlist = () =>
     update({
       ...WIZARD_DEFAULTS,
+      choices: FRESH_CHOICES,
       screen: 'wizard',
       addPolicyOpen: false,
       introOpen: false,
@@ -1021,6 +1156,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         scenario={isSetupRow ? (state.panelScenario ?? undefined) : undefined}
         spendingLimitBlockedTokens={BLOCKED_SPENDING_LIMIT_TOKENS}
         paymentsExcludedTokens={state.choices.excludedTokens}
+        paymentsAppliesToSpendingLimits={state.choices.applyToSpendingLimits}
         onClose={() => update({ policyId: null, panelScenario: null })}
         // Only the new allowlist is driven by the prototype: Confirm reviews it, Execute opens the execute step.
         onConfirm={isSetupRow ? () => openWizardAt(REVIEW_STEP) : undefined}
@@ -1095,6 +1231,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             onClose={closeWizard}
             mode={state.wizardMode}
             initialChoices={state.editInitialChoices ?? undefined}
+            topBar={<FlowTopBar />}
           />
           {/* The wizard layer covers the page's toasts, so it shows its own while it's open. */}
           <div data-m2-toasts="">

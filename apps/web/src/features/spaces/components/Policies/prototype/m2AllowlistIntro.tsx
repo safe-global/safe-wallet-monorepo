@@ -61,19 +61,19 @@ export type AllowlistIntroDialogProps = {
   onProceed: () => void
 }
 
-/** The recipient allowlist's intro, in M1's PolicyIntroDialog like SpendingLimitIntroDialog and ProposerIntroDialog. */
+/** The allowlist's intro, in M1's PolicyIntroDialog like SpendingLimitIntroDialog and ProposerIntroDialog. */
 export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => (
   <PolicyIntroDialog
     open={open}
     onOpenChange={onOpenChange}
     onProceed={onProceed}
-    title="Recipient allowlist"
+    title="Allowlist"
     description="Only addresses on your list can receive funds. Everything else is blocked."
     helpArticle={HelpCenterArticle.POLICIES}
-    helpLabel="Learn more about recipient allowlists"
+    helpLabel="Learn more about allowlists"
     explainers={EXPLAINERS}
     preview={<AllowlistPreview />}
-    proceedLabel="Set up recipient allowlist"
+    proceedLabel="Set up allowlist"
     testId="recipient-allowlist-intro-dialog"
   />
 )

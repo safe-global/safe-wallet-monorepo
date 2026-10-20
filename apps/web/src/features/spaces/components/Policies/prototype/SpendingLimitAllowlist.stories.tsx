@@ -218,7 +218,7 @@ export const TokenDropdownAllowlist: Story = {
     const usdt = await body.findByRole('option', { name: /USDT/ }, { timeout: 5000 })
     await userEvent.hover(usdt)
     await body.findByText(
-      `Blocked by the recipient allowlist on ${PAYMENTS.name}. It only lets allowed tokens be sent, so a spending limit for this one wouldn't work.`,
+      `Blocked by the allowlist on ${PAYMENTS.name}. It only lets allowed tokens be sent, so a spending limit for this one wouldn't work.`,
       {},
       TOOLTIP_TIMEOUT,
     )

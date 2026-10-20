@@ -19,7 +19,7 @@ import type { SpendingLimitMock } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
 import { RowStatusChip, type RowStatus } from './m2OverviewPage'
 
-const LOCKED_HELPER = 'Locked by the recipient allowlist.'
+const LOCKED_HELPER = 'Locked by the allowlist.'
 
 /** M1's active state with Edit disabled, so SpendingLimitActions shows its own disabled Edit with the reason under it. */
 const LOCKED_STATE: SpendingLimitDrawerState = {
@@ -63,14 +63,14 @@ export type BlockedSpendingLimitDrawerProps = {
   limit: SpendingLimitMock
 } & (
   | {
-      /** The recipient allowlist leaves out the limit's tokens, so the limit can't be used. */
+      /** The allowlist leaves out the limit's tokens, so the limit can't be used. */
       variant: 'blocked'
       blockedTokens: string[]
       /** "See policy here". */
       onOpenAllowlist?: () => void
     }
   | {
-      /** The recipient allowlist applies to existing permissions, so the limit works but can't be edited. */
+      /** The allowlist applies to existing permissions, so the limit works but can't be edited. */
       variant: 'locked'
     }
 )
@@ -121,7 +121,7 @@ export const BlockedSpendingLimitDrawer = (props: BlockedSpendingLimitDrawerProp
             <M2Alert
               tone="info"
               title="This spending limit is locked"
-              description={`The recipient allowlist on ${account.name} applies to it, so it can't be changed. Turn that off in the allowlist to edit it.`}
+              description={`The allowlist on ${account.name} applies to it, so it can't be changed. Turn that off in the allowlist to edit it.`}
             />
           )}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage />

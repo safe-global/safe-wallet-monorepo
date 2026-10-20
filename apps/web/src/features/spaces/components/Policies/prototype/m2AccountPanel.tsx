@@ -488,7 +488,7 @@ const PanelBody = ({
                   content: (
                     <span className="inline-flex items-center gap-1">
                       <ShieldCheck className="size-3.5" />
-                      Safe guard
+                      Safe policy contract
                     </span>
                   ),
                 },

@@ -8,6 +8,7 @@ import {
   DEFAULT_CHOICES,
   EXECUTE_STEP,
   PERMISSIONS_STEP,
+  SETTINGS_STEP,
   REVIEW_STEP,
   SecondSignerConfirm,
   SETUP_PREVIEW_HANDLERS,
@@ -76,7 +77,10 @@ const meta = {
   },
   argTypes: {
     initialStep: { control: { type: 'number', min: 0, max: WIZARD_STEP_NAMES.length - 1 } },
-    preflight: { control: 'select', options: ['ready', 'old-version', 'other-guard', 'pending-transactions'] },
+    preflight: {
+      control: 'select',
+      options: ['ready', 'old-version', 'other-guard', 'policy-guard', 'pending-transactions'],
+    },
   },
 } satisfies Meta<typeof WizardStory>
 
@@ -96,9 +100,14 @@ export const CreateOldVersion: Story = {
   args: { preflight: 'old-version' },
 }
 
-/** Create blocked: another guard is installed. */
+/** Create blocked: an unknown policy is installed and has to be removed first. */
 export const CreateAnotherGuard: Story = {
   args: { preflight: 'other-guard' },
+}
+
+/** Create blocked: the account already has an allowlist, so that one is edited or deleted instead. */
+export const CreateExistingPolicyGuard: Story = {
+  args: { preflight: 'policy-guard' },
 }
 
 /** Create blocked: transactions are still queued. */
@@ -111,7 +120,12 @@ export const CreateNoRecipients: Story = {
   args: { initialChoices: { ...DEFAULT_CHOICES, recipients: [] } },
 }
 
-/** Permissions ("Existing permissions"): Payments' spending limits, one blocked since USDC starts unchecked. */
+/** Safe account settings: which changes to the Safe account the allowlist still lets through. */
+export const Settings: Story = {
+  args: { initialStep: SETTINGS_STEP },
+}
+
+/** Permissions ("Existing policies"): Payments' spending limits, one blocked since USDC starts unchecked. */
 export const Permissions: Story = {
   args: { initialStep: PERMISSIONS_STEP },
 }

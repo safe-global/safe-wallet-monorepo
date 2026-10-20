@@ -123,13 +123,13 @@ import {
 
 const ICON_STROKE_WIDTH = 1.5
 
-/** The selected account's recipient allowlist; null means no allowlist, so the form behaves exactly like M1's. */
+/** The selected account's allowlist; null means no allowlist, so the form behaves exactly like M1's. */
 export type AllowlistTokens = { allowedAddresses: string[]; accountName: string }
 
 export const AllowlistTokensContext = createContext<AllowlistTokens | null>(null)
 
 const getBlockedReason = (accountName: string): string =>
-  `Blocked by the recipient allowlist on ${accountName}. It only lets allowed tokens be sent, so a spending limit for this one wouldn't work.`
+  `Blocked by the allowlist on ${accountName}. It only lets allowed tokens be sent, so a spending limit for this one wouldn't work.`
 
 type AllowlistTokenSelectorProps = TokenSelectorProps & {
   /** Listed but not selectable, like `disabledAddresses`, with their own tooltip. */

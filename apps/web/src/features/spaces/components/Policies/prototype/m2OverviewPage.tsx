@@ -81,12 +81,12 @@ export type PaymentsSnapshot = {
 
 const DEFAULT_PAYMENTS: PaymentsSnapshot = { state: 'waiting', signedCount: 1, pendingChange: false }
 
-/** M2 adds one type, the recipient allowlist. */
+/** M2 adds one type, the allowlist. */
 export type M2PolicyType = 'allowlist' | 'spending-limit' | 'proposer'
 
 /** M2 types next to the M1 types they share the list with; M1 keeps its own icons. */
 export const POLICY_TYPES: Record<M2PolicyType, { name: string; chip: string; Icon: LucideIcon }> = {
-  allowlist: { name: 'Recipient allowlist', chip: 'Recipient allowlist', Icon: Users },
+  allowlist: { name: 'Allowlist', chip: 'Allowlist', Icon: Users },
   'spending-limit': { name: 'Spending limit', chip: 'Spending limit', Icon: POLICY_ICONS['spending-limit'] },
   proposer: { name: 'Proposer role', chip: 'Proposer', Icon: POLICY_ICONS.proposer },
 }
@@ -658,7 +658,7 @@ export const PoliciesOverviewPage = ({
 export const POLICY_ROW_LABELS: Record<M2PolicyType, string> = {
   'spending-limit': 'Spending limit',
   proposer: 'Proposer',
-  allowlist: 'Recipient allowlist',
+  allowlist: 'Allowlist',
 }
 
 const POLICY_ROW_TYPE_ORDER: M2PolicyType[] = ['spending-limit', 'proposer', 'allowlist']
@@ -707,7 +707,7 @@ export type PolicyRow = {
   signatures?: { signed: number; required: number }
   /** Allowlist rows once executed: the side panel's "Last updated". */
   lastUpdated?: string
-  /** Spending limit only: active, but the recipient allowlist stops it being edited. */
+  /** Spending limit only: active, but the allowlist stops it being edited. */
   locked?: boolean
   /** Spending limit only: the spender's limit its side panel shows. */
   spendingLimit?: SpendingLimitMock
@@ -853,7 +853,7 @@ export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): Po
   ]
 }
 
-/** Accounts that already have a recipient allowlist, keyed like getAccountKey: the create flow disables them. */
+/** Accounts that already have an allowlist, keyed like getAccountKey: the create flow disables them. */
 export const getAllowlistAccountKeys = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): string[] =>
   getPolicyRows(payments)
     // A failed setup left nothing on the account, so it can be set up again.
@@ -896,7 +896,7 @@ export const getStatusDetail = ({
     return signed >= required ? 'Ready to execute' : `${signed} of ${required} signatures`
   }
   if (status === 'failed') return 'The transaction failed. Nothing changed on this account.'
-  if (status === 'active' && locked) return 'Locked by the recipient allowlist'
+  if (status === 'active' && locked) return 'Locked by the allowlist'
   return undefined
 }
 

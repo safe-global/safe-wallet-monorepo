@@ -78,7 +78,6 @@ import { InputGroupAddon } from '@safe-global/views/components/ui/input-group'
 import { BelowComboboxContent } from './m2SpendingLimitForm'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressInput from '@/components/common/AddressInput'
-import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -117,6 +116,9 @@ import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Switch } from '@safe-global/views/components/ui/switch'
+import { Toggle } from '@safe-global/views/components/ui/toggle'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { AccountSelect } from './m2AccountSelect'
 import { M2Alert } from './m2Alert'
@@ -137,7 +139,9 @@ import SafeRowStats from '../../SafeSelectorDropdown/components/SafeRowStats'
 import type { ActiveDetails } from './m2AccountPanel'
 import {
   ADDRESS_BOOK,
+  AddressHoverTooltip,
   findAddressBookContact,
+  ShortAddress,
   getAccountKey,
   getAccountSpendingLimits,
   OPERATIONS,
@@ -155,10 +159,11 @@ import {
   type SignerId,
 } from './m2Prototype'
 
-/** One per stepper item; Permissions is skipped for an account that has none. */
-export const WIZARD_STEP_NAMES = ['Create', 'Policies', 'Review', 'Confirm', 'Execute'] as const
+/** One per stepper item; Policies is skipped for an account that has none. */
+export const WIZARD_STEP_NAMES = ['Create', 'Policies', 'Settings', 'Review', 'Confirm', 'Execute'] as const
 
 export const CREATE_STEP = WIZARD_STEP_NAMES.indexOf('Create')
+export const SETTINGS_STEP = WIZARD_STEP_NAMES.indexOf('Settings')
 export const PERMISSIONS_STEP = WIZARD_STEP_NAMES.indexOf('Policies')
 export const REVIEW_STEP = WIZARD_STEP_NAMES.indexOf('Review')
 export const CONFIRM_STEP = WIZARD_STEP_NAMES.indexOf('Confirm')
@@ -168,6 +173,7 @@ export const EXECUTE_STEP = WIZARD_STEP_NAMES.indexOf('Execute')
 const STEP_TITLES = [
   'Create new policy',
   'Existing policies',
+  'Safe account settings',
   'Confirm policy',
   'Review details',
   'Review details',
@@ -181,23 +187,29 @@ const getStepTitle = (mode: WizardMode, step: number): string =>
   mode === 'edit' && step === 0 ? EDIT_STEP_TITLE : STEP_TITLES[step]
 
 /** The pre-setup checks on the account: all pass, or the one that blocks setup. */
-export type Preflight = 'ready' | 'old-version' | 'other-guard' | 'pending-transactions'
+export type Preflight = 'ready' | 'old-version' | 'other-guard' | 'policy-guard' | 'pending-transactions'
 
 const PREFLIGHT_FAILURES: Record<
   Exclude<Preflight, 'ready'>,
-  { title: string; description: string; action: string; href?: string }
+  { title: string; description: string; action: string; href?: string; tone?: 'error' | 'warning' }
 > = {
   'old-version': {
-    title: 'This Safe needs an update',
+    title: 'This Safe account needs an update',
     description: 'Policies need Safe version 1.3.0 or later.',
-    action: 'Update Safe',
+    action: 'Update Safe account',
   },
   'other-guard': {
-    title: 'This Safe account has an unknown guard installed',
-    description:
-      "A Safe account can only have one guard, so you can't set up a recipient allowlist until it's removed.",
-    action: 'How to remove a guard',
+    title: 'This Safe account has an unknown policy installed',
+    description: 'Remove it to set up an allowlist.',
+    action: 'How to remove it',
     href: HelpCenterArticle.TRANSACTION_GUARD,
+  },
+  // Not a failure: the account already has an allowlist, so it gets edited or deleted instead.
+  'policy-guard': {
+    title: 'This Safe account already has an allowlist installed',
+    description: 'Delete the current policy to set up a new one, or edit it instead.',
+    action: 'Edit current policy',
+    tone: 'warning',
   },
   'pending-transactions': {
     title: 'You have pending transactions',
@@ -250,7 +262,7 @@ const FIAT_TOTALS: Record<string, string> = {
 
 // Prototype only: M1's selector has a fixed set of reasons, so this one is registered on its text map at runtime.
 const HAS_ALLOWLIST = 'has-allowlist' as string as SafeAccountIneligibility
-INELIGIBILITY_TEXT[HAS_ALLOWLIST] = 'Already has a recipient allowlist'
+INELIGIBILITY_TEXT[HAS_ALLOWLIST] = 'Already has an allowlist'
 
 /** An M2 account as M1's Safe account row takes it, so "Applies to" and the dropdown are M1's own rows. */
 const toSafeAccountOption = (account: M2Account, ineligibleReason?: SafeAccountIneligibility): SafeAccountOption => ({
@@ -301,7 +313,7 @@ const getAccountEntries = (disabledKeys: string[]): SafeAccountEntry[] =>
 
 const NESTED_SAFES_NOTICE = {
   title: NESTED_SAFES_NOTICE_TITLE,
-  description: 'To manage recipient allowlists for the Nested Safe accounts, go to the Safe account settings.',
+  description: 'To manage allowlists for the Nested Safe accounts, go to the Safe account settings.',
 }
 
 const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
@@ -317,8 +329,6 @@ export type Recipient = {
 }
 
 type Contact = { name: string; address: string }
-
-const isInAddressBook = (address: string): boolean => Boolean(findAddressBookContact(address))
 
 export const PREFILLED_RECIPIENTS: Recipient[] = [
   {
@@ -359,6 +369,8 @@ export type SetupChoices = {
   addedTokens: string[]
   /** Spenders whose spending-limit conflict was answered with "Keep as is". */
   keptConflicts: string[]
+  /** Ids of Safe account settings left unselected: changes to them will be blocked. */
+  blockedSettings: string[]
   /** Whether the allowlist also checks the account's existing spending limits (the Permissions step's switch). */
   applyToSpendingLimits: boolean
 }
@@ -369,6 +381,7 @@ export const DEFAULT_CHOICES: SetupChoices = {
   excludedTokens: ['USDC'],
   addedTokens: [],
   keptConflicts: [],
+  blockedSettings: [],
   applyToSpendingLimits: true,
 }
 
@@ -430,13 +443,25 @@ const popularToken = (symbol: string, name: string, address: string, logoUri = t
   logoUri,
 })
 
-const POPULAR_TOKENS: AccountToken[] = [
+export const POPULAR_TOKENS: AccountToken[] = [
   popularToken('USDC', 'USD Coin', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'),
   popularToken('USDT', 'Tether USD', '0xdAC17F958D2ee523a2206206994597C13D831ec7', USDT_LOGO),
   popularToken('DAI', 'Dai Stablecoin', '0x6B175474E89094C44Da98b954EedeAC495271d0F'),
   popularToken('WETH', 'Wrapped Ether', '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'),
   popularToken('WBTC', 'Wrapped BTC', '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'),
   popularToken('LINK', 'Chainlink', '0x514910771AF9Ca656af840dff83E8264EcF986CA'),
+  popularToken('UNI', 'Uniswap', '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'),
+  popularToken('AAVE', 'Aave', '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'),
+  popularToken('MKR', 'Maker', '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'),
+  popularToken('LDO', 'Lido DAO', '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32'),
+  popularToken('stETH', 'Lido Staked Ether', '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84'),
+  popularToken('rETH', 'Rocket Pool ETH', '0xae78736Cd615f374D3085123A210448E74Fc6393'),
+  popularToken('COMP', 'Compound', '0xc00e94Cb662C3520282E6f5717214004A7f26888'),
+  popularToken('CRV', 'Curve DAO', '0xD533a949740bb3306d119CC777fa900bA034cd52'),
+  popularToken('SNX', 'Synthetix', '0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F'),
+  popularToken('ENS', 'Ethereum Name Service', '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72'),
+  popularToken('GRT', 'The Graph', '0xc944E90C64B2c07662A292be6244BDf05Cda44a7'),
+  popularToken('SAFE', 'Safe', '0x5aFE3855358E112B5647B952709E6165e1c1eEEe'),
 ]
 
 /** The form's token list: the account's own, then any added by hand. Empty until an account is picked. */
@@ -466,6 +491,7 @@ const isSameSet = (a: string[], b: string[]): boolean => a.length === b.length &
 const isUnchangedChoices = (choices: SetupChoices, initial: SetupChoices, account?: M2Account): boolean =>
   isSameSet(getSelectedRecipients(choices).map(recipientKey), getSelectedRecipients(initial).map(recipientKey)) &&
   isSameSet(getAllowedTokens(choices, account).map(tokenKey), getAllowedTokens(initial, account).map(tokenKey)) &&
+  isSameSet(choices.blockedSettings, initial.blockedSettings) &&
   choices.applyToSpendingLimits === initial.applyToSpendingLimits
 
 /** The CHANGE_BADGE verdicts an allowlist edit can give a recipient or a token. */
@@ -495,23 +521,27 @@ const MutedLine = ({ children }: { children: ReactNode }): ReactElement => (
 const GroupSurface = ({
   title,
   description,
+  action,
   sectionRef,
   markNew,
   children,
 }: {
   title: string
   description?: string
+  /** Top right of the section, e.g. Select all. */
+  action?: ReactNode
   /** For scrolling the section into view, e.g. "Change tokens". */
   sectionRef?: Ref<HTMLElement>
   markNew: string
   children?: ReactNode
 }): ReactElement => (
-  <section ref={sectionRef} className="flex scroll-mt-60 flex-col gap-4 rounded-xl bg-muted p-4" data-m2-new={markNew}>
+  <section ref={sectionRef} className="flex scroll-mt-72 flex-col gap-4 rounded-xl bg-muted p-4" data-m2-new={markNew}>
     <div className="flex items-center justify-between gap-3">
       <div className="flex min-w-0 flex-col gap-1">
         <TxSectionTitle>{title}</TxSectionTitle>
         {description && <MutedLine>{description}</MutedLine>}
       </div>
+      {action}
     </div>
     {children}
   </section>
@@ -553,7 +583,7 @@ const ItemList = ({ children }: { children: ReactNode }): ReactElement => (
 /** Labels sit in a 40px box, one name-over-address line, so each lines up with the first item beside it. */
 const SummaryRow = ({ label, children }: { label: string; children: ReactNode }): ReactElement => (
   <div className="@container w-full">
-    <div className="grid grid-cols-1 items-start gap-1 @md:grid-cols-[144px_1fr] @md:gap-4">
+    <div className="grid grid-cols-1 items-start gap-1 @md:grid-cols-[176px_1fr] @md:gap-6">
       <Typography variant="paragraph-small" color="muted" className="flex min-h-10 items-center">
         {label}
       </Typography>
@@ -579,16 +609,19 @@ const PolicyDetailsCard = ({
   safe,
   tokens,
   recipients,
+  allowedSettings,
 }: {
   safe: SafeAccountOption
   tokens: Marked<AccountToken>[]
   recipients: Marked<Recipient>[]
+  /** Titles of the Safe account settings left selected. */
+  allowedSettings: string[]
 }): ReactElement => (
   <Card variant="muted" size="none" radius="lg">
     <div className="flex flex-col p-4" data-m2-new="New · Policy details card">
       <SummaryRow label="Applies to">
-        {/* Four equal columns: SafeRowStats renders its threshold and network cells as siblings. */}
-        <div className="grid min-h-10 grid-cols-4 items-center gap-3">
+        {/* One even gap between account, signers, network and value; SafeRowStats renders its cells as siblings. */}
+        <div className="flex min-h-10 flex-wrap items-center gap-x-8 gap-y-2">
           <div className="min-w-0">
             <SafeAddress name={safe.name} address={safe.address} />
           </div>
@@ -600,9 +633,7 @@ const PolicyDetailsCard = ({
             showPending={false}
             fitColumns
           />
-          <div className="flex justify-end">
-            <AccountBalance fiatTotal={safe.fiatTotal} fitColumn />
-          </div>
+          <AccountBalance fiatTotal={safe.fiatTotal} fitColumn />
         </div>
       </SummaryRow>
 
@@ -630,16 +661,63 @@ const PolicyDetailsCard = ({
       <Separator className="my-3" />
 
       <SummaryRow label={`Allowed recipients (${recipients.filter(({ change }) => change !== 'removed').length})`}>
-        {recipients.map(({ name, address, change }) => (
-          <SummaryLine key={address} className="gap-3">
-            {/* M1's removed limit row: dimmed and struck through, still listed. */}
-            <div className={classnames('min-w-0 flex-1', change === 'removed' && 'opacity-50 line-through')}>
-              <SafeAddress name={name} address={address} />
-            </div>
-            {change && <ChangeBadge change={change} />}
-          </SummaryLine>
-        ))}
+        {/* The Create step's address layout without the pill; a removed one is dimmed and struck through, as M1's removed limit row. */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+          {recipients.map(({ name, address, source, change }) => (
+            <AddressHoverTooltip key={address} address={address} className="flex min-w-0">
+              <AddressPill
+                name={name}
+                address={address}
+                nameSuffix={
+                  (source === 'address-book' || findAddressBookContact(address)) && (
+                    <AddressBookIcon className="size-4 text-muted-foreground" aria-label="In your address book" />
+                  )
+                }
+                isRemoved={change === 'removed'}
+                endSlot={change && <ChangeBadge change={change} />}
+                isPlain
+              />
+            </AddressHoverTooltip>
+          ))}
+        </div>
       </SummaryRow>
+
+      <Separator className="my-3" />
+
+      {/* Closed by default: the title and the count, the list opening underneath. */}
+      <Collapsible data-m2-new="New · Allowed account changes dropdown">
+        <CollapsibleTrigger className="group flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-md text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+          <Typography variant="paragraph-small" color="muted" className="flex-1">
+            Allowed account changes
+          </Typography>
+          <Typography variant="paragraph-small-medium">{allowedSettings.length}</Typography>
+          <ChevronDown
+            className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[panel-open]:rotate-180"
+            aria-hidden
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          {/* SummaryRow's grid with an empty label cell, so the list starts where the values above start. */}
+          <div className="@container w-full pt-2 pb-1">
+            <div className="grid grid-cols-1 gap-1 @md:grid-cols-[176px_1fr] @md:gap-6">
+              <span aria-hidden />
+              <div className="flex flex-col gap-2">
+                {allowedSettings.length > 0 ? (
+                  allowedSettings.map((title) => (
+                    <Typography key={title} variant="paragraph-small-medium">
+                      {title}
+                    </Typography>
+                  ))
+                ) : (
+                  <Typography variant="paragraph-small" color="muted">
+                    None. Every change to the Safe account will be blocked.
+                  </Typography>
+                )}
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   </Card>
 )
@@ -668,11 +746,11 @@ const PoliciesCallout = ({
 )
 
 const PreflightFailure = ({ preflight }: { preflight: Exclude<Preflight, 'ready'> }): ReactElement => {
-  const { title, description, action, href } = PREFLIGHT_FAILURES[preflight]
+  const { title, description, action, href, tone = 'error' } = PREFLIGHT_FAILURES[preflight]
 
   return (
     <M2Alert
-      tone="error"
+      tone={tone}
       title={title}
       description={description}
       action={
@@ -685,27 +763,6 @@ const PreflightFailure = ({ preflight }: { preflight: Exclude<Preflight, 'ready'
         )
       }
     />
-  )
-}
-
-/** The app's address book icon after a recipient's name: full colour when saved, muted when not. */
-const AddressBookIndicator = ({ address }: { address: string }): ReactElement => {
-  const isSaved = isInAddressBook(address)
-
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="inline-flex shrink-0" data-m2-new="New · Address book indicator" data-m2-new-compact="" />
-        }
-      >
-        <AddressBookIcon
-          className={classnames('size-4', isSaved ? 'text-foreground' : 'text-muted-foreground opacity-50')}
-          aria-label={isSaved ? 'In your address book' : 'Not in your address book'}
-        />
-      </TooltipTrigger>
-      <TooltipContent>{isSaved ? 'In your address book' : 'Not in your address book'}</TooltipContent>
-    </Tooltip>
   )
 }
 
@@ -1151,6 +1208,136 @@ const TokenDraftRow = ({
   )
 }
 
+/**
+ * A token or recipient the allowlist can include, styled and stated like the outline Button
+ * (packages/views button.tsx): on is its default, on white so it stands out on the grey section; off is its
+ * disabled look at half opacity, but still clickable to turn it back on. 7px left inset centres the 24px icon.
+ */
+/** Name (with any suffix) over the monospaced short address; the name truncates in a fixed-width pill. */
+const AddressChipText = ({
+  name,
+  address,
+  nameSuffix,
+  className,
+}: {
+  name: string
+  address: string
+  nameSuffix?: ReactNode
+  className?: string
+}): ReactElement => (
+  <span className={classnames('flex min-w-0 flex-1 flex-col items-start gap-1 text-left', className)}>
+    <span className="flex w-full min-w-0 items-center gap-1">
+      <span className="truncate">{name}</span>
+      {nameSuffix && <span className="flex shrink-0">{nameSuffix}</span>}
+    </span>
+    <ShortAddress address={address} />
+  </span>
+)
+
+/** The pill's look without the toggle, for read-only lists such as Review: a white pill, grey outline, no ✓. */
+const AddressPill = ({
+  name,
+  address,
+  nameSuffix,
+  isRemoved = false,
+  endSlot,
+  isPlain = false,
+}: {
+  name: string
+  address: string
+  nameSuffix?: ReactNode
+  /** Just the identicon, name and address, without the pill's outline, fill and padding. */
+  isPlain?: boolean
+  isRemoved?: boolean
+  /** E.g. an Added/Removed badge. */
+  endSlot?: ReactNode
+}): ReactElement => (
+  <div
+    className={classnames(
+      'flex w-full min-w-0 items-center gap-2 text-sm leading-none font-medium',
+      !isPlain && 'rounded-full border border-border bg-card py-[7px] pr-3.5 pl-2.5 shadow-xs',
+    )}
+    data-m2-new="New · Address pill"
+  >
+    <span className={classnames('flex shrink-0', isRemoved && 'opacity-50')}>
+      <Identicon address={address} size={24} />
+    </span>
+    <AddressChipText
+      name={name}
+      address={address}
+      nameSuffix={nameSuffix}
+      className={classnames(isRemoved && 'line-through opacity-50')}
+    />
+    {endSlot && <span className="ml-2 flex shrink-0">{endSlot}</span>}
+  </div>
+)
+
+const SelectableChip = ({
+  isSelected,
+  onToggle,
+  icon,
+  label,
+  labelSuffix,
+  detail,
+  subline,
+  isFullWidth = false,
+  ariaLabel,
+}: {
+  isSelected: boolean
+  onToggle: () => void
+  icon: ReactNode
+  label: string
+  /** Right after the label, e.g. the address book icon. */
+  labelSuffix?: ReactNode
+  /** Muted after the label, e.g. an amount. */
+  detail?: string
+  /** A second line under the label, e.g. a Safe account's address: the chip grows to two lines. */
+  subline?: ReactNode
+  /** Fills its grid cell, the label truncating, so every chip in the grid has one width. */
+  isFullWidth?: boolean
+  ariaLabel: string
+}): ReactElement => (
+  <Toggle
+    variant="outline"
+    size="lg"
+    pressed={isSelected}
+    onPressedChange={onToggle}
+    aria-label={ariaLabel}
+    className={classnames(
+      'gap-2 rounded-full border-border bg-transparent pr-3.5 pl-[7px] leading-none shadow-xs hover:bg-foreground/[0.06] hover:text-foreground aria-pressed:bg-card aria-pressed:hover:bg-card/80',
+      // Two lines with a 24px icon: 10px around it, so the inset matches top, bottom and left.
+      Boolean(subline) && 'h-auto py-[7px] pl-2.5',
+      isFullWidth && 'w-full min-w-0 justify-start',
+      // Hovering an off chip previews it on: full opacity on white, still without the ✓.
+      !isSelected && 'opacity-50 hover:bg-card hover:opacity-100',
+    )}
+  >
+    <span className="flex shrink-0">{icon}</span>
+    {subline ? (
+      <span className="flex min-w-0 flex-1 flex-col items-start gap-1 text-left">
+        <span className="flex w-full min-w-0 items-center gap-1">
+          <span className="truncate">{label}</span>
+          {labelSuffix && <span className="flex shrink-0">{labelSuffix}</span>}
+        </span>
+        {subline}
+      </span>
+    ) : (
+      <span className={classnames('flex min-w-0 items-center gap-2', isFullWidth && 'flex-1')}>
+        <span className="shrink-0">{label}</span>
+        {labelSuffix}
+        {detail && <span className="truncate font-normal text-muted-foreground">{detail}</span>}
+      </span>
+    )}
+    {/* On hover a selected chip shows ✕ instead of ✓: clicking it takes the item out. */}
+    {isSelected && (
+      <span className="ml-2 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Check className="size-3 group-hover/toggle:hidden" aria-hidden />
+        <X className="hidden size-3 group-hover/toggle:block" aria-hidden />
+      </span>
+    )}
+  </Toggle>
+)
+
 /** One checkbox per token, all checked by default. */
 const TokensGroup = ({
   account,
@@ -1178,6 +1365,16 @@ const TokensGroup = ({
         : [...choices.excludedTokens, symbol],
     })
 
+  const symbols = tokens.map(({ symbol }) => symbol)
+  const isAllSelected = symbols.every((symbol) => !choices.excludedTokens.includes(symbol))
+  const setAll = (isSelected: boolean) =>
+    onChoicesChange({
+      ...choices,
+      excludedTokens: isSelected
+        ? choices.excludedTokens.filter((excluded) => !symbols.includes(excluded))
+        : Array.from(new Set([...choices.excludedTokens, ...symbols])),
+    })
+
   const add = (symbol: string) => {
     onChoicesChange({
       ...choices,
@@ -1191,7 +1388,7 @@ const TokensGroup = ({
     <GroupSurface
       title="Which tokens can be sent"
       sectionRef={sectionRef}
-      markNew="New · Token checklist"
+      markNew="New · Token chips"
       description={
         !account
           ? 'Pick a Safe account to choose from its tokens.'
@@ -1204,34 +1401,33 @@ const TokensGroup = ({
       {tokens.length === 0 ? (
         <EmptyItem>Tokens in this account will show here.</EmptyItem>
       ) : (
-        <div className="flex flex-col gap-2">
-          <ItemList>
-            {tokens.map(({ symbol, name, logoUri, balance }) => (
-              <ItemSurface key={symbol}>
-                <div className="flex items-center gap-3">
-                  <TokenIcon logoUri={logoUri} tokenSymbol={symbol} size={24} />
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <Typography variant="paragraph-small-medium">{symbol}</Typography>
-                    <MutedLine>{name}</MutedLine>
-                  </div>
-                  <Typography variant="paragraph-small" color="muted">
-                    {balance ?? 'Not held yet'}
-                  </Typography>
-                  <Checkbox
-                    checked={!choices.excludedTokens.includes(symbol)}
-                    onCheckedChange={() => toggle(symbol)}
-                    aria-label={`Allow ${symbol}`}
-                  />
-                </div>
-              </ItemSurface>
-            ))}
-            {isDrafting && <TokenDraftRow addable={addable} onConfirm={add} onRemove={() => setIsDrafting(false)} />}
-          </ItemList>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2" data-m2-new="New · Token chips">
+          {/* Equal-width chips, as many per row as fit (4 in the card at full width), sized for symbols like WBTC or stETH. */}
+          {tokens.map(({ symbol, logoUri }) => (
+            <SelectableChip
+              key={symbol}
+              isSelected={!choices.excludedTokens.includes(symbol)}
+              onToggle={() => toggle(symbol)}
+              icon={<TokenIcon logoUri={logoUri} tokenSymbol={symbol} size={24} />}
+              label={symbol}
+              isFullWidth
+              ariaLabel={`Allow ${symbol}`}
+            />
+          ))}
         </div>
       )}
 
-      {/* Like M1's token field, it waits for a Safe account. */}
-      <div className="flex justify-end">
+      {isDrafting && <TokenDraftRow addable={addable} onConfirm={add} onRemove={() => setIsDrafting(false)} />}
+
+      {/* Like M1's token field, adding waits for a Safe account. */}
+      <div className="flex items-center justify-between gap-2">
+        {tokens.length > 0 ? (
+          <Button variant="ghost" size="sm" onClick={() => setAll(!isAllSelected)}>
+            {isAllSelected ? 'Deselect all' : 'Select all'}
+          </Button>
+        ) : (
+          <span />
+        )}
         <Button
           variant="outline"
           size="sm"
@@ -1265,7 +1461,8 @@ const RecipientsGroup = ({
   callout,
 }: ChoiceHandlers & { account?: M2Account; isEditMode?: boolean; callout?: ReactNode }): ReactElement => {
   const [isBookOpen, setIsBookOpen] = useState(false)
-  const [isDrafting, setIsDrafting] = useState(false)
+  // With no recipients yet, the entry row starts open, so the first one can be typed straight away.
+  const [isDrafting, setIsDrafting] = useState(() => getShownRecipients(choices, account).length === 0)
   const reservePageRoom = useContext(PageRoomContext)
   const recipients = getShownRecipients(choices, account)
 
@@ -1275,14 +1472,10 @@ const RecipientsGroup = ({
   }, [isBookOpen, reservePageRoom])
   const listedAddresses = recipients.map(({ address }) => address.toLowerCase())
   const isEmpty = recipients.length === 0
-  const hasPrefilled = recipients.some(({ history }) => history)
-  const description = !account
-    ? 'Pick a Safe account to see who it paid in the last 90 days, or add addresses yourself.'
-    : hasPrefilled
-      ? undefined
-      : isEditMode
-        ? 'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.'
-        : 'No recent recipients. Add the addresses this account pays.'
+  const description =
+    account && isEditMode
+      ? 'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.'
+      : undefined
 
   const toggle = (address: string) =>
     onChoicesChange({
@@ -1312,39 +1505,41 @@ const RecipientsGroup = ({
     })
   }
 
-  const historyText = ({ history, source }: Recipient): string => {
-    if (history) return `${history.count} transactions · last ${history.last}`
-    return source === 'address-book' ? 'From address book' : 'Added by you'
-  }
-
   return (
-    <GroupSurface title="Who can receive funds" description={description} markNew="New · Recipient checklist">
+    <GroupSurface title="Who can receive funds" description={description} markNew="New · Recipient chips">
       {callout}
       {isEmpty && !isDrafting ? (
         !account && <EmptyItem>Recipients will show here.</EmptyItem>
       ) : (
-        <ItemList>
-          {recipients.map((recipient) => (
-            <ItemSurface key={recipient.address}>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="min-w-0 flex-1">
-                  <SafeAddress
-                    name={recipient.name}
-                    address={recipient.address}
-                    nameSuffix={<AddressBookIndicator address={recipient.address} />}
+        <div className="flex flex-col gap-3">
+          {recipients.length > 0 && (
+            <div className="grid grid-cols-3 gap-2" data-m2-new="New · Recipient chips">
+              {recipients.map((recipient) => (
+                <AddressHoverTooltip
+                  key={recipient.address}
+                  address={recipient.address}
+                  chainId={account?.chainId}
+                  note={recipient.history && `${recipient.history.count} transactions · last ${recipient.history.last}`}
+                  className="flex min-w-0"
+                >
+                  <SelectableChip
+                    isSelected={recipient.selected}
+                    onToggle={() => toggle(recipient.address)}
+                    icon={<Identicon address={recipient.address} size={24} />}
+                    label={recipient.name}
+                    labelSuffix={
+                      (recipient.source === 'address-book' || findAddressBookContact(recipient.address)) && (
+                        <AddressBookIcon className="size-4 text-muted-foreground" aria-label="In your address book" />
+                      )
+                    }
+                    subline={<ShortAddress address={recipient.address} />}
+                    isFullWidth
+                    ariaLabel={`Allow ${recipient.name}`}
                   />
-                </div>
-                <Typography variant="paragraph-small" color="muted">
-                  {historyText(recipient)}
-                </Typography>
-                <Checkbox
-                  checked={recipient.selected}
-                  onCheckedChange={() => toggle(recipient.address)}
-                  aria-label={`Allow ${recipient.name}`}
-                />
-              </div>
-            </ItemSurface>
-          ))}
+                </AddressHoverTooltip>
+              ))}
+            </div>
+          )}
           {isDrafting && (
             <RecipientDraftRow
               listedAddresses={listedAddresses}
@@ -1352,7 +1547,7 @@ const RecipientsGroup = ({
               onRemove={() => setIsDrafting(false)}
             />
           )}
-        </ItemList>
+        </div>
       )}
 
       <div className="flex justify-end gap-2">
@@ -1422,7 +1617,6 @@ const CreateStep = ({
   const hasRecipient = getShownRecipients(choices, account).some((recipient) => recipient.selected)
   const hasToken = getAllowedTokens(choices, account).length > 0
   const tokensRef = useRef<HTMLElement>(null)
-  const isBlocked = Boolean(account) && preflight !== 'ready'
 
   // Two frames: the layout resets the scroll to the top in the first, after this effect, so the tokens scroll in the next.
   useEffect(() => {
@@ -1447,46 +1641,41 @@ const CreateStep = ({
         {isEditMode && (
           <M2Alert
             tone="warning"
-            title="You are overwriting an existing recipient allowlist."
+            title="You are overwriting an existing allowlist."
             description="Once the change applies, funds can only be sent to the recipients and in the tokens you keep below."
           />
         )}
 
-        {account && preflight !== 'ready' && <PreflightFailure preflight={preflight} />}
-
-        {/* While a check blocks the account, the fieldset disables and dims every control in it. */}
-        <fieldset
-          disabled={isBlocked}
-          aria-disabled={isBlocked || undefined}
-          className={classnames(
-            'm-0 flex min-w-0 flex-col gap-4 border-0 p-0',
-            isBlocked && 'pointer-events-none opacity-50',
-          )}
-        >
-          <TokensGroup
-            account={account}
-            choices={choices}
-            onChoicesChange={onChoicesChange}
-            sectionRef={tokensRef}
-            isEditMode={isEditMode}
-            callout={
-              account &&
-              !isEditMode &&
-              !isTokensCalloutDismissed && <PoliciesCallout subject="tokens" onDismiss={onDismissTokensCallout} />
-            }
-          />
-          <RecipientsGroup
-            account={account}
-            choices={choices}
-            onChoicesChange={onChoicesChange}
-            isEditMode={isEditMode}
-            callout={
-              account &&
-              !isEditMode &&
-              !isCalloutDismissed && <PoliciesCallout subject="recipients" onDismiss={onDismissCallout} />
-            }
-          />
-        </fieldset>
+        {/* A failed check leaves only the account and its banner: there is nothing to set up until it's resolved. */}
+        {account && preflight !== 'ready' ? (
+          <PreflightFailure preflight={preflight} />
+        ) : (
+          <div className="flex min-w-0 flex-col gap-4">
+            <TokensGroup
+              account={account}
+              choices={choices}
+              onChoicesChange={onChoicesChange}
+              sectionRef={tokensRef}
+              isEditMode={isEditMode}
+              callout={
+                account &&
+                !isEditMode &&
+                !isTokensCalloutDismissed && <PoliciesCallout subject="tokens" onDismiss={onDismissTokensCallout} />
+              }
+            />
+            <RecipientsGroup
+              account={account}
+              choices={choices}
+              onChoicesChange={onChoicesChange}
+              isEditMode={isEditMode}
+              callout={
+                account &&
+                !isEditMode &&
+                !isCalloutDismissed && <PoliciesCallout subject="recipients" onDismiss={onDismissCallout} />
+              }
+            />
+          </div>
+        )}
 
         <PrimaryAction
           label="Next"
@@ -1520,7 +1709,7 @@ const PolicySummary = ({
       {initialChoices && (
         <M2Alert
           tone="info"
-          title={`You're changing the recipient allowlist for ${account.name} on ${network}.`}
+          title={`You're changing the allowlist for ${account.name} on ${network}.`}
           description="The new rules apply 24 hours after this executes. Any signer can cancel the change before then."
         />
       )}
@@ -1531,6 +1720,7 @@ const PolicySummary = ({
         recipients={
           initialChoices ? markChanges(selected, getSelectedRecipients(initialChoices), recipientKey) : selected
         }
+        allowedSettings={getAllowedSettings(choices).map(({ title }) => title)}
       />
     </div>
   )
@@ -1700,20 +1890,188 @@ const ExistingPermissions = ({
   )
 }
 
-/** Its own step between Create and Review; the flow skips it for an account with no existing permissions. */
+type AccountSetting = { id: string; title: string; description: string; note?: string }
+
+/** The Safe account changes the allowlist can still let through, in plain words: no "guard" or "module". */
+export const ACCOUNT_SETTING_GROUPS: { title: string; settings: AccountSetting[] }[] = [
+  {
+    title: 'Signers',
+    settings: [
+      {
+        id: 'add-signer',
+        title: 'Add a signer',
+        description: 'Adds a signer and sets how many signatures are needed.',
+      },
+      {
+        id: 'remove-signer',
+        title: 'Remove a signer',
+        description: 'Removes a signer and sets how many signatures are needed.',
+      },
+      {
+        id: 'replace-signer',
+        title: 'Replace a signer',
+        description: 'Swaps one signer for another. The number of signatures needed stays the same.',
+      },
+      {
+        id: 'change-threshold',
+        title: 'Change the threshold',
+        description: 'Changes how many signatures a transaction needs.',
+      },
+    ],
+  },
+  {
+    title: 'Policies',
+    settings: [
+      {
+        id: 'add-policy',
+        title: 'Add a policy',
+        description: 'Lets you add policies such as spending limits and proposers.',
+        note: 'Needed to add a spending limit after this setup.',
+      },
+      {
+        id: 'remove-policy',
+        title: 'Remove a policy',
+        description: 'Lets you remove policies such as spending limits and proposers.',
+      },
+      {
+        id: 'change-policy-checks',
+        title: 'Change how existing policies are checked',
+        description: 'Replaces the check that applies to spending limits and other policies.',
+      },
+      {
+        id: 'change-allowlist',
+        title: 'Replace or remove this allowlist',
+        description: 'Replaces the policy that checks every transaction, including this allowlist.',
+      },
+    ],
+  },
+  {
+    title: 'Advanced',
+    settings: [
+      {
+        id: 'change-fallback',
+        title: 'Change how unknown calls are handled',
+        description: 'Replaces the contract that answers calls the Safe account has no function for.',
+      },
+      {
+        id: 'batch',
+        title: 'Batched transactions',
+        description: 'Several changes in one transaction. Each one is still checked.',
+      },
+    ],
+  },
+]
+
+const ALL_ACCOUNT_SETTINGS = ACCOUNT_SETTING_GROUPS.flatMap(({ settings }) => settings)
+
+/** The settings left selected, in their listed order. */
+const getAllowedSettings = (choices: SetupChoices): AccountSetting[] =>
+  ALL_ACCOUNT_SETTINGS.filter(({ id }) => !choices.blockedSettings.includes(id))
+
+/** One group of settings: a grey section, its rows white inside it, Select all / Deselect all at the top right. */
+const SettingsGroup = ({
+  title,
+  settings,
+  choices,
+  onChoicesChange,
+}: ChoiceHandlers & { title: string; settings: AccountSetting[] }): ReactElement => {
+  const ids = settings.map(({ id }) => id)
+  const isAllSelected = ids.every((id) => !choices.blockedSettings.includes(id))
+
+  const toggle = (id: string) =>
+    onChoicesChange({
+      ...choices,
+      blockedSettings: choices.blockedSettings.includes(id)
+        ? choices.blockedSettings.filter((blocked) => blocked !== id)
+        : [...choices.blockedSettings, id],
+    })
+  const setAll = (isSelected: boolean) =>
+    onChoicesChange({
+      ...choices,
+      blockedSettings: isSelected
+        ? choices.blockedSettings.filter((blocked) => !ids.includes(blocked))
+        : Array.from(new Set([...choices.blockedSettings, ...ids])),
+    })
+
+  return (
+    <GroupSurface
+      title={title}
+      markNew="New · Safe account settings"
+      action={
+        <Button variant="ghost" size="sm" onClick={() => setAll(!isAllSelected)}>
+          {isAllSelected ? 'Deselect all' : 'Select all'}
+        </Button>
+      }
+    >
+      <ItemList>
+        {settings.map(({ id, title: settingTitle, description, note }) => {
+          const checkboxId = `account-setting-${id}`
+
+          return (
+            <ItemSurface key={id}>
+              <label htmlFor={checkboxId} className="flex cursor-pointer items-center gap-3">
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <Typography variant="paragraph-small-medium">{settingTitle}</Typography>
+                  <MutedLine>{description}</MutedLine>
+                  {note && (
+                    <Typography variant="paragraph-small" className="text-success-strong">
+                      {note}
+                    </Typography>
+                  )}
+                </div>
+                <Checkbox
+                  id={checkboxId}
+                  checked={!choices.blockedSettings.includes(id)}
+                  onCheckedChange={() => toggle(id)}
+                />
+              </label>
+            </ItemSurface>
+          )
+        })}
+      </ItemList>
+    </GroupSurface>
+  )
+}
+
+/** After Policies, before Review: which changes to the Safe account itself the allowlist still lets through. */
+const SettingsStep = ({
+  choices,
+  onChoicesChange,
+  onNext,
+  isUnchangedEdit = false,
+}: ChoiceHandlers & {
+  onNext: () => void
+  /** The last step before Review in an edit: Next stays off until something changes, as in M1. */
+  isUnchangedEdit?: boolean
+}): ReactElement => (
+  <TxCard>
+    <div className="flex flex-col gap-5" data-m2-new="New · Safe account settings step">
+      {ACCOUNT_SETTING_GROUPS.map(({ title, settings }) => (
+        <SettingsGroup
+          key={title}
+          title={title}
+          settings={settings}
+          choices={choices}
+          onChoicesChange={onChoicesChange}
+        />
+      ))}
+
+      <PrimaryAction label="Next" disabled={isUnchangedEdit} onClick={onNext} />
+    </div>
+  </TxCard>
+)
+
+/** Its own step between Create and Settings; the flow skips it for an account with no existing permissions. */
 const PermissionsStep = ({
   account,
   choices,
   onChoicesChange,
   onChangeTokens,
   onNext,
-  isUnchangedEdit = false,
 }: ChoiceHandlers & {
   account: M2Account
   onChangeTokens: () => void
   onNext: () => void
-  /** The last step before Review in an edit, so it takes Create's rule: Next stays off until something changes. */
-  isUnchangedEdit?: boolean
 }): ReactElement => (
   <TxCard>
     <div className="flex flex-col gap-5">
@@ -1730,7 +2088,7 @@ const PermissionsStep = ({
         <MutedLine>This account has no existing policies.</MutedLine>
       )}
 
-      <PrimaryAction label="Next" disabled={isUnchangedEdit} onClick={onNext} />
+      <PrimaryAction label="Next" onClick={onNext} />
     </div>
   </TxCard>
 )
@@ -2554,7 +2912,7 @@ const describeRecipients = (recipients: Recipient[]): string =>
 /** The choices so far as one sentence, rebuilt on every change and shown on every step. */
 type SetupSummary = {
   title: string
-  description: string
+  description?: string
   /** Behind the info icon at the end of the description. */
   details?: string
 }
@@ -2562,8 +2920,9 @@ type SetupSummary = {
 const useSetupSummary = (
   account: M2Account | undefined,
   choices: SetupChoices,
-  /** From Review on, for an account that has spending limits. */
-  showPermissions: boolean,
+  /** The step the banner sits on: its title and line are that step's own. */
+  step: number,
+  isEditMode: boolean,
 ): SetupSummary => {
   const chain = useChain(account?.chainId ?? '')
   const tokens = getAllowedTokens(choices, account)
@@ -2571,53 +2930,102 @@ const useSetupSummary = (
 
   const who = account ? `${account.name}${chain ? ` on ${chain.chainName}` : ''}` : undefined
   const isComplete = tokens.length > 0 && recipients.length > 0
+  const otherSigners = Math.max((account?.threshold ?? 1) - 1, 0)
 
-  const title = !who
-    ? 'Pick a Safe account to start.'
-    : isComplete
+  const allowedRule =
+    isComplete && who
       ? `${who} will only be able to send ${describeTokens(tokens)} to ${describeRecipients(recipients)}.`
-      : `${who} won't be able to send funds until you allow at least one token and one recipient.`
-  const permissions = choices.applyToSpendingLimits
-    ? 'Existing spending limits will follow the same rules. '
-    : "Existing spending limits won't be covered. "
-  const description = !who
-    ? 'Then choose which tokens it can send and who can receive them.'
-    : `${showPermissions ? permissions : ''}This takes effect as soon as this transaction is executed. Further changes will take 24 hours to apply.`
+      : `To create an allowlist policy on ${who}, select at least one token and one recipient.`
+  const limitCount = account ? getExistingPermissions(account).length : 0
+  const limits = limitCount === 1 ? 'Your spending limit' : `Your ${limitCount} spending limits`
+  const allowedSettingCount = getAllowedSettings(choices).length
+  const permissions =
+    limitCount > 0
+      ? choices.applyToSpendingLimits
+        ? ' Existing spending limits will follow the same rules.'
+        : " Existing spending limits won't be covered."
+      : ''
+
+  // Each step's own title and line; the timing sits behind the ⓘ on every step.
+  const STEP_BANNERS: Record<number, Pick<SetupSummary, 'title' | 'description'>> = {
+    [CREATE_STEP]: isEditMode
+      ? {
+          title: `You're editing the allowlist on ${who}.`,
+          description:
+            'Change the tokens and recipients. Anything you deselect will be blocked once the change applies.',
+        }
+      : {
+          title: allowedRule,
+          description: 'Select the tokens and recipients to allow. Anything you leave out will be blocked.',
+        },
+    [PERMISSIONS_STEP]: choices.applyToSpendingLimits
+      ? {
+          title: `${limits} will follow the allowlist.`,
+          description: 'They can only send allowed tokens to allowed recipients.',
+        }
+      : {
+          title: `${limits} won't follow the allowlist.`,
+          description: 'They can still send any token to any address.',
+        },
+    [SETTINGS_STEP]: {
+      title:
+        allowedSettingCount === 0
+          ? 'No account changes will be allowed.'
+          : `${allowedSettingCount} of ${ALL_ACCOUNT_SETTINGS.length} account changes will stay allowed.`,
+      description: 'Only the account changes you select below can still be made. Every other change will be blocked.',
+    },
+    [REVIEW_STEP]: { title: allowedRule, description: `Check the details below before you sign.${permissions}` },
+    [CONFIRM_STEP]: {
+      title: `Sign to add the ${isEditMode ? 'change' : 'allowlist'} to the queue.`,
+      description:
+        otherSigners > 0
+          ? `${otherSigners} more ${otherSigners === 1 ? 'signer needs' : 'signers need'} to confirm before it can be executed.`
+          : 'Your signature is the only one needed. It can be executed right after.',
+    },
+    [EXECUTE_STEP]: isEditMode
+      ? { title: 'Execute to start the 24-hour wait.', description: 'The change applies after that.' }
+      : { title: 'Execute to turn the allowlist on.', description: 'It applies right away.' },
+  }
+  const { title, description } = who
+    ? STEP_BANNERS[step]
+    : {
+        title: 'Pick a Safe account to start.',
+        description: 'Then choose which tokens it can send and who can receive them.',
+      }
 
   const details = who
-    ? `Every other transaction from ${who} will be blocked. You can change this later by editing the policy.`
+    ? 'This takes effect as soon as this action is executed. Further changes will take 24 hours to apply.'
     : undefined
 
   return { title, description, details }
 }
 
+/** The summary's title with its ⓘ: the timing and what gets blocked, behind a tooltip. */
+const SummaryTitle = ({ title, details }: Pick<SetupSummary, 'title' | 'details'>): ReactElement => (
+  <>
+    {title}
+    {details && (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              aria-label="When this takes effect"
+              className="ml-1 inline-flex cursor-pointer align-[-2px] text-muted-foreground hover:text-foreground"
+            />
+          }
+        >
+          <Info className="size-3.5" aria-hidden />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">{details}</TooltipContent>
+      </Tooltip>
+    )}
+  </>
+)
+
 const SetupSentence = ({ title, description, details }: SetupSummary): ReactElement => (
   <div className="px-[var(--space-3)] pt-[var(--space-2)]" aria-live="polite" data-m2-new="New · Summary banner">
-    <M2Alert
-      tone="info"
-      title={title}
-      description={
-        <>
-          {description}
-          {details && (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <button
-                    type="button"
-                    aria-label="More about what this blocks"
-                    className="ml-1 inline-flex cursor-pointer align-[-2px] text-muted-foreground hover:text-foreground"
-                  />
-                }
-              >
-                <Info className="size-3.5" aria-hidden />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">{details}</TooltipContent>
-            </Tooltip>
-          )}
-        </>
-      }
-    />
+    <M2Alert tone="info" title={<SummaryTitle title={title} details={details} />} description={description} />
   </div>
 )
 
@@ -2655,10 +3063,13 @@ const SIDE_FRAME_OFFSET =
 const CompactHeader = ({
   account,
   summary,
+  details,
   isVisible,
 }: {
   account?: M2Account
   summary: string
+  /** Behind the same ⓘ as the full banner's. */
+  details?: string
   isVisible: boolean
 }): ReactElement => (
   <div className={classnames('sticky z-10 h-0', PINNED_TITLE_TOP)}>
@@ -2670,7 +3081,7 @@ const CompactHeader = ({
       )}
     >
       <div className="bg-[var(--color-background-main)] [[data-theme=dark]_&]:bg-background">
-        <CompactHeaderTile account={account} summary={summary} />
+        <CompactHeaderTile account={account} summary={summary} details={details} />
         <div aria-hidden className="mt-4 h-4 rounded-t-xl bg-card" />
       </div>
       {/* A short white fade inside the frame's edge, so the content slides out from under it softly. */}
@@ -2680,7 +3091,15 @@ const CompactHeader = ({
 )
 
 /** The policy, account and summary in one small frame. */
-const CompactHeaderTile = ({ account, summary }: { account?: M2Account; summary: string }): ReactElement => (
+const CompactHeaderTile = ({
+  account,
+  summary,
+  details,
+}: {
+  account?: M2Account
+  summary: string
+  details?: string
+}): ReactElement => (
   <div className="flex shrink-0 flex-col gap-3 rounded-xl bg-card p-4" data-m2-new="New · Compact header">
     <div className="flex items-center gap-3">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border [&_svg]:size-4">
@@ -2699,14 +3118,14 @@ const CompactHeaderTile = ({ account, summary }: { account?: M2Account; summary:
         )}
       </div>
     </div>
-    <M2Alert tone="info" title={<span className="block truncate">{summary}</span>} />
+    <M2Alert tone="info" title={<SummaryTitle title={summary} details={details} />} />
   </div>
 )
 
 /** The card header's name, where M1 has "Spending limit"; M1's info link is left out for now. */
-const FlowSubtitle = (): ReactElement => <span>Recipient allowlist</span>
+const FlowSubtitle = (): ReactElement => <span>Allowlist</span>
 
-/** The recipient allowlist's icon, as in the policy table and side panel. */
+/** The allowlist's icon, as in the policy table and side panel. */
 const ShieldIcon = (): ReactElement => <Users aria-hidden />
 
 const StepLabel = ({ children }: { children: ReactNode }): ReactElement => (
@@ -2783,6 +3202,7 @@ const PolicySetupLayout = ({
   onClose,
   summary,
   summaryAccount,
+  hideSummary = false,
   belowSummary,
   children,
 }: {
@@ -2791,6 +3211,8 @@ const PolicySetupLayout = ({
   summary: SetupSummary
   /** The account the summary describes, for the compact header; unset until one is picked. */
   summaryAccount?: M2Account
+  /** Create with a failed account check: there is nothing to summarise yet. */
+  hideSummary?: boolean
   /** In the header card under the summary, e.g. Create's account field. */
   belowSummary?: ReactNode
   /** The steps that apply to the account, for the stepper; children stay one per step. */
@@ -2824,7 +3246,7 @@ const PolicySetupLayout = ({
     const policyRow = policyRowRef.current
     if (!titleRow || !policyRow) return
 
-    // Once the "Recipient allowlist" row has slid under the pinned title.
+    // Once the "Allowlist" row has slid under the pinned title.
     const update = () =>
       setIsPolicyRowHidden(policyRow.getBoundingClientRect().bottom < titleRow.getBoundingClientRect().bottom)
     update()
@@ -2882,7 +3304,12 @@ const PolicySetupLayout = ({
                   </div>
                 </div>
 
-                <CompactHeader account={summaryAccount} summary={summary.title} isVisible={isPolicyRowHidden} />
+                <CompactHeader
+                  account={summaryAccount}
+                  summary={summary.title}
+                  details={summary.details}
+                  isVisible={isPolicyRowHidden}
+                />
 
                 <div
                   data-testid="modal-header"
@@ -2891,7 +3318,7 @@ const PolicySetupLayout = ({
                   <div ref={policyRowRef}>
                     <TxLayoutHeader subtitle={<FlowSubtitle />} icon={ShieldIcon} hideNonce={step < REVIEW_STEP} />
                   </div>
-                  <SetupSentence {...summary} />
+                  {!hideSummary && <SetupSentence {...summary} />}
                   {belowSummary}
                 </div>
 
@@ -2944,6 +3371,8 @@ export type SetUpPoliciesFlowProps = ChoiceHandlers & {
   mode?: WizardMode
   /** Edit only: the allowlist as it is now, to tell whether anything changed and to mark the changes on Review. */
   initialChoices?: SetupChoices
+  /** A bar above the title that scrolls away with the page, e.g. the prototype's logo and wallet bar. */
+  topBar?: ReactNode
 }
 
 export const SetUpPoliciesFlow = ({
@@ -2962,6 +3391,7 @@ export const SetUpPoliciesFlow = ({
   onClose,
   mode = 'create',
   initialChoices,
+  topBar,
 }: SetUpPoliciesFlowProps): ReactElement => {
   // Held here rather than in the step, as M1 does: the step unmounts on Next and would forget the dismissal on Back.
   const [isCalloutDismissed, setIsCalloutDismissed] = useState(false)
@@ -2989,12 +3419,8 @@ export const SetUpPoliciesFlow = ({
   const accountEntries = useMemo(() => getAccountEntries(disabledAccountKeys), [disabledAccountKeys])
   // Past Create the steps show reviewedAccount, so the summary does too.
   const summaryAccount = currentStep > CREATE_STEP ? reviewedAccount : account
-  const summary = useSetupSummary(
-    summaryAccount,
-    choices,
-    // From Review on: on the Policies step its own switch says this.
-    currentStep > PERMISSIONS_STEP && hasExistingPermissions(reviewedAccount),
-  )
+  const isPreflightBlocked = currentStep === CREATE_STEP && !isEditMode && Boolean(account) && preflight !== 'ready'
+  const summary = useSetupSummary(summaryAccount, choices, currentStep, isEditMode)
 
   useEffect(() => {
     latestSetup.choices = choices
@@ -3039,6 +3465,7 @@ export const SetUpPoliciesFlow = ({
         )
       }
       summary={summary}
+      hideSummary={isPreflightBlocked}
       summaryAccount={summaryAccount}
     >
       <CreateStep
@@ -3054,8 +3481,8 @@ export const SetUpPoliciesFlow = ({
         onDismissTokensCallout={() => setIsTokensCalloutDismissed(true)}
         onNext={next}
         isEditMode={isEditMode}
-        // With a Permissions step, its switch can still change the edit, so the check waits for that step's Next.
-        isUnchangedEdit={isUnchangedEdit && !hasPermissionsStep}
+        // Settings, the last step before Review, can still change the edit, so the check waits for its Next.
+        isUnchangedEdit={false}
         scrollToTokens={isTokensScrollPending}
         onScrolledToTokens={clearTokensScroll}
       />
@@ -3065,6 +3492,12 @@ export const SetUpPoliciesFlow = ({
         choices={choices}
         onChoicesChange={onChoicesChange}
         onChangeTokens={changeTokens}
+        onNext={next}
+      />
+      <SettingsStep
+        key="settings"
+        choices={choices}
+        onChoicesChange={onChoicesChange}
         onNext={next}
         isUnchangedEdit={isUnchangedEdit}
       />
@@ -3084,21 +3517,40 @@ export const SetUpPoliciesFlow = ({
 
   if (inline) return flow
 
-  return <M2FlowDialog onClose={onClose}>{flow}</M2FlowDialog>
+  return (
+    <M2FlowDialog onClose={onClose} topBar={topBar}>
+      {flow}
+    </M2FlowDialog>
+  )
 }
 
 /** TxModalDialog without its corner X or the right gutter kept for it: the flow draws its own X by the title. */
-const M2FlowDialog = ({ children, onClose }: { children: ReactNode; onClose?: () => void }): ReactElement => {
+const M2FlowDialog = ({
+  children,
+  onClose,
+  topBar,
+}: {
+  children: ReactNode
+  onClose?: () => void
+  /** Scrolls with the page, so the dialog starts at the very top and the title can pin there. */
+  topBar?: ReactNode
+}): ReactElement => {
   const portalContainer = usePortalContainer()
 
   return (
     <DialogPrimitive.Root open onOpenChange={(nextOpen) => !nextOpen && onClose?.()}>
       <DialogPrimitive.Portal container={portalContainer}>
         <DialogPrimitive.Popup
-          className={classnames(txDialogCss.dialog, txDialogCss.paper, txDialogCss.fullWidth)}
+          className={classnames(
+            txDialogCss.dialog,
+            txDialogCss.paper,
+            txDialogCss.fullWidth,
+            Boolean(topBar) && 'top-0!',
+          )}
           onClick={(event) => event.stopPropagation()}
         >
           <div tabIndex={-1} className="text-[var(--color-text-primary)]">
+            {topBar}
             {children}
           </div>
         </DialogPrimitive.Popup>
