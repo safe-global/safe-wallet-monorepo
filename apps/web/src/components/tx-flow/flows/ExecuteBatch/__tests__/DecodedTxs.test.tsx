@@ -88,13 +88,12 @@ describe('DecodedTxs', () => {
     expect(row).toHaveTextContent(shortenAddress(recipient))
   })
 
-  it('shows no row for a transaction without data', async () => {
+  it('numbers the rows without a gap for a transaction without data', async () => {
     const withoutData = transactionDetailsBuilder().with({ txData: null }).build()
 
     const rows = await renderRows([withoutData, approveTx()])
 
-    expect(rows).toHaveLength(1)
-    expect(rows[0]).toHaveTextContent('approve')
+    expect(rows.map((row) => row.textContent)).toEqual(['1approve'])
   })
 
   it('opens and closes every row with "Expand all" and "Collapse all"', async () => {
