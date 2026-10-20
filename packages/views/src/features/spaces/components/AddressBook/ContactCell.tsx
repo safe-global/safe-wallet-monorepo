@@ -44,8 +44,10 @@ const CopyAddress = ({ address }: { address: string }) => {
             aria-label="Copy address"
             onClick={(event) => {
               event.stopPropagation()
-              void navigator.clipboard?.writeText(address)
-              setCopied(true)
+              navigator.clipboard?.writeText(address).then(
+                () => setCopied(true),
+                () => setCopied(false),
+              )
             }}
           />
         }

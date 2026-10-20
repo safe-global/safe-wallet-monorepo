@@ -29,13 +29,13 @@ export const toLocalContacts = (
   workspaceItems: SpaceAddressBookItemDto[],
   configs: Chain[],
 ): AddressBookContact[] => {
-  const byAddress = new Map<string, { address: string; name: string; chainIds: string[] }>()
+  const byAddress = new Map<string, { address: string; name: string; chainIds: Set<string> }>()
   for (const [chainId, book] of Object.entries(localBooks)) {
     for (const [address, name] of Object.entries(book)) {
       const key = address.toLowerCase()
       const existing = byAddress.get(key)
-      if (existing) existing.chainIds.push(chainId)
-      else byAddress.set(key, { address, name, chainIds: [chainId] })
+      if (existing) existing.chainIds.add(chainId)
+      else byAddress.set(key, { address, name, chainIds: new Set([chainId]) })
     }
   }
 
@@ -45,7 +45,7 @@ export const toLocalContacts = (
     .map(({ address, name, chainIds }) => ({
       address,
       name,
-      chains: toChainInfos(chainIds, configs),
+      chains: toChainInfos(Array.from(chainIds), configs),
       isLocal: true,
       isShared: shared.has(address.toLowerCase()),
     }))

@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -107,6 +108,16 @@ describe('toLocalContacts', () => {
 
     expect(contacts).toHaveLength(1)
     expect(contacts[0].chains.map((chain) => chain.chainId)).toEqual(['1', '100'])
+  })
+
+  it('lists a chain once when the same address is saved on it in two casings', () => {
+    const contacts = toLocalContacts(
+      { '1': { [checksumAddress(address)]: 'Hardware wallet', [address.toLowerCase()]: 'Hardware wallet' } },
+      [],
+      configs,
+    )
+
+    expect(contacts[0].chains.map((chain) => chain.chainId)).toEqual(['1'])
   })
 
   it('marks contacts the workspace already has as shared and lists them last', () => {
