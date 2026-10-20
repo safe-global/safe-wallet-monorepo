@@ -51,7 +51,7 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: Plan shards
@@ -76,16 +76,16 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
 
       - name: Check isolated runner
         run: yarn workspace @safe-global/web e2e:env:test
 
       - name: Build wallet for local CGW
-        uses: ./.github/actions/build
+        uses: $/.github/actions/build
         with:
           prod: 'false'
         env:
@@ -103,7 +103,7 @@ jobs:
         run: yarn workspace @safe-global/tx-builder exec vite build --config vite.config.ts
 
       - name: Upload builds
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: isolated-e2e-builds
           path: |
@@ -120,6 +120,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      packages: read
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -130,10 +131,10 @@ jobs:
       SAFE_E2E_WEB_URL: http://localhost:8080
       SAFE_E2E_SPECS: ${{ matrix.specs }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
 
       - name: Install browser dependencies
         id: browser
@@ -149,9 +150,17 @@ jobs:
           fi
           node -e 'console.log("path=" + require("@playwright/test").chromium.executablePath())' >> "$GITHUB_OUTPUT"
 
+      # The Queue Service image is a private package.
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
       - name: Start and validate backend
         id: backend
-        uses: ./.github/actions/isolated-e2e-backend
+        uses: $/.github/actions/isolated-e2e-backend
         with:
           project: ${{ env.SAFE_E2E_PROJECT }}
           fork-rpc-url: ${{ secrets.SEPOLIA_FORK_RPC_URL }}
@@ -180,7 +189,7 @@ jobs:
           exit 1
 
       - name: Download builds
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           name: isolated-e2e-builds
           path: apps
@@ -196,7 +205,7 @@ jobs:
 
       - name: Run isolated Cypress shard
         if: matrix.runner == 'cypress'
-        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
+        uses: cypress-io/github-action@v7.4.6
         with:
           install: false
           working-directory: apps/web
@@ -231,7 +240,7 @@ jobs:
           mkdir -p "$output"
           docker ps --all --filter "label=com.docker.compose.project=$SAFE_E2E_PROJECT" \
             --format '{{.Names}}\t{{.State}}\t{{.Status}}' > "$output/containers.txt"
-          for service in cgw-web decoder-web txs-web txs-worker-indexer; do
+          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker; do
             python3 scripts/test_env.py logs "$service" --tail all > "$output/$service.log"
           done
 
@@ -242,7 +251,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: isolated-e2e-results-${{ matrix.shard }}
           # The fork cache lives in .anvil-cache, which the action skips as hidden by default.

@@ -9,7 +9,7 @@ Cypress → Playwright migration: follow [docs/CYPRESS_MIGRATION_GUIDE.md](docs/
 ## Layout
 
 - `tests/{smoke,regression,api,e2e}/` — specs; they run on staging and, when registered in `environment/playwright-specs.mjs`, on the local stack. Read Safes and wallets from the `safes` and `credentials` fixtures, never from `SAFES` directly
-- `src/pages/` — page objects · `src/fixtures/` — fixtures · `src/data/` — test data · `src/api/` — API helpers
+- `src/pages/` — page objects · `src/fixtures/` — fixtures · `src/data/` — test data · `src/api/` — API helpers · `src/seed/` and `src/chain/` — seed state and on-chain reads for the journeys in `tests/e2e/`
 
 ## Commands
 

@@ -34,7 +34,7 @@ jobs:
         containers: [1, 2, 3, 4, 5]
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -61,7 +61,7 @@ jobs:
           echo "specs=$SPEC_LIST" >> "$GITHUB_OUTPUT"
           echo "Shard ${{ matrix.containers }}: ${#SHARD_SPECS[@]} specs out of $TOTAL total"
 
-      - uses: ./.github/actions/cypress
+      - uses: $/.github/actions/cypress
         with:
           spec: ${{ steps.specs.outputs.specs }}
           group: 'Argos E2E'
@@ -138,9 +138,9 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
 
       - name: Finalize Argos build
         run: npx @argos-ci/cli finalize

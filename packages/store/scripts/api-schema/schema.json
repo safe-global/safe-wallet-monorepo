@@ -3961,7 +3961,7 @@
     },
     "/v1/spaces/{spaceId}/policies/active": {
       "get": {
-        "description": "Returns the policies of every Safe in the Space. A Safe whose spending-limit or proposer data could not be read is omitted from the corresponding policies.",
+        "description": "Returns the policies of every Safe in the Space. A Safe whose enabled modules and guards could not be read is omitted from the spending-limit and guard-enforced policies; a Safe whose delegates could not be read is omitted from the proposer policies.",
         "operationId": "spacePoliciesGetActivePoliciesV1",
         "parameters": [
           {
@@ -4380,6 +4380,83 @@
         "summary": "Relay a transaction at a workspace's expense",
         "tags": [
           "relay"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/safenet/checks": {
+      "post": {
+        "description": "Queues a Safenet check of a pending Safe transaction that an owner has signed. Safe Labs pays the fee and counts the check against the workspace in the path. The caller must be an active member of that workspace, the workspace must hold the Safe and have a plan that includes Safenet checks, and the chain must list SAFENET_CHECKS.",
+        "operationId": "safenetChecksRequestCheckV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSafenetCheckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued, or already queued"
+          },
+          "400": {
+            "description": "Malformed workspace identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Not a member of the workspace, or the workspace does not hold the Safe or its plan does not include checks"
+          },
+          "404": {
+            "description": "Workspace not found, or no such transaction for this Safe"
+          },
+          "422": {
+            "description": "The Safe is older than 1.3.0, or the transaction is executed or stale, unsigned by an owner, or of another Safe"
+          },
+          "429": {
+            "description": "The workspace has used its daily limit of sponsored Safenet checks"
+          },
+          "501": {
+            "description": "Safenet checks are not available on this chain"
+          }
+        },
+        "summary": "Request a Safenet check at a workspace expense",
+        "tags": [
+          "safenet"
         ]
       }
     },
@@ -7321,7 +7398,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-2a92a92",
+    "version": "main-a0de2d2",
     "contact": {}
   },
   "tags": [],
@@ -10177,6 +10254,9 @@
           },
           "version": {
             "type": "string"
+          },
+          "safe": {
+            "type": "string"
           }
         }
       },
@@ -10961,6 +11041,16 @@
             "type": "number",
             "description": "Total count of Safes in the space",
             "example": 5
+          },
+          "experimentalFeatures": {
+            "type": "array",
+            "description": "Experimental features this Workspace has opted into.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "POLICY_RECIPIENT_ALLOWLIST"
+              ]
+            }
           }
         },
         "required": [
@@ -10968,7 +11058,8 @@
           "name",
           "members",
           "memberCount",
-          "safeCount"
+          "safeCount",
+          "experimentalFeatures"
         ]
       },
       "UpdateSpaceDto": {
@@ -10982,6 +11073,16 @@
             "enum": [
               "ACTIVE"
             ]
+          },
+          "experimentalFeatures": {
+            "type": "array",
+            "description": "Replaces the stored set; [] opts out of all. Omit to leave it unchanged.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "POLICY_RECIPIENT_ALLOWLIST"
+              ]
+            }
           }
         }
       },
@@ -12287,6 +12388,31 @@
           }
         }
       },
+      "PolicyAccessDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "The contract the governed calls target"
+          },
+          "selector": {
+            "type": "string",
+            "description": "The 4-byte function selector of the governed calls"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "CALL",
+              "DELEGATECALL"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation"
+        ]
+      },
       "GuardEnforcementDto": {
         "type": "object",
         "properties": {
@@ -12298,11 +12424,20 @@
           },
           "guards": {
             "$ref": "#/components/schemas/GuardSlotsDto"
+          },
+          "access": {
+            "description": "The calls the guard applies the policy to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicyAccessDto"
+              }
+            ]
           }
         },
         "required": [
           "via",
-          "guards"
+          "guards",
+          "access"
         ]
       },
       "OffChainEnforcementDto": {
@@ -12573,6 +12708,62 @@
           "proposers"
         ]
       },
+      "Erc20TransferRecipientDto": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "An address the Safe can send this token to"
+          },
+          "permission": {
+            "type": "string",
+            "enum": [
+              "ONCE",
+              "ALWAYS"
+            ]
+          }
+        },
+        "required": [
+          "account",
+          "permission"
+        ]
+      },
+      "Erc20TransferPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The ERC20 token the allowlist applies to"
+          },
+          "recipients": {
+            "description": "The recipients of the token transfers the policy permits",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Erc20TransferRecipientDto"
+            }
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "recipients"
+        ]
+      },
+      "CosignerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "cosignerAddress": {
+            "type": "string",
+            "description": "The cosigner the policy enforces."
+          }
+        },
+        "required": [
+          "cosignerAddress"
+        ]
+      },
+      "StatelessPolicyDataDto": {
+        "type": "object",
+        "properties": {}
+      },
       "SafeRefDto": {
         "type": "object",
         "properties": {
@@ -12601,7 +12792,8 @@
               "cosigner",
               "allow",
               "native-transfer",
-              "deny"
+              "deny",
+              "multisend"
             ]
           },
           "enforcement": {
@@ -12636,6 +12828,15 @@
               },
               {
                 "$ref": "#/components/schemas/ProposerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TransferPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/CosignerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/StatelessPolicyDataDto"
               }
             ]
           },
@@ -13195,7 +13396,8 @@
           "safe_seats",
           "copilot_scans",
           "sponsored_transactions",
-          "policies"
+          "policies",
+          "safenet_checks"
         ],
         "description": "Feature key from the entitlements catalog."
       },
@@ -13487,6 +13689,18 @@
           "requested",
           "reason",
           "available"
+        ]
+      },
+      "CreateSafenetCheckDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash"
+          }
+        },
+        "required": [
+          "safeTxHash"
         ]
       },
       "SafeList": {

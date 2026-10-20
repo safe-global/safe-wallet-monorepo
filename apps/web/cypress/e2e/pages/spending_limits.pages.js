@@ -78,10 +78,6 @@ export function verifyOldValuesAreDisplayed() {
   main.verifyElementsIsVisible([oldTokenAmount, oldResetTime, slimitReplacementWarning])
 }
 
-export function verifyActionNamesAreDisplayed(names) {
-  main.verifyValuesExist(actionItem, names)
-}
-
 export function verifySpendingLimitsIcons() {
   main.verifyElementsIsVisible([splimitBeneficiaryIcon, splimitAssetIcon, splimitTimeIcon])
 }

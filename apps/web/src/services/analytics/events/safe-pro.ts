@@ -19,4 +19,13 @@ export const SAFE_PRO_EVENTS = {
   FREE_ACCESS_REMINDER_VIEWED: event('Free access reminder viewed'),
   WORKSPACE_LOCKED_VIEWED: event('Workspace locked viewed'),
   UPGRADE_PROMPT_VIEWED: event('Upgrade prompt viewed'),
+  PLANS_CLICKED: event('Safe Pro plans clicked'),
+}
+
+export enum SAFE_PRO_PLANS_LABELS {
+  compare_features = 'compare_features',
+  talk_to_sales = 'talk_to_sales',
+  account_team = 'account_team',
+  discuss_add_on = 'discuss_add_on',
+  sales_prompt = 'sales_prompt',
 }

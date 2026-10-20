@@ -1,5 +1,5 @@
 /**
- * The local Auth0 sign-in and step-up page of the isolated stack (environment/infra/scripts/auth0_api.py).
+ * The local Auth0 sign-in and step-up page of the isolated stack (environment/infra/mocks/auth0-api.ts).
  *
  * Rule: Page Objects hold locators and actions. Assertions belong in the test file.
  */

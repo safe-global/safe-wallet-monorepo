@@ -23,6 +23,7 @@ import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecuti
 import { getMultiSendTxs } from '@/utils/transactions'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
+import { RiskConfirmation } from '@/components/tx-flow/features/RiskConfirmation'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -263,6 +264,8 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           submitError={submitError}
           isRejectedByUser={isRejectedByUser}
         />
+
+        <RiskConfirmation subject="transaction" />
 
         <div>
           <div className="pt-4">

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "e2e:env": "node e2e/environment/run.mjs",
-    "e2e:env:test": "node --test e2e/environment/*.test.mjs",
+    "e2e:env:test": "yarn run -T -B tsc --noEmit -p e2e/environment/infra/mocks && node --test 'e2e/environment/*.test.mjs' 'e2e/environment/infra/mocks/*.test.ts'",
     "pw:test": "npx playwright test --config=e2e/playwright.config.ts --project=chromium",
     "pw:test:smoke": "npx playwright test --config=e2e/playwright.config.ts --grep @smoke",
     "pw:test:api": "npx playwright test --config=e2e/playwright.config.ts --grep @api",

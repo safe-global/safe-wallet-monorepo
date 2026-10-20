@@ -62,7 +62,7 @@ const SafeProSidebarBanner = ({
         size="xs"
         render={
           <a
-            onClick={() => trackSafeProBannerClick('sidebar')}
+            onClick={() => trackSafeProBannerClick('sidebar', SAFE_PRO_ANNOUNCEMENT_URL)}
             href={SAFE_PRO_ANNOUNCEMENT_URL}
             target="_blank"
             rel="noopener noreferrer"

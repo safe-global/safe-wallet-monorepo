@@ -7,6 +7,7 @@ import useGetSpaceAuditLog, { type SpaceAuditLogQueryArgs } from '../../hooks/us
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuditEventRow from './AuditEventRow'
@@ -74,9 +75,7 @@ function SpaceActivityLog() {
   const [extraCursors, setExtraCursors] = useState<string[]>([])
   const [extraPages, setExtraPages] = useState<Record<number, SpaceAuditLogPage>>({})
 
-  useEffect(() => {
-    trackEvent(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
-  }, [])
+  useTrackOnce(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
 
   const handleFiltersChange = (next: ActivityLogFilterState) => {
     const changed = (Object.keys(FILTER_SOURCE) as Array<keyof ActivityLogFilterState>).find(

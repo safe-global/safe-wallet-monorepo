@@ -52,6 +52,12 @@ export class SendTokensPage {
     await this.recipientInput.waitFor({ state: 'visible' })
   }
 
+  /** Enter the recipient's address and an amount of the selected token */
+  async fillTransfer({ recipient, amount }: { recipient: string; amount: string }): Promise<void> {
+    await this.recipientInput.fill(recipient)
+    await this.amountField.fill(amount)
+  }
+
   /** A single suggestion, matched by the contact name or address it renders. */
   suggestion(text: string): Locator {
     return this.suggestions.filter({ hasText: text })

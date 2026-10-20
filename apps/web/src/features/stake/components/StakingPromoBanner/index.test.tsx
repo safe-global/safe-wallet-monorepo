@@ -45,7 +45,7 @@ describe('StakingPromoBanner', () => {
   it('fires the show event on mount', () => {
     render(<StakingPromoBanner onDismiss={jest.fn()} />, { routerProps: { query: { safe: SAFE } } })
 
-    expect(mockTrackEvent).toHaveBeenCalledWith(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
+    expect(mockTrackEvent).toHaveBeenCalledWith(OVERVIEW_EVENTS.SHOW_STAKING_BANNER, undefined)
   })
 
   it('opens the native SAFE staking app and tracks the CTA click', () => {
