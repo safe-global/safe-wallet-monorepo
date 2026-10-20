@@ -73,6 +73,7 @@ workflows:
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
+        - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
         - 'cypress-io/github-action@v6.10.9'
     '.github/workflows/web-argos-storybook.yml':
@@ -104,6 +105,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
         - 'actions/setup-python@v7.0.0'
+        - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
         - 'cypress-io/github-action@v6.10.9'
     '.github/workflows/web-e2e-hp-ondemand.yml':
@@ -111,12 +113,14 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
         - 'actions/setup-python@v7.0.0'
+        - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
         - 'cypress-io/github-action@v6.10.9'
     '.github/workflows/web-e2e-smoke.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
+        - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
         - 'cypress-io/github-action@v6.10.9'
         - 'slackapi/slack-github-action@v4.0.0'
