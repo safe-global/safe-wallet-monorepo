@@ -30,8 +30,9 @@ const draftItem = (): DraftBatchItem => ({
   txData: { to: faker.finance.ethereumAddress(), value: '1', data: '0x', operation: OperationType.Call },
 })
 
-const renderSidebar = ({ onToggle = jest.fn() }: { onToggle?: (open: boolean) => void } = {}) => {
+const renderSidebar = () => {
   const setTxFlow = jest.fn()
+  const onToggle = jest.fn()
   render(
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
       <BatchSidebar isOpen onToggle={onToggle} />
@@ -58,6 +59,14 @@ describe('BatchSidebar', () => {
     )
 
     expect(setTxFlow).not.toHaveBeenCalled()
+  })
+
+  it('invites the user to add a first transaction to an empty batch', () => {
+    mockUseDraftBatch.mockReturnValue([])
+
+    renderSidebar()
+
+    expect(screen.getByText('Add an initial transaction to the batch')).toBeInTheDocument()
   })
 
   it('opens a new transaction from the empty batch', () => {

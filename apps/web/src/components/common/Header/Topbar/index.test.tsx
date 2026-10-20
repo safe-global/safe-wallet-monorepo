@@ -57,8 +57,9 @@ jest.mock('@reown/walletkit', () => ({
   },
 }))
 
+const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
 jest.mock('@/features/batching', () => ({
-  useDraftBatch: () => [],
+  useDraftBatch: () => mockUseDraftBatch(),
   BatchTooltip: ({ children }: { children: ReactNode }) => children,
 }))
 
@@ -155,6 +156,7 @@ const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseDraftBatch.mockReturnValue([])
     mockUseIsMobile.mockReturnValue(false)
     mockUseIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
@@ -213,6 +215,14 @@ describe('Topbar', () => {
       expect(screen.getByLabelText('Batch transactions')).toBeInTheDocument()
     })
 
+    it('counts the transactions in the draft batch on the Batch button', () => {
+      mockUseDraftBatch.mockReturnValue([{}])
+
+      renderOnSafePage()
+
+      expect(screen.getByLabelText('1 batched transactions')).toBeInTheDocument()
+    })
+
     it('opens the WalletConnect pairing popup when the WalletConnect button is clicked', async () => {
       const user = userEvent.setup()
       renderOnSafePage()
@@ -226,6 +236,7 @@ describe('Topbar', () => {
 
   it('hides the Batch button on a page without a Safe', () => {
     mockIsSpaceRoute.mockReturnValue(false)
+    mockUseSafeAddress.mockReturnValue('')
 
     render(<Topbar />)
 

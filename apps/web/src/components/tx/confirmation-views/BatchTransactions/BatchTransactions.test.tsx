@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Operation, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import type { DraftBatchItem } from '@/features/batching/store'
@@ -47,70 +48,65 @@ const preview = (recipients: string[]): TransactionPreview => {
   }
 }
 
-const shortAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`
+const randomAddresses = (count: number) =>
+  Array.from({ length: count }, () => checksumAddress(faker.finance.ethereumAddress()))
 
-const renderBatch = (recipients: string[]) => {
+const renderBatch = (recipients: string[], { isDecoded = true } = {}) => {
   jest.spyOn(batching, 'useDraftBatch').mockReturnValue(recipients.map(draftItem))
-  jest.spyOn(useTxPreview, 'default').mockReturnValue([preview(recipients), undefined, false])
+  const decoded = isDecoded ? preview(recipients) : undefined
+  jest.spyOn(useTxPreview, 'default').mockReturnValue([decoded, undefined, !isDecoded])
   render(<BatchTransactions />)
-  return screen.findAllByTestId('action-item')
 }
+
+const rowsOf = () => screen.getAllByRole('listitem')
 
 describe('BatchTransactions', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
 
-  it('shows one numbered row per draft transaction with its amount and recipient', async () => {
-    const recipients = [
-      checksumAddress(faker.finance.ethereumAddress()),
-      checksumAddress(faker.finance.ethereumAddress()),
-    ]
+  it('numbers each draft row and shows its decoded amount and recipient', async () => {
+    const recipients = randomAddresses(2)
 
-    const rows = await renderBatch(recipients)
+    renderBatch(recipients)
 
-    expect(rows).toHaveLength(2)
-    const items = screen.getAllByRole('listitem')
-    recipients.forEach((recipient, index) => {
-      expect(items[index]).toHaveTextContent(new RegExp(`^${index + 1}Send`))
-      expect(rows[index]).toHaveTextContent(shortAddress(recipient))
+    await screen.findAllByTestId('action-item')
+    rowsOf().forEach((row, index) => {
+      expect(row).toHaveTextContent(new RegExp(`^${index + 1}Send`))
+      expect(row).toHaveTextContent(shortenAddress(recipients[index]))
     })
   })
 
-  it('shows a single draft transaction without a MultiSend', async () => {
-    const recipient = checksumAddress(faker.finance.ethereumAddress())
+  it('shows a single draft transaction that is not a MultiSend', async () => {
+    const [recipient] = randomAddresses(1)
 
-    const rows = await renderBatch([recipient])
+    renderBatch([recipient])
 
-    expect(rows).toHaveLength(1)
-    expect(rows[0]).toHaveTextContent(shortAddress(recipient))
+    await screen.findByTestId('action-item')
+    expect(rowsOf()).toHaveLength(1)
+    expect(rowsOf()[0]).toHaveTextContent(shortenAddress(recipient))
   })
 
   it('opens a row to show the decoded transaction and closes it again', async () => {
-    const recipients = [
-      checksumAddress(faker.finance.ethereumAddress()),
-      checksumAddress(faker.finance.ethereumAddress()),
-    ]
-    const rows = await renderBatch(recipients)
+    const recipients = randomAddresses(2)
+    renderBatch(recipients)
+    const [firstRow] = await screen.findAllByTestId('action-item')
 
-    fireEvent.click(rows[0])
+    fireEvent.click(firstRow)
 
-    await waitFor(() => expect(rows[0]).toHaveAttribute('aria-expanded', 'true'))
+    await waitFor(() => expect(firstRow).toHaveAttribute('aria-expanded', 'true'))
     expect(screen.getByText('Interacted with')).toBeInTheDocument()
     expect(screen.getByText(recipients[0])).toBeInTheDocument()
 
-    fireEvent.click(rows[0])
+    fireEvent.click(firstRow)
 
-    await waitFor(() => expect(rows[0]).toHaveAttribute('aria-expanded', 'false'))
+    await waitFor(() => expect(firstRow).toHaveAttribute('aria-expanded', 'false'))
   })
 
   it('shows a placeholder for each row until the batch is decoded', () => {
-    jest.spyOn(batching, 'useDraftBatch').mockReturnValue([draftItem(checksumAddress(faker.finance.ethereumAddress()))])
-    jest.spyOn(useTxPreview, 'default').mockReturnValue([undefined, undefined, true])
-
-    render(<BatchTransactions />)
+    renderBatch(randomAddresses(2), { isDecoded: false })
 
     expect(screen.queryByTestId('action-item')).not.toBeInTheDocument()
-    expect(screen.getAllByRole('listitem')).toHaveLength(1)
+    expect(rowsOf()).toHaveLength(2)
   })
 })

@@ -88,26 +88,26 @@ describe('BatchTxList', () => {
     await waitFor(() => expect(getByTitle('Delete transaction')).toBeInTheDocument())
   })
 
-  it('removes a transaction from the batch once the user confirms', async () => {
+  const clickDeleteAndAnswer = async (confirmed: boolean) => {
     mockUseSafeSDK.mockReturnValue(safeSdk)
     mockUseTxPreview.mockReturnValue([previewOf('0xTo', '1'), undefined, false])
-    jest.spyOn(window, 'confirm').mockReturnValue(true)
+    jest.spyOn(window, 'confirm').mockReturnValue(confirmed)
     const onDelete = jest.fn()
 
     const { findByTitle } = render(<BatchTxList txItems={txItems} onDelete={onDelete} />)
     fireEvent.click(await findByTitle('Delete transaction'))
+
+    return onDelete
+  }
+
+  it('removes a transaction from the batch once the user confirms', async () => {
+    const onDelete = await clickDeleteAndAnswer(true)
 
     expect(onDelete).toHaveBeenCalledWith('1')
   })
 
   it('keeps the transaction when the user cancels the removal', async () => {
-    mockUseSafeSDK.mockReturnValue(safeSdk)
-    mockUseTxPreview.mockReturnValue([previewOf('0xTo', '1'), undefined, false])
-    jest.spyOn(window, 'confirm').mockReturnValue(false)
-    const onDelete = jest.fn()
-
-    const { findByTitle } = render(<BatchTxList txItems={txItems} onDelete={onDelete} />)
-    fireEvent.click(await findByTitle('Delete transaction'))
+    const onDelete = await clickDeleteAndAnswer(false)
 
     expect(onDelete).not.toHaveBeenCalled()
   })
