@@ -119,6 +119,7 @@ class EnvironmentTests(unittest.TestCase):
                 "command": ["--fork-url", "https://secret.example/key"],
             },
             "nginx": {"ports": [{"published": "8000"}]},
+            "ledger-emulator": {"ports": [{"published": "9555"}]},
             "txs-init": {"environment": {"FORK_CHAIN_ID": "11155111"}},
         }
         for service in services.values():
@@ -126,6 +127,7 @@ class EnvironmentTests(unittest.TestCase):
         result = public_config({"services": services})
         self.assertNotIn("secret", str(result))
         self.assertEqual(result["gatewayUrl"], GATEWAY)
+        self.assertEqual(result["ledgerEmulatorUrl"], "http://localhost:9555")
         self.assertEqual(result["forkBlock"], 100)
 
     @patch("scripts.test_env.subprocess.run")

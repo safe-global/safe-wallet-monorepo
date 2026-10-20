@@ -152,7 +152,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     )
   }, [userNonce, onboard, wallet, multiSendTxData, multiSendContract, txsWithDetails, gasPrice, isEIP1559, safe])
 
-  const [safeTx] = useAsync<SafeTransaction | undefined>(async () => {
+  const [safeTx, safeTxError] = useAsync<SafeTransaction | undefined>(async () => {
     const safeTx = multiSendTxs ? await createMultiSendCallOnlyTx(multiSendTxs) : undefined
 
     if (safeTx) {
@@ -265,7 +265,8 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           isRejectedByUser={isRejectedByUser}
         />
 
-        <RiskConfirmation subject="transaction" />
+        {/* Safe Shield binds a confirmation to the transaction, so a tick before the build settles would be lost */}
+        {(safeTx || safeTxError) && <RiskConfirmation subject="transaction" />}
 
         <div>
           <div className="pt-4">

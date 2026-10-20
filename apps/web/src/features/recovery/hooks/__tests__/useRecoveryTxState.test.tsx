@@ -2,7 +2,8 @@ import { faker } from '@faker-js/faker'
 
 import { useRecoveryTxState } from '../useRecoveryTxState'
 import { renderHook } from '@/tests/test-utils'
-import store from '../../components/RecoveryContext'
+import store, { type RecoveryContextType } from '../../components/RecoveryContext'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 describe('useRecoveryTxState', () => {
   beforeEach(() => {
@@ -217,6 +218,46 @@ describe('useRecoveryTxState', () => {
         isExecutable: false,
         remainingSeconds: 0,
         isExpired: true,
+        isNext: true,
+        isPending: false,
+      })
+    })
+
+    it('should return correct values when validFrom is in the past and there is no expiration', () => {
+      jest.setSystemTime(1_000)
+
+      const delayModifierAddress = faker.finance.ethereumAddress()
+      const nextTxHash = faker.string.hexadecimal({ length: 10 })
+
+      const validFrom = BigInt(0)
+      const expiresAt = null
+
+      const data = [
+        {
+          address: delayModifierAddress,
+          txNonce: BigInt(0),
+          queue: [
+            {
+              address: delayModifierAddress,
+              transactionHash: nextTxHash,
+              validFrom,
+              expiresAt,
+              args: { queueNonce: BigInt(0) },
+            },
+          ],
+        },
+      ]
+
+      store.setStore({
+        state: [data],
+      } as unknown as RecoveryContextType)
+
+      const { result } = renderHook(() => useRecoveryTxState(data[0].queue[0] as unknown as RecoveryQueueItem))
+
+      expect(result.current).toStrictEqual({
+        isExecutable: true,
+        remainingSeconds: 0,
+        isExpired: false,
         isNext: true,
         isPending: false,
       })

@@ -12,7 +12,6 @@ const activeNftIcon = '[data-testid="nft-icon-primary"]'
 const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"]`
 const selectAllNFTsCheckbox = '[data-slot="checkbox"][title="Select all"]'
 const activeSendNFTBtn = '[data-testid="nft-send-btn-false"]'
-const disabledSendNFTBtn = '[data-testid="nft-send-btn-true"]'
 const modalSelectedNFTs = '[data-testid="selected-nfts"]'
 const nftItemList = '[data-testid="nft-item-list"]'
 const nftItemNane = '[data-testid="nft-item-name"]'
@@ -21,9 +20,6 @@ export const accordionActionItem = '[data-testid="action-item"]'
 
 const noneNFTSelected = /0 NFT[s]? selected/
 
-export function verifySendNFTBtnDisabled() {
-  cy.get(disabledSendNFTBtn).should('be.visible')
-}
 export function verifyTxDetails(data) {
   main.verifyValuesExist(txDetailsSummary, data)
 }

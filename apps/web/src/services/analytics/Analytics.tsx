@@ -8,6 +8,7 @@ import {
   hasConsentFor,
   type CookiesAndTermsState,
 } from '@/store/cookiesAndTermsSlice'
+import { datadogRum } from '@datadog/browser-rum'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { useEffect, useState } from 'react'
 
@@ -19,6 +20,10 @@ const Analytics = () => {
   })
   const hasStoreConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
   const isAnalyticsEnabled = hasStoreConsent || hasStoredConsent
+
+  useEffect(() => {
+    datadogRum.setTrackingConsent(isAnalyticsEnabled ? 'granted' : 'not-granted')
+  }, [isAnalyticsEnabled])
 
   useEffect(() => {
     if (!isAnalyticsEnabled) return

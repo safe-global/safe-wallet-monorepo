@@ -55,10 +55,7 @@ const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
-const checkWalletTooltipTrigger = '[data-testid="check-wallet-tooltip-trigger"]'
-const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
-export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
@@ -86,7 +83,6 @@ const gridViewBtn = '[data-testid="grid-view-btn"]'
 const txHexData = '[data-testid="tx-hex-data"]'
 const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
-const nonceFld = '[data-testid="nonce-fld"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
 const addrecipientBtn = '[data-testid="add-recipient-btn"]'
 const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
@@ -113,7 +109,6 @@ const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
-export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
 const noTxFoundStr = (type) => `0 ${type} transactions found`
 const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
@@ -206,25 +201,12 @@ export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
 }
 
-export function verifyReplaceChoiceBtnVisible() {
-  cy.get(replaceChoiceBtn).find('button').should('be.visible')
-}
-
 export function getRejectButton() {
   return cy.get(rejectTxBtn)
 }
 
 export function clickOnRejectBtn() {
   getRejectButton().click()
-}
-
-export function hoverOverRejectBtnBtn() {
-  // Base UI tooltips open on a native mouseenter on the trigger span (CheckWallet wrapper), not the disabled button
-  main.hoverUntilTooltipOpen(() => getRejectButton().closest(checkWalletTooltipTrigger))
-}
-
-export function verifyRejectBtnDisabled() {
-  getRejectButton().should('be.disabled')
 }
 
 export function verifyPayNowOptionIsDisabled() {
@@ -238,24 +220,6 @@ export function verifyTxRejectModalVisible() {
 
 export function clickOnRejectionChoiceBtn(choice) {
   cy.get(wallet.choiceBtn).eq(choice).click()
-}
-
-export function verifyTxNonceDisplayed(nonce) {
-  cy.get(nonceFld).should('include.text', nonce)
-}
-
-export function checkNonceIsReadOnly() {
-  cy.get(nonceFld).then(($el) => {
-    expect($el[0].nodeName).to.equal('DIV')
-  })
-}
-
-export function verifyRejecChoiceBtnStatus(option) {
-  cy.get(rejectChoiceBtn).find('button').should(option)
-}
-
-export function verifyDeleteChoiceBtnStatus(option) {
-  cy.get(deleteChoiceBtn).find('button').should(option)
 }
 
 export function typeNoteText(text) {
@@ -465,14 +429,6 @@ export function clickOnTransactionItemByName(name, token) {
     matches = matches.filter(':contains("' + token + '")')
   }
   matches.first().scrollIntoView().click({ force: true })
-}
-
-export function clickOnTransactionItemByIndex(index) {
-  cy.get(messageItem)
-    .eq(index)
-    .then(($elements) => {
-      cy.wrap($elements).click({ force: true })
-    })
 }
 
 export function scrollToBottom() {
@@ -687,23 +643,6 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
     }
   })
 }
-export function verifySummaryByIndex(index, data, alt) {
-  cy.get(messageItem)
-    .eq(index)
-    .then(($elements) => {
-      cy.wrap($elements).then(($element) => {
-        if (Array.isArray(data)) {
-          data.forEach((text) => {
-            cy.wrap($element).contains(text).should('be.visible')
-          })
-        } else {
-          cy.wrap($element).contains(data).should('be.visible')
-        }
-        if (alt) cy.wrap($element).find('img').eq(0).should('have.attr', 'alt', alt).should('be.visible')
-      })
-    })
-}
-
 export function clickOnTransactionItem(item) {
   cy.get(transactionItem).eq(item).scrollIntoView().click({ force: true })
 }
@@ -827,10 +766,6 @@ export function changeNonce(value) {
 
 export function hasNonce() {
   cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
-}
-
-export function verifyNonceInputValue(value) {
-  cy.get(nonceInput).should('have.value', value)
 }
 
 export function displayAdvancedDetails() {
@@ -995,10 +930,6 @@ export function verifyImageAltTxt(index, text) {
 
 export function verifyStatus(status) {
   cy.contains('div', status).should('exist')
-}
-
-export function verifyTransactionStrExists(str) {
-  cy.contains(str).should('exist')
 }
 
 export function verifyTransactionStrNotVible(str) {

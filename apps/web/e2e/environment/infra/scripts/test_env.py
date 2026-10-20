@@ -121,6 +121,7 @@ def public_config(config):
         raise ValueError("FORK_BLOCK_NUMBER must be positive")
     rpc_port = services["anvil"]["ports"][0]["published"]
     api_port = services["nginx"]["ports"][0]["published"]
+    ledger_port = services["ledger-emulator"]["ports"][0]["published"]
     init = services["txs-init"]["environment"]
     return {
         "forkBlock": block,
@@ -130,6 +131,7 @@ def public_config(config):
         "gatewayUrl": f"http://localhost:{api_port}/cgw",
         "transactionServiceUrl": f"http://localhost:{api_port}/txs/api",
         "decoderUrl": f"http://localhost:{api_port}/decoder",
+        "ledgerEmulatorUrl": f"http://localhost:{ledger_port}",
         "images": {name: service["image"] for name, service in services.items()},
     }
 
@@ -199,7 +201,7 @@ def check_fork(manifest):
 
 
 def check_ports(manifest):
-    for key in ("rpcUrl", "gatewayUrl"):
+    for key in ("rpcUrl", "gatewayUrl", "ledgerEmulatorUrl"):
         if key not in manifest:
             continue
         port = urllib.parse.urlparse(manifest[key]).port
@@ -209,7 +211,7 @@ def check_ports(manifest):
             except OSError as exc:
                 raise RuntimeError(
                     f"Local port {port} is already in use; "
-                    "choose distinct RPC_PORT and REVERSE_PROXY_PORT"
+                    "choose distinct RPC_PORT, REVERSE_PROXY_PORT and LEDGER_EMULATOR_PORT"
                 ) from exc
 
 

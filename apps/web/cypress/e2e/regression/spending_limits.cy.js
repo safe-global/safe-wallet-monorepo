@@ -59,13 +59,6 @@ describe('Spending limits tests', () => {
       )
     })
 
-    // Added to prod
-    it('Verify Spending limit option is available when selecting the corresponding token', () => {
-      navigation.clickOnNewTxBtn()
-      tx.clickOnSendTokensBtn()
-      spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption])
-    })
-
     it('Verify spending limit option shows available amount', () => {
       navigation.clickOnNewTxBtn()
       tx.clickOnSendTokensBtn()

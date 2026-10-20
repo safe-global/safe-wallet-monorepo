@@ -60,7 +60,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
   const [data] = useRecovery()
   const recovery = data && selectDelayModifierByRecoverer(data, wallet?.address ?? '')
   const [, executionValidationError] = useIsValidRecoveryExecTransactionFromModule(recovery?.address, safeTx)
-  const [gasPrice] = useGasPrice()
+  const [gasPrice, gasPriceError] = useGasPrice()
   const chain = useCurrentChain()
 
   const [txPreview] = useTxPreview(safeTx?.data)
@@ -81,11 +81,15 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
     promise.then(setSafeTx).catch(setSafeTxError)
   }, [newThreshold, newOwners, safe, setSafeTx, setSafeTxError])
 
+  const submitContext =
+    recovery && onboard && wallet && safeTx && gasPrice ? { recovery, wallet, safeTx, gasPrice } : undefined
+
   // On modal submit
   const onSubmit = async () => {
-    if (!recovery || !onboard || !wallet || !safeTx || !gasPrice) {
+    if (!submitContext) {
       return
     }
+    const { recovery, wallet, safeTx, gasPrice } = submitContext
 
     setIsSubmittable(false)
     setSubmitError(undefined)
@@ -94,10 +98,10 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
     const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
     const overrides = isEIP1559
       ? {
-          maxFeePerGas: gasPrice?.maxFeePerGas?.toString(),
-          maxPriorityFeePerGas: gasPrice?.maxPriorityFeePerGas?.toString(),
+          maxFeePerGas: gasPrice.maxFeePerGas?.toString(),
+          maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas?.toString(),
         }
-      : { gasPrice: gasPrice?.maxFeePerGas?.toString() }
+      : { gasPrice: gasPrice.maxFeePerGas?.toString() }
 
     try {
       await dispatchRecoveryProposal({
@@ -124,7 +128,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
     setTxFlow(undefined)
   }
 
-  const submitDisabled = !safeTx || !isSubmittable || !recovery
+  const submitDisabled = !submitContext || !isSubmittable
 
   return (
     <>
@@ -158,6 +162,8 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
         {safeTxError && <TxCheckError error={safeTxError} />}
+
+        {gasPriceError && <ErrorMessage error={gasPriceError}>Couldn&apos;t load the gas price</ErrorMessage>}
 
         {executionValidationError && <TxCheckError error={executionValidationError} />}
 

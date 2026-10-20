@@ -5,7 +5,7 @@ import * as navigation from '../pages/navigation.page'
 import * as addressBook from '../pages/address_book.page'
 
 const tooltipLabel = (label) => `span[aria-label="${label}"]`
-export const removeOwnerBtn = 'span[data-track="settings: Remove owner"] > span > button'
+const removeOwnerBtn = 'span[data-track="settings: Remove owner"] > span > button'
 const replaceOwnerBtn = 'span[data-track="settings: Replace owner"] > span > button'
 const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > button'
 const tooltip = 'div[role="tooltip"]'
@@ -43,7 +43,6 @@ const changeThresholdStr = 'Change threshold'
 
 export const safeAccountNonceStr = 'Safe account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe account'
-export const disconnectedUserErrorMsg = 'Please connect your wallet'
 
 export function checkExistingSignerCount(count) {
   cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
@@ -115,10 +114,6 @@ export function verifyRemoveBtnIsEnabled() {
   return cy.get(removeOwnerBtn).should('exist')
 }
 
-export function verifyRemoveBtnIsDisabled() {
-  return cy.get(removeOwnerBtn).should('exist').and('be.disabled')
-}
-
 export function openRemoveOwnerWindow(btn) {
   const minimumCount = btn === 0 ? 1 : btn
   main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
@@ -149,21 +144,6 @@ export function openReplaceOwnerWindow(index) {
 export function verifyTooltipLabel(label) {
   cy.get(tooltipLabel(label)).should('be.visible')
 }
-export function verifyReplaceBtnIsEnabled() {
-  cy.get(replaceOwnerBtn).should('exist')
-  main.verifyBtnIsEnabled(replaceOwnerBtn)
-}
-
-export function verifyReplaceBtnIsDisabled() {
-  cy.get(replaceOwnerBtn).should('exist')
-  main.verifyBtnIsDisabled(replaceOwnerBtn)
-}
-
-export function verifyManageSignersBtnIsEnabled() {
-  cy.get(manageSignersBtn).should('exist')
-  main.verifyBtnIsEnabled(manageSignersBtn)
-}
-
 export function verifyManageSignersBtnIsDisabled() {
   cy.get(manageSignersBtn).should('exist')
   main.verifyBtnIsDisabled(manageSignersBtn)
