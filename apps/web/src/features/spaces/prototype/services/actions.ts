@@ -37,8 +37,9 @@ export const getBlocker = (tx: Proposal, items: Proposal[], persona: Persona) =>
     const blockerState = getState(other, persona)
     return blockerState.canSign || blockerState.ready
   })
+  // Workspace members can remind signers. View-only users cannot.
   const waiting =
-    !actionable && youOwn(tx, persona) ? blockers.find((other) => getState(other, persona).missing > 0) : undefined
+    !actionable && persona === 'owner' ? blockers.find((other) => getState(other, persona).missing > 0) : undefined
   return { nonce: nextNonce, actionable, waiting }
 }
 
@@ -83,7 +84,7 @@ export const getPrimaryAction = (
       target: blocker.waiting,
       hint: `#${blocker.nonce} is waiting on ${people(othersMissing(blocker.waiting))}.`,
     }
-  if (youOwn(tx, persona) && state.missing > 0 && tx.signers.includes('Dev'))
+  if (persona === 'owner' && state.missing > 0 && !state.waiting)
     return { kind: 'remind', label: remindedIds.includes(tx.id) ? 'Reminded' : 'Remind', target: tx }
   return { kind: 'review', label: 'Review' }
 }
@@ -119,11 +120,11 @@ export const getStatusHint = (tx: Proposal, items: Proposal[], persona: Persona)
         : blocker.waiting
           ? `#${blocker.nonce} is waiting on ${people(othersMissing(blocker.waiting))}.`
           : 'Nothing to do yet.'
-    return `Runs after #${getAccount(tx).nextNonce}. ${next}`
+    return `Executes after #${getAccount(tx).nextNonce}. ${next}`
   }
   if (state.canSign)
     return state.finalSignature ? 'Yours is the last signature needed.' : 'Needs your signature. Sign it.'
   const names = othersMissing(tx)
   const who = state.missing < names.length ? `${state.missing} more from ${people(names)}` : people(names)
-  return `Waiting on ${who}.${tx.signers.includes('Dev') ? ' Remind them.' : ''}`
+  return `Waiting on ${who}.${persona === 'owner' ? ' Remind them.' : ''}`
 }

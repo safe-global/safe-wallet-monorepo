@@ -14,12 +14,14 @@ import {
   Layers,
   Split,
   type LucideIcon,
+  Info,
 } from 'lucide-react'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import Identicon from '@/components/common/Identicon'
-import type { TypeLabel } from '../services/model'
-import type { Filter } from '../types'
+import { getStepsStatus, type TypeLabel } from '../services/model'
+import type { Filter, Persona, Proposal } from '../types'
 
 export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'awaiting', 'waiting']
 export const QUICK_FILTERS: Filter[] = ['sign', 'ready', 'waiting']
@@ -126,5 +128,22 @@ export function StatusChip({ tone, children }: { tone: StatusTone; children: Rea
       <BadgeDot />
       {children}
     </Badge>
+  )
+}
+
+// Next steps: the status chip. An info icon marks a row that executes after an earlier nonce. The chip tooltip explains it.
+export function StepsStatusChip({ tx, persona }: { tx: Proposal; persona: Persona }) {
+  const { label, tone, after } = getStepsStatus(tx, persona)
+  return (
+    <span className="flex min-w-0 items-center gap-1">
+      <StatusChip tone={tone}>{label}</StatusChip>
+      {after !== undefined && (
+        <Info
+          className="size-3.5 shrink-0 text-muted-foreground"
+          strokeWidth={ICON_STROKE}
+          aria-label={`Executes after #${after}`}
+        />
+      )}
+    </span>
   )
 }

@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { getAccount, getState, getStatusTone } from '../../services/model'
+import { getAccount, getState, getStepsStatus } from '../../services/model'
 import type { Filter, Persona, Proposal } from '../../types'
 import { HINT_CLASS, HintContent, type StatusTone } from '../shared'
 
@@ -77,7 +77,7 @@ export function NonceLabel({ tx, persona, competing }: { tx: Proposal; persona: 
         onClick={(event) => event.stopPropagation()}
         className={`${LABEL} ${ROW_COLOR}`}
       >
-        <Dot tone={competing ? 'conflict' : getStatusTone(tx, persona)} />
+        <Dot tone={competing ? 'conflict' : getStepsStatus(tx, persona).tone} />
         {tx.nonce}
       </TooltipTrigger>
       <TooltipContent className={HINT_CLASS}>
@@ -107,7 +107,7 @@ export function NonceMark({
 }) {
   return (
     <span className={`${LABEL} ${active ? 'text-foreground' : ROW_COLOR}`} aria-label={`Nonce ${tx.nonce}`} role="img">
-      <Dot tone={group || competing ? 'conflict' : getStatusTone(tx, persona)} />
+      <Dot tone={group || competing ? 'conflict' : getStepsStatus(tx, persona).tone} />
       {tx.nonce}
     </span>
   )

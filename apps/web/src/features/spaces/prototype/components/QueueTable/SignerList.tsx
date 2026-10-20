@@ -1,7 +1,7 @@
 import { Check, Circle } from 'lucide-react'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
-import { getSignatureSummary, getSignerRows } from '../../services/signers'
+import { getNotSignerNote, getSignatureSummary, getSignerRows } from '../../services/signers'
 import type { Persona, Proposal } from '../../types'
 
 const MAX_SIGNERS = 6
@@ -43,6 +43,7 @@ export function SignerList({ tx, persona }: { tx: Proposal; persona: Persona }) 
         ))}
       </ul>
       {rows.length > shown.length && <p className="mt-1 text-background/60">+{rows.length - shown.length} more</p>}
+      {getNotSignerNote(tx, persona) && <p className="mt-1.5 text-background/60">{getNotSignerNote(tx, persona)}</p>}
     </>
   )
 }

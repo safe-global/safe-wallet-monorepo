@@ -24,7 +24,6 @@ function QueueFiltersPreview({
       <QueueToolbar
         filters={filters}
         accounts={accounts}
-        persona={persona}
         hasItems={items.length > 0}
         groupBy={groupBy}
         onGroupByChange={setGroupBy}

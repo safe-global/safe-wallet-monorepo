@@ -32,6 +32,7 @@ export function useQueueFilters(
   persona: Persona,
   initial: Partial<QueueFilterValues> = {},
   recoveries: Recovery[] = [],
+  exclusive = false,
 ) {
   const [accountFilter, setAccountFilter] = useState<string[]>(initial.accounts ?? [])
   const [networkFilter, setNetworkFilter] = useState<string[]>(initial.networks ?? [])
@@ -46,7 +47,9 @@ export function useQueueFilters(
     (skip === 'accounts' || inSelection(accountFilter, tx.account)) &&
     (skip === 'networks' || inSelection(networkFilter, getAccount(tx).network)) &&
     (skip === 'types' || inSelection(typeFilter, getTypeLabel(tx))) &&
-    (skip === 'statuses' || !stateFilter.length || stateFilter.some((status) => matchesFilter(tx, status, persona))) &&
+    (skip === 'statuses' ||
+      !stateFilter.length ||
+      stateFilter.some((status) => matchesFilter(tx, status, persona, exclusive))) &&
     (skip === 'conflicting' || !conflicting || getConflicts(tx, items).length > 0) &&
     `${getTransactionLabel(tx)} ${tx.recipient} ${tx.amount} ${tx.nonce} ${getAccount(tx).name}`
       .toLowerCase()
@@ -111,6 +114,7 @@ export function useQueueFilters(
     search,
     networks,
     items,
+    matches: (tx: Proposal, status: Filter) => matchesFilter(tx, status, persona, exclusive),
     toggleAccount: (id: string) => setAccountFilter(toggled(accountFilter, id)),
     toggleNetwork: (network: string) => setNetworkFilter(toggled(networkFilter, network)),
     toggleType: (type: string) => setTypeFilter(toggled(typeFilter, type)),

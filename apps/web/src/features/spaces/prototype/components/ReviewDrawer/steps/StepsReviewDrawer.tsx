@@ -3,15 +3,8 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from '@/components/common/Drawer'
 import { getDetail, getHeadline, TYPE_HINTS } from '../../../services/columns'
 import { getStatusHint } from '../../../services/actions'
-import {
-  getAccount,
-  getConflicts,
-  getStatusLabel,
-  getStatusTone,
-  getTransactionLabel,
-  getTypeLabel,
-} from '../../../services/model'
-import { HINT_CLASS, HintContent, StatusChip, TYPE_ICONS } from '../../shared'
+import { getAccount, getConflicts, getTransactionLabel, getTypeLabel } from '../../../services/model'
+import { HINT_CLASS, HintContent, StepsStatusChip, TYPE_ICONS } from '../../shared'
 import { NonceMark } from '../../QueueTable/NonceCell'
 import type { Hypernative } from '../../ScenarioBar'
 import type { ReviewDrawerProps } from '../ReviewDrawer'
@@ -122,7 +115,7 @@ export function StepsReviewDrawer({
                   render={<span className="ml-auto shrink-0" />}
                   aria-label={getStatusHint(review, items, persona)}
                 >
-                  <StatusChip tone={getStatusTone(review, persona)}>{getStatusLabel(review, persona)}</StatusChip>
+                  <StepsStatusChip tx={review} persona={persona} />
                 </TooltipTrigger>
                 <TooltipContent>{getStatusHint(review, items, persona)}</TooltipContent>
               </Tooltip>

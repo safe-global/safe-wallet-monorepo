@@ -16,6 +16,7 @@ import {
   getScenario,
   getState,
   getPrimaryStatus,
+  getStepsStatus,
   matchesFilter,
 } from './model'
 
@@ -196,5 +197,30 @@ describe('prototype queue state', () => {
     expect(getCounterparty(real('payroll-20'))).toEqual({ label: 'Parent Safe', value: 'Treasury Main' })
     expect(getCounterparty(real('grants-9'))).toBeUndefined()
     expect(getCounterparty(proposal('treasury-43'))).toBeUndefined()
+  })
+})
+
+describe('next steps status', () => {
+  it('labels a row you can sign behind an earlier nonce as Sign, with the nonce it executes after', () => {
+    expect(getStepsStatus(proposal('treasury-44'), 'owner')).toEqual({ label: 'Sign', tone: 'success', after: 42 })
+  })
+
+  it('does not add an after nonce to the next nonce', () => {
+    expect(getStepsStatus(proposal('treasury-42'), 'owner').after).toBeUndefined()
+  })
+
+  it('labels a fully signed row behind an earlier nonce as blocked', () => {
+    expect(getStepsStatus(proposal('treasury-43'), 'owner')).toEqual({
+      label: 'Blocked by #42',
+      tone: 'warning',
+      after: undefined,
+    })
+  })
+
+  it('matches each row to one status only when exclusive', () => {
+    const tx = proposal('treasury-44')
+    expect(matchesFilter(tx, 'waiting', 'owner')).toBe(true)
+    expect(matchesFilter(tx, 'waiting', 'owner', true)).toBe(false)
+    expect(matchesFilter(tx, 'sign', 'owner', true)).toBe(true)
   })
 })

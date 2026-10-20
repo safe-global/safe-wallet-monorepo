@@ -436,7 +436,9 @@ export const getPrimaryStatus = (tx: Proposal, persona: Persona): Filter => {
   return 'awaiting'
 }
 
-export const matchesFilter = (tx: Proposal, filter: Filter, persona: Persona) => {
+// `exclusive` (next steps): each row matches one status only, the status of its section.
+export const matchesFilter = (tx: Proposal, filter: Filter, persona: Persona, exclusive = false) => {
+  if (exclusive) return getPrimaryStatus(tx, persona) === filter
   const state = getState(tx, persona)
   return (
     (filter === 'sign' && state.canSign) ||
@@ -673,6 +675,22 @@ export const getSignerSummary = (tx: Proposal, persona: Persona) => {
     name === 'Dev' && persona === 'owner' ? 'you' : getSignerName(name),
   )
   return `${missing} more from ${names.join(', ')}`
+}
+// Next steps: short chip labels that follow the section. `after`: a row you can sign behind an earlier nonce.
+export const getStepsStatus = (tx: Proposal, persona: Persona) => {
+  const status = getPrimaryStatus(tx, persona)
+  const { nextNonce } = getAccount(tx)
+  const labels: Record<Filter, string> = {
+    ready: 'Execute',
+    sign: 'Sign',
+    awaiting: 'Waiting',
+    waiting: `Blocked by #${nextNonce}`,
+  }
+  return {
+    label: labels[status],
+    tone: status === 'ready' || status === 'sign' ? ('success' as const) : ('warning' as const),
+    after: status === 'sign' && getState(tx, persona).waiting ? nextNonce : undefined,
+  }
 }
 export const getStatusTone = (tx: Proposal, persona: Persona) => {
   const state = getState(tx, persona)

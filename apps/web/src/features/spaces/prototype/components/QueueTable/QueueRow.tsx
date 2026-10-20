@@ -27,6 +27,7 @@ import {
   getSignerSummary,
   getState,
   getStatusLabel,
+  getStepsStatus,
   getStatusTone,
   getTransactionLabel,
   getTypeLabel,
@@ -42,7 +43,7 @@ import { getMenuActions, getPrimaryAction, getStatusHint, MENU_LABELS, type Menu
 import type { PreviewAction } from '../../services/queue'
 import Identicon from '@/components/common/Identicon'
 import { getCounterpartyCell, getCounterpartyHint, getDetail, getHeadline, TYPE_HINTS } from '../../services/columns'
-import { chainLogoUrl, HINT_CLASS, HintContent, SafeIdentity, StatusChip, TYPE_ICONS } from '../shared'
+import { chainLogoUrl, HINT_CLASS, HintContent, SafeIdentity, StatusChip, StepsStatusChip, TYPE_ICONS } from '../shared'
 
 export type QueueRowProps = {
   tx: Proposal
@@ -418,13 +419,13 @@ export function QueueRow({
             <Tooltip delay={150}>
               <TooltipTrigger
                 render={<span />}
-                aria-label={`${getStatusLabel(tx, persona)}. ${statusHint}`}
+                aria-label={`${getStepsStatus(tx, persona).label}. ${statusHint}`}
                 onClick={(event) => event.stopPropagation()}
               >
                 {willBeReplaced ? (
                   <StatusChip tone="secondary">Would be replaced</StatusChip>
                 ) : (
-                  <StatusChip tone={getStatusTone(tx, persona)}>{getStatusLabel(tx, persona)}</StatusChip>
+                  <StepsStatusChip tx={tx} persona={persona} />
                 )}
               </TooltipTrigger>
               <TooltipContent>
@@ -482,7 +483,10 @@ export function QueueRow({
               ))}
             </div>
           )}
-          {primary.hint ? (
+          {stepsPrimary?.kind === 'review' && !primary.hint ? (
+            // Next steps: no main button when there is nothing to do. The row still opens the drawer.
+            <span className="w-20" aria-hidden="true" />
+          ) : primary.hint ? (
             <Tooltip delay={150}>
               <TooltipTrigger
                 render={

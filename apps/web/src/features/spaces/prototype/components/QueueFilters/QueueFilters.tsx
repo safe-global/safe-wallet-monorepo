@@ -20,8 +20,8 @@ import { Chip } from '@safe-global/views/components/ui/chip'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
-import { getAccount, getConflicts, getTypeLabel, matchesFilter, TYPE_LABELS } from '../../services/model'
-import type { Account, Filter, Persona } from '../../types'
+import { getAccount, getConflicts, getTypeLabel, TYPE_LABELS } from '../../services/model'
+import type { Account, Filter } from '../../types'
 import {
   chainLogoUrl,
   CONFLICTING_META,
@@ -96,7 +96,6 @@ function FilterSectionTitle({ title, summary }: { title: string; summary?: strin
 type QueueFiltersProps = {
   filters: QueueFilterState
   accounts: Account[]
-  persona: Persona
   hasItems: boolean
   groupBy: GroupBy
   onGroupByChange: (groupBy: GroupBy) => void
@@ -151,7 +150,6 @@ function ViewSwitch({ groupBy, onGroupByChange }: Pick<QueueFiltersProps, 'group
 export function QueueToolbar({
   filters,
   accounts,
-  persona,
   hasItems,
   groupBy,
   onGroupByChange,
@@ -174,7 +172,7 @@ export function QueueToolbar({
             : QUICK_FILTERS.map((status) => ({ status, label: STATUS_META[status].label }))
           ).map(({ status, label }) => {
             const meta = STATUS_META[status]
-            const count = filters.optionCount('statuses', (tx) => matchesFilter(tx, status, persona))
+            const count = filters.optionCount('statuses', (tx) => filters.matches(tx, status))
             const pressed = filters.stateFilter.includes(status)
             return (
               <Tooltip key={status} delay={300}>
@@ -297,7 +295,7 @@ export function QueueToolbar({
                     key={status}
                     label={STATUS_META[status].label}
                     checked={filters.stateFilter.includes(status)}
-                    count={filters.optionCount('statuses', (tx) => matchesFilter(tx, status, persona))}
+                    count={filters.optionCount('statuses', (tx) => filters.matches(tx, status))}
                     icon={<StatusIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
                     onToggle={() => filters.toggleStatus(status)}
                   />

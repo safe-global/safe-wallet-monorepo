@@ -98,7 +98,7 @@ function PendingQueueView() {
   const [collapsedSections, setCollapsedSections] = useState<string[]>([])
   const [feedback, setFeedback] = useState('')
   const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
-  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible)
+  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, direction === 'steps')
   const recoveries = {
     ...allRecoveries,
     visible: filters.visibleRecoveries,
@@ -415,7 +415,6 @@ function PendingQueueView() {
               <QueueToolbar
                 filters={filters}
                 accounts={accounts}
-                persona={persona}
                 hasItems={items.length > 0}
                 groupBy={groupBy}
                 onGroupByChange={setGroupBy}

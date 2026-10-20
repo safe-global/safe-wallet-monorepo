@@ -18,8 +18,7 @@ import {
   getCreatedAt,
   getSignerIdentity,
   getState,
-  getStatusLabel,
-  getStatusTone,
+  getStepsStatus,
   getWarnings,
   WARNING_DETAILS,
   WARNING_LABELS,
@@ -28,7 +27,7 @@ import { getTechnicalData } from '../../../services/technical'
 import type { Persona, Proposal } from '../../../types'
 import { BatchActions, getDetailItems } from '../../ProposalDetails'
 import { NonceMark } from '../../QueueTable/NonceCell'
-import { chainLogoUrl, StatusChip } from '../../shared'
+import { chainLogoUrl, StepsStatusChip } from '../../shared'
 import type { Hypernative } from '../../ScenarioBar'
 import type { Replacement, ReviewLayout } from '../ReviewDrawer'
 import { IdentityRow } from './IdentityRow'
@@ -55,9 +54,15 @@ export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Prop
   return (
     <>
       {blocking && (
-        <Alert variant={state.waiting ? 'warning' : 'subtle'} outlined={false}>
-          <AlertSeverityIcon variant={state.waiting ? 'warning' : 'info'} />
-          <AlertTitle>{getStatusLabel(tx, persona)}</AlertTitle>
+        <Alert variant={state.waiting && !state.canSign ? 'warning' : 'subtle'} outlined={false}>
+          <AlertSeverityIcon variant={state.waiting && !state.canSign ? 'warning' : 'info'} />
+          <AlertTitle>
+            {state.canSign
+              ? `Executes after #${getAccount(tx).nextNonce}`
+              : state.waiting
+                ? getStepsStatus(tx, persona).label
+                : 'Waiting on others'}
+          </AlertTitle>
           <AlertDescription>{getStatusHint(tx, items, persona)}</AlertDescription>
         </Alert>
       )}
@@ -185,7 +190,7 @@ function QueueRow({
     >
       <NonceMark tx={tx} persona={persona} competing={competing} />
       <span className="min-w-0 flex-1 truncate">{getHeadline(tx)}</span>
-      <StatusChip tone={getStatusTone(tx, persona)}>{getStatusLabel(tx, persona)}</StatusChip>
+      <StepsStatusChip tx={tx} persona={persona} />
     </button>
   )
 }

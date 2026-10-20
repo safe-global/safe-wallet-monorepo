@@ -12,7 +12,7 @@ import { formatAuditDateTime } from '@/components/common/AuditLog'
 import Identicon from '@/components/common/Identicon'
 import { getMenuActions, getPrimaryAction, MENU_LABELS, type MenuAction } from '../../../services/actions'
 import { getCreatedAt, getCreator } from '../../../services/model'
-import { getSignatureSummary, getSignerRows } from '../../../services/signers'
+import { getNotSignerNote, getSignatureSummary, getSignerRows } from '../../../services/signers'
 import type { PreviewAction } from '../../../services/queue'
 import type { Persona, Proposal } from '../../../types'
 import { CopyTransactionLink } from '../../ProposalDetails'
@@ -86,6 +86,9 @@ export function SignersPanel({ tx, persona, layout }: { tx: Proposal; persona: P
           </li>
         ))}
       </ul>
+      {layout.signersOpen && getNotSignerNote(tx, persona) && (
+        <p className="pb-3 text-xs text-muted-foreground">{getNotSignerNote(tx, persona)}</p>
+      )}
       <Separator className="mb-4" />
     </section>
   )
@@ -152,7 +155,10 @@ export function StepsActions({
   onMenuAction?: (tx: Proposal, action: MenuAction) => void
 }) {
   const primary = getPrimaryAction(tx, items, persona, remindedIds)
-  const menu = getMenuActions(tx, items, persona, primary)
+  // The copy icon in the signatures header already copies the link.
+  const menu = getMenuActions(tx, items, persona, primary).filter((action) => action !== 'copyLink')
+  const menuLabel = (action: MenuAction) =>
+    action === 'remind' && remindedIds.includes(tx.id) ? 'Remind signers again' : MENU_LABELS[action]
   const run = () => {
     if (primary.kind === 'flow') layout.setPendingAction(primary.flow)
     else if (primary.kind === 'goTo') onReview(primary.target)
@@ -167,7 +173,16 @@ export function StepsActions({
           {primary.label}
         </Button>
       )}
-      {menu.length > 0 && (
+      {menu.length === 1 && (
+        <Button
+          variant={primary.kind === 'review' ? 'outline' : 'ghost'}
+          className="w-full"
+          onClick={() => onMenuAction?.(tx, menu[0])}
+        >
+          {menuLabel(menu[0])}
+        </Button>
+      )}
+      {menu.length > 1 && (
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant={primary.kind === 'review' ? 'outline' : 'ghost'} className="w-full" />}
@@ -178,7 +193,7 @@ export function StepsActions({
           <DropdownMenuContent align="center" className="w-auto min-w-56 whitespace-nowrap">
             {menu.map((action) => (
               <DropdownMenuItem key={action} onClick={() => onMenuAction?.(tx, action)}>
-                {action === 'remind' && remindedIds.includes(tx.id) ? 'Remind signers again' : MENU_LABELS[action]}
+                {menuLabel(action)}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
