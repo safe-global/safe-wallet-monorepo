@@ -54,5 +54,5 @@
     "../../packages/views/src/**/*.ts",
     "../../packages/views/src/**/*.tsx"
   ],
-  "exclude": ["node_modules", "src/types/contracts"]
+  "exclude": ["node_modules", "src/types/contracts", "e2e/environment/infra/mocks"]
 }

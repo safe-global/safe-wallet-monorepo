@@ -16,7 +16,7 @@ Root `yarn verify:changed` does NOT cover this app; run `node scripts/verify.mjs
 
 ## Testing
 
-Unit tests are colocated. E2E coverage lives in the main web suite at `apps/web/cypress/e2e/safe-apps/` (exercises the real iframe integration). `VITE_GATEWAY_URL` makes one Client Gateway serve every gateway request and the only ABI source; the isolated E2E stack uses it (see `apps/web/e2e/docs/ISOLATED_ENVIRONMENT.md`).
+Unit tests are colocated. Page tests render the whole app with `renderApp()` from `src/test/app.tsx`. They replace the host with the Safe Apps SDK fake in `src/test/sdk.ts` (`jest.mock('@safe-global/safe-apps-react-sdk', () => jest.requireActual('../test/sdk').safeAppsReactSdkFake)`) and mock Sourcify, the Client Gateway and the Tenderly simulation API with the MSW server in `src/test/server.ts`, which `setupTests.ts` starts. The builder's own forms, uploads, library and simulation are tested here. The web Cypress suite at `apps/web/cypress/e2e/safe-apps/` keeps only the journeys that need the wallet around the iframe. `VITE_GATEWAY_URL` makes one Client Gateway serve every gateway request and the only ABI source; the isolated E2E stack uses it (see `apps/web/e2e/docs/ISOLATED_ENVIRONMENT.md`).
 
 ## Safe App constraints
 

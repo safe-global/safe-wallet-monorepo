@@ -341,7 +341,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           </Accordion>
 
           <div className="[&:not(:empty)]:mt-4">
-            <RiskConfirmation />
+            <RiskConfirmation subject="message" />
           </div>
         </div>
       </TxCard>

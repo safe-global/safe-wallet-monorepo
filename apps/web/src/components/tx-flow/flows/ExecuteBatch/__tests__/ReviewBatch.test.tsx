@@ -5,7 +5,8 @@ import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
 import { getMockTx } from '@/tests/mocks/transactions'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
-import { dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
+import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
+import { createMockSafeTransaction } from '@/tests/transactions'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { logError } from '@/services/exceptions'
 import type { GasPaymentOptions } from '@/hooks/useGasPaymentOptions'
@@ -61,8 +62,11 @@ jest.mock('@/hooks/wallets/useOnboard', () => ({ __esModule: true, default: () =
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChains')
 
+type RiskState = { needsRiskConfirmation: boolean; isRiskConfirmed: boolean; setIsRiskConfirmed: jest.Mock }
+const NO_RISK: RiskState = { needsRiskConfirmation: false, isRiskConfirmed: false, setIsRiskConfirmed: jest.fn() }
+const mockUseSafeShield = jest.fn<RiskState, []>(() => NO_RISK)
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  useSafeShield: () => ({ needsRiskConfirmation: false, isRiskConfirmed: false }),
+  useSafeShield: () => mockUseSafeShield(),
   useSafeShieldForTxData: () => undefined,
 }))
 
@@ -131,6 +135,7 @@ const submit = async () => {
 describe('ReviewBatch', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseSafeShield.mockReturnValue(NO_RISK)
     mockSafeInfo({ version: '1.4.1' })
     const chain = mockCurrentChain()
     ;(jest.requireMock('@/hooks/useChains').default as jest.Mock).mockReturnValue({ configs: [chain] })
@@ -142,6 +147,74 @@ describe('ReviewBatch', () => {
     ])
     mockDispatchBatchExecution.mockResolvedValue(faker.string.hexadecimal({ length: 64 }))
     mockDispatchBatchExecutionRelay.mockResolvedValue(undefined)
+  })
+
+  describe('when Safe Shield needs a risk confirmation', () => {
+    const mockCreateMultiSendCallOnlyTx = createMultiSendCallOnlyTx as jest.MockedFunction<
+      typeof createMultiSendCallOnlyTx
+    >
+
+    beforeEach(() => {
+      mockCreateMultiSendCallOnlyTx.mockResolvedValue(
+        createMockSafeTransaction({ to: faker.finance.ethereumAddress(), data: '0x' }),
+      )
+    })
+
+    const mockRiskState = (isRiskConfirmed: boolean) => {
+      const setIsRiskConfirmed = jest.fn()
+      mockUseSafeShield.mockReturnValue({ needsRiskConfirmation: true, isRiskConfirmed, setIsRiskConfirmed })
+      return setIsRiskConfirmed
+    }
+
+    it('shows the risk checkbox and keeps Submit disabled until the risk is confirmed', async () => {
+      const setIsRiskConfirmed = mockRiskState(false)
+      renderReviewBatch()
+
+      expect(
+        await screen.findByText('I understand the risks and would like to proceed with this transaction.'),
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+
+      fireEvent.click(screen.getByRole('checkbox'))
+
+      expect(setIsRiskConfirmed).toHaveBeenCalledTimes(1)
+    })
+
+    it('shows no risk checkbox and keeps Submit disabled until the MultiSend transaction is built', async () => {
+      mockRiskState(false)
+      mockCreateMultiSendCallOnlyTx.mockReturnValue(new Promise(() => {}))
+      renderReviewBatch()
+
+      await screen.findByText('Data')
+      expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    })
+
+    it('shows the risk checkbox when the MultiSend transaction cannot be built', async () => {
+      mockRiskState(false)
+      mockCreateMultiSendCallOnlyTx.mockRejectedValue(new Error('The Safe SDK is not initialized'))
+      renderReviewBatch()
+
+      expect(
+        await screen.findByText('I understand the risks and would like to proceed with this transaction.'),
+      ).toBeInTheDocument()
+    })
+
+    it('executes the batch once the risk is confirmed', async () => {
+      mockRiskState(true)
+      renderReviewBatch()
+
+      await submit()
+
+      await waitFor(() => expect(mockDispatchBatchExecutionRelay).toHaveBeenCalledTimes(1))
+    })
+  })
+
+  it('shows no risk checkbox when Safe Shield needs no confirmation', async () => {
+    renderReviewBatch()
+
+    await screen.findByText('Data')
+    expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
   })
 
   it('relays a daily offer through the chain route', async () => {

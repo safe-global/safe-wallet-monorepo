@@ -103,7 +103,11 @@ export const ENTERPRISE_TIER: PlanTier = {
   currency: 'eur',
   billingCycle: null,
   options: [{ paymentLinkId: null, priceId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
-  copy: { subtitle: 'Tailored to your organization, with custom capacity and commercial terms.' },
+  copy: {
+    subtitle: 'Tailored to your organization, with custom capacity and commercial terms.',
+    supportLevel: 'Tailored',
+    supportDetail: '+ Customized onboarding',
+  },
   features: [
     'Unlimited sponsored transactions',
     'Shared address book',
@@ -115,6 +119,5 @@ export const ENTERPRISE_TIER: PlanTier = {
     'Custom Safe capacity',
     'Multiple workspaces',
     'Tailored contract & billing terms',
-    'Tailored support + customized onboarding',
   ],
 }

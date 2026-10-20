@@ -69,7 +69,7 @@ jobs:
           echo "Linear release version: $VERSION"
 
       - name: Run Linear release (${{ inputs.command }})
-        uses: linear/linear-release-action@v0.18.0
+        uses: linear/linear-release-action@v0.18.1
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: ${{ inputs.command }}

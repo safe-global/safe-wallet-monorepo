@@ -1,11 +1,12 @@
 /** @type {import('jest').Config} */
 const config = {
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jest-fixed-jsdom',
   roots: ['<rootDir>/src'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__mocks__/fileMock.js',
+    '\\.(jpg|jpeg|png|gif|webp)$': '<rootDir>/src/__mocks__/fileMock.js',
+    '\\.svg$': '<rootDir>/src/test/svgMock.ts',
     '^\\.\\./(?:\\.\\./)?utils/env$': '<rootDir>/src/utils/__mocks__/env.ts',
     '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
   },
