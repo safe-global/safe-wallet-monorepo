@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
+import { formatDecodedValue, Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type MethodDetailsProps = {
@@ -46,9 +46,14 @@ export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetails
         return (
           <TxDataRow key={`${data.method}_param-${index}`} title={title}>
             {isArrayValueParam ? (
-              <Value method={data.method} type={param.type} value={param.value as string} />
+              <Value method={data.method} type={param.type} value={param.value} />
             ) : (
-              generateDataRowValue(param.value as string, inlineType, true, addressEx)
+              generateDataRowValue(
+                param.value == null ? undefined : formatDecodedValue(param.value),
+                inlineType,
+                true,
+                addressEx,
+              )
             )}
           </TxDataRow>
         )

@@ -12,14 +12,25 @@ type ValueArrayProps = {
   key?: string
 }
 
+export const formatDecodedValue = (value: unknown): string => {
+  if (typeof value === 'string') return value
+  if (typeof value === 'object' && value !== null) return JSON.stringify(value)
+  return String(value)
+}
+
+const hasUnsafeInteger = (value: unknown): boolean =>
+  Array.isArray(value) ? value.some(hasUnsafeInteger) : typeof value === 'number' && !Number.isSafeInteger(value)
+
 // Sometime DApps return stringified arrays, e.g. "["hello","world"]"
-const parseValue = (value: ValueArrayProps['value']) => {
+const parseValue = (value: ValueArrayProps['value']): unknown => {
   if (Array.isArray(value)) {
     return value
   }
 
   try {
-    return JSON.parse(value)
+    const parsed: unknown = JSON.parse(value)
+    // JSON.parse drops digits beyond 2^53, so such arrays stay as the raw string
+    return Array.isArray(parsed) && !hasUnsafeInteger(parsed) ? parsed : value
   } catch {
     return value
   }
@@ -48,7 +59,13 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
               }
               return (
                 <div key={`${address}_${key}`}>
-                  <EthHashInfo address={address} showAvatar={false} shortAddress={false} showCopyButton hasExplorer />
+                  <EthHashInfo
+                    address={formatDecodedValue(address)}
+                    showAvatar={false}
+                    shortAddress={false}
+                    showCopyButton
+                    hasExplorer
+                  />
                 </div>
               )
             })}
@@ -62,11 +79,11 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
   return <GenericValue value={parsedValue} {...props} />
 }
 
-const getTextValue = (value: string, key?: string) => {
-  return <HexEncodedData highlightFirstBytes={false} limit={60} hexData={value} key={key} />
+const getTextValue = (value: unknown, key?: string) => {
+  return <HexEncodedData highlightFirstBytes={false} limit={60} hexData={formatDecodedValue(value)} key={key} />
 }
 
-const getArrayValue = (parentId: string, value: string[], separator?: boolean) => (
+const getArrayValue = (parentId: string, value: unknown[], separator?: boolean) => (
   <div className="text-sm">
     [
     <div className={css.nestedWrapper}>
@@ -85,7 +102,7 @@ const getArrayValue = (parentId: string, value: string[], separator?: boolean) =
   </div>
 )
 
-const GenericValue = ({ method, value }: Omit<ValueArrayProps, 'type'>): React.ReactElement => {
+const GenericValue = ({ method, value }: { method: string; value: unknown }): React.ReactElement => {
   if (Array.isArray(value)) {
     return getArrayValue(method, value)
   }
