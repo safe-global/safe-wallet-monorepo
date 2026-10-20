@@ -1,4 +1,5 @@
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { SpaceExperimentalFeature } from '@safe-global/store/gateway/types'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Switch } from '@safe-global/views/components/ui/switch'
@@ -8,25 +9,37 @@ import SpaceSettingsSection, {
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 export const EXPERIMENTAL_ADMIN_ONLY_MESSAGE = 'Only admins can change experimental features for this Workspace'
+export const EXPERIMENTAL_EMPTY_MESSAGE = 'No experimental features are available for this Workspace yet.'
 
 export type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 
 export const EXPERIMENTAL_FEATURES = [
   {
-    key: 'POLICY_RECIPIENT_ALLOWLIST',
+    key: SpaceExperimentalFeature.POLICY_RECIPIENT_ALLOWLIST,
     label: 'Recipient allowlist',
     description: 'Sepolia testnet only. Try our new policy engine.',
   },
 ] as const satisfies ReadonlyArray<{ key: ExperimentalFeature; label: string; description: string }>
 
 type ExperimentalSectionProps = {
+  available: ExperimentalFeature[]
   enabled: ExperimentalFeature[]
   onChange: (enabled: ExperimentalFeature[]) => void
   isAdmin: boolean
   isSaving?: boolean
+  disabled?: boolean
 }
 
-const ExperimentalSection = ({ enabled, onChange, isAdmin, isSaving = false }: ExperimentalSectionProps) => {
+const ExperimentalSection = ({
+  available,
+  enabled,
+  onChange,
+  isAdmin,
+  isSaving = false,
+  disabled = false,
+}: ExperimentalSectionProps) => {
+  const features = EXPERIMENTAL_FEATURES.filter(({ key }) => available.includes(key))
+
   const handleToggle = (key: ExperimentalFeature, checked: boolean) => {
     onChange(checked ? [...enabled, key] : enabled.filter((enabledKey) => enabledKey !== key))
   }
@@ -35,7 +48,13 @@ const ExperimentalSection = ({ enabled, onChange, isAdmin, isSaving = false }: E
     <SpaceSettingsSection data-testid="settings-experimental-section">
       <SpaceSettingsSectionTitle>Experimental</SpaceSettingsSectionTitle>
 
-      {EXPERIMENTAL_FEATURES.map(({ key, label, description }) => {
+      {features.length === 0 && (
+        <p className="text-muted-foreground text-sm" data-testid="experimental-empty">
+          {EXPERIMENTAL_EMPTY_MESSAGE}
+        </p>
+      )}
+
+      {features.map(({ key, label, description }) => {
         const id = `experimental-${key}`
 
         return (
@@ -54,7 +73,7 @@ const ExperimentalSection = ({ enabled, onChange, isAdmin, isSaving = false }: E
                   aria-labelledby={`${id}-label`}
                   checked={enabled.includes(key)}
                   onCheckedChange={(checked) => handleToggle(key, checked)}
-                  disabled={!isAdmin || isSaving}
+                  disabled={!isAdmin || isSaving || disabled}
                   data-testid={`${id}-toggle`}
                 />
               </AdminOnlyWorkspaceTooltip>

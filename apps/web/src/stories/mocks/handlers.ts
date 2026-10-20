@@ -7,6 +7,7 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { GetSpaceResponse, UpdateSpaceDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   safeFixtures,
   balancesFixtures,
@@ -19,10 +20,12 @@ import { createChainData, createChainsPageData, createChainsPageDataV2 } from '.
 import type { FeatureFlags, MockStoryConfig } from './types'
 import { MOCK_SPACE_ID } from './ids'
 
+type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
+
 /**
  * Core chain configuration handlers
  */
-export function coreHandlers(chainData: Chain): RequestHandler[] {
+export function coreHandlers(chainData: Chain, features: FeatureFlags = {}): RequestHandler[] {
   const indexingStatus: IndexingStatus = {
     currentBlockNumber: 20000000,
     currentBlockTimestamp: new Date().toISOString(),
@@ -40,7 +43,7 @@ export function coreHandlers(chainData: Chain): RequestHandler[] {
     http.get(/\/v1\/chains\/\d+\/about\/indexing$/, () => HttpResponse.json(indexingStatus)),
     http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
     http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(chainData))),
-    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(chainData))),
+    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(chainData, features))),
   ]
 }
 
@@ -453,11 +456,14 @@ export const mockSafeOverviews = [
 /**
  * Mock space data for spaces feature
  */
-export function createMockSpace(spaceId: string = MOCK_SPACE_ID) {
+export function createMockSpace(spaceId: string = MOCK_SPACE_ID, experimentalFeatures: ExperimentalFeature[] = []) {
   return {
     uuid: spaceId,
     name: 'Test Space',
     status: 'ACTIVE' as const,
+    memberCount: 1,
+    safeCount: 0,
+    experimentalFeatures,
     members: [
       {
         id: 1,
@@ -480,6 +486,9 @@ export function createMockSpace(spaceId: string = MOCK_SPACE_ID) {
  * Spaces feature handlers - users and spaces API
  */
 export function spacesHandlers(): RequestHandler[] {
+  // Kept across requests so the refetch after a PATCH reflects the toggle
+  let experimentalFeatures: ExperimentalFeature[] = []
+
   return [
     // User with wallets endpoint
     http.get(/\/v1\/users$/, () => HttpResponse.json(mockUser)),
@@ -494,7 +503,13 @@ export function spacesHandlers(): RequestHandler[] {
       const url = new URL(params[0] as string, 'https://example.com')
       const pathParts = url.pathname.split('/')
       const spaceId = pathParts[pathParts.length - 1] || MOCK_SPACE_ID
-      return HttpResponse.json(createMockSpace(spaceId))
+      return HttpResponse.json(createMockSpace(spaceId, experimentalFeatures))
+    }),
+    // Update space (name or experimental features)
+    http.patch(/\/v1\/spaces\/[^/]+$/, async ({ request }) => {
+      const body = (await request.json()) as UpdateSpaceDto
+      if (body.experimentalFeatures) experimentalFeatures = body.experimentalFeatures
+      return HttpResponse.json({ uuid: MOCK_SPACE_ID })
     }),
     // List all spaces for user
     http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(MOCK_SPACE_ID)])),
@@ -877,12 +892,13 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
+    policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,
   }
 
   // Build handlers array
   const allHandlers: RequestHandler[] = [
-    ...coreHandlers(chainData),
+    ...coreHandlers(chainData, features),
     ...safeInfoHandlers(safeData),
     ...balanceHandlers(balancesData),
     ...safeAppsHandlers(safeAppsData),

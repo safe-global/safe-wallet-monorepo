@@ -2,7 +2,6 @@ import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
 import * as modal from '../pages/modals.page'
-import { dataRow } from '../pages/tables.page'
 import * as navigation from './navigation.page'
 import * as walletUtils from '../../support/utils/wallet.js'
 import * as owner from './owners.pages'
@@ -1000,14 +999,6 @@ export function verifySuccessfulSimulation() {
 
 export function insufficientBalanceErrorExists() {
   cy.get(insufficientBalanceError).should('exist')
-}
-
-export function recipientAddress(index, address) {
-  cy.contains(`Recipient ${index}`)
-    .parents(dataRow)
-    .within(() => {
-      cy.contains(address).should('exist')
-    })
 }
 
 export function insufficientFundsErrorExists(index) {

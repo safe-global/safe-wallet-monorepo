@@ -20,3 +20,4 @@ export type {
 export { usePolicyGuard } from './hooks/usePolicyGuard'
 export type { UsePolicyGuardResult } from './hooks/usePolicyGuard'
 export { useIsAllowlistEnabled, useIsAllowlistAvailableInSpace } from './hooks/useAllowlistAvailability'
+export { useIsAllowlistActiveInSpace } from './hooks/useIsAllowlistActiveInSpace'

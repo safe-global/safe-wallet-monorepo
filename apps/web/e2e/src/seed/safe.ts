@@ -12,6 +12,9 @@ export type SeededSafe = {
   context: Awaited<ReturnType<typeof openSafe>>
 }
 
+/** A Safe that the journey's owners cannot sign for */
+export type SafeAddress = Pick<SeededSafe, 'address' | 'prefixedAddress'>
+
 export type QueuedTransaction = {
   safeTxHash: string
   /** The CGW transaction ID, as in `/transactions/tx?id=` */
@@ -48,4 +51,14 @@ export async function seedQueuedTransfer(
   const { hash } = await proposeTransaction(context, transfer)
   await waitForQueued(context.env, context, [hash])
   return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
+}
+
+/** A 1/1 Safe of OWNER_4 (the parent) and a 1/1 Safe whose only owner is the parent (the child). */
+export async function seedNestedSafe(journey: Journey): Promise<{ parent: SeededSafe; child: SafeAddress }> {
+  const parent = await seedSafe(journey, { threshold: 1 })
+  const address = await createSafeAddress(journey.env, journey.owners, {
+    threshold: 1,
+    ownerAddresses: [parent.address],
+  })
+  return { parent, child: { address, prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}` } }
 }

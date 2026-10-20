@@ -5,7 +5,7 @@ import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import TxCheckError from '../TxCheckError'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import ApprovalEditor from '../ApprovalEditor'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -64,10 +64,10 @@ export const ReviewTransactionContent = ({
           isApproval={isApproval}
           withDecodedData={withDecodedData}
         >
-          {!isRejection && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-              {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
-            </ObservabilityErrorBoundary>
+          {!isRejection && isApproval && (
+            <ParsingErrorBoundary>
+              <ApprovalEditor safeTransaction={safeTx} />
+            </ParsingErrorBoundary>
           )}
         </ConfirmationView>
 
