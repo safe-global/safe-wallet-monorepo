@@ -157,6 +157,7 @@ x-queue: &queue
     # Queued data is written only to the Queue Service; the worker still applies executions from the TXS events.
     ENABLE_MIGRATION_EVENT_PROCESSING: 'false'
 volumes:
+  ledger-apps:
   nginx-shared-txs:
   nginx-shared-cfg:
   postgres-data:
@@ -288,6 +289,45 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
+  ledger-emulator:
+    image: ${SPECULOS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        python -c "
+        import hashlib, os, urllib.request
+        path = '/apps/ethereum.elf'
+        if not os.path.exists(path):
+            urllib.request.urlretrieve(os.environ['LEDGER_APP_URL'], path)
+        digest = hashlib.sha256(open(path, 'rb').read()).hexdigest()
+        if digest != os.environ['LEDGER_APP_SHA256']:
+            os.remove(path)
+            raise SystemExit(f'The Ledger app download has digest {digest}, not LEDGER_APP_SHA256')
+        "
+        exec python ./speculos.py /apps/ethereum.elf --model nanosp --display headless --api-port 5000 \
+          --apdu-port 9999 --seed "$$LEDGER_SEED"
+    environment:
+      LEDGER_APP_URL: ${LEDGER_APP_URL:?Load test-images.env}
+      LEDGER_APP_SHA256: ${LEDGER_APP_SHA256:?Load test-images.env}
+      # Public test mnemonic: every address it derives is test-only. Its first address owns the Ledger Safes.
+      LEDGER_SEED: solution enroll ozone error hazard glory reunion pear shoe rapid nephew kitchen
+    volumes:
+      - ledger-apps:/apps
+    ports:
+      - 127.0.0.1:${LEDGER_EMULATOR_PORT:-9555}:5000
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:5000/events')
+      interval: 5s
+      timeout: 5s
+      retries: 12
   fork-upstream:
     <<: *fork-upstream
     environment:
