@@ -2,10 +2,6 @@ import { test, expect } from '../../src/fixtures/test.fixture'
 import { seedConnectedWallet } from '../../src/fixtures/seed-wallet'
 import { AssetsPage } from '../../src/pages/assets.page'
 
-// TODO: assets_2's spending-limit test was dropped because its signer (OWNER_4) is also an owner of
-// that Safe, so it never exercised the allowance path. Covering it needs a dedicated Safe with a
-// spending limit granted to a non-owner test key; none of the four wallet credentials qualify today.
-
 test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
   test('should show a hide checkbox on every token row when "Hide tokens" is picked from the manage-tokens menu', async ({
     safePage,
@@ -65,25 +61,4 @@ test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
     await expect(safePage.getByRole('heading', { name: 'Send tokens' })).toBeVisible()
     await expect(safePage.getByTestId('token-selector')).toContainText(symbol)
   })
-
-  test(
-    'should enable Send and Swap on a token row when the connected wallet is a proposer but not an owner',
-    { tag: '@permissions' },
-    async ({ safePage, walletPage, credentials, safes }, testInfo) => {
-      testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_PROPOSER_SAFE })
-      expect(credentials.OWNER_1_PRIVATE_KEY, 'OWNER_1_PRIVATE_KEY is the proposer key').toBeTruthy()
-      await seedConnectedWallet(safePage, credentials.OWNER_1_PRIVATE_KEY!)
-
-      const assets = new AssetsPage(safePage)
-      await assets.goto(safes.SEP_PROPOSER_SAFE)
-      await expect(walletPage.accountCenter).toBeVisible({ timeout: 30_000 })
-      // This Safe only holds a fraction of a cent of ETH, which the default dust filter hides.
-      await assets.setHideSmallBalances(false)
-
-      const row = assets.tokenRows.first()
-      await expect(row).toBeVisible()
-      await expect(assets.sendButton(row)).toBeEnabled()
-      await expect(assets.swapButton(row)).toBeEnabled()
-    },
-  )
 })

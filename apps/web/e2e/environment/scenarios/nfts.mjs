@@ -8,10 +8,8 @@ import { erc721Artifact, short } from './chain.mjs'
 export async function prepareNftsScenario(env, owners) {
   const contexts = []
   try {
-    for (const owner of [owners.owner4.address, owners.owner1.address]) {
-      contexts.push(await createSafe(env, owners, { ownerAddresses: [owner], threshold: 1 }))
-    }
-    const [context, nonOwner] = contexts
+    const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
+    contexts.push(context)
     const signer = new NonceManager(context.signer)
     const cats = await new ContractFactory(erc721Artifact.abi, erc721Artifact.bytecode, signer).deploy(
       'CatFactory',
@@ -20,18 +18,12 @@ export async function prepareNftsScenario(env, owners) {
     )
     await cats.waitForDeployment()
     for (let id = 0; id < 10; id++) await (await cats.mint(context.safeAddress)).wait()
-    await (await cats.mint(nonOwner.safeAddress)).wait()
     const catAddress = await cats.getAddress()
-    for (const [safe, address, count] of [
-      [context, catAddress, 10],
-      [nonOwner, catAddress, 1],
-    ]) {
-      await waitUntil(
-        env,
-        `${env.SAFE_TXS_BASE_URL}/v2/safes/${safe.safeAddress}/collectibles/?trusted=false`,
-        (collectibles) => collectibles.results.filter((item) => item.address === address).length === count,
-      )
-    }
+    await waitUntil(
+      env,
+      `${env.SAFE_TXS_BASE_URL}/v2/safes/${context.safeAddress}/collectibles/?trusted=false`,
+      (collectibles) => collectibles.results.filter((item) => item.address === catAddress).length === 10,
+    )
     await trustToken(env, catAddress)
     await registerContract(env, {
       address: catAddress,
@@ -39,23 +31,17 @@ export async function prepareNftsScenario(env, owners) {
       name: 'CatFactory',
       abi: erc721Artifact.abi,
     })
-    for (const [safe, count] of [
-      [context, 10],
-      [nonOwner, 1],
-    ]) {
-      await waitUntil(
-        env,
-        `${env.SAFE_CGW_BASE_URL}/v2/chains/${context.chainId}/safes/${safe.safeAddress}/collectibles`,
-        (collectibles) => collectibles.results.length === count,
-      )
-    }
+    await waitUntil(
+      env,
+      `${env.SAFE_CGW_BASE_URL}/v2/chains/${context.chainId}/safes/${context.safeAddress}/collectibles`,
+      (collectibles) => collectibles.results.length === 10,
+    )
     return {
       safes: {
         static: {
           SEP_STATIC_SAFE_2: `sep:${context.safeAddress}`,
           SEP_STATIC_SAFE_23: `sep:${context.safeAddress}`,
         },
-        nfts: { SEP_NFT_SAFE_2: `sep:${nonOwner.safeAddress}` },
       },
       fixtures: { 'nfts.address': short(catAddress) },
     }

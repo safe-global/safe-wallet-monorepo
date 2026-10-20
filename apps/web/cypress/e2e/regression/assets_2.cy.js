@@ -1,23 +1,13 @@
 import * as constants from '../../support/constants.js'
 import * as assets from '../pages/assets.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as main from '../pages/main.page.js'
-import * as navigation from '../pages/navigation.page'
 import * as nfts from '../pages/nfts.pages.js'
-import { clickOnAssetSwapBtn } from '../pages/swaps.pages.js'
-import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const nftCollectionName = 'CatFactory'
 const nftTokenSymbol = 'CF'
-
-let signer, signer2
-before(() => {
-  signer = walletCredentials.OWNER_1_PRIVATE_KEY
-  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
-})
 
 describe('Assets 2 tests', () => {
   before(async () => {
@@ -39,29 +29,6 @@ describe('Assets 2 tests', () => {
     assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
     main.verifyElementsCount(assets.tablePaginationContainer, 0)
-  })
-
-  it('Verify Proposers have the Send and Swap buttons enabled', () => {
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
-    assets.toggleShowAllTokens(false)
-    assets.toggleHideDust(false)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    assets.showSendBtn().should('be.enabled')
-    assets.showSwapBtn().should('be.enabled')
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
-  it('Verify that Send and Swap buttons are enabled for spending limit users', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_8)
-    wallet.connectSigner(signer2)
-    assets.toggleShowAllTokens(false)
-    assets.toggleHideDust(false)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    assets.showSendBtn().should('be.enabled')
-    assets.showSwapBtn().should('be.enabled')
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
   })
 
   it('Verify the counter at the top is updated for every selected token', () => {

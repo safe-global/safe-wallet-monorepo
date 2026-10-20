@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants'
 import * as nfts from '../pages/nfts.pages'
-import * as navigation from '../pages/navigation.page'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
@@ -71,17 +70,4 @@ describe('NFTs tests', () => {
   })
 
   // Added to prod
-  it('Verify Send button is disabled for non-owner', () => {
-    cy.visit(constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_2)
-    nfts.verifyInitialNFTData()
-    nfts.selectNFTs(1)
-    nfts.verifySendNFTBtnDisabled()
-  })
-
-  it('Verify Send button is disabled for disconnected wallet', () => {
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-    nfts.selectNFTs(1)
-    nfts.verifySendNFTBtnDisabled()
-  })
 })

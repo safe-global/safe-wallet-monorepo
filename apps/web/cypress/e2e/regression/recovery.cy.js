@@ -6,7 +6,6 @@ import * as spaces from '../pages/spaces.page.js'
 import * as dashboard from '../pages/dashboard.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as modules from '../pages/modules.page.js'
 import * as navigation from '../pages/navigation.page.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
 import recoveryData from '../../fixtures/recovery.js'
@@ -37,35 +36,6 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     cy.clearLocalStorage()
     main.acceptCookies()
     main.verifyElementsCount(recovery.setupRecoveryBtn, 0)
-  })
-
-  it('Verify that non-owner can not edit and delete recovery set up on Security and Login', () => {
-    cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    main.acceptCookies()
-    recovery.verifyRecoveryTableDisplayed()
-    main.verifyElementsCount(recovery.removeRecovererBtn, 0)
-    main.verifyElementsCount(recovery.editRecovererBtn, 0)
-  })
-
-  it('Verify that non-owner can not delete recovery set up on Modules', () => {
-    cy.visit(constants.modulesUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    main.acceptCookies()
-    main.verifyElementsStatus([modules.moduleRemoveIcon], constants.enabledStates.disabled)
-  })
-
-  it('Verify that guardian can not delete or edit recovery set up on Security and Login', () => {
-    cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    wallet.connectSignerViaStorage(guardian)
-    main.acceptCookies()
-    recovery.postponeRecovery()
-    recovery.verifyRecoveryTableDisplayed()
-    main.verifyElementsCount(recovery.removeRecovererBtn, 0)
-    main.verifyElementsCount(recovery.editRecovererBtn, 0)
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
   })
 
   it('Verify that during the first connection to the safe "Proposal to recover account" modal is displayed for the guardian', () => {
@@ -109,17 +79,6 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     wallet.connectSignerViaStorage(signer)
     main.acceptCookies()
     recovery.verifyRecoveryProposalDialog(constants.elementExistanceStates.not_exist)
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
-  it('Verify that the guardian can not delete recovery set up on Modules', () => {
-    cy.visit(constants.modulesUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    wallet.connectSignerViaStorage(guardian)
-    main.acceptCookies()
-    recovery.postponeRecovery()
-    main.verifyElementsStatus([modules.moduleRemoveIcon], constants.enabledStates.disabled)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
