@@ -165,18 +165,34 @@ describe('SafenetChecksSection', () => {
     expect(section).toHaveTextContent(copy)
   })
 
-  it('lists the cited rules on a risk under one title, most-cited first', () => {
-    const events = ['R-4.4', 'R-4.5', 'R-4.5'].map((reason) => sentinelRevealedEvent({ approved: false, reason }))
+  const renderRisk = (reasons: string[]) => {
+    const events = reasons.map((reason) => sentinelRevealedEvent({ approved: false, reason }))
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.MALICIOUS, events })
     mockUseSafenetCheck.mockReturnValue(
       buildCheckView({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
     )
-
     renderInFlow({ txId: TX_ID, txDetails })
+    return screen.getByTestId('safenet-rejection-rules')
+  }
+
+  it('shows the cited rules, most-cited first, and the sentinel tally below them in one card', () => {
+    const card = renderRisk(['R-4.4', 'R-4.5', 'R-4.5'])
 
     expect(screen.getByRole('status')).toHaveTextContent('Risks detected')
-    const rules = screen.getByTestId('safenet-rejection-rules').textContent ?? ''
-    expect(rules.indexOf('Unlimited approval')).toBeLessThan(rules.indexOf('Unknown spender'))
+    const text = card.textContent ?? ''
+    expect(text.indexOf('Unlimited approval')).toBeLessThan(text.indexOf('Unknown spender'))
+    expect(text.indexOf('Unknown spender')).toBeLessThan(text.indexOf('3 of 3 sentinels flagged this.'))
+    expect(screen.getAllByTestId('safenet-flagged-count')).toHaveLength(1)
+  })
+
+  it.each([
+    ['R-4.1', 'var(--color-warning-main)'],
+    ['R-4.5', 'var(--color-warning-main)'],
+    ['R-4.6', 'var(--color-error-main)'],
+  ])('colors a risk citing %s with %s', (reason, color) => {
+    const card = renderRisk([reason])
+
+    expect((card.closest('[style]') as HTMLElement).style.borderLeftColor).toBe(color)
   })
 
   it('pulses instead of showing a severity icon while the check runs', () => {

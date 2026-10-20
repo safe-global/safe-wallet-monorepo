@@ -188,6 +188,8 @@ export const StatusUnknown = viewStory(
 export const Simulating = viewStory(verdict(inProgressWithDeadline()))
 export const NoIssuesFound = viewStory(verdict(exampleSnapshot(CheckStatus.BENIGN)))
 export const RiskDetected = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.approvalAndSpender)))
+export const RiskSettingsChange = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.settingsChange)))
+export const RiskMaliciousAddress = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.blocklisted)))
 export const CheckFailed = viewStory(
   verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.openDispute, CheckStatus.TIMED_OUT)),
 )
