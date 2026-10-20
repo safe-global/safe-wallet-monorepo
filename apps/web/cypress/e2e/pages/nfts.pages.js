@@ -5,25 +5,7 @@ export const nftsRow = '[data-testid^="nfts-table-row"]'
 const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"]`
 const selectAllNFTsCheckbox = '[data-slot="checkbox"][title="Select all"]'
 const activeSendNFTBtn = '[data-testid="nft-send-btn-false"]'
-const modalSelectedNFTs = '[data-testid="selected-nfts"]'
-const nftItemList = '[data-testid="nft-item-list"]'
-const nftItemNane = '[data-testid="nft-item-name"]'
-const txDetailsSummary = '[data-testid="decoded-tx-summary"]'
 export const accordionActionItem = '[data-testid="action-item"]'
-
-const noneNFTSelected = /0 NFT[s]? selected/
-
-export function verifyTxDetails(data) {
-  main.verifyValuesExist(txDetailsSummary, data)
-}
-
-export function verifyCountOfActions(count) {
-  main.verifyElementsCount(accordionActionItem, count)
-}
-
-export function verifyActionName(index, name) {
-  cy.get(accordionActionItem).eq(index).should('contain', name)
-}
 
 export function verifyDataInTable(name, address, tokenID) {
   cy.get(nftsRow).contains(name)
@@ -51,30 +33,8 @@ export function checkSelectedNFTsNumberIs(numberOfNFTs) {
   cy.contains('button', `Send ${numberOfNFTs} NFT${numberOfNFTs > 1 ? 's' : ''}`)
 }
 
-export function deselectNFTs(checkboxIndexes, checkedItems) {
-  let total = checkedItems - checkboxIndexes.length
-
-  checkboxIndexes.forEach((i) => {
-    cy.get(nftCheckBox(i)).should('have.attr', 'aria-checked', 'true').click()
-  })
-
-  cy.contains(`${total} NFT${total !== 1 ? 's' : ''} selected`)
-  if (total === 0) {
-    verifyInitialNFTData()
-  }
-}
-
-export function verifyInitialNFTData() {
-  cy.contains(noneNFTSelected)
-  cy.contains('button[disabled]', 'Send')
-}
-
 export function sendNFT() {
   cy.get(activeSendNFTBtn).click()
-}
-
-export function verifyNFTModalData() {
-  main.verifyElementsExist([main.modalTitle, main.modalHeader, modalSelectedNFTs])
 }
 
 export function typeRecipientAddress(address) {
@@ -83,9 +43,4 @@ export function typeRecipientAddress(address) {
 
 export function clikOnNextBtn() {
   cy.contains('button', main.nextBtnStr).click()
-}
-
-export function verifyReviewModalData(NFTcount) {
-  main.verifyElementsExist([nftItemList])
-  main.verifyElementsCount(nftItemNane, NFTcount)
 }

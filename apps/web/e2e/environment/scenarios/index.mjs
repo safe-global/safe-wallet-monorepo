@@ -17,7 +17,6 @@ import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
 import * as messages from './messages.mjs'
 import * as nested from './nested.mjs'
-import * as nfts from './nfts.mjs'
 import * as notes from './notes.mjs'
 import * as owners from './owners.mjs'
 import * as proposers from './proposers.mjs'
@@ -50,7 +49,6 @@ const modules = [
   ledger,
   messages,
   nested,
-  nfts,
   notes,
   owners,
   proposers,
