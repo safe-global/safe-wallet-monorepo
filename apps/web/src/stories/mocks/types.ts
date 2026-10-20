@@ -49,6 +49,8 @@ export interface FeatureFlags {
   workspacesExperimentalFeatures?: boolean
   /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
   policyRecipientAllowlist?: boolean
+  /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
+  spaceAuditLog?: boolean
 }
 
 /**

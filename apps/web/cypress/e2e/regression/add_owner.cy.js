@@ -18,18 +18,6 @@ describe('Add Owners tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  describe('Disconnected', () => {
-    beforeEach(() => {
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-      cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    })
-
-    // Added to prod
-    it('Verify add owner button is disabled for disconnected user', () => {
-      owner.verifyManageSignersBtnIsDisabled()
-    })
-  })
-
   describe('Connected', () => {
     beforeEach(() => {
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)

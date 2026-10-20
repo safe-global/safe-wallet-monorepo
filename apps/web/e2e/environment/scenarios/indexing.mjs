@@ -1,14 +1,10 @@
 import { SEPOLIA } from './chain.mjs'
 
 // The TXS endpoint behind each CGW route; `samePredicate`: the scenario's condition applies to its JSON too.
+// Multisig transactions have none: queued ones live only in the Queue Service.
 const TRANSACTION_SERVICE_ROUTES = [
   { pattern: /^safes\/(0x[0-9a-fA-F]{40})\/transactions\/creation$/, path: 'safes/$1/creation/', samePredicate: true },
   { pattern: /^owners\/(0x[0-9a-fA-F]{40})\/safes$/, path: 'owners/$1/safes/', samePredicate: true },
-  {
-    pattern: /^transactions\/multisig_0x[0-9a-fA-F]{40}_(0x[0-9a-fA-F]{64})$/,
-    path: 'multisig-transactions/$1/',
-    samePredicate: false,
-  },
   { pattern: /^safes\/(0x[0-9a-fA-F]{40})(\/.*)?$/, path: 'safes/$1/', samePredicate: false },
 ]
 

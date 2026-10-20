@@ -35,6 +35,7 @@
 
 // Main factory function
 export { createMockStory, createMinimalDecorator } from './createMockStory'
+export { MOCK_SPACE_ID } from './ids'
 
 // Types
 export type { MockStoryConfig, MockStoryResult, WalletPreset, LayoutType, FeatureFlags, StoreOverrides } from './types'

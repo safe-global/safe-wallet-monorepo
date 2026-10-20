@@ -22,6 +22,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   safePro: false,
   workspacesExperimentalFeatures: false,
   policyRecipientAllowlist: false,
+  spaceAuditLog: false,
 }
 
 /**
@@ -42,6 +43,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   safePro: 'SAFE_PRO',
   workspacesExperimentalFeatures: 'WORKSPACES_EXPERIMENTAL_FEATURES',
   policyRecipientAllowlist: 'POLICY_RECIPIENT_ALLOWLIST',
+  spaceAuditLog: 'SPACE_AUDIT_LOG',
 }
 
 /**

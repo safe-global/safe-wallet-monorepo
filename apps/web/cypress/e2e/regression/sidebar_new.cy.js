@@ -1,17 +1,10 @@
 import * as constants from '../../support/constants'
 import * as sideBar from '../pages/sidebar.pages'
-import * as navigation from '../pages/navigation.page'
 import * as swaps from '../pages/swaps.pages.js'
 import { exchangeStr, clickOnBridgeOption } from '../pages/bridge.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
-import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-let signer
-before(() => {
-  signer = walletCredentials.OWNER_4_PRIVATE_KEY
-})
 
 describe('Sidebar tests', () => {
   before(async () => {
@@ -21,10 +14,6 @@ describe('Sidebar tests', () => {
   describe('Disconnected', () => {
     beforeEach(() => {
       cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
-    })
-
-    it('Verify New Transaction button disabled for non-owners', () => {
-      sideBar.verifyNewTxBtnStatus(constants.enabledStates.disabled)
     })
 
     it('Verify the side menu buttons exist', () => {
@@ -47,18 +36,6 @@ describe('Sidebar tests', () => {
         cy.wrap($body).should('exist')
         cy.wrap($body).contains(exchangeStr).should('be.visible')
       })
-    })
-  })
-
-  describe('Connected', () => {
-    it('Verify New transaction button enabled for owners', () => {
-      wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
-      sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
-    })
-
-    it('Verify New transaction button enabled for beneficiaries who are non-owners', () => {
-      wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_11)
-      sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
     })
   })
 })

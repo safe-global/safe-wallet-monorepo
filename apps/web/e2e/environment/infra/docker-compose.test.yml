@@ -1,9 +1,17 @@
-# The TypeScript mocks and fork helpers in mocks/.
+# The TypeScript mocks and fork helpers in mocks/. A mock answers only localhost unless MOCK_HOST says otherwise,
+# so the entrypoint sets it: services may replace `environment` without losing it.
 x-mock: &mock
   image: ${NODE_IMAGE:?Load test-images.env}
   entrypoint:
+    - env
+    - MOCK_HOST=0.0.0.0
     - node
   user: node
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
   volumes:
     - ./mocks:/mocks:ro
 x-fork-proxy-healthcheck: &fork-proxy-healthcheck
@@ -140,7 +148,16 @@ x-auth0-client: &auth0-client
   AUTH0_DOMAIN: auth.safe-e2e.test
   AUTH0_CLIENT_ID: safe-e2e-local
   AUTH0_CLIENT_SECRET: local-test-only-auth0-secret
+x-queue: &queue
+  image: ${QUEUE_IMAGE:?Load test-images.env}
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/queue
+    RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
+    CONFIG_SERVICE_URL: http://nginx:8000/cfg
+    # Queued data is written only to the Queue Service; the worker still applies executions from the TXS events.
+    ENABLE_MIGRATION_EVENT_PROCESSING: 'false'
 volumes:
+  ledger-apps:
   nginx-shared-txs:
   nginx-shared-cfg:
   postgres-data:
@@ -180,8 +197,9 @@ services:
     <<: *mock
     command:
       - /mocks/cow-api.ts
-    # Binds port 443.
-    user: root
+    # Binds port 443 without root.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
     environment:
       COW_API_OFFLINE: 'true'
     volumes:
@@ -208,8 +226,9 @@ services:
     <<: *mock
     command:
       - /mocks/auth0-api.ts
-    # Binds port 443: the gateway only calls https://AUTH0_DOMAIN, without a port.
-    user: root
+    # Binds port 443 without root: the gateway only calls https://AUTH0_DOMAIN, without a port.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
     environment:
       <<: *auth0-client
     volumes:
@@ -270,6 +289,45 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
+  ledger-emulator:
+    image: ${SPECULOS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        python -c "
+        import hashlib, os, urllib.request
+        path = '/apps/ethereum.elf'
+        if not os.path.exists(path):
+            urllib.request.urlretrieve(os.environ['LEDGER_APP_URL'], path)
+        digest = hashlib.sha256(open(path, 'rb').read()).hexdigest()
+        if digest != os.environ['LEDGER_APP_SHA256']:
+            os.remove(path)
+            raise SystemExit(f'The Ledger app download has digest {digest}, not LEDGER_APP_SHA256')
+        "
+        exec python ./speculos.py /apps/ethereum.elf --model nanosp --display headless --api-port 5000 \
+          --apdu-port 9999 --seed "$$LEDGER_SEED"
+    environment:
+      LEDGER_APP_URL: ${LEDGER_APP_URL:?Load test-images.env}
+      LEDGER_APP_SHA256: ${LEDGER_APP_SHA256:?Load test-images.env}
+      # Public test mnemonic: every address it derives is test-only. Its first address owns the Ledger Safes.
+      LEDGER_SEED: solution enroll ozone error hazard glory reunion pear shoe rapid nephew kitchen
+    volumes:
+      - ledger-apps:/apps
+    ports:
+      - 127.0.0.1:${LEDGER_EMULATOR_PORT:-9555}:5000
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:5000/events')
+      interval: 5s
+      timeout: 5s
+      retries: 12
   fork-upstream:
     <<: *fork-upstream
     environment:
@@ -486,6 +544,32 @@ services:
       interval: 5s
       timeout: 10s
       retries: 30
+  # Runs the migrations, so the worker starts after it.
+  queue-web:
+    <<: *queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/run_web.sh
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:8888/health/ready',
+          timeout=5)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+  queue-worker:
+    <<: *queue
+    depends_on:
+      queue-web:
+        condition: service_healthy
+    command: docker/workers/run_tx_service_sync.sh
   cgw-web:
     image: ${CGW_IMAGE:?Load test-images.env}
     env_file:
@@ -494,7 +578,8 @@ services:
       AMQP_URL: amqp://general-rabbitmq:5672
       USE_TX_SERVICE_VPC_URL: 'true'
       FF_FILTER_VALUE_PARSING: 'true'
-      FF_SAFE_QUEUE_SERVICE: 'false'
+      FF_SAFE_QUEUE_SERVICE: 'true'
+      SAFE_QUEUE_SERVICE_BASE_URI: http://queue-web:8888
       FF_AUTH: 'true'
       FF_USERS: 'true'
       FF_TRUSTED_DELEGATE_CALL: 'true'
@@ -559,6 +644,8 @@ services:
       redis:
         condition: service_healthy
       decoder-web:
+        condition: service_healthy
+      queue-web:
         condition: service_healthy
       postgres:
         condition: service_healthy

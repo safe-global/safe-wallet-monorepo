@@ -11,7 +11,6 @@ const executeBtn = '[data-testid="combo-submit-execute"]'
 const signedNotice = '[data-testid="signed-notice"]'
 const radioItem = '[data-slot="radio-group-item"]'
 const signBtn = '[data-testid="sign-btn"]'
-const txConfirmBtn = '[data-track="tx-list: Confirm transaction"] > button'
 const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 
 const txCompletedStr = 'Transaction was successful'
@@ -45,10 +44,6 @@ export function verifyUntrustedHandllerWarningVisible() {
 
 export function verifyUntrustedHandllerWarningDoesNotExist() {
   cy.get(untrustedFallbackHandlerWarning).should('not.exist')
-}
-
-export function verifyTxConfirmBtnDisabled() {
-  cy.get(txConfirmBtn).should('be.disabled')
 }
 
 export function verifySignBtnEnabled() {

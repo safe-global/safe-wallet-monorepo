@@ -2,8 +2,8 @@ import { http, HttpResponse } from 'msw'
 import type { PaymentLink, Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { EntitlementsResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import { groupOffersByPlan } from '../../hooks/billing/paymentLinks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 
-export const SPACE_ID = 'uuid-1'
 export const DAY = 24 * 60 * 60
 export const now = () => Math.floor(Date.now() / 1000)
 
@@ -68,7 +68,7 @@ export const PAID_PLANS = groupOffersByPlan(PAID_LINKS)
 export const subscription = (overrides: Partial<Subscription> = {}): Subscription => ({
   id: 'sub_1',
   customerId: 'cus_1',
-  upstreamCustomerId: SPACE_ID,
+  upstreamCustomerId: MOCK_SPACE_ID,
   status: 'trialing',
   createdAt: now() - 25 * DAY,
   startAt: now() - 25 * DAY,
