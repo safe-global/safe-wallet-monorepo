@@ -1,9 +1,8 @@
 import { faker } from '@faker-js/faker'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
-import { getAddedByLabel, toLocalContacts, toWorkspaceContacts } from '../utils'
+import { toLocalContacts, toWorkspaceContacts } from '../utils'
 
 const itemBuilder = () =>
   Builder.new<SpaceAddressBookItemDto>().with({
@@ -23,26 +22,6 @@ const gnosis = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain', 
 const configs = [mainnet, gnosis]
 
 const noMember = () => undefined
-
-describe('getAddedByLabel', () => {
-  it('prefers the member name', () => {
-    expect(getAddedByLabel('alice@example.com', 'Alice')).toBe('Alice')
-  })
-
-  it('shortens a wallet address when the member is unknown', () => {
-    const address = faker.finance.ethereumAddress()
-
-    expect(getAddedByLabel(address, undefined)).toBe(shortenAddress(address))
-  })
-
-  it('falls back to the email the contact was added with', () => {
-    expect(getAddedByLabel('alice@example.com', undefined)).toBe('alice@example.com')
-  })
-
-  it('knows nobody when neither is set', () => {
-    expect(getAddedByLabel('', undefined)).toBeUndefined()
-  })
-})
 
 describe('toWorkspaceContacts', () => {
   it('names each chain from the chain configs', () => {
@@ -74,6 +53,21 @@ describe('toWorkspaceContacts', () => {
     const [contact] = toWorkspaceContacts([item], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
 
     expect(contact).toEqual(expect.objectContaining({ name: item.name, address: item.address, addedBy: 'Maya Chen' }))
+  })
+
+  it.each([
+    ['wallet address', faker.finance.ethereumAddress()],
+    ['email', 'alice@example.com'],
+  ])('falls back to the %s the contact was added with', (_, createdBy) => {
+    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy }).build()], configs, noMember)
+
+    expect(contact.addedBy).toBe(createdBy)
+  })
+
+  it('knows nobody added the contact when neither is set', () => {
+    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy: '' }).build()], configs, noMember)
+
+    expect(contact.addedBy).toBeUndefined()
   })
 })
 

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Check, Copy, HardDrive } from 'lucide-react'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
@@ -64,10 +65,11 @@ type ContactCellProps = {
   isCompact?: boolean
   /** The identicon. Defaults to a neutral gradient avatar. */
   avatar?: ReactNode
+  explorerLink?: { href: string; title: string }
 }
 
 /** Name and full address in one cell, so the address is always visible in full. */
-const ContactCell = ({ name, address, isLocal = false, isCompact = false, avatar }: ContactCellProps) => {
+const ContactCell = ({ name, address, isLocal = false, isCompact = false, avatar, explorerLink }: ContactCellProps) => {
   const checksummed = checksumAddress(address)
 
   return (
@@ -81,9 +83,11 @@ const ContactCell = ({ name, address, isLocal = false, isCompact = false, avatar
             <TooltipContent>{name}</TooltipContent>
           </Tooltip>
         </div>
-        <div className="flex items-center gap-1">
-          <GroupedAddress address={checksummed} />
+        <div className={cn('flex items-center gap-1', isCompact && 'flex-wrap')}>
+          {/* Compact: the groups and buttons wrap in one row, so the pinned column never forces a scroll */}
+          <GroupedAddress address={checksummed} className={isCompact ? 'contents' : undefined} />
           <CopyAddress address={checksummed} />
+          {explorerLink && <ExplorerButton {...explorerLink} className="text-muted-foreground hover:text-foreground" />}
         </div>
       </div>
     </div>

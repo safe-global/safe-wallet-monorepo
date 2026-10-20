@@ -13,8 +13,10 @@ import {
   useMemberNameResolver,
   useSpaceAddressBookState,
 } from '@/features/spaces'
-import { useHasFeature } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
+import { chainBuilder } from '@/tests/builders/chains'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import { downloadCsv } from '../../../utils/addressBookCsv'
@@ -35,7 +37,13 @@ jest.mock('@/features/spaces', () => ({
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
+  useCurrentChain: jest.fn(),
   useHasFeature: jest.fn(),
+}))
+const mockTrackEvent = jest.fn()
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }))
 jest.mock('../../../utils/addressBookCsv', () => ({
   ...jest.requireActual('../../../utils/addressBookCsv'),
@@ -131,6 +139,11 @@ const requestBuilder = () =>
 
 const SETTLED = { isLoading: false, isError: false }
 
+const EXPLORER = 'https://explorer.test/address/'
+const currentChain = chainBuilder()
+  .with({ blockExplorerUriTemplate: { address: `${EXPLORER}{{address}}`, txHash: '', api: '' } })
+  .build()
+
 const mockWorkspaceBook = (state: Partial<ReturnType<typeof useSpaceAddressBookState>> = {}) => {
   const refetch = jest.fn()
   ;(useSpaceAddressBookState as jest.Mock).mockReturnValue({ items: [], ...SETTLED, refetch, ...state })
@@ -176,6 +189,7 @@ describe('SpaceAddressBookV2', () => {
     mockWorkspaceBook()
     mockRequests()
     ;(useMemberNameResolver as jest.Mock).mockReturnValue(() => undefined)
+    ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })
 
   describe('workspace contacts', () => {
@@ -210,6 +224,15 @@ describe('SpaceAddressBookV2', () => {
       expect(within(rowOf('Treasury')).getByText('Maya Chen')).toBeInTheDocument()
     })
 
+    it("links each contact to the current chain's explorer", () => {
+      const treasury = itemBuilder().with({ name: 'Treasury' }).build()
+      mockWorkspaceBook({ items: [treasury] })
+
+      renderAddressBook()
+
+      expect(within(rowOf('Treasury')).getByRole('link')).toHaveAttribute('href', `${EXPLORER}${treasury.address}`)
+    })
+
     it('gives admins Import, Export, Add contact and the row menu', () => {
       mockWorkspaceBook({ items: [itemBuilder().with({ name: 'Treasury' }).build()] })
 
@@ -221,13 +244,13 @@ describe('SpaceAddressBookV2', () => {
       expect(screen.getByRole('button', { name: 'Actions for Treasury' })).toBeInTheDocument()
     })
 
-    it.each(['member', 'invited'] as const)('gives an %s only Export', (role) => {
+    it.each(['member', 'invited'] as const)('gives an %s no actions', (role) => {
       mockRole(role)
       mockWorkspaceBook({ items: [itemBuilder().with({ name: 'Treasury' }).build()] })
 
       renderAddressBook()
 
-      expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Import' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Add contact' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Actions for Treasury' })).not.toBeInTheDocument()
@@ -322,6 +345,15 @@ describe('SpaceAddressBookV2', () => {
         `${item.address},Treasury,100`,
       ])
     })
+
+    it('tracks the export', async () => {
+      mockWorkspaceBook({ items: [itemBuilder().build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining(SPACE_EVENTS.EXPORT_ADDRESS_BOOK), undefined)
+    })
   })
 
   describe('tabs', () => {
@@ -374,6 +406,13 @@ describe('SpaceAddressBookV2', () => {
 
       expect(screen.getByRole('tab', { name: 'Local contacts (1)' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Add Hardware wallet to Workspace on 1,100' })).toBeInTheDocument()
+    })
+
+    it("links each local contact to the current chain's explorer", async () => {
+      renderAddressBook({ '1': { [hardwareWallet]: 'Hardware wallet' } })
+      await openLocalTab()
+
+      expect(within(rowOf('Hardware wallet')).getByRole('link')).toHaveAttribute('href', `${EXPLORER}${hardwareWallet}`)
     })
 
     it('offers members to request a contact, showing ones already requested', async () => {

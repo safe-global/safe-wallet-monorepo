@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Download } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
@@ -16,7 +17,7 @@ import {
 import Identicon from '@/components/common/Identicon'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
-import useChains from '@/hooks/useChains'
+import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
@@ -42,6 +43,7 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin }: Wor
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
   const { configs } = useChains()
+  const chain = useCurrentChain()
   const resolveMemberName = useMemberNameResolver()
   const spaceId = useCurrentSpaceId()
 
@@ -115,14 +117,18 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin }: Wor
         query={query}
         onQueryChange={setQuery}
         actions={
-          <>
-            {isAdmin && <ImportAddressBook />}
-            <Button variant="outline" size="action" onClick={handleExport}>
-              <Download aria-hidden="true" data-icon="inline-start" />
-              Export
-            </Button>
-            {isAdmin && addContact}
-          </>
+          isAdmin ? (
+            <>
+              <ImportAddressBook />
+              <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK}>
+                <Button variant="outline" size="action" onClick={handleExport}>
+                  <Download aria-hidden="true" data-icon="inline-start" />
+                  Export
+                </Button>
+              </Track>
+              {addContact}
+            </>
+          ) : undefined
         }
       />
 
@@ -134,6 +140,7 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin }: Wor
             contacts={visibleContacts}
             permissions={isAdmin ? FULL_PERMISSIONS : NO_PERMISSIONS}
             renderAvatar={renderAvatar}
+            getExplorerLink={chain ? (address) => getBlockExplorerLink(chain, address) : undefined}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

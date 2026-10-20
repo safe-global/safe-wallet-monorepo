@@ -13,7 +13,7 @@ export type AddressBookContact = {
   address: string
   name: string
   chains: ChainInfo[]
-  /** Display name of the member who added the contact. */
+  /** The member who added the contact: their name, else their wallet address or email. */
   addedBy?: string
   /** A contact from this browser's local address book, not the workspace one. */
   isLocal?: boolean

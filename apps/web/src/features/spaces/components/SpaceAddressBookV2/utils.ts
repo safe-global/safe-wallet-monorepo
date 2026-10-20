@@ -1,5 +1,3 @@
-import { isAddress } from 'ethers'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { AddressBookContact, ChainInfo } from '@safe-global/views/features/spaces/components/AddressBook/types'
@@ -13,13 +11,6 @@ const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>
       : { chainId, name: chainId }
   })
 
-/** The member's name, else the wallet address or email the contact was added with. */
-export const getAddedByLabel = (createdBy: string, memberName: string | undefined): string | undefined => {
-  const label = memberName || createdBy
-  if (!label) return undefined
-  return isAddress(label) ? shortenAddress(label) : label
-}
-
 export const toWorkspaceContacts = (
   items: SpaceAddressBookItemDto[],
   configs: Chain[],
@@ -29,7 +20,7 @@ export const toWorkspaceContacts = (
     address: item.address,
     name: item.name,
     chains: toChainInfos(item.chainIds, configs),
-    addedBy: getAddedByLabel(item.createdBy, resolveMemberName(item.createdByUserId)),
+    addedBy: resolveMemberName(item.createdByUserId) || item.createdBy || undefined,
   }))
 
 /** This browser's contacts, one per address across chains; those the workspace already has go last. */

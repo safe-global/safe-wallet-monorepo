@@ -7,7 +7,7 @@ const GROUP_SIZE = 4
 /**
  * The full 42-character address, checksummed, split into groups of four hex characters. The first
  * and last group carry full contrast; the middle groups are muted so the eye lands on the parts that
- * tell look-alike addresses apart. Never shortened: the table scrolls horizontally instead.
+ * tell look-alike addresses apart. Never shortened: in the compact table it wraps between groups instead.
  */
 const GroupedAddress = ({ address, className }: { address: string; className?: string }) => {
   const checksummed = checksumAddress(address)

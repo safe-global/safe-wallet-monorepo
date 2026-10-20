@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Check } from 'lucide-react'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -14,6 +15,7 @@ import {
 } from '@safe-global/views/features/spaces/components/AddressBook/types'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import Identicon from '@/components/common/Identicon'
+import { useCurrentChain } from '@/hooks/useChains'
 import AddLocalContact from '../SpaceAddressBook/AddLocalContact'
 import AddToWorkspaceButton from '../SpaceAddressBook/AddToWorkspaceButton'
 import RequestToAddButton from '../SpaceAddressBook/RequestToAddButton'
@@ -61,6 +63,7 @@ const LocalContacts = ({
 }: LocalContactsProps) => {
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
+  const chain = useCurrentChain()
 
   const visibleContacts = useMemo(() => filterContacts(contacts, query), [contacts, query])
   const pendingAddresses = useMemo(
@@ -102,6 +105,7 @@ const LocalContacts = ({
             permissions={FULL_PERMISSIONS}
             book="local"
             renderAvatar={renderAvatar}
+            getExplorerLink={chain ? (address) => getBlockExplorerLink(chain, address) : undefined}
             onEdit={(contact) => setDialog({ type: 'edit', contact })}
             onDelete={(contact) => setDialog({ type: 'delete', contact })}
             renderRowAction={renderShareAction}

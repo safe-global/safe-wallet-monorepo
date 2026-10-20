@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import AddressBookTable from '../AddressBookTable'
 import { ADDRESSES, LOCAL_CONTACTS, WORKSPACE_CONTACTS } from '../mocks/fixtures'
 import { FULL_PERMISSIONS, NO_PERMISSIONS } from '../types'
@@ -45,6 +46,35 @@ describe('AddressBookTable', () => {
     const [treasuryRow, atlasRow] = screen.getAllByTestId('table-row')
     expect(within(treasuryRow).getByText('Maya Chen')).toBeInTheDocument()
     expect(within(atlasRow).getByText('—')).toBeInTheDocument()
+  })
+
+  it('shortens the wallet address a contact was added by and shows it in full on hover', async () => {
+    render(<AddressBookTable contacts={[{ ...treasury, addedBy: ADDRESSES.maya }]} permissions={FULL_PERMISSIONS} />)
+
+    await userEvent.hover(within(screen.getByTestId('table-row')).getByText(shortenAddress(ADDRESSES.maya)))
+
+    expect(await screen.findByText(ADDRESSES.maya)).toBeInTheDocument()
+  })
+
+  it('pins the contact column, so the name stays in view while the table scrolls', () => {
+    render(<AddressBookTable contacts={[treasury]} permissions={FULL_PERMISSIONS} />)
+
+    expect(screen.getByTestId('table-cell-contact')).toHaveAttribute('data-sticky')
+  })
+
+  it('links each address to the explorer it is given', () => {
+    render(
+      <AddressBookTable
+        contacts={[treasury]}
+        permissions={FULL_PERMISSIONS}
+        getExplorerLink={(address) => ({ href: `https://explorer.test/${address}`, title: 'View on explorer.test' })}
+      />,
+    )
+
+    expect(screen.getByRole('link', { name: 'View on explorer.test' })).toHaveAttribute(
+      'href',
+      `https://explorer.test/${treasury.address}`,
+    )
   })
 
   it('has no row menu for a member who may not change contacts', () => {

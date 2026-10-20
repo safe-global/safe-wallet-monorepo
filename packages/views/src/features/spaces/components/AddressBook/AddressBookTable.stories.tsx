@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { Check } from 'lucide-react'
 import { fn } from 'storybook/test'
 import Identicon from '@/components/common/Identicon'
 import TableCard from '@safe-global/views/components/common/TableCard'
@@ -21,6 +22,10 @@ const meta = {
     contacts: WORKSPACE_CONTACTS,
     permissions: FULL_PERMISSIONS,
     renderAvatar: (address: string) => <Identicon address={address} size={24} />,
+    getExplorerLink: (address: string) => ({
+      href: `https://etherscan.io/address/${address}`,
+      title: 'View on etherscan.io',
+    }),
     onEdit: fn(),
     onDelete: fn(),
   },
@@ -41,7 +46,11 @@ export const LocalBook: Story = {
     book: 'local',
     renderRowAction: (contact, { isCompact }) =>
       contact.isShared ? (
-        <Badge variant="secondary">Already shared</Badge>
+        isCompact ? (
+          <Check role="img" aria-label="Already shared" className="text-muted-foreground size-4" />
+        ) : (
+          <Badge variant="secondary">Already shared</Badge>
+        )
       ) : (
         <Button variant="outline" size={isCompact ? 'icon-sm' : 'sm'}>
           {isCompact ? '+' : 'Add to Workspace'}
@@ -53,7 +62,7 @@ export const LocalBook: Story = {
 /** Without `renderAvatar` the cell falls back to a neutral gradient avatar. */
 export const DefaultAvatars: Story = { args: { renderAvatar: undefined } }
 
-/** A narrow container: secondary columns fold into each row's expandable details. */
+/** A narrow container: secondary columns fold into each row's expandable details and the address wraps. */
 export const Compact: Story = {
   decorators: [(Story) => <div className="max-w-[420px]">{Story()}</div>],
 }

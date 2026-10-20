@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
+import { isAddress } from 'ethers'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
@@ -20,7 +23,12 @@ const AddedBy = ({ name }: { name?: string }) =>
       <Avatar size="xs">
         <AvatarFallback>{initials(name)}</AvatarFallback>
       </Avatar>
-      <span className="min-w-0 truncate text-sm">{name}</span>
+      <Tooltip>
+        <TooltipTrigger render={<span className="min-w-0 truncate text-left text-sm" />}>
+          {isAddress(name) ? shortenAddress(name) : name}
+        </TooltipTrigger>
+        <TooltipContent align="start">{name}</TooltipContent>
+      </Tooltip>
     </span>
   ) : (
     <span className="text-muted-foreground text-xs">&mdash;</span>
@@ -33,6 +41,8 @@ export type AddressBookTableProps = {
   book?: 'workspace' | 'local'
   /** The identicon for an address. Defaults to a neutral gradient avatar. */
   renderAvatar?: (address: string) => ReactNode
+  /** The block explorer page of an address. Without it the row has no explorer link. */
+  getExplorerLink?: (address: string) => { href: string; title: string } | undefined
   onEdit?: (contact: AddressBookContact) => void
   onDelete?: (contact: AddressBookContact) => void
   /** A control before the row menu, such as "Add to Workspace" on a local contact. */
@@ -49,6 +59,7 @@ const AddressBookTable = ({
   permissions,
   book = 'workspace',
   renderAvatar,
+  getExplorerLink,
   onEdit,
   onDelete,
   renderRowAction,
@@ -62,6 +73,7 @@ const AddressBookTable = ({
       header: 'Contact',
       cellTestId: 'table-cell-contact',
       width: '40%',
+      sticky: true,
       // The full address in monospace needs this much; below it the table goes compact.
       minWidth: 360,
       sortValue: (contact) => contact.name.toLowerCase(),
@@ -72,6 +84,7 @@ const AddressBookTable = ({
           isLocal={contact.isLocal}
           isCompact={isCompact}
           avatar={renderAvatar?.(contact.address)}
+          explorerLink={getExplorerLink?.(contact.address)}
         />
       ),
     },
