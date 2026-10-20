@@ -7,11 +7,22 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'outline', 'primary', 'warning', 'success', 'destructive', 'info', 'positive', 'negative'],
+      options: [
+        'default',
+        'outline',
+        'card',
+        'primary',
+        'warning',
+        'success',
+        'destructive',
+        'info',
+        'positive',
+        'negative',
+      ],
     },
     size: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'auto'],
+      options: ['sm', 'default', 'lg', 'xl', 'auto'],
     },
     shape: {
       control: 'select',
