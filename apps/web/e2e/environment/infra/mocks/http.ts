@@ -25,7 +25,6 @@ export type Handler = (request: MockRequest) => Reply | Promise<Reply>
 export const MAX_BODY_BYTES = 4 * 1024 * 1024
 export const KEYS_DIR = '/keys'
 const LOCAL_REQUEST_TIMEOUT_MS = 5000
-const LISTEN_HOST = '0.0.0.0'
 
 class RequestTooLarge extends Error {}
 
@@ -34,6 +33,11 @@ export class UpstreamUnreachable extends Error {}
 
 export function json(status: number, payload: unknown): Reply {
   return { status, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+}
+
+/** Compose sets MOCK_HOST to 0.0.0.0; anywhere else a mock answers only this machine. */
+export function listenHost(): string {
+  return process.env.MOCK_HOST || '127.0.0.1'
 }
 
 export function requiredEnv(name: string): string {
@@ -85,7 +89,7 @@ function listener(handle: Handler): (message: IncomingMessage, response: ServerR
 }
 
 export function serve(port: number, handle: Handler): Server {
-  return createHttpServer(listener(handle)).listen(port, LISTEN_HOST)
+  return createHttpServer(listener(handle)).listen(port, listenHost())
 }
 
 /** Serves over HTTPS with the shared mock certificate. */
@@ -95,7 +99,7 @@ export function serveTls(port: number, handle: Handler): Server {
     cert: readFileSync(`${KEYS_DIR}/tls-cert.pem`),
     key: readFileSync(`${KEYS_DIR}/tls-key.pem`),
   }
-  return createHttpsServer(options, listener(handle)).listen(port, LISTEN_HOST)
+  return createHttpsServer(options, listener(handle)).listen(port, listenHost())
 }
 
 /** Posts JSON and returns the parsed answer; throws on an HTTP error status, or UpstreamUnreachable. */
@@ -121,7 +125,7 @@ export async function postJson(
   return text ? JSON.parse(text) : null
 }
 
-type LocalRequestOptions = { servername?: string }
+type LocalRequestOptions = { method?: string; body?: string; servername?: string }
 
 /**
  * Calls a mock in this container. A `servername` makes the call HTTPS and checks the certificate against
@@ -130,9 +134,9 @@ type LocalRequestOptions = { servername?: string }
 export function localRequest(
   port: number,
   path: string,
-  { servername }: LocalRequestOptions = {},
+  { method = 'GET', body = '', servername }: LocalRequestOptions = {},
 ): Promise<{ status: number; body: string }> {
-  const options = { host: '127.0.0.1', port, path }
+  const options = { host: '127.0.0.1', port, path, method, headers: { 'Content-Type': 'application/json' } }
   return new Promise((resolve, reject) => {
     const onResponse = (response: IncomingMessage): void => {
       readText(response).then((text) => resolve({ status: response.statusCode ?? 0, body: text }), reject)
@@ -144,7 +148,7 @@ export function localRequest(
       request.destroy(new Error(`No answer from port ${port} within ${LOCAL_REQUEST_TIMEOUT_MS} ms`))
     })
     request.on('error', reject)
-    request.end()
+    request.end(body)
   })
 }
 

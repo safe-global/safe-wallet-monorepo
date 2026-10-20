@@ -1,9 +1,17 @@
-# The TypeScript mocks and fork helpers in mocks/.
+# The TypeScript mocks and fork helpers in mocks/. A mock answers only localhost unless MOCK_HOST says otherwise,
+# so the entrypoint sets it: services may replace `environment` without losing it.
 x-mock: &mock
   image: ${NODE_IMAGE:?Load test-images.env}
   entrypoint:
+    - env
+    - MOCK_HOST=0.0.0.0
     - node
   user: node
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
   volumes:
     - ./mocks:/mocks:ro
 x-fork-proxy-healthcheck: &fork-proxy-healthcheck
@@ -180,8 +188,9 @@ services:
     <<: *mock
     command:
       - /mocks/cow-api.ts
-    # Binds port 443.
-    user: root
+    # Binds port 443 without root.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
     environment:
       COW_API_OFFLINE: 'true'
     volumes:
@@ -208,8 +217,9 @@ services:
     <<: *mock
     command:
       - /mocks/auth0-api.ts
-    # Binds port 443: the gateway only calls https://AUTH0_DOMAIN, without a port.
-    user: root
+    # Binds port 443 without root: the gateway only calls https://AUTH0_DOMAIN, without a port.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
     environment:
       <<: *auth0-client
     volumes:
