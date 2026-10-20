@@ -8,7 +8,7 @@ export const isAllowlistEnabled = (chain: Pick<Chain, 'chainId' | 'features'>): 
   hasFeature(chain, FEATURES.POLICY_RECIPIENT_ALLOWLIST) && !!getPolicyGuardAddress(chain.chainId)
 
 export const isAllowlistOptedIn = (space: Pick<GetSpaceResponse, 'experimentalFeatures'> | undefined): boolean =>
-  space?.experimentalFeatures.includes('POLICY_RECIPIENT_ALLOWLIST') ?? false
+  space?.experimentalFeatures?.includes('POLICY_RECIPIENT_ALLOWLIST') ?? false
 
 export const isSafeEligibleForAllowlist = (
   safe: { version?: string | null; deployed?: boolean },
