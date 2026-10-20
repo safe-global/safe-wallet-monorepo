@@ -1,6 +1,0 @@
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "additionalContext": "This text will be public on GitHub, and it stays public even if it is edited later. Before you send it, read the whole title, body or comment and make sure it contains no private data: customer or user data, content from internal tools (Notion, Linear, Slack, call transcripts, support tickets), internal hostnames, credentials, plans that are not public, or links to Claude sessions. If it does, change it first."
-  }
-}
