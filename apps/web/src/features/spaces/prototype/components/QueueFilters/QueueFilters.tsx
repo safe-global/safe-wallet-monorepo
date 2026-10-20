@@ -120,7 +120,6 @@ function ViewSwitch({ groupBy, onGroupByChange }: Pick<QueueFiltersProps, 'group
       role="radiogroup"
       aria-label="View"
       className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-card p-[3px] shadow-xs"
-      data-prototype-element="View switch"
     >
       {VIEWS.map((option) => {
         const active = groupBy === option.value
@@ -156,7 +155,7 @@ export function QueueToolbar({
   groupingAsView,
 }: QueueFiltersProps) {
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-3" data-prototype-element="Filters">
+    <div className="mb-5 flex flex-wrap items-center gap-3">
       <SearchInput
         className="min-w-48 flex-1"
         aria-label="Find a proposal"
@@ -364,12 +363,7 @@ export function AppliedFilters({
   ]
   if (!pills.length) return null
   return (
-    <div
-      role="group"
-      aria-label="Applied filters"
-      className="-mt-2 mb-5 flex flex-wrap items-center gap-2"
-      data-prototype-element="Applied filters"
-    >
+    <div role="group" aria-label="Applied filters" className="-mt-2 mb-5 flex flex-wrap items-center gap-2">
       {pills.map((filter) => (
         <Chip key={filter.section} variant="outline" size="lg" onDelete={filter.clear} className={APPLIED_PILL}>
           <span className="text-muted-foreground">{filter.title}:</span>

@@ -325,7 +325,7 @@ export function RecoveryPanel({ controller, isWide }: { controller: RecoveryCont
   const columns = getColumns('status', isWide, true)
   if (!visible.length) return null
   return (
-    <section className="mb-6 flex flex-col gap-2" data-prototype-element="Account recovery">
+    <section className="mb-6 flex flex-col gap-2">
       <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium">
         <RecoveryMark />
         Account recovery

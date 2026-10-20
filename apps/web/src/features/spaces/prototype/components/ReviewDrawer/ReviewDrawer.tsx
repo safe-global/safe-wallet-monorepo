@@ -273,10 +273,7 @@ function ClassicReviewDrawer({
       )}
     >
       <DrawerHeader>
-        <div
-          className="flex min-w-0 flex-1 flex-col gap-4 pr-22 md:pr-36"
-          data-prototype-element="Review drawer header"
-        >
+        <div className="flex min-w-0 flex-1 flex-col gap-4 pr-22 md:pr-36">
           {review && (
             <div className="flex min-w-0 items-center gap-3">
               <span
@@ -295,7 +292,7 @@ function ClassicReviewDrawer({
       </DrawerHeader>
       <DrawerBody>
         {review && (
-          <div className="flex flex-col gap-3" data-prototype-element="Review drawer">
+          <div className="flex flex-col gap-3">
             {getWarnings(review).map((warning) => (
               <Alert key={warning} variant="warning" outlined={false}>
                 <AlertSeverityIcon variant="warning" />
@@ -448,11 +445,7 @@ function ClassicReviewDrawer({
           </div>
         )}
       </DrawerBody>
-      <div
-        className="@container shrink-0 border-t border-border bg-background"
-        data-testid="proposal-fixed-footer"
-        data-prototype-element="Review drawer footer"
-      >
+      <div className="@container shrink-0 border-t border-border bg-background" data-testid="proposal-fixed-footer">
         <DrawerFooter safeArea>
           {review && (
             <>

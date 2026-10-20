@@ -36,7 +36,7 @@ export function ScenarioBar({
 }) {
   const [copied, setCopied] = useState(false)
   return (
-    <div className="border-t border-border px-6 py-4" data-prototype-element="Preview options">
+    <div className="border-t border-border px-6 py-4">
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <FlaskConical className="size-4" />

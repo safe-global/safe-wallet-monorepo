@@ -73,10 +73,7 @@ export function StepsReviewDrawer({
     >
       <DrawerHeader>
         {review && account && (
-          <div
-            className="flex min-w-0 flex-1 items-center gap-3 pr-22 md:pr-36"
-            data-prototype-element="Review drawer header"
-          >
+          <div className="flex min-w-0 flex-1 items-center gap-3 pr-22 md:pr-36">
             <Tooltip delay={150}>
               <TooltipTrigger
                 render={
@@ -99,7 +96,7 @@ export function StepsReviewDrawer({
       </DrawerHeader>
       <DrawerBody>
         {review && (
-          <div className="flex flex-col gap-6" data-prototype-element="Review drawer">
+          <div className="flex flex-col gap-6">
             <div className="flex min-w-0 items-center gap-2">
               <div className="min-w-0 flex-1 overflow-hidden">
                 <DrawerSubtitle>
@@ -134,11 +131,7 @@ export function StepsReviewDrawer({
           </div>
         )}
       </DrawerBody>
-      <div
-        className="shrink-0 border-t border-border bg-background"
-        data-testid="proposal-fixed-footer"
-        data-prototype-element="Review drawer footer"
-      >
+      <div className="shrink-0 border-t border-border bg-background" data-testid="proposal-fixed-footer">
         <DrawerFooter safeArea>
           {review && <SignersPanel tx={review} persona={persona} layout={layout} />}
           {feedback && (

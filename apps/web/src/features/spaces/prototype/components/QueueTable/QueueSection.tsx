@@ -303,10 +303,7 @@ export function QueueSection({
     />
   )
   return (
-    <section
-      className={`flex flex-col ${steps ? '' : 'gap-2'}`}
-      data-prototype-element={grouped ? `Table (${section.label})` : 'Table'}
-    >
+    <section className={`flex flex-col ${steps ? '' : 'gap-2'}`}>
       {grouped &&
         // Next steps: a collapsed section keeps the card of the expanded table.
         (steps && headerInCard ? (

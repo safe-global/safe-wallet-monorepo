@@ -55,12 +55,9 @@ import { buildSections } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
 import { SCENARIOS, ScenarioBar, type Hypernative } from './ScenarioBar'
-import { PinCommentLayer } from './PinComments/PinCommentLayer'
-import { CommentFab } from './PinComments/CommentFab'
 import { RecoveryPanel, useRecoveries } from './Recovery/RecoveryPanel'
 import { RecoveryDrawer } from './Recovery/RecoveryDrawer'
 import { QueueError, QueueSkeleton } from './QueueStates'
-import { PENDING_QUEUE_FEEDBACK } from './PinComments/linearIssue'
 
 const HISTORY_HOVER: Partial<Record<ReturnType<typeof getTypeLabel>, string>> = {
   Send: 'group-hover/history:text-destructive group-focus-visible/history:text-destructive',
@@ -105,8 +102,6 @@ function PendingQueueView() {
     forAccount: (accountId: string) => filters.visibleRecoveries.filter((item) => item.accountId === accountId),
   }
   const [replaceHover, setReplaceHover] = useState<string | null>(null)
-  const [commenting, setCommenting] = useState(false)
-  const toggleCommenting = () => setCommenting(!commenting)
 
   const [review, setReview] = useState<Proposal | null>(null)
   const [cursorId, setCursorId] = useState<string | null>(null)
@@ -276,13 +271,7 @@ function PendingQueueView() {
       if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"]'))
         return
       const command = event.metaKey || event.ctrlKey
-      // Cmd/Ctrl+C only means "comment" when nothing is selected, so copying text still works.
-      if (event.key === 'c' && !event.altKey && (!command || window.getSelection()?.isCollapsed !== false)) {
-        if (command) event.preventDefault()
-        setCommenting(true)
-        return
-      }
-      if (command || event.altKey || commenting || bulkScope !== null) return
+      if (command || event.altKey || bulkScope !== null) return
       const offset = event.key === 'j' ? 1 : event.key === 'k' ? -1 : 0
       if (review) {
         if (offset) stepReview(offset)
@@ -622,18 +611,6 @@ function PendingQueueView() {
             setBulkHover([])
           }}
           onExecute={runBulkExecute}
-        />
-        <CommentFab active={commenting} onToggle={toggleCommenting} />
-        <PinCommentLayer
-          active={commenting}
-          onEnter={() => setCommenting(true)}
-          onExit={() => setCommenting(false)}
-          target={PENDING_QUEUE_FEEDBACK}
-          transaction={
-            review
-              ? { id: review.id, label: `${getTransactionLabel(review)} · ${getAccount(review).name} #${review.nonce}` }
-              : undefined
-          }
         />
       </PrototypeFrame>
     </div>
