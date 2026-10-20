@@ -3,7 +3,7 @@ import { createSafe } from './safe.mjs'
 import { trustToken } from './tokens.mjs'
 import { registerContract } from './contracts.mjs'
 import { waitUntil } from './indexing.mjs'
-import { erc721Artifact, short } from './chain.mjs'
+import { erc721Artifact } from './chain.mjs'
 
 export async function prepareNftsScenario(env, owners) {
   const contexts = []
@@ -37,13 +37,7 @@ export async function prepareNftsScenario(env, owners) {
       (collectibles) => collectibles.results.length === 10,
     )
     return {
-      safes: {
-        static: {
-          SEP_STATIC_SAFE_2: `sep:${context.safeAddress}`,
-          SEP_STATIC_SAFE_23: `sep:${context.safeAddress}`,
-        },
-      },
-      fixtures: { 'nfts.address': short(catAddress) },
+      safes: { static: { SEP_STATIC_SAFE_2: `sep:${context.safeAddress}` } },
     }
   } finally {
     for (const context of contexts) context.provider.destroy()
