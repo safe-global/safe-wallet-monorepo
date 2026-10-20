@@ -7,6 +7,7 @@ export type Scenario =
   | 'gap'
   | 'partial'
   | 'recovery'
+  | 'many-safes'
   | 'loading'
   | 'error'
   | 'empty'

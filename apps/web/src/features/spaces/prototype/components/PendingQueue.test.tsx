@@ -42,7 +42,7 @@ const chooseGrouping = async (user: TestUser, option: string) => {
 const sectionHeader = (name: string) =>
   screen.getByRole('button', { name }).closest<HTMLElement>('[data-slot="section-header"]')!
 
-const allPending = () => within(screen.getByRole('tabpanel', { name: 'Queue' }))
+const allPending = () => within(screen.getByRole('region', { name: 'Queue' }))
 
 describe('queue design exploration', () => {
   it('defaults to a table with named columns and review actions without executing', () => {
@@ -110,7 +110,7 @@ describe('queue design exploration', () => {
   })
   it('keeps rows compact and details out of the table', () => {
     render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    expect(screen.getByRole('tabpanel', { name: 'Queue' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Queue' })).toBeInTheDocument()
     expect(screen.queryByTestId('execution-reason')).not.toBeInTheDocument()
     fireEvent.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
     fireEvent.click(screen.getByRole('button', { name: 'Transaction summary' }))
@@ -139,6 +139,45 @@ describe('queue design exploration', () => {
     expect(screen.queryByRole('heading', { name: 'Ready to move' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Treasury Main' })).not.toBeInTheDocument()
   })
+  it('groups next steps by Safe by default', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'steps' } } })
+    expect(screen.queryByRole('table', { name: 'Ready to sign transactions' })).not.toBeInTheDocument()
+    expect(screen.getByRole('table', { name: 'Treasury Main transactions' })).toBeInTheDocument()
+  })
+  it('filters next steps from the Status and Safe dropdowns', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'steps' } } })
+    expect(screen.queryByRole('group', { name: 'Quick filters' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /^Safe/ }))
+    expect(await screen.findByText('Sorted by actionable transactions')).toBeVisible()
+    fireEvent.click(await screen.findByRole('menuitemcheckbox', { name: /^Grants/ }))
+    expect(await screen.findByRole('menuitem', { name: /^Clear/ })).toHaveTextContent('Clear1 selected')
+    await closeMenus(user)
+    expect(screen.getByRole('button', { name: /^Safe/ })).toHaveAccessibleName('Safe')
+    expect(screen.queryByRole('table', { name: 'Treasury Main transactions' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
+    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Safe:Grants')
+    await openFilter(user, 'Safe account')
+    expect(await screen.findByRole('menuitemcheckbox', { name: /^Grants/ })).toHaveAttribute('aria-checked', 'true')
+    await closeMenus(user)
+    await user.click(screen.getByRole('button', { name: /^Filter/ }))
+    const reset = await screen.findByRole('menuitem', { name: /^Reset all filters/ })
+    expect(reset).toHaveTextContent('1 applied')
+    await user.click(reset)
+    expect(screen.getByRole('table', { name: 'Treasury Main transactions' })).toBeInTheDocument()
+  })
+  it('shows only the Safe dropdown in the next steps status view', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'steps', groupBy: 'status' } } })
+    expect(screen.getByRole('button', { name: /^Safe/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Status/ })).not.toBeInTheDocument()
+  })
+  it('puts conflicting transactions below ready to sign in the next steps status view', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'steps', groupBy: 'status', scenario: 'conflict' } } })
+    const labels = screen.getAllByRole('table').map((table) => table.getAttribute('aria-label'))
+    const conflicting = labels.indexOf('Conflicting transactions transactions')
+    expect(conflicting).toBeGreaterThan(-1)
+    expect(labels.slice(0, conflicting)).not.toContain('Blocked transactions')
+    expect(labels.slice(0, conflicting)).not.toContain('Waiting on others transactions')
+  })
   it('collapses one status without hiding proposals in other sections', () => {
     render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     const section = within(screen.getByRole('table', { name: 'Ready to sign transactions' }))
@@ -155,8 +194,8 @@ describe('queue design exploration', () => {
     expect(screen.getAllByRole('table').map((table) => table.getAttribute('aria-label'))).toEqual([
       'Ready to execute transactions',
       'Ready to sign transactions',
-      'Waiting on others transactions',
       'Blocked transactions',
+      'Waiting on others transactions',
     ])
     for (const [label, count] of [
       ['Waiting on others', '1'],
@@ -188,17 +227,11 @@ describe('queue design exploration', () => {
     expect(sectionHeader('Collapse Ready to sign')).toHaveTextContent('0')
     expect(sectionHeader('Collapse Blocked')).toHaveTextContent('0')
   })
-  it('shows history and message placeholders and restores the queue when returning', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    await user.click(screen.getByRole('tab', { name: 'History' }))
-    expect(screen.getByText('No transactions executed in this preview yet.')).toBeVisible()
-    expect(screen.queryByRole('tabpanel', { name: 'Queue' })).not.toBeInTheDocument()
-    await user.click(screen.getByRole('tab', { name: 'Messages' }))
-    expect(screen.getByText('Messages are not included in this queue design prototype.')).toBeVisible()
-    await user.click(screen.getByRole('tab', { name: 'Queue' }))
-    expect(screen.getByRole('tabpanel', { name: 'Queue' })).toBeVisible()
-    expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(6)
-    expect(screen.queryByText('Messages are not included in this queue design prototype.')).not.toBeInTheDocument()
+  it('shows the queue without page tabs', () => {
+    render(<PendingQueue />)
+    expect(screen.queryByRole('tab', { name: 'History' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Messages' })).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Queue' })).toBeVisible()
   })
   it('groups proposals by Safe in nonce order and preserves independent collapse states', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
@@ -371,7 +404,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('Q4 vendor payment.')
     expect(screen.getByRole('button', { name: 'Blocked by #42' })).toBeDisabled()
   })
-  it('executes after confirmation, unblocks the next nonce, and records history', async () => {
+  it('executes after confirmation and unblocks the next nonce', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
     await user.click(screen.getByRole('button', { name: 'Review, sign and execute' }))
@@ -379,9 +412,6 @@ describe('queue design exploration', () => {
     expect(allPending().queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
     const signerRow = allPending().getByRole('button', { name: 'Open Add signer Priya' }).closest('tr')!
     expect(signerRow).toHaveTextContent('Ready to execute')
-    await user.click(screen.getByRole('tab', { name: 'History' }))
-    expect(screen.getByText('Sent to Globex Payroll · #42 · Treasury Main')).toBeVisible()
-    expect(screen.getByText('Executed in preview')).toBeVisible()
   })
   it('creates a cancellation competitor while retaining the original and its note', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
@@ -897,10 +927,10 @@ describe('queue design exploration', () => {
       .getAllByRole('button', { name: /^Open / })
       .map((button) => button.getAttribute('aria-label'))
     expect(titles).toEqual(['Open Batch · 46 actions', 'Open Batch · 14 actions'])
-    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter 1 applied')
+    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
     expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Type:Batch')
     await openFilter(user, 'Type')
-    expect(await screen.findByRole('menuitem', { name: 'Type' })).toHaveTextContent('TypeBatch')
+    expect(await screen.findByRole('menuitem', { name: 'Type' })).toHaveTextContent('Type1')
     await closeMenus(user)
     await user.click(
       within(screen.getByRole('group', { name: 'Applied filters' })).getByRole('button', { name: 'Remove' }),

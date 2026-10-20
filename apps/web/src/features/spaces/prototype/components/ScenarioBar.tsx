@@ -14,6 +14,7 @@ export const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: 'gap', label: 'Missing dependency' },
   { value: 'partial', label: 'Partial loading' },
   { value: 'recovery', label: 'Account recovery' },
+  { value: 'many-safes', label: '20 Safes' },
   { value: 'loading', label: 'Loading' },
   { value: 'error', label: 'Failed to load' },
   { value: 'empty', label: 'Empty workspace' },

@@ -17,3 +17,7 @@ export const StatusGroups: Story = { parameters: { nextjs: { router: { query: { 
 export const MobileTable: Story = { parameters: { viewport: { defaultViewport: 'mobile1' } } }
 export const ActionInbox: Story = { parameters: { nextjs: { router: { query: { option: 'inbox' } } } } }
 export const CompetingProposals: Story = { parameters: { nextjs: { router: { query: { scenario: 'conflict' } } } } }
+export const NextSteps: Story = { parameters: { nextjs: { router: { query: { option: 'steps' } } } } }
+export const ManySafes: Story = {
+  parameters: { nextjs: { router: { query: { option: 'steps', scenario: 'many-safes' } } } },
+}

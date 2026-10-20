@@ -23,8 +23,7 @@ export type QueueFilterValues = {
 export const inSelection = <T>(selection: T[], value: T) => selection.length === 0 || selection.includes(value)
 export const toggled = <T>(selection: T[], value: T) =>
   selection.includes(value) ? selection.filter((item) => item !== value) : [...selection, value]
-const summarise = (values: string[]) =>
-  values.length === 0 ? undefined : values.length === 1 ? values[0] : String(values.length)
+const summarise = (values: string[]) => (values.length === 0 ? undefined : String(values.length))
 
 export function useQueueFilters(
   items: Proposal[],
@@ -76,11 +75,12 @@ export function useQueueFilters(
     ...stateFilter.map((status) => STATUS_META[status].label),
     ...(conflicting ? [CONFLICTING_META.short] : []),
   ]
+  const accountNames = accounts.filter((account) => accountFilter.includes(account.id)).map((account) => account.name)
   const applied = [
     {
       section: 'accounts' as const,
       title: 'Safe',
-      values: accounts.filter((account) => accountFilter.includes(account.id)).map((account) => account.name),
+      values: accountNames,
       clear: () => setAccountFilter([]),
     },
     { section: 'networks' as const, title: 'Network', values: networkFilter, clear: () => setNetworkFilter([]) },
@@ -127,7 +127,7 @@ export function useQueueFilters(
     optionCount,
     applied,
     summaries: {
-      accounts: summarise(accountFilter),
+      accounts: summarise(accountNames),
       networks: summarise(networkFilter),
       types: summarise(typeFilter),
       statuses: summarise(statusLabels),

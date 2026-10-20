@@ -64,8 +64,14 @@ export function buildSections({
           }))
       : groupBy === 'none'
         ? [{ id: 'ungrouped', category: 'all', label: 'Pending', items: ordered }]
-        : [
-            ...(direction === 'steps'
+        : STATUS_ORDER.flatMap((status) => [
+            {
+              id: `status-${status}`,
+              category: status,
+              label: STATUS_META[status].label,
+              items: ordered.filter((tx) => !isConflicting(tx) && getPrimaryStatus(tx, persona) === status),
+            },
+            ...(direction === 'steps' && status === 'sign'
               ? [
                   {
                     id: 'status-conflicting',
@@ -77,20 +83,26 @@ export function buildSections({
                   },
                 ]
               : []),
-            ...STATUS_ORDER.map((status) => ({
-              id: `status-${status}`,
-              category: status,
-              label: STATUS_META[status].label,
-              items: ordered.filter((tx) => !isConflicting(tx) && getPrimaryStatus(tx, persona) === status),
-            })),
-          ]
+          ])
   const clustered = sections.map((section) => ({ ...section, items: clusterByNonce(section.items) }))
   if (direction === 'steps' && groupBy === 'status') return clustered.filter((section) => section.items.length > 0)
   if (direction !== 'steps' || groupBy !== 'safe') return clustered
-  // Safes that need you come first, by most urgent step. Other Safes keep their order.
   const ranked = clustered.map((section) => ({ ...section, urgency: getUrgency(section.items, persona) }))
   return ranked.sort((a, b) => (a.urgency ?? STEP_RANK.length) - (b.urgency ?? STEP_RANK.length))
 }
+
+// Safes that need you come first, by most urgent step. Other Safes keep their order.
+export const rankAccounts = (accounts: Account[], items: Proposal[], persona: Persona) =>
+  accounts
+    .map((account) => ({
+      account,
+      urgency: getUrgency(
+        items.filter((tx) => tx.account === account.id),
+        persona,
+      ),
+    }))
+    .sort((a, b) => (a.urgency ?? STEP_RANK.length) - (b.urgency ?? STEP_RANK.length))
+    .map(({ account }) => account)
 
 const getUrgency = (items: Proposal[], persona: Persona) => {
   const ranks = items.flatMap((tx) => {

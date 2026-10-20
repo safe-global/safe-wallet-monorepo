@@ -1,4 +1,4 @@
-import { accounts, getAccount, getScenario, getState } from './model'
+import { getAccount, getScenario, getScenarioAccounts, getState, knownAccounts } from './model'
 import type { Account, Persona, Proposal, Scenario } from '../types'
 
 export type PreviewQueue = {
@@ -13,7 +13,7 @@ export const createPreviewQueue = (scenario: Scenario): PreviewQueue => ({
   items: getScenario(scenario),
   completed: [],
   nextProposalId: 1,
-  nextNonces: Object.fromEntries(accounts.map((account) => [account.id, account.nextNonce])),
+  nextNonces: Object.fromEntries(getScenarioAccounts(scenario).map((account) => [account.id, account.nextNonce])),
 })
 
 export function applyPreviewAction(
@@ -74,7 +74,7 @@ export type BulkBatch = { account: Account; proposals: Proposal[]; blocked?: { n
 
 // Mirrors the single-Safe rules: fully signed, consecutive from the next nonce, one per nonce, at most 20.
 export function getBulkExecutable(items: Proposal[]): BulkBatch[] {
-  return accounts.flatMap((base) => {
+  return knownAccounts.flatMap((base) => {
     const safeItems = items.filter((tx) => tx.account === base.id)
     if (!safeItems.length) return []
     const account = getAccount(safeItems[0])

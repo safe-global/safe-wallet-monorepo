@@ -23,9 +23,10 @@ import Identicon from '@/components/common/Identicon'
 import { getStepsStatus, type TypeLabel } from '../services/model'
 import type { Filter, Persona, Proposal } from '../types'
 
-export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'awaiting', 'waiting']
+// Blocked comes before Waiting on others: you can act on what blocks it.
+export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'waiting', 'awaiting']
 export const QUICK_FILTERS: Filter[] = ['sign', 'ready', 'waiting']
-// Next steps: conflicting transactions have their own section, above all statuses.
+// Next steps: conflicting transactions have their own section, below Ready to sign.
 export const CONFLICTING_META = {
   label: 'Conflicting transactions',
   short: 'Conflicting',

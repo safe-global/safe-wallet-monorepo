@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 import { ListFilter, MoreHorizontal, StickyNote, TriangleAlert } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -103,6 +103,7 @@ export function QueueRow({
   onConflictHover,
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
+  const noteIcon = useRef<SVGSVGElement>(null)
   // The drawer covers the row, so mouseleave does not fire. mousemove resets the hover.
   useEffect(() => setHovered(false), [selected])
   const state = getState(tx, persona)
@@ -167,6 +168,15 @@ export function QueueRow({
       </TooltipContent>
     </Tooltip>
   )
+  const noteDetails = tx.note && (
+    <>
+      <p className="font-medium">Off-chain note</p>
+      <p className="mt-1 leading-relaxed">{tx.note.text}</p>
+      <p className="mt-1 text-background/70">
+        {tx.note.author} · {tx.note.date}
+      </p>
+    </>
+  )
   const noteButton = tx.note && (
     <Tooltip delay={150}>
       <TooltipTrigger
@@ -176,10 +186,7 @@ export function QueueRow({
       >
         <StickyNote className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
       </TooltipTrigger>
-      <TooltipContent className="max-w-sm whitespace-normal">
-        <p className="font-medium">Off-chain note</p>
-        <p className="mt-1 leading-relaxed">{tx.note.text}</p>
-      </TooltipContent>
+      <TooltipContent className="max-w-sm whitespace-normal">{noteDetails}</TooltipContent>
     </Tooltip>
   )
 
@@ -394,18 +401,16 @@ export function QueueRow({
               onClick={review}
             >
               <StickyNote
+                ref={noteIcon}
                 className="mt-0.5 size-4 shrink-0 text-muted-foreground"
                 strokeWidth={ICON_STROKE}
                 aria-hidden="true"
               />
               <span className="line-clamp-2 text-sm">{tx.note.text}</span>
             </TooltipTrigger>
-            <TooltipContent className="max-w-sm whitespace-normal">
-              <p className="font-medium">Off-chain note</p>
-              <p className="mt-1 leading-relaxed">{tx.note.text}</p>
-              <p className="mt-1 text-background/70">
-                {tx.note.author} · {tx.note.date}
-              </p>
+            {/* The tooltip points at the icon, not the middle of the note text. */}
+            <TooltipContent anchor={noteIcon} className="max-w-sm whitespace-normal">
+              {noteDetails}
             </TooltipContent>
           </Tooltip>
         </TableCell>

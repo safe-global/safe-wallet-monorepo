@@ -66,6 +66,77 @@ export const accounts: Account[] = [
     threshold: 2,
   },
 ]
+// Many Safes: a protocol team's workspace with 20 Safes. About half have nothing queued.
+const MANY_SAFES: [id: string, name: string, network: string, chainId: string, nextNonce: number][] = [
+  ['market-making', 'Market Making', 'Ethereum', '1', 212],
+  ['grants-committee', 'Grants Committee', 'Optimism', '10', 31],
+  ['security-council', 'Security Council', 'Ethereum', '1', 9],
+  ['liquidity-ops', 'Liquidity Ops', 'Arbitrum', '42161', 87],
+  ['marketing', 'Marketing', 'Base', '8453', 54],
+  ['ecosystem-fund', 'Ecosystem Fund', 'Polygon', '137', 23],
+  ['bug-bounty', 'Bug Bounty', 'Ethereum', '1', 15],
+  ['legal', 'Legal & Compliance', 'Ethereum', '1', 6],
+  ['payroll-eu', 'Payroll EU', 'Gnosis', '100', 64],
+  ['payroll-us', 'Payroll US', 'Base', '8453', 71],
+  ['vesting', 'Vesting Escrow', 'Ethereum', '1', 12],
+  ['partnerships', 'Partnerships', 'Arbitrum', '42161', 19],
+  ['events', 'Events', 'Polygon', '137', 28],
+  ['research', 'Research', 'Optimism', '10', 11],
+  ['infra', 'Infra Costs', 'Base', '8453', 140],
+  ['dao-reserve', 'DAO Reserve', 'Ethereum', '1', 4],
+  ['hot-ops', 'Hot Wallet Ops', 'Arbitrum', '42161', 503],
+]
+export const manySafesAccounts: Account[] = MANY_SAFES.map(([id, name, network, chainId, nextNonce]) => {
+  const address = fixtureAddress(id)
+  return {
+    id,
+    name,
+    network,
+    chainId,
+    address: shortAddress(address),
+    iconAddress: address,
+    owners: ['Dev', 'Ana', 'Max', 'Jonas'],
+    nextNonce,
+    threshold: 2,
+  }
+})
+export const knownAccounts = [...accounts, ...manySafesAccounts]
+export const getScenarioAccounts = (scenario: Scenario) => (scenario === 'many-safes' ? knownAccounts : accounts)
+
+const queued = (
+  account: string,
+  nonce: number,
+  recipient: string,
+  amount: string,
+  signers: string[],
+  age: string,
+  kind: TransactionKind = { type: 'transfer' },
+): Proposal => ({ id: `${account}-${nonce}`, account, nonce, recipient, amount, kind, age, signers, eligible: true })
+// Threshold is 2 of 4. Two signatures at the next nonce is ready, Dev alone is waiting, a later nonce is blocked.
+const manySafesProposals = (): Proposal[] => [
+  queued('market-making', 212, 'Litware Markets · 0x51c7…9a02', '1,500,000 USDC', ['Ana', 'Max'], '4h ago'),
+  queued('market-making', 213, 'Litware Markets · 0x51c7…9a02', '400 ETH', ['Ana'], '2h ago'),
+  queued('security-council', 9, 'Pause guardian', '', ['Jonas'], '1d ago', {
+    type: 'settings',
+    change: { kind: 'setGuard', guard: 'Pause guardian' },
+  }),
+  queued('security-council', 10, 'Priya · 0x3e1b…09cd', '', ['Ana', 'Max'], '20h ago', {
+    type: 'settings',
+    change: { kind: 'addOwner', owner: 'Priya' },
+  }),
+  queued('liquidity-ops', 87, 'Uniswap v3 · ETH/USDC', '250 ETH', ['Dev'], '3h ago'),
+  queued('bug-bounty', 15, 'Whitehat · 0x0b9d…e441', '50,000 USDC', ['Max'], '2d ago'),
+  queued('payroll-eu', 64, '22 recipients · Batch transfer', '118,300 EURe', ['Ana', 'Jonas'], '6h ago', {
+    type: 'batch',
+    actions: generateBatchActions(22, 'Employee'),
+  }),
+  queued('vesting', 12, 'Investor unlock · 0x77fe…2c10', '2,000,000 SAFE', ['Max', 'Jonas'], '1d ago'),
+  queued('partnerships', 19, 'Northwind · 0x2a8c…f3b1', '75,000 USDC', ['Dev'], '5d ago'),
+  queued('infra', 140, 'Cloud hosting · 0x9c1e…4d7a', '18,420 USDC', ['Ana'], '8h ago'),
+  queued('dao-reserve', 4, 'Aave v3 · Supply', '5,000,000 USDC', ['Jonas'], '3d ago'),
+  queued('dao-reserve', 5, 'Lido · Stake', '1,200 ETH', ['Dev'], '2d ago'),
+  queued('dao-reserve', 6, 'Woodgrove Custody · 0x6b2d…a9e0', '800 ETH', ['Ana', 'Max'], '1d ago'),
+]
 export const generateBatchActions = (count: number, recipient = 'Supplier'): BatchAction[] =>
   Array.from({ length: count }, (_, index) => {
     const id = (index + 1).toString(16).padStart(4, '0')
@@ -301,7 +372,7 @@ const realisticProposals: Proposal[] = [
   },
 ]
 export const getAccount = (tx: Proposal) => {
-  const account = accounts.find((account) => account.id === tx.account)!
+  const account = knownAccounts.find((account) => account.id === tx.account)!
   return tx.queueNextNonce === undefined ? account : { ...account, nextNonce: tx.queueNextNonce }
 }
 export const getOutstandingSigners = (tx: Proposal) =>
@@ -329,6 +400,7 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
 export const getScenario = (scenario: Scenario): Proposal[] => {
   if (scenario === 'empty' || scenario === 'loading' || scenario === 'error') return []
   const items = proposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))
+  if (scenario === 'many-safes') return [...items, ...manySafesProposals()]
   if (scenario === 'conflict')
     items.push({
       id: 'treasury-42-swap',
