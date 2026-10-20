@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@/tests/test-utils'
+import { fireEvent, render, within } from '@/tests/test-utils'
 import Multisend from '.'
 import { Operation } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
@@ -94,9 +94,10 @@ describe('Multisend', () => {
 
     fireEvent.click(result.getByTestId('expande-all-btn'))
 
-    expect(result.getAllByTestId('action-item')).toHaveLength(actions.length)
-    actions.forEach(({ dataDecoded }) => {
-      expect(result.getAllByText(dataDecoded!.method).length).toBeGreaterThan(0)
+    const items = result.getAllByTestId('action-item')
+    expect(items).toHaveLength(actions.length)
+    items.forEach((item, index) => {
+      expect(within(item).getByText(actions[index].dataDecoded.method)).toBeInTheDocument()
     })
     expect(result.queryByText('Error parsing data')).not.toBeInTheDocument()
   })

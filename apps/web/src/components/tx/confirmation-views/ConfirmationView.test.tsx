@@ -1,50 +1,20 @@
-import type { ComponentProps } from 'react'
-import { faker } from '@faker-js/faker'
-import type { MultiSend, TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { basicTypesActions, multiSendTxDataBuilder } from '@/tests/builders/dataDecoded'
-import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
+import { basicTypesActions, multiSendTxDataBuilder, multiSendTxInfo } from '@/tests/builders/dataDecoded'
+import * as DecodedDataModule from '@/components/transactions/TxDetails/TxData/DecodedData'
 import ConfirmationView from '.'
-
-let mockDecodedDataThrows = false
 
 jest.mock('@/services/observability', () => ({
   ...jest.requireActual('@/services/observability'),
-  captureError: jest.fn(),
+  captureRenderError: jest.fn(),
 }))
-jest.mock('@/components/transactions/TxDetails/TxData/DecodedData', () => {
-  const { default: ActualDecodedData } = jest.requireActual('@/components/transactions/TxDetails/TxData/DecodedData')
 
-  return {
-    __esModule: true,
-    default: (props: ComponentProps<typeof DecodedData>) => {
-      if (mockDecodedDataThrows) throw new Error('Cannot render decoded value')
-      return <ActualDecodedData {...props} />
-    },
-  }
-})
-
-const batchPreview = (actions: MultiSend[]): TransactionPreview => ({
-  txInfo: {
-    type: TransactionInfoType.CUSTOM,
-    humanDescription: null,
-    to: { value: faker.finance.ethereumAddress() },
-    dataSize: '0',
-    value: '0',
-    methodName: 'multiSend',
-    actionCount: actions.length,
-    isCancellation: false,
-  },
+const batchPreview = (actions: ReturnType<typeof basicTypesActions>): TransactionPreview => ({
+  txInfo: multiSendTxInfo(actions.length),
   txData: multiSendTxDataBuilder(actions).build(),
 })
 
 describe('ConfirmationView with decoded data', () => {
-  beforeEach(() => {
-    mockDecodedDataThrows = false
-    jest.spyOn(console, 'error').mockImplementation(() => {})
-  })
-
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -60,7 +30,10 @@ describe('ConfirmationView with decoded data', () => {
   })
 
   it('keeps the rest of the review when the decoded data cannot be rendered', () => {
-    mockDecodedDataThrows = true
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    jest.spyOn(DecodedDataModule, 'default').mockImplementation(() => {
+      throw new Error('Cannot render decoded value')
+    })
     const actions = basicTypesActions().slice(0, 2)
     render(
       <ConfirmationView txPreview={batchPreview(actions)}>

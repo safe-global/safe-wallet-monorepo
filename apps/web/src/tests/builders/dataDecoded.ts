@@ -1,19 +1,24 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type {
+  BaseDataDecoded,
   DataDecodedParameter,
   MultiSend,
-  TransactionData,
+  MultiSendTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Operation } from '@safe-global/store/gateway/types'
+import { Operation, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 
 type DecodedValue = string | DecodedValue[]
 
 type Param = [name: string, type: string, value: DecodedValue]
 
-const BYTES16_ZERO = `0x${'0'.repeat(32)}`
-const BYTES32_ZERO = `0x${'0'.repeat(64)}`
+type DecodedAction = MultiSend & { dataDecoded: BaseDataDecoded }
+
+const SELECTOR_HEX_LENGTH = 8
+const WORD_HEX_LENGTH = 64
+const BYTES16_ZERO = `0x${'0'.repeat(WORD_HEX_LENGTH / 2)}`
+const BYTES32_ZERO = `0x${'0'.repeat(WORD_HEX_LENGTH)}`
 const MULTI_SEND_SELECTOR = '0x8d80ff0a'
 
 export const HUGE_UINT = '6426191757410075707'
@@ -110,27 +115,33 @@ const toParameter = ([name, type, value]: Param): DataDecodedParameter => ({
   value: value as DataDecodedParameter['value'],
 })
 
-/**
- * Builds the decoded calls of the Transaction Builder batch that QA uses to cover every ABI type.
- *
- * @param contract - the address of the BasicTypesTestContract the calls target
- * @returns one MultiSend action per contract method
- */
-export const basicTypesActions = (contract = checksumAddress(faker.finance.ethereumAddress())): MultiSend[] => {
+// Mirrors the Transaction Builder batch QA uses against BasicTypesTestContract
+export const basicTypesActions = (contract = checksumAddress(faker.finance.ethereumAddress())): DecodedAction[] => {
   const address = checksumAddress(faker.finance.ethereumAddress())
 
   return basicTypesCalls(address).map(([method, params]) => ({
     operation: Operation.CALL,
     to: contract,
     value: '0',
-    data: faker.string.hexadecimal({ length: 72, casing: 'lower' }),
+    data: faker.string.hexadecimal({ length: SELECTOR_HEX_LENGTH + WORD_HEX_LENGTH, casing: 'lower' }),
     dataDecoded: { method, parameters: params.map(toParameter) },
   }))
 }
 
+export const multiSendTxInfo = (actionCount: number): MultiSendTransactionInfo => ({
+  type: TransactionInfoType.CUSTOM,
+  humanDescription: null,
+  to: { value: checksumAddress(faker.finance.ethereumAddress()) },
+  dataSize: '0',
+  value: '0',
+  methodName: 'multiSend',
+  actionCount,
+  isCancellation: false,
+})
+
 export const multiSendTxDataBuilder = (actions: MultiSend[] = basicTypesActions()) =>
   transactionDataBuilder().with({
-    hexData: `${MULTI_SEND_SELECTOR}${faker.string.hexadecimal({ length: 200, casing: 'lower', prefix: '' })}`,
+    hexData: `${MULTI_SEND_SELECTOR}${faker.string.hexadecimal({ length: WORD_HEX_LENGTH, casing: 'lower', prefix: '' })}`,
     operation: Operation.DELEGATE,
     dataDecoded: {
       method: 'multiSend',

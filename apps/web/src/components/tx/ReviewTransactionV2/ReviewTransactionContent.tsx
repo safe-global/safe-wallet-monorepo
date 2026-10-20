@@ -64,8 +64,10 @@ export const ReviewTransactionContent = ({
           isApproval={isApproval}
           withDecodedData={withDecodedData}
         >
-          {!isRejection && (
-            <ParsingErrorBoundary>{isApproval && <ApprovalEditor safeTransaction={safeTx} />}</ParsingErrorBoundary>
+          {!isRejection && isApproval && (
+            <ParsingErrorBoundary>
+              <ApprovalEditor safeTransaction={safeTx} />
+            </ParsingErrorBoundary>
           )}
         </ConfirmationView>
 

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
-import { captureError } from '@/services/observability'
+import { captureRenderError } from '@/services/observability'
 import ParsingErrorBoundary from './ParsingErrorBoundary'
 
-jest.mock('@/services/observability', () => ({ captureError: jest.fn() }))
+jest.mock('@/services/observability', () => ({ captureRenderError: jest.fn() }))
 
 const Broken = (): never => {
   throw new Error('Cannot render decoded value')
@@ -41,18 +41,16 @@ describe('ParsingErrorBoundary', () => {
     expect(screen.getByText('Signers')).toBeInTheDocument()
   })
 
-  it('reports the error as user facing', () => {
+  it('reports the render error', () => {
     render(
       <ParsingErrorBoundary>
         <Broken />
       </ParsingErrorBoundary>,
     )
 
-    expect(captureError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        error: expect.objectContaining({ message: 'Cannot render decoded value' }),
-        isUserFacing: true,
-      }),
+    expect(captureRenderError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Cannot render decoded value' }),
+      expect.any(String),
     )
   })
 })

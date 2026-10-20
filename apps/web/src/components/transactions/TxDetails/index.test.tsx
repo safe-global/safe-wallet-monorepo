@@ -1,12 +1,11 @@
-import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
-import { TransactionInfoType, TransactionStatus } from '@safe-global/store/gateway/types'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { CheckStatus, type Hex } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import { buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { basicTypesActions, multiSendTxDataBuilder } from '@/tests/builders/dataDecoded'
+import { basicTypesActions, multiSendTxDataBuilder, multiSendTxInfo } from '@/tests/builders/dataDecoded'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import * as useChainsModule from '@/hooks/useChains'
@@ -53,16 +52,7 @@ describe('TxDetails decoded data', () => {
         HttpResponse.json(
           transactionDetailsBuilder()
             .with({
-              txInfo: {
-                type: TransactionInfoType.CUSTOM,
-                humanDescription: null,
-                to: { value: faker.finance.ethereumAddress() },
-                dataSize: '0',
-                value: '0',
-                methodName: 'multiSend',
-                actionCount: actions.length,
-                isCancellation: false,
-              },
+              txInfo: multiSendTxInfo(actions.length),
               txData: multiSendTxDataBuilder(actions).build(),
               detailedExecutionInfo: multisigExecutionDetailsBuilder().build(),
             })
