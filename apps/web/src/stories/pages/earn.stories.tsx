@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
+import { within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
 import { localItem } from '@/services/local-storage/local'
-import { EARN_CONSENT_STORAGE_KEY } from '@/features/earn/constants'
+import { EARN_CONSENT_STORAGE_KEY, hideEarnInfoStorageKey } from '@/features/earn/constants'
 import Earn from '@/pages/earn'
 
 /**
@@ -15,6 +16,7 @@ const defaultSetup = createMockStory({
   wallet: 'owner',
   layout: 'fullPage',
   pathname: '/earn',
+  features: { earn: true },
 })
 
 const meta = {
@@ -31,9 +33,26 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
-
-export const Disclaimer: Story = {
-  parameters: createMockStory({ scenario: 'efSafe', pathname: '/earn', features: { earn: true } }).parameters,
+export const Default: Story = {
   beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).remove(),
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByRole('button', { name: 'Continue' })
+  },
+}
+
+export const ConsentAccepted: Story = {
+  beforeEach: () => {
+    localItem(EARN_CONSENT_STORAGE_KEY).set(true)
+    localItem(hideEarnInfoStorageKey).remove()
+  },
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByRole('button', { name: 'Get started' })
+  },
+}
+
+export const NotAvailable: Story = {
+  parameters: createMockStory({ scenario: 'efSafe', pathname: '/earn' }).parameters,
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText('Earn is not available on this network.')
+  },
 }
