@@ -27,6 +27,8 @@ export type Fixtures = { orders: Map<string, Order>; appData: Record<string, unk
 export type Settlements = Map<string, string[]>
 export type Upstream = (path: string) => Promise<Reply>
 
+const SETTLEMENT_USAGE = 'Usage: register-settlement <transaction hash> <order uid>...'
+
 class InvalidSettlement extends Error {}
 
 export function loadFixtures(file: URL = ORDERS_FILE): Fixtures {
@@ -49,7 +51,7 @@ export function registerSettlement(settlements: Settlements, txHash: string, uid
   const hash = txHash.toLowerCase()
   const orders = uids.map((uid) => uid.toLowerCase())
   if (!TX_HASH.test(hash) || orders.length === 0 || !orders.every((uid) => UID.test(uid))) {
-    throw new InvalidSettlement('Usage: register-settlement <transaction hash> <order uid>...')
+    throw new InvalidSettlement(SETTLEMENT_USAGE)
   }
   settlements.set(hash, orders)
 }
@@ -115,10 +117,31 @@ const realApi: Upstream = async (path) => {
 
 type CowOptions = { fixtures: Fixtures; settlements: Settlements; offline: boolean; upstream?: Upstream }
 
-function storeSettlement(settlements: Settlements, body: string): Reply {
-  const { txHash, uids } = JSON.parse(body || '{}') as { txHash?: string; uids?: string[] }
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string')
+
+function parseJson(body: string): unknown {
   try {
-    registerSettlement(settlements, txHash ?? '', uids ?? [])
+    return JSON.parse(body || '{}')
+  } catch {
+    throw new InvalidSettlement(SETTLEMENT_USAGE)
+  }
+}
+
+function parseSettlement(body: string): { txHash: string; uids: string[] } {
+  const data = parseJson(body)
+  if (typeof data !== 'object' || data === null || !('txHash' in data) || !('uids' in data)) {
+    throw new InvalidSettlement(SETTLEMENT_USAGE)
+  }
+  const { txHash, uids } = data
+  if (typeof txHash !== 'string' || !isStringArray(uids)) throw new InvalidSettlement(SETTLEMENT_USAGE)
+  return { txHash, uids }
+}
+
+function storeSettlement(settlements: Settlements, body: string): Reply {
+  try {
+    const { txHash, uids } = parseSettlement(body)
+    registerSettlement(settlements, txHash, uids)
     return json(200, { txHash, uids })
   } catch (error) {
     if (error instanceof InvalidSettlement) return json(400, { message: error.message })
