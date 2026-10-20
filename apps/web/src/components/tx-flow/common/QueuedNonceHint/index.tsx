@@ -4,7 +4,6 @@ import { Info } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Link } from '@safe-global/views/components/ui/link'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -41,26 +40,19 @@ const QueuedNonceHint = () => {
     const lowestNonce = safe.nonce
     content = (
       <Alert variant="subtle">
-        <Info />
+        <Tooltip>
+          <TooltipTrigger render={<Info tabIndex={0} aria-label="How nonces work" className="cursor-help" />} />
+          <TooltipContent className="max-w-xs">
+            Transactions are executed in order of their nonce, starting from the lowest one. Using the lowest nonce puts
+            this transaction first in line. If a queued transaction already has that nonce, only one of them can be
+            executed.
+          </TooltipContent>
+        </Tooltip>
         <AlertDescription>
           Queued transactions will run before this one.{' '}
           <HintLink onClick={() => setNonce(lowestNonce)}>
             {previousNonces.includes(lowestNonce) ? 'Use the oldest nonce instead' : 'Move it to the front instead'}
           </HintLink>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span className="ml-1 inline-flex align-middle text-[var(--color-border-main)]">
-                  <InfoIcon className="size-4" />
-                </span>
-              }
-            />
-            <TooltipContent className="max-w-xs">
-              Transactions are executed in order of their nonce, starting from the lowest one. Using the lowest nonce
-              puts this transaction first in line. If a queued transaction already has that nonce, only one of them can
-              be executed.
-            </TooltipContent>
-          </Tooltip>
         </AlertDescription>
       </Alert>
     )
