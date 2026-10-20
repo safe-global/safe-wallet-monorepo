@@ -11,8 +11,8 @@ describe('policyEngineDeployments', () => {
   })
 
   it('returns undefined for a chain without a deployment', () => {
-    expect(getPolicyGuardAddress('100')).toBeUndefined()
-    expect(getPolicyEngineAddress('100', 'ERC20TransferPolicy')).toBeUndefined()
+    expect(getPolicyGuardAddress('999999')).toBeUndefined()
+    expect(getPolicyEngineAddress('999999', 'ERC20TransferPolicy')).toBeUndefined()
   })
 })
 
