@@ -21,6 +21,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   safeStaking: false,
   safePro: false,
   workspacesExperimentalFeatures: false,
+  spaceAuditLog: false,
 }
 
 /**
@@ -40,6 +41,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   safeStaking: 'SAFE_STAKING',
   safePro: 'SAFE_PRO',
   workspacesExperimentalFeatures: 'WORKSPACES_EXPERIMENTAL_FEATURES',
+  spaceAuditLog: 'SPACE_AUDIT_LOG',
 }
 
 /**

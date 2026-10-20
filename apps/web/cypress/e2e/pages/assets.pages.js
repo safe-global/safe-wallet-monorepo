@@ -2,7 +2,6 @@ import * as main from './main.page'
 import * as addressbook from '../pages/address_book.page'
 import * as createTx from '../pages/create_tx.pages'
 import { tokenSelector } from '../pages/create_tx.pages'
-import { assetsSwapBtn } from '../pages/swaps.pages'
 import { nftsRow } from '../pages/nfts.pages'
 
 // Re-export common selectors from main.page.js for backward compatibility
@@ -147,14 +146,6 @@ export function checkNftCopyIconAndLink() {
   })
 }
 
-export function showSendBtn(index = 0) {
-  return cy.get(sendBtn).eq(index).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
-}
-
-export function showSwapBtn() {
-  return cy.get(assetsSwapBtn).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
-}
-
 export function enterAmount(amount) {
   cy.get(tokenAmountFld).find('input').clear().type(amount)
 }
@@ -201,10 +192,6 @@ export function clickOnSendBtnAssetsTable(index) {
     .within(() => {
       cy.get(sendBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click()
     })
-}
-
-export function VerifySendButtonIsDisabled() {
-  cy.get(sendBtn).first().should('be.disabled')
 }
 
 export function verifyTableRows(assetsLength) {

@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as addressBook from './address_book.page'
-import * as batch from './batches.pages'
 import * as create_tx from './create_tx.pages'
 
 export const proposersSection = '[data-testid="proposer-section"]'
@@ -125,16 +124,8 @@ export function deleteAllProposers() {
   main.verifyElementsCount(deleteProposerBtn, 0)
 }
 
-export function verifyAddProposerBtnIsDisabled() {
-  cy.get(addProposerBtn).should('exist').and('be.disabled')
-}
-
 export function checkSafeAsProposerErrorMessage() {
   cy.contains('label', safeAsProposerMessage).should('exist')
-}
-
-export function verifyBatchDoesNotExist() {
-  main.verifyElementsCount(batch.batchTxTopBar, 0)
 }
 
 export function verifyProposerSuccessMsgDisplayed() {
@@ -143,8 +134,4 @@ export function verifyProposerSuccessMsgDisplayed() {
 
 export function verifyEditProposerBtnEnabled(address) {
   getProposerRow(address).find(editProposerBtn).should('be.enabled')
-}
-
-export function verifyDeleteProposerBtnIsDisabled(address) {
-  getProposerRow(address).find(deleteProposerBtn).should('be.disabled')
 }

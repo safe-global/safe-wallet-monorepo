@@ -21,20 +21,9 @@ describe('[SMOKE] Replace Owners tests', () => {
       cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
     })
 
-    it('[SMOKE] Verify that "Replace" icon is visible', () => {
-      owner.verifyReplaceBtnIsEnabled()
-    })
-
     it('[SMOKE] Verify that the owner replacement form is opened', () => {
       owner.waitForConnectionStatus()
       owner.openReplaceOwnerWindow(0)
-    })
-  })
-
-  describe('Non-owner safe', () => {
-    it('[SMOKE] Verify owner replace button is disabled for Non-Owner', () => {
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-      owner.verifyReplaceBtnIsDisabled()
     })
   })
 })

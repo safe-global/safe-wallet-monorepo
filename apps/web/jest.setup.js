@@ -81,6 +81,7 @@ jest.mock(
       addError: jest.fn(),
       setGlobalContextProperty: jest.fn(),
       getInitConfiguration: jest.fn(),
+      setTrackingConsent: jest.fn(),
     },
   }),
   { virtual: true },
