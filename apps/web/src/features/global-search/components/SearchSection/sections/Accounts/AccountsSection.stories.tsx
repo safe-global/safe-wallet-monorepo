@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { ReactNode } from 'react'
-import { http, HttpResponse, delay } from 'msw'
+import { http, HttpResponse, delay, type RequestHandler } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
 import type { GetSpaceSafeResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
-import type { MockStoryConfig } from '@/stories/mocks/types'
 import { SectionVisibilityProvider } from '@safe-global/views/features/global-search/components/SearchSection/SectionVisibilityContext'
 import AccountsSection from './AccountsSection'
 
@@ -18,21 +17,21 @@ const populatedSafes: GetSpaceSafeResponse = {
   },
 }
 
-const storyConfig = (handlers: MockStoryConfig['handlers']): MockStoryConfig => ({
+const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/home',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
-  handlers,
+})
+
+// First: the Spaces defaults answer /safes with an empty list, and MSW is first-match-wins.
+const withSpaceSafes = (spaceSafesHandler: RequestHandler) => ({
+  msw: { handlers: [spaceSafesHandler, ...setup.handlers] },
 })
 
 const withSectionVisibility = (children: ReactNode) => <SectionVisibilityProvider>{children}</SectionVisibilityProvider>
-
-const populatedSetup = createMockStory(
-  storyConfig([http.get(SPACE_SAFES_URL, () => HttpResponse.json(populatedSafes))]),
-)
 
 const meta = {
   title: 'Features/GlobalSearch/AccountsSection',
@@ -40,9 +39,10 @@ const meta = {
   loaders: [mswLoader],
   parameters: {
     layout: 'padded',
-    ...populatedSetup.parameters,
+    ...setup.parameters,
+    ...withSpaceSafes(http.get(SPACE_SAFES_URL, () => HttpResponse.json(populatedSafes))),
   },
-  decorators: [(Story) => withSectionVisibility(<Story />), populatedSetup.decorator],
+  decorators: [(Story) => withSectionVisibility(<Story />), setup.decorator],
   args: {
     label: 'Safe accounts',
     query: '',
@@ -70,16 +70,12 @@ export const FilteredByQuery: Story = {
  * Loading state — the skeleton placeholders shown while the Space Safes request is in flight.
  */
 export const Loading: Story = {
-  parameters: {
-    ...createMockStory(
-      storyConfig([
-        http.get(SPACE_SAFES_URL, async () => {
-          await delay('infinite')
-          return HttpResponse.json(populatedSafes)
-        }),
-      ]),
-    ).parameters,
-  },
+  parameters: withSpaceSafes(
+    http.get(SPACE_SAFES_URL, async () => {
+      await delay('infinite')
+      return HttpResponse.json(populatedSafes)
+    }),
+  ),
 }
 
 /**
