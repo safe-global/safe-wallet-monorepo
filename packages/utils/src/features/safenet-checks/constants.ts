@@ -44,7 +44,7 @@ export const SAFENET_ORACLE_ADDRESSES = parseCsv(
 export const SAFENET_EXPLORER_URL = (
   process.env.NEXT_PUBLIC_SAFENET_EXPLORER_URL ||
   process.env.EXPO_PUBLIC_SAFENET_EXPLORER_URL ||
-  'https://www.safe.dev/safenet'
+  'https://safenet-explorer.eth.limo'
 ).replace(/\/$/, '')
 
 // --- Lookback tuning ------------------------------------------------------
