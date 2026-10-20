@@ -84,6 +84,7 @@ const SpaceAddressBookV2 = () => {
               isError={workspaceBook.isError}
               onReload={workspaceBook.refetch}
               isAdmin={isAdmin}
+              isInvited={isInvited}
             />
           </TabsContent>
 

@@ -244,8 +244,20 @@ describe('SpaceAddressBookV2', () => {
       expect(screen.getByRole('button', { name: 'Actions for Treasury' })).toBeInTheDocument()
     })
 
-    it.each(['member', 'invited'] as const)('gives an %s no actions', (role) => {
-      mockRole(role)
+    it('gives members Export only', () => {
+      mockRole('member')
+      mockWorkspaceBook({ items: [itemBuilder().with({ name: 'Treasury' }).build()] })
+
+      renderAddressBook()
+
+      expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Import' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Add contact' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Actions for Treasury' })).not.toBeInTheDocument()
+    })
+
+    it('gives an invited person no actions', () => {
+      mockRole('invited')
       mockWorkspaceBook({ items: [itemBuilder().with({ name: 'Treasury' }).build()] })
 
       renderAddressBook()

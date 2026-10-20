@@ -35,11 +35,12 @@ type WorkspaceContactsProps = {
   isError: boolean
   onReload: () => void
   isAdmin: boolean
+  isInvited: boolean
 }
 
 const renderAvatar = (address: string) => <Identicon address={address} size={24} />
 
-const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin }: WorkspaceContactsProps) => {
+const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInvited }: WorkspaceContactsProps) => {
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
   const { configs } = useChains()
@@ -92,6 +93,16 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin }: Wor
     </Track>
   )
 
+  // Admins and members export; invited people only preview the book.
+  const exportButton = (
+    <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK}>
+      <Button variant="outline" size="action" onClick={handleExport}>
+        <Download aria-hidden="true" data-icon="inline-start" />
+        Export
+      </Button>
+    </Track>
+  )
+
   if (items.length === 0) {
     return (
       <TableCard>
@@ -120,15 +131,12 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin }: Wor
           isAdmin ? (
             <>
               <ImportAddressBook />
-              <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK}>
-                <Button variant="outline" size="action" onClick={handleExport}>
-                  <Download aria-hidden="true" data-icon="inline-start" />
-                  Export
-                </Button>
-              </Track>
+              {exportButton}
               {addContact}
             </>
-          ) : undefined
+          ) : isInvited ? undefined : (
+            exportButton
+          )
         }
       />
 
