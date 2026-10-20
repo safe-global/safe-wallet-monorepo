@@ -207,6 +207,12 @@ describe('Topbar', () => {
       expect(screen.getByTestId('notifications-title')).toBeInTheDocument()
     })
 
+    it('shows the Batch button', () => {
+      renderOnSafePage()
+
+      expect(screen.getByLabelText('Batch transactions')).toBeInTheDocument()
+    })
+
     it('opens the WalletConnect pairing popup when the WalletConnect button is clicked', async () => {
       const user = userEvent.setup()
       renderOnSafePage()
@@ -216,6 +222,14 @@ describe('Topbar', () => {
 
       expect(await screen.findByText(PAIRING_PROMPT)).toBeInTheDocument()
     })
+  })
+
+  it('hides the Batch button on a page without a Safe', () => {
+    mockIsSpaceRoute.mockReturnValue(false)
+
+    render(<Topbar />)
+
+    expect(screen.queryByLabelText('Batch transactions')).not.toBeInTheDocument()
   })
 
   it('renders notification badge when there are unread notifications', () => {

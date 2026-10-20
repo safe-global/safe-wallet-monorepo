@@ -1,4 +1,4 @@
-import { act, render, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import BatchTxList from '../BatchTxList'
 import type { DraftBatchItem } from '../../../store/batchSlice'
 import { OperationType } from '@safe-global/types-kit'
@@ -86,5 +86,29 @@ describe('BatchTxList', () => {
 
     // The delete control only exists on a decoded row, so this rules out the skeleton state.
     await waitFor(() => expect(getByTitle('Delete transaction')).toBeInTheDocument())
+  })
+
+  it('removes a transaction from the batch once the user confirms', async () => {
+    mockUseSafeSDK.mockReturnValue(safeSdk)
+    mockUseTxPreview.mockReturnValue([previewOf('0xTo', '1'), undefined, false])
+    jest.spyOn(window, 'confirm').mockReturnValue(true)
+    const onDelete = jest.fn()
+
+    const { findByTitle } = render(<BatchTxList txItems={txItems} onDelete={onDelete} />)
+    fireEvent.click(await findByTitle('Delete transaction'))
+
+    expect(onDelete).toHaveBeenCalledWith('1')
+  })
+
+  it('keeps the transaction when the user cancels the removal', async () => {
+    mockUseSafeSDK.mockReturnValue(safeSdk)
+    mockUseTxPreview.mockReturnValue([previewOf('0xTo', '1'), undefined, false])
+    jest.spyOn(window, 'confirm').mockReturnValue(false)
+    const onDelete = jest.fn()
+
+    const { findByTitle } = render(<BatchTxList txItems={txItems} onDelete={onDelete} />)
+    fireEvent.click(await findByTitle('Delete transaction'))
+
+    expect(onDelete).not.toHaveBeenCalled()
   })
 })
