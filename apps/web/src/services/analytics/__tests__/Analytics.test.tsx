@@ -3,6 +3,7 @@ import { render } from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
 import { CookieAndTermType, cookiesAndTermsInitialState, cookiesAndTermsSlice } from '@/store/cookiesAndTermsSlice'
 import { version } from '@/markdown/terms/version'
+import { datadogRum } from '@datadog/browser-rum'
 import Analytics from '../Analytics'
 
 describe('Analytics', () => {
@@ -49,5 +50,30 @@ describe('Analytics', () => {
     } finally {
       local.removeItem(cookiesAndTermsSlice.name)
     }
+  })
+
+  it('should, when the user has not given analytics consent, keep Datadog tracking consent not granted', () => {
+    jest.mocked(datadogRum.setTrackingConsent).mockClear()
+
+    render(<Analytics />, {
+      initialReduxState: {
+        cookies_terms: { ...cookiesAndTermsInitialState, [CookieAndTermType.ANALYTICS]: false, termsVersion: version },
+      },
+    })
+
+    expect(datadogRum.setTrackingConsent).toHaveBeenCalledWith('not-granted')
+    expect(datadogRum.setTrackingConsent).not.toHaveBeenCalledWith('granted')
+  })
+
+  it('should, when the user has given analytics consent, grant Datadog tracking consent', () => {
+    jest.mocked(datadogRum.setTrackingConsent).mockClear()
+
+    render(<Analytics />, {
+      initialReduxState: {
+        cookies_terms: { ...cookiesAndTermsInitialState, [CookieAndTermType.ANALYTICS]: true, termsVersion: version },
+      },
+    })
+
+    expect(datadogRum.setTrackingConsent).toHaveBeenLastCalledWith('granted')
   })
 })
