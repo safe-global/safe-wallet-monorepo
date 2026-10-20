@@ -105,6 +105,16 @@ describe('CoW API mock', () => {
     const malformed = JSON.stringify({ txHash: TX_HASH, uids: ['not-a-uid'] })
     assert.equal((await dispatch(request('POST', '/__test/settlements', malformed), options)).status, 400)
     assert.throws(() => registerSettlement(settlements, 'not-a-hash', [RECORDED_UID]))
+    for (const body of [
+      JSON.stringify({ txHash: 1, uids: [RECORDED_UID] }),
+      JSON.stringify({ txHash: TX_HASH, uids: RECORDED_UID }),
+      JSON.stringify({ txHash: TX_HASH, uids: [RECORDED_UID, 1] }),
+      JSON.stringify([TX_HASH, RECORDED_UID]),
+      '{"txHash":',
+    ]) {
+      assert.equal((await dispatch(request('POST', '/__test/settlements', body), options)).status, 400, body)
+    }
+    assert.equal(settlements.size, 0)
     registerSettlement(settlements, TX_HASH, [UNRECORDED_UID])
     assert.throws(() => get(`/transactions/${TX_HASH}/orders`, settlements), /unrecorded order/)
   })
