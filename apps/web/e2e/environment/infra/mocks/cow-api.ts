@@ -44,10 +44,10 @@ function orderFor(fixtures: Fixtures, uid: string): Order | undefined {
   return { ...order, uid }
 }
 
-/** Stores the orders of a replayed settlement; throws InvalidSettlement for a malformed hash or UID. */
-export function registerSettlement(settlements: Settlements, txHash: string, uids: string[]): void {
-  const hash = txHash.toLowerCase()
-  const orders = uids.map((uid) => uid.toLowerCase())
+/** Stores the orders of a replayed settlement; throws InvalidSettlement for a missing or malformed hash or UID. */
+export function registerSettlement(settlements: Settlements, txHash: unknown, uids: unknown): void {
+  const hash = typeof txHash === 'string' ? txHash.toLowerCase() : ''
+  const orders = Array.isArray(uids) ? uids.map((uid) => (typeof uid === 'string' ? uid.toLowerCase() : '')) : []
   if (!TX_HASH.test(hash) || orders.length === 0 || !orders.every((uid) => UID.test(uid))) {
     throw new InvalidSettlement('Usage: register-settlement <transaction hash> <order uid>...')
   }
@@ -116,12 +116,15 @@ const realApi: Upstream = async (path) => {
 type CowOptions = { fixtures: Fixtures; settlements: Settlements; offline: boolean; upstream?: Upstream }
 
 function storeSettlement(settlements: Settlements, body: string): Reply {
-  const { txHash, uids } = JSON.parse(body || '{}') as { txHash?: string; uids?: string[] }
   try {
-    registerSettlement(settlements, txHash ?? '', uids ?? [])
+    const request: unknown = JSON.parse(body || '{}')
+    const fields = typeof request === 'object' && request !== null ? request : {}
+    const txHash = 'txHash' in fields ? fields.txHash : undefined
+    const uids = 'uids' in fields ? fields.uids : undefined
+    registerSettlement(settlements, txHash, uids)
     return json(200, { txHash, uids })
   } catch (error) {
-    if (error instanceof InvalidSettlement) return json(400, { message: error.message })
+    if (error instanceof InvalidSettlement || error instanceof SyntaxError) return json(400, { message: error.message })
     throw error
   }
 }
