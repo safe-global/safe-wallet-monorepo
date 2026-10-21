@@ -7,6 +7,7 @@
 import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type {
   QueuedItemPage,
   TransactionDetails,
@@ -83,6 +84,11 @@ export class SafeApiClient {
     if (response.status === 404) return null
     if (!response.ok) throw await apiError(response)
     return response.json() as Promise<TransactionDetails>
+  }
+
+  /** Get an off-chain message by its Safe message hash */
+  async getMessage(messageHash: string): Promise<Message> {
+    return this.get<Message>(`/v1/chains/${this.chainId}/messages/${messageHash}`)
   }
 
   /** Get collectibles (NFTs) */

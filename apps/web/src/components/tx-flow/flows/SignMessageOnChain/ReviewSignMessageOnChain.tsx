@@ -21,7 +21,7 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
@@ -112,9 +112,9 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
       </InfoDetails>
 
       {isEIP712TypedData(decodedMessage) && (
-        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+        <ParsingErrorBoundary>
           <ApprovalEditor safeMessage={decodedMessage} />
-        </ObservabilityErrorBoundary>
+        </ParsingErrorBoundary>
       )}
 
       {safeTx && (

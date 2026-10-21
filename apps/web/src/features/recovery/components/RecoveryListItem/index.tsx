@@ -12,7 +12,7 @@ import {
 } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
-function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactElement {
+function ProvidedRecoveryListItem({ item, isNested }: { item: RecoveryQueueItem; isNested?: boolean }): ReactElement {
   const { submitError, setSubmitError } = useContext(RecoveryListItemContext)
   const [expanded, setExpanded] = useState(false)
 
@@ -31,6 +31,7 @@ function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactE
     <TxListAccordionItem
       value={isExpanded ? [TX_LIST_ITEM_VALUE] : []}
       onValueChange={onChange}
+      isNested={isNested}
       testId="recovery-item"
       summary={<RecoverySummary item={item} />}
       details={<RecoveryDetails item={item} />}

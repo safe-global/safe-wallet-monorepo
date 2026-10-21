@@ -38,7 +38,6 @@ jobs:
       - uses: $/.github/actions/cypress
         env:
           BEAMER_DATA_E2E: ${{ secrets.BEAMER_DATA_E2E }}
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
           NEXT_PUBLIC_BEAMER_ID: ${{ secrets.NEXT_PUBLIC_BEAMER_ID }}
           NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
@@ -95,6 +94,8 @@ jobs:
           spec: cypress/e2e/smoke/*.cy.js
           group: 'Smoke tests'
           tag: 'smoke'
+          container-index: ${{ matrix.containers }}
+          container-total: ${{ strategy.job-total }}
 
   notify:
     if: failure() && github.event_name == 'push'

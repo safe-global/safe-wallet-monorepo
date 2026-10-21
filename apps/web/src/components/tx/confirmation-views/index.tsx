@@ -38,6 +38,7 @@ import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
 import { ManageSigners } from './ManageSigners'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import BridgeTransaction from './BridgeTransaction'
 import { LifiSwapTransaction } from './LifiSwapTransaction'
 import { SpendingLimitBatchSummary } from '@/components/transactions/TxDetails/TxData/SpendingLimits/SpendingLimitBatchSummary'
@@ -139,28 +140,32 @@ const ConfirmationView = ({
 
   return (
     <>
-      {withDecodedData &&
-        (ConfirmationViewComponent ||
-          (details && showTxDetails && (
-            <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
-              <div ref={decodedDataRef}>
-                <DecodedData
-                  txData={details.txData}
-                  toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
-                />
-              </div>
-            </TxData>
-          )))}
+      <ParsingErrorBoundary>
+        {withDecodedData &&
+          (ConfirmationViewComponent ||
+            (details && showTxDetails && (
+              <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
+                <div ref={decodedDataRef}>
+                  <DecodedData
+                    txData={details.txData}
+                    toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
+                  />
+                </div>
+              </TxData>
+            )))}
+      </ParsingErrorBoundary>
 
       {props.children}
 
-      <Summary
-        safeTxData={safeTx?.data}
-        txDetails={txDetails}
-        txData={details?.txData}
-        txInfo={details?.txInfo}
-        showDecodedData={!isDecodedDataVisible}
-      />
+      <ParsingErrorBoundary>
+        <Summary
+          safeTxData={safeTx?.data}
+          txDetails={txDetails}
+          txData={details?.txData}
+          txInfo={details?.txInfo}
+          showDecodedData={!isDecodedDataVisible}
+        />
+      </ParsingErrorBoundary>
     </>
   )
 }

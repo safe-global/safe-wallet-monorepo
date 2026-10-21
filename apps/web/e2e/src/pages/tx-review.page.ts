@@ -74,6 +74,13 @@ export class TxReviewPage {
     await this.submitButton.click()
   }
 
+  /** Confirm the risk, continue from the review and execute a fully signed transaction with the connected wallet */
+  async continueAndExecute(): Promise<void> {
+    await this.confirmRisk()
+    await this.continueButton.click()
+    await this.execute()
+  }
+
   /** Close the flow and confirm "Discard this transaction?"; an app that asked for it gets a rejection */
   async discard(): Promise<void> {
     await this.closeButton.click()
@@ -90,6 +97,11 @@ export class TxReviewPage {
   /** Wait until the success screen reports the transaction as mined; the indexer may still be behind */
   async waitForExecution(): Promise<void> {
     await this.status.filter({ hasText: EXECUTED_STATUS }).waitFor({ timeout: EXECUTION_TIMEOUT_MS })
+  }
+
+  /** Wait until the success screen reports the transaction as indexed; the app has then reloaded the Safe nonce */
+  async waitForIndexing(): Promise<void> {
+    await this.status.filter({ hasText: 'Transaction was successful' }).waitFor({ timeout: EXECUTION_TIMEOUT_MS })
   }
 
   private async confirmRisk(): Promise<void> {

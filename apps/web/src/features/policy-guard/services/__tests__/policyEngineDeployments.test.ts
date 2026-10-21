@@ -1,26 +1,18 @@
 import { getPolicyEngineAddress, getPolicyGuardAddress, isSafeVersionSupported } from '../policyEngineDeployments'
 
 describe('policyEngineDeployments', () => {
-  it('returns the Sepolia policy guard', () => {
-    expect(getPolicyGuardAddress('11155111')).toBe('0x5202B1ebE100812437d47eae769e155945fbba6a')
+  it.each(['1', '137', '11155111'])('returns the 60s-delay policy guard on chain %s', (chainId) => {
+    expect(getPolicyGuardAddress(chainId)).toBe('0xC83bC185770ac0Da8A970f35695064eEe62e236c')
   })
 
-  it('returns a policy address per chain', () => {
-    expect(getPolicyEngineAddress('11155111', 'AllowPolicy')).toBe('0x92e94Af03982C2486dffa8DcBc5d069D33996eF2')
-  })
-
-  it('returns the indexer-watched policies', () => {
-    expect(getPolicyEngineAddress('11155111', 'DenyPolicy')).toBe('0x348d9F0B2fECb0bF88655C74Ed3eFD5052A9E436')
-    expect(getPolicyEngineAddress('11155111', 'CoSignerPolicy')).toBe('0xd9f2A31C5C68422a466754cd4F4965Be2b6024FB')
-    expect(getPolicyEngineAddress('11155111', 'ERC20TransferPolicy')).toBe('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187')
-    expect(getPolicyEngineAddress('11155111', 'NativeTransferPolicy')).toBe(
-      '0x01b792988be451C5F6327b6e2D215Ff1d4cc7246',
-    )
+  it.each(['1', '137', '11155111'])('returns the indexer-watched policies on chain %s', (chainId) => {
+    expect(getPolicyEngineAddress(chainId, 'ERC20ApprovePolicy')).toBe('0xfF86DD4caf79672E55e0C3e3A5410746600d60F4')
+    expect(getPolicyEngineAddress(chainId, 'ERC20TransferPolicy')).toBe('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187')
   })
 
   it('returns undefined for a chain without a deployment', () => {
-    expect(getPolicyGuardAddress('1')).toBeUndefined()
-    expect(getPolicyEngineAddress('1', 'AllowPolicy')).toBeUndefined()
+    expect(getPolicyGuardAddress('999999')).toBeUndefined()
+    expect(getPolicyEngineAddress('999999', 'ERC20TransferPolicy')).toBeUndefined()
   })
 })
 

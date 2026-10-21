@@ -8,9 +8,11 @@ import { useDraftBatch } from '@/features/batching'
 import type { DraftBatchItem } from '@/features/batching/store'
 import BatchSidebar from '..'
 
+const mockDeleteTx = jest.fn()
+
 jest.mock('@/features/batching', () => ({
   useDraftBatch: jest.fn(),
-  useUpdateBatch: () => [jest.fn(), jest.fn()],
+  useUpdateBatch: () => [jest.fn(), mockDeleteTx],
 }))
 
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -20,7 +22,16 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
-jest.mock('../BatchTxList', () => ({ __esModule: true, default: () => null }))
+jest.mock('../BatchTxList', () => ({
+  __esModule: true,
+  default({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete: (id: string) => void }) {
+    return txItems.map((item) => (
+      <button key={item.id} onClick={() => onDelete(item.id)}>
+        Delete {item.id}
+      </button>
+    ))
+  },
+}))
 
 const mockUseDraftBatch = useDraftBatch as jest.MockedFunction<typeof useDraftBatch>
 
@@ -76,6 +87,17 @@ describe('BatchSidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'New transaction' }))
 
     expect(setTxFlow).toHaveBeenCalledWith(expect.objectContaining({ type: NewTxFlow }), undefined, false)
+  })
+
+  it('lists every batched transaction and deletes the one the user removes', () => {
+    const [first, second] = [draftItem(), draftItem()]
+    mockUseDraftBatch.mockReturnValue([first, second])
+    renderSidebar()
+
+    fireEvent.click(screen.getByRole('button', { name: `Delete ${second.id}` }))
+
+    expect(screen.getByRole('button', { name: `Delete ${first.id}` })).toBeInTheDocument()
+    expect(mockDeleteTx).toHaveBeenCalledWith(second.id)
   })
 
   it('adds another transaction to a batch that has some', () => {
