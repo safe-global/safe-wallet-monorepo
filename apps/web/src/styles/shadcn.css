@@ -89,7 +89,7 @@
   /* Obra "Alert / Light" banner (node 273:27982): Tailwind 50 surfaces with 200 borders. */
   --alert-error-surface: #fef2f2;
   --alert-error-border: #fecaca;
-  --alert-warning-surface: #fefce8;
+  --alert-warning-surface: var(--warning-subtle);
   --alert-warning-border: #fef08a;
   --alert-success-surface: #f0fdf4;
   --alert-success-border: #bbf7d0;
