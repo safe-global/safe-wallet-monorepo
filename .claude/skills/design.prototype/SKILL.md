@@ -39,13 +39,23 @@ If missing, ask:
 
 ## Step 3: Create Component
 
-**Location**: `apps/web/src/features/design-system/prototypes/<Name>.tsx`
+**Location**: `packages/views/src/features/design-system/prototypes/<Name>/`, with the screen in `index.tsx` and each section in its own file next to it.
 
 **Rules**:
 
 - Use only shadcn/ui components from `packages/views/src/components/ui/`
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
+
+**Build it as views**, so developers can reuse the parts in the app as they are:
+
+- Before writing new markup, look in `packages/views` for a view that already renders it, and reuse it.
+- Split the screen into small components, one per section (for example `SummaryCard`, `ChecksList`).
+- Each component gets everything it shows through props: data, labels and callbacks such as `onConfirm`. It only returns markup. Local UI state (`useState` for open/closed or the selected tab) is fine.
+- Keep the sample data in `index.tsx` or the story, never inside the sections.
+- Do not import from the app (`@/…`), the store, hooks that fetch data, or analytics. The package's lint rejects them.
+
+This only changes where the code lives. The user sees the same Storybook story, so there is nothing to explain to them.
 
 **Styling Guidelines:**
 
@@ -65,30 +75,42 @@ DON'T:
 **Template**:
 
 ```tsx
+// SummaryCard.tsx
 import * as React from 'react'
 
 import { Card, CardHeader, CardTitle, CardContent } from '@safe-global/views/components/ui/card'
-// ... other shadcn imports
 
-export const MyPrototype = (): React.ReactElement => {
-  return (
-    <div className="flex flex-col gap-6 p-6">
-      <h2 className="text-xl font-semibold">Page Title</h2>
-      {/* Layout with shadcn components */}
-    </div>
-  )
-}
+export const SummaryCard = ({ title, value }: { title: string; value: string }): React.ReactElement => (
+  <Card>
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardContent>{value}</CardContent>
+  </Card>
+)
+
+// index.tsx
+import * as React from 'react'
+
+import { SummaryCard } from './SummaryCard'
+
+export const MyPrototype = ({ title, balance }: { title: string; balance: string }): React.ReactElement => (
+  <div className="flex flex-col gap-6 p-6">
+    <h2 className="text-xl font-semibold">{title}</h2>
+    <SummaryCard title="Balance" value={balance} />
+  </div>
+)
 ```
 
 ## Step 4: Create Story
 
-**Location**: `apps/web/src/features/design-system/stories/prototypes/<Name>.stories.tsx`
+**Location**: `packages/views/src/features/design-system/prototypes/<Name>/<Name>.stories.tsx`
 
 **Template**:
 
 ```tsx
 import type { Meta, StoryObj } from '@storybook/react'
-import { MyPrototype } from '../../prototypes/MyPrototype'
+import { MyPrototype } from '.'
 
 const meta = {
   title: 'Design System/Prototypes/My Prototype',
@@ -103,7 +125,8 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    // component props if any
+    title: 'Page title',
+    balance: '1,250.00 USDC',
   },
 }
 ```
@@ -123,7 +146,8 @@ If variants exist, capture each variant.
 ## Step 6: Verify
 
 ```bash
-yarn workspace @safe-global/web type-check
+yarn workspace @safe-global/views type-check
+yarn workspace @safe-global/views lint
 yarn workspace @safe-global/web storybook
 ```
 
@@ -139,8 +163,7 @@ yarn workspace @safe-global/web storybook
 ## Project Notes
 
 - **Components Path**: `packages/views/src/components/ui/`
-- **Utility Path**: `apps/web/src/utils/cn.ts`
+- **Utility Path**: `@safe-global/views/utils/cn`
 - **Icon Library**: `lucide-react`
-- **Prototypes Path**: `apps/web/src/features/design-system/prototypes/`
-- **Stories Path**: `apps/web/src/features/design-system/stories/prototypes/`
+- **Prototypes and Stories Path**: `packages/views/src/features/design-system/prototypes/<Name>/`
 - **Storybook**: `yarn workspace @safe-global/web storybook`
