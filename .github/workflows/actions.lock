@@ -75,7 +75,7 @@ workflows:
         - 'actions/setup-node@v6.4.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v6.10.9'
+        - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-argos-storybook.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -107,7 +107,7 @@ workflows:
         - 'actions/setup-python@v7.0.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v6.10.9'
+        - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-e2e-hp-ondemand.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -115,14 +115,14 @@ workflows:
         - 'actions/setup-python@v7.0.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v6.10.9'
+        - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-e2e-smoke.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v6.10.9'
+        - 'cypress-io/github-action@v7.4.6'
         - 'slackapi/slack-github-action@v4.0.0'
     '.github/workflows/web-isolated-e2e-backend.yml':
         - 'actions/cache@v5.0.5'
@@ -285,11 +285,6 @@ dependencies:
         commit: 'sha1-2dc316deee8e90f13e1a351ab510b4d5bc0c82cd'
         owner_id: 1951866
         repo_id: 260488959
-    'cypress-io/github-action@v6.10.9':
-        ref: 'v6.10.9'
-        commit: 'sha1-f790eee7a50d9505912f50c2095510be7de06aa7'
-        owner_id: 8908513
-        repo_id: 219649445
     'cypress-io/github-action@v7.4.6':
         ref: 'v7.4.6'
         commit: 'sha1-c541a95ea92d9239347a2355f2e895cd4b3f8060'

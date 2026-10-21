@@ -113,7 +113,7 @@ runs:
         NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
     # An empty spec would make Cypress run every spec, so the steps above and below skip it.
-    - uses: cypress-io/github-action@v6.10.9
+    - uses: cypress-io/github-action@v7.4.6
       if: steps.specs.outputs.spec != ''
       with:
         spec: ${{ steps.specs.outputs.spec }}
