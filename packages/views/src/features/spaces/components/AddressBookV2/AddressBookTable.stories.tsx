@@ -14,7 +14,7 @@ import { FULL_PERMISSIONS, NO_PERMISSIONS } from './types'
  * summed column minimums the table goes compact.
  */
 const meta = {
-  title: 'Features/Spaces/AddressBook/AddressBookTable',
+  title: 'Features/Spaces/AddressBookV2/AddressBookTable',
   component: AddressBookTable,
   parameters: { layout: 'padded' },
   decorators: [(Story) => <TableCard>{Story()}</TableCard>],

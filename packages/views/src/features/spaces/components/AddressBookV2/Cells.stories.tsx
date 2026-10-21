@@ -8,7 +8,7 @@ import { ADDRESSES, ALL_CHAINS, CHAINS } from './mocks/fixtures'
 
 /** The building blocks of a row. */
 const meta = {
-  title: 'Features/Spaces/AddressBook/Cells',
+  title: 'Features/Spaces/AddressBookV2/Cells',
   parameters: { layout: 'padded' },
 } satisfies Meta
 

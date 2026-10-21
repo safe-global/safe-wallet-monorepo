@@ -6,7 +6,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import AddressBookEmptyState from './AddressBookEmptyState'
 
 const meta = {
-  title: 'Features/Spaces/AddressBook/AddressBookEmptyState',
+  title: 'Features/Spaces/AddressBookV2/AddressBookEmptyState',
   component: AddressBookEmptyState,
   parameters: { layout: 'padded' },
   decorators: [(Story) => <TableCard>{Story()}</TableCard>],

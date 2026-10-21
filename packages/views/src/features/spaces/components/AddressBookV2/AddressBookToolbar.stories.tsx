@@ -6,7 +6,7 @@ import AddressBookToolbar from './AddressBookToolbar'
 
 /** The search fills the row; Filters and the actions are slots the page fills. */
 const meta = {
-  title: 'Features/Spaces/AddressBook/AddressBookToolbar',
+  title: 'Features/Spaces/AddressBookV2/AddressBookToolbar',
   component: AddressBookToolbar,
   parameters: { layout: 'padded' },
   args: { query: '', onQueryChange: () => {} },

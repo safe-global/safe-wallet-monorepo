@@ -1,6 +1,6 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { AddressBookContact, ChainInfo } from '@safe-global/views/features/spaces/components/AddressBook/types'
+import type { AddressBookContact, ChainInfo } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { AddressBookState } from '@/store/addressBookSlice'
 
 const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>

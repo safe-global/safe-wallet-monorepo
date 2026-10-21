@@ -5,15 +5,15 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
-import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBook/AddressBookEmptyState'
-import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBook/AddressBookTable'
-import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBook/AddressBookToolbar'
-import { filterContacts } from '@safe-global/views/features/spaces/components/AddressBook/filters'
+import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
+import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
+import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
+import { filterContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/filters'
 import {
   FULL_PERMISSIONS,
   NO_PERMISSIONS,
   type AddressBookContact,
-} from '@safe-global/views/features/spaces/components/AddressBook/types'
+} from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import Identicon from '@/components/common/Identicon'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
