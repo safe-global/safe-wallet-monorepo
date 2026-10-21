@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { Link } from '@safe-global/views/components/ui/link'
-import { AccountIdentity } from '@/features/spaces/components/Policies/components/AccountIdentity'
 import GuardStatusBanner from './GuardStatusBanner'
 
 const FOREIGN_GUARD = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
@@ -20,8 +18,6 @@ const meta = {
   tags: ['autodocs'],
   args: {
     safeName: 'Treasury',
-    settingsLink: <Link href="#">Go to Safe settings</Link>,
-    renderAddress: (address: string) => <AccountIdentity address={address} showCopyButton />,
     onRetry: fn(),
     guard: { status: 'none' },
   },
@@ -54,6 +50,9 @@ export const UnknownGuardInBothSlots: Story = {
 }
 
 export const PartlyEnabled: Story = { args: { guard: { status: 'partial', missingSlot: 'module' } } }
+export const PartlyEnabledWithoutTransactionGuard: Story = {
+  args: { guard: { status: 'partial', missingSlot: 'transaction' } },
+}
 
 export const Unsupported: Story = { args: { guard: { status: 'unsupported' } } }
 

@@ -1,17 +1,10 @@
 import type { ReactElement, ReactNode } from 'react'
-import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertSeverityIcon,
-  AlertTitle,
-} from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import AllowlistAlert from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistAlert'
 
 export type GuardSlotName = 'transaction' | 'module'
 
@@ -29,27 +22,10 @@ export type GuardStatus =
 export type GuardStatusBannerProps = {
   guard: GuardStatus
   safeName: string
-  /** Leads to the Safe's settings, where a transaction guard can be removed. */
-  settingsLink?: ReactNode
-  /** The app's identity row for a guard address; a shortened address without it. */
-  renderAddress?: (address: string) => ReactNode
   onRetry?: () => void
 }
 
-const SLOT_LABELS: Record<GuardSlotName, string> = {
-  transaction: 'Transaction guard',
-  module: 'Module guard',
-}
-
-const OTHER_SLOT: Record<GuardSlotName, GuardSlotName> = { transaction: 'module', module: 'transaction' }
-
-const MODULE_GUARD_HINT = 'Removing a module guard needs a transaction from this Safe account.'
-
-const defaultRenderAddress = (address: string): ReactNode => (
-  <Typography variant="paragraph-mini" className="font-mono">
-    {shortenAddress(address)}
-  </Typography>
-)
+const BANNER_TONES = { info: 'info', success: 'success', warning: 'warning', destructive: 'error' } as const
 
 const Banner = ({
   variant,
@@ -57,39 +33,30 @@ const Banner = ({
   children,
   action,
 }: {
-  variant: 'info' | 'success' | 'destructive'
+  variant: keyof typeof BANNER_TONES
   title: string
   children: ReactNode
   action?: ReactNode
 }): ReactElement => (
-  <Alert
-    variant={variant}
-    outlined={false}
-    // The success variant keeps a border even with `outlined={false}`
-    className="border-transparent *:data-[slot=alert-description]:text-muted-foreground"
+  <AllowlistAlert
+    tone={BANNER_TONES[variant]}
+    title={title}
+    description={<div className="flex flex-col gap-3">{children}</div>}
+    action={action}
     data-testid={`guard-status-${variant}`}
-  >
-    <AlertSeverityIcon variant={variant} />
-    <AlertTitle>{title}</AlertTitle>
-    <AlertDescription className="flex flex-col gap-3">{children}</AlertDescription>
-    {action && <AlertAction>{action}</AlertAction>}
-  </Alert>
+  />
 )
 
-const GuardStatusBanner = ({
-  guard,
-  safeName,
-  settingsLink,
-  renderAddress = defaultRenderAddress,
-  onRetry,
-}: GuardStatusBannerProps): ReactElement => {
+const GuardStatusBanner = ({ guard, safeName, onRetry }: GuardStatusBannerProps): ReactElement => {
   switch (guard.status) {
     case 'loading':
       return (
-        <Alert variant="subtle" data-testid="guard-status-loading">
-          <Spinner />
-          <AlertTitle>Checking guards on {safeName}…</AlertTitle>
-        </Alert>
+        <AllowlistAlert
+          tone="loading"
+          title={`Checking guards on ${safeName}…`}
+          aria-live="polite"
+          data-testid="guard-status-loading"
+        />
       )
 
     case 'none':
@@ -107,39 +74,37 @@ const GuardStatusBanner = ({
         </Banner>
       )
 
-    case 'unknown': {
-      const slots = guard.foreignGuards.map(({ slot }) => slot)
+    case 'unknown':
       return (
-        <Banner variant="destructive" title="This Safe account has an unknown guard">
-          <p>
-            A Safe account can only have one guard, so you can&apos;t set up a recipient allowlist until it&apos;s
-            removed.{slots.includes('module') && ` ${MODULE_GUARD_HINT}`}
-          </p>
-          <dl className="flex flex-col gap-2">
-            {guard.foreignGuards.map(({ slot, address }) => (
-              <div key={slot} className="flex items-center justify-between gap-3">
-                <dt>{SLOT_LABELS[slot]}</dt>
-                <dd className="min-w-0 text-foreground">{renderAddress(address)}</dd>
-              </div>
-            ))}
-          </dl>
-          {slots.includes('transaction') && settingsLink}
+        <Banner
+          variant="destructive"
+          title="This Safe account has an unknown policy installed"
+          action={
+            <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD} mode="button">
+              How to remove it
+            </ExternalLink>
+          }
+        >
+          Remove it to set up an allowlist.
         </Banner>
       )
-    }
 
-    case 'partial': {
-      const guardSlot = OTHER_SLOT[guard.missingSlot]
+    case 'partial':
       return (
-        <Banner variant="destructive" title="The Safe policy guard is only partly enabled">
-          <p>
-            The {SLOT_LABELS[guard.missingSlot].toLowerCase()} slot isn&apos;t set. Remove the guard and try again.
-            {guardSlot === 'module' && ` ${MODULE_GUARD_HINT}`}
-          </p>
-          {guardSlot === 'transaction' && settingsLink}
+        <Banner variant="warning" title="The Safe policy guard is only partly enabled">
+          {guard.missingSlot === 'module' ? (
+            <div>
+              It checks transactions signed by the owners, but the module guard slot isn&apos;t set, so transactions
+              sent through modules skip your policies. You can set the module guard later in this flow.
+            </div>
+          ) : (
+            <div>
+              It checks transactions sent through modules, but the transaction guard slot isn&apos;t set, so
+              transactions signed by the owners skip your policies. This setup sets the transaction guard.
+            </div>
+          )}
         </Banner>
       )
-    }
 
     case 'unsupported':
       return (
