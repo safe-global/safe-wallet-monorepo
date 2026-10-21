@@ -107,6 +107,24 @@ describe('allowlistForm', () => {
 
       expect(rules).toEqual([{ tokenAddress: token, recipients: [r.address] }])
     })
+
+    it('lists a recipient entered twice in different cases once', () => {
+      const r = recipient()
+
+      const rules = buildAllowlistRules(
+        [address()],
+        values({ recipients: [r, { ...r, address: r.address.toLowerCase() }] }),
+      )
+
+      expect(rules[0].recipients).toEqual([r.address])
+    })
+
+    it('gives every rule its own recipients array', () => {
+      const rules = buildAllowlistRules([address(), address()], values({ recipients: [recipient()] }))
+
+      expect(rules[0].recipients).toEqual(rules[1].recipients)
+      expect(rules[0].recipients).not.toBe(rules[1].recipients)
+    })
   })
 
   describe('isAllowlistComplete', () => {
