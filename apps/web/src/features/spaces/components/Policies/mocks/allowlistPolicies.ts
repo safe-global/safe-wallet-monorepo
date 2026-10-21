@@ -8,6 +8,10 @@ import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, asActivePolicy } from './polic
 
 const POLICY_GUARD = '0x1a4F7b8C9d0E1f2A3b4C5d6E7f8091A2b3C4c802'
 
+const DAY = 86_400
+
+const secondsFromNow = (seconds: number): number => Math.floor(Date.now() / 1_000) + seconds
+
 const RECIPIENTS: AllowlistRecipient[] = [
   { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },
   { account: MOCK_ADDRESSES.bob, permission: 'ALWAYS' },
@@ -41,6 +45,7 @@ export const mockPendingAllowlist = (overrides: Partial<QueuedAllowlistPolicy> =
   confirmationsSubmitted: 1,
   confirmationsRequired: 2,
   proposedAt: 1_781_300_000,
+  expiresAt: secondsFromNow(6.5 * DAY),
   ...overrides,
 })
 
@@ -54,14 +59,12 @@ export const mockPendingAllowlistUpdate = (): QueuedAllowlistPolicy =>
 export const mockPendingAllowlistRemoval = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-remove', operation: 'remove' })
 
-const IN_24_HOURS = (): number => Math.floor(Date.now() / 1_000) + 24 * 3_600
-
 /** A new allowlist, executed and waiting out the guard's delay before it is enforced. */
 export const mockActivatingAllowlist = (): AllowlistPolicy & { status: 'active' } =>
   asActivePolicy(
     mockAllowlistPolicy({
       id: '0xallowlist-activating',
-      scheduledChange: { operation: 'create', appliesAt: IN_24_HOURS() },
+      scheduledChange: { operation: 'create', appliesAt: secondsFromNow(DAY) },
     }),
   )
 
@@ -70,7 +73,7 @@ export const mockAllowlistChangePending = (): AllowlistPolicy & { status: 'activ
   asActivePolicy(
     mockAllowlistPolicy({
       id: '0xallowlist-change-pending',
-      scheduledChange: { operation: 'update', appliesAt: IN_24_HOURS() },
+      scheduledChange: { operation: 'update', appliesAt: secondsFromNow(DAY) },
     }),
   )
 

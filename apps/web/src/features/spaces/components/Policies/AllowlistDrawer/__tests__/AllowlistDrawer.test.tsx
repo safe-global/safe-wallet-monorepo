@@ -226,6 +226,20 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByText('Only signers of this Safe account can cancel this change.')).toBeInTheDocument()
   })
 
+  it('says how long is left to sign a pending transaction', () => {
+    setup(mockPendingAllowlist())
+
+    expect(screen.getByText('Time to sign')).toBeInTheDocument()
+    expect(screen.getByText(/^6 days left · until /)).toBeInTheDocument()
+  })
+
+  it('leaves the time to sign out when the expiry is unknown', () => {
+    setup(mockPendingAllowlist({ expiresAt: undefined }))
+
+    expect(screen.getByText('Pending signatures')).toBeInTheDocument()
+    expect(screen.queryByText('Time to sign')).not.toBeInTheDocument()
+  })
+
   it('disables the Edit and Remove buttons until their flows are passed in', () => {
     render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 

@@ -11,6 +11,7 @@ import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Po
 import { getPolicyTokens } from '@safe-global/views/features/spaces/components/Policies/utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
+import { formatTimeToSign } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import {
   getPolicyStatus,
@@ -96,7 +97,16 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
           {state.kind === 'pending' && (
             <>
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
-              <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
+              <PendingSignatures
+                safe={safe}
+                signed={state.signed}
+                required={state.required}
+                timeToSign={
+                  policy.status === 'pending' && policy.expiresAt
+                    ? formatTimeToSign(policy.expiresAt, Date.now())
+                    : undefined
+                }
+              />
             </>
           )}
           {state.kind === 'scheduled' && policy.status === 'active' && policy.scheduledChange && (
