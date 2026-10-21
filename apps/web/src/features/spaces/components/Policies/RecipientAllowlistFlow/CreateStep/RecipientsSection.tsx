@@ -7,7 +7,7 @@ import {
   AllowlistEmptyItem,
   AllowlistSection,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
-import DismissibleCallout from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/DismissibleCallout'
+import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
 import ShortAddress from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ShortAddress'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
 import {
@@ -75,6 +75,7 @@ const RecipientsSection = ({
     <AllowlistSection title={RECIPIENTS_SECTION_TITLE} data-testid="allowlist-recipients-section">
       {hasAccount && !isCalloutDismissed && (
         <DismissibleCallout
+          className="mb-1"
           title={RECIPIENTS_CALLOUT_TITLE}
           description={RECIPIENTS_CALLOUT_DESCRIPTION}
           onDismiss={onDismissCallout}
