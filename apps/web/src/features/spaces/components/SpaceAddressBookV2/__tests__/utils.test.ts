@@ -1,22 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
-import { staleCasingKeys, storedKeysOf, toLocalContacts, toWorkspaceContacts } from '../utils'
+import { spaceAddressBookItemBuilder, spaceAddressBookTagBuilder } from '@/tests/builders/space'
+import { staleCasingKeys, storedKeysOf, tagNamesOf, toLocalContacts, toWorkspaceContacts } from '../utils'
 
-const itemBuilder = () =>
-  Builder.new<SpaceAddressBookItemDto>().with({
-    name: faker.person.fullName(),
-    address: faker.finance.ethereumAddress(),
-    chainIds: ['1'],
-    createdBy: faker.internet.email(),
-    createdByUserId: faker.number.int(),
-    lastUpdatedBy: faker.internet.email(),
-    lastUpdatedByUserId: faker.number.int(),
-    createdAt: faker.date.past().toISOString(),
-    updatedAt: faker.date.recent().toISOString(),
-  })
+const itemBuilder = spaceAddressBookItemBuilder
 
 const mainnet = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png' }).build()
 const gnosis = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null }).build()
@@ -30,7 +18,7 @@ describe('toWorkspaceContacts', () => {
       .with({ chainIds: ['1', '100'] })
       .build()
 
-    const [contact] = toWorkspaceContacts([item], configs, noMember)
+    const [contact] = toWorkspaceContacts([item], [], configs, noMember)
 
     expect(contact.chains).toEqual([
       { chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png', shortName: mainnet.shortName },
@@ -43,7 +31,7 @@ describe('toWorkspaceContacts', () => {
       .with({ chainIds: ['999'] })
       .build()
 
-    const [contact] = toWorkspaceContacts([item], configs, noMember)
+    const [contact] = toWorkspaceContacts([item], [], configs, noMember)
 
     expect(contact.chains).toEqual([{ chainId: '999', chainName: '999', chainLogoUri: null, shortName: '999' }])
   })
@@ -51,7 +39,7 @@ describe('toWorkspaceContacts', () => {
   it('resolves who added the contact from its creator', () => {
     const item = itemBuilder().with({ createdByUserId: 7 }).build()
 
-    const [contact] = toWorkspaceContacts([item], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
+    const [contact] = toWorkspaceContacts([item], [], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
 
     expect(contact).toEqual(expect.objectContaining({ name: item.name, address: item.address, addedBy: 'Maya Chen' }))
   })
@@ -60,15 +48,53 @@ describe('toWorkspaceContacts', () => {
     ['wallet address', faker.finance.ethereumAddress()],
     ['email', 'alice@example.com'],
   ])('falls back to the %s the contact was added with', (_, createdBy) => {
-    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy }).build()], configs, noMember)
+    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy }).build()], [], configs, noMember)
 
     expect(contact.addedBy).toBe(createdBy)
   })
 
+  it('gives each contact its tags in its own order, with their names and colours', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
+    const payroll = spaceAddressBookTagBuilder().with({ id: 2 }).build()
+    const item = itemBuilder()
+      .with({ tagIds: [2, 1] })
+      .build()
+
+    const [contact] = toWorkspaceContacts([item], [vendor, payroll], configs, noMember)
+
+    expect(contact.tags).toEqual([
+      { id: 2, name: payroll.name, color: payroll.color },
+      { id: 1, name: vendor.name, color: vendor.color },
+    ])
+  })
+
+  it('leaves out a tag id the workspace no longer has', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
+    const item = itemBuilder()
+      .with({ tagIds: [1, 99] })
+      .build()
+
+    const [contact] = toWorkspaceContacts([item], [vendor], configs, noMember)
+
+    expect(contact.tags?.map((tag) => tag.id)).toEqual([1])
+  })
+
   it('knows nobody added the contact when neither is set', () => {
-    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy: '' }).build()], configs, noMember)
+    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy: '' }).build()], [], configs, noMember)
 
     expect(contact.addedBy).toBeUndefined()
+  })
+})
+
+describe('tagNamesOf', () => {
+  it("names the contact's tags in its own order", () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
+    const payroll = spaceAddressBookTagBuilder().with({ id: 2 }).build()
+    const item = itemBuilder()
+      .with({ tagIds: [2, 1] })
+      .build()
+
+    expect(tagNamesOf(item, [vendor, payroll])).toEqual([payroll.name, vendor.name])
   })
 })
 

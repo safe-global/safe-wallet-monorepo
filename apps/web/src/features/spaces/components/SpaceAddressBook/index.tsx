@@ -75,6 +75,7 @@ const SpaceAddressBook = () => {
       address,
       chainIds: Array.from(chainIds),
       createdBy: walletAddress,
+      tagIds: [],
       createdByUserId: 0,
       lastUpdatedBy: '',
       lastUpdatedByUserId: 0,

@@ -8,7 +8,10 @@ import { getInitials } from '@safe-global/views/components/common/AccountRow/uti
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
+import { TagChips } from './tags/TagChip'
 import type { AddressBookContact } from './types'
+
+const EmptyCell = () => <span className="text-muted-foreground text-xs">&mdash;</span>
 
 const AddedBy = ({ name }: { name?: string }) =>
   name ? (
@@ -24,7 +27,7 @@ const AddedBy = ({ name }: { name?: string }) =>
       />
     </span>
   ) : (
-    <span className="text-muted-foreground text-xs">&mdash;</span>
+    <EmptyCell />
   )
 
 export type AddressBookTableProps = {
@@ -35,9 +38,11 @@ export type AddressBookTableProps = {
   renderAvatar?: (address: string) => ReactNode
   /** The block explorer page of an address. Without it the row has no explorer link. */
   getExplorerLink?: (address: string) => { href: string; title: string } | undefined
-  /** Each callback adds its item to the row menu; with neither there is no menu. */
+  /** Each callback adds its item to the row menu; with none there is no menu. */
   onEdit?: (contact: AddressBookContact) => void
   onDelete?: (contact: AddressBookContact) => void
+  /** Adds "Edit tags" to the row menu; members get only this. */
+  onEditTags?: (contact: AddressBookContact) => void
   /** A control before the row menu, such as "Add to Workspace" on a local contact. */
   renderRowAction?: (contact: AddressBookContact, context: { isCompact: boolean }) => ReactNode
   pageSize?: number
@@ -50,30 +55,41 @@ const AddressBookTable = ({
   getExplorerLink,
   onEdit,
   onDelete,
+  onEditTags,
   renderRowAction,
   pageSize,
 }: AddressBookTableProps) => {
   const chainsColumn: DataTableColumn<AddressBookContact> = {
     id: 'chains',
     header: 'Chains',
-    width: '20%',
+    width: book === 'workspace' ? '15%' : '20%',
     priority: 'secondary',
     minWidth: 90,
     sortValue: (contact) => contact.chains.length,
     cell: (contact) => <ChainLogos chains={contact.chains} />,
   }
 
+  const tagsColumn: DataTableColumn<AddressBookContact> = {
+    id: 'tags',
+    header: 'Tags',
+    width: '30%',
+    priority: 'secondary',
+    minWidth: 140,
+    sortValue: (contact) => contact.tags?.map((tag) => tag.name.toLowerCase()).sort()[0] ?? null,
+    cell: (contact) => (contact.tags?.length ? <TagChips tags={contact.tags} /> : <EmptyCell />),
+  }
+
   const addedByColumn: DataTableColumn<AddressBookContact> = {
     id: 'added-by',
     header: 'Added by',
-    width: '20%',
+    width: '15%',
     priority: 'secondary',
     minWidth: 120,
     sortValue: (contact) => contact.addedBy?.toLowerCase() ?? null,
     cell: (contact) => <AddedBy name={contact.addedBy} />,
   }
 
-  const secondaryColumns = book === 'workspace' ? [chainsColumn, addedByColumn] : [chainsColumn]
+  const secondaryColumns = book === 'workspace' ? [chainsColumn, tagsColumn, addedByColumn] : [chainsColumn]
 
   const columns: DataTableColumn<AddressBookContact>[] = [
     {
@@ -110,6 +126,7 @@ const AddressBookTable = ({
             name={contact.name}
             onEdit={onEdit && (() => onEdit(contact))}
             onDelete={onDelete && (() => onDelete(contact))}
+            onEditTags={onEditTags && (() => onEditTags(contact))}
           />
         </span>
       ),

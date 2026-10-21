@@ -26,13 +26,21 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { sameTagNames } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
+import { toTagChoices, toTagRequest } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagColor'
+import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { tagNamesOf } from '../SpaceAddressBookV2/utils'
+import TagsField from './TagsField'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
   onClose: () => void
+  /** Shows the Tags field; the v2 address book passes them. */
+  workspaceTags?: WorkspaceTag[]
+  onTagLimitReached?: () => void
 }
 
-const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
+const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }: EditContactDialogProps) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs } = useChains()
@@ -48,10 +56,13 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     })
     .filter(Boolean)
 
+  const defaultTags = workspaceTags ? toTagChoices(tagNamesOf(entry, workspaceTags), workspaceTags) : []
+
   const defaultValues = {
     name: entry.name,
     address: entry.address,
     networks: defaultNetworks,
+    tags: defaultTags,
   }
 
   const methods = useForm<ContactField>({
@@ -66,6 +77,11 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   // Watch for changes in name and networks
   const watchedName = watch('name')
   const watchedNetworks = watch('networks')
+  const watchedTags = watch('tags')
+  const tagsChanged = !sameTagNames(
+    watchedTags.map((tag) => tag.name),
+    defaultTags.map((tag) => tag.name),
+  )
 
   // Check if any changes were made
   const hasChanges = useMemo(() => {
@@ -77,8 +93,8 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       originalChainIds.length !== currentChainIds.length ||
       originalChainIds.some((id, index) => id !== currentChainIds[index])
 
-    return nameChanged || networksChanged
-  }, [watchedName, watchedNetworks, entry.name, entry.chainIds])
+    return nameChanged || networksChanged || tagsChanged
+  }, [watchedName, watchedNetworks, entry.name, entry.chainIds, tagsChanged])
 
   const handleClose = () => {
     reset(defaultValues)
@@ -89,10 +105,13 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
 
+    const { tags, tagColors } =
+      workspaceTags && tagsChanged ? toTagRequest(data.tags, workspaceTags) : { tags: undefined, tagColors: [] }
     const addressBookItem = {
       name: sanitizeName(data.name),
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
+      ...(tags && { tags }),
     }
 
     try {
@@ -101,7 +120,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
       const result = await upsertAddressBook({
         spaceId: spaceId ?? '',
-        upsertAddressBookItemsDto: { items: [addressBookItem] },
+        upsertAddressBookItemsDto: { items: [addressBookItem], ...(tagColors.length > 0 ? { tagColors } : {}) },
       })
 
       if (isElevationRequiredError(result.error)) return
@@ -170,6 +189,8 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
                     rules={{ required: true }}
                   />
                 </div>
+
+                {workspaceTags && <TagsField workspaceTags={workspaceTags} onLimitReached={onTagLimitReached} />}
               </div>
 
               {error && (

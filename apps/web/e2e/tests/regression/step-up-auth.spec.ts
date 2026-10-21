@@ -105,7 +105,7 @@ const ENTITLEMENTS = {
   entitlements: [],
 } satisfies EntitlementsGetEntitlementsV1ApiResponse
 
-const ADDRESS_BOOK = { spaceUuid: SPACE_ID, data: [] } satisfies AddressBooksGetAddressBookItemsV1ApiResponse
+const ADDRESS_BOOK = { spaceUuid: SPACE_ID, data: [], tags: [] } satisfies AddressBooksGetAddressBookItemsV1ApiResponse
 
 const PAYMENT_LINKS = [] satisfies BillingGetSpacePaymentLinksV1ApiResponse
 

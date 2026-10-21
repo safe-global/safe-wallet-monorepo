@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AddContact from '../AddContact'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUpsertAddressBook = jest.fn()
@@ -35,6 +36,8 @@ type CapturedProps = {
   submit: (item: unknown, sid: string) => Promise<unknown>
   onSubmitStart?: () => void
   onSuccess?: () => void
+  workspaceTags?: unknown[]
+  onTagLimitReached?: () => void
 }
 
 let lastProps: CapturedProps | undefined
@@ -61,6 +64,34 @@ describe('AddContact', () => {
     expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
+  })
+
+  it('hands the workspace tags to the dialog, so it shows the Tags field', () => {
+    const workspaceTags = [spaceAddressBookTagBuilder().build()]
+    const onTagLimitReached = jest.fn()
+    render(<AddContact workspaceTags={workspaceTags} onTagLimitReached={onTagLimitReached} />)
+
+    expect(lastProps?.workspaceTags).toBe(workspaceTags)
+    expect(lastProps?.onTagLimitReached).toBe(onTagLimitReached)
+  })
+
+  it('sends the tags picked for a new contact, with the colours of the tags it creates', async () => {
+    mockUpsertAddressBook.mockResolvedValue({})
+    render(<AddContact />)
+    const tagColors = [{ name: 'EU', color: 'rose' }]
+
+    await lastProps!.submit(
+      { name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor', 'EU'], tagColors },
+      MOCK_SPACE_UUID,
+    )
+
+    expect(mockUpsertAddressBook).toHaveBeenCalledWith({
+      spaceId: MOCK_SPACE_UUID,
+      upsertAddressBookItemsDto: {
+        items: [{ name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor', 'EU'] }],
+        tagColors,
+      },
+    })
   })
 
   it('defaults the trigger label to "Add contact"', () => {

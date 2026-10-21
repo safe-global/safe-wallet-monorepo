@@ -17,6 +17,7 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
+import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import { getStoreInstance } from '@/store'
 import type * as Store from '@/store'
 import type * as AddressBookSlice from '@/store/addressBookSlice'
@@ -82,6 +83,18 @@ jest.mock('../../SpaceAddressBook/EditContactDialog', () => {
   const EditContactDialog = ({ entry }: { entry: { name: string } }) => <div role="dialog">Editing {entry.name}</div>
   return EditContactDialog
 })
+const mockSaveContactTags = jest.fn()
+const mockRenameTag = jest.fn()
+const mockDeleteTag = jest.fn()
+jest.mock('../useTagActions', () => ({
+  __esModule: true,
+  default: () => ({
+    saveContactTags: mockSaveContactTags,
+    isSavingContactTags: false,
+    renameTag: mockRenameTag,
+    deleteTag: mockDeleteTag,
+  }),
+}))
 jest.mock('../../SpaceAddressBook/DeleteContactDialog', () => {
   const DeleteContactDialog = ({ name, networks }: { name: string; networks: string[] }) => (
     <div role="dialog">
@@ -137,6 +150,7 @@ const itemBuilder = () =>
     name: faker.person.fullName(),
     address: checksumAddress(faker.finance.ethereumAddress()),
     chainIds: ['1'],
+    tagIds: [],
     createdBy: faker.internet.email(),
     createdByUserId: faker.number.int(),
     lastUpdatedBy: faker.internet.email(),
@@ -168,7 +182,7 @@ const currentChain = chainBuilder()
 
 const mockWorkspaceBook = (state: Partial<ReturnType<typeof useSpaceAddressBookState>> = {}) => {
   const refetch = jest.fn()
-  ;(useSpaceAddressBookState as jest.Mock).mockReturnValue({ items: [], ...SETTLED, refetch, ...state })
+  ;(useSpaceAddressBookState as jest.Mock).mockReturnValue({ items: [], tags: [], ...SETTLED, refetch, ...state })
   return refetch
 }
 
@@ -269,7 +283,7 @@ describe('SpaceAddressBookV2', () => {
       expect(screen.getByRole('button', { name: 'Actions for Treasury' })).toBeInTheDocument()
     })
 
-    it('gives members Export only', () => {
+    it('gives members Export and a row menu with only Edit tags', async () => {
       mockRole('member')
       mockWorkspaceBook({ items: [itemBuilder().with({ name: 'Treasury' }).build()] })
 
@@ -278,7 +292,10 @@ describe('SpaceAddressBookV2', () => {
       expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Import' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Add contact' })).not.toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: 'Actions for Treasury' })).not.toBeInTheDocument()
+
+      await openRowMenu('Treasury')
+
+      expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Edit tags'])
     })
 
     it('gives an invited person no actions', () => {
@@ -390,6 +407,170 @@ describe('SpaceAddressBookV2', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Export' }))
 
       expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining(SPACE_EVENTS.EXPORT_ADDRESS_BOOK), undefined)
+    })
+  })
+
+  describe('tags', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1, name: 'Vendor', contactCount: 1 }).build()
+    const internal = spaceAddressBookTagBuilder().with({ id: 2, name: 'Internal', contactCount: 1 }).build()
+
+    const mockTaggedBook = () => {
+      const treasury = itemBuilder()
+        .with({ name: 'Treasury', tagIds: [2] })
+        .build()
+      const northwind = itemBuilder()
+        .with({ name: 'Northwind', tagIds: [1, 2] })
+        .build()
+      const atlas = itemBuilder().with({ name: 'Atlas', tagIds: [] }).build()
+      mockWorkspaceBook({ items: [treasury, northwind, atlas], tags: [vendor, internal] })
+      return { treasury, northwind, atlas }
+    }
+
+    const openFilters = async () => {
+      await userEvent.click(screen.getByTestId('filters-dropdown'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+    }
+
+    const visibleNames = () =>
+      screen.getAllByTestId('table-row').map((row) => within(row).getByTestId('table-cell-contact').textContent)
+
+    it("shows each contact's tags", () => {
+      mockTaggedBook()
+
+      renderAddressBook()
+
+      expect(
+        within(rowOf('Northwind'))
+          .getAllByTestId('tag-chip')
+          .map((chip) => chip.textContent),
+      ).toEqual(['Vendor', 'Internal'])
+    })
+
+    it('finds contacts by tag name', async () => {
+      mockTaggedBook()
+
+      renderAddressBook()
+      await userEvent.type(screen.getByRole('searchbox', { name: /Search contacts/ }), 'vend')
+
+      expect(visibleNames()).toEqual([expect.stringContaining('Northwind')])
+    })
+
+    it('keeps the contacts that have every selected tag', async () => {
+      mockTaggedBook()
+
+      renderAddressBook()
+      await openFilters()
+      await userEvent.click(screen.getByRole('option', { name: /Internal/ }))
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+
+      expect(visibleNames()).toEqual([expect.stringContaining('Northwind')])
+    })
+
+    it('tracks the filters once they close with a change', async () => {
+      mockTaggedBook()
+
+      renderAddressBook()
+      await openFilters()
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.CONTACTS_FILTERED, { 'Tag Count': 1 })
+    })
+
+    it('moves a filter onto the tag a rename merged it into', async () => {
+      mockTaggedBook()
+      mockRenameTag.mockResolvedValue({ mergedIntoId: 2 })
+
+      const { rerender } = renderAddressBook()
+      await openFilters()
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.click(screen.getByRole('button', { name: 'Rename Vendor' }))
+      await userEvent.clear(screen.getByTestId('facet-option-rename-input'))
+      await userEvent.type(screen.getByTestId('facet-option-rename-input'), 'Internal{Enter}')
+
+      expect(mockRenameTag).toHaveBeenCalledWith(vendor, 'Internal')
+
+      const treasury = itemBuilder()
+        .with({ name: 'Treasury', tagIds: [2] })
+        .build()
+      const northwind = itemBuilder()
+        .with({ name: 'Northwind', tagIds: [2] })
+        .build()
+      mockWorkspaceBook({ items: [treasury, northwind], tags: [{ ...internal, contactCount: 2 }] })
+      rerender(<SpaceAddressBookV2 />)
+
+      expect(screen.getByTestId('filters-count')).toHaveTextContent('1')
+      expect(visibleNames()).toEqual([expect.stringContaining('Treasury'), expect.stringContaining('Northwind')])
+    })
+
+    it('drops a deleted tag from the filters', async () => {
+      mockTaggedBook()
+
+      const { rerender } = renderAddressBook()
+      await openFilters()
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      expect(screen.getByTestId('filters-count')).toHaveTextContent('1')
+
+      mockWorkspaceBook({
+        items: [
+          itemBuilder()
+            .with({ name: 'Treasury', tagIds: [2] })
+            .build(),
+        ],
+        tags: [internal],
+      })
+      rerender(<SpaceAddressBookV2 />)
+
+      expect(screen.queryByTestId('filters-count')).not.toBeInTheDocument()
+    })
+
+    it("saves a contact's tags from the row menu", async () => {
+      mockRole('member')
+      const { northwind } = mockTaggedBook()
+      mockSaveContactTags.mockResolvedValue({ saved: true })
+
+      renderAddressBook()
+      await openRowMenu('Northwind')
+      await userEvent.click(screen.getByRole('menuitem', { name: 'Edit tags' }))
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Tags/ }))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+      await userEvent.click(screen.getByTestId('save-tags-btn'))
+
+      expect(mockSaveContactTags).toHaveBeenCalledWith(northwind.address, { tags: ['Internal'], tagColors: [] })
+      await waitFor(() => expect(screen.queryByText('Edit tags')).not.toBeInTheDocument())
+    })
+
+    it('keeps the tags dialog open with the error CGW returned', async () => {
+      mockTaggedBook()
+      mockSaveContactTags.mockResolvedValue({ saved: false, error: 'A contact can have at most 3 tags' })
+
+      renderAddressBook()
+      await openRowMenu('Treasury')
+      await userEvent.click(screen.getByRole('menuitem', { name: 'Edit tags' }))
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Tags/ }))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+      await userEvent.click(screen.getByTestId('save-tags-btn'))
+
+      expect(await screen.findByText('A contact can have at most 3 tags')).toBeInTheDocument()
+    })
+
+    it('lets an invited person see tags but not change them', async () => {
+      mockRole('invited')
+      mockTaggedBook()
+
+      renderAddressBook()
+
+      expect(within(rowOf('Treasury')).getByTestId('tag-chip')).toHaveTextContent('Internal')
+      expect(screen.queryByRole('button', { name: 'Actions for Treasury' })).not.toBeInTheDocument()
+
+      await openFilters()
+
+      expect(screen.queryByRole('button', { name: 'Rename Vendor' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Delete Vendor' })).not.toBeInTheDocument()
     })
   })
 

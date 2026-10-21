@@ -1,31 +1,42 @@
 import { useMemo, useState } from 'react'
 import { Download } from 'lucide-react'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import { searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import ContactFiltersDropdown, {
+  type TagEditing,
+} from '@safe-global/views/features/spaces/components/AddressBookV2/ContactFiltersDropdown'
+import EditTagsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/EditTagsDialog'
+import { filterByTags, searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { toTagRequest, type TagChoice } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagColor'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
 import useChains from '@/hooks/useChains'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
 import AddContact from '../SpaceAddressBook/AddContact'
 import DeleteContactDialog from '../SpaceAddressBook/DeleteContactDialog'
 import EditContactDialog from '../SpaceAddressBook/EditContactDialog'
 import ImportAddressBook from '../SpaceAddressBook/Import'
 import useAddressCellProps from './useAddressCellProps'
-import { toWorkspaceContacts } from './utils'
+import useTagActions from './useTagActions'
+import { tagNamesOf, toWorkspaceContacts } from './utils'
 
-type OpenDialog = { type: 'edit' | 'delete'; entry: SpaceAddressBookItemDto }
+type OpenDialog = { type: 'edit' | 'delete' | 'tags'; entry: SpaceAddressBookItemDto }
+
+const trackTagLimitReached = (location: 'row_menu' | 'add_contact' | 'edit_contact') =>
+  trackEvent(SPACE_EVENTS.TAG_LIMIT_REACHED, { [MixpanelEventParams.LOCATION]: location })
 
 type WorkspaceContactsProps = {
   items: SpaceAddressBookItemDto[]
+  tags: SpaceAddressBookTagDto[]
   isLoading: boolean
   isError: boolean
   onReload: () => void
@@ -33,19 +44,38 @@ type WorkspaceContactsProps = {
   isInvited: boolean
 }
 
-const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInvited }: WorkspaceContactsProps) => {
+const WorkspaceContacts = ({
+  items,
+  tags,
+  isLoading,
+  isError,
+  onReload,
+  isAdmin,
+  isInvited,
+}: WorkspaceContactsProps) => {
   const [query, setQuery] = useState('')
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
   const [dialog, setDialog] = useState<OpenDialog>()
+  const [tagsError, setTagsError] = useState<string>()
+  const { saveContactTags, isSavingContactTags, renameTag, deleteTag } = useTagActions()
   const { configs } = useChains()
   const addressCellProps = useAddressCellProps()
   const resolveMemberName = useMemberNameResolver()
   const spaceId = useCurrentSpaceId()
 
   const contacts = useMemo(
-    () => toWorkspaceContacts(items, configs, resolveMemberName),
-    [items, configs, resolveMemberName],
+    () => toWorkspaceContacts(items, tags, configs, resolveMemberName),
+    [items, tags, configs, resolveMemberName],
   )
-  const visibleContacts = useMemo(() => searchContacts(contacts, query), [contacts, query])
+  // A deleted tag drops out of the filters
+  const activeTagIds = useMemo(
+    () => selectedTagIds.filter((id) => tags.some((tag) => tag.id === id)),
+    [selectedTagIds, tags],
+  )
+  const visibleContacts = useMemo(
+    () => filterByTags(searchContacts(contacts, query), activeTagIds),
+    [contacts, query, activeTagIds],
+  )
 
   const openDialog = (type: OpenDialog['type'], contact: AddressBookContact) => {
     const entry = items.find((item) => item.address === contact.address)
@@ -61,6 +91,32 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
     trackEvent(SPACE_EVENTS.REMOVE_ADDRESS)
     openDialog('delete', contact)
   }
+
+  const handleEditTags = (contact: AddressBookContact) => {
+    setTagsError(undefined)
+    openDialog('tags', contact)
+  }
+
+  const handleSaveTags = async (entry: SpaceAddressBookItemDto, choices: TagChoice[]) => {
+    const { saved, error } = await saveContactTags(entry.address, toTagRequest(choices, tags))
+    setTagsError(error)
+    if (saved) setDialog(undefined)
+  }
+
+  const tagEditing: TagEditing | undefined = isInvited
+    ? undefined
+    : {
+        onRename: async (tag, name) => {
+          const { error, mergedIntoId } = await renameTag(tag, name)
+          if (mergedIntoId !== undefined) {
+            setSelectedTagIds((ids) =>
+              ids.includes(tag.id) ? [...new Set(ids.map((id) => (id === tag.id ? mergedIntoId : id)))] : ids,
+            )
+          }
+          return error
+        },
+        onDelete: deleteTag,
+      }
 
   const handleExport = () => downloadCsv(`workspace-${spaceId}-address-book.csv`, spaceAddressBookToCsv(items))
 
@@ -82,7 +138,11 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
 
   const addContact = (
     <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-      <AddContact label="Add contact" />
+      <AddContact
+        label="Add contact"
+        workspaceTags={tags}
+        onTagLimitReached={() => trackTagLimitReached('add_contact')}
+      />
     </Track>
   )
 
@@ -119,6 +179,17 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
       <AddressBookToolbar
         query={query}
         onQueryChange={setQuery}
+        filters={
+          <ContactFiltersDropdown
+            tags={tags}
+            selectedTagIds={activeTagIds}
+            onSelectedTagIdsChange={setSelectedTagIds}
+            onSelectionCommitted={(ids) =>
+              trackEvent(SPACE_EVENTS.CONTACTS_FILTERED, { [MixpanelEventParams.TAG_COUNT]: ids.length })
+            }
+            tagEditing={tagEditing}
+          />
+        }
         actions={
           isAdmin ? (
             <>
@@ -134,18 +205,43 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
 
       <TableCard>
         {visibleContacts.length === 0 ? (
-          <AddressBookEmptyState kind="no-results" onClearSearch={() => setQuery('')} />
+          <AddressBookEmptyState
+            kind="no-results"
+            onClearSearch={() => {
+              setQuery('')
+              setSelectedTagIds([])
+            }}
+          />
         ) : (
           <AddressBookTable
             contacts={visibleContacts}
             {...addressCellProps}
             onEdit={isAdmin ? handleEdit : undefined}
             onDelete={isAdmin ? handleDelete : undefined}
+            onEditTags={isInvited ? undefined : handleEditTags}
           />
         )}
       </TableCard>
 
-      {dialog?.type === 'edit' && <EditContactDialog entry={dialog.entry} onClose={() => setDialog(undefined)} />}
+      {dialog?.type === 'edit' && (
+        <EditContactDialog
+          entry={dialog.entry}
+          workspaceTags={tags}
+          onTagLimitReached={() => trackTagLimitReached('edit_contact')}
+          onClose={() => setDialog(undefined)}
+        />
+      )}
+      {dialog?.type === 'tags' && (
+        <EditTagsDialog
+          contact={{ ...dialog.entry, tags: tagNamesOf(dialog.entry, tags) }}
+          workspaceTags={tags}
+          onSave={(choices) => handleSaveTags(dialog.entry, choices)}
+          onClose={() => setDialog(undefined)}
+          onLimitReached={() => trackTagLimitReached('row_menu')}
+          isSubmitting={isSavingContactTags}
+          error={tagsError}
+        />
+      )}
       {dialog?.type === 'delete' && (
         <DeleteContactDialog
           name={dialog.entry.name}

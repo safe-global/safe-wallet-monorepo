@@ -5,7 +5,8 @@ import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/us
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { workspaceTrackingListener } from '../workspaceTrackingListener'
+import { spaceAddressBookItemBuilder, spaceAddressBookTagBuilder } from '@/tests/builders/space'
+import { countTagChanges, workspaceTrackingListener } from '../workspaceTrackingListener'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
@@ -178,5 +179,118 @@ describe('workspaceTrackingListener', () => {
     run(mutation('spacesUpdateV1', { id: spaceId, updateSpaceDto: { name: 'B' } }, { uuid: spaceId }))
 
     expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  describe('tags', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1, name: 'Vendor', contactCount: 4 }).build()
+    const internal = spaceAddressBookTagBuilder().with({ id: 2, name: 'Internal' }).build()
+    const contact = spaceAddressBookItemBuilder()
+      .with({ tagIds: [1] })
+      .build()
+
+    beforeEach(() => {
+      jest
+        .spyOn(spacesApi.endpoints.addressBooksGetAddressBookItemsV1, 'select')
+        .mockReturnValue(() => ({ data: { spaceUuid: spaceId, data: [contact], tags: [vendor, internal] } }) as never)
+    })
+
+    it('tracks tags saved from the row menu against the book before the change', () => {
+      run(
+        mutation('addressBooksSetContactTagsV1', {
+          spaceId,
+          setContactTagsDto: { items: [{ address: contact.address.toLowerCase(), tags: ['internal', 'EU'] }] },
+        }),
+      )
+
+      expect(jest.mocked(trackEvent).mock.calls).toEqual([
+        [
+          SPACE_EVENTS.CONTACT_TAGS_UPDATED,
+          {
+            [MixpanelEventParams.LOCATION]: 'row_menu',
+            [MixpanelEventParams.TAGS_ADDED]: 2,
+            [MixpanelEventParams.TAGS_REMOVED]: 1,
+            [MixpanelEventParams.TAGS_CREATED]: 1,
+            [MixpanelEventParams.MEMBER_ROLE]: 'ADMIN',
+          },
+        ],
+      ])
+    })
+
+    it.each([
+      ['add_contact', spaceAddressBookItemBuilder().build().address],
+      ['edit_contact', contact.address],
+    ])('tracks tags saved from the %s dialog', (location, address) => {
+      run(
+        mutation('addressBooksUpsertAddressBookItemsV1', {
+          spaceId,
+          upsertAddressBookItemsDto: { items: [{ address, name: 'A', chainIds: ['1'], tags: ['Vendor'] }] },
+        }),
+      )
+
+      expect(trackEvent).toHaveBeenCalledWith(
+        SPACE_EVENTS.CONTACT_TAGS_UPDATED,
+        expect.objectContaining({ [MixpanelEventParams.LOCATION]: location }),
+      )
+    })
+
+    it('does not track an upsert that leaves the tags alone', () => {
+      run(
+        mutation('addressBooksUpsertAddressBookItemsV1', {
+          spaceId,
+          upsertAddressBookItemsDto: { items: [{ address: contact.address, name: 'A', chainIds: ['1'] }] },
+        }),
+      )
+
+      expect(trackEvent).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['a rename', [vendor, internal], false],
+      ['a merge', [internal], true],
+    ])('tracks %s', (_, tagsAfter, merged) => {
+      run(
+        mutation(
+          'addressBooksRenameTagV1',
+          { spaceId, tagId: vendor.id, renameTagDto: { name: 'Internal' } },
+          { spaceUuid: spaceId, data: [], tags: tagsAfter },
+        ),
+      )
+
+      expect(jest.mocked(trackEvent).mock.calls).toEqual([
+        [
+          SPACE_EVENTS.TAG_RENAMED,
+          { [MixpanelEventParams.MERGED]: merged, [MixpanelEventParams.MEMBER_ROLE]: 'ADMIN' },
+        ],
+      ])
+    })
+
+    it('tracks a delete with how many contacts had the tag', () => {
+      run(mutation('addressBooksDeleteTagV1', { spaceId, tagId: vendor.id }))
+
+      expect(jest.mocked(trackEvent).mock.calls).toEqual([
+        [
+          SPACE_EVENTS.TAG_DELETED,
+          { [MixpanelEventParams.CONTACT_COUNT]: 4, [MixpanelEventParams.MEMBER_ROLE]: 'ADMIN' },
+        ],
+      ])
+    })
+
+    it('tracks tags once when the rejected request is replayed after step-up', () => {
+      const originalArgs = { spaceId, setContactTagsDto: { items: [{ address: contact.address, tags: [] }] } }
+      run(mutation('addressBooksSetContactTagsV1', originalArgs, { status: 403 }, 'rejected'))
+      run(mutation('addressBooksSetContactTagsV1', originalArgs))
+
+      expect(trackEvent).toHaveBeenCalledTimes(1)
+    })
+  })
+})
+
+describe('countTagChanges', () => {
+  it('counts names case-insensitively', () => {
+    expect(countTagChanges(['Vendor', 'EU'], ['vendor', 'Payroll'], ['VENDOR', 'eu'])).toEqual({
+      [MixpanelEventParams.TAGS_ADDED]: 1,
+      [MixpanelEventParams.TAGS_REMOVED]: 1,
+      [MixpanelEventParams.TAGS_CREATED]: 1,
+    })
   })
 })

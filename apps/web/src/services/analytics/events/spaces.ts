@@ -317,6 +317,26 @@ export const SPACE_EVENTS = {
     action: 'Local contact added',
     category: SPACE_CATEGORY,
   },
+  CONTACT_TAGS_UPDATED: {
+    action: 'Contact tags updated',
+    category: SPACE_CATEGORY,
+  },
+  TAG_RENAMED: {
+    action: 'Tag renamed',
+    category: SPACE_CATEGORY,
+  },
+  TAG_DELETED: {
+    action: 'Tag deleted',
+    category: SPACE_CATEGORY,
+  },
+  CONTACTS_FILTERED: {
+    action: 'Contacts filtered',
+    category: SPACE_CATEGORY,
+  },
+  TAG_LIMIT_REACHED: {
+    action: 'Tag limit reached',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {

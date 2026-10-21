@@ -127,6 +127,53 @@ describe('getAuditEventDescription', () => {
       'updated the contact Vendor (0x1111111111111111111111111111111111111111)',
     ],
     [
+      'ADDRESS_BOOK_TAGS_UPDATED',
+      {
+        eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const,
+        payload: {
+          address: '0x1111111111111111111111111111111111111111',
+          oldTags: ['Vendor'],
+          newTags: ['Vendor', 'EU'],
+        },
+      },
+      'changed the tags of 0x1111111111111111111111111111111111111111 from Vendor to Vendor, EU',
+    ],
+    [
+      'ADDRESS_BOOK_TAGS_UPDATED (first tags)',
+      {
+        eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const,
+        payload: { address: '0x1111111111111111111111111111111111111111', oldTags: [], newTags: ['Vendor'] },
+      },
+      'changed the tags of 0x1111111111111111111111111111111111111111 from no tags to Vendor',
+    ],
+    [
+      'ADDRESS_BOOK_TAG_RENAMED',
+      {
+        eventType: 'ADDRESS_BOOK_TAG_RENAMED' as const,
+        payload: { oldName: 'Vendor', newName: 'Supplier', merged: false },
+      },
+      'renamed the tag Vendor to Supplier',
+    ],
+    [
+      'ADDRESS_BOOK_TAG_RENAMED (merged)',
+      {
+        eventType: 'ADDRESS_BOOK_TAG_RENAMED' as const,
+        payload: { oldName: 'Vendors', newName: 'Vendor', merged: true },
+      },
+      'renamed the tag Vendors to Vendor, merging it into the existing tag',
+    ],
+    ['ADDRESS_BOOK_TAG_RENAMED (missing names)', { eventType: 'ADDRESS_BOOK_TAG_RENAMED' as const }, 'renamed a tag'],
+    [
+      'ADDRESS_BOOK_TAG_DELETED',
+      { eventType: 'ADDRESS_BOOK_TAG_DELETED' as const, payload: { name: 'Vendor', contactCount: 4 } },
+      'deleted the tag Vendor from 4 contacts',
+    ],
+    [
+      'ADDRESS_BOOK_TAG_DELETED (unused)',
+      { eventType: 'ADDRESS_BOOK_TAG_DELETED' as const, payload: { name: 'Vendor', contactCount: 0 } },
+      'deleted the tag Vendor',
+    ],
+    [
       'ADDRESS_BOOK_DELETED (with address)',
       {
         eventType: 'ADDRESS_BOOK_DELETED' as const,

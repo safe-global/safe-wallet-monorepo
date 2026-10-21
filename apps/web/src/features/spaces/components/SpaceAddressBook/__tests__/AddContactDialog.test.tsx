@@ -1,5 +1,7 @@
 import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import AddContactDialog from '../AddContactDialog'
 
 const mockDispatch = jest.fn()
@@ -245,5 +247,58 @@ describe('AddContactDialog', () => {
     openDialog()
 
     expect(screen.getByLabelText('Address or ENS')).toHaveAttribute('data-ens-chain', '1')
+  })
+
+  describe('tags', () => {
+    it('submits the colour picked for a tag it creates', async () => {
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} workspaceTags={[]} />)
+      openDialog()
+      fillRequiredFields()
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.type(screen.getByRole('searchbox'), 'Vendor')
+      await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+      await userEvent.keyboard('{Escape}')
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() => expect(submit).toHaveBeenCalled())
+      const [[item]] = submit.mock.calls
+      expect(item.tags).toEqual(['Vendor'])
+      expect(item.tagColors).toEqual([{ name: 'Vendor', color: expect.any(String) }])
+    })
+
+    it('has no Tags field without workspace tags, as for a local contact', () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+      openDialog()
+
+      expect(screen.queryByTestId('tag-picker')).not.toBeInTheDocument()
+    })
+
+    it('submits the picked tags with the new contact', async () => {
+      const vendor = spaceAddressBookTagBuilder().with({ name: 'Vendor' }).build()
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} workspaceTags={[vendor]} />)
+      openDialog()
+      fillRequiredFields()
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() =>
+        expect(submit).toHaveBeenCalledWith(
+          { name: 'Alice', address: '0xabc', chainIds: ['1', '137'], tags: ['Vendor'], tagColors: [] },
+          '42',
+        ),
+      )
+    })
   })
 })

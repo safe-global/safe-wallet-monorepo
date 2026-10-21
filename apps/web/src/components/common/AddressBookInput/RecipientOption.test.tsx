@@ -24,6 +24,7 @@ const contact = (overrides: Partial<ExtendedContact> = {}): ExtendedContact => (
   address: checksumAddress('0x1234567890123456789012345678901234567890'),
   chainIds: ['1'],
   createdBy: '',
+  tagIds: [],
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,

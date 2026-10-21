@@ -40,6 +40,11 @@ const ContactRef = ({ contact }: { contact: Contact }) => (
   </>
 )
 
+const TagList = ({ tags }: { tags: unknown }) => {
+  const names = Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === 'string') : []
+  return names.length > 0 ? <Em>{names.join(', ')}</Em> : <>no tags</>
+}
+
 export function getTargetUserId(payload: SpaceAuditLogEntryDto['payload']): number | undefined {
   const targetUserId = asPayload(payload).targetUserId
   return typeof targetUserId === 'number' ? targetUserId : undefined
@@ -198,6 +203,37 @@ export function getAuditEventDescription(
         </>
       ) : (
         'rejected the request to add a contact to Workspace'
+      )
+    }
+    case 'ADDRESS_BOOK_TAGS_UPDATED': {
+      const address = asString(payload.address)
+      return (
+        <>
+          changed the tags of {address ? <span className="break-all">{address}</span> : 'a contact'} from{' '}
+          <TagList tags={payload.oldTags} /> to <TagList tags={payload.newTags} />
+        </>
+      )
+    }
+    case 'ADDRESS_BOOK_TAG_RENAMED': {
+      const oldName = asString(payload.oldName)
+      const newName = asString(payload.newName)
+      if (!oldName || !newName) return 'renamed a tag'
+      return (
+        <>
+          renamed the tag <Em>{oldName}</Em> to <Em>{newName}</Em>
+          {payload.merged === true ? ', merging it into the existing tag' : ''}
+        </>
+      )
+    }
+    case 'ADDRESS_BOOK_TAG_DELETED': {
+      const name = asString(payload.name)
+      const contactCount = typeof payload.contactCount === 'number' ? payload.contactCount : 0
+      if (!name) return 'deleted a tag'
+      return (
+        <>
+          deleted the tag <Em>{name}</Em>
+          {contactCount > 0 ? ` from ${pluralize(contactCount, 'contact')}` : ''}
+        </>
       )
     }
     default:

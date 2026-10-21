@@ -1,0 +1,80 @@
+import { useState } from 'react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import GroupedAddress from './GroupedAddress'
+import TagPicker from './tags/TagPicker'
+import { TagChips } from './tags/TagChip'
+import { toTagChoices, type TagChoice } from './tags/tagColor'
+import { TAGS_DISCLAIMER, sameTagNames } from './tags/tagRules'
+import type { WorkspaceTag } from './types'
+
+type EditTagsDialogProps = {
+  contact: { name: string; address: string; tags: string[] }
+  workspaceTags: WorkspaceTag[]
+  onSave: (tags: TagChoice[]) => void
+  onClose: () => void
+  onLimitReached?: () => void
+  isSubmitting?: boolean
+  error?: string
+}
+
+/** Tag editing for every active member. Name, address and chains are shown, never changed. */
+const EditTagsDialog = ({
+  contact,
+  workspaceTags,
+  onSave,
+  onClose,
+  onLimitReached,
+  isSubmitting = false,
+  error,
+}: EditTagsDialogProps) => {
+  const [tags, setTags] = useState<TagChoice[]>(() => toTagChoices(contact.tags, workspaceTags))
+  const names = tags.map((tag) => tag.name)
+
+  return (
+    <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent padding="none">
+        <DialogHeader divided>
+          <DialogTitle className="text-xl font-bold">Edit tags</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 p-6">
+          <div className="flex flex-col gap-1">
+            <Typography variant="paragraph-bold">{contact.name}</Typography>
+            <GroupedAddress address={contact.address} />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <TagPicker value={tags} onChange={setTags} workspaceTags={workspaceTags} onLimitReached={onLimitReached} />
+            <TagChips tags={tags} />
+          </div>
+          <Typography variant="paragraph-small" className="text-muted-foreground">
+            {TAGS_DISCLAIMER}
+          </Typography>
+          {error && (
+            <Alert variant="destructive">
+              <AlertSeverityIcon variant="destructive" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+        </div>
+        <DialogFooter divided className="flex-row items-center justify-between">
+          <Button variant="outline" size="submit" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            size="submit"
+            onClick={() => onSave(tags)}
+            disabled={sameTagNames(names, contact.tags) || isSubmitting}
+            data-testid="save-tags-btn"
+          >
+            {isSubmitting ? <Spinner /> : 'Save'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default EditTagsDialog
