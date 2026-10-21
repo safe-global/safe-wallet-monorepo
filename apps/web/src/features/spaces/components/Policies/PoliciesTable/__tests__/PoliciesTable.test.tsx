@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import {
   MOCK_SAFES,
   asActivePolicy,
@@ -129,6 +129,14 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 
     expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when hovering a pending status, say how many signatures are in', async () => {
+    const { user } = renderWithUserEvent(<PoliciesTable policies={[mockPendingPolicy()]} />)
+
+    await user.hover(screen.getByTestId('policy-status-pending'))
+
+    expect(await screen.findByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signed')
   })
 
   it('should, when an executed change is not yet indexed, show it as activating', () => {

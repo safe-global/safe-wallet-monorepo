@@ -37,39 +37,30 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** A live allowlist seen by a signer, who can edit or remove it. */
 export const ActiveSigner: Story = {}
 
-/** No wallet connected; editing needs a signer wallet first. */
 export const ActiveNoWallet: Story = { args: { viewer: MOCK_VIEWERS.disconnected } }
 
-/** Connected, but this wallet does not sign for the Safe. */
 export const ActiveNotASigner: Story = { args: { viewer: MOCK_VIEWERS.nonSigner } }
 
-/** Awaiting signatures, this signer's among them. */
 export const PendingNotSigned: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer },
 }
 
-/** Awaiting signatures; this signer has signed and waits for the others. */
 export const PendingAlreadySigned: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signerWhoSigned },
 }
 
-/** Awaiting signatures, no wallet connected. */
 export const PendingNoWallet: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.disconnected },
 }
 
-/** Awaiting signatures, seen by a wallet that does not sign for the Safe. */
 export const PendingNotASigner: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.nonSigner },
 }
 
-/** Awaiting execution: every signature is in, so anyone can execute it. */
 export const PendingFullySigned: Story = {
   args: { ...PENDING_ARGS, policy: mockFullySignedPendingAllowlist(), viewer: MOCK_VIEWERS.nonSigner },
 }
 
-/** Nothing in the address book: every recipient reads as its shortened address. */
 export const UnnamedRecipients: Story = { args: { names: undefined, safe: { address: MOCK_SAFES.treasury.address } } }

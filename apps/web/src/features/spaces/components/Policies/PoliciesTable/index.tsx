@@ -12,6 +12,7 @@ import PolicyRule from '@safe-global/views/features/spaces/components/Policies/P
 import PolicyTokens from './components/PolicyTokens'
 import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
+import { getPendingStatusDetail } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
@@ -152,7 +153,20 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       width: 'fit',
       minWidth: 140,
       cellTestId: 'policy-cell-status',
-      cell: (policy) => <PolicyStatusChip status={getPolicyStatus(policy)} />,
+      cell: (policy) => {
+        const chip = <PolicyStatusChip status={getPolicyStatus(policy)} />
+        const detail = getPendingStatusDetail(policy)
+        if (!detail) return chip
+
+        return (
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
+            <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
+              <span data-testid="policy-status-detail">{detail}</span>
+            </TooltipContent>
+          </Tooltip>
+        )
+      },
     },
     {
       id: 'open',

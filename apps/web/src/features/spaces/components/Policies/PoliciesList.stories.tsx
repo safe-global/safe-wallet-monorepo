@@ -13,6 +13,7 @@ import {
   mockRecoveryPolicy,
   mockUnenforcedPolicy,
 } from './mocks/policies'
+import { mockActiveAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from './mocks/allowlistPolicies'
 import PoliciesList from './PoliciesList'
 
 const meta = {
@@ -59,6 +60,24 @@ export const ProposerGrant: Story = {
 
 export const Recovery: Story = {
   args: { policies: [asActivePolicy(mockRecoveryPolicy())] },
+}
+
+export const ActiveAllowlist: Story = {
+  args: { policies: [mockActiveAllowlist()] },
+}
+
+export const PendingAllowlist: Story = {
+  args: { policies: [mockPendingAllowlist()] },
+}
+
+export const AllowlistReadyToExecute: Story = {
+  args: { policies: [mockFullySignedPendingAllowlist()] },
+}
+
+export const WithAllowlists: Story = {
+  args: {
+    policies: [...mockPolicies(), mockActiveAllowlist(), mockPendingAllowlist(), mockFullySignedPendingAllowlist()],
+  },
 }
 
 /** Exercises pagination and the sort control. */
