@@ -37,7 +37,7 @@ describe('TagChips', () => {
   })
 
   it('renders automatic and team tags side by side', () => {
-    render(<TagChips tags={[SIGNER_TAG, 'Vendor']} titles={{ [SIGNER_TAG]: 'Signer of Treasury' }} />)
+    render(<TagChips tags={[SIGNER_TAG, 'Vendor']} />)
 
     expect(screen.getByTestId('system-tag-chip')).toHaveTextContent(SIGNER_TAG)
     expect(screen.getByTestId('tag-chip')).toHaveTextContent('Vendor')

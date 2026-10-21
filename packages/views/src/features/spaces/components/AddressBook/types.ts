@@ -15,7 +15,7 @@ export type AddressBookContact = {
   chains: ChainInfo[]
   /** One of this workspace's Safes. Adds the automatic "Workspace Safe" tag. */
   isWorkspaceSafe?: boolean
-  /** Names of the workspace Safes this address signs for. Non-empty adds the automatic "Signer of a Safe" tag. */
+  /** Names of the workspace Safes this address signs for. Non-empty adds the automatic "Signer" label. */
   signerOf: string[]
   /** Team-written labels, without the automatic ones. Local contacts have none. */
   tags: string[]

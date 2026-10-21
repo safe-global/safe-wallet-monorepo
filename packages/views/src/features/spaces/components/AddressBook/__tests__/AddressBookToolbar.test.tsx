@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddressBookToolbar, { type AddressBookToolbarProps } from '../AddressBookToolbar'
-import { SIGNER_TAG } from '../tags/systemTags'
+import { SIGNER_TAG, WORKSPACE_SAFE_TAG } from '../tags/systemTags'
 import { ADMIN_PERMISSIONS, EMPTY_FILTERS, MEMBER_PERMISSIONS } from '../types'
 
 const renderToolbar = (props: Partial<AddressBookToolbarProps> = {}) =>
@@ -46,22 +46,81 @@ describe('AddressBookToolbar', () => {
     expect(onImport).toHaveBeenCalledTimes(1)
   })
 
-  it('lists the automatic tags first in Filters, without rename or delete', async () => {
+  const openFilters = async () => {
+    await userEvent.click(screen.getByTestId('filters-dropdown'))
+    await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+  }
+
+  it('lists the automatic labels in a Type section without rename or delete', async () => {
     renderToolbar({
-      systemTags: [{ tag: SIGNER_TAG, count: 2 }],
+      systemTags: [
+        { tag: WORKSPACE_SAFE_TAG, count: 1 },
+        { tag: SIGNER_TAG, count: 2 },
+      ],
       tags: [{ tag: 'Vendor', count: 3 }],
       tagEditing: { onRenameOption: jest.fn(), onDeleteOption: jest.fn() },
     })
 
-    await userEvent.click(screen.getByTestId('filters-dropdown'))
-    await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+    await openFilters()
 
-    const [first, second] = screen.getAllByRole('option')
-    expect(first).toHaveTextContent(SIGNER_TAG)
-    expect(second).toHaveTextContent('Vendor')
-    expect(screen.queryByRole('button', { name: `Rename ${SIGNER_TAG}` })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: `Delete ${SIGNER_TAG}` })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Rename Vendor' })).toBeInTheDocument()
+    const type = screen.getByRole('listbox', { name: 'Type' })
+    expect(
+      within(type)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual([expect.stringContaining(WORKSPACE_SAFE_TAG), expect.stringContaining(SIGNER_TAG)])
+    expect(within(type).queryByRole('button', { name: /^Rename/ })).not.toBeInTheDocument()
+    expect(within(type).queryByRole('button', { name: /^Delete/ })).not.toBeInTheDocument()
+
+    const tags = screen.getByRole('listbox', { name: 'Tags' })
+    expect(within(tags).getAllByRole('option')).toHaveLength(1)
+    expect(within(tags).getByRole('option')).toHaveTextContent('Vendor')
+    expect(within(tags).getByRole('button', { name: 'Rename Vendor' })).toBeInTheDocument()
+    expect(within(tags).getByRole('button', { name: 'Delete Vendor' })).toBeInTheDocument()
+  })
+
+  it('hides the Type section when no contact has an automatic label', async () => {
+    renderToolbar({ tags: [{ tag: 'Vendor', count: 3 }] })
+
+    await openFilters()
+
+    expect(screen.queryByRole('listbox', { name: 'Type' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Type')).not.toBeInTheDocument()
+  })
+
+  it('keeps the selected team tags when a Type option is ticked', async () => {
+    const onFiltersChange = jest.fn()
+    renderToolbar({
+      filters: { query: 'atlas', tags: ['Vendor'] },
+      onFiltersChange,
+      systemTags: [{ tag: SIGNER_TAG, count: 2 }],
+      tags: [
+        { tag: 'Vendor', count: 3 },
+        { tag: 'EU', count: 1 },
+      ],
+    })
+
+    await openFilters()
+    await userEvent.click(
+      within(screen.getByRole('listbox', { name: 'Type' })).getByRole('option', { name: new RegExp(SIGNER_TAG) }),
+    )
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ query: 'atlas', tags: [SIGNER_TAG, 'Vendor'] })
+  })
+
+  it('keeps the selected Type labels when a team tag is ticked', async () => {
+    const onFiltersChange = jest.fn()
+    renderToolbar({
+      filters: { query: '', tags: [SIGNER_TAG] },
+      onFiltersChange,
+      systemTags: [{ tag: SIGNER_TAG, count: 2 }],
+      tags: [{ tag: 'Vendor', count: 3 }],
+    })
+
+    await openFilters()
+    await userEvent.click(within(screen.getByRole('listbox', { name: 'Tags' })).getByRole('option', { name: /Vendor/ }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ query: '', tags: [SIGNER_TAG, 'Vendor'] })
   })
 
   it('hides Clear while nothing is filtered', () => {
@@ -72,7 +131,7 @@ describe('AddressBookToolbar', () => {
 
   it('resets the filters on Clear', async () => {
     const onFiltersChange = jest.fn()
-    renderToolbar({ filters: { query: 'atlas', tags: ['Workspace Safe', 'Vendor'] }, onFiltersChange })
+    renderToolbar({ filters: { query: 'atlas', tags: [WORKSPACE_SAFE_TAG, 'Vendor'] }, onFiltersChange })
 
     await userEvent.click(screen.getByTestId('clear-filters'))
 

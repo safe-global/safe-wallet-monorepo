@@ -43,12 +43,14 @@ export const countSystemTags = (contacts: AddressBookContact[]): TagCount[] =>
     count: contacts.filter((contact) => systemTagsOf(contact).includes(tag)).length,
   })).filter(({ count }) => count > 0)
 
-/** Sorts the Tags column: automatic tags first, so workspace Safes and signers group together. */
-export const tagSortValue = (contact: AddressBookContact): string | null => {
-  const [first] = allTagsOf(contact)
-  if (!first) return null
-  const systemIndex = SYSTEM_TAGS.indexOf(first as (typeof SYSTEM_TAGS)[number])
-  return systemIndex >= 0 ? `0${systemIndex}` : `1${first.toLowerCase()}`
+/** Sorts the Tags column by the first tag alphabetically, so contacts that share a tag group together. */
+export const tagSortValue = (contact: AddressBookContact): string | null =>
+  contact.tags.map((tag) => tag.toLowerCase()).sort((a, b) => a.localeCompare(b))[0] ?? null
+
+/** Sorts the Type column: workspace Safes, then signers, then contacts with neither. */
+export const typeSortValue = (contact: AddressBookContact): number | null => {
+  if (contact.isWorkspaceSafe) return 0
+  return contact.signerOf.length > 0 ? 1 : null
 }
 
 export const activeFilterCount = (filters: ContactFilters): number => filters.tags.length

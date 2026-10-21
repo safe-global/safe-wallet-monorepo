@@ -19,8 +19,8 @@ import { ADMIN_PERMISSIONS, EMPTY_FILTERS, MEMBER_PERMISSIONS } from './types'
  *
  * Data: "Lumen Labs", a made-up company with four workspace Safes (Treasury, Payroll, Ops multisig,
  * Grants program), their signers, the DeFi contracts they use (real mainnet addresses), vendors and
- * contractors. Workspace Safes and their signers carry the automatic "Workspace Safe" and "Signer
- * of a Safe" tags, which nobody can edit or delete.
+ * contractors. Workspace Safes and their signers show "Workspace Safe" or "Signer" in the Type column,
+ * set by the app; nobody can edit or delete them.
  */
 const meta = {
   title: 'Features/Spaces/AddressBook/Page',
@@ -70,7 +70,7 @@ export const NoSuggestions: Story = {
   args: { initialTab: 'suggested', suggestions: [] },
 }
 
-/** Filtered to the automatic "Signer of a Safe" tag: every signer of a workspace Safe. */
+/** Filtered to Type "Signer": every signer of a workspace Safe. */
 export const Filtered: Story = {
   args: { initialFilters: { ...EMPTY_FILTERS, tags: [SIGNER_TAG] } },
 }

@@ -15,8 +15,6 @@ export type FacetOption<V extends string = string> = {
   count?: number
   /** Text the search box matches against when `label` is not a plain string. */
   searchText?: string
-  /** Hides rename and delete for this option, e.g. a tag the app manages. */
-  locked?: boolean
 }
 
 export type FacetOptionListProps<V extends string = string> = {
@@ -236,7 +234,7 @@ export function FacetOptionList<V extends string = string>({
                   <span className="text-muted-foreground text-xs tabular-nums">{option.count}</span>
                 )}
               </button>
-              {hasOptionActions && !option.locked && (
+              {hasOptionActions && (
                 <span className="flex shrink-0 items-center pr-1 opacity-0 group-focus-within/option:opacity-100 group-hover/option:opacity-100">
                   {onRenameOption && (
                     <Button
@@ -265,10 +263,6 @@ export function FacetOptionList<V extends string = string>({
                     </Button>
                   )}
                 </span>
-              )}
-              {hasOptionActions && option.locked && (
-                // Holds the actions' width so locked rows keep their counts aligned with the rest.
-                <span aria-hidden="true" className="w-13 shrink-0" />
               )}
             </li>
           )

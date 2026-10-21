@@ -8,6 +8,12 @@ import GroupedAddress from './GroupedAddress'
 
 const COPIED_MS = 1500
 
+/**
+ * Width of a table column holding this cell: avatar, gap, the full grouped address, copy button and
+ * cell padding. Tables pin the column to it, since the address is never shortened.
+ */
+export const CONTACT_COLUMN_WIDTH = 412
+
 /** A neutral stand-in for the identicon, derived from the address so rows stay distinguishable. */
 export const AddressAvatar = ({ address, size = 24 }: { address: string; size?: number }) => {
   const hue = parseInt(address.slice(2, 6), 16) % 360

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import Identicon from '@/components/common/Identicon'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
+import AutomaticLabels from './tags/AutomaticLabels'
 import GroupedAddress from './GroupedAddress'
 import { ADDRESSES, ALL_CHAINS, CHAINS } from './mocks/fixtures'
 
@@ -56,6 +57,26 @@ export const Address: Story = {
     <div className="flex flex-col gap-2">
       <GroupedAddress address={ADDRESSES.treasury} />
       <GroupedAddress address={ADDRESSES.treasuryLookAlike} />
+    </div>
+  ),
+}
+
+/**
+ * The Type column: "Workspace Safe" and "Signer", set by the app from workspace data and never by a
+ * member. A nested Safe can be both. Hover a label to see why it is there.
+ */
+export const Type: Story = {
+  render: () => (
+    <div className="max-w-md">
+      <Row label="Workspace Safe">
+        <AutomaticLabels contact={{ isWorkspaceSafe: true, signerOf: [] }} />
+      </Row>
+      <Row label="Signer">
+        <AutomaticLabels contact={{ signerOf: ['Treasury', 'Payroll'] }} />
+      </Row>
+      <Row label="Both">
+        <AutomaticLabels contact={{ isWorkspaceSafe: true, signerOf: ['Treasury'] }} />
+      </Row>
     </div>
   ),
 }

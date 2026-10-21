@@ -1,17 +1,15 @@
-import { PenLine, Vault } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { tagColor } from './tagColor'
-import { WORKSPACE_SAFE_TAG, isSystemTag } from './systemTags'
+import { isSystemTag } from './systemTags'
 
 const CHIP = 'inline-flex max-w-40 items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-xs font-medium'
 
 /**
- * An automatic tag: an icon instead of the colour dot, on a neutral fill, so it reads as set by
+ * An automatic label: no colour dot, a neutral fill and a hairline border, so it reads as set by
  * the app rather than by a teammate. The tooltip says why it is there.
  */
 const SystemTagChip = ({ tag, title, className }: { tag: string; title?: string; className?: string }) => {
-  const Icon = tag.toLowerCase() === WORKSPACE_SAFE_TAG.toLowerCase() ? Vault : PenLine
   return (
     <Tooltip>
       <TooltipTrigger
@@ -22,7 +20,6 @@ const SystemTagChip = ({ tag, title, className }: { tag: string; title?: string;
           />
         }
       >
-        <Icon aria-hidden="true" className="text-muted-foreground size-3 shrink-0" />
         <span className="truncate">{tag}</span>
       </TooltipTrigger>
       <TooltipContent>{title ?? 'Added automatically'}</TooltipContent>
@@ -51,12 +48,10 @@ const DEFAULT_MAX_VISIBLE = 3
 type TagChipsProps = {
   tags: string[]
   maxVisible?: number
-  /** Hover text per tag, used for the automatic ones. */
-  titles?: Record<string, string>
 }
 
 /** Up to `maxVisible` chips, then "+N" with the rest in a tooltip. */
-export const TagChips = ({ tags, maxVisible = DEFAULT_MAX_VISIBLE, titles }: TagChipsProps) => {
+export const TagChips = ({ tags, maxVisible = DEFAULT_MAX_VISIBLE }: TagChipsProps) => {
   if (tags.length === 0) return null
   const visible = tags.slice(0, maxVisible)
   const rest = tags.slice(maxVisible)
@@ -64,7 +59,7 @@ export const TagChips = ({ tags, maxVisible = DEFAULT_MAX_VISIBLE, titles }: Tag
   return (
     <span className="inline-flex flex-wrap items-center gap-1" data-testid="tag-chips">
       {visible.map((tag) => (
-        <TagChip key={tag} tag={tag} title={titles?.[tag]} />
+        <TagChip key={tag} tag={tag} />
       ))}
       {rest.length > 0 && (
         <Tooltip>

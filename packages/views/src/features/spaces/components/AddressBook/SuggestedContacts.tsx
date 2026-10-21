@@ -5,7 +5,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@s
 import { Typography } from '@safe-global/views/components/ui/typography'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import ChainLogos from './ChainLogos'
-import ContactCell from './ContactCell'
+import ContactCell, { CONTACT_COLUMN_WIDTH } from './ContactCell'
 import { describeSuggestion, type SuggestedContact, type SuggestionReason } from './types'
 
 const ReasonIcon = ({ reason }: { reason: SuggestionReason }) => {
@@ -56,8 +56,8 @@ const SuggestedContacts = ({ suggestions, canAdd, onAdd, renderAvatar, pageSize 
     {
       id: 'contact',
       header: 'Contact',
-      width: '40%',
-      minWidth: 360,
+      width: 'fit',
+      minWidth: CONTACT_COLUMN_WIDTH,
       sortValue: (item) => item.suggestedName.toLowerCase(),
       cell: (item, { isCompact }) => (
         <ContactCell
@@ -80,7 +80,6 @@ const SuggestedContacts = ({ suggestions, canAdd, onAdd, renderAvatar, pageSize 
     {
       id: 'reason',
       header: 'Why suggested',
-      width: '30%',
       priority: 'secondary',
       minWidth: 200,
       sortValue: (item) => describeSuggestion(item.reason).toLowerCase(),

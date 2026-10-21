@@ -7,14 +7,14 @@ describe('tagColor', () => {
     expect(tagColor('Vendor')).toBe(tagColor('Vendor'))
   })
 
-  it('always lands in the ten-colour palette', () => {
+  it('always lands in the eight-colour palette', () => {
     const tags = ['Internal', 'Vendor', 'Payroll', 'Investor', 'Exchange', 'Auditor', 'Legal', 'Grants', 'DeFi', 'Ops']
     for (const tag of tags) {
       const index = tagColorIndex(tag)
       expect(index).toBeGreaterThanOrEqual(0)
       expect(index).toBeLessThan(TAG_PALETTE.length)
     }
-    expect(TAG_PALETTE).toHaveLength(10)
+    expect(TAG_PALETTE).toHaveLength(8)
   })
 
   it('spreads different tags over more than one colour', () => {

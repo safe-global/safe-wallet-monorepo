@@ -6,13 +6,11 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import GroupedAddress from '../GroupedAddress'
 import TagPicker from '../tags/TagPicker'
 import { TagChips } from '../tags/TagChip'
-import { systemTagsOf, systemTagTitles } from '../tags/systemTags'
 import { TAGS_DISCLAIMER, hasTag } from '../tags/tagRules'
 import type { AddressBookContact, TagCount } from '../types'
 
 type EditTagsDialogProps = {
-  contact: Pick<AddressBookContact, 'name' | 'address' | 'tags'> &
-    Partial<Pick<AddressBookContact, 'isWorkspaceSafe' | 'signerOf'>>
+  contact: Pick<AddressBookContact, 'name' | 'address' | 'tags'>
   tagOptions: TagCount[]
   onSave: (tags: string[]) => void
   onClose: () => void
@@ -25,8 +23,6 @@ const sameTags = (a: readonly string[], b: readonly string[]) =>
 /** Tag editing for every active member. Name, address and chains are shown, never changed. */
 const EditTagsDialog = ({ contact, tagOptions, onSave, onClose, isSubmitting = false }: EditTagsDialogProps) => {
   const [tags, setTags] = useState<string[]>(contact.tags)
-  const automatic = { isWorkspaceSafe: contact.isWorkspaceSafe, signerOf: contact.signerOf ?? [] }
-  const systemTags = systemTagsOf(automatic)
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -39,12 +35,6 @@ const EditTagsDialog = ({ contact, tagOptions, onSave, onClose, isSubmitting = f
             <Typography variant="paragraph-bold">{contact.name}</Typography>
             <GroupedAddress address={contact.address} />
           </div>
-          {systemTags.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2" data-testid="automatic-tags">
-              <TagChips tags={systemTags} titles={systemTagTitles(automatic)} />
-              <span className="text-muted-foreground text-xs">Added automatically, can’t be changed</span>
-            </div>
-          )}
           <div className="flex flex-wrap items-center gap-2">
             <TagPicker value={tags} onChange={setTags} options={tagOptions} showCounts={false} />
             <TagChips tags={tags} maxVisible={10} />

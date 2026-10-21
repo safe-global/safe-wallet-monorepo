@@ -9,6 +9,7 @@ import {
   type FacetOptionListProps,
 } from '@safe-global/views/components/common/FacetFilter'
 import { activeFilterCount } from './filters'
+import { isSystemTag } from './tags/systemTags'
 import { TagChip } from './tags/TagChip'
 import type { ContactFilters, TagCount } from './types'
 
@@ -17,7 +18,7 @@ type TagEditing = Pick<FacetOptionListProps, 'onRenameOption' | 'onDeleteOption'
 export type ContactFiltersDropdownProps = {
   filters: ContactFilters
   onFiltersChange: (filters: ContactFilters) => void
-  /** Automatic tags in the book (Workspace Safe, Signer of a Safe), listed first and locked. */
+  /** Automatic labels in the book (Workspace Safe, Signer), in their own Type section. */
   systemTags: TagCount[]
   /** Distinct team-written tags in the book. */
   tags: TagCount[]
@@ -29,7 +30,7 @@ const SectionHeading = ({ children }: { children: string }) => (
   <p className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">{children}</p>
 )
 
-/** One "Filters" dropdown of tags: the automatic ones first, then the team's, which can be renamed or deleted. */
+/** One "Filters" dropdown: the automatic Type labels, then the team's tags, which can be renamed or deleted. */
 const ContactFiltersDropdown = ({
   filters,
   onFiltersChange,
@@ -40,16 +41,15 @@ const ContactFiltersDropdown = ({
   const [open, setOpen] = useState(false)
   const activeCount = activeFilterCount(filters)
 
-  const tagOptions: FacetOption[] = [
-    ...systemTags.map(({ tag, count }) => ({
-      value: tag,
-      label: <TagChip tag={tag} />,
-      searchText: tag,
-      count,
-      locked: true,
-    })),
-    ...tags.map(({ tag, count }) => ({ value: tag, label: <TagChip tag={tag} />, searchText: tag, count })),
-  ]
+  const toOption = ({ tag, count }: TagCount): FacetOption => ({
+    value: tag,
+    label: <TagChip tag={tag} />,
+    searchText: tag,
+    count,
+  })
+  // Both sections filter through `filters.tags`; each edits only its own values.
+  const selectedSystem = filters.tags.filter(isSystemTag)
+  const selectedTags = filters.tags.filter((tag) => !isSystemTag(tag))
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -69,12 +69,26 @@ const ContactFiltersDropdown = ({
       </PopoverTrigger>
 
       <PopoverContent align="start" sideOffset={4} className="flex w-72 flex-col gap-1 p-1">
+        {systemTags.length > 0 && (
+          <>
+            <SectionHeading>Type</SectionHeading>
+            <FacetOptionList
+              label="Type"
+              options={systemTags.map(toOption)}
+              value={selectedSystem}
+              onChange={(next) => onFiltersChange({ ...filters, tags: [...next, ...selectedTags] })}
+              searchable={false}
+            />
+            <div className="border-border my-1 border-t" />
+          </>
+        )}
+
         <SectionHeading>Tags</SectionHeading>
         <FacetOptionList
           label="Tags"
-          options={tagOptions}
-          value={filters.tags}
-          onChange={(next) => onFiltersChange({ ...filters, tags: next })}
+          options={tags.map(toOption)}
+          value={selectedTags}
+          onChange={(next) => onFiltersChange({ ...filters, tags: [...selectedSystem, ...next] })}
           searchable
           searchPlaceholder="Search tags"
           emptyText="No tags yet"

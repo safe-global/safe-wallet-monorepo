@@ -1,37 +1,16 @@
 /**
- * Ten hues anchored on the Safe theme (brand green, info, warning, error, review, graphite) plus
- * four complementary ones, ordered so neighbours differ. Colour is a deterministic hash of the tag
- * name, so the same tag looks the same everywhere and nothing about colour is stored.
+ * The eight tag colours from the Safe{Wallet} colour system (tag/<name>/fg, /bg and /dot), the names
+ * CGW stores. Here the colour is a hash of the tag name; CGW assigns and stores it in the app.
  */
 export const TAG_PALETTE = [
-  {
-    dot: 'bg-[var(--color-secondary-main)]',
-    fill: 'bg-[var(--color-secondary-background)] text-[var(--color-success-dark)]',
-  },
-  {
-    dot: 'bg-[var(--color-info-main)]',
-    fill: 'bg-[var(--color-info-background)] text-[var(--color-info-dark)]',
-  },
-  {
-    dot: 'bg-[var(--color-warning-main)]',
-    fill: 'bg-[var(--color-warning-background)] text-[var(--color-warning-dark)]',
-  },
-  { dot: 'bg-violet-500', fill: 'bg-violet-500/10 text-violet-800 dark:text-violet-200' },
-  {
-    dot: 'bg-[var(--color-error-main)]',
-    fill: 'bg-[var(--color-error-background)] text-[var(--color-error-dark)]',
-  },
-  { dot: 'bg-teal-600', fill: 'bg-teal-600/10 text-teal-800 dark:text-teal-200' },
-  {
-    dot: 'bg-[var(--color-review-main)]',
-    fill: 'bg-[var(--color-review-background)] text-amber-900 dark:text-amber-200',
-  },
-  { dot: 'bg-blue-500', fill: 'bg-blue-500/10 text-blue-800 dark:text-blue-200' },
-  { dot: 'bg-pink-500', fill: 'bg-pink-500/10 text-pink-800 dark:text-pink-200' },
-  {
-    dot: 'bg-[var(--color-primary-light)]',
-    fill: 'bg-[var(--color-background-main)] text-[var(--color-text-primary)]',
-  },
+  { name: 'Slate', dot: 'bg-[#7d8ea0]', fill: 'bg-[#f0f4f7] text-[#4f5c6b]' },
+  { name: 'Clay', dot: 'bg-[#b08060]', fill: 'bg-[#fbf1eb] text-[#775136]' },
+  { name: 'Rose', dot: 'bg-[#cd6199]', fill: 'bg-[#ffeef5] text-[#8e3665]' },
+  { name: 'Lilac', dot: 'bg-[#af7de1]', fill: 'bg-[#f7f2fe] text-[#6f4198]' },
+  { name: 'Iris', dot: 'bg-[#5551d8]', fill: 'bg-[#ebeefe] text-[#403caa]' },
+  { name: 'Cobalt', dot: 'bg-[#276ee1]', fill: 'bg-[#e9f1fe] text-[#184da3]' },
+  { name: 'Sky', dot: 'bg-[#3cb1e9]', fill: 'bg-[#edf8fe] text-[#086990]' },
+  { name: 'Lagoon', dot: 'bg-[#199a8d]', fill: 'bg-[#dffbf6] text-[#05665d]' },
 ] as const
 
 export const tagColorIndex = (tag: string): number => {

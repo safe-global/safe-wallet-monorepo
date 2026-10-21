@@ -165,26 +165,6 @@ describe('FacetFilter', () => {
     await waitFor(() => expect(screen.queryByTestId('facet-option-confirm-delete')).not.toBeInTheDocument())
   })
 
-  it('shows no rename or delete actions on a locked option', async () => {
-    render(
-      <FacetFilter
-        label="Role"
-        options={[{ ...options[0], locked: true }, ...options.slice(1)]}
-        value={[]}
-        onChange={jest.fn()}
-        onRenameOption={jest.fn()}
-        onDeleteOption={jest.fn()}
-      />,
-    )
-
-    await openFilter()
-
-    expect(screen.queryByRole('button', { name: 'Rename Workspace account' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Delete Workspace account' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Rename Signer' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Delete Signer' })).toBeInTheDocument()
-  })
-
   it('shows no rename or delete actions without handlers', async () => {
     render(<FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} />)
 

@@ -2,10 +2,11 @@ import type { ReactNode } from 'react'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import ChainLogos from './ChainLogos'
-import ContactCell from './ContactCell'
+import ContactCell, { CONTACT_COLUMN_WIDTH } from './ContactCell'
 import ContactRowActions from './ContactRowActions'
-import { tagSortValue } from './filters'
-import { allTagsOf, systemTagTitles } from './tags/systemTags'
+import { tagSortValue, typeSortValue } from './filters'
+import AutomaticLabels from './tags/AutomaticLabels'
+import { systemTagsOf } from './tags/systemTags'
 import { TagChips } from './tags/TagChip'
 import type { AddressBookContact, AddressBookPermissions } from './types'
 
@@ -29,11 +30,20 @@ const AddedBy = ({ name }: { name?: string }) =>
     <span className="text-muted-foreground text-xs">&mdash;</span>
   )
 
+/** Width of the Type column: the "Workspace Safe" label plus the cell's padding. */
+const TYPE_COLUMN_WIDTH = 120
+
+const Type = ({ contact }: { contact: AddressBookContact }) =>
+  systemTagsOf(contact).length > 0 ? (
+    <AutomaticLabels contact={contact} />
+  ) : (
+    <span className="text-muted-foreground text-xs">&mdash;</span>
+  )
+
 const Tags = ({ contact }: { contact: AddressBookContact }) => {
   if (contact.isLocal) return <span className="text-muted-foreground text-xs">Workspace only</span>
-  const tags = allTagsOf(contact)
-  return tags.length > 0 ? (
-    <TagChips tags={tags} titles={systemTagTitles(contact)} />
+  return contact.tags.length > 0 ? (
+    <TagChips tags={contact.tags} />
   ) : (
     <span className="text-muted-foreground text-xs">&mdash;</span>
   )
@@ -79,9 +89,9 @@ const AddressBookTable = ({
       id: 'contact',
       header: 'Contact',
       cellTestId: 'table-cell-contact',
-      width: isWorkspace ? '35%' : '40%',
-      // The full address in monospace needs this much; below it the table goes compact.
-      minWidth: 360,
+      // Pinned to the full address, so it never runs into Chains. Below the summed minimums the table goes compact.
+      width: 'fit',
+      minWidth: CONTACT_COLUMN_WIDTH,
       sortValue: (contact) => contact.name.toLowerCase(),
       cell: (contact, { isCompact }) => (
         <ContactCell
@@ -102,13 +112,23 @@ const AddressBookTable = ({
       sortValue: (contact) => contact.chains.length,
       cell: (contact) => <ChainLogos chains={contact.chains} />,
     },
+    {
+      id: 'type',
+      header: 'Type',
+      cellTestId: 'table-cell-type',
+      // Exactly as wide as the "Workspace Safe" label, the widest one.
+      width: 'fit',
+      minWidth: TYPE_COLUMN_WIDTH,
+      priority: 'secondary',
+      sortValue: typeSortValue,
+      cell: (contact) => <Type contact={contact} />,
+    },
     ...(isWorkspace
       ? ([
           {
             id: 'tags',
             header: 'Tags',
             cellTestId: 'table-cell-tags',
-            width: '35%',
             priority: 'secondary',
             minWidth: 220,
             sortValue: tagSortValue,
@@ -148,6 +168,10 @@ const AddressBookTable = ({
       <dt className="text-muted-foreground">Chains</dt>
       <dd>
         <ChainLogos chains={contact.chains} />
+      </dd>
+      <dt className="text-muted-foreground">Type</dt>
+      <dd>
+        <Type contact={contact} />
       </dd>
       {isWorkspace && (
         <>

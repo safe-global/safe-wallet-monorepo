@@ -1,11 +1,11 @@
 import type { AddressBookContact } from '../types'
 
 /**
- * Tags the app adds on its own, from workspace data. Nobody can add, rename or remove them, and
- * they don't count towards the tag limits.
+ * The Type labels the app sets from workspace data. Nobody can add, rename or remove them, they
+ * don't count towards the tag limits, and their names can't be used as team tags.
  */
 export const WORKSPACE_SAFE_TAG = 'Workspace Safe'
-export const SIGNER_TAG = 'Signer of a Safe'
+export const SIGNER_TAG = 'Signer'
 
 export const SYSTEM_TAGS = [WORKSPACE_SAFE_TAG, SIGNER_TAG] as const
 

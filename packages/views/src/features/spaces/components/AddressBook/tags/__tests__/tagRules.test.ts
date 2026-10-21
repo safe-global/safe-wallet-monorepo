@@ -1,3 +1,4 @@
+import { SIGNER_TAG, WORKSPACE_SAFE_TAG } from '../systemTags'
 import { commonTags, dedupeTags, hasTag, validateTag, withoutTags, TAG_MAX_LENGTH } from '../tagRules'
 
 describe('validateTag', () => {
@@ -20,12 +21,15 @@ describe('validateTag', () => {
     expect(validateTag(tag)).toMatch(/can only contain/)
   })
 
-  it.each(['Workspace Safe', 'workspace safe', 'Signer of a Safe', 'SIGNER OF A SAFE', ' signer of a safe '])(
-    'rejects the automatic tag name %s',
-    (tag) => {
-      expect(validateTag(tag)).toMatch(/is added automatically/)
-    },
-  )
+  it.each([
+    WORKSPACE_SAFE_TAG,
+    WORKSPACE_SAFE_TAG.toLowerCase(),
+    SIGNER_TAG,
+    SIGNER_TAG.toUpperCase(),
+    ` ${SIGNER_TAG.toLowerCase()} `,
+  ])('rejects the automatic tag name %s', (tag) => {
+    expect(validateTag(tag)).toMatch(/is added automatically/)
+  })
 
   it('allows a dash inside the tag', () => {
     expect(validateTag('pre-sale')).toBeUndefined()

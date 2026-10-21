@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { countSystemTags, countTags, filterContacts, tagSortValue } from '../filters'
+import { countSystemTags, countTags, filterContacts, tagSortValue, typeSortValue } from '../filters'
 import { SIGNER_TAG, WORKSPACE_SAFE_TAG } from '../tags/systemTags'
 import { EMPTY_FILTERS, type AddressBookContact, type ContactFilters } from '../types'
 
@@ -126,22 +126,45 @@ describe('filters', () => {
   })
 
   describe('tagSortValue', () => {
-    it('sorts workspace Safes, then signers, then team tags', () => {
-      const safe = buildContact({ isWorkspaceSafe: true, tags: ['Audit'] })
-      const signer = buildContact({ signerOf: ['Treasury'], tags: ['Audit'] })
-      const tagged = buildContact({ tags: ['Audit'] })
-      const values = [safe, signer, tagged].map(tagSortValue)
+    it('sorts by the alphabetically first team tag, lowercased', () => {
+      expect(tagSortValue(buildContact({ tags: ['Vendor', 'audit', 'EU'] }))).toBe('audit')
+    })
 
-      expect(values).not.toContain(null)
-      expect([...values].sort()).toEqual(values)
+    it('ignores the automatic labels', () => {
+      const safe = buildContact({ isWorkspaceSafe: true, tags: ['Vendor'] })
+      const signer = buildContact({ signerOf: ['Treasury'], tags: ['Vendor'] })
+
+      expect(tagSortValue(safe)).toBe('vendor')
+      expect(tagSortValue(signer)).toBe('vendor')
     })
 
     it('returns no value for an untagged contact so it sorts last', () => {
       expect(tagSortValue(buildContact())).toBeNull()
     })
 
+    it('returns no value for a workspace Safe or signer without team tags', () => {
+      expect(tagSortValue(buildContact({ isWorkspaceSafe: true }))).toBeNull()
+      expect(tagSortValue(buildContact({ signerOf: ['Treasury'] }))).toBeNull()
+    })
+
     it('sorts team tags case-insensitively', () => {
       expect(tagSortValue(buildContact({ tags: ['Vendor'] }))).toBe(tagSortValue(buildContact({ tags: ['vendor'] })))
+    })
+  })
+
+  describe('typeSortValue', () => {
+    it('ranks workspace Safes before signers', () => {
+      expect(typeSortValue(buildContact({ isWorkspaceSafe: true }))).toBe(0)
+      expect(typeSortValue(buildContact({ signerOf: ['Treasury'] }))).toBe(1)
+    })
+
+    it('ranks a workspace Safe that also signs as a workspace Safe', () => {
+      expect(typeSortValue(buildContact({ isWorkspaceSafe: true, signerOf: ['Treasury'] }))).toBe(0)
+    })
+
+    it('returns no value for a contact with neither label so it sorts last', () => {
+      expect(typeSortValue(buildContact({ tags: ['Vendor'] }))).toBeNull()
+      expect(typeSortValue(buildContact({ isWorkspaceSafe: false, signerOf: [] }))).toBeNull()
     })
   })
 })

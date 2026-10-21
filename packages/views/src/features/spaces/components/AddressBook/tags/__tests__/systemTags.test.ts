@@ -7,12 +7,12 @@ describe('systemTags', () => {
       expect(systemTagsOf({ isWorkspaceSafe: false, signerOf: [] })).toEqual([])
     })
 
-    it('adds Workspace Safe for a workspace Safe and Signer of a Safe for a signer', () => {
+    it('adds Workspace Safe for a workspace Safe and Signer for a signer', () => {
       expect(systemTagsOf({ isWorkspaceSafe: true, signerOf: [] })).toEqual([WORKSPACE_SAFE_TAG])
       expect(systemTagsOf({ signerOf: ['Treasury'] })).toEqual([SIGNER_TAG])
     })
 
-    it('puts Workspace Safe before Signer of a Safe', () => {
+    it('puts Workspace Safe before Signer', () => {
       expect(systemTagsOf({ isWorkspaceSafe: true, signerOf: ['Treasury'] })).toEqual([WORKSPACE_SAFE_TAG, SIGNER_TAG])
     })
   })
@@ -33,14 +33,14 @@ describe('systemTags', () => {
   })
 
   describe('isSystemTag', () => {
-    it.each(['Workspace Safe', 'workspace safe', 'SIGNER OF A SAFE', '  Signer of a Safe  '])(
+    it.each([WORKSPACE_SAFE_TAG, 'workspace safe', SIGNER_TAG, 'SIGNER', '  signer  '])(
       'recognises %s, ignoring case and surrounding spaces',
       (tag) => {
         expect(isSystemTag(tag)).toBe(true)
       },
     )
 
-    it.each(['Vendor', 'Workspace', 'Signer', 'Safe'])('does not treat %s as automatic', (tag) => {
+    it.each(['Vendor', 'Workspace', 'Sign', 'Signers', 'Safe'])('does not treat %s as automatic', (tag) => {
       expect(isSystemTag(tag)).toBe(false)
     })
   })

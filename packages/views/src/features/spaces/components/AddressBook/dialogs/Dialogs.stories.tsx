@@ -32,7 +32,6 @@ type Story = StoryObj<typeof meta>
 const tagOptions = countTags(WORKSPACE_CONTACTS)
 const otcDesk = WORKSPACE_CONTACTS.find((contact) => contact.address === ADDRESSES.otcDesk)!
 const amara = WORKSPACE_CONTACTS.find((contact) => contact.address === ADDRESSES.amara)!
-const maya = WORKSPACE_CONTACTS.find((contact) => contact.address === ADDRESSES.maya)!
 
 /** Address, name, networks and tags. The address preview groups the characters once it is valid. */
 export const AddContact: Story = {
@@ -78,11 +77,6 @@ export const EditContactError: Story = {
 /** Every active member can edit tags. "Search or create a tag" creates one inline. */
 export const EditTags: Story = {
   render: () => <EditTagsDialog contact={amara} tagOptions={tagOptions} onSave={fn()} onClose={fn()} />,
-}
-
-/** A signer: "Signer of a Safe" is shown above the picker and can't be removed. */
-export const EditTagsOfSigner: Story = {
-  render: () => <EditTagsDialog contact={maya} tagOptions={tagOptions} onSave={fn()} onClose={fn()} />,
 }
 
 export const DeleteContact: Story = {
