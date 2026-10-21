@@ -10,6 +10,7 @@ import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Pol
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { getPolicyTokens } from '@safe-global/views/features/spaces/components/Policies/utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
+import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import {
   getPolicyStatus,
@@ -31,6 +32,7 @@ import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'
 import AllowlistTokens from './components/AllowlistTokens'
 import FailedBanner from './components/FailedBanner'
+import ScheduledBanner from './components/ScheduledBanner'
 
 type AllowlistDrawerBaseProps = {
   open: boolean
@@ -48,6 +50,7 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   policy: ActiveAllowlistPolicy
   onEdit?: () => void
   onRemove?: () => void
+  onCancelChange?: () => void
 }
 
 type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
@@ -82,7 +85,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const isRemoved = state.kind !== 'active' && state.operation === 'remove'
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
-    : { onEdit: props.onEdit, onRemove: props.onRemove }
+    : { onEdit: props.onEdit, onRemove: props.onRemove, onCancelChange: props.onCancelChange }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
@@ -95,6 +98,13 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
               <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
             </>
+          )}
+          {state.kind === 'scheduled' && policy.status === 'active' && policy.scheduledChange && (
+            <ScheduledBanner
+              title={state.bannerTitle}
+              line2={state.bannerLine2}
+              appliesAt={formatAppliesAt(policy.scheduledChange.appliesAt, Date.now())}
+            />
           )}
           {state.kind === 'closed' &&
             (outcome === 'executed' ? (

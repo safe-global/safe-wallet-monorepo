@@ -1,7 +1,9 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
 import {
+  mockActivatingAllowlist,
   mockActiveAllowlist,
+  mockAllowlistChangePending,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
@@ -180,6 +182,48 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.getByText('The allowlist is removed after the 24-hour delay.')).toBeInTheDocument()
     expect(screen.getAllByText('Removed')).toHaveLength(2)
+  })
+
+  it('says a new allowlist is not checked yet while it waits out the delay, with no action', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockActivatingAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+
+    expect(screen.getByText('Change pending')).toBeInTheDocument()
+    expect(screen.getByText("Until then, transactions aren't checked against it.")).toBeInTheDocument()
+    expect(screen.getByTestId('scheduled-applies-at')).toHaveTextContent(/^Applies in 24h · /)
+    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+  })
+
+  it('lets a signer cancel a change that waits out the delay', async () => {
+    const onCancelChange = jest.fn()
+    const { user } = renderWithUserEvent(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockAllowlistChangePending()}
+        viewer={MOCK_VIEWERS.signer}
+        onCancelChange={onCancelChange}
+      />,
+    )
+
+    expect(screen.getByText('Any signer can cancel it before then.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Cancel change' }))
+
+    expect(onCancelChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('disables Cancel change for a wallet that is not a signer', () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockAllowlistChangePending()}
+        viewer={MOCK_VIEWERS.nonSigner}
+        onCancelChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Cancel change' })).toBeDisabled()
+    expect(screen.getByText('Only signers of this Safe account can cancel this change.')).toBeInTheDocument()
   })
 
   it('disables the Edit and Remove buttons until their flows are passed in', () => {

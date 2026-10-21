@@ -12,6 +12,7 @@ export type AllowlistActionsProps = {
   /** The edit and remove flows are not built yet; without a handler the button stays disabled. */
   onEdit?: () => void
   onRemove?: () => void
+  onCancelChange?: () => void
   transactionLink?: string
   /** Absent until the transaction and chain configs have loaded. */
   reviewTransactionHref?: LinkProps['href']
@@ -22,6 +23,7 @@ const AllowlistActions = ({
   onConnectWallet,
   onEdit,
   onRemove,
+  onCancelChange,
   transactionLink,
   reviewTransactionHref,
 }: AllowlistActionsProps): ReactElement | null => {
@@ -43,6 +45,17 @@ const AllowlistActions = ({
             </Button>
           </div>
         </DrawerFooter>
+      )
+
+    case 'cancel':
+      return (
+        <PolicyDrawerActions
+          actionLabel="Cancel change"
+          variant="secondary"
+          onClick={onCancelChange}
+          hint={state.helper}
+          disabled={state.disabled || !onCancelChange}
+        />
       )
 
     case 'review':

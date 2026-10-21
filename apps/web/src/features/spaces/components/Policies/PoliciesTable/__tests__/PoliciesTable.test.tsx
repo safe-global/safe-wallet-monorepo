@@ -14,7 +14,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../../mocks/policies'
-import { mockActiveAllowlist } from '../../mocks/allowlistPolicies'
+import { mockActiveAllowlist, mockAllowlistChangePending } from '../../mocks/allowlistPolicies'
 import PoliciesTable from '../index'
 
 const mockResolveSafeName = jest.fn()
@@ -147,6 +147,12 @@ describe('PoliciesTable', () => {
     act(() => jest.runOnlyPendingTimers())
 
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signed')
+  })
+
+  it('should, when an allowlist change waits out the delay, show it as pending', () => {
+    render(<PoliciesTable policies={[mockAllowlistChangePending()]} />)
+
+    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
   })
 
   it('should, when the policy is an allowlist, show its label, recipient count and tokens', () => {

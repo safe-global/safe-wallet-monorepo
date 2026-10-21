@@ -18,3 +18,14 @@ const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
 
 export const outcomeLine = (outcome: PendingTxOutcome, operation: PendingPolicyOperation): string =>
   outcome === 'executed' ? EXECUTED_LINE[operation] : 'Close this panel to see the current policies.'
+
+export const SCHEDULED_BANNER_TITLE = 'Change pending'
+
+export const SCHEDULED_BANNER_LINE: Record<'create' | 'update', string> = {
+  create: "Until then, transactions aren't checked against it.",
+  update: 'Any signer can cancel it before then.',
+}
+
+export const CANCEL_CONNECT_HELPER = 'Connect a signer wallet to cancel the change.'
+
+export const CANCEL_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can cancel this change.'

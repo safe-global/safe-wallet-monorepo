@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../mocks/policies'
 import {
+  mockActivatingAllowlist,
   mockActiveAllowlist,
+  mockAllowlistChangePending,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
@@ -34,6 +36,7 @@ const meta = {
     names: { [MOCK_ADDRESSES.alice]: 'Alice Contractor', [MOCK_ADDRESSES.bob]: 'Bob Supplier' },
     onEdit: fn(),
     onRemove: fn(),
+    onCancelChange: fn(),
     onConnectWallet: fn(),
     policy: mockActiveAllowlist(),
     viewer: MOCK_VIEWERS.signer,
@@ -91,6 +94,18 @@ export const PendingReplaced: Story = {
 
 export const PendingDeleted: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'deleted' },
+}
+
+export const Activating: Story = { args: { policy: mockActivatingAllowlist() } }
+
+export const ChangePending: Story = { args: { policy: mockAllowlistChangePending() } }
+
+export const ChangePendingNoWallet: Story = {
+  args: { policy: mockAllowlistChangePending(), viewer: MOCK_VIEWERS.disconnected },
+}
+
+export const ChangePendingNotASigner: Story = {
+  args: { policy: mockAllowlistChangePending(), viewer: MOCK_VIEWERS.nonSigner },
 }
 
 export const UnnamedRecipients: Story = { args: { names: undefined, safe: { address: MOCK_SAFES.treasury.address } } }

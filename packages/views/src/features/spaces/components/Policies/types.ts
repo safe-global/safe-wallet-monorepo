@@ -106,6 +106,14 @@ export type AllowlistPolicyData = {
   entries: AllowlistEntry[]
 }
 
+/** An executed change waiting out the guard's 24-hour delay. `create`: the allowlist is not enforced until then. */
+// Placeholder: CGW has no field for this yet, so the shape follows the design until the API defines it.
+export type AllowlistScheduledChange = {
+  operation: 'create' | 'update'
+  /** Unix SECONDS. */
+  appliesAt: number
+}
+
 type PolicyBase = {
   /** Stable across requests. Table rows and the open detail panel are keyed on it. */
   id: string
@@ -121,7 +129,11 @@ type PolicyBase = {
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type RecoveryPolicy = PolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPolicyData }
-export type AllowlistPolicy = PolicyBase & { type: 'allowlist'; data: AllowlistPolicyData }
+export type AllowlistPolicy = PolicyBase & {
+  type: 'allowlist'
+  data: AllowlistPolicyData
+  scheduledChange?: AllowlistScheduledChange
+}
 
 export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | AllowlistPolicy
 
@@ -150,7 +162,8 @@ export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy |
 export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
 export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending' }
 
-export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed'
+export type PolicyStatus =
+  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
@@ -176,6 +189,7 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
   if (isPendingPolicy(policy)) return policy.status
+  if (isAllowlistPolicy(policy) && policy.scheduledChange) return 'change-pending'
   if (policy.enabled) return 'active'
 
   // A proposer grant has no module to switch on, so one that is not in force was never activated.

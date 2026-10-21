@@ -52,3 +52,23 @@ export const mockPendingAllowlistUpdate = (): QueuedAllowlistPolicy =>
 
 export const mockPendingAllowlistRemoval = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-remove', operation: 'remove' })
+
+const IN_24_HOURS = (): number => Math.floor(Date.now() / 1_000) + 24 * 3_600
+
+/** A new allowlist, executed and waiting out the guard's delay before it is enforced. */
+export const mockActivatingAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-activating',
+      scheduledChange: { operation: 'create', appliesAt: IN_24_HOURS() },
+    }),
+  )
+
+/** A live allowlist with an executed edit waiting out the guard's delay. */
+export const mockAllowlistChangePending = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-change-pending',
+      scheduledChange: { operation: 'update', appliesAt: IN_24_HOURS() },
+    }),
+  )

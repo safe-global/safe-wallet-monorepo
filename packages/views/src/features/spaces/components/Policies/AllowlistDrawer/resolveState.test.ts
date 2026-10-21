@@ -1,6 +1,8 @@
 import { MOCK_VIEWERS } from '@/features/spaces/components/Policies/mocks/policies'
 import {
+  mockActivatingAllowlist,
   mockActiveAllowlist,
+  mockAllowlistChangePending,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
 } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
@@ -83,6 +85,29 @@ describe('resolveAllowlistDrawerState', () => {
       action: 'none',
       bannerTitle,
       bannerLine2,
+    })
+  })
+
+  it('should offer no action while a new allowlist waits out the delay', () => {
+    expect(resolveAllowlistDrawerState(mockActivatingAllowlist(), MOCK_VIEWERS.signer, 'Treasury')).toEqual({
+      kind: 'scheduled',
+      operation: 'create',
+      action: 'none',
+      disabled: false,
+      bannerTitle: 'Change pending',
+      bannerLine2: "Until then, transactions aren't checked against it.",
+    })
+  })
+
+  it.each([
+    ['signer', MOCK_VIEWERS.signer, { action: 'cancel', disabled: false }],
+    ['viewer without a wallet', MOCK_VIEWERS.disconnected, { action: 'connect', disabled: false }],
+    ['wallet that is not a signer', MOCK_VIEWERS.nonSigner, { action: 'cancel', disabled: true }],
+  ] as const)('should, for a %s, resolve the change waiting out the delay', (_, viewer, expected) => {
+    expect(resolveAllowlistDrawerState(mockAllowlistChangePending(), viewer, 'Treasury')).toMatchObject({
+      kind: 'scheduled',
+      operation: 'update',
+      ...expected,
     })
   })
 })

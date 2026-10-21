@@ -12,6 +12,8 @@ const BADGE_BY_STATUS: Record<
   unenforced: { label: 'Not enforced', variant: 'secondary' },
   'not-activated': { label: 'Not activated', variant: 'destructive' },
   failed: { label: 'Failed', variant: 'destructive' },
+  // Executed but still in the guard's delay: the tooltip says when it applies.
+  'change-pending': { label: 'Pending', variant: 'warning' },
 }
 
 /** Status of a policy, matching the 2FA status badges on the Team table. */

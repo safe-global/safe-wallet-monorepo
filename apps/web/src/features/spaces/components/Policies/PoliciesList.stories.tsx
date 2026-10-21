@@ -13,7 +13,13 @@ import {
   mockRecoveryPolicy,
   mockUnenforcedPolicy,
 } from './mocks/policies'
-import { mockActiveAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from './mocks/allowlistPolicies'
+import {
+  mockActivatingAllowlist,
+  mockActiveAllowlist,
+  mockAllowlistChangePending,
+  mockFullySignedPendingAllowlist,
+  mockPendingAllowlist,
+} from './mocks/allowlistPolicies'
 import PoliciesList from './PoliciesList'
 
 const meta = {
@@ -74,9 +80,24 @@ export const AllowlistReadyToExecute: Story = {
   args: { policies: [mockFullySignedPendingAllowlist()] },
 }
 
+export const AllowlistActivating: Story = {
+  args: { policies: [mockActivatingAllowlist()] },
+}
+
+export const AllowlistChangePending: Story = {
+  args: { policies: [mockAllowlistChangePending()] },
+}
+
 export const WithAllowlists: Story = {
   args: {
-    policies: [...mockPolicies(), mockActiveAllowlist(), mockPendingAllowlist(), mockFullySignedPendingAllowlist()],
+    policies: [
+      ...mockPolicies(),
+      mockActiveAllowlist(),
+      mockPendingAllowlist(),
+      mockFullySignedPendingAllowlist(),
+      mockActivatingAllowlist(),
+      mockAllowlistChangePending(),
+    ],
   },
 }
 
