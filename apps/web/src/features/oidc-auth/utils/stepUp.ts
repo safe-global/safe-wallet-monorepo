@@ -5,10 +5,10 @@ import { STEP_UP_CANCELLED } from '../constants'
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
 /**
- * A static page, so the popup does not start the whole app only to report the outcome. No `.html`, like every
- * route: a host that redirects to clean URLs would drop the query, and with it the `error` of the challenge.
+ * A static page, so the popup does not start the whole app only to report the outcome. `.htm`, not `.html`:
+ * dev servers serve it only by its file name, and `serve` redirects `.html` to a clean URL without the query.
  */
-const STEP_UP_COMPLETE_PATH = '/step-up-complete'
+const STEP_UP_COMPLETE_PATH = '/step-up-complete.htm'
 
 /** Also hardcoded in `public/step-up-complete.js`. */
 export const STEP_UP_CHANNEL = 'safe-step-up'
