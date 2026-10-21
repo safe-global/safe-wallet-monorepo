@@ -39,10 +39,26 @@ export const buildAllowlistRules = (
   }))
 }
 
+/** Adding a recipient that is listed but deselected selects it again instead of listing it twice. */
+export const addAllowlistRecipients = (
+  recipients: readonly AllowlistRecipient[],
+  added: readonly AllowlistRecipient[],
+): AllowlistRecipient[] => {
+  const reselected = recipients.map((recipient) => {
+    const match = added.find(({ address }) => sameAddress(address, recipient.address))
+    return match ? { ...recipient, name: recipient.name ?? match.name, selected: true } : recipient
+  })
+  const fresh = added.filter(({ address }) => !recipients.some((recipient) => sameAddress(recipient.address, address)))
+
+  return [...reselected, ...fresh]
+}
+
 export const validateAllowlistRecipient = (
   address: string,
   { safeAddress, existing }: { safeAddress: string; existing: readonly AllowlistRecipient[] },
 ): string | undefined =>
   addressIsNotReserved(RECIPIENT_RESERVED_ERROR)(address) ??
   addressIsNotCurrentSafe(safeAddress, RECIPIENT_IS_SAFE_ERROR)(address) ??
-  (existing.some((recipient) => sameAddress(recipient.address, address)) ? RECIPIENT_DUPLICATE_ERROR : undefined)
+  (existing.some((recipient) => recipient.selected && sameAddress(recipient.address, address))
+    ? RECIPIENT_DUPLICATE_ERROR
+    : undefined)
