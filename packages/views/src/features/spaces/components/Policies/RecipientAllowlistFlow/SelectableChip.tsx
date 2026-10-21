@@ -19,16 +19,12 @@ const SelectableChip = ({
   className,
 }: SelectableChipProps): ReactElement => (
   <Toggle
-    variant="outline"
+    variant="chip"
     size="lg"
     pressed={selected}
     onPressedChange={(next) => onToggle(next)}
     aria-label={ariaLabel}
-    className={cn(
-      'gap-2 rounded-full border-border bg-transparent pr-3.5 pl-[7px] leading-none shadow-xs hover:bg-[var(--color-background-secondary)] hover:text-foreground aria-pressed:bg-card aria-pressed:hover:bg-[var(--color-background-secondary)]',
-      !selected && 'opacity-50 hover:bg-card hover:opacity-100',
-      className,
-    )}
+    className={cn('pr-3.5 pl-1.75', className)}
   >
     {children}
     {selected && (
