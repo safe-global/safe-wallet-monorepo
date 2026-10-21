@@ -184,7 +184,7 @@
     "cross-env": "^7.0.3",
     "cypress": "^16.1.1",
     "esbuild": "^0.27.2",
-    "eslint": "^9.39.4",
+    "eslint": "^9.29.0",
     "eslint-config-next": "^15.0.4",
     "eslint-plugin-no-only-tests": "^3.4.0",
     "eslint-plugin-storybook": "^10.6.0",

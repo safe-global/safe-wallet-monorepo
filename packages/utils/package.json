@@ -17,7 +17,7 @@
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.0.3",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.39.4",
+    "eslint": "^9.29.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "ethers": "6.17.0",
