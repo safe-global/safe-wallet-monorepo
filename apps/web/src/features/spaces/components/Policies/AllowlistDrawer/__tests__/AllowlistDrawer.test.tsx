@@ -77,6 +77,52 @@ describe('AllowlistDrawer', () => {
     )
   })
 
+  it('lists each token once expanded', async () => {
+    const { user } = setup(mockActiveAllowlist())
+
+    await user.click(screen.getByRole('button', { name: 'Show token details' }))
+
+    expect(screen.getAllByTestId('allowlist-token').map((token) => token.textContent)).toEqual(['USDC', 'USDT'])
+  })
+
+  it('asks a viewer without a wallet to connect one', async () => {
+    const onConnectWallet = jest.fn()
+    const { user } = renderWithUserEvent(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockActiveAllowlist()}
+        viewer={MOCK_VIEWERS.disconnected}
+        onConnectWallet={onConnectWallet}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Connect wallet' }))
+
+    expect(onConnectWallet).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('Connect a signer wallet to edit.')).toBeInTheDocument()
+  })
+
+  it('disables Edit and explains why for a wallet that is not a signer', () => {
+    setup(mockActiveAllowlist(), MOCK_VIEWERS.nonSigner)
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
+    expect(screen.getByText('Only signers of this Safe account can edit this allowlist.')).toBeInTheDocument()
+  })
+
+  it('offers the transaction link to a signer who has already signed', () => {
+    setup(mockPendingAllowlist(), MOCK_VIEWERS.signerWhoSigned)
+
+    expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  it('renders no footer when the transaction link is not known yet', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signerWhoSigned} />)
+
+    expect(screen.queryByRole('button', { name: 'Copy transaction link' })).not.toBeInTheDocument()
+  })
+
   it('disables the Edit and Remove buttons until their flows are passed in', () => {
     render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 
