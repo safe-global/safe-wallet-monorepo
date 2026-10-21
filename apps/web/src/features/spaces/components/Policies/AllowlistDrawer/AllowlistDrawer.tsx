@@ -67,6 +67,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
 
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account')
   const Icon = getPolicyIcon(policy.type)
+  const isRemoved = state.kind === 'pending' && state.operation === 'remove'
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
     : { onEdit: props.onEdit, onRemove: props.onRemove }
@@ -83,8 +84,8 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
             </>
           )}
-          <AllowlistRecipients recipients={getAllowlistRecipients(policy.data)} names={names} />
-          <AllowlistTokens tokens={getPolicyTokens(policy)} />
+          <AllowlistRecipients recipients={getAllowlistRecipients(policy.data)} names={names} isRemoved={isRemoved} />
+          <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
           <PolicyOverview
             {...overview}
             appliesTo={{

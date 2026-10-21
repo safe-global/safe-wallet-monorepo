@@ -46,3 +46,9 @@ export const mockPendingAllowlist = (overrides: Partial<QueuedAllowlistPolicy> =
 /** Every signature collected; the transaction is waiting only for execution. */
 export const mockFullySignedPendingAllowlist = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-full', confirmationsSubmitted: 2 })
+
+export const mockPendingAllowlistUpdate = (): QueuedAllowlistPolicy =>
+  mockPendingAllowlist({ id: '0xallowlist-pending-update', operation: 'update' })
+
+export const mockPendingAllowlistRemoval = (): QueuedAllowlistPolicy =>
+  mockPendingAllowlist({ id: '0xallowlist-pending-remove', operation: 'remove' })

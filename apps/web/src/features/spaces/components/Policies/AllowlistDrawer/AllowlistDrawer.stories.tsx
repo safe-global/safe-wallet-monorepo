@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../mocks/policies'
-import { mockActiveAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from '../mocks/allowlistPolicies'
+import {
+  mockActiveAllowlist,
+  mockFullySignedPendingAllowlist,
+  mockPendingAllowlist,
+  mockPendingAllowlistRemoval,
+  mockPendingAllowlistUpdate,
+} from '../mocks/allowlistPolicies'
 import { createMockStory } from '@/stories/mocks'
 import AllowlistDrawer from './AllowlistDrawer'
 
@@ -61,6 +67,14 @@ export const PendingNotASigner: Story = {
 
 export const PendingFullySigned: Story = {
   args: { ...PENDING_ARGS, policy: mockFullySignedPendingAllowlist(), viewer: MOCK_VIEWERS.nonSigner },
+}
+
+export const PendingUpdate: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlistUpdate(), viewer: MOCK_VIEWERS.signer },
+}
+
+export const PendingRemoval: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlistRemoval(), viewer: MOCK_VIEWERS.signer },
 }
 
 export const UnnamedRecipients: Story = { args: { names: undefined, safe: { address: MOCK_SAFES.treasury.address } } }

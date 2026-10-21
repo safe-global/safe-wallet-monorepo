@@ -1,6 +1,11 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
-import { mockActiveAllowlist, mockPendingAllowlist } from '../../mocks/allowlistPolicies'
+import {
+  mockActiveAllowlist,
+  mockPendingAllowlist,
+  mockPendingAllowlistRemoval,
+  mockPendingAllowlistUpdate,
+} from '../../mocks/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type { AllowlistDrawerPolicy } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
 import AllowlistDrawer from '../AllowlistDrawer'
@@ -121,6 +126,24 @@ describe('AllowlistDrawer', () => {
     render(<AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signerWhoSigned} />)
 
     expect(screen.queryByRole('button', { name: 'Copy transaction link' })).not.toBeInTheDocument()
+  })
+
+  it('marks every recipient and token as removed while a removal is pending', async () => {
+    const { user } = setup(mockPendingAllowlistRemoval())
+
+    expect(screen.getByText('This allowlist is still active until the removal is executed.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Show recipient details' }))
+    await user.click(screen.getByRole('button', { name: 'Show token details' }))
+
+    expect(screen.getAllByText('Removed')).toHaveLength(7)
+  })
+
+  it('keeps the current recipients unmarked while an update is pending', () => {
+    setup(mockPendingAllowlistUpdate())
+
+    expect(screen.getByText('The current recipients still apply until the change is executed.')).toBeInTheDocument()
+    expect(screen.queryByText('Removed')).not.toBeInTheDocument()
   })
 
   it('disables the Edit and Remove buttons until their flows are passed in', () => {
