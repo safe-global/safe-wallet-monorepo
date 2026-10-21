@@ -73,10 +73,10 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
     )?.label
 
     return {
-      previousAmount: previousAmount !== data?.amount ? previousAmount : undefined,
+      previousAmount: BigInt(existingSpendingLimit.amount) !== BigInt(amountInWei) ? previousAmount : undefined,
       previousResetTime: existingSpendingLimit.resetTimeMin !== data?.resetTime ? previousResetTime : undefined,
     }
-  }, [existingSpendingLimit, decimals, chainId, data?.amount, data?.resetTime])
+  }, [existingSpendingLimit, decimals, chainId, amountInWei, data?.resetTime])
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>

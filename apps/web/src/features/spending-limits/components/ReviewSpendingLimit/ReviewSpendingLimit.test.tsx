@@ -21,6 +21,7 @@ const MAINNET = '1'
 const ONE_DAY_IN_MINUTES = '1440'
 const ONE_WEEK_IN_MINUTES = '10080'
 const ONE_USDC = '1000000'
+const ONE_THOUSAND_USDC = '1000000000'
 
 jest.mock('../../services/spendingLimitExecution', () => ({ createNewSpendingLimitTx: jest.fn() }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
@@ -39,9 +40,9 @@ const newLimit: NewSpendingLimitFlowProps = {
   resetTime: ONE_DAY_IN_MINUTES,
 }
 
-const existingLimit = (): SpendingLimitState =>
+const existingLimit = (amount = ONE_USDC): SpendingLimitState =>
   spendingLimitStateBuilder()
-    .with({ beneficiary: newLimit.beneficiary, token: usdc, amount: ONE_USDC, resetTimeMin: ONE_WEEK_IN_MINUTES })
+    .with({ beneficiary: newLimit.beneficiary, token: usdc, amount, resetTimeMin: ONE_WEEK_IN_MINUTES })
     .build()
 
 const givenSafeHolds = (tokens: Erc20Token[]) => {
@@ -53,9 +54,9 @@ const givenSafeHolds = (tokens: Erc20Token[]) => {
   })
 }
 
-const renderReview = (spendingLimits: SpendingLimitState[] = []) => {
+const renderReview = (spendingLimits: SpendingLimitState[] = [], limit: NewSpendingLimitFlowProps = newLimit) => {
   const context = safeTxContextBuilder().build()
-  const txFlow: TxFlowContextType<NewSpendingLimitFlowProps> = { ...initialContext, data: newLimit }
+  const txFlow: TxFlowContextType<NewSpendingLimitFlowProps> = { ...initialContext, data: limit }
   render(
     <SafeTxContext.Provider value={context}>
       <TxFlowContext.Provider value={txFlow}>
@@ -97,6 +98,26 @@ describe('ReviewSpendingLimit', () => {
     expect(screen.getByTestId('old-token-amount').textContent).toBe('1')
     expect(screen.getByTestId('old-reset-time').textContent).toBe('1 week')
     expect(screen.getByText('1 day')).toBeInTheDocument()
+  })
+
+  it('shows only the old reset time when the replacing limit keeps the amount', () => {
+    renderReview([existingLimit()], { ...newLimit, amount: '1' })
+
+    expect(screen.queryByTestId('old-token-amount')).not.toBeInTheDocument()
+    expect(screen.getByTestId('old-reset-time').textContent).toBe('1 week')
+  })
+
+  it('shows only the old amount when the replacing limit keeps the reset time', () => {
+    renderReview([existingLimit()], { ...newLimit, resetTime: ONE_WEEK_IN_MINUTES })
+
+    expect(screen.getByTestId('old-token-amount').textContent).toBe('1')
+    expect(screen.queryByTestId('old-reset-time')).not.toBeInTheDocument()
+  })
+
+  it('treats a typed amount equal to the old limit as unchanged, whatever its display format', () => {
+    renderReview([existingLimit(ONE_THOUSAND_USDC)], { ...newLimit, amount: '1000', resetTime: ONE_WEEK_IN_MINUTES })
+
+    expect(screen.queryByTestId('old-token-amount')).not.toBeInTheDocument()
   })
 
   it('builds the spending limit transaction', async () => {
