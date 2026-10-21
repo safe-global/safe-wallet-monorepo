@@ -2,17 +2,18 @@
  * Story and test fixtures for the workspace address book: a fictional company, "Lumen Labs".
  * Contract addresses are the real mainnet deployments; every person, vendor and Safe is made up.
  */
-import type { AddressBookContact, ChainInfo } from '../types'
+import type { ChainInfo } from '@safe-global/views/features/spaces/types'
+import type { AddressBookContact } from '../types'
 
 const logo = (chainId: string) => `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
 
 export const CHAINS = {
-  ethereum: { chainId: '1', name: 'Ethereum', logoUri: logo('1') },
-  optimism: { chainId: '10', name: 'OP Mainnet', logoUri: logo('10') },
-  gnosis: { chainId: '100', name: 'Gnosis Chain', logoUri: logo('100') },
-  polygon: { chainId: '137', name: 'Polygon', logoUri: logo('137') },
-  base: { chainId: '8453', name: 'Base', logoUri: logo('8453') },
-  arbitrum: { chainId: '42161', name: 'Arbitrum', logoUri: logo('42161') },
+  ethereum: { chainId: '1', chainName: 'Ethereum', chainLogoUri: logo('1'), shortName: 'eth' },
+  optimism: { chainId: '10', chainName: 'OP Mainnet', chainLogoUri: logo('10'), shortName: 'oeth' },
+  gnosis: { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: logo('100'), shortName: 'gno' },
+  polygon: { chainId: '137', chainName: 'Polygon', chainLogoUri: logo('137'), shortName: 'matic' },
+  base: { chainId: '8453', chainName: 'Base', chainLogoUri: logo('8453'), shortName: 'base' },
+  arbitrum: { chainId: '42161', chainName: 'Arbitrum', chainLogoUri: logo('42161'), shortName: 'arb1' },
 } satisfies Record<string, ChainInfo>
 
 export const ALL_CHAINS: ChainInfo[] = Object.values(CHAINS)

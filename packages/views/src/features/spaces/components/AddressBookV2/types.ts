@@ -2,12 +2,7 @@
  * View models for the workspace address book. The views only render these; the app derives them
  * from the address book, the local address book and the chain configs.
  */
-
-export type ChainInfo = {
-  chainId: string
-  name: string
-  logoUri?: string
-}
+import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 
 export type AddressBookContact = {
   address: string

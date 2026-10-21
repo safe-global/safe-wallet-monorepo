@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Check } from 'lucide-react'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -14,12 +13,11 @@ import {
   type AddressBookContact,
 } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import Identicon from '@/components/common/Identicon'
-import { useCurrentChain } from '@/hooks/useChains'
 import AddLocalContact from '../SpaceAddressBook/AddLocalContact'
 import AddToWorkspaceButton from '../SpaceAddressBook/AddToWorkspaceButton'
 import RequestToAddButton from '../SpaceAddressBook/RequestToAddButton'
 import DeleteLocalContactDialog from './DeleteLocalContactDialog'
+import useAddressCellProps from './useAddressCellProps'
 
 type OpenDialog = { type: 'edit' | 'delete'; contact: AddressBookContact }
 
@@ -32,8 +30,6 @@ type LocalContactsProps = {
   isAdmin: boolean
   isInvited: boolean
 }
-
-const renderAvatar = (address: string) => <Identicon address={address} size={24} />
 
 const chainIdsOf = (contact: AddressBookContact) => contact.chains.map((chain) => chain.chainId)
 
@@ -63,7 +59,7 @@ const LocalContacts = ({
 }: LocalContactsProps) => {
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
-  const chain = useCurrentChain()
+  const addressCellProps = useAddressCellProps()
 
   const visibleContacts = useMemo(() => filterContacts(contacts, query), [contacts, query])
   const pendingAddresses = useMemo(
@@ -104,8 +100,7 @@ const LocalContacts = ({
             contacts={visibleContacts}
             permissions={FULL_PERMISSIONS}
             book="local"
-            renderAvatar={renderAvatar}
-            getExplorerLink={chain ? (address) => getBlockExplorerLink(chain, address) : undefined}
+            {...addressCellProps}
             onEdit={(contact) => setDialog({ type: 'edit', contact })}
             onDelete={(contact) => setDialog({ type: 'delete', contact })}
             renderRowAction={renderShareAction}

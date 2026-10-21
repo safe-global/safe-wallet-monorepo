@@ -1,14 +1,19 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import type { ChainInfo } from './types'
+import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 
 const MAX_VISIBLE = 3
 
 const ChainLogo = ({ chain }: { chain: ChainInfo }) =>
-  chain.logoUri ? (
-    <img src={chain.logoUri} alt={chain.name} className="ring-card size-5 rounded-full ring-2" loading="lazy" />
+  chain.chainLogoUri ? (
+    <img
+      src={chain.chainLogoUri}
+      alt={chain.chainName}
+      className="ring-card size-5 rounded-full ring-2"
+      loading="lazy"
+    />
   ) : (
     <span className="bg-muted ring-card text-muted-foreground flex size-5 items-center justify-center rounded-full text-[9px] font-bold ring-2">
-      {chain.name.slice(0, 2)}
+      {chain.chainName.slice(0, 2)}
     </span>
   )
 
@@ -16,7 +21,7 @@ const ChainLogo = ({ chain }: { chain: ChainInfo }) =>
 const ChainLogos = ({ chains }: { chains: ChainInfo[] }) => {
   const visible = chains.slice(0, MAX_VISIBLE)
   const rest = chains.length - visible.length
-  const names = chains.map((chain) => chain.name).join(', ')
+  const names = chains.map((chain) => chain.chainName).join(', ')
 
   return (
     <Tooltip>

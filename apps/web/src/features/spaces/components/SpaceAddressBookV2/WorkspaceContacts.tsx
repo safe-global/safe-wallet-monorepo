@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Download } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
@@ -14,10 +13,9 @@ import {
   NO_PERMISSIONS,
   type AddressBookContact,
 } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import Identicon from '@/components/common/Identicon'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
-import useChains, { useCurrentChain } from '@/hooks/useChains'
+import useChains from '@/hooks/useChains'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
@@ -25,6 +23,7 @@ import AddContact from '../SpaceAddressBook/AddContact'
 import DeleteContactDialog from '../SpaceAddressBook/DeleteContactDialog'
 import EditContactDialog from '../SpaceAddressBook/EditContactDialog'
 import ImportAddressBook from '../SpaceAddressBook/Import'
+import useAddressCellProps from './useAddressCellProps'
 import { toWorkspaceContacts } from './utils'
 
 type OpenDialog = { type: 'edit' | 'delete'; entry: SpaceAddressBookItemDto }
@@ -38,13 +37,11 @@ type WorkspaceContactsProps = {
   isInvited: boolean
 }
 
-const renderAvatar = (address: string) => <Identicon address={address} size={24} />
-
 const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInvited }: WorkspaceContactsProps) => {
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
   const { configs } = useChains()
-  const chain = useCurrentChain()
+  const addressCellProps = useAddressCellProps()
   const resolveMemberName = useMemberNameResolver()
   const spaceId = useCurrentSpaceId()
 
@@ -146,8 +143,7 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
           <AddressBookTable
             contacts={visibleContacts}
             permissions={isAdmin ? FULL_PERMISSIONS : NO_PERMISSIONS}
-            renderAvatar={renderAvatar}
-            getExplorerLink={chain ? (address) => getBlockExplorerLink(chain, address) : undefined}
+            {...addressCellProps}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

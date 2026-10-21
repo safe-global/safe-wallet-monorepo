@@ -33,8 +33,8 @@ describe('toWorkspaceContacts', () => {
     const [contact] = toWorkspaceContacts([item], configs, noMember)
 
     expect(contact.chains).toEqual([
-      { chainId: '1', name: 'Ethereum', logoUri: 'https://logo/1.png' },
-      { chainId: '100', name: 'Gnosis Chain', logoUri: undefined },
+      { chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png', shortName: mainnet.shortName },
+      { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null, shortName: gnosis.shortName },
     ])
   })
 
@@ -45,7 +45,7 @@ describe('toWorkspaceContacts', () => {
 
     const [contact] = toWorkspaceContacts([item], configs, noMember)
 
-    expect(contact.chains).toEqual([{ chainId: '999', name: '999' }])
+    expect(contact.chains).toEqual([{ chainId: '999', chainName: '999', chainLogoUri: null, shortName: '999' }])
   })
 
   it('resolves who added the contact from its creator', () => {
@@ -87,8 +87,8 @@ describe('toLocalContacts', () => {
         address,
         name: 'Hardware wallet',
         chains: [
-          { chainId: '1', name: 'Ethereum', logoUri: 'https://logo/1.png' },
-          { chainId: '100', name: 'Gnosis Chain', logoUri: undefined },
+          { chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png', shortName: mainnet.shortName },
+          { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null, shortName: gnosis.shortName },
         ],
         isLocal: true,
         isShared: false,

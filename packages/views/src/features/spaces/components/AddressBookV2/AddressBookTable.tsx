@@ -2,33 +2,26 @@ import type { ReactNode } from 'react'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
+import { getInitials } from '@safe-global/views/components/common/AccountRow/utils'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
 import type { AddressBookContact, AddressBookPermissions } from './types'
 
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-
 const AddedBy = ({ name }: { name?: string }) =>
   name ? (
     <span className="inline-flex min-w-0 items-center gap-1.5">
       <Avatar size="xs">
-        <AvatarFallback>{initials(name)}</AvatarFallback>
+        <AvatarFallback>{getInitials(name)}</AvatarFallback>
       </Avatar>
-      <Tooltip>
-        <TooltipTrigger render={<span className="min-w-0 truncate text-left text-sm" />}>
-          {isAddress(name) ? shortenAddress(name) : name}
-        </TooltipTrigger>
-        <TooltipContent align="start">{name}</TooltipContent>
-      </Tooltip>
+      <TruncatedText
+        variant="paragraph-small"
+        className="min-w-0"
+        text={isAddress(name) ? shortenAddress(name) : name}
+        fullText={isAddress(name) ? name : undefined}
+      />
     </span>
   ) : (
     <span className="text-muted-foreground text-xs">&mdash;</span>

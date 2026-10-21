@@ -74,7 +74,7 @@ export const Chains: Story = {
         <ChainLogos chains={ALL_CHAINS} />
       </Row>
       <Row label="No logo">
-        <ChainLogos chains={[{ chainId: '999', name: 'Hyperliquid' }]} />
+        <ChainLogos chains={[{ chainId: '999', chainName: 'Hyperliquid', chainLogoUri: null, shortName: 'hl' }]} />
       </Row>
     </div>
   ),
