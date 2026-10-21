@@ -17,6 +17,7 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
 } from './mocks/allowlistPolicies'
@@ -88,6 +89,10 @@ export const AllowlistChangePending: Story = {
   args: { policies: [mockAllowlistChangePending()] },
 }
 
+export const AllowlistFailed: Story = {
+  args: { policies: [mockFailedAllowlist()] },
+}
+
 export const WithAllowlists: Story = {
   args: {
     policies: [
@@ -97,6 +102,7 @@ export const WithAllowlists: Story = {
       mockFullySignedPendingAllowlist(),
       mockActivatingAllowlist(),
       mockAllowlistChangePending(),
+      mockFailedAllowlist(),
     ],
   },
 }

@@ -155,7 +155,12 @@ type PendingPolicyBase = PolicyBase & {
 /** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
 export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
-export type PendingAllowlistPolicy = PendingPolicyBase & { type: 'allowlist'; data: AllowlistPolicyData }
+// Placeholder: `failed` (executed but reverted, nothing changed) follows the design; CGW's pending API has no such state yet.
+export type PendingAllowlistPolicy = Omit<PendingPolicyBase, 'status'> & {
+  status: PendingPolicyBase['status'] | 'failed'
+  type: 'allowlist'
+  data: AllowlistPolicyData
+}
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy | PendingAllowlistPolicy
 
 /** Still in the queue, as opposed to executed and waiting for the indexer. */
@@ -169,7 +174,7 @@ export type PolicyStatus =
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
 
 export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
-  policy.status === 'pending' || policy.status === 'activating'
+  policy.status === 'pending' || policy.status === 'activating' || policy.status === 'failed'
 
 export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'

@@ -5,6 +5,7 @@ import {
 } from '@/features/spaces/components/Policies/mocks/policies'
 import {
   mockAllowlistChangePending,
+  mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
 } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
@@ -26,6 +27,12 @@ describe('getPendingStatusDetail', () => {
   it('should return nothing for an active or activating policy', () => {
     expect(getPendingStatusDetail(mockActiveSpendingLimit())).toBeUndefined()
     expect(getPendingStatusDetail(mockActivatingPolicy())).toBeUndefined()
+  })
+
+  it('should say a failed transaction changed nothing', () => {
+    expect(getPendingStatusDetail(mockFailedAllowlist())).toBe(
+      'The transaction failed. Nothing changed on this account.',
+    )
   })
 
   it('should say when a change waiting out the delay applies', () => {

@@ -14,7 +14,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../../mocks/policies'
-import { mockActiveAllowlist, mockAllowlistChangePending } from '../../mocks/allowlistPolicies'
+import { mockActiveAllowlist, mockAllowlistChangePending, mockFailedAllowlist } from '../../mocks/allowlistPolicies'
 import PoliciesTable from '../index'
 
 const mockResolveSafeName = jest.fn()
@@ -153,6 +153,12 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[mockAllowlistChangePending()]} />)
 
     expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when an allowlist setup failed, show it as failed', () => {
+    render(<PoliciesTable policies={[mockFailedAllowlist()]} />)
+
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
   })
 
   it('should, when the policy is an allowlist, show its label, recipient count and tokens', () => {

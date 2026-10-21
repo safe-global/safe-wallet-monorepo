@@ -1,6 +1,7 @@
 import type {
   AllowlistPolicy,
   AllowlistRecipient,
+  PendingAllowlistPolicy,
   QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, asActivePolicy } from './policies'
@@ -72,3 +73,10 @@ export const mockAllowlistChangePending = (): AllowlistPolicy & { status: 'activ
       scheduledChange: { operation: 'update', appliesAt: IN_24_HOURS() },
     }),
   )
+
+/** Executed but reverted: nothing changed on the Safe. */
+export const mockFailedAllowlist = (): PendingAllowlistPolicy => ({
+  ...mockFullySignedPendingAllowlist(),
+  id: '0xallowlist-failed',
+  status: 'failed',
+})
