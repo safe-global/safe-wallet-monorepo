@@ -57,6 +57,9 @@ const AllowlistActions = ({
     case 'copy-link':
       return transactionLink ? <CopyTransactionLink transactionLink={transactionLink} /> : null
 
+    case 'none':
+      return null
+
     // A new action must pick a branch above rather than silently rendering nothing.
     default: {
       const exhaustive: never = state

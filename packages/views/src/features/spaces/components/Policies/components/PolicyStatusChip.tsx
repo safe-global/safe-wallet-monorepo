@@ -11,6 +11,7 @@ const BADGE_BY_STATUS: Record<
   // A configured module that is not enabled enforces nothing, so it is not called active.
   unenforced: { label: 'Not enforced', variant: 'secondary' },
   'not-activated': { label: 'Not activated', variant: 'destructive' },
+  failed: { label: 'Failed', variant: 'destructive' },
 }
 
 /** Status of a policy, matching the 2FA status badges on the Team table. */

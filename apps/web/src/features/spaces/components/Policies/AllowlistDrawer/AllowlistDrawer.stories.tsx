@@ -77,4 +77,20 @@ export const PendingRemoval: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlistRemoval(), viewer: MOCK_VIEWERS.signer },
 }
 
+export const PendingExecuted: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'executed' },
+}
+
+export const PendingFailed: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'failed' },
+}
+
+export const PendingReplaced: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'replaced' },
+}
+
+export const PendingDeleted: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'deleted' },
+}
+
 export const UnnamedRecipients: Story = { args: { names: undefined, safe: { address: MOCK_SAFES.treasury.address } } }

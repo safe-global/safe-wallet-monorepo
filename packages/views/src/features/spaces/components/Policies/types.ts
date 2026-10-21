@@ -150,7 +150,7 @@ export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy |
 export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
 export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending' }
 
-export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
+export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy

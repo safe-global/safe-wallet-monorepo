@@ -1,16 +1,23 @@
 import type { AllowlistPolicy, QueuedAllowlistPolicy } from '../types'
-import type { ActiveDrawerState, PendingDrawerState, Viewer } from '../SpendingLimitDrawer/resolveState'
+import type {
+  ActiveDrawerState,
+  ClosedDrawerState,
+  PendingDrawerState,
+  PendingTxOutcome,
+  Viewer,
+} from '../SpendingLimitDrawer/resolveState'
 import {
   ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
+  PENDING_OUTCOME_TITLE,
   connectHelper,
   executeLine,
   signedAndWaitingLine,
   signAndExecuteLine,
 } from '../SpendingLimitDrawer/messages'
-import { NOT_A_SIGNER_HELPER, PENDING_BANNER_TITLE } from './messages'
+import { NOT_A_SIGNER_HELPER, PENDING_BANNER_TITLE, outcomeLine } from './messages'
 
-export type AllowlistDrawerState = ActiveDrawerState | PendingDrawerState
+export type AllowlistDrawerState = ActiveDrawerState | PendingDrawerState | ClosedDrawerState
 
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
 
@@ -54,9 +61,23 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
+const resolveClosed = (policy: QueuedAllowlistPolicy, outcome: PendingTxOutcome): ClosedDrawerState => ({
+  kind: 'closed',
+  operation: policy.operation,
+  action: 'none',
+  bannerTitle: PENDING_OUTCOME_TITLE[outcome],
+  bannerLine2: outcomeLine(outcome, policy.operation),
+})
+
 export const resolveAllowlistDrawerState = (
   policy: AllowlistDrawerPolicy,
   viewer: Viewer,
   safeName: string,
-): AllowlistDrawerState =>
-  policy.status === 'pending' ? resolvePending(policy, viewer, safeName) : resolveActive(viewer)
+  outcome?: PendingTxOutcome,
+): AllowlistDrawerState => {
+  if (policy.status === 'pending') {
+    return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
+  }
+
+  return resolveActive(viewer)
+}

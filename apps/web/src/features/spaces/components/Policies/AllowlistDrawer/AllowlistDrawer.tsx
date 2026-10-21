@@ -13,9 +13,13 @@ import { getAllowlistRecipients } from '@safe-global/views/features/spaces/compo
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import {
   getPolicyStatus,
+  type PolicyStatus,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+import type {
+  PendingTxOutcome,
+  Viewer,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
   resolveAllowlistDrawerState,
   type ActiveAllowlistPolicy,
@@ -26,6 +30,7 @@ import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'
 import AllowlistTokens from './components/AllowlistTokens'
+import FailedBanner from './components/FailedBanner'
 
 type AllowlistDrawerBaseProps = {
   open: boolean
@@ -49,12 +54,17 @@ type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   policy: QueuedAllowlistPolicy
   transactionLink?: string
   reviewTransactionHref?: LinkProps['href']
+  /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
+  outcome?: PendingTxOutcome
 }
 
 export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlistDrawerProps
 
 const isPendingDrawer = (props: AllowlistDrawerProps): props is PendingAllowlistDrawerProps =>
   props.policy.status === 'pending'
+
+/** An executed change still waits out the guard's delay, so it reads Pending rather than Activating. */
+const getOutcomeStatus = (outcome: PendingTxOutcome): PolicyStatus => (outcome === 'executed' ? 'pending' : 'failed')
 
 const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const { open, onClose, policy, viewer, safe, overview, names, onConnectWallet } = props
@@ -65,16 +75,18 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
       ? getBlockExplorerLink(chain, policy.enforcement.guardAddress)?.href
       : undefined
 
-  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account')
+  const outcome = isPendingDrawer(props) ? props.outcome : undefined
+  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
-  const isRemoved = state.kind === 'pending' && state.operation === 'remove'
+  const status = outcome ? getOutcomeStatus(outcome) : getPolicyStatus(policy)
+  const isRemoved = state.kind !== 'active' && state.operation === 'remove'
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
     : { onEdit: props.onEdit, onRemove: props.onRemove }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
-      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={getPolicyStatus(policy)} />
+      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={status} />
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
@@ -84,6 +96,12 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
             </>
           )}
+          {state.kind === 'closed' &&
+            (outcome === 'executed' ? (
+              <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
+            ) : (
+              <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />
+            ))}
           <AllowlistRecipients recipients={getAllowlistRecipients(policy.data)} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
           <PolicyOverview

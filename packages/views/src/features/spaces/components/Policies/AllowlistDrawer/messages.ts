@@ -1,4 +1,5 @@
 import type { PendingPolicyOperation } from '../types'
+import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 
 export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   create: 'The allowlist is not active as the transaction is not yet executed.',
@@ -7,3 +8,13 @@ export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
 }
 
 export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this allowlist.'
+
+// Every change to the allowlist waits out the guard's 24-hour delay after execution.
+const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
+  create: 'The allowlist applies after the 24-hour delay.',
+  update: 'The new recipients apply after the 24-hour delay.',
+  remove: 'The allowlist is removed after the 24-hour delay.',
+}
+
+export const outcomeLine = (outcome: PendingTxOutcome, operation: PendingPolicyOperation): string =>
+  outcome === 'executed' ? EXECUTED_LINE[operation] : 'Close this panel to see the current policies.'

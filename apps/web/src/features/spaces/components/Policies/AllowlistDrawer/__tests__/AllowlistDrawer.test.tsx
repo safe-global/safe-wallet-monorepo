@@ -146,6 +146,42 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByText('Removed')).not.toBeInTheDocument()
   })
 
+  it('says an executed transaction applies after the delay and offers no action', () => {
+    render(
+      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
+    )
+
+    expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+    expect(screen.getByText('The allowlist applies after the 24-hour delay.')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  it('reports a failed transaction in red and marks the policy as failed', () => {
+    render(
+      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="failed" />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('The transaction failed and can no longer be executed.')
+    expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+  })
+
+  it('keeps the removed badges once a removal has executed', () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockPendingAllowlistRemoval()}
+        viewer={MOCK_VIEWERS.signer}
+        outcome="executed"
+      />,
+    )
+
+    expect(screen.getByText('The allowlist is removed after the 24-hour delay.')).toBeInTheDocument()
+    expect(screen.getAllByText('Removed')).toHaveLength(2)
+  })
+
   it('disables the Edit and Remove buttons until their flows are passed in', () => {
     render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 

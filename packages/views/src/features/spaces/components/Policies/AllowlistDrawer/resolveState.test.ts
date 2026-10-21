@@ -67,4 +67,22 @@ describe('resolveAllowlistDrawerState', () => {
       resolveAllowlistDrawerState(mockFullySignedPendingAllowlist(), MOCK_VIEWERS.nonSigner, 'Payroll'),
     ).toMatchObject({ action: 'review', bannerLine2: 'Execute the transaction to activate.' })
   })
+
+  it.each([
+    ['executed', 'The transaction was executed.', 'The allowlist applies after the 24-hour delay.'],
+    [
+      'failed',
+      'The transaction failed and can no longer be executed.',
+      'Close this panel to see the current policies.',
+    ],
+    ['deleted', 'The transaction was deleted.', 'Close this panel to see the current policies.'],
+  ] as const)('should, once the transaction was %s, report it with no action', (outcome, bannerTitle, bannerLine2) => {
+    expect(resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll', outcome)).toEqual({
+      kind: 'closed',
+      operation: 'create',
+      action: 'none',
+      bannerTitle,
+      bannerLine2,
+    })
+  })
 })
