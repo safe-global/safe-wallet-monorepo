@@ -2,7 +2,7 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import type { Proposal } from '../types'
 
-// Production's transaction warning chips (components/transactions/Warning): same names, colours and tooltips.
+// Production's transaction warning chips (components/transactions/Warning): same names and tooltips. Untrusted is yellow here, red in production.
 export type RiskFlag = {
   key: string
   label: string
@@ -23,7 +23,7 @@ export const getRiskFlags = (tx: Proposal): RiskFlag[] => {
     flags.push({
       key: 'untrusted',
       label: 'Untrusted transaction',
-      variant: 'destructive',
+      variant: 'warning',
       hint: 'This transaction is unsigned and could have been created by anyone. To avoid phishing, only sign it if you trust the source of the link.',
       issue: true,
     })

@@ -19,42 +19,36 @@ import {
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
+import { Tag } from '@safe-global/views/components/ui/tag'
 import Identicon from '@/components/common/Identicon'
 import { getStepsStatus, type TypeLabel } from '../services/model'
+import { TYPE_HINTS } from '../services/columns'
 import type { Filter, Persona, Proposal } from '../types'
 
 // Blocked comes before Waiting on others: you can act on what blocks it.
 export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'waiting', 'awaiting']
-export const QUICK_FILTERS: Filter[] = ['sign', 'ready', 'waiting']
-// Next steps: conflicting transactions have their own section, below Ready to sign.
 export const CONFLICTING_META = {
-  label: 'Conflicting transactions',
   short: 'Conflicting',
-  description: 'Proposals that share a nonce. Only one per nonce can execute',
   icon: Split,
 }
-export const STATUS_META: Record<Filter, { label: string; description: string; icon: LucideIcon; tone: string }> = {
+export const STATUS_META: Record<Filter, { label: string; icon: LucideIcon; tone: string }> = {
   ready: {
     label: 'Ready to execute',
-    description: 'Fully signed and next in line',
     icon: CircleCheck,
     tone: 'bg-success-subtle text-success-strong',
   },
   sign: {
     label: 'Ready to sign',
-    description: 'Proposals waiting for you to sign',
     icon: PenLine,
     tone: 'bg-success-subtle text-success-strong',
   },
   awaiting: {
     label: 'Waiting on others',
-    description: 'Waiting on other signers',
     icon: Users,
     tone: 'bg-warning-subtle text-warning-strong',
   },
   waiting: {
     label: 'Blocked',
-    description: 'Waiting on an earlier transaction',
     icon: Clock3,
     tone: 'bg-warning-subtle text-warning-strong',
   },
@@ -66,15 +60,13 @@ export const TYPE_ICONS: Record<TypeLabel, LucideIcon> = {
   Bridge: ArrowRightLeft,
   Batch: Layers,
   Contract: FileCode2,
-  Update: Settings,
+  Settings,
   Nested: Network,
   'On-chain rejection': CircleX,
 }
 
-// Next steps: recoveries are not proposals. They have their own Type filter label.
+// Recoveries are not proposals. They have their own Type filter label.
 export const RECOVERY_TYPE = 'Account recovery'
-
-export type GroupBy = 'none' | 'status' | 'safe'
 
 export const chainLogoUrl = (chainId: string | undefined) =>
   `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
@@ -145,7 +137,7 @@ export function StatusChip({ tone, children }: { tone: StatusTone; children: Rea
   )
 }
 
-// Next steps: the status chip. An info icon marks a row that executes after an earlier nonce. The chip tooltip explains it.
+// The status chip. An info icon marks a row that executes after an earlier nonce. The chip tooltip explains it.
 export function StepsStatusChip({ tx, persona }: { tx: Proposal; persona: Persona }) {
   const { label, tone, after } = getStepsStatus(tx, persona)
   return (
@@ -159,5 +151,29 @@ export function StepsStatusChip({ tx, persona }: { tx: Proposal; persona: Person
         />
       )}
     </span>
+  )
+}
+
+// On a hovered or selected row the tag turns card-coloured, so it doesn't vanish into the row fill.
+export const ROW_TAG_FILL = 'group-hover/transaction:*:bg-card group-data-[state=selected]/transaction:*:bg-card'
+
+// A transaction's type as a tag: its icon and name, like the Type filter. The tooltip says what the type means.
+export function TypeTag({ type, onRow = false }: { type: TypeLabel; onRow?: boolean }) {
+  const Icon = TYPE_ICONS[type]
+  return (
+    <Tooltip delay={150}>
+      <TooltipTrigger
+        render={<span className={`flex shrink-0 ${onRow ? ROW_TAG_FILL : ''}`} role="img" />}
+        aria-label={`${type}. ${TYPE_HINTS[type]}`}
+      >
+        <Tag>
+          <Icon strokeWidth={ICON_STROKE} aria-hidden="true" />
+          {type}
+        </Tag>
+      </TooltipTrigger>
+      <TooltipContent className={HINT_CLASS}>
+        <HintContent title={type} body={TYPE_HINTS[type]} />
+      </TooltipContent>
+    </Tooltip>
   )
 }

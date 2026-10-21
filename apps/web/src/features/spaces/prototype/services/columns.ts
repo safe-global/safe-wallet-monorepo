@@ -33,24 +33,50 @@ export const getHeadline = (tx: Proposal) => {
   }
 }
 
-export const getDetail = (tx: Proposal) => {
+// Next to the type tag: what happens, without repeating the type or naming the other party.
+export const getSummary = (tx: Proposal) => {
+  const { kind } = tx
+  switch (kind.type) {
+    case 'transfer':
+      return tx.amount
+    case 'swap':
+      return `${kind.sell} → ${kind.buy}`
+    case 'bridge':
+      return kind.sell
+    case 'batch':
+      return `${kind.actions.length} actions`
+    case 'contract':
+      return kind.method
+    case 'nested':
+      return `Approves #${kind.parentNonce}`
+    case 'rejection':
+      return `Cancels #${tx.nonce}`
+    case 'settings':
+      return getTransactionLabel(tx)
+  }
+}
+
+// The summary's tooltip: the value in dollars, or what the action does.
+export const getSummaryHint = (tx: Proposal) => {
   const { kind } = tx
   const { threshold, owners } = getAccount(tx)
   switch (kind.type) {
     case 'transfer':
-      return tx.fiat
+      return tx.fiat ? `Worth about ${tx.fiat}` : undefined
     case 'swap':
-      return [kind.order === 'market' ? 'Market' : kind.order === 'limit' ? 'Limit' : 'TWAP', kind.expiry].join(' · ')
+      return `${kind.order === 'market' ? 'Market' : kind.order === 'limit' ? 'Limit' : 'TWAP'} order · ${kind.expiry}`
     case 'bridge':
-      return `Fees ${kind.fees}`
+      return `${kind.destination ? `To ${kind.destination}` : 'To an unknown network'} · Fees ${kind.fees}`
     case 'batch':
-      return [tx.amount, tx.fiat].filter(Boolean).join(' · ') || undefined
+      return [`${kind.actions.length} actions in one transaction`, tx.amount, tx.fiat].filter(Boolean).join(' · ')
     case 'contract':
-      return kind.steps?.join(' · ') ?? tx.amount
+      return [kind.verified ? 'Verified contract' : 'Unverified contract', ...(kind.steps ?? []), tx.amount]
+        .filter(Boolean)
+        .join(' · ')
     case 'nested':
-      return `Signs for ${kind.parentSafe}`
+      return `Signs #${kind.parentNonce} on ${kind.parentSafe}, a Safe this one is a signer of`
     case 'rejection':
-      return 'Cancels this nonce'
+      return `An empty transaction at #${tx.nonce}. Executing it cancels everything else at this nonce.`
     case 'settings':
       switch (kind.change.kind) {
         case 'addOwner':
@@ -64,6 +90,10 @@ export const getDetail = (tx: Proposal) => {
       }
   }
 }
+
+// Between the summary and the other party, so the line reads as a sentence.
+export const getCounterpartyJoin = (tx: Proposal) =>
+  tx.kind.type === 'transfer' ? 'to' : tx.kind.type === 'bridge' || tx.kind.type === 'batch' ? 'via' : 'on'
 
 export type Counterparty = {
   name: string
@@ -128,37 +158,9 @@ export const TYPE_HINTS: Record<TypeLabel, string> = {
   Bridge: 'Moves tokens from this network to another one.',
   Batch: 'Runs several actions together in one transaction.',
   Contract: 'Calls a function on a smart contract.',
-  Update: 'Changes this Safe’s settings, such as its signers or threshold.',
+  Settings: 'Changes this Safe’s settings, such as its signers or threshold.',
   Nested: 'Approves a transaction on another Safe that this Safe co-owns.',
   'On-chain rejection': 'Cancels the proposal at this nonce by replacing it.',
-}
-
-export const getCounterpartyHint = (tx: Proposal): { title: string; body: string } => {
-  const { kind } = tx
-  switch (kind.type) {
-    case 'settings':
-    case 'rejection':
-      return { title: 'This Safe', body: 'The change applies to this Safe itself. No funds leave it.' }
-    case 'transfer':
-      return kind.toSelf
-        ? { title: 'This Safe', body: 'The tokens go back to this Safe.' }
-        : { title: 'Recipient', body: 'The address that receives the tokens.' }
-    case 'swap':
-      return { title: 'Swap protocol', body: 'The service that fills the trade.' }
-    case 'bridge':
-      return { title: 'Bridge', body: 'The contract that carries the tokens to the other network.' }
-    case 'contract':
-      return {
-        title: kind.verified ? 'Verified contract' : 'Unverified contract',
-        body: kind.verified
-          ? 'Its source code is public, so the call can be decoded.'
-          : 'Its source code isn’t public, so we can’t decode the call.',
-      }
-    case 'batch':
-      return { title: 'Batch contract', body: 'The contract that runs each action in the batch.' }
-    case 'nested':
-      return { title: 'Parent Safe', body: 'The Safe whose transaction this one approves.' }
-  }
 }
 
 // Fixtures name every recipient, so this lists the ones treated as not in the address book.

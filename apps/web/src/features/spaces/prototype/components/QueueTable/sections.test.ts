@@ -41,8 +41,6 @@ describe('Safe order', () => {
       accounts,
       accountFilter: [],
       persona: 'owner',
-      direction: 'steps',
-      groupBy: 'safe',
       order: ['grants', 'payroll', 'treasury'],
     })
     expect(sections.map((section) => section.account?.id)).toEqual(['grants', 'payroll', 'treasury'])

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Check, CircleHelp, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { Bell, Check, CircleHelp, ShieldAlert, ShieldCheck, UserPlus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
@@ -22,7 +22,24 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import { getScenarioAccounts, getTransactionLabel, type RowSecondaryAction } from '../services/model'
+import {
+  getOutstandingSigners,
+  getScenarioAccounts,
+  getSignerName,
+  getState,
+  getTransactionLabel,
+} from '../services/model'
+import {
+  getOpsKind,
+  getPulse,
+  getSignerLoad,
+  pinEmergencies,
+  PROPOSED_OPTIONS,
+  proposedWithin,
+  PULSE,
+  type ProposedWithin,
+  type PulseKey,
+} from '../services/fleet'
 import {
   applyPreviewAction,
   createPreviewQueue,
@@ -32,26 +49,32 @@ import {
   type PreviewAction,
 } from '../services/queue'
 import { getOutsiders, getRemindable, type MenuAction } from '../services/actions'
-import { parsePersona } from '../services/personas'
+import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
 import type { Direction, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
-import { type GroupBy } from './shared'
+import { CONFLICTING_META } from './shared'
 import { useQueueFilters } from './QueueFilters/useQueueFilters'
-import { AppliedFilters, QueueToolbar } from './QueueFilters/QueueFilters'
-import { CollapseAllButton, QueueSection } from './QueueTable/QueueSection'
+import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueGroupedTable } from './QueueTable/QueueGroupedTable'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
 import { SCENARIOS, ScenarioBar, type Hypernative } from './ScenarioBar'
-import { RecoveryPanel, useRecoveries } from './Recovery/RecoveryPanel'
+import { useRecoveries } from './Recovery/RecoveryPanel'
 import { RecoveryDrawer } from './Recovery/RecoveryDrawer'
 import { QueueError, QueueSkeleton } from './QueueStates'
+import { FleetPulse } from './Fleet/FleetPulse'
+import { FleetFilterMenu } from './Fleet/FleetFilterMenu'
+import { SignerLoadTable } from './Fleet/SignerLoadTable'
+import { MemberDrawer } from './Fleet/MemberDrawer'
+import { getMemberProfile } from '../services/members'
+
+const DEFAULT_SCENARIO = 'fleet'
 
 export default function PendingQueue() {
   const router = useRouter()
-  return <PendingQueueView key={`${router.query.scenario ?? 'everyday'}:${router.query.option ?? 'table'}`} />
+  return <PendingQueueView key={`${router.query.scenario ?? DEFAULT_SCENARIO}:${router.query.option ?? 'fleet'}`} />
 }
 
 function PendingQueueView() {
@@ -59,15 +82,10 @@ function PendingQueueView() {
   const isMobile = useIsMobile()
   const isWide = useMediaQuery('(min-width: 1280px)')
   const isExtraWide = useMediaQuery('(min-width: 2160px)')
-  // One table is the default direction.
-  const direction: Direction =
-    router.query.option === 'queues' || router.query.option === 'inbox' || router.query.option === 'steps'
-      ? router.query.option
-      : 'table'
-  // One table builds on next steps. Only the table layout differs.
-  const steps = direction === 'steps' || direction === 'table'
-  const consolidated = direction === 'table'
-  const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? 'everyday'
+  // The preview opens on Fleet admin. `?option=table` shows option A.
+  const direction: Direction = router.query.option === 'table' ? 'table' : 'fleet'
+  const fleet = direction === 'fleet'
+  const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? DEFAULT_SCENARIO
   const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
 
@@ -77,23 +95,15 @@ function PendingQueueView() {
     ...account,
     nextNonce: queue.nextNonces[account.id],
   }))
-  const [groupBy, setGroupBy] = useState<GroupBy>(
-    consolidated
-      ? 'safe'
-      : router.query.groupBy === 'status' || router.query.groupBy === 'safe' || router.query.groupBy === 'none'
-        ? router.query.groupBy
-        : steps
-          ? 'safe'
-          : 'none',
-  )
   const unavailable = scenario === 'loading' || scenario === 'error'
-  // Next steps: Safes with nothing for you start collapsed.
+  // Safes with nothing for you start collapsed. Fleet admin keeps emergencies open for everyone.
   const idleSafeIds = () =>
-    steps
-      ? buildSections({ visible: items, accounts, accountFilter: [], persona, direction: 'steps', groupBy: 'safe' })
-          .filter((section) => section.urgency === undefined)
-          .map((section) => section.id)
-      : []
+    buildSections({ visible: items, accounts, accountFilter: [], persona })
+      .filter(
+        (section) =>
+          section.urgency === undefined && !(fleet && section.items.some((tx) => getOpsKind(tx) === 'emergency')),
+      )
+      .map((section) => section.id)
   const [collapsedSections, setCollapsedSections] = useState<string[]>(idleSafeIds)
   // Re-seed when the persona changes. The page does not remount for it.
   const [seededPersona, setSeededPersona] = useState(persona)
@@ -103,16 +113,35 @@ function PendingQueueView() {
   }
   const [feedback, setFeedback] = useState('')
   const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
-  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, steps)
+  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, true)
+  // Fleet admin: a pulse counter or a signer narrows the queue on top of the toolbar filters.
+  const [pulseKey, setPulseKey] = useState<PulseKey | null>(null)
+  const [signerFocus, setSignerFocus] = useState<string | null>(null)
+  const [showSigners, setShowSigners] = useState(false)
+  const [memberId, setMemberId] = useState<string | null>(null)
+  const [proposed, setProposed] = useState<ProposedWithin | null>(null)
+  // A card's own highlight shows its filter, so it gets no pill. The same filter from the Filter menu does.
+  const [fromCard, setFromCard] = useState(false)
+  const visible = fleet
+    ? filters.visible.filter(
+        (tx) =>
+          (!pulseKey || PULSE[pulseKey].match(tx, persona, items)) &&
+          (!signerFocus || (getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(signerFocus))) &&
+          (!proposed || proposedWithin(tx, proposed)),
+      )
+    : filters.visible
   // A new status filter opens every Safe. Clearing it leaves them as they are.
-  const statusKey = filters.stateFilter.join(',')
+  const statusKey = [filters.stateFilter.join(','), pulseKey, signerFocus, proposed].join('|')
   const [seededStatus, setSeededStatus] = useState(statusKey)
   if (seededStatus !== statusKey) {
     setSeededStatus(statusKey)
     if (statusKey) setCollapsedSections([])
   }
   // Safe order is set on load and when the person or filters change. Acting on a transaction doesn't move its Safe.
-  const rankSafes = () => rankAccounts(accounts, items, persona).map((account) => account.id)
+  const rankSafes = () => {
+    const ranked = rankAccounts(accounts, items, persona).map((account) => account.id)
+    return fleet ? pinEmergencies(ranked, items) : ranked
+  }
   const [safeOrder, setSafeOrder] = useState(rankSafes)
   const orderKey = [
     persona,
@@ -138,8 +167,10 @@ function PendingQueueView() {
 
   const [review, setReview] = useState<Proposal | null>(null)
   const [cursorId, setCursorId] = useState<string | null>(null)
+  // The J/K cursor stays after the drawer closes only for keyboard users. A click clears it on close.
+  const usingKeys = useRef(false)
   const [reviewSections, setReviewSections] = useState<string[]>([])
-  const [signersOpen, setSignersOpen] = useState(!steps)
+  const [signersOpen, setSignersOpen] = useState(false)
   const [showTechnical, setShowTechnical] = useState(false)
   const [sectionsMode, setSectionsMode] = useState<SectionsMode>('default')
   const [sectionsVersion, setSectionsVersion] = useState(0)
@@ -175,7 +206,7 @@ function PendingQueueView() {
     setReplacement(null)
     if (!keepLayout) {
       setReviewSections([])
-      setSignersOpen(!steps)
+      setSignersOpen(false)
       setSectionsMode('default')
       setShowTechnical(false)
     }
@@ -196,7 +227,7 @@ function PendingQueueView() {
     )
   }
 
-  // Next steps: Sign and Execute open the drawer confirm step. It replaces the production flow.
+  // Sign and Execute open the drawer confirm step. It replaces the production flow.
   const startFlow = (tx: Proposal, flow: PreviewAction) => {
     reviewTx(tx)
     setPendingAction(flow)
@@ -228,13 +259,6 @@ function PendingQueueView() {
     setFeedback(
       `${getTransactionLabel(tx)} deleted from the queue in this preview. Signatures already given stay valid.`,
     )
-  }
-
-  const runSecondaryAction = (tx: Proposal, action: RowSecondaryAction) => {
-    reviewTx(tx)
-    setReject(true)
-    setReviewSections(['cancel'])
-    if (action === 'replace') setReplacement({ recipient: tx.recipient, amount: tx.amount })
   }
 
   const performAction = (action: PreviewAction) => {
@@ -278,31 +302,57 @@ function PendingQueueView() {
     )
   }
 
-  const filtering = filters.applied.length > 0 || filters.search.length > 0
-  // Next steps: while filtering, hide Safes with no matches.
+  const filtering = filters.applied.length > 0 || filters.search.length > 0 || !!pulseKey || !!signerFocus || !!proposed
+  // While filtering, hide Safes with no matches.
   const sections = buildSections({
-    visible: filters.visible,
+    visible,
     accounts,
     accountFilter: filters.accountFilter,
     persona,
-    direction: steps ? 'steps' : direction,
-    groupBy,
-    order: steps ? safeOrder : undefined,
-  }).filter(
-    (section) =>
-      !steps ||
-      !filtering ||
-      section.category !== 'safe' ||
-      section.items.length > 0 ||
-      recoveries.forAccount(section.account!.id).length > 0,
-  )
-  const isCollapsed = (id: string) => groupBy !== 'none' && collapsedSections.includes(id)
+    order: safeOrder,
+  }).filter((section) => !filtering || section.items.length > 0 || recoveries.forAccount(section.account.id).length > 0)
+  const signerLoad = fleet ? getSignerLoad(filters.visible, accounts, persona) : []
+  const focusedLoad = signerLoad.find((signer) => signer.id === signerFocus)
+  const fleetPills: AppliedPill[] = [
+    ...(pulseKey && !fromCard
+      ? [{ section: 'pulse', title: 'Fleet', values: [PULSE[pulseKey].label], clear: () => setPulseKey(null) }]
+      : []),
+    ...(signerFocus
+      ? [
+          {
+            section: 'signer',
+            title: 'Signer',
+            values: [getSignerName(signerFocus)],
+            clear: () => setSignerFocus(null),
+          },
+        ]
+      : []),
+    ...(proposed && !(fromCard && proposed === 'stale')
+      ? [
+          {
+            section: 'proposed',
+            title: 'Proposed',
+            values: [PROPOSED_OPTIONS.find((option) => option.value === proposed)!.label],
+            clear: () => setProposed(null),
+          },
+        ]
+      : []),
+  ]
+  const resetFilters = () => {
+    filters.reset()
+    setPulseKey(null)
+    setSignerFocus(null)
+    setProposed(null)
+  }
+  const isCardActive = (key: PulseKey) =>
+    key === 'stale' ? proposed === 'stale' : key === 'conflicting' ? filters.conflicting : pulseKey === key
+  const isCollapsed = (id: string) => collapsedSections.includes(id)
   const toggleSection = (id: string) =>
     setCollapsedSections((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]))
   const allCollapsed = sections.length > 0 && sections.every((section) => isCollapsed(section.id))
   const toggleAll = () => setCollapsedSections(allCollapsed ? [] : sections.map((section) => section.id))
-  const safeBatchFor = (section: { account?: { id: string } }) =>
-    section.account ? bulkBatches.find((batch) => batch.account.id === section.account?.id) : undefined
+  const safeBatchFor = (section: { account: { id: string } }) =>
+    bulkBatches.find((batch) => batch.account.id === section.account.id)
   // "Go to #N": open the section of the blocking transaction, then select it and open its review.
   const goTo = (tx: Proposal) => {
     const section = sections.find((candidate) => candidate.items.some((item) => item.id === tx.id))
@@ -323,9 +373,10 @@ function PendingQueueView() {
       const command = event.metaKey || event.ctrlKey
       if (command || event.altKey || bulkScope !== null) return
       const offset = event.key === 'j' ? 1 : event.key === 'k' ? -1 : 0
+      if (offset || event.key === 'Enter') usingKeys.current = true
       if (review) {
         if (offset) stepReview(offset)
-        if (event.key === 'e' && steps) toggleAllSections()
+        if (event.key === 'e') toggleAllSections()
         return
       }
       const cursorIndex = reviewOrder.findIndex((tx) => tx.id === cursorId)
@@ -341,8 +392,15 @@ function PendingQueueView() {
       )
         reviewTx(reviewOrder[cursorIndex])
     }
+    const onPointerDown = () => {
+      usingKeys.current = false
+    }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('pointerdown', onPointerDown)
+    }
   })
 
   const linkedTx = typeof router.query.tx === 'string' ? router.query.tx : undefined
@@ -365,25 +423,21 @@ function PendingQueueView() {
   const sectionProps = {
     items,
     persona,
-    groupBy,
-    steps,
     isWide,
-    showNoteText: steps && isExtraWide,
+    showNoteText: isExtraWide,
     onBulkExecute: setBulkScope,
-    onGroupByChange: setGroupBy,
     reviewId: review?.id,
     cursorId: review ? undefined : (cursorId ?? undefined),
     bulkHover,
     replaceHover,
     onReplaceHover: setReplaceHover,
     onReview: reviewTx,
-    onSecondaryAction: runSecondaryAction,
     remindedIds,
-    onRemind: steps ? remindSigners : undefined,
-    onGoTo: steps ? goTo : undefined,
-    onStartFlow: steps ? startFlow : undefined,
-    onMenuAction: steps ? runMenuAction : undefined,
-    recoveries: steps ? recoveries : undefined,
+    onRemind: remindSigners,
+    onGoTo: goTo,
+    onStartFlow: startFlow,
+    onMenuAction: runMenuAction,
+    recoveries,
   }
 
   return (
@@ -451,20 +505,85 @@ function PendingQueueView() {
                 </AlertAction>
               </Alert>
             )}
+            {fleet && !unavailable && (
+              <FleetPulse
+                pulse={getPulse(items, persona, (match) => filters.optionCount('conflicting', match))}
+                isActive={(key) => !showSigners && isCardActive(key)}
+                onSelect={(key) => {
+                  // One card at a time. Stale and Conflicting are the Proposal date and Status filters, so they stay in sync.
+                  const turnOn = !isCardActive(key)
+                  setPulseKey(turnOn && key !== 'stale' && key !== 'conflicting' ? key : null)
+                  if (key === 'stale' || proposed === 'stale') setProposed(turnOn && key === 'stale' ? 'stale' : null)
+                  if (filters.conflicting !== (turnOn && key === 'conflicting')) filters.toggleConflicting()
+                  setFromCard(turnOn)
+                  setShowSigners(false)
+                }}
+                signers={{
+                  count: signerLoad.length,
+                  open: showSigners,
+                  onToggle: () => {
+                    if (!showSigners) {
+                      setPulseKey(null)
+                      if (proposed === 'stale') setProposed(null)
+                      if (fromCard && filters.conflicting) filters.toggleConflicting()
+                    }
+                    setShowSigners(!showSigners)
+                  },
+                }}
+              />
+            )}
             <QueueToolbar
               filters={filters}
-              accounts={steps ? orderedAccounts : accounts}
+              accounts={orderedAccounts}
               hasItems={items.length > 0}
-              groupBy={groupBy}
-              onGroupByChange={setGroupBy}
-              groupingAsView={steps}
-              hideViewSwitch={consolidated}
+              extraMenu={
+                fleet && (
+                  <FleetFilterMenu
+                    items={filters.visible}
+                    load={signerLoad}
+                    persona={persona}
+                    signer={signerFocus}
+                    onSignerChange={(id) => {
+                      setSignerFocus(id)
+                      setShowSigners(false)
+                    }}
+                    proposed={proposed}
+                    onProposedChange={(value) => {
+                      setProposed(value)
+                      setFromCard(false)
+                    }}
+                  />
+                )
+              }
             />
-            <AppliedFilters filters={filters} groupBy={groupBy} onGroupByChange={setGroupBy} groupingAsView={steps} />
-            {!(steps && groupBy === 'safe') && <RecoveryPanel controller={recoveries} isWide={isWide} />}
+            <AppliedFilters
+              filters={filters}
+              extra={fleetPills}
+              hidden={fromCard && filters.conflicting ? [CONFLICTING_META.short] : []}
+              actions={
+                focusedLoad &&
+                !isYou(focusedLoad.id, persona) &&
+                (focusedLoad.member || canInvite(persona)) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setFeedback(
+                        focusedLoad.member
+                          ? `Reminder sent to ${getSignerName(focusedLoad.id)} for ${focusedLoad.txs.length} ${focusedLoad.txs.length === 1 ? 'transaction' : 'transactions'} in this preview.`
+                          : `Invite sent to ${getSignerName(focusedLoad.id)} in this preview. They get reminders once they join.`,
+                      )
+                    }
+                  >
+                    {focusedLoad.member ? <Bell /> : <UserPlus />}
+                    {focusedLoad.member ? 'Remind' : 'Invite'} {getSignerName(focusedLoad.id)}
+                  </Button>
+                )
+              }
+            />
             {scenario === 'loading' && <QueueSkeleton />}
             {scenario === 'error' && <QueueError onRetry={() => setOption({ scenario: 'everyday' })} />}
-            {!unavailable && !filters.visible.length && !recoveries.visible.length && (
+            {!unavailable && !showSigners && !visible.length && !recoveries.visible.length && (
               <Empty className="rounded-2xl border border-border bg-card">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -481,14 +600,33 @@ function PendingQueueView() {
                 </EmptyHeader>
                 {items.length > 0 && (
                   <EmptyContent>
-                    <Button variant="outline" onClick={filters.reset}>
+                    <Button variant="outline" onClick={resetFilters}>
                       Clear filters
                     </Button>
                   </EmptyContent>
                 )}
               </Empty>
             )}
-            {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && consolidated && (
+            {!unavailable && showSigners && (
+              <SignerLoadTable
+                load={signerLoad}
+                persona={persona}
+                onShow={(id) => {
+                  setSignerFocus(id)
+                  setShowSigners(false)
+                }}
+                onOpen={setMemberId}
+                onRemind={({ id, txs }) =>
+                  setFeedback(
+                    `Reminder sent to ${getSignerName(id)} for ${txs.length} ${txs.length === 1 ? 'transaction' : 'transactions'} in this preview.`,
+                  )
+                }
+                onInvite={({ id }) =>
+                  setFeedback(`Invite sent to ${getSignerName(id)} in this preview. They get reminders once they join.`)
+                }
+              />
+            )}
+            {!unavailable && !showSigners && (visible.length > 0 || recoveries.visible.length > 0) && (
               <QueueGroupedTable
                 sections={sections}
                 isCollapsed={isCollapsed}
@@ -498,32 +636,12 @@ function PendingQueueView() {
                 {...sectionProps}
               />
             )}
-            {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && !consolidated && (
-              <div className={`flex flex-col ${steps ? 'gap-6' : 'gap-10'}`}>
-                {/* Next steps: right-aligned over the section chevrons. */}
-                {steps && groupBy !== 'none' && (
-                  <div className="-mb-4 flex justify-end">
-                    <CollapseAllButton allCollapsed={allCollapsed} onToggle={toggleAll} />
-                  </div>
-                )}
-                {sections.map((section) => (
-                  <QueueSection
-                    key={section.id}
-                    section={section}
-                    collapsed={isCollapsed(section.id)}
-                    onToggle={() => toggleSection(section.id)}
-                    safeBatch={safeBatchFor(section)}
-                    {...sectionProps}
-                  />
-                ))}
-              </div>
-            )}
             <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-2">
                 <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
                 transactions.
               </span>
-              {!isMobile && filters.visible.length > 0 && (
+              {!isMobile && !showSigners && visible.length > 0 && (
                 <span className="flex items-center gap-1">
                   <Kbd>J</Kbd>
                   <Kbd>K</Kbd> to move, <Kbd>Enter</Kbd> to open
@@ -562,11 +680,13 @@ function PendingQueueView() {
           }}
           feedback={feedback}
           onStep={stepReview}
-          onClose={() => setReview(null)}
+          onClose={() => {
+            setReview(null)
+            if (!usingKeys.current) setCursorId(null)
+          }}
           onReview={reviewTx}
           onAction={performAction}
           onProposeAlternative={proposeAlternative}
-          steps={steps}
           remindedIds={remindedIds}
           onRemind={remindSigners}
           onMenuAction={runMenuAction}
@@ -580,6 +700,34 @@ function PendingQueueView() {
           canCancel={recoveries.open ? recoveries.canCancel(recoveries.open) : false}
           onCancel={() => recoveries.open && recoveries.cancel(recoveries.open)}
           onClose={() => recoveries.setOpenId(null)}
+        />
+        <MemberDrawer
+          member={memberId ? getMemberProfile(memberId, accounts, items, persona) : null}
+          persona={persona}
+          onClose={() => setMemberId(null)}
+          onOpenTx={(tx) => {
+            setMemberId(null)
+            reviewTx(tx)
+          }}
+          onOpenSafe={(account) => {
+            setMemberId(null)
+            setShowSigners(false)
+            if (!filters.accountFilter.includes(account.id)) filters.toggleAccount(account.id)
+            setCollapsedSections((ids) => ids.filter((id) => id !== `safe-${account.id}`))
+          }}
+          onShowInQueue={(id) => {
+            setMemberId(null)
+            setSignerFocus(id)
+            setShowSigners(false)
+          }}
+          onRemind={({ name, waiting }) =>
+            setFeedback(
+              `Reminder sent to ${name} for ${waiting.length} ${waiting.length === 1 ? 'transaction' : 'transactions'} in this preview.`,
+            )
+          }
+          onInvite={({ name }) =>
+            setFeedback(`Invite sent to ${name} in this preview. They get reminders once they join.`)
+          }
         />
         <ConfirmActionDialog
           confirm={pendingConfirm}

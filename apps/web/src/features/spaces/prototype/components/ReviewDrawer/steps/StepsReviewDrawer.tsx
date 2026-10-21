@@ -1,13 +1,11 @@
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
-import { getDetail, getHeadline, TYPE_HINTS } from '../../../services/columns'
 import { getStatusHint } from '../../../services/actions'
-import { getAccount, getConflicts, getState, getTransactionLabel, getTypeLabel } from '../../../services/model'
+import { getAccount, getConflicts, getState, getTransactionLabel } from '../../../services/model'
 import { getOwnerWallet } from '../../../services/nextSteps'
 import { isSignerOf } from '../../../services/personas'
-import { HintContent, StatusChip, StepsStatusChip, TYPE_ICONS } from '../../shared'
-import type { Hypernative } from '../../ScenarioBar'
+import { StatusChip, StepsStatusChip } from '../../shared'
 import type { ReviewDrawerProps } from '../ReviewDrawer'
 import { SharedDrawerHeader } from '../../Panel/SharedDrawerHeader'
 import {
@@ -23,7 +21,7 @@ import {
 } from './StepsSections'
 import { ConfirmStep, StepsFooter } from './StepsFooter'
 
-// Next steps drawer: same title, status and actions as the queue row.
+// Same title, status and actions as the queue row.
 export function StepsReviewDrawer({
   review,
   items,
@@ -42,12 +40,9 @@ export function StepsReviewDrawer({
   hypernative = 'in',
   showTechnical = false,
   onToggleTechnical,
-}: ReviewDrawerProps & { hypernative?: Hypernative; showTechnical?: boolean; onToggleTechnical?: () => void }) {
-  const type = review ? getTypeLabel(review) : 'Send'
-  const Icon = TYPE_ICONS[type]
+}: ReviewDrawerProps) {
   const account = review ? getAccount(review) : undefined
   const competing = review ? getConflicts(review, items).length : 0
-  const detail = review ? getDetail(review) : undefined
   return (
     <Drawer
       resizable
@@ -60,11 +55,10 @@ export function StepsReviewDrawer({
         account && (
           <SharedDrawerHeader
             media={{
-              kind: 'icon',
-              icon: Icon,
-              iconHint: <HintContent title={type} body={TYPE_HINTS[type]} />,
-              title: getHeadline(review),
-              subtitle: detail && <span className="min-w-0 truncate">{detail}</span>,
+              kind: 'safe',
+              address: account.iconAddress,
+              title: account.name,
+              subtitle: `Nonce #${review.nonce} · ${account.network}`,
             }}
             onPrevious={() => onStep(-1)}
             onNext={() => onStep(1)}

@@ -22,7 +22,7 @@ export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collap
   collapse: CollapseAll
 }
 
-// One table: a single column header, and each Safe or status is a band that collapses its rows.
+// One table: a single column header, and each Safe is a band that collapses its rows.
 export function QueueGroupedTable({
   sections,
   isCollapsed,
@@ -31,10 +31,10 @@ export function QueueGroupedTable({
   collapse,
   ...props
 }: QueueGroupedTableProps) {
-  const { groupBy, steps, isWide, showNoteText, persona, recoveries } = props
-  const columns = getColumns(groupBy, isWide, steps)
-  const widths = getColumnWidths(isWide, steps, showNoteText)
-  const { scroller, overflowing } = useScrollOverflow(steps, sections.map((section) => isCollapsed(section.id)).join())
+  const { isWide, showNoteText, persona, recoveries } = props
+  const columns = getColumns(isWide)
+  const widths = getColumnWidths(showNoteText)
+  const { scroller, overflowing } = useScrollOverflow(sections.map((section) => isCollapsed(section.id)).join())
   return (
     <Card radius="xl" size="none">
       <CardContent>
@@ -49,17 +49,10 @@ export function QueueGroupedTable({
                 <col key={label} className={widths[label]} />
               ))}
             </colgroup>
-            <QueueTableHead
-              columns={columns}
-              groupBy={groupBy}
-              steps={steps}
-              onGroupByChange={props.onGroupByChange}
-              collapse={collapse}
-            />
+            <QueueTableHead columns={columns} collapse={collapse} />
             {sections.map((section) => {
               const collapsed = isCollapsed(section.id)
-              const safeRecoveries =
-                groupBy === 'safe' && section.account ? (recoveries?.forAccount(section.account.id) ?? []) : []
+              const safeRecoveries = recoveries?.forAccount(section.account.id) ?? []
               return (
                 <Fragment key={section.id}>
                   <TableBody>
@@ -69,7 +62,7 @@ export function QueueGroupedTable({
                         onClick={() => onToggle(section.id)}
                       >
                         <span className="flex justify-center">
-                          <SectionToggle section={section} collapsed={collapsed} inTable />
+                          <SectionToggle section={section} collapsed={collapsed} />
                         </span>
                       </TableCell>
                       <TableCell
@@ -77,13 +70,11 @@ export function QueueGroupedTable({
                         className="rounded-r-lg bg-foreground/[0.03] py-0! pr-3! transition-colors group-hover/band:bg-foreground/[0.06]"
                       >
                         <SectionHeader
-                          inTable
                           section={section}
                           collapsed={collapsed}
                           onToggle={() => onToggle(section.id)}
                           safeBatch={getSafeBatch(section)}
                           onBulkExecute={props.onBulkExecute}
-                          steps={steps}
                           persona={persona}
                           recoveryCount={safeRecoveries.length}
                         />

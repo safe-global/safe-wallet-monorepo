@@ -8,10 +8,12 @@ export type Scenario =
   | 'partial'
   | 'recovery'
   | 'many-safes'
+  | 'protocol'
+  | 'fleet'
   | 'loading'
   | 'error'
   | 'empty'
-export type Direction = 'queues' | 'inbox' | 'steps' | 'table'
+export type Direction = 'table' | 'fleet'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
 export type Account = {
@@ -57,6 +59,8 @@ export type Proposal = {
   queueNextNonce?: number
   kind: TransactionKind
   origin?: 'replacement'
+  // Fleet admin: why this is urgent. Shown as the drawer's first alert; its Safe is pinned to the top.
+  emergency?: string
   proposedBy?: string
   note?: { text: string; author: string; date: string; onchain?: boolean }
 }

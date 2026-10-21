@@ -105,8 +105,113 @@ export const manySafesAccounts: Account[] = MANY_SAFES.map(([id, name, network, 
     threshold: 2,
   }
 })
-export const knownAccounts = [...accounts, ...manySafesAccounts]
-export const getScenarioAccounts = (scenario: Scenario) => (scenario === 'many-safes' ? knownAccounts : accounts)
+// Protocol team: 50 Safes, one per team and chain. Most chains run the same set of Safes.
+const PROTOCOL_CHAINS: [network: string, chainId: string][] = [
+  ['Ethereum', '1'],
+  ['Arbitrum', '42161'],
+  ['Base', '8453'],
+  ['Optimism', '10'],
+  ['Polygon', '137'],
+  ['Gnosis', '100'],
+  ['BNB Chain', '56'],
+  ['Avalanche', '43114'],
+]
+const TREASURY_SIGNERS = ['Dev', 'Ana', 'Max', 'Jonas', 'Lena']
+const SECURITY_SIGNERS = ['Jonas', 'Lena', 'Max', 'Ana', UNNAMED_SIGNER]
+const OPS_SIGNERS = ['Dev', 'Ana', 'Max', 'Lena']
+const PROTOCOL_TEAMS: [id: string, name: string, chains: number, owners: string[], threshold: number][] = [
+  ['treasury', 'Treasury', 5, TREASURY_SIGNERS, 3],
+  ['bridge', 'Bridge escrow', 8, SECURITY_SIGNERS, 3],
+  ['security', 'Security council', 3, SECURITY_SIGNERS, 3],
+  ['liquidity', 'Liquidity', 8, OPS_SIGNERS, 2],
+  ['incentives', 'Incentives', 8, OPS_SIGNERS, 2],
+  ['market', 'Market making', 4, OPS_SIGNERS, 2],
+  ['grants', 'Grants', 3, OPS_SIGNERS, 2],
+  ['vesting', 'Vesting', 3, TREASURY_SIGNERS, 3],
+  ['keepers', 'Keepers', 4, OPS_SIGNERS, 2],
+  ['payroll', 'Payroll', 2, ['Dev', 'Ana', 'Sam'], 2],
+  ['reserve', 'DAO reserve', 2, TREASURY_SIGNERS, 3],
+]
+const PAYROLL_CHAINS = ['Base', 'Gnosis']
+export const protocolAccounts: Account[] = PROTOCOL_TEAMS.flatMap(([team, name, count, owners, threshold]) =>
+  PROTOCOL_CHAINS.filter(([network]) => team !== 'payroll' || PAYROLL_CHAINS.includes(network))
+    .slice(0, count)
+    .map(([network, chainId]) => {
+      const id = `${team}-${network.toLowerCase().replace(/ /g, '-')}`
+      const address = fixtureAddress(id)
+      return {
+        id,
+        name: `${name} ${network}`,
+        network,
+        chainId,
+        address: shortAddress(address),
+        iconAddress: address,
+        // Sam signs one Safe only. Omar signs an idle Safe, so nothing waits on him.
+        owners:
+          team === 'payroll' && network !== 'Base'
+            ? owners.filter((owner) => owner !== 'Sam')
+            : id === 'reserve-arbitrum'
+              ? [...owners, 'Omar']
+              : owners,
+        nextNonce: 4 + ([...id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 180),
+        threshold,
+      }
+    }),
+)
+// Fleet admin: 20 Safes and 11 signers, with conflicts, untrusted and stale proposals to monitor.
+const CHAIN_IDS: Record<string, string> = {
+  Ethereum: '1',
+  Arbitrum: '42161',
+  Base: '8453',
+  Optimism: '10',
+  Gnosis: '100',
+}
+const FLEET_SAFES: [name: string, network: string, owners: string[], threshold: number][] = [
+  ['Treasury', 'Ethereum', TREASURY_SIGNERS, 3],
+  ['Treasury', 'Arbitrum', TREASURY_SIGNERS, 3],
+  ['Treasury', 'Base', TREASURY_SIGNERS, 3],
+  ['Security council', 'Ethereum', ['Jonas', 'Lena', 'Max', 'Nadia', UNNAMED_SIGNER], 3],
+  ['Security council', 'Arbitrum', ['Jonas', 'Lena', 'Max', 'Nadia', UNNAMED_SIGNER], 3],
+  ['Bridge escrow', 'Ethereum', ['Jonas', 'Lena', 'Theo', 'Ana'], 3],
+  ['Bridge escrow', 'Base', ['Jonas', 'Lena', 'Theo', 'Ana'], 3],
+  ['Bridge escrow', 'Optimism', ['Jonas', 'Lena', 'Theo', 'Ana'], 3],
+  ['Liquidity', 'Ethereum', ['Dev', 'Ana', 'Max', 'Kai'], 2],
+  ['Liquidity', 'Arbitrum', ['Dev', 'Ana', 'Max', 'Kai'], 2],
+  ['Liquidity', 'Base', ['Dev', 'Ana', 'Max', 'Kai'], 2],
+  ['Market making', 'Ethereum', ['Dev', 'Max', 'Kai', 'Theo'], 2],
+  ['Market making', 'Arbitrum', ['Dev', 'Max', 'Kai', 'Theo'], 2],
+  ['Grants', 'Optimism', ['Ana', 'Lena', 'Nadia', 'Theo'], 2],
+  ['Grants', 'Base', ['Ana', 'Lena', 'Nadia', 'Theo'], 2],
+  ['Payroll', 'Base', ['Dev', 'Ana', 'Sam'], 2],
+  ['Payroll', 'Gnosis', ['Dev', 'Ana', 'Nadia'], 2],
+  ['Vesting', 'Ethereum', ['Dev', 'Max', 'Jonas', 'Lena'], 3],
+  ['Keepers', 'Arbitrum', ['Ana', 'Kai', 'Theo'], 2],
+  ['DAO reserve', 'Ethereum', ['Dev', 'Ana', 'Max', 'Jonas', 'Omar'], 3],
+]
+export const fleetAccounts: Account[] = FLEET_SAFES.map(([name, network, owners, threshold]) => {
+  const id = `fleet-${name.toLowerCase().replace(/ /g, '-')}-${network.toLowerCase()}`
+  const address = fixtureAddress(id)
+  return {
+    id,
+    name: `${name} ${network}`,
+    network,
+    chainId: CHAIN_IDS[network],
+    address: shortAddress(address),
+    iconAddress: address,
+    owners,
+    nextNonce: 3 + ([...id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 120),
+    threshold,
+  }
+})
+export const knownAccounts = [...accounts, ...manySafesAccounts, ...protocolAccounts, ...fleetAccounts]
+export const getScenarioAccounts = (scenario: Scenario) =>
+  scenario === 'many-safes'
+    ? [...accounts, ...manySafesAccounts]
+    : scenario === 'protocol'
+      ? protocolAccounts
+      : scenario === 'fleet'
+        ? fleetAccounts
+        : accounts
 
 const queued = (
   account: string,
@@ -151,6 +256,285 @@ export const generateBatchActions = (count: number, recipient = 'Supplier'): Bat
       value: `${((index % 7) + 1) * 250} USDC`,
     }
   })
+
+// Fleet admin: 6 conflicting proposals at 3 nonces, 3 untrusted, 5 stale for 7+ days.
+const fleetProposals = (): Proposal[] => {
+  const at = (
+    account: string,
+    offset: number,
+    recipient: string,
+    amount: string,
+    signers: string[],
+    age: string,
+    kind?: TransactionKind,
+  ) => {
+    const id = `fleet-${account}`
+    return queued(
+      id,
+      fleetAccounts.find((item) => item.id === id)!.nextNonce + offset,
+      recipient,
+      amount,
+      signers,
+      age,
+      kind,
+    )
+  }
+  const reject = (account: string, signers: string[], age: string): Proposal => ({
+    ...at(account, 0, 'This Safe account', '0 ETH', signers, age, { type: 'rejection' }),
+    id: `fleet-${account}-reject`,
+  })
+  const untrusted = (tx: Proposal): Proposal => ({ ...tx, proposedBy: `Proposer · ${tx.recipient.split(' · ')[1]}` })
+  const addPriya: TransactionKind = { type: 'settings', change: { kind: 'addOwner', owner: 'Priya' } }
+  const priya = 'Priya · 0x3e1b…09cd'
+  return [
+    {
+      ...at('security-council-ethereum', 0, 'Bridge router · 0x4b2a…91fe', '', ['Jonas'], '25m ago', {
+        type: 'contract',
+        contract: 'Bridge router',
+        method: 'pause',
+        verified: true,
+      }),
+      emergency:
+        'Monitoring flagged unusual outflows from the bridge router. Pausing stops every bridge transfer until the council unpauses it.',
+    },
+    at('treasury-ethereum', 0, 'Audit firm · 0x2c4d…8e1f', '180,000 USDC', ['Dev', 'Ana'], '12d ago'),
+    reject('treasury-ethereum', ['Max'], '1d ago'),
+    at('treasury-ethereum', 1, 'Coinbase Prime · 0x7a9b…c210', '2,000 ETH', ['Dev'], '9d ago'),
+    at('treasury-base', 0, 'Coinbase Prime · 0x7a9b…c210', '250,000 USDC', ['Ana', 'Max'], '6h ago'),
+    at('market-making-ethereum', 0, 'Market making Ethereum policy', '', ['Max'], '3d ago', {
+      type: 'settings',
+      change: { kind: 'changeThreshold', threshold: 1 },
+    }),
+    reject('market-making-ethereum', ['Kai'], '1d ago'),
+    at('liquidity-arbitrum', 0, 'CoW Swap · USDC → ETH', '400,000 USDC', ['Dev'], '3h ago', {
+      type: 'swap',
+      sell: '400,000 USDC',
+      buy: '124.8 ETH',
+      order: 'market',
+      expiry: 'Expires in 20h',
+    }),
+    {
+      ...at('liquidity-arbitrum', 0, 'Uniswap v4 · ETH/USDC', '400,000 USDC', ['Ana'], '2h ago'),
+      id: 'fleet-liquidity-arbitrum-alt',
+    },
+    untrusted(at('liquidity-base', 0, 'Unknown · 0x9f3e…77c1', '480,000 USDT', [], '35m ago')),
+    untrusted(at('grants-optimism', 0, 'Unknown · 0x1d0c…a3e9', '120,000 USDC', [], '2h ago')),
+    untrusted(at('keepers-arbitrum', 0, 'Unknown · 0x5b7e…c0d4', '60 ETH', [], '5h ago')),
+    at('vesting-ethereum', 0, 'Investor unlock · 0x77fe…2c10', '2,000,000 SAFE', ['Max', 'Jonas'], '15d ago'),
+    at('grants-base', 0, '14 recipients · Batch transfer', '310,000 USDC', ['Ana'], '8d ago', {
+      type: 'batch',
+      actions: generateBatchActions(14, 'Grantee'),
+    }),
+    at('bridge-escrow-optimism', 0, priya, '', ['Jonas'], '10d ago', addPriya),
+    at('bridge-escrow-ethereum', 0, priya, '', ['Jonas', 'Lena', 'Theo'], '1d ago', addPriya),
+    at('bridge-escrow-base', 0, priya, '', ['Jonas'], '1d ago', addPriya),
+    at('security-council-arbitrum', 0, 'Timelock guard', '', ['Jonas'], '2d ago', {
+      type: 'settings',
+      change: { kind: 'setGuard', guard: 'Timelock guard' },
+    }),
+    at('liquidity-ethereum', 0, 'Uniswap v4 · ETH/USDC', '1,200 ETH', ['Dev', 'Ana'], '2h ago'),
+    at('market-making-arbitrum', 0, 'Litware Markets · 0x51c7…9a02', '1,000,000 USDC', ['Max'], '30m ago'),
+    at('payroll-base', 0, '31 recipients · Batch transfer', '412,000 USDC', ['Ana'], '4h ago', {
+      type: 'batch',
+      actions: generateBatchActions(31, 'Employee'),
+    }),
+    at('payroll-gnosis', 0, '18 recipients · Batch transfer', '96,500 EURe', ['Dev', 'Ana'], '3h ago', {
+      type: 'batch',
+      actions: generateBatchActions(18, 'Employee'),
+    }),
+    // The busiest Safes, each with 5 to 10 transactions queued.
+    at('security-council-ethereum', 1, 'Nadia · 0x6d2a…b4f0', '', ['Jonas', 'Lena'], '1d ago', {
+      type: 'settings',
+      change: { kind: 'removeOwner', owner: 'Nadia' },
+    }),
+    at('security-council-ethereum', 2, 'Whitehat · 0x0b9d…e441', '50,000 USDC', ['Lena'], '2d ago'),
+    at('security-council-ethereum', 3, 'Security council Ethereum policy', '', ['Jonas'], '2d ago', {
+      type: 'settings',
+      change: { kind: 'changeThreshold', threshold: 4 },
+    }),
+    at('security-council-ethereum', 4, 'Recovery module', '', ['Max'], '3d ago', {
+      type: 'settings',
+      change: { kind: 'enableModule', module: 'Recovery module' },
+    }),
+    at('treasury-ethereum', 2, 'Northwind · 0x2a8c…f3b1', '75,000 USDC', ['Ana'], '2d ago'),
+    at('treasury-ethereum', 3, 'CoW Swap · ETH → USDC', '300 ETH', ['Dev'], '1d ago', {
+      type: 'swap',
+      sell: '300 ETH',
+      buy: '958,000 USDC',
+      order: 'limit',
+      expiry: 'Expires in 3d',
+    }),
+    at('treasury-ethereum', 4, 'Legal counsel · 0x4e6f…1a2b', '42,000 USDC', ['Max'], '5h ago'),
+    at('treasury-ethereum', 5, 'Contoso Ltd · 0x4f2a…c81d', '18,500 USDC', ['Dev', 'Ana'], '2h ago'),
+    at('liquidity-arbitrum', 1, 'Camelot · ETH/ARB', '90 ETH', ['Kai'], '1d ago'),
+    at('liquidity-arbitrum', 2, 'Uniswap v4 · ARB/USDC', '500,000 ARB', ['Dev'], '20h ago'),
+    at('liquidity-arbitrum', 3, 'Merkl · 0x48d1…0f6e', '200,000 ARB', ['Max'], '6h ago'),
+    at('liquidity-arbitrum', 4, 'Market making Arbitrum · 0x9d1c…77e0', '1,000,000 USDC', ['Ana'], '1h ago'),
+    at('liquidity-ethereum', 1, 'Curve · 3pool', '2,000,000 USDC', ['Dev'], '1d ago'),
+    at('liquidity-ethereum', 2, 'Aave v3 · 0x6c2f…a914', '500 ETH', ['Kai'], '20h ago'),
+    at('liquidity-ethereum', 3, 'Balancer · wstETH/ETH', '800 ETH', ['Max', 'Ana'], '8h ago'),
+    at('liquidity-ethereum', 4, 'Lido · 0x1d4e…7b30', '1,000 ETH', ['Dev'], '4h ago'),
+    at('market-making-ethereum', 1, 'Litware Markets · 0x51c7…9a02', '2,500,000 USDC', ['Kai'], '2d ago'),
+    at('market-making-ethereum', 2, 'Fabrikam OTC · 0x90ab…12c3', '800 ETH', ['Theo'], '1d ago'),
+    at('market-making-ethereum', 3, 'Tailspin Labs · 0x55c1…e3f0', '1,200,000 USDC', ['Dev'], '9h ago'),
+    at('vesting-ethereum', 1, 'Advisor unlock · 0x31aa…7c02', '250,000 SAFE', ['Jonas'], '4d ago'),
+    at('vesting-ethereum', 2, 'Team unlock · 0x8b2e…0f19', '1,500,000 SAFE', ['Max'], '3d ago'),
+    at('vesting-ethereum', 3, 'Vesting escrow · 0x92c4…aa31', '500,000 SAFE', ['Lena', 'Jonas'], '2d ago'),
+    at('vesting-ethereum', 4, 'Investor unlock · 0x77fe…2c10', '750,000 SAFE', ['Dev'], '6h ago'),
+    at('treasury-base', 1, 'Coinbase Prime · 0x7a9b…c210', '120,000 USDC', ['Jonas'], '5d ago'),
+    at('treasury-base', 2, 'Aerodrome · ETH/USDC', '80 ETH', ['Ana', 'Lena'], '2d ago'),
+    at('treasury-base', 3, 'Northwind · 0x2a8c…f3b1', '30,000 USDC', ['Dev'], '1d ago'),
+    at('treasury-base', 4, 'Morpho · 0x5e81…c2d7', '400,000 USDC', ['Max'], '3h ago'),
+    at('payroll-base', 1, 'Contractor · 0x1c9f…77aa', '12,000 USDC', ['Dev'], '3d ago'),
+    at('payroll-base', 2, '6 recipients · Batch transfer', '48,000 USDC', ['Sam'], '2d ago', {
+      type: 'batch',
+      actions: generateBatchActions(6, 'Contractor'),
+    }),
+    at('payroll-base', 3, 'Benefits provider · 0x6a1d…92e3', '22,400 USDC', ['Ana'], '1d ago'),
+    at('payroll-base', 4, 'Contractor · 0x4c7b…10ef', '9,500 USDC', ['Dev', 'Sam'], '4h ago'),
+    at('bridge-escrow-ethereum', 1, 'Theo · 0x5d91…a0b7', '', ['Jonas'], '4d ago', {
+      type: 'settings',
+      change: { kind: 'removeOwner', owner: 'Theo' },
+    }),
+    at('bridge-escrow-ethereum', 2, 'Bridge router · 0x4b2a…91fe', '5,000,000 USDC', ['Lena'], '2d ago'),
+    at('bridge-escrow-ethereum', 3, 'Bridge escrow Ethereum policy', '', ['Ana'], '1d ago', {
+      type: 'settings',
+      change: { kind: 'changeThreshold', threshold: 2 },
+    }),
+    at('bridge-escrow-ethereum', 4, 'Bridge router · 0x4b2a…91fe', '1,200 ETH', ['Jonas', 'Theo'], '5h ago'),
+    at('payroll-gnosis', 1, 'Contractor · 0x7e2a…3c90', '8,200 EURe', ['Nadia'], '4d ago'),
+    at('payroll-gnosis', 2, '9 recipients · Batch transfer', '41,000 EURe', ['Dev'], '2d ago', {
+      type: 'batch',
+      actions: generateBatchActions(9, 'Employee'),
+    }),
+    at('payroll-gnosis', 3, 'Benefits provider · 0x6a1d…92e3', '14,300 EURe', ['Ana'], '1d ago'),
+    at('payroll-gnosis', 4, 'Contractor · 0x2f8d…b561', '6,750 EURe', ['Nadia', 'Dev'], '2h ago'),
+  ]
+}
+
+// Protocol team: two emergencies, a signer rotation across the bridge Safes, config changes, untrusted and stale proposals.
+const protocolProposals = (): Proposal[] => {
+  const at = (
+    account: string,
+    offset: number,
+    recipient: string,
+    amount: string,
+    signers: string[],
+    age: string,
+    kind?: TransactionKind,
+  ) =>
+    queued(
+      account,
+      protocolAccounts.find((item) => item.id === account)!.nextNonce + offset,
+      recipient,
+      amount,
+      signers,
+      age,
+      kind,
+    )
+  const contract = (name: string, method: string): TransactionKind => ({
+    type: 'contract',
+    contract: name,
+    method,
+    verified: true,
+  })
+  const addPriya: TransactionKind = { type: 'settings', change: { kind: 'addOwner', owner: 'Priya' } }
+  const priya = 'Priya · 0x3e1b…09cd'
+  const untrusted = (tx: Proposal): Proposal => ({ ...tx, proposedBy: `Proposer · ${tx.recipient.split(' · ')[1]}` })
+  return [
+    {
+      ...at(
+        'security-ethereum',
+        0,
+        'Bridge router · 0x4b2a…91fe',
+        '',
+        ['Jonas'],
+        '25m ago',
+        contract('Bridge router', 'pause'),
+      ),
+      emergency:
+        'Monitoring flagged unusual outflows from the bridge router. Pausing stops every bridge transfer until the council unpauses it.',
+    },
+    {
+      ...at('bridge-arbitrum', 0, 'USDC · 0x2b7c…e406', '', ['Lena'], '40m ago', contract('USDC', 'approve')),
+      emergency:
+        'A bridge adapter with an open USDC approval was reported compromised. This sets the approval to 0 so it can no longer move funds.',
+    },
+    at('bridge-arbitrum', 1, priya, '', ['Jonas'], '1d ago', addPriya),
+    at('bridge-ethereum', 0, priya, '', ['Jonas', 'Lena', 'Ana'], '1d ago', addPriya),
+    at('bridge-base', 0, priya, '', ['Jonas', 'Lena'], '1d ago', addPriya),
+    at('bridge-optimism', 0, priya, '', ['Jonas'], '1d ago', addPriya),
+    at('bridge-polygon', 0, priya, '', ['Jonas', 'Ana'], '1d ago', addPriya),
+    at('bridge-gnosis', 0, priya, '', ['Jonas'], '1d ago', addPriya),
+    at('bridge-bnb-chain', 0, priya, '', ['Jonas', 'Lena', 'Max'], '1d ago', addPriya),
+    at('bridge-avalanche', 0, priya, '', ['Jonas'], '1d ago', addPriya),
+    at('market-ethereum', 0, 'Market making Ethereum policy', '', ['Max'], '3d ago', {
+      type: 'settings',
+      change: { kind: 'changeThreshold', threshold: 1 },
+    }),
+    at('incentives-base', 0, 'Allowance module', '', ['Dev'], '2d ago', {
+      type: 'settings',
+      change: { kind: 'enableModule', module: 'Allowance module' },
+    }),
+    at('vesting-ethereum', 0, 'Timelock guard', '', ['Jonas'], '5d ago', {
+      type: 'settings',
+      change: { kind: 'setGuard', guard: 'Timelock guard' },
+    }),
+    untrusted(at('liquidity-bnb-chain', 0, 'Unknown · 0x9f3e…77c1', '480,000 USDT', [], '35m ago')),
+    // Conflicts: signers reject the untrusted proposal and the threshold drop to 1 at the same nonces.
+    {
+      ...at('liquidity-bnb-chain', 0, 'This Safe account', '0 ETH', ['Dev'], '20m ago', { type: 'rejection' }),
+      id: 'liquidity-bnb-chain-reject',
+    },
+    {
+      ...at('market-ethereum', 0, 'This Safe account', '0 ETH', ['Ana'], '1d ago', { type: 'rejection' }),
+      id: 'market-ethereum-reject',
+    },
+    untrusted(at('grants-ethereum', 0, 'Unknown · 0x1d0c…a3e9', '120,000 USDC', [], '2h ago')),
+    at('treasury-ethereum', 0, 'Audit firm · 0x2c4d…8e1f', '180,000 USDC', ['Dev', 'Ana'], '12d ago'),
+    at('treasury-ethereum', 1, 'Coinbase Prime · 0x7a9b…c210', '2,000 ETH', ['Dev'], '9d ago'),
+    at('reserve-ethereum', 0, 'Treasury Ethereum · 0x8675…c3d2', '5,000,000 USDC', ['Max', 'Jonas'], '15d ago'),
+    at('grants-arbitrum', 0, '14 recipients · Batch transfer', '310,000 ARB', ['Ana'], '8d ago', {
+      type: 'batch',
+      actions: generateBatchActions(14, 'Grantee'),
+    }),
+    at('keepers-optimism', 0, 'Gelato · 0x3a1f…bb02', '2 ETH', ['Ana'], '11d ago'),
+    at('treasury-arbitrum', 0, 'CoW Swap · USDC → ETH', '400,000 USDC', ['Dev'], '3h ago', {
+      type: 'swap',
+      sell: '400,000 USDC',
+      buy: '124.8 ETH',
+      order: 'market',
+      expiry: 'Expires in 20h',
+    }),
+    at('treasury-base', 0, 'Coinbase Prime · 0x7a9b…c210', '250,000 USDC', ['Ana', 'Max'], '6h ago'),
+    at('liquidity-ethereum', 0, 'Uniswap v4 · ETH/USDC', '1,200 ETH', ['Dev', 'Ana'], '2h ago'),
+    at('liquidity-arbitrum', 0, 'Uniswap v4 · ETH/USDC', '800 ETH', ['Ana', 'Max'], '4h ago'),
+    at('liquidity-base', 0, 'Aerodrome · ETH/USDC', '300 ETH', ['Dev'], '1h ago'),
+    at('liquidity-optimism', 0, 'Velodrome · ETH/OP', '150 ETH', ['Max'], '5h ago'),
+    at('incentives-arbitrum', 0, '40 recipients · Batch transfer', '900,000 ARB', ['Ana'], '1d ago', {
+      type: 'batch',
+      actions: generateBatchActions(40, 'Liquidity provider'),
+    }),
+    at('incentives-optimism', 0, '25 recipients · Batch transfer', '500,000 OP', ['Dev', 'Max'], '20h ago', {
+      type: 'batch',
+      actions: generateBatchActions(25, 'Liquidity provider'),
+    }),
+    at('incentives-polygon', 0, 'Merkl · 0x48d1…0f6e', '200,000 POL', ['Lena'], '7h ago'),
+    at('market-arbitrum', 0, 'Litware Markets · 0x51c7…9a02', '3,000,000 USDC', ['Ana', 'Max'], '1d ago'),
+    at('market-base', 0, 'Litware Markets · 0x51c7…9a02', '1,000,000 USDC', ['Dev'], '30m ago'),
+    at('payroll-base', 0, '31 recipients · Batch transfer', '412,000 USDC', ['Ana'], '4h ago', {
+      type: 'batch',
+      actions: generateBatchActions(31, 'Employee'),
+    }),
+    at('payroll-gnosis', 0, '18 recipients · Batch transfer', '96,500 EURe', ['Dev', 'Ana'], '3h ago', {
+      type: 'batch',
+      actions: generateBatchActions(18, 'Employee'),
+    }),
+    at('keepers-ethereum', 0, 'Chainlink Automation · 0x6593…a2b1', '5,000 LINK', ['Max'], '1d ago'),
+    at('vesting-arbitrum', 0, 'Investor unlock · 0x77fe…2c10', '1,000,000 ARB', ['Max', 'Jonas'], '2d ago'),
+    at('grants-base', 0, 'Northwind · 0x2a8c…f3b1', '75,000 USDC', ['Dev', 'Lena'], '6h ago'),
+  ]
+}
 const proposals: Proposal[] = [
   {
     id: 'payroll-17',
@@ -405,6 +789,8 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
   if (scenario === 'empty' || scenario === 'loading' || scenario === 'error') return []
   const items = proposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))
   if (scenario === 'many-safes') return [...items, ...manySafesProposals()]
+  if (scenario === 'protocol') return protocolProposals()
+  if (scenario === 'fleet') return fleetProposals()
   if (scenario === 'conflict')
     items.push({
       id: 'treasury-42-swap',
@@ -582,7 +968,7 @@ export const TYPE_LABELS = [
   'Bridge',
   'Batch',
   'Contract',
-  'Update',
+  'Settings',
   'Nested',
   'On-chain rejection',
 ] as const
@@ -595,7 +981,7 @@ export const getTypeLabel = (tx: Proposal): TypeLabel =>
       bridge: 'Bridge',
       batch: 'Batch',
       contract: 'Contract',
-      settings: 'Update',
+      settings: 'Settings',
       nested: 'Nested',
       rejection: 'On-chain rejection',
     }) as const

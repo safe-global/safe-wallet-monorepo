@@ -9,8 +9,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -23,27 +21,11 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
 import { getAccount, getConflicts, getTypeLabel, TYPE_LABELS } from '../../services/model'
 import type { Account, Filter } from '../../types'
-import {
-  chainLogoUrl,
-  CONFLICTING_META,
-  QUICK_FILTERS,
-  RECOVERY_TYPE,
-  STATUS_META,
-  STATUS_ORDER,
-  TYPE_ICONS,
-  type GroupBy,
-} from '../shared'
+import { chainLogoUrl, CONFLICTING_META, RECOVERY_TYPE, STATUS_META, TYPE_ICONS } from '../shared'
 import type { QueueFilterState } from './useQueueFilters'
 
 const APPLIED_PILL = 'h-7 bg-card pr-2.5 pl-3 shadow-xs transition-colors hover:bg-muted'
-const GROUPING_LABELS: Record<Exclude<GroupBy, 'none'>, string> = { safe: 'Safe', status: 'Status' }
-const GROUPING_OPTIONS: { value: GroupBy; label: string; hint: string }[] = [
-  { value: 'safe', label: 'Safe', hint: 'Safe view' },
-  { value: 'status', label: 'Status', hint: 'Status view' },
-  { value: 'none', label: 'List', hint: 'Every proposal in one list' },
-]
-
-function FilterOption({
+export function FilterOption({
   label,
   checked,
   count,
@@ -78,7 +60,7 @@ function FilterOption({
   )
 }
 
-function FilterSectionTitle({ title, summary }: { title: string; summary?: string }) {
+export function FilterSectionTitle({ title, summary }: { title: string; summary?: string }) {
   return (
     <span className="flex flex-1 items-center gap-2 pr-2">
       {title}
@@ -98,15 +80,13 @@ type QueueFiltersProps = {
   filters: QueueFilterState
   accounts: Account[]
   hasItems: boolean
-  groupBy: GroupBy
-  onGroupByChange: (groupBy: GroupBy) => void
-  // Next steps: grouping is a view setting, not a filter.
-  groupingAsView?: boolean
-  // One table: always by Safe. The Status and Safe filters cover the other view.
-  hideViewSwitch?: boolean
+  // Fleet admin: more sections in the Filter menu, after Type.
+  extraMenu?: ReactNode
 }
 
-// Next steps statuses, in section order.
+export type AppliedPill = { section: string; title: string; values: string[]; clear: () => void }
+
+// Statuses in section order.
 const STEPS_STATUSES: { status: Filter; label: string }[] = [
   { status: 'ready', label: 'Execute' },
   { status: 'sign', label: 'Sign' },
@@ -114,42 +94,7 @@ const STEPS_STATUSES: { status: Filter; label: string }[] = [
   { status: 'awaiting', label: 'Waiting' },
 ]
 
-const VIEWS = GROUPING_OPTIONS.filter((option) => option.value !== 'none')
-
-// Next steps: a switch between the two views.
-function ViewSwitch({ groupBy, onGroupByChange }: Pick<QueueFiltersProps, 'groupBy' | 'onGroupByChange'>) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label="View"
-      className="flex h-9 items-center gap-0.5 rounded-md border border-border bg-card p-[3px] shadow-xs"
-    >
-      {VIEWS.map((option) => {
-        const active = groupBy === option.value
-        return (
-          <Tooltip key={option.value} delay={300}>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  onClick={() => onGroupByChange(option.value)}
-                  className={`h-full cursor-pointer rounded-[8px] px-3 text-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 ${active ? 'bg-muted font-medium text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                />
-              }
-            >
-              {option.label}
-            </TooltipTrigger>
-            <TooltipContent>{option.hint}</TooltipContent>
-          </Tooltip>
-        )
-      })}
-    </div>
-  )
-}
-
-function ToolbarDropdown({
+export function ToolbarDropdown({
   label,
   tooltip,
   selected,
@@ -312,15 +257,7 @@ function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filt
   )
 }
 
-export function QueueToolbar({
-  filters,
-  accounts,
-  hasItems,
-  groupBy,
-  onGroupByChange,
-  groupingAsView,
-  hideViewSwitch,
-}: QueueFiltersProps) {
+export function QueueToolbar({ filters, accounts, hasItems, extraMenu }: QueueFiltersProps) {
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3">
       <SearchInput
@@ -331,45 +268,8 @@ export function QueueToolbar({
         onChange={(event) => filters.setSearch(event.target.value)}
         onClear={() => filters.setSearch('')}
       />
-      {groupingAsView && (
-        <>
-          {!hideViewSwitch && <ViewSwitch groupBy={groupBy} onGroupByChange={onGroupByChange} />}
-          {/* The Status view already splits by status. */}
-          {hasItems && groupBy !== 'status' && <StatusDropdown filters={filters} />}
-          {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}
-        </>
-      )}
-      {hasItems && !groupingAsView && (
-        <div role="group" aria-label="Quick filters" className="flex flex-wrap items-center gap-2">
-          {QUICK_FILTERS.map((status) => ({ status, label: STATUS_META[status].label })).map(({ status, label }) => {
-            const meta = STATUS_META[status]
-            const count = filters.optionCount('statuses', (tx) => filters.matches(tx, status))
-            const pressed = filters.stateFilter.includes(status)
-            return (
-              <Tooltip key={status} delay={300}>
-                <TooltipTrigger
-                  render={
-                    <button
-                      type="button"
-                      aria-pressed={pressed}
-                      aria-label={`${label}, ${count}`}
-                      onClick={() => filters.toggleStatus(status)}
-                      className={`flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border bg-card pr-3 pl-1.5 text-sm shadow-xs outline-none transition-colors hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 ${pressed ? 'border-foreground' : 'border-border'}`}
-                    />
-                  }
-                >
-                  <span className={`flex size-6 items-center justify-center rounded ${meta.tone}`} aria-hidden="true">
-                    <meta.icon className="size-3.5" strokeWidth={ICON_STROKE} />
-                  </span>
-                  {label}
-                  <span className="tabular-nums text-muted-foreground">{count}</span>
-                </TooltipTrigger>
-                <TooltipContent>{meta.description}</TooltipContent>
-              </Tooltip>
-            )
-          })}
-        </div>
-      )}
+      {hasItems && <StatusDropdown filters={filters} />}
+      {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}
       <DropdownMenu>
         <Tooltip delay={300}>
           <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="outline" />} />}>
@@ -379,22 +279,47 @@ export function QueueToolbar({
           <TooltipContent>All filters</TooltipContent>
         </Tooltip>
         <DropdownMenuContent align="end" className="w-60">
-          {groupingAsView && (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <FilterSectionTitle title="Status" summary={filters.summaries.statuses} />
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-60">
-                <StepsStatusOptions filters={filters} />
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          )}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <FilterSectionTitle title="Status" summary={filters.summaries.statuses} />
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-60">
+              <StepsStatusOptions filters={filters} />
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <FilterSectionTitle title="Safe account" summary={filters.summaries.accounts} />
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="w-64">
               <SafeAccountOptions filters={filters} accounts={accounts} />
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <FilterSectionTitle title="Type" summary={filters.summaries.types} />
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-60">
+              {TYPE_LABELS.map((type) => {
+                const TypeIcon = TYPE_ICONS[type]
+                return (
+                  <FilterOption
+                    key={type}
+                    label={type}
+                    checked={filters.typeFilter.includes(type)}
+                    count={filters.optionCount('types', (tx) => getTypeLabel(tx) === type)}
+                    icon={<TypeIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                    onToggle={() => filters.toggleType(type)}
+                  />
+                )
+              })}
+              <FilterOption
+                label={RECOVERY_TYPE}
+                checked={filters.typeFilter.includes(RECOVERY_TYPE)}
+                count={filters.recoveryCount}
+                icon={<LifeBuoy className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                onToggle={() => filters.toggleType(RECOVERY_TYPE)}
+              />
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuSub>
@@ -422,75 +347,7 @@ export function QueueToolbar({
               ))}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <FilterSectionTitle title="Type" summary={filters.summaries.types} />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-60">
-              {TYPE_LABELS.map((type) => {
-                const TypeIcon = TYPE_ICONS[type]
-                return (
-                  <FilterOption
-                    key={type}
-                    label={type}
-                    checked={filters.typeFilter.includes(type)}
-                    count={filters.optionCount('types', (tx) => getTypeLabel(tx) === type)}
-                    icon={<TypeIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-                    onToggle={() => filters.toggleType(type)}
-                  />
-                )
-              })}
-              {groupingAsView && (
-                <FilterOption
-                  label={RECOVERY_TYPE}
-                  checked={filters.typeFilter.includes(RECOVERY_TYPE)}
-                  count={filters.recoveryCount}
-                  icon={<LifeBuoy className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-                  onToggle={() => filters.toggleType(RECOVERY_TYPE)}
-                />
-              )}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          {!groupingAsView && (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <FilterSectionTitle title="Status" summary={filters.summaries.statuses} />
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-64">
-                {STATUS_ORDER.map((status) => {
-                  const StatusIcon = STATUS_META[status].icon
-                  return (
-                    <FilterOption
-                      key={status}
-                      label={STATUS_META[status].label}
-                      checked={filters.stateFilter.includes(status)}
-                      count={filters.optionCount('statuses', (tx) => filters.matches(tx, status))}
-                      icon={<StatusIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-                      onToggle={() => filters.toggleStatus(status)}
-                    />
-                  )
-                })}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          )}
-          {!groupingAsView && <DropdownMenuSeparator />}
-          {!groupingAsView && (
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <FilterSectionTitle
-                  title="Group by"
-                  summary={groupBy === 'none' ? undefined : GROUPING_LABELS[groupBy]}
-                />
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-44">
-                <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupByChange(value as GroupBy)}>
-                  <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="status">Status</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="safe">Safe</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          )}
+          {extraMenu}
           {filters.applied.length > 0 && (
             <>
               <DropdownMenuSeparator />
@@ -515,22 +372,21 @@ export function QueueToolbar({
 
 export function AppliedFilters({
   filters,
-  groupBy,
-  onGroupByChange,
-  groupingAsView,
-}: Pick<QueueFiltersProps, 'filters' | 'groupBy' | 'onGroupByChange' | 'groupingAsView'>) {
+  extra = [],
+  hidden = [],
+  actions,
+}: Pick<QueueFiltersProps, 'filters'> & {
+  // Fleet admin: the pulse counter and signer filters show here too.
+  extra?: AppliedPill[]
+  // Fleet admin: values a selected card already shows, so they get no pill.
+  hidden?: string[]
+  actions?: ReactNode
+}) {
   const pills = [
-    ...filters.applied,
-    ...(groupBy === 'none' || groupingAsView
-      ? []
-      : [
-          {
-            section: 'grouping',
-            title: 'Group by',
-            values: [GROUPING_LABELS[groupBy]],
-            clear: () => onGroupByChange('none'),
-          },
-        ]),
+    ...extra,
+    ...filters.applied
+      .map((pill) => ({ ...pill, values: pill.values.filter((value) => !hidden.includes(value)) }))
+      .filter((pill) => pill.values.length > 0),
   ]
   if (!pills.length) return null
   return (
@@ -543,12 +399,13 @@ export function AppliedFilters({
             : filter.values.join(', ')}
         </Chip>
       ))}
+      {actions}
       <Button
         variant="ghost"
         size="sm"
         onClick={() => {
+          extra.forEach((pill) => pill.clear())
           filters.reset()
-          if (!groupingAsView) onGroupByChange('none')
         }}
       >
         Clear

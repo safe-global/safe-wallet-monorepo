@@ -110,20 +110,20 @@ describe('prototype queue state', () => {
     expect([getTransactionLabel(swap), getAmountLabel(swap)]).toEqual(['Swap USDC → ETH', '200,000 USDC → 62.4 ETH'])
     expect(getTransactionLabel({ ...proposal('treasury-42'), kind: { type: 'rejection' } })).toBe('On-chain rejection')
   })
-  it('labels settings changes as updates with the specific change', () => {
+  it('labels settings changes as settings changes with the specific change', () => {
     expect([getTypeLabel(proposal('treasury-43')), getAmountLabel(proposal('treasury-43'))]).toEqual([
-      'Update',
+      'Settings',
       'New signer: Priya',
     ])
     const threshold = getScenario('conflict-heavy').find((tx) => tx.id === 'treasury-42-threshold')!
-    expect([getTypeLabel(threshold), getAmountLabel(threshold)]).toEqual(['Update', 'Threshold 3 → 2'])
+    expect([getTypeLabel(threshold), getAmountLabel(threshold)]).toEqual(['Settings', 'Threshold 3 → 2'])
   })
   describe('realistic scenario', () => {
     const real = (id: string) => getScenario('realistic').find((tx) => tx.id === id)!
     it.each([
       ['treasury-45', 'Bridge', 'Bridge ETH to Unknown network', '0.04 ETH → Unknown network', ['unknownNetwork']],
       ['treasury-46', 'Contract', 'Call execute on Uniswap Universal Router', 'execute · Uniswap Universal Router', []],
-      ['treasury-48', 'Update', 'Enable module Zodiac Roles', 'Enable module: Zodiac Roles', ['policyChange']],
+      ['treasury-48', 'Settings', 'Enable module Zodiac Roles', 'Enable module: Zodiac Roles', ['policyChange']],
       ['payroll-19', 'Batch', 'Batch · 2 actions', '2 actions', []],
       ['payroll-20', 'Nested', 'Approve #44 on Treasury Main', 'Approves #44 on Treasury Main', []],
       ['grants-9', 'Swap', 'Swap ARB → USDC', '10,000 ARB → 7,950 USDC · Limit', ['expired']],

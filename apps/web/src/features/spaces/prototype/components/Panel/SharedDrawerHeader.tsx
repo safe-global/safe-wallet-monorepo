@@ -1,6 +1,7 @@
 // Ported from #9133 Policies/prototype/sharedDrawer; keep names and props in sync.
 import { useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, Maximize2, Minimize2, X, type LucideIcon } from 'lucide-react'
+import Identicon from '@/components/common/Identicon'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
@@ -22,6 +23,8 @@ export type HeaderMedia =
   | { kind: 'account'; name: string; address: string; chainId: string }
   // `iconHint` wraps the icon in a tooltip, e.g. what a transaction type means.
   | { kind: 'icon'; icon: LucideIcon; title: string; subtitle?: ReactNode; iconHint?: ReactNode }
+  // Queue: the Safe a transaction belongs to, as the title, with its nonce under it.
+  | { kind: 'safe'; address: string; title: string; subtitle?: ReactNode }
 
 export type SharedDrawerHeaderProps = {
   media: HeaderMedia
@@ -135,6 +138,41 @@ const IconMedia = ({
     </>
   )
 }
+
+const SafeMedia = ({
+  address,
+  title,
+  subtitle,
+  ending,
+  extra,
+}: {
+  address: string
+  title: string
+  subtitle?: ReactNode
+  ending: NameEnding
+  extra?: ReactNode
+}): ReactElement => (
+  <>
+    <span className="flex shrink-0">
+      <Identicon address={address} size={36} />
+    </span>
+    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <Typography as="h2" variant="paragraph-bold" className="min-w-0 leading-tight">
+        <FittedText ending={ending}>{title}</FittedText>
+      </Typography>
+      {(subtitle || extra) && (
+        <div className="flex min-w-0 items-center gap-2">
+          {subtitle && (
+            <span className="flex min-w-0 items-center gap-1.5 truncate text-xs tabular-nums text-muted-foreground">
+              {subtitle}
+            </span>
+          )}
+          {extra}
+        </div>
+      )}
+    </div>
+  </>
+)
 
 export type HeaderAction = {
   id: string
@@ -275,6 +313,14 @@ export const SharedDrawerHeader = ({
           <IdentityRow name={media.name} address={media.address} chainId={media.chainId} avatarSize={36} />
           {badge}
         </div>
+      ) : media.kind === 'safe' ? (
+        <SafeMedia
+          address={media.address}
+          title={media.title}
+          subtitle={media.subtitle}
+          ending={nameEnding}
+          extra={badge}
+        />
       ) : (
         <IconMedia
           icon={media.icon}

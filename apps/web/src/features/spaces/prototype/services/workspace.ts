@@ -24,7 +24,10 @@ export const getWorkspaceProfile = (scenario: Scenario) => {
   const nonSigners = Object.values(PERSONAS).filter((profile) => !profile.you).length
   return {
     // The fixture workspace is a crypto-native company running its own treasury, payroll and grants.
-    segment: 'Crypto-native company · Manages onchain capital',
+    segment:
+      scenario === 'protocol' || scenario === 'fleet'
+        ? `Protocol team · ${new Set(accounts.map((account) => account.network)).size} chains`
+        : 'Crypto-native company · Manages onchain capital',
     plan: getPlan(accounts.length),
     safes: accounts.length,
     members: signers.length - outside + nonSigners,

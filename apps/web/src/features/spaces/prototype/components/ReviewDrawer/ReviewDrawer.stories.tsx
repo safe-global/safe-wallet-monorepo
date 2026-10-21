@@ -11,19 +11,15 @@ function ReviewDrawerPreview({
   scenario = 'everyday',
   persona = 'owner',
   pick,
-  sections = [],
-  steps = false,
 }: {
   scenario?: Scenario
   persona?: Persona
   pick: Selector
-  sections?: string[]
-  steps?: boolean
 }) {
   const items = createPreviewQueue(scenario).items
   const order = items.filter((tx) => pick(tx, items, persona))
   const [index, setIndex] = useState(0)
-  const [openSections, setSections] = useState(sections)
+  const [openSections, setSections] = useState<string[]>([])
   const [signersOpen, setSignersOpen] = useState(true)
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
@@ -54,7 +50,6 @@ function ReviewDrawerPreview({
       onReview={() => undefined}
       onAction={() => setPendingAction(null)}
       onProposeAlternative={() => undefined}
-      steps={steps}
       showTechnical={showTechnical}
       onToggleTechnical={() => setShowTechnical(!showTechnical)}
     />
@@ -70,49 +65,27 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const ReadyToSign: Story = {
-  args: { pick: (tx, _items, persona) => getState(tx, persona).canSign, sections: ['summary'] },
+  args: { pick: (tx, _items, persona) => getState(tx, persona).canSign },
 }
 export const ReadyToExecute: Story = {
-  args: { pick: (tx, _items, persona) => getState(tx, persona).ready, sections: ['summary'] },
+  args: { pick: (tx, _items, persona) => getState(tx, persona).ready },
 }
 export const Blocked: Story = {
-  args: { pick: (tx, _items, persona) => getState(tx, persona).waiting, sections: ['summary', 'dependencies'] },
+  args: { pick: (tx, _items, persona) => getState(tx, persona).waiting && !getState(tx, persona).canSign },
 }
-export const CompetingProposals: Story = {
+export const WaitingOnOthers: Story = {
   args: {
-    scenario: 'conflict-heavy',
-    pick: (tx, items) => getConflicts(tx, items).length > 0,
-    sections: ['conflicts'],
-  },
-}
-export const Warnings: Story = {
-  args: { scenario: 'realistic', pick: (tx) => getWarnings(tx).length > 0, sections: ['details'] },
-}
-export const NonOwner: Story = { args: { persona: 'member', pick: () => true, sections: ['summary'] } }
-
-// Next steps (option C): the drawer shows the queue row in full.
-export const NextStepsReadyToSign: Story = {
-  args: { steps: true, pick: (tx, _items, persona) => getState(tx, persona).canSign },
-}
-export const NextStepsReadyToExecute: Story = {
-  args: { steps: true, pick: (tx, _items, persona) => getState(tx, persona).ready },
-}
-export const NextStepsBlocked: Story = {
-  args: { steps: true, pick: (tx, _items, persona) => getState(tx, persona).waiting && !getState(tx, persona).canSign },
-}
-export const NextStepsWaitingOnOthers: Story = {
-  args: {
-    steps: true,
     pick: (tx, _items, persona) =>
       !getState(tx, persona).canSign && !getState(tx, persona).waiting && !getState(tx, persona).ready,
   },
 }
-export const NextStepsCompeting: Story = {
-  args: { steps: true, scenario: 'conflict-heavy', pick: (tx, items) => getConflicts(tx, items).length > 0 },
+export const Competing: Story = {
+  args: { scenario: 'conflict-heavy', pick: (tx, items) => getConflicts(tx, items).length > 0 },
 }
-export const NextStepsWithWarnings: Story = {
-  args: { steps: true, scenario: 'realistic', pick: (tx) => getWarnings(tx).length > 0 },
+export const WithWarnings: Story = {
+  args: { scenario: 'realistic', pick: (tx) => getWarnings(tx).length > 0 },
 }
-export const NextStepsEveryType: Story = {
-  args: { steps: true, scenario: 'realistic', pick: () => true },
+export const EveryType: Story = {
+  args: { scenario: 'realistic', pick: () => true },
 }
+export const NonOwner: Story = { args: { persona: 'member', pick: () => true } }

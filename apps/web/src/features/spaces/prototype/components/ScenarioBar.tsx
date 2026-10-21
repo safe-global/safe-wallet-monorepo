@@ -11,6 +11,7 @@ import { PixelAvatar } from './PixelAvatar'
 import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../services/workspace'
 
 export const SCENARIOS: { value: Scenario; label: string }[] = [
+  { value: 'fleet', label: 'Fleet admin' },
   { value: 'everyday', label: 'Everyday queue' },
   { value: 'realistic', label: 'Realistic mix' },
   { value: 'conflict', label: 'Conflicting transactions' },
@@ -20,6 +21,7 @@ export const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: 'partial', label: 'Partial loading' },
   { value: 'recovery', label: 'Account recovery' },
   { value: 'many-safes', label: '20 Safes' },
+  { value: 'protocol', label: 'Protocol team · 50 Safes' },
   { value: 'loading', label: 'Loading' },
   { value: 'error', label: 'Failed to load' },
   { value: 'empty', label: 'Empty workspace' },
@@ -107,12 +109,16 @@ export function ScenarioBar({
           <FlaskConical className="size-4" />
           Preview · simulated
         </div>
-        <Tabs value={direction} onValueChange={(value) => onChange({ option: String(value) })}>
+        <Tabs
+          value={direction}
+          // Fleet admin opens on its own 20-Safe workspace.
+          onValueChange={(value) =>
+            onChange(value === 'fleet' ? { option: 'fleet', scenario: 'fleet' } : { option: String(value) })
+          }
+        >
           <TabsList aria-label="Design direction">
-            <TabsTrigger value="queues">A · Safe queues</TabsTrigger>
-            <TabsTrigger value="inbox">B · Action inbox</TabsTrigger>
-            <TabsTrigger value="steps">C · Next steps</TabsTrigger>
-            <TabsTrigger value="table">D · One table</TabsTrigger>
+            <TabsTrigger value="table">A · One table</TabsTrigger>
+            <TabsTrigger value="fleet">B · Fleet admin</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="ml-auto flex flex-wrap items-center gap-2">

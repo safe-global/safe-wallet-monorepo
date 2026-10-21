@@ -22,6 +22,7 @@ import {
   getSignatureCount,
   getSignerIdentity,
   getState,
+  getTypeLabel,
   getWarnings,
   WARNING_DETAILS,
   WARNING_LABELS,
@@ -30,7 +31,8 @@ import { getMethodName, getTechnicalData } from '../../../services/technical'
 import { getSafenetCheck, SAFENET_LABELS, SAFENET_URL } from '../../../services/safenet'
 import type { Persona, Proposal } from '../../../types'
 import { BatchActions, getDetailItems } from '../../ProposalDetails'
-import { chainLogoUrl, StatusChip } from '../../shared'
+import { chainLogoUrl, StatusChip, TypeTag } from '../../shared'
+import { SummaryText } from '../../QueueTable/TransactionLine'
 import { NonceMark } from '../../QueueTable/NonceCell'
 import type { Hypernative } from '../../ScenarioBar'
 import type { Replacement, ReviewLayout, SectionsMode } from '../ReviewDrawer'
@@ -44,7 +46,7 @@ const SECTION_TITLES: Record<Proposal['kind']['type'], string> = {
   bridge: 'Bridge',
   batch: 'Batch',
   contract: 'Contract call',
-  settings: 'Settings change',
+  settings: 'Settings',
   nested: 'Nested Safe approval',
   rejection: 'On-chain rejection',
 }
@@ -60,11 +62,12 @@ const getEarlierNonces = (tx: Proposal, persona: Persona) => {
 const atNonce = (tx: Proposal, items: Proposal[], nonce: number) =>
   items.filter((other) => other.account === tx.account && other.nonce === nonce)
 
-// Queue order lives in Summary. Alerts are for risks, and for a missing nonce, which stops the whole queue.
+// Queue order lives in Summary. Alerts are for urgent transactions, risks, and a missing nonce, which stops the whole queue.
 export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Proposal[]; persona: Persona }) {
   const gap = getEarlierNonces(tx, persona).find((nonce) => !atNonce(tx, items, nonce).length)
   return (
     <>
+      {tx.emergency && <PanelAlert tone="error" title="Urgent" description={tx.emergency} />}
       {gap !== undefined && (
         <PanelAlert
           tone="warning"
@@ -142,6 +145,14 @@ export function SummarySection({ tx, status }: { tx: Proposal; status?: ReactNod
   const section = useSectionOpen(true)
   return (
     <PanelSection collapsible {...section} title="Summary" rightNode={status}>
+      <PanelRow label="Type">
+        <span className="flex justify-end">
+          <TypeTag type={getTypeLabel(tx)} />
+        </span>
+      </PanelRow>
+      <PanelRow label="Action">
+        <SummaryText tx={tx} />
+      </PanelRow>
       {getFlowRows(tx).map((row) =>
         row.top ? (
           <div key={row.label} className="flex items-start justify-between gap-2">
@@ -182,9 +193,6 @@ export function SummarySection({ tx, status }: { tx: Proposal; status?: ReactNod
         ) : (
           'Unknown'
         )}
-      </PanelRow>
-      <PanelRow label="Nonce">
-        <span className="tabular-nums">#{tx.nonce}</span>
       </PanelRow>
     </PanelSection>
   )

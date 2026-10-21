@@ -6,22 +6,23 @@ const meta = {
   component: PendingQueue,
   parameters: {
     layout: 'fullscreen',
-    nextjs: { router: { pathname: '/prototypes/pending-queue', query: { option: 'queues' } } },
+    nextjs: { router: { pathname: '/prototypes/pending-queue', query: { option: 'table', scenario: 'everyday' } } },
   },
 } satisfies Meta<typeof PendingQueue>
 export default meta
 type Story = StoryObj<typeof meta>
-export const TransactionTable: Story = {}
-export const SafeQueues: Story = { parameters: { nextjs: { router: { query: { groupBy: 'safe' } } } } }
-export const StatusGroups: Story = { parameters: { nextjs: { router: { query: { groupBy: 'status' } } } } }
+export const OneTable: Story = {}
 export const MobileTable: Story = { parameters: { viewport: { defaultViewport: 'mobile1' } } }
-export const ActionInbox: Story = { parameters: { nextjs: { router: { query: { option: 'inbox' } } } } }
 export const CompetingProposals: Story = { parameters: { nextjs: { router: { query: { scenario: 'conflict' } } } } }
-export const NextSteps: Story = { parameters: { nextjs: { router: { query: { option: 'steps' } } } } }
-export const ManySafes: Story = {
-  parameters: { nextjs: { router: { query: { option: 'steps', scenario: 'many-safes' } } } },
-}
-export const OneTable: Story = { parameters: { nextjs: { router: { query: { option: 'table' } } } } }
 export const OneTableManySafes: Story = {
   parameters: { nextjs: { router: { query: { option: 'table', scenario: 'many-safes' } } } },
+}
+export const FleetAdmin: Story = {
+  parameters: { nextjs: { router: { query: { option: 'fleet', scenario: 'fleet' } } } },
+}
+export const FleetAdminProtocolTeam: Story = {
+  parameters: { nextjs: { router: { query: { option: 'fleet', scenario: 'protocol' } } } },
+}
+export const FleetAdminSecurityLead: Story = {
+  parameters: { nextjs: { router: { query: { option: 'fleet', scenario: 'fleet', persona: 'security' } } } },
 }
