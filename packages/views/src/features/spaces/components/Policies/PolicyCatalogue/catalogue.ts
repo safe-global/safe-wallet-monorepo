@@ -1,6 +1,6 @@
-import { MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
+import { MessageSquarePlus, ShieldCheck, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
 
-export type PolicyCatalogueId = 'spending-limit' | 'proposer' | 'suggestion'
+export type PolicyCatalogueId = 'recipient-allowlist' | 'spending-limit' | 'proposer' | 'suggestion'
 
 /** The tiles that stand for a policy, as opposed to the suggestion tile. */
 export type PolicyId = Exclude<PolicyCatalogueId, 'suggestion'>
@@ -14,6 +14,13 @@ export interface PolicyCatalogueEntry {
 }
 
 export const POLICY_CATALOGUE: PolicyCatalogueEntry[] = [
+  {
+    id: 'recipient-allowlist',
+    title: 'Recipient allowlist',
+    description: 'Only let funds go to addresses you approve.',
+    Icon: ShieldCheck,
+    action: 'Set policy',
+  },
   {
     id: 'spending-limit',
     title: 'Spending limit',

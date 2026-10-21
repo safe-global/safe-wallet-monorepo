@@ -3,6 +3,7 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const endpoints = spacesApi?.endpoints
@@ -25,6 +26,23 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
   startListening({
     matcher: endpoints.spacesDeleteV1.matchFulfilled,
     effect: () => trackEvent({ ...SPACE_EVENTS.DELETE_SPACE }),
+  })
+
+  // Name updates are tracked by the form that submits them (useUpdateSpace).
+  startListening({
+    matcher: endpoints.spacesUpdateV1.matchFulfilled,
+    effect: ({ meta }) => {
+      const { id, updateSpaceDto } = meta.arg.originalArgs
+      if (!updateSpaceDto.experimentalFeatures) return
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_UPDATED, label: id },
+        {
+          [MixpanelEventParams.SOURCE]: 'experimental_features',
+          workspace_id: id,
+          experimental_features: updateSpaceDto.experimentalFeatures.join(','),
+        },
+      )
+    },
   })
 
   startListening({

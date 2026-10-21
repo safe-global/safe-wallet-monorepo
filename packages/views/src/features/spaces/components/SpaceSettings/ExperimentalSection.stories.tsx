@@ -10,6 +10,7 @@ const meta = {
     layout: 'padded',
   },
   args: {
+    available: ['POLICY_RECIPIENT_ALLOWLIST'],
     enabled: [],
     onChange: fn(),
     isAdmin: true,
@@ -46,6 +47,12 @@ export const Saving: Story = {
   args: {
     enabled: ['POLICY_RECIPIENT_ALLOWLIST'],
     isSaving: true,
+  },
+}
+
+export const Empty: Story = {
+  args: {
+    available: [],
   },
 }
 

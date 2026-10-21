@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useChain } from '@/hooks/useChains'
@@ -12,11 +12,18 @@ import type { PolicyGuardState, PolicyGuardTarget } from '../types'
 import { useGuardedSafe } from './useGuardedSafe'
 import { useCappedReread } from './useCappedReread'
 
-export type UsePolicyGuardResult = { state?: PolicyGuardState; isLoading: boolean; error?: Error }
+export type UsePolicyGuardResult = {
+  state?: PolicyGuardState
+  isLoading: boolean
+  /** A failed read is being read again; `error` stays set until it settles. */
+  isRetrying: boolean
+  error?: Error
+  refetch: () => void
+}
 
 /** Reads the open Safe by default; pass a target to read any other Safe */
 export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult => {
-  const { safe, safeAddress, safeLoaded, safeLoading, error: safeError } = useGuardedSafe(target)
+  const { safe, safeAddress, safeLoaded, safeLoading, error: safeError, refetch: refetchSafe } = useGuardedSafe(target)
   const chain = useChain(safe.chainId)
   const policyGuardAddress = getPolicyGuardAddress(safe.chainId)
   const eligibility = isSafeEligibleForAllowlist(safe, chain)
@@ -50,9 +57,17 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
     : ''
   useCappedReread(!!readError || state?.status === 'partial', readKey, moduleGuardQuery.refetch)
 
+  const { refetch: refetchModuleGuard, isUninitialized: isModuleGuardUninitialized } = moduleGuardQuery
+  const refetch = useCallback(() => {
+    refetchSafe()
+    if (!isModuleGuardUninitialized) refetchModuleGuard()
+  }, [refetchSafe, isModuleGuardUninitialized, refetchModuleGuard])
+
   return {
     state,
     isLoading: safeLoading || (shouldRead && !moduleGuard && !readError),
+    isRetrying: !!readError && moduleGuardQuery.isFetching,
     error: safeError ?? readError,
+    refetch,
   }
 }

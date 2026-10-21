@@ -56,6 +56,8 @@ jobs:
       - name: Run ESLint (push only)
         if: github.event_name == 'push'
         run: yarn turbo run lint --filter=@safe-global/web
+      - name: Run ESLint (packages/views)
+        run: yarn turbo run lint --filter=@safe-global/views
 
   prettier:
     permissions:

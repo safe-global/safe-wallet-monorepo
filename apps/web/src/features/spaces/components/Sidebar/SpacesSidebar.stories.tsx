@@ -12,6 +12,7 @@ import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
+import { MOCK_SPACE_ID } from '@/stories/mocks'
 
 const mockSpaceId = '1'
 
@@ -99,7 +100,7 @@ const mockDisabledSetupGroup: ResolvedSidebarGroup = {
 }
 
 const mockSpaces: SpaceItem[] = [
-  { uuid: 'uuid-1', name: 'Company Space', safeCount: 0 },
+  { uuid: MOCK_SPACE_ID, name: 'Company Space', safeCount: 0 },
   { uuid: 'uuid-2', name: 'Personal Space', safeCount: 0 },
 ]
 

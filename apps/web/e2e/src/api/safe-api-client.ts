@@ -6,9 +6,21 @@
  */
 import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
+import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type {
+  QueuedItemPage,
+  TransactionDetails,
+  TransactionItemPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const REQUEST_TIMEOUT_MS = 10_000
 const RETRY_DELAY_MS = 1_000
+
+async function apiError(response: Response): Promise<Error> {
+  const body = await response.text().catch(() => '')
+  return new Error(`API ${response.status}: ${response.statusText} — ${response.url}${body ? `\n${body}` : ''}`)
+}
 
 export class SafeApiClient {
   private baseUrl: string
@@ -20,46 +32,30 @@ export class SafeApiClient {
   }
 
   /**
-   * GET request with timeout and single retry on 5xx / network errors.
-   * - 4xx errors fail immediately (real failures, not transient)
-   * - 5xx errors retry once after 1s delay
-   * - Network errors (timeout, DNS, connection refused) retry once
+   * GET request with timeout and single retry on 5xx / network errors; returns the last response.
+   * 4xx responses return at once (real failures, not transient).
    */
-  private async get<T>(path: string, retries = 1): Promise<T> {
+  private async request(path: string, retries = 1): Promise<Response> {
     const url = `${this.baseUrl}${path}`
-
-    for (let attempt = 0; attempt <= retries; attempt++) {
+    for (let attempt = 0; ; attempt++) {
+      const isLastAttempt = attempt >= retries
       try {
         const response = await fetch(url, {
           headers: { 'Content-Type': 'application/json' },
           signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         })
-
-        if (response.ok) {
-          return response.json() as Promise<T>
-        }
-
-        // 5xx — retry if attempts remain
-        if (response.status >= 500 && attempt < retries) {
-          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS))
-          continue
-        }
-
-        // 4xx or final 5xx attempt — fail with response body for debugging
-        const body = await response.text().catch(() => '')
-        throw new Error(`API ${response.status}: ${response.statusText} — ${url}${body ? `\n${body}` : ''}`)
+        if (response.status < 500 || isLastAttempt) return response
       } catch (err) {
-        // Network error or timeout — retry if attempts remain
-        if (attempt < retries && !(err instanceof Error && err.message.startsWith('API '))) {
-          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS))
-          continue
-        }
-        throw err
+        if (isLastAttempt) throw err
       }
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS))
     }
+  }
 
-    // TypeScript: unreachable, but satisfies return type
-    throw new Error(`API request failed after ${retries + 1} attempts: ${path}`)
+  private async get<T>(path: string, retries = 1): Promise<T> {
+    const response = await this.request(path, retries)
+    if (!response.ok) throw await apiError(response)
+    return response.json() as Promise<T>
   }
 
   /** Get Safe info (owners, threshold, nonce, modules) */
@@ -73,17 +69,30 @@ export class SafeApiClient {
   }
 
   /** Get queued transactions */
-  async getQueuedTransactions(safeAddress: string): Promise<unknown> {
+  async getQueuedTransactions(safeAddress: string): Promise<QueuedItemPage> {
     return this.get(`/v1/chains/${this.chainId}/safes/${safeAddress}/transactions/queued`)
   }
 
   /** Get transaction history */
-  async getTransactionHistory(safeAddress: string): Promise<unknown> {
+  async getTransactionHistory(safeAddress: string): Promise<TransactionItemPage> {
     return this.get(`/v1/chains/${this.chainId}/safes/${safeAddress}/transactions/history`)
   }
 
+  /** Get a transaction by its ID (`multisig_<safe>_<safeTxHash>`); null when CGW does not know it */
+  async findTransaction(txId: string): Promise<TransactionDetails | null> {
+    const response = await this.request(`/v1/chains/${this.chainId}/transactions/${txId}`)
+    if (response.status === 404) return null
+    if (!response.ok) throw await apiError(response)
+    return response.json() as Promise<TransactionDetails>
+  }
+
+  /** Get an off-chain message by its Safe message hash */
+  async getMessage(messageHash: string): Promise<Message> {
+    return this.get<Message>(`/v1/chains/${this.chainId}/messages/${messageHash}`)
+  }
+
   /** Get collectibles (NFTs) */
-  async getCollectibles(safeAddress: string): Promise<unknown> {
+  async getCollectibles(safeAddress: string): Promise<CollectiblePage> {
     return this.get(`/v2/chains/${this.chainId}/safes/${safeAddress}/collectibles`)
   }
 

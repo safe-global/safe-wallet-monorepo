@@ -1,6 +1,8 @@
 import {
+  buildArbitrationTimedOutLog,
   buildCommittedLog,
   buildDisputeResolvedLog,
+  buildDisputeTriggeredLog,
   buildNewRequestLog,
   buildOracleAttestedLog,
   buildOracleProposedLog,
@@ -10,6 +12,8 @@ import {
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import type {
   DisputeResolvedEvent,
+  DisputeTriggeredEvent,
+  InconclusiveEvent,
   NormalizedCheckEvent,
   OracleAttestedEvent,
   OracleProposedEvent,
@@ -64,5 +68,15 @@ export const oracleResultEvent = (over: Partial<OracleResultEvent> = {}): Oracle
 
 export const disputeResolvedEvent = (over: Partial<DisputeResolvedEvent> = {}): DisputeResolvedEvent => ({
   ...decodeOne<DisputeResolvedEvent>(buildDisputeResolvedLog()),
+  ...over,
+})
+
+export const disputeTriggeredEvent = (over: Partial<DisputeTriggeredEvent> = {}): DisputeTriggeredEvent => ({
+  ...decodeOne<DisputeTriggeredEvent>(buildDisputeTriggeredLog()),
+  ...over,
+})
+
+export const arbitrationTimedOutEvent = (over: Partial<InconclusiveEvent> = {}): InconclusiveEvent => ({
+  ...decodeOne<InconclusiveEvent>(buildArbitrationTimedOutLog()),
   ...over,
 })

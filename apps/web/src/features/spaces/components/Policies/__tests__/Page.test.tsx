@@ -36,6 +36,13 @@ jest.mock('../../AuthState', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
+let mockIsAllowlistAvailable = false
+
+jest.mock('@/features/policy-guard', () => ({
+  ...jest.requireActual('@/features/policy-guard'),
+  useIsAllowlistAvailableInSpace: () => mockIsAllowlistAvailable,
+}))
+
 jest.mock('../SpendingLimitFlow', () => ({
   __esModule: true,
   default: () => null,
@@ -49,6 +56,7 @@ const lockedGate = { mustUpgradeToSafePro: true, isLoading: false, upgradeHref: 
 describe('SpacePoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsAllowlistAvailable = false
     mockUseSpacePolicies.mockReturnValue(settled)
     mockUsePlanGate.mockReturnValue(openGate)
     mockUseSpacePlan.mockReturnValue({ tierName: 'Starter', isLoading: false })
@@ -149,6 +157,17 @@ describe('SpacePoliciesPage', () => {
     ).toBeInTheDocument()
     expect(
       within(screen.getByTestId('policy-catalogue-tile-proposer')).getByTestId('policy-locked-icon'),
+    ).toBeInTheDocument()
+  })
+
+  it('should, when the plan does not include policies, lock the recipient allowlist tile too', () => {
+    mockUsePlanGate.mockReturnValue(lockedGate)
+    mockIsAllowlistAvailable = true
+
+    render(<SpacePoliciesPage spaceId="space-1" />)
+
+    expect(
+      within(screen.getByTestId('policy-catalogue-tile-recipient-allowlist')).getByTestId('policy-locked-icon'),
     ).toBeInTheDocument()
   })
 

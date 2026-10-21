@@ -8,6 +8,7 @@ import useChains from '@/hooks/useChains'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/getTotalBridgeFee'
 import { formatUnits } from 'ethers'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
@@ -143,10 +144,7 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   const chainId = useChainId()
   const { configs } = useChains()
 
-  const totalFee = formatUnits(
-    BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n),
-    txInfo.fromToken.decimals,
-  )
+  const totalFee = getTotalBridgeFee(txInfo.fees)
 
   let rows = []
   if (txInfo.status === 'PENDING' || txInfo.status === 'AWAITING_EXECUTION') {
@@ -161,7 +159,13 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   rows.push(
     <BridgeTxRecipientRow key="recipient" txInfo={txInfo} />,
     <DataRow datatestid="total-fee" key="fees" title="Fees">
-      {formatAmount(totalFee)} {txInfo.fromToken.symbol}
+      {totalFee === null ? (
+        'Unknown'
+      ) : (
+        <>
+          {formatAmount(formatUnits(totalFee, txInfo.fromToken.decimals))} {txInfo.fromToken.symbol}
+        </>
+      )}
     </DataRow>,
   )
 

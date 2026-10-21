@@ -81,7 +81,7 @@ const proofLinkFor = (publicStatus: VerdictStatus, links: SafenetLinks, isInFlig
   return { href: links.explorerHref, testId: 'safenet-details-explorer', label: SAFENET_EXPLORER_LINK_LABEL }
 }
 
-/** Says why a failed check never produced a verdict; renders nothing for any other state. */
+/** Says why a check has no verdict, failed or still in dispute; renders nothing for any other state. */
 const FailureReason = ({
   publicStatus,
   snapshot,
@@ -89,7 +89,7 @@ const FailureReason = ({
   publicStatus: VerdictStatus
   snapshot: SafenetCheckSnapshot
 }): ReactElement | null => {
-  if (publicStatus !== CheckStatus.TIMED_OUT) return null
+  if (publicStatus !== CheckStatus.TIMED_OUT && publicStatus !== CheckStatus.DISPUTED) return null
 
   return (
     <Typography variant="paragraph-small" className={META_TEXT_CLASS} data-testid="safenet-failure-reason">

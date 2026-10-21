@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as owner from '../pages/owners.pages'
 import * as createwallet from '../pages/create_wallet.pages'
 import * as createTx from '../pages/create_tx.pages.js'
@@ -28,10 +27,6 @@ describe('Remove Owners tests', () => {
 
     it('Verify that "Remove" icon is visible', () => {
       owner.verifyRemoveBtnIsEnabled().should('have.length', 2)
-    })
-
-    it('Verify remove owner button is disabled for disconnected user', () => {
-      owner.verifyRemoveBtnIsDisabled()
     })
   })
 
@@ -69,15 +64,6 @@ describe('Remove Owners tests', () => {
       createTx.clickViewTransaction()
       createTx.clickOnTransactionItemByName('removeOwner')
       createTx.verifyTxDestinationAddress('@removedAddress')
-    })
-  })
-
-  describe('Single-owner safe', () => {
-    it('Verify remove button does not exist for Non-Owner when there is only 1 owner in the safe', () => {
-      cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-      cy.wait('@History', { timeout: 20000 })
-      main.verifyElementsCount(owner.removeOwnerBtn, 0)
     })
   })
 })

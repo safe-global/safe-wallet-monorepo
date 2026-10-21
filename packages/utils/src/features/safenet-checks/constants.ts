@@ -20,7 +20,7 @@ export const SAFENET_CHAIN_ID = '100'
 export const SAFENET_CONSENSUS_ADDRESS =
   process.env.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
   process.env.EXPO_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
-  '0x73b4BDc3112Dfb86085cDD84f26Ab908B20A4A84'
+  '0xc855761D619f6002923507cE68B84d7689C2aa96'
 
 /** FROSTCoordinator for the Safenet deployment on Gnosis Chain. */
 export const SAFENET_COORDINATOR_ADDRESS =
@@ -37,14 +37,14 @@ export const SAFENET_COORDINATOR_ADDRESS =
 export const SAFENET_ORACLE_ADDRESSES = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES ||
     process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES ||
-    '0xB83c4b66e752D947c1F55fd703b7937e21e401E4',
+    '0x4F61B8832978e83b80D69551AEf07557DBE41d03',
 )
 
 /** Safenet explorer base URL — display-only deep links to a check's attestation. */
 export const SAFENET_EXPLORER_URL = (
   process.env.NEXT_PUBLIC_SAFENET_EXPLORER_URL ||
   process.env.EXPO_PUBLIC_SAFENET_EXPLORER_URL ||
-  'https://www.safe.dev/safenet'
+  'https://safenet-explorer.eth.limo'
 ).replace(/\/$/, '')
 
 // --- Lookback tuning ------------------------------------------------------
@@ -109,3 +109,9 @@ export const ARBITRATION_WINDOW_MS = 24 * 60 * 60_000
 
 /** Poll interval inside {@link ARBITRATION_WINDOW_MS}. */
 export const ARBITRATION_POLL_MS = 5 * 60_000
+
+/**
+ * Poll interval for an open dispute. Arbitration runs for about 28 days and
+ * its ruling lands in no log window, so only `getRequest` can show it.
+ */
+export const DISPUTED_POLL_MS = 5 * 60_000

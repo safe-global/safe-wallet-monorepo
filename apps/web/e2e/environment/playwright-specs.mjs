@@ -5,14 +5,30 @@
  */
 export const playwrightSpecs = {
   'api/credentials.spec.ts': {},
+  'e2e/ledger-sign-execute.spec.ts': {
+    scenarios: ['prepareLedgerScenario'],
+    safes: { SEP_LEDGER_SIGN_SAFE: 'SEP_STATIC_SAFE_48', SEP_LEDGER_EXECUTE_SAFE: 'SEP_STATIC_SAFE_49' },
+  },
   'api/safe-info.api.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
+  'e2e/batch.spec.ts': {},
+  'e2e/bulk-execute.spec.ts': {},
+  'e2e/delete.spec.ts': {},
+  'e2e/erc20-transfer.spec.ts': {},
+  'e2e/mass-payout.spec.ts': {},
+  'e2e/multisig-confirm.spec.ts': {},
+  'e2e/nft-transfer.spec.ts': {},
+  'e2e/recovery.spec.ts': {},
+  'e2e/reject.spec.ts': {},
+  'e2e/replace.spec.ts': {},
+  'e2e/sign-offchain-message.spec.ts': {},
+  'e2e/spending-limit.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
-    scenarios: ['prepareAssetsScenario', 'prepareProposersScenario'],
-    safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2', SEP_PROPOSER_SAFE: 'SEP_STATIC_SAFE_31' },
+    scenarios: ['prepareAssetsScenario'],
+    safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
   },
   'regression/recipient-dropdown-caret-toggle.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],
@@ -50,4 +66,6 @@ export const playwrightSpecs = {
   },
   'smoke/dashboard.spec.ts': { scenarios: ['prepareBasicScenario'], safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' } },
   'smoke/landing.spec.ts': {},
+  'e2e/walletconnect.spec.ts': {},
+  'e2e/walletconnect-nested-signer.spec.ts': {},
 }

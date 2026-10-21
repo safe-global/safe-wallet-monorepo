@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as modal from './modals.page.js'
-import * as navigation from './navigation.page.js'
 import * as file from './import_export.pages.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
@@ -332,10 +331,6 @@ export function verifyEtherscanLinkExists() {
     .within(() => {
       cy.get(explorerBtn).should('have.attr', 'href').and('include', constants.etherscanlLink)
     })
-}
-
-export function verifyNewTxBtnStatus(status) {
-  main.verifyElementsStatus([navigation.newTxBtn], status)
 }
 
 export function verifySideListItems() {
