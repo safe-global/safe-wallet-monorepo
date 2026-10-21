@@ -175,7 +175,7 @@ describe('usePolicyGuard', () => {
 
   it.each([
     ['the flag is off', () => mockChain([]), {}],
-    ['the chain has no deployment', () => {}, { chainId: '1' }],
+    ['the chain has no deployment', () => {}, { chainId: '999999' }],
     ['the Safe is counterfactual', () => {}, { deployed: false }],
   ])('returns nothing and skips the read when %s', (_, setup, overrides) => {
     setup()

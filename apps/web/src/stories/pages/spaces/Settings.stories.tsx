@@ -46,7 +46,15 @@ export const Default: Story = (() => {
 
 export const Experimental: Story = createSettingsPageStory('/spaces/settings/experimental', SpaceSettingsExperimental, {
   workspacesExperimentalFeatures: true,
+  policyRecipientAllowlist: true,
 })
+
+/** The page is on but no chain offers the allowlist, so the section only shows its empty message. */
+export const ExperimentalUnavailable: Story = createSettingsPageStory(
+  '/spaces/settings/experimental',
+  SpaceSettingsExperimental,
+  { workspacesExperimentalFeatures: true },
+)
 
 export const Account: Story = createSettingsPageStory('/spaces/settings/account', SpaceSettingsAccount)
 
