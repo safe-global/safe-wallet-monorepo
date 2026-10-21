@@ -56,6 +56,7 @@ const StatusAlert = ({
   return (
     <Alert
       className={cn('flex items-center gap-4 rounded-lg px-4 py-3', TONE_SURFACES[tone], className)}
+      role={tone === 'error' ? 'alert' : 'status'}
       aria-live={ariaLive}
       data-testid={testId}
     >

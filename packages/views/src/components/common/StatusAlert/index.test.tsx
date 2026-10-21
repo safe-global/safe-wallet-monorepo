@@ -17,6 +17,15 @@ describe('StatusAlert', () => {
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
   })
 
+  it('interrupts screen readers only for errors', () => {
+    const { rerender } = render(<StatusAlert tone="error" title="Failed" />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Failed')
+
+    rerender(<StatusAlert tone="info" title="Tip" />)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Tip')
+  })
+
   it('shows a dismiss button only when onDismiss is passed', () => {
     const onDismiss = jest.fn()
     const { rerender } = render(<StatusAlert tone="info" title="Heads up" />)
