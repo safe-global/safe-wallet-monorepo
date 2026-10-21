@@ -39,9 +39,19 @@ If missing, ask:
 4. **Patterns**: Use hero summary, grid clusters, and consistent actions
 5. **Tone**: Subtle, calm, non-alarming. Use muted backgrounds and secondary/outline badges
 
-## Step 3: Create Component
+## Step 3: Create the Code
 
-**Location**: `packages/views/src/features/design-system/prototypes/<Name>/`, with the screen in `index.tsx` and each section in its own file next to it.
+Lay the prototype out the way a developer would build the real feature, so each file can be copied into the codebase as it is. Never put a whole screen in one file.
+
+| What        | Where                                                                                          | Contains                                                                                             |
+| ----------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Sections    | `packages/views/src/features/<feature>/components/<Section>/<Section>.tsx` (plus `index.ts`)   | Pure markup from props                                                                               |
+| Screen      | `packages/views/src/features/<feature>/components/<Name>Page/<Name>Page.tsx` (plus `index.ts`) | The layout that composes the sections, also pure markup from props                                   |
+| Sample data | `apps/web/src/features/<feature>/prototype/sampleData.ts`                                      | Only data                                                                                            |
+| Hooks       | `apps/web/src/features/<feature>/prototype/hooks/use<Concern>.ts`                              | One small hook per concern, such as the current step of a flow, the selected item or a form's values |
+| Container   | `apps/web/src/features/<feature>/prototype/<Name>Prototype.tsx`                                | Calls the hooks and renders `<Name>Page` with their results, nothing else                            |
+
+`<feature>` is the existing feature the prototype belongs to (for example `spaces` or `safe-shield`). Put new views next to the views that feature already has.
 
 **Rules**:
 
@@ -49,23 +59,21 @@ If missing, ask:
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
 
-**Build it as views.** Nearly every file is pure markup, and the little logic the prototype needs sits in one place.
+**Views (sections and screen)** only turn props into markup:
 
 - Before writing new markup, look in `packages/views` for a view that already renders it, and reuse it.
-- Split the screen into small components, one per section (for example `SummaryCard`, `ChecksList`), each in its own file.
-- A section only turns props into markup. In a section, write only:
-  - markup and shadcn components;
-  - layout classes and variants;
-  - copy;
-  - `items.map(...)` over a prop;
-  - `cond && …` or `a ? b : c` on a prop.
-- A section does not compute, format, sort, filter or decide anything. Pass it the finished values: `"1,250.00 USDC"`, not a number to format. Handlers only call the callback prop they were given (`onClick={onConfirm}`).
-- The only state a section may hold is what the eye sees and nothing else reads: open or closed, hovered, the selected tab (`useState`). No effects, timers, `window` or `document`.
-- Everything else lives in `index.tsx`: the sample data, the prototype's state (the current step, which item is selected) and the callbacks that change it. `index.tsx` passes the results down as props. It is the only file a developer needs to read closely.
-- Files in `packages/views` do not import from the app (`@/…`), the store, hooks that fetch data, or analytics. The package's lint rejects them.
-- If the prototype should show live data, that is fine: keep the sections in `packages/views` as above, and add one small container in `apps/web` (next to the feature it belongs to) that reads the live data and passes it to `index.tsx`. The container holds the hooks; the sections stay pure markup, so developers can pick them up as they are.
+- In a view, write only markup and shadcn components, layout classes and variants, copy, `items.map(...)` over a prop, and `cond && …` or `a ? b : c` on a prop.
+- A view does not compute, format, sort, filter or decide anything. Pass it the finished values: `"1,250.00 USDC"`, not a number to format. Handlers only call the callback prop they were given (`onClick={onConfirm}`).
+- The only state a view may hold is what the eye sees and nothing else reads: open or closed, hovered, the selected tab (`useState`). No effects, timers, `window` or `document`.
+- Views do not import from the app (`@/…`), the store, hooks that fetch data, or analytics. The package's lint rejects them.
 
-If the prototype truly needs more logic in a section, add it; these are defaults, not hard limits. This only changes how the code is organised: the user sees the same Storybook story, so there is nothing to explain to them.
+**Logic (hooks and container)** stays small and separate:
+
+- Each hook does one thing and returns finished values and callbacks for the views.
+- The container renders only `<Name>Page` with the hooks' results. It has no markup, class names or copy of its own.
+- For a prototype on live data, the hooks read real app data instead of `sampleData.ts`. Nothing else changes.
+
+If the prototype truly needs to break one of these rules, it may; they are defaults, not hard limits. This only changes how the code is organised: the user sees the same Storybook story, so there is nothing to explain to them.
 
 **Styling Guidelines:**
 
@@ -85,7 +93,7 @@ DON'T:
 **Template**:
 
 ```tsx
-// SummaryCard.tsx
+// packages/views/src/features/<feature>/components/SummaryCard/SummaryCard.tsx
 import * as React from 'react'
 
 import { Card, CardHeader, CardTitle, CardContent } from '@safe-global/views/components/ui/card'
@@ -99,28 +107,49 @@ export const SummaryCard = ({ title, value }: { title: string; value: string }):
   </Card>
 )
 
-// index.tsx
+// packages/views/src/features/<feature>/components/MyPage/MyPage.tsx
 import * as React from 'react'
 
-import { SummaryCard } from './SummaryCard'
+import { Button } from '@safe-global/views/components/ui/button'
+import { SummaryCard } from '../SummaryCard'
 
-export const MyPrototype = ({ title, balance }: { title: string; balance: string }): React.ReactElement => (
+export const MyPage = ({ balance, onRefresh }: { balance: string; onRefresh: () => void }): React.ReactElement => (
   <div className="flex flex-col gap-6 p-6">
-    <h2 className="text-xl font-semibold">{title}</h2>
+    <h2 className="text-xl font-semibold">Overview</h2>
     <SummaryCard title="Balance" value={balance} />
+    <Button variant="outline" onClick={onRefresh}>
+      Refresh
+    </Button>
   </div>
 )
+
+// apps/web/src/features/<feature>/prototype/hooks/useBalance.ts
+import { useState } from 'react'
+
+import { SAMPLE_BALANCES } from '../sampleData'
+
+export const useBalance = () => {
+  const [index, setIndex] = useState(0)
+  return { balance: SAMPLE_BALANCES[index], onRefresh: () => setIndex((i) => (i + 1) % SAMPLE_BALANCES.length) }
+}
+
+// apps/web/src/features/<feature>/prototype/MyPrototype.tsx
+import { MyPage } from '@safe-global/views/features/<feature>/components/MyPage'
+
+import { useBalance } from './hooks/useBalance'
+
+export const MyPrototype = () => <MyPage {...useBalance()} />
 ```
 
 ## Step 4: Create Story
 
-**Location**: `packages/views/src/features/design-system/prototypes/<Name>/<Name>.stories.tsx`
+**Location**: `apps/web/src/features/<feature>/prototype/<Name>Prototype.stories.tsx`
 
 **Template**:
 
 ```tsx
 import type { Meta, StoryObj } from '@storybook/react'
-import { MyPrototype } from '.'
+import { MyPrototype } from './MyPrototype'
 
 const meta = {
   title: 'Design System/Prototypes/My Prototype',
@@ -133,12 +162,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  args: {
-    title: 'Page title',
-    balance: '1,250.00 USDC',
-  },
-}
+export const Default: Story = {}
 ```
 
 ## Step 5: Screenshot Workflow
@@ -158,6 +182,7 @@ If variants exist, capture each variant.
 ```bash
 yarn workspace @safe-global/views type-check
 yarn workspace @safe-global/views lint
+yarn workspace @safe-global/web type-check
 yarn workspace @safe-global/web storybook
 ```
 
@@ -165,8 +190,10 @@ yarn workspace @safe-global/web storybook
 
 | Item      | Format                                     | Example                                          |
 | --------- | ------------------------------------------ | ------------------------------------------------ |
-| Component | `<Name>.tsx`                               | `SecurityHub.tsx`                                |
-| Story     | `<Name>.stories.tsx`                       | `SecurityHub.stories.tsx`                        |
+| Section   | `<Section>/<Section>.tsx`                  | `SummaryCard/SummaryCard.tsx`                    |
+| Screen    | `<Name>Page/<Name>Page.tsx`                | `SecurityHubPage/SecurityHubPage.tsx`            |
+| Container | `<Name>Prototype.tsx`                      | `SecurityHubPrototype.tsx`                       |
+| Story     | `<Name>Prototype.stories.tsx`              | `SecurityHubPrototype.stories.tsx`               |
 | Title     | `Design System/Prototypes/<Name>`          | `Design System/Prototypes/Security Hub`          |
 | Slug      | `design-system-prototypes-<name>--default` | `design-system-prototypes-security-hub--default` |
 
@@ -175,5 +202,6 @@ yarn workspace @safe-global/web storybook
 - **Components Path**: `packages/views/src/components/ui/`
 - **Utility Path**: `@safe-global/views/utils/cn`
 - **Icon Library**: `lucide-react`
-- **Prototypes and Stories Path**: `packages/views/src/features/design-system/prototypes/<Name>/`
+- **Views Path**: `packages/views/src/features/<feature>/components/`
+- **Prototype Logic and Stories Path**: `apps/web/src/features/<feature>/prototype/`
 - **Storybook**: `yarn workspace @safe-global/web storybook`
