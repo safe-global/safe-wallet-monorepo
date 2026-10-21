@@ -15,8 +15,6 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
 
 const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose: () => void }) => {
   const [error, setError] = useState<string>()
@@ -33,7 +31,6 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       await leaveSpace({ spaceId: space.uuid }).unwrap()
       onClose()
 
-      trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE })
       dispatch(
         showNotification({
           message: `Left Workspace ${space.name}.`,

@@ -160,6 +160,24 @@ describe('MembersList', () => {
     expect(cells).toEqual([SHORT_WALLET_ADDRESS, 'alice@example.com', 'zed@example.com'])
   })
 
+  it('sorts the Name column by the display name, so an alias wins over the name', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder().with({ id: 1, name: 'Charlie' }).build(),
+          memberBuilder().with({ id: 2, name: 'Alice' }).build(),
+          memberBuilder().with({ id: 3, name: 'Bob' }).build(),
+          memberBuilder().with({ id: 4, name: 'Zed', alias: 'Aaron' }).build(),
+        ]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Name' }))
+
+    const names = screen.getAllByTestId('table-cell-name').map((cell) => cell.textContent)
+    expect(names).toEqual(['Zed', 'Alice', 'Bob', 'Charlie'])
+  })
+
   it('prefers the email over the wallet address when both are present', () => {
     render(
       <MembersList

@@ -290,6 +290,35 @@ describe('SpacesSidebarContent', () => {
     })
   })
 
+  describe('SPACE_TRANSACTIONS feature flag', () => {
+    it('hides the Transactions entry when the flag is explicitly off', () => {
+      mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.SPACE_TRANSACTIONS)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toEqual(['/spaces', '/spaces/policies', '/spaces/activity'])
+    })
+
+    it('keeps the Transactions entry while the flag is undefined (chain config still loading)', () => {
+      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.SPACE_TRANSACTIONS ? undefined : true))
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toContain('/spaces/transactions')
+    })
+
+    it('keeps the Transactions entry when the flag is enabled', () => {
+      mockUseHasFeature.mockReturnValue(true)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toContain('/spaces/transactions')
+    })
+  })
+
   describe('POLICIES feature flag', () => {
     it('hides the Policies entry when the flag is explicitly off', () => {
       mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.POLICIES)

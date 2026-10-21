@@ -48,7 +48,7 @@ describe('Happy path Add Owners tests', () => {
 
       getEvents()
       checkDataLayerEvents(tx_confirmed)
-      createTx.deleteTx()
+      createTx.deleteAllTx()
     },
   )
 })

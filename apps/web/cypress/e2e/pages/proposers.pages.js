@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as addressBook from './address_book.page'
-import * as batch from './batches.pages'
 import * as create_tx from './create_tx.pages'
 
 export const proposersSection = '[data-testid="proposer-section"]'
@@ -114,31 +113,19 @@ export function confirmProposerDeletion(index) {
 }
 
 export function deleteAllProposers() {
-  cy.get('body').then(($body) => {
-    if ($body.find(deleteProposerBtn).length > 0) {
-      cy.get(deleteProposerBtn)
-        .should('be.enabled')
-        .then(($items) => {
-          for (let i = 0; i < $items.length; i++) {
-            cy.wrap($items[i]).click({ force: true })
-            confirmProposerDeletion(0)
-          }
-        })
+  getProposersSection().then(($section) => {
+    const count = $section.find(deleteProposerBtn).length
+    for (let i = 0; i < count; i++) {
+      getProposersSection().find(deleteProposerBtn).first().should('be.enabled').click()
+      confirmProposerDeletion(0)
+      cy.get(confrimDeleteProposerBtn).should('not.exist')
     }
-    main.verifyElementsCount(deleteProposerBtn, 0)
   })
-}
-
-export function verifyAddProposerBtnIsDisabled() {
-  cy.get(addProposerBtn).should('exist').and('be.disabled')
+  main.verifyElementsCount(deleteProposerBtn, 0)
 }
 
 export function checkSafeAsProposerErrorMessage() {
   cy.contains('label', safeAsProposerMessage).should('exist')
-}
-
-export function verifyBatchDoesNotExist() {
-  main.verifyElementsCount(batch.batchTxTopBar, 0)
 }
 
 export function verifyProposerSuccessMsgDisplayed() {
@@ -147,8 +134,4 @@ export function verifyProposerSuccessMsgDisplayed() {
 
 export function verifyEditProposerBtnEnabled(address) {
   getProposerRow(address).find(editProposerBtn).should('be.enabled')
-}
-
-export function verifyDeleteProposerBtnIsDisabled(address) {
-  getProposerRow(address).find(deleteProposerBtn).should('be.disabled')
 }

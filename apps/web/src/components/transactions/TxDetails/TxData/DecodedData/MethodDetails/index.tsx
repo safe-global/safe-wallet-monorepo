@@ -4,6 +4,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
+import { formatDecodedValue } from '@/components/transactions/TxDetails/TxData/DecodedData/decodedValue'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type MethodDetailsProps = {
@@ -33,6 +34,7 @@ export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetails
         const isArrayValueParam = isArrayParameter(param.type) || Array.isArray(param.value)
         const inlineType = isAddress(param.type) ? 'address' : isByte(param.type) ? 'bytes' : undefined
         const addressEx = typeof param.value === 'string' ? addressInfoIndex?.[param.value] : undefined
+        const displayValue = param.value == null ? undefined : formatDecodedValue(param.value)
 
         const title = (
           <div className="-mb-1.5">
@@ -46,9 +48,9 @@ export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetails
         return (
           <TxDataRow key={`${data.method}_param-${index}`} title={title}>
             {isArrayValueParam ? (
-              <Value method={data.method} type={param.type} value={param.value as string} />
+              <Value method={data.method} type={param.type} value={param.value} />
             ) : (
-              generateDataRowValue(param.value as string, inlineType, true, addressEx)
+              generateDataRowValue(displayValue, inlineType, true, addressEx)
             )}
           </TxDataRow>
         )

@@ -52,7 +52,7 @@ jobs:
       containers: ${{ steps.specs.outputs.containers }}
       title: ${{ steps.specs.outputs.title }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
       # Scheduled runs have no inputs and fall through to the full regression.
       - name: Resolve specs to run
@@ -121,9 +121,9 @@ jobs:
       matrix:
         containers: ${{ fromJSON(needs.plan.outputs.containers) }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: ./.github/actions/cypress
+      - uses: $/.github/actions/cypress
         env:
           BEAMER_DATA_E2E: ${{ secrets.BEAMER_DATA_E2E }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -186,7 +186,7 @@ jobs:
 
       - name: Python setup
         if: always() && needs.plan.outputs.partial != 'true'
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: '3.x'
 

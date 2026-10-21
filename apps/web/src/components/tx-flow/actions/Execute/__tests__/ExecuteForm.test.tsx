@@ -578,6 +578,26 @@ describe('ExecuteForm', () => {
     })
   })
 
+  it('reports a rejection that the wallet throws as a plain EIP-1193 object as a user rejection', async () => {
+    const setSubmitError = jest.fn()
+    const setIsRejectedByUser = jest.fn()
+    const mockExecuteTx = jest.fn().mockRejectedValue({ code: 4001, message: 'User rejected transaction' })
+
+    const { getByText } = render(
+      <TxFlowContext.Provider value={{ ...initialContext, setSubmitError, setIsRejectedByUser }}>
+        <ExecuteForm
+          {...defaultProps}
+          safeTx={safeTransaction}
+          txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+        />
+      </TxFlowContext.Provider>,
+    )
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => expect(setIsRejectedByUser).toHaveBeenCalledWith(true))
+    expect(setSubmitError).not.toHaveBeenCalledWith(expect.any(Error))
+  })
+
   it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {
     const mockExecuteTx = jest
       .fn()

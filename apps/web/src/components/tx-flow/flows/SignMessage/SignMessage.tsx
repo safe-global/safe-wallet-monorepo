@@ -37,7 +37,7 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import RiskConfirmationError from '@/components/tx/shared/errors/RiskConfirmationError'
 import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import { isWalletRejection } from '@/utils/wallets'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
@@ -313,9 +313,9 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           <DialogHeader threshold={safe.threshold} />
 
           {isEip712 && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <ApprovalEditor safeMessage={decodedMessage} />
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           )}
 
           <BlindSigningWarning
@@ -341,7 +341,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           </Accordion>
 
           <div className="[&:not(:empty)]:mt-4">
-            <RiskConfirmation />
+            <RiskConfirmation subject="message" />
           </div>
         </div>
       </TxCard>

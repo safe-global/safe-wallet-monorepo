@@ -1,4 +1,4 @@
-import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
+import type { CowSwapWidgetParams } from '@cowprotocol/widget-lib'
 import {
   type OnTradeParamsPayload,
   type CowWidgetEventListeners as CowEventListeners,
@@ -29,13 +29,9 @@ import { UiOrderTypeToOrderType, parseCowTradeParams } from '../../helpers/utils
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
-import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { parseCowSupportedChainId } from '../../helpers/cowSupportedChainId'
-import lightPalette from '@safe-global/theme/palettes/light'
-import darkPalette from '@safe-global/theme/palettes/dark'
-
-const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
+import { getCowSwapBaseUrl, getSwapWidgetParams, getSwapWidgetTheme } from '../../helpers/widgetParams'
 
 type Params = {
   sell?: {
@@ -47,7 +43,6 @@ type Params = {
 
 const SwapWidget = ({ sell }: Params) => {
   const darkMode = useDarkMode()
-  const palette = darkMode ? darkPalette : lightPalette
   const chainId = useChainId()
   const cowChainId = useMemo(() => parseCowSupportedChainId(chainId), [chainId])
   const dispatch = useAppDispatch()
@@ -60,7 +55,7 @@ const SwapWidget = ({ sell }: Params) => {
   const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
-  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.fi' : 'https://swap.cow.fi'
+  const cowSwapBaseUrl = getCowSwapBaseUrl(useStagingCowServer)
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
   const { data: isWalletAddressBlocked } = useGetIsSanctionedQuery(wallet?.address || skipToken)
@@ -73,61 +68,15 @@ const SwapWidget = ({ sell }: Params) => {
 
   const blockedAddress = getKeyWithTrueValue(blockedAddresses)
 
-  const [params, setParams] = useState<CowSwapWidgetParams>({
-    appCode: 'Safe Wallet Swaps', // Name of your app (max 50 characters)
-    // Must match appData.url (used as the communicator's allowed origin) or the Safe Apps SDK
-    // handshake is dropped and the widget can't auto-connect the Safe
-    baseUrl: cowSwapBaseUrl,
-    width: '100%', // Width in pixels (or 100% to use all available space)
-    height: '860px',
-    chainId: cowChainId,
-    standaloneMode: false,
-    disableToastMessages: true,
-    disablePostedOrderConfirmationModal: true,
-    disableCrossChainSwap: true,
-    hideLogo: true,
-    hideNetworkSelector: true,
-    sounds: {
-      orderError: null,
-      orderExecuted: null,
-      postOrder: null,
-    },
-    tradeType: swapParams.tradeType,
-    sell: sell || {
-      asset: '',
-      amount: '0',
-    },
-    buy: {
-      asset: '',
-      amount: '0',
-    },
-    images: {
-      emptyOrders: darkMode
-        ? BASE_URL + '/images/common/swap-empty-dark.svg'
-        : BASE_URL + '/images/common/swap-empty-light.svg',
-    },
-    enabledTradeTypes: [TradeType.SWAP, TradeType.LIMIT, TradeType.ADVANCED],
-    theme: {
-      baseTheme: darkMode ? 'dark' : 'light',
-      primary: palette.primary.main,
-      background: palette.background.main,
-      paper: palette.background.paper,
-      text: palette.text.primary,
-      danger: palette.error.dark,
-      info: palette.info.main,
-      success: palette.success.main,
-      warning: palette.warning.main,
-      alert: palette.warning.main,
-    },
-    partnerFee: {
-      bps: feeEnabled ? 35 : 0,
-      recipient: SWAP_FEE_RECIPIENT,
-    },
-    content: {
-      feeLabel: 'Widget Fee',
-      feeTooltipMarkdown: `The [tiered widget fee](https://help.safe.global/articles/9969629388-How-does-the-widget-fee-work-for-native-swaps) incurred here is charged by CoW Protocol for the operation of this widget. The fee is automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operate the CoW Swap Widget and/or CoW Swap`,
-    },
-  })
+  const [params, setParams] = useState<CowSwapWidgetParams>(() =>
+    getSwapWidgetParams({
+      chainId: cowChainId,
+      darkMode,
+      flags: { feeEnabled, useStagingCowServer },
+      tradeType: swapParams.tradeType,
+      sell,
+    }),
+  )
 
   const appData: SafeAppData = useMemo(
     () => ({
@@ -238,20 +187,9 @@ const SwapWidget = ({ sell }: Params) => {
       ...params,
       baseUrl: cowSwapBaseUrl,
       chainId: cowChainId,
-      theme: {
-        baseTheme: darkMode ? 'dark' : 'light',
-        primary: palette.primary.main,
-        background: palette.background.main,
-        paper: palette.background.paper,
-        text: palette.text.primary,
-        danger: palette.error.dark,
-        info: palette.info.main,
-        success: palette.success.main,
-        warning: palette.warning.main,
-        alert: palette.warning.main,
-      },
+      theme: getSwapWidgetTheme(darkMode),
     }))
-  }, [palette, darkMode, cowChainId, cowSwapBaseUrl])
+  }, [darkMode, cowChainId, cowSwapBaseUrl])
 
   useEffect(() => {
     if (!sell) return

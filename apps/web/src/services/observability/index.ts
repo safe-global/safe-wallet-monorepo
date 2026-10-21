@@ -44,3 +44,7 @@ export const logger: ILogger = {
 export const captureError = (error: ObservedError): void => {
   activeProvider.captureError(error)
 }
+
+export const captureRenderError = (error: Error, componentStack?: string): void => {
+  captureError({ error, isUserFacing: true, tags: { componentStack } })
+}

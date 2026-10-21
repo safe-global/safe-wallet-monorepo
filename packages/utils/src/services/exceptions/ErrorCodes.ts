@@ -50,6 +50,8 @@ enum ErrorCodes {
   _650 = '650: Error syncing counterfactual safes with backend',
   _651 = '651: Error adding a Safe to a Workspace',
   _652 = '652: Error requesting a Safenet check',
+  _653 = '653: Error reading the Safe module guard',
+  _654 = '654: Error loading the module guard reader',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',
