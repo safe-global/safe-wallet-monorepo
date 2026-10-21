@@ -1997,6 +1997,120 @@ exports[`./Drawer.stories Sections 1`] = `
                   A section with no trailing note.
                 </span>
               </section>
+              <section
+                class="group/drawer-section flex w-full flex-col gap-2"
+                data-open=""
+                data-slot="collapsible"
+              >
+                <div
+                  class="flex items-center justify-between gap-2"
+                >
+                  <button
+                    aria-controls="base-ui-_r_r_"
+                    aria-disabled="false"
+                    aria-expanded="true"
+                    class="-mx-1 flex min-h-6 flex-1 cursor-pointer items-center gap-1 rounded-sm px-1 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    data-panel-open=""
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      class="m-0 text-xs leading-4 font-semibold text-muted-foreground uppercase"
+                      data-slot="typography"
+                      data-variant="paragraph-mini-bold"
+                    >
+                      Collapsible
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-chevron-down size-3.5 text-muted-foreground transition-transform group-data-[closed]/drawer-section:-rotate-90"
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m6 9 6 6 6-6"
+                      />
+                    </svg>
+                  </button>
+                  <span
+                    class="m-0 text-sm leading-5 font-normal text-muted-foreground shrink-0"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Starts open
+                  </span>
+                </div>
+                <div
+                  class="flex flex-col gap-2"
+                  data-open=""
+                  data-slot="collapsible-content"
+                  id="base-ui-_r_r_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
+                >
+                  <div
+                    class="rounded-lg bg-muted p-3"
+                  >
+                    <span
+                      class="m-0 text-sm leading-5 font-normal"
+                      data-slot="typography"
+                      data-variant="paragraph-small"
+                    >
+                      The title toggles this content.
+                    </span>
+                  </div>
+                </div>
+              </section>
+              <section
+                class="group/drawer-section flex w-full flex-col gap-2"
+                data-closed=""
+                data-slot="collapsible"
+              >
+                <div
+                  class="flex items-center justify-between gap-2"
+                >
+                  <button
+                    aria-disabled="false"
+                    aria-expanded="false"
+                    class="-mx-1 flex min-h-6 flex-1 cursor-pointer items-center gap-1 rounded-sm px-1 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      class="m-0 text-xs leading-4 font-semibold text-muted-foreground uppercase"
+                      data-slot="typography"
+                      data-variant="paragraph-mini-bold"
+                    >
+                      Collapsed by default
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-chevron-down size-3.5 text-muted-foreground transition-transform group-data-[closed]/drawer-section:-rotate-90"
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m6 9 6 6 6-6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -2051,7 +2165,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_t_"
+      id="_r_v_"
     >
       <div
         aria-hidden="true"
@@ -2082,7 +2196,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_r_"
+        id="_r_t_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -2184,7 +2298,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_10_"
+      id="_r_12_"
     >
       <div
         aria-hidden="true"
@@ -2215,7 +2329,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_u_"
+        id="_r_10_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"

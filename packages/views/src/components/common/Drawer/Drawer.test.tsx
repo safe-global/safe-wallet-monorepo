@@ -178,6 +178,32 @@ describe('Drawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
     expect(screen.getByText('Full screen')).toBeVisible()
   })
+  it('lets a custom header replace the built-in buttons and still expand and close', () => {
+    const onClose = jest.fn()
+    render(
+      <Drawer
+        open
+        resizable
+        onClose={onClose}
+        headerActions={() => <span>Unused</span>}
+        header={({ fullScreen, toggleFullScreen, close }) => (
+          <header>
+            <button onClick={toggleFullScreen}>{fullScreen ? 'Restore' : 'Expand'}</button>
+            <button onClick={close}>Dismiss</button>
+          </header>
+        )}
+      >
+        <DrawerBody>Body</DrawerBody>
+      </Drawer>,
+    )
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Unused')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Expand' }))
+    expect(screen.getByRole('button', { name: 'Restore' })).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
   it('clamps dragged width to the viewport and minimum and stops resizing on pointer up', () => {
     render(
       <Drawer open resizable onClose={jest.fn()}>

@@ -14,6 +14,8 @@ export type DrawerProps = {
   ariaLabel?: string
   /** Extra header buttons, placed left of the expand and close buttons. */
   headerActions?: (state: { fullScreen: boolean }) => ReactNode
+  /** Replaces the built-in expand, header action and close buttons with a header that owns them. */
+  header?: (controls: { fullScreen: boolean; toggleFullScreen?: () => void; close: () => void }) => ReactNode
   children?: ReactNode
 }
 
@@ -25,6 +27,7 @@ export const Drawer = ({
   mobileFullScreen = false,
   ariaLabel,
   headerActions,
+  header,
   children,
 }: DrawerProps): ReactElement => {
   const [width, setWidth] = useState(size === 'lg' ? 700 : 440)
@@ -114,9 +117,16 @@ export const Drawer = ({
             }}
           />
         )}
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+          {header?.({
+            fullScreen,
+            toggleFullScreen: resizable && !mobileSurface ? () => setFullScreen(!fullScreen) : undefined,
+            close,
+          })}
+          {children}
+        </div>
 
-        {resizable && !mobileSurface && (
+        {!header && resizable && !mobileSurface && (
           <Button
             variant="surface"
             size="icon"
@@ -129,7 +139,7 @@ export const Drawer = ({
           </Button>
         )}
 
-        {headerActions && (
+        {!header && headerActions && (
           <div
             className={`absolute top-6 flex items-center gap-2 ${resizable && !mobileSurface ? 'right-30' : 'right-18'}`}
           >
@@ -138,9 +148,11 @@ export const Drawer = ({
         )}
 
         {/* Positioned by the Drawer rather than the header so every drawer has a close affordance */}
-        <Button variant="surface" size="icon" onClick={close} aria-label="Close" className="absolute top-6 right-6">
-          <X />
-        </Button>
+        {!header && (
+          <Button variant="surface" size="icon" onClick={close} aria-label="Close" className="absolute top-6 right-6">
+            <X />
+          </Button>
+        )}
       </SheetContent>
     </Sheet>
   )

@@ -245,3 +245,30 @@ export const Mobile: Story = {
   ...Responsive,
   parameters: { viewport: { defaultViewport: 'mobile1' } },
 }
+
+export const CustomHeader: Story = {
+  args: { resizable: true, ariaLabel: 'Drawer with its own header' },
+  render: (args) => (
+    <Drawer
+      {...args}
+      header={({ fullScreen, toggleFullScreen, close }) => (
+        <div className="flex items-center gap-3 px-6 pt-6">
+          <DrawerTitle>Custom header</DrawerTitle>
+          <span className="flex-1" />
+          {toggleFullScreen && (
+            <Button variant="outline" size="sm" onClick={toggleFullScreen}>
+              {fullScreen ? 'Restore' : 'Expand'}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={close}>
+            Close
+          </Button>
+        </div>
+      )}
+    >
+      <DrawerBody>
+        <Paragraphs count={6} />
+      </DrawerBody>
+    </Drawer>
+  ),
+}
