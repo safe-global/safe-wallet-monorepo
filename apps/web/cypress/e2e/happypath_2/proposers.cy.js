@@ -53,5 +53,7 @@ describe('Happy path Proposers tests', { defaultCommandTimeout: 30000 }, () => {
     proposer.verifyProposerSuccessMsgDisplayed()
     cy.reload()
     proposer.checkProposerData([proposerName])
+
+    proposer.deleteAllProposers()
   })
 })

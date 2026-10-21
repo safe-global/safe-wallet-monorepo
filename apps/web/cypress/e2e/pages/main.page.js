@@ -227,39 +227,20 @@ export const getRelayRemainingAttempts = (safeAddress) => {
       headers: {
         accept: 'application/json',
       },
+      failOnStatusCode: false,
     })
-    .then((response) => {
-      console.log('Remaining relay attempts: ', response.body.remaining)
-      return response.body.remaining
-    })
+    .then((response) => (response.status === 200 ? response.body.remaining : 0))
 }
 
 export function verifyNonceChange(safeAddress, expectedNonce, retries = 30, delay = 10000) {
-  let attempts = 0
-
-  function checkNonce() {
-    return fetchCurrentNonce(safeAddress).then((newNonce) => {
-      console.log(`Attempt ${attempts + 1}: newNonce = ${newNonce}, expectedNonce = ${expectedNonce}`)
-
-      if (newNonce === expectedNonce) {
-        console.log('Nonce matches the expected value')
-        expect(newNonce).to.equal(expectedNonce)
-        return
-      }
-
-      attempts += 1
-      if (attempts < retries) {
-        return new Promise((resolve) => {
-          setTimeout(resolve, delay)
-        }).then(checkNonce)
-      } else {
-        console.error(`Nonce did not change to expected value after ${retries} attempts`)
-        return Promise.reject(new Error(`Nonce did not change to expected value after ${retries} attempts`))
-      }
-    })
-  }
-
-  return checkNonce()
+  fetchCurrentNonce(safeAddress).then((newNonce) => {
+    if (newNonce === expectedNonce || retries <= 1) {
+      expect(newNonce, 'Safe nonce').to.equal(expectedNonce)
+      return
+    }
+    cy.wait(delay)
+    verifyNonceChange(safeAddress, expectedNonce, retries - 1, delay)
+  })
 }
 
 export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {

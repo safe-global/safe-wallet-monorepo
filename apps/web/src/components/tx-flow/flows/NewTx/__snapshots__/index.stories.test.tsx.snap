@@ -100,6 +100,7 @@ exports[`./index.stories Default 1`] = `
                       Manage assets
                     </h4>
                     <span
+                      class="contents"
                       data-track="modals: Send tokens"
                     >
                       <button
@@ -123,6 +124,7 @@ exports[`./index.stories Default 1`] = `
                       Interact with contracts
                     </h4>
                     <span
+                      class="contents"
                       data-track="modals: Contract interaction"
                     >
                       <a
@@ -251,6 +253,7 @@ exports[`./index.stories SendTokensJourney 1`] = `
                       Manage assets
                     </h4>
                     <span
+                      class="contents"
                       data-track="modals: Send tokens"
                     >
                       <button
@@ -274,6 +277,7 @@ exports[`./index.stories SendTokensJourney 1`] = `
                       Interact with contracts
                     </h4>
                     <span
+                      class="contents"
                       data-track="modals: Contract interaction"
                     >
                       <a

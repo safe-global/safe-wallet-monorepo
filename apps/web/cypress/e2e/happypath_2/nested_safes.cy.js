@@ -36,16 +36,15 @@ describe('Nested safes happy path tests', () => {
     nsafes.completeIntroScreenSelectValid()
     nsafes.clickOnAddNestedSafeBtn()
     createTx.hasNonce()
-    createTx.changeNonce(3)
     nsafes.nameInputHasPlaceholder()
     nsafes.typeName(main.generateRandomString(51))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
     nsafes.typeName(safe)
     nsafes.clickOnAddNextBtn()
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.selectComboButtonOption('sign')
-    createTx.clickOnSignTransactionBtn()
-    createTx.clickViewTransaction()
+    createTx.signAndOpenExecuteStep()
+    createTx.clickOnExecuteLaterBtn()
+    createTx.clickOnTransactionItem(0)
     main.verifyValuesExist(createTx.transactionItem, [
       createTx.tx_status.execute,
       nsafes.nonfundAssetsActions[0],

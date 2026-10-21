@@ -32,7 +32,7 @@ const SpaceMembers = () => {
               <ShadcnButton
                 data-testid="add-member-button"
                 size="lg"
-                className="px-4 py-0"
+                className="self-start px-4 py-0"
                 onClick={() => setOpenAddMembersModal(true)}
               >
                 <Plus className="size-4 mr-1 text-green-500" />

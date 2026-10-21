@@ -1,13 +1,14 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { mockSafeInfo } from '@/tests/mocks/hooks'
+import { mockRole, type TestRole } from '@/tests/mocks/roles'
 import { SidebarActionButton } from '../SidebarActionButton'
 
 const mockSetTxFlow = jest.fn()
 const mockTrackEvent = jest.fn()
 const mockUseIsCounterfactualSafe = jest.fn()
 const mockUseLoadFeature = jest.fn()
-let mockCheckWalletOk = true
 
 jest.mock('@/features/counterfactual', () => ({
   useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
@@ -15,6 +16,7 @@ jest.mock('@/features/counterfactual', () => ({
 }))
 
 jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
   useLoadFeature: () => mockUseLoadFeature(),
 }))
 
@@ -24,9 +26,17 @@ jest.mock('@/services/analytics', () => ({
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
-jest.mock('@/components/common/CheckWallet', () => ({
-  __esModule: true,
-  default: ({ children }: { children: (ok: boolean) => ReactElement }) => children(mockCheckWalletOk),
+jest.mock('@/hooks/wallets/useWallet')
+jest.mock('@/hooks/useIsSafeOwner')
+jest.mock('@/hooks/useIsWrongChain')
+jest.mock('@/hooks/useProposers')
+jest.mock('@/hooks/useIsNestedSafeOwner')
+jest.mock('@/hooks/coreSDK/safeCoreSDK')
+jest.mock('@/hooks/useSafeInfo')
+
+jest.mock('@/features/spending-limits', () => ({
+  ...jest.requireActual('@/features/spending-limits'),
+  useIsOnlySpendingLimitBeneficiary: jest.fn(),
 }))
 
 jest.mock('@/components/tx-flow/flows', () => ({
@@ -63,7 +73,8 @@ const renderWithContext = (ui: ReactElement) =>
 describe('SidebarActionButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockCheckWalletOk = true
+    mockRole('owner')
+    mockSafeInfo({ deployed: true })
     mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseLoadFeature.mockReturnValue({ ActivateAccountButton: () => <button>Activate account</button> })
   })
@@ -85,9 +96,19 @@ describe('SidebarActionButton', () => {
     )
   })
 
-  it('disables the button when the wallet check fails', () => {
-    mockCheckWalletOk = false
+  it.each<TestRole>(['owner', 'proposer', 'spendingLimitBeneficiary'])('enables the button for a %s', (role) => {
+    mockRole(role)
+
     renderWithContext(<SidebarActionButton />)
+
+    expect(screen.getByTestId('new-tx-btn')).toBeEnabled()
+  })
+
+  it.each<TestRole>(['nonOwner', 'disconnected'])('disables the button for a %s', (role) => {
+    mockRole(role)
+
+    renderWithContext(<SidebarActionButton />)
+
     expect(screen.getByTestId('new-tx-btn')).toBeDisabled()
   })
 

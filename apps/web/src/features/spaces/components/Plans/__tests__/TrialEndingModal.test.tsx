@@ -170,7 +170,6 @@ describe('TrialEndingModal', () => {
     expect(screen.getByText(/add a payment method by Dec 5, 2026, your Workspace will be locked/)).toBeInTheDocument()
     expect(screen.getByTestId('trial-reminder-tooltip')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
-    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
 
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED, {

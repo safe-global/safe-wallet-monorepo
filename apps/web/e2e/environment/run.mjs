@@ -38,8 +38,13 @@ export function walletEnvironment(manifest, env = process.env) {
       ([key]) => !key.startsWith('FORK_') && key !== 'SEPOLIA_FORK_RPC_URL' && key !== 'ELECTRON_RUN_AS_NODE',
     ),
   )
+  // Stacks started before the Ledger emulator existed have no URL for it; only the Ledger specs need one.
+  const ledger = manifest.ledgerEmulatorUrl
+    ? { NEXT_PUBLIC_LEDGER_EMULATOR_URL: localUrl(manifest.ledgerEmulatorUrl, 'Ledger emulator') }
+    : {}
   return {
     ...filtered,
+    ...ledger,
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',

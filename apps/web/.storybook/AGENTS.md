@@ -6,7 +6,7 @@ Guidance for the Storybook **configuration** in this directory. For writing stor
 
 - `main.ts` — Storybook config (webpack-based).
 - `preview.tsx` — global setup that stories must NOT re-add per-file: the global `mswLoader`, `ShadcnProvider` + light/dark theme sync decorators, viewport presets, and the sidebar `storySort` (including the curated `Design System` top-level group).
-- `decorators/` — shared story decorators; `withMockProvider` is re-exported to stories via `@/storybook/preview`.
+- `decorators/` — shared story decorators; stories import `withMockProvider` from `@/storybook/decorators`. Never re-export them from `preview.tsx`: every story downloads its imports, and `withMockProvider` pulls in the whole store.
 - `mocks/` — config-level mocks.
 - `COVERAGE.md` — **generated**; regenerate with `yarn workspace @safe-global/web storybook:generate-coverage`, never hand-edit.
 - `test-runner.mjs` — Storybook test-runner config.

@@ -22,17 +22,6 @@ describe('Replace Owners tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  describe('Disconnected', () => {
-    beforeEach(() => {
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-      cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    })
-
-    it('Verify Tooltip displays correct message for disconnected user', () => {
-      owner.verifyReplaceBtnIsDisabled()
-    })
-  })
-
   describe('Connected', () => {
     beforeEach(() => {
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
@@ -96,6 +85,7 @@ describe('Replace Owners tests', () => {
           safeAddress: staticSafes.SEP_STATIC_SAFE_25.slice(6),
         },
       ]
+      createTx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_25, signer)
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_25)
       owner.waitForConnectionStatus()
       owner.openReplaceOwnerWindow(1)

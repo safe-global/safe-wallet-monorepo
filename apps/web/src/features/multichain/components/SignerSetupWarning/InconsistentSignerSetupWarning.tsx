@@ -2,7 +2,7 @@ import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes, useGetMultipleSafeOverviewsQuery } from '@/store/slices'
@@ -86,18 +86,17 @@ export const InconsistentSignerSetupWarning = () => {
         This could break approvals and you may risk losing control of this Safe. First, switch to the affected network
         and review the signer setup for this Safe.
         <div className="mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-foreground"
-            data-testid="review-signers-btn"
-            onClick={() => {
-              trackEvent(ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS)
-              handleReviewSigners()
-            }}
-          >
-            Review signers
-          </Button>
+          <Track {...ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-foreground"
+              data-testid="review-signers-btn"
+              onClick={handleReviewSigners}
+            >
+              Review signers
+            </Button>
+          </Track>
         </div>
       </AlertDescription>
     </Alert>

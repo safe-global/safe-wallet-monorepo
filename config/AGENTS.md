@@ -17,10 +17,10 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. To refresh or add one:
 
 ```bash
-node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe]
+node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions]
 ```
 
-Without `--safe=<key>` it re-fetches and overwrites **all** fixtures. The flag only accepts the `=` form.
+Without `--safe=<key>` or `--group=<name>` it re-fetches and overwrites **all** fixtures. Both flags only accept the `=` form. The `transactions` group records the history of the Sepolia Safe `SEP_STATIC_SAFE_7` and the details of selected rows under `test/msw/fixtures/transactions/`; `createTransactionHandlersFromFixture` serves them and is not part of any default handler set.
 
 ## Scenario names are a cross-workspace contract
 

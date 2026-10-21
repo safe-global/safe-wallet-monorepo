@@ -22,6 +22,7 @@ import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 type ExpandableTransactionItemProps = {
   isConflictGroup?: boolean
   isBulkGroup?: boolean
+  isNested?: boolean
   item: MultisigTransaction
   txDetails?: TransactionDetails
 }
@@ -29,6 +30,7 @@ type ExpandableTransactionItemProps = {
 const ExpandableTransactionItem = ({
   isConflictGroup = false,
   isBulkGroup = false,
+  isNested = false,
   item,
   txDetails,
   testId,
@@ -50,7 +52,7 @@ const ExpandableTransactionItem = ({
           trackEvent(TX_LIST_EVENTS.EXPAND_TRANSACTION)
         }
       }}
-      isNested={isBulkGroup || isConflictGroup}
+      isNested={isNested || isBulkGroup || isConflictGroup}
       isBulkGroup={isBulkGroup}
       isBatched={isBatched}
       keepMounted={hasExpanded}

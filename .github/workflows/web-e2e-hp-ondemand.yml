@@ -21,12 +21,11 @@ jobs:
       matrix:
         containers: [1, 2, 3]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
 
-      - uses: ./.github/actions/cypress
+      - uses: $/.github/actions/cypress
         env:
           BEAMER_DATA_E2E: ${{ secrets.BEAMER_DATA_E2E }}
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
           NEXT_PUBLIC_BEAMER_ID: ${{ secrets.NEXT_PUBLIC_BEAMER_ID }}
           NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
@@ -84,10 +83,12 @@ jobs:
             cypress/e2e/happypath/*.cy.js
           group: 'Happy path on demand tests'
           tag: 'happypath'
+          container-index: ${{ matrix.containers }}
+          container-total: ${{ strategy.job-total }}
 
       - name: Python setup
         if: always()
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: '3.x'
 
