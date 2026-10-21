@@ -19,7 +19,8 @@ type AllowlistSummaryProps = {
 const MAX_LISTED_TOKENS = 3
 
 const describeTokens = (symbols: string[]): string => {
-  if (symbols.length > MAX_LISTED_TOKENS) return `${symbols.length} tokens`
+  const hasSharedSymbol = new Set(symbols).size < symbols.length
+  if (symbols.length > MAX_LISTED_TOKENS || hasSharedSymbol) return `${symbols.length} tokens`
   if (symbols.length === 1) return symbols[0]
   return `${symbols.slice(0, -1).join(', ')} and ${symbols[symbols.length - 1]}`
 }

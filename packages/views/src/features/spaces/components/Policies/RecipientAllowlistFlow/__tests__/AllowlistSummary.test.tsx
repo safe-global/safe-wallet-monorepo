@@ -48,6 +48,18 @@ describe('AllowlistSummary', () => {
     ).toBeInTheDocument()
   })
 
+  it('counts tokens that share a symbol instead of repeating it', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments on Sepolia"
+        tokenSymbols={['USDC', 'USDC']}
+        recipientNames={['Alice']}
+      />,
+    )
+
+    expect(screen.getByText('Payments on Sepolia will only be able to send 2 tokens to Alice.')).toBeInTheDocument()
+  })
+
   it('joins two tokens with "and"', () => {
     render(<AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B']} recipientNames={['Alice']} />)
 
