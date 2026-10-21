@@ -66,7 +66,13 @@ export type ReviewLayout = {
   setPendingAction: (action: PreviewAction | null) => void
   replacement: Replacement | null
   setReplacement: (replacement: Replacement | null) => void
+  // Next steps: "Expand all" / "Collapse all", kept while stepping. A new `sectionsVersion` re-applies it.
+  sectionsMode?: SectionsMode
+  sectionsVersion?: number
+  toggleAllSections?: () => void
 }
+
+export type SectionsMode = 'default' | 'expanded' | 'collapsed'
 
 export type ReviewDrawerProps = {
   review: Proposal | null

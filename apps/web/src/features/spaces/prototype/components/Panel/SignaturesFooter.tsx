@@ -29,6 +29,8 @@ export type SignaturesFooterProps = {
   metaTooltip?: string
   // Queue: replaces the badge text, e.g. "1 more from 2 signers".
   summary?: string
+  // Queue: the table's signature gauge. The header then reads "2/3 Signatures" with plain text, no badge.
+  gauge?: ReactNode
   actions?: FooterActions
   onDismiss?: () => void
   padding?: HeaderPadding
@@ -220,6 +222,7 @@ export const SignaturesFooter = ({
   meta,
   metaTooltip,
   summary,
+  gauge,
   actions,
   onDismiss,
   padding = 16,
@@ -248,15 +251,29 @@ export const SignaturesFooter = ({
     >
       <section aria-label="Signatures">
         <div className="flex items-center gap-2 py-2.5">
-          <span className="text-sm font-medium">Signatures</span>
-          {!(yourTurn && open) && (
-            <Badge variant={complete ? 'success' : 'warning'} size="status" shape="status">
-              {complete
-                ? `${signed} of ${required} signed`
-                : yourTurn
-                  ? YOUR_SIGNATURE
-                  : (summary ?? `${signed} of ${required} required`)}
-            </Badge>
+          {!gauge && <span className="text-sm font-medium">Signatures</span>}
+          {gauge ? (
+            <span className="flex min-w-0 items-center gap-1.5 text-sm tabular-nums">
+              {gauge}
+              <span className="font-medium">
+                {signed}/{required} Signatures
+              </span>
+              {!complete && !(yourTurn && open) && (
+                <span className="truncate text-xs text-muted-foreground">
+                  · {yourTurn ? YOUR_SIGNATURE : (summary ?? `${required - signed} more needed`)}
+                </span>
+              )}
+            </span>
+          ) : (
+            !(yourTurn && open) && (
+              <Badge variant={complete ? 'success' : 'warning'} size="status" shape="status">
+                {complete
+                  ? `${signed} of ${required} signed`
+                  : yourTurn
+                    ? YOUR_SIGNATURE
+                    : (summary ?? `${signed} of ${required} required`)}
+              </Badge>
+            )
           )}
           {copyLink}
           <span className="flex-1" />

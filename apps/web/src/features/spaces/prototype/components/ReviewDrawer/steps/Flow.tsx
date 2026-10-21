@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { getCounterpartyCell, isNewRecipient } from '../../../services/columns'
 import { getAccount, getToken } from '../../../services/model'
 import { getFullAddress } from '../../../services/technical'
@@ -53,10 +54,11 @@ function Recipient({ tx }: { tx: Proposal }) {
   const full = counterparty.address ? getFullAddress(counterparty.address) : undefined
   const isNew = isNewRecipient(tx)
   return (
-    <span className="flex flex-col items-end gap-1">
-      <span className="flex h-6 min-w-0 items-center justify-end gap-2">
+    <TwoLines>
+      <span className="flex h-6 min-w-0 items-center gap-2">
         <IdentityRow
           inline
+          align="start"
           name={counterparty.name}
           avatar={counterparty.avatar}
           detail=""
@@ -66,7 +68,7 @@ function Recipient({ tx }: { tx: Proposal }) {
         {isNew && !added && <Badge variant="warning">New recipient</Badge>}
         {full && <AddressActions address={full} chainId={chainId} />}
       </span>
-      {full && <span className="break-all text-right font-mono text-xs text-muted-foreground">{full}</span>}
+      {full && <span className="break-all font-mono text-xs text-muted-foreground">{full}</span>}
       {isNew &&
         (added ? (
           <span className="text-xs text-success-strong">Added to address book</span>
@@ -75,22 +77,41 @@ function Recipient({ tx }: { tx: Proposal }) {
             Add to address book
           </Button>
         ))}
-    </span>
+    </TwoLines>
+  )
+}
+
+// Right-aligned in the row, with its lines sharing one left edge.
+const TwoLines = ({ children }: { children: ReactNode }) => (
+  <span className="flex min-w-0 justify-end">
+    <span className="flex min-w-0 flex-col items-start gap-1">{children}</span>
+  </span>
+)
+
+// Your own Safe, laid out like the recipient: name, chain and address actions, then the full address.
+function SafeIdentity({ tx }: { tx: Proposal }) {
+  const account = getAccount(tx)
+  return (
+    <TwoLines>
+      <span className="flex h-6 min-w-0 items-center gap-2">
+        <IdentityRow inline align="start" name={account.name} avatar={account.iconAddress} detail="" />
+        <Tooltip delay={150}>
+          <TooltipTrigger render={<span className="flex shrink-0" />} aria-label={account.network}>
+            <img src={chainLogoUrl(account.chainId)} alt="" className="size-4 rounded-full" />
+          </TooltipTrigger>
+          <TooltipContent>{account.network}</TooltipContent>
+        </Tooltip>
+        <AddressActions address={account.iconAddress} chainId={account.chainId} />
+      </span>
+      <span className="break-all font-mono text-xs text-muted-foreground">{account.iconAddress}</span>
+    </TwoLines>
   )
 }
 
 export function getFlowRows(tx: Proposal): FlowRow[] {
   const account = getAccount(tx)
   const { kind } = tx
-  const safe = (
-    <IdentityRow
-      inline
-      name={account.name}
-      address={account.iconAddress}
-      chainId={account.chainId}
-      network={{ name: account.network, logo: chainLogoUrl(account.chainId) }}
-    />
-  )
+  const safe = <SafeIdentity tx={tx} />
   const counterparty = getCounterpartyCell(tx)
   const toSelf = kind.type === 'transfer' && kind.toSelf
   const to: FlowRow = toSelf
@@ -136,8 +157,8 @@ export function getFlowRows(tx: Proposal): FlowRow[] {
       ]
     case 'settings':
     case 'rejection':
-      return [{ label: 'Safe', content: safe }]
+      return [{ label: 'Safe', top: true, content: safe }]
     default:
-      return [{ label: 'From', content: safe }, to]
+      return [{ label: 'From', top: true, content: safe }, to]
   }
 }

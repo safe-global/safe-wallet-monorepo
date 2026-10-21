@@ -7,6 +7,7 @@ import type { PreviewAction } from '../../../services/queue'
 import type { Wallet } from '../../../services/nextSteps'
 import type { Persona, Proposal } from '../../../types'
 import { CopyTransactionLink } from '../../ProposalDetails'
+import { SignatureGauge } from '../../QueueTable/SignatureGauge'
 import { ActionRow, SignaturesFooter } from '../../Panel/SignaturesFooter'
 import type { ReviewLayout } from '../ReviewDrawer'
 
@@ -116,6 +117,7 @@ export function StepsFooter({
       signed={signed}
       required={account.threshold}
       summary={getSignatureSummary(tx).split(' · ')[1]}
+      gauge={<SignatureGauge count={signed} threshold={account.threshold} />}
       rows={toSignatureRows(tx, persona)}
       chainId={account.chainId}
       open={layout.signersOpen}

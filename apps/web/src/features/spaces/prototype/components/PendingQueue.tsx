@@ -42,7 +42,7 @@ import { AppliedFilters, QueueToolbar } from './QueueFilters/QueueFilters'
 import { CollapseAllButton, QueueSection } from './QueueTable/QueueSection'
 import { QueueGroupedTable } from './QueueTable/QueueGroupedTable'
 import { buildSections, rankAccounts } from './QueueTable/sections'
-import { ReviewDrawer, type Replacement } from './ReviewDrawer/ReviewDrawer'
+import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
 import { SCENARIOS, ScenarioBar, type Hypernative } from './ScenarioBar'
 import { RecoveryPanel, useRecoveries } from './Recovery/RecoveryPanel'
@@ -141,6 +141,15 @@ function PendingQueueView() {
   const [reviewSections, setReviewSections] = useState<string[]>([])
   const [signersOpen, setSignersOpen] = useState(!steps)
   const [showTechnical, setShowTechnical] = useState(false)
+  const [sectionsMode, setSectionsMode] = useState<SectionsMode>('default')
+  const [sectionsVersion, setSectionsVersion] = useState(0)
+  const toggleAllSections = () => {
+    const next = sectionsMode === 'expanded' ? 'collapsed' : 'expanded'
+    setSectionsMode(next)
+    setSectionsVersion(sectionsVersion + 1)
+    setShowTechnical(next === 'expanded')
+    setSignersOpen(next === 'expanded')
+  }
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
   const [replacement, setReplacement] = useState<Replacement | null>(null)
@@ -167,6 +176,8 @@ function PendingQueueView() {
     if (!keepLayout) {
       setReviewSections([])
       setSignersOpen(!steps)
+      setSectionsMode('default')
+      setShowTechnical(false)
     }
     setFeedback('')
     setCursorId(tx.id)
@@ -314,6 +325,7 @@ function PendingQueueView() {
       const offset = event.key === 'j' ? 1 : event.key === 'k' ? -1 : 0
       if (review) {
         if (offset) stepReview(offset)
+        if (event.key === 'e' && steps) toggleAllSections()
         return
       }
       const cursorIndex = reviewOrder.findIndex((tx) => tx.id === cursorId)
@@ -544,6 +556,9 @@ function PendingQueueView() {
             setPendingAction,
             replacement,
             setReplacement,
+            sectionsMode,
+            sectionsVersion,
+            toggleAllSections,
           }}
           feedback={feedback}
           onStep={stepReview}

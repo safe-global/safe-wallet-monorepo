@@ -41,6 +41,8 @@ export type SharedDrawerHeaderProps = {
   padding?: HeaderPadding
   buttonSize?: HeaderButtonSize
   buttonLayout?: HeaderButtonLayout
+  // Queue: extra buttons before full screen, e.g. expand or collapse every section.
+  extraActions?: HeaderAction[]
 }
 
 const FADES: Record<NameEnding, string | undefined> = {
@@ -134,7 +136,7 @@ const IconMedia = ({
   )
 }
 
-type HeaderAction = {
+export type HeaderAction = {
   id: string
   label: string
   icon: ReactNode
@@ -226,6 +228,7 @@ export const SharedDrawerHeader = ({
   padding = 16,
   buttonSize = 'icon-sm',
   buttonLayout = 'group',
+  extraActions = [],
 }: SharedDrawerHeaderProps): ReactElement => {
   const badge =
     statusSlot ??
@@ -250,6 +253,7 @@ export const SharedDrawerHeader = ({
           { id: 'next', label: 'Next', icon: <ChevronDown />, onClick: onNext, disabled: !hasNext, shortcut: 'J' },
         ]
       : []),
+    ...extraActions,
     ...(onToggleFullScreen
       ? [
           {

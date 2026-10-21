@@ -72,15 +72,8 @@ type SectionProps = {
   onOpenChange?: (open: boolean) => void
 }
 
-// Queue: `callout` sits above the frame and `footer` below it, e.g. why the transaction can't execute yet.
-export const PanelSection = ({
-  children,
-  callout,
-  footer,
-  ...section
-}: SectionProps & { children: ReactNode; callout?: ReactNode; footer?: ReactNode }): ReactElement => (
+export const PanelSection = ({ children, ...section }: SectionProps & { children: ReactNode }): ReactElement => (
   <DrawerSection {...section}>
-    {callout}
     <Frame className="flex w-full flex-col">
       {Children.toArray(children).map((row, index) => (
         <Fragment key={index}>
@@ -89,7 +82,6 @@ export const PanelSection = ({
         </Fragment>
       ))}
     </Frame>
-    {footer}
   </DrawerSection>
 )
 

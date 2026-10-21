@@ -1,17 +1,19 @@
+import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { getDetail, getHeadline, TYPE_HINTS } from '../../../services/columns'
 import { getStatusHint } from '../../../services/actions'
-import { getAccount, getConflicts, getTransactionLabel, getTypeLabel } from '../../../services/model'
+import { getAccount, getConflicts, getState, getTransactionLabel, getTypeLabel } from '../../../services/model'
 import { getOwnerWallet } from '../../../services/nextSteps'
 import { isSignerOf } from '../../../services/personas'
-import { HintContent, StepsStatusChip, TYPE_ICONS } from '../../shared'
-import { NonceMark } from '../../QueueTable/NonceCell'
+import { HintContent, StatusChip, StepsStatusChip, TYPE_ICONS } from '../../shared'
 import type { Hypernative } from '../../ScenarioBar'
 import type { ReviewDrawerProps } from '../ReviewDrawer'
 import { SharedDrawerHeader } from '../../Panel/SharedDrawerHeader'
 import {
   ChangeSection,
+  ConflictsSection,
+  SectionsContext,
   NoteSection,
   SecuritySection,
   StatusAlerts,
@@ -62,12 +64,7 @@ export function StepsReviewDrawer({
               icon: Icon,
               iconHint: <HintContent title={type} body={TYPE_HINTS[type]} />,
               title: getHeadline(review),
-              subtitle: (
-                <>
-                  <NonceMark tx={review} persona={persona} competing={competing} />
-                  {detail && <span className="min-w-0 truncate">{detail}</span>}
-                </>
-              ),
+              subtitle: detail && <span className="min-w-0 truncate">{detail}</span>,
             }}
             onPrevious={() => onStep(-1)}
             onNext={() => onStep(1)}
@@ -78,40 +75,70 @@ export function StepsReviewDrawer({
             onToggleFullScreen={toggleFullScreen}
             onClose={close}
             padding={24}
+            extraActions={
+              layout.toggleAllSections
+                ? [
+                    {
+                      id: 'sections',
+                      label: layout.sectionsMode === 'expanded' ? 'Collapse all sections' : 'Expand all sections',
+                      icon: layout.sectionsMode === 'expanded' ? <ChevronsDownUp /> : <ChevronsUpDown />,
+                      onClick: layout.toggleAllSections,
+                      shortcut: 'E',
+                    },
+                  ]
+                : undefined
+            }
           />
         )
       }
     >
       <DrawerBody>
         {review && (
-          // Keyed so every section goes back to its default when stepping to another transaction.
-          <div key={review.id} className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2 empty:hidden">
-              <StatusAlerts tx={review} items={items} persona={persona} />
+          // Keyed so each transaction starts from the defaults, or from "Expand all" while stepping.
+          <SectionsContext.Provider
+            key={review.id}
+            value={{ mode: layout.sectionsMode ?? 'default', version: layout.sectionsVersion ?? 0 }}
+          >
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2 empty:hidden">
+                <StatusAlerts tx={review} items={items} persona={persona} />
+              </div>
+              <ChangeSection tx={review} layout={layout} onProposeAlternative={onProposeAlternative} />
+              <SummarySection
+                tx={review}
+                // Blocked shows on "Conflicts and checks". Here, a blocked transaction you can still sign says so.
+                status={
+                  getState(review, persona).waiting ? (
+                    getState(review, persona).canSign && (
+                      <Tooltip delay={150}>
+                        <TooltipTrigger render={<span className="shrink-0" />}>
+                          <StatusChip tone="success">Sign ahead</StatusChip>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          You can sign now. It executes after #{getAccount(review).nextNonce}.
+                        </TooltipContent>
+                      </Tooltip>
+                    )
+                  ) : (
+                    <Tooltip delay={150}>
+                      <TooltipTrigger
+                        render={<span className="shrink-0" />}
+                        aria-label={getStatusHint(review, items, persona)}
+                      >
+                        <StepsStatusChip tx={review} persona={persona} />
+                      </TooltipTrigger>
+                      <TooltipContent>{getStatusHint(review, items, persona)}</TooltipContent>
+                    </Tooltip>
+                  )
+                }
+              />
+              <ConflictsSection tx={review} items={items} persona={persona} onReview={onReview} />
+              <SecuritySection tx={review} hypernative={hypernative} />
+              <WhatItDoesSection tx={review} />
+              <NoteSection tx={review} />
+              <TransactionDataSection tx={review} open={showTechnical} onToggle={() => onToggleTechnical?.()} />
             </div>
-            <ChangeSection tx={review} layout={layout} onProposeAlternative={onProposeAlternative} />
-            <SummarySection
-              tx={review}
-              items={items}
-              persona={persona}
-              onReview={onReview}
-              status={
-                <Tooltip delay={150}>
-                  <TooltipTrigger
-                    render={<span className="shrink-0" />}
-                    aria-label={getStatusHint(review, items, persona)}
-                  >
-                    <StepsStatusChip tx={review} persona={persona} />
-                  </TooltipTrigger>
-                  <TooltipContent>{getStatusHint(review, items, persona)}</TooltipContent>
-                </Tooltip>
-              }
-            />
-            <SecuritySection tx={review} hypernative={hypernative} />
-            <WhatItDoesSection tx={review} />
-            <NoteSection tx={review} />
-            <TransactionDataSection tx={review} open={showTechnical} onToggle={() => onToggleTechnical?.()} />
-          </div>
+          </SectionsContext.Provider>
         )}
       </DrawerBody>
       {review && account && (

@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useState, type ReactNode } from 'react'
-import { ChevronRight, Info, LockKeyhole, ShieldAlert, ShieldCheck, ShieldEllipsis } from 'lucide-react'
+import { createContext, Fragment, useContext, useEffect, useState, type ReactNode } from 'react'
+import { Info, LockKeyhole, ShieldAlert, ShieldCheck, ShieldEllipsis } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Input } from '@safe-global/views/components/ui/input'
@@ -12,7 +12,7 @@ import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import { DrawerList } from '@/components/common/Drawer'
 import { PanelAlert } from '../../Panel/PanelAlert'
 import { TOOLTIP_TIMING } from '../../Panel/SharedDrawerHeader'
-import { Divider, Frame, PanelLinkRow, PanelRow, PanelSection } from '../../Panel/PanelBody'
+import { PanelLinkRow, PanelRow, PanelSection } from '../../Panel/PanelBody'
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import { getActionBreakdown, getHeadline } from '../../../services/columns'
 import {
@@ -30,10 +30,10 @@ import { getMethodName, getTechnicalData } from '../../../services/technical'
 import { getSafenetCheck, SAFENET_LABELS, SAFENET_URL } from '../../../services/safenet'
 import type { Persona, Proposal } from '../../../types'
 import { BatchActions, getDetailItems } from '../../ProposalDetails'
-import { chainLogoUrl } from '../../shared'
+import { chainLogoUrl, StatusChip } from '../../shared'
 import { NonceMark } from '../../QueueTable/NonceCell'
 import type { Hypernative } from '../../ScenarioBar'
-import type { Replacement, ReviewLayout } from '../ReviewDrawer'
+import type { Replacement, ReviewLayout, SectionsMode } from '../ReviewDrawer'
 import { IdentityRow } from './IdentityRow'
 import { getFlowRows } from './Flow'
 import { getRiskFlags, RiskFlagBadge } from '../../RiskFlag'
@@ -84,6 +84,21 @@ export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Prop
   )
 }
 
+export const SectionsContext = createContext<{ mode: SectionsMode; version: number }>({ mode: 'default', version: 0 })
+
+// A section's open state: its own default, overridden by "Expand all" / "Collapse all" each time they're pressed.
+const useSectionOpen = (defaultOpen: boolean) => {
+  const { mode, version } = useContext(SectionsContext)
+  const target = mode === 'expanded' ? true : mode === 'collapsed' ? false : defaultOpen
+  const [open, setOpen] = useState(target)
+  const [appliedVersion, setAppliedVersion] = useState(version)
+  if (appliedVersion !== version) {
+    setAppliedVersion(version)
+    setOpen(target)
+  }
+  return { open, onOpenChange: setOpen }
+}
+
 // Only Summary opens by default. Security and the type section also open when there's a warning to look at.
 const hasSecurityIssue = (tx: Proposal) => getWarnings(tx).length > 0 || getSafenetCheck(tx) === 'risk'
 
@@ -120,30 +135,13 @@ const getSectionSummary = (tx: Proposal) => {
 
 const MethodName = ({ method }: { method: string }) => <code className="font-mono text-xs">{method}</code>
 
-export function SummarySection({
-  tx,
-  items,
-  persona,
-  status,
-  onReview,
-}: {
-  tx: Proposal
-  items: Proposal[]
-  persona: Persona
-  status?: ReactNode
-  onReview: (tx: Proposal) => void
-}) {
+export function SummarySection({ tx, status }: { tx: Proposal; status?: ReactNode }) {
   const account = getAccount(tx)
   const creatorId = tx.signers[0]
   const creator = creatorId ? getSignerIdentity(creatorId) : undefined
+  const section = useSectionOpen(true)
   return (
-    <PanelSection
-      collapsible
-      title="Summary"
-      rightNode={status}
-      callout={<BlockedCallout tx={tx} items={items} persona={persona} onReview={onReview} />}
-      footer={<ConflictNotice tx={tx} items={items} onReview={onReview} />}
-    >
+    <PanelSection collapsible {...section} title="Summary" rightNode={status}>
       {getFlowRows(tx).map((row) =>
         row.top ? (
           <div key={row.label} className="flex items-start justify-between gap-2">
@@ -185,20 +183,19 @@ export function SummarySection({
           'Unknown'
         )}
       </PanelRow>
+      <PanelRow label="Nonce">
+        <span className="tabular-nums">#{tx.nonce}</span>
+      </PanelRow>
     </PanelSection>
   )
 }
 
 export function WhatItDoesSection({ tx }: { tx: Proposal }) {
   const { kind } = tx
+  const section = useSectionOpen(hasSecurityIssue(tx))
   if (!hasOwnSection(tx)) return null
   return (
-    <PanelSection
-      collapsible
-      defaultOpen={hasSecurityIssue(tx)}
-      title={SECTION_TITLES[kind.type]}
-      rightNode={getSectionSummary(tx)}
-    >
+    <PanelSection collapsible {...section} title={SECTION_TITLES[kind.type]} rightNode={getSectionSummary(tx)}>
       {getTypeRows(tx, true).map((item) => (
         <PanelRow key={String(item.label)} label={item.label}>
           {item.content}
@@ -217,9 +214,10 @@ export function WhatItDoesSection({ tx }: { tx: Proposal }) {
 }
 
 export function NoteSection({ tx }: { tx: Proposal }) {
+  const section = useSectionOpen(false)
   if (!tx.note) return null
   return (
-    <PanelSection collapsible defaultOpen={false} title="Note" rightNode={tx.note.onchain ? 'On-chain' : 'Off-chain'}>
+    <PanelSection collapsible {...section} title="Note" rightNode={tx.note.onchain ? 'On-chain' : 'Off-chain'}>
       <div className="space-y-2">
         <p className="text-sm leading-relaxed">{tx.note.text}</p>
         <p className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
@@ -239,69 +237,74 @@ const getBlockerStep = (next: Proposal, persona: Persona) => {
   return `Waiting on ${missing} ${missing === 1 ? 'signer' : 'signers'} for #${next.nonce}.`
 }
 
-// Above the Summary rows: the earliest transaction this one waits on.
-function BlockedCallout({ tx, items, persona, onReview }: QueueProps) {
-  const earlierNonces = getEarlierNonces(tx, persona)
-  const next = earlierNonces.flatMap((nonce) => atNonce(tx, items, nonce))[0]
-  if (!next) return null
-  return (
-    <button
-      type="button"
-      onClick={() => onReview(next)}
-      className="group/callout flex w-full items-center gap-3 rounded-lg bg-muted px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.07] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-    >
-      <span className="min-w-0 flex-1">
-        <span className="flex items-baseline gap-2 text-sm font-medium">
-          Runs after #{next.nonce}
-          {earlierNonces.length > 1 && (
-            <span className="text-xs font-normal text-muted-foreground">+{earlierNonces.length - 1} earlier</span>
-          )}
-        </span>
-        <span className="block truncate text-xs text-muted-foreground">
-          {getHeadline(next)} · {getBlockerStep(next, persona)}
-        </span>
-      </span>
-      <ChevronRight
-        className="size-4 shrink-0 text-muted-foreground group-hover/callout:text-foreground"
-        aria-hidden="true"
-      />
-    </button>
-  )
-}
-
 type QueueProps = { tx: Proposal; items: Proposal[]; persona: Persona; onReview: (tx: Proposal) => void }
 
-// Below the Summary rows: the other transactions at this nonce.
-function ConflictNotice({ tx, items, onReview }: Omit<QueueProps, 'persona'>) {
+// Why this can't simply be signed and executed: what it waits on, what it competes with, and its risk flags.
+export function ConflictsSection({ tx, items, persona, onReview }: QueueProps) {
+  const section = useSectionOpen(true)
+  const earlierNonces = getEarlierNonces(tx, persona)
+  const next = earlierNonces.flatMap((nonce) => atNonce(tx, items, nonce))[0]
   const conflicts = getConflicts(tx, items)
-  if (!conflicts.length) return null
+  const flags = getRiskFlags(tx)
+  if (!next && !conflicts.length && !flags.length) return null
+  const flagIssue = flags.some((flag) => flag.issue)
+  // Blocked wins: it's the reason this can't execute yet, and it uses the table's status pill.
+  const summary = next ? (
+    <StatusChip tone="warning">Blocked by #{next.nonce}</StatusChip>
+  ) : conflicts.length ? (
+    <Warning>Conflict</Warning>
+  ) : (
+    <span className={flagIssue ? 'text-warning-strong' : undefined}>
+      {flags.length} {flags.length === 1 ? 'flag' : 'flags'}
+    </span>
+  )
   return (
-    <div className="flex flex-col gap-2">
-      <div className="rounded-lg border border-(--warning-accent)/40 bg-warning-subtle px-3 py-2.5">
-        <p className="text-sm font-medium text-warning-strong">
-          {conflicts.length + 1} transactions at #{tx.nonce}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Only one can execute. Once it does, the {conflicts.length === 1 ? 'other becomes' : 'others become'} invalid.
-        </p>
-      </div>
-      <Frame className="flex w-full flex-col">
-        {conflicts.map((other, index) => (
-          <Fragment key={other.id}>
-            {index > 0 && <Divider />}
-            <div className="px-3 py-3">
-              <PanelLinkRow onClick={() => onReview(other)}>
-                <NonceMark tx={other} />
-                <span className="min-w-0 flex-1 truncate text-sm">{getHeadline(other)}</span>
-                <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                  {getSignatureCount(other)} of {getAccount(other).threshold} signed
-                </span>
-              </PanelLinkRow>
-            </div>
-          </Fragment>
-        ))}
-      </Frame>
-    </div>
+    <PanelSection collapsible {...section} title="Conflicts and checks" rightNode={summary}>
+      {next && (
+        <PanelLinkRow onClick={() => onReview(next)}>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-baseline gap-2 text-sm font-medium">
+              Runs after #{next.nonce}
+              {earlierNonces.length > 1 && (
+                <span className="text-xs font-normal text-muted-foreground">+{earlierNonces.length - 1} earlier</span>
+              )}
+            </span>
+            <span className="block truncate text-xs text-muted-foreground">
+              {getHeadline(next)} · {getBlockerStep(next, persona)}
+            </span>
+          </span>
+        </PanelLinkRow>
+      )}
+      {conflicts.length > 0 && (
+        <div>
+          <p className="text-sm font-medium text-warning-strong">
+            {conflicts.length + 1} transactions at #{tx.nonce}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Only one can execute. Once it does, the {conflicts.length === 1 ? 'other becomes' : 'others become'}{' '}
+            invalid.
+          </p>
+        </div>
+      )}
+      {conflicts.map((other) => (
+        <PanelLinkRow key={other.id} onClick={() => onReview(other)}>
+          <NonceMark tx={other} />
+          <span className="min-w-0 flex-1 truncate text-sm">{getHeadline(other)}</span>
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+            {getSignatureCount(other)} of {getAccount(other).threshold} signed
+          </span>
+        </PanelLinkRow>
+      ))}
+      {flags.length > 0 && (
+        <PanelRow label="Checks">
+          <span className="flex flex-wrap justify-end gap-1">
+            {flags.map((flag) => (
+              <RiskFlagBadge key={flag.key} flag={flag} />
+            ))}
+          </span>
+        </PanelRow>
+      )}
+    </PanelSection>
   )
 }
 
@@ -342,7 +345,7 @@ function SecurityVerdict({
       : [hypernative === 'out' ? 'notRun' : getWarnings(tx).length > 0 ? 'issue' : ('passed' as CheckResult)]),
   ]
   const count = (result: CheckResult) => results.filter((item) => item === result).length
-  const issues = count('issue') + getRiskFlags(tx).filter((flag) => flag.issue).length
+  const issues = count('issue')
   const passed = `${count('passed')} of ${results.length}`
   const [Icon, tone, label] = issues
     ? [ShieldAlert, SAFENET_TONES.risk, `${issues} ${issues === 1 ? 'issue' : 'issues'}`]
@@ -371,31 +374,15 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
   const safenet = getSafenetCheck(tx)
   const SafenetIcon = SAFENET_ICONS[safenet]
   const issues = getWarnings(tx).length > 0
-  const flags = getRiskFlags(tx)
+  const section = useSectionOpen(hasSecurityIssue(tx))
   return (
     <PanelSection
       collapsible
-      // A proposer-created transaction has no signer behind it yet, so Security opens for it too.
-      defaultOpen={hasSecurityIssue(tx) || flags.some((flag) => flag.issue)}
+      {...section}
       title="Security"
       rightNode={<SecurityVerdict tx={tx} hypernative={hypernative} simulation={simulation} />}
     >
       {[
-        ...(flags.length
-          ? [
-              {
-                key: 'Checks',
-                label: 'Checks',
-                content: (
-                  <span className="flex flex-wrap justify-end gap-1">
-                    {flags.map((flag) => (
-                      <RiskFlagBadge key={flag.key} flag={flag} />
-                    ))}
-                  </span>
-                ),
-              },
-            ]
-          : []),
         ...(hypernative === 'none'
           ? []
           : [
