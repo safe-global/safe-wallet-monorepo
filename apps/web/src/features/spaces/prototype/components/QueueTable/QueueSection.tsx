@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, ChevronUp, ListTree } from 'lucide-react'
+import { Check, ChevronDown, ChevronsDownUp, ChevronsUpDown, ChevronUp, ListTree } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -9,7 +9,7 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import type { BulkBatch, PreviewAction } from '../../services/queue'
 import type { MenuAction } from '../../services/actions'
 import type { RowSecondaryAction } from '../../services/model'
-import type { Filter, Persona, Proposal } from '../../types'
+import type { Account, Filter, Persona, Proposal } from '../../types'
 import {
   CONFLICTING_META,
   HINT_CLASS,
@@ -17,7 +17,10 @@ import {
   SafeIdentity,
   STATUS_META,
   STATUS_ORDER,
+  StatusChip,
+  chainLogoUrl,
   type GroupBy,
+  type StatusTone,
 } from '../shared'
 import { QueueRow } from './QueueRow'
 import { getColumns, type QueueSectionData } from './sections'
@@ -102,24 +105,94 @@ const SUMMARY_LABELS = {
   waiting: 'blocked',
 } as const
 
+const SUMMARY_TONES: Record<Filter, StatusTone> = {
+  ready: 'success',
+  sign: 'success',
+  awaiting: 'secondary',
+  waiting: 'secondary',
+}
+
 // Proposals at the same nonce count once. Only one can execute.
-const summarise = (section: QueueSectionData, persona: Persona) => {
-  const rows = new Map<keyof typeof SUMMARY_LABELS, number>()
-  const nonces = new Map<keyof typeof SUMMARY_LABELS, Set<string>>()
+export const getSummary = (section: QueueSectionData, persona: Persona) => {
+  const rows = new Map<Filter, number>()
+  const nonces = new Map<Filter, Set<string>>()
   section.items.forEach((tx) => {
     const status = getPrimaryStatus(tx, persona)
     rows.set(status, (rows.get(status) ?? 0) + 1)
     nonces.set(status, (nonces.get(status) ?? new Set()).add(`${tx.account}:${tx.nonce}`))
   })
-  const parts = STATUS_ORDER.filter((status) => rows.has(status)).map((status) => {
-    const count = nonces.get(status)!.size
-    const options = rows.get(status)!
-    return `${count} ${SUMMARY_LABELS[status]}${options > count ? ` · ${options} options` : ''}`
-  })
-  return [section.urgency === undefined ? 'Nothing for you' : undefined, ...parts].filter(Boolean).join(' · ')
+  return STATUS_ORDER.filter((status) => rows.has(status)).map((status) => ({
+    status,
+    count: nonces.get(status)!.size,
+    options: rows.get(status)!,
+  }))
 }
 
-function SectionHeader({
+// Next steps: one pill per status, in the tones of the row status chips.
+function SafeSummary({
+  section,
+  persona,
+  recoveryCount,
+}: {
+  section: QueueSectionData
+  persona: Persona
+  recoveryCount: number
+}) {
+  const summary = getSummary(section, persona)
+  if (!summary.length && !recoveryCount)
+    return <span className="text-xs font-normal text-muted-foreground">No pending transactions</span>
+  return (
+    <span className="flex flex-wrap items-center justify-end gap-1.5">
+      {recoveryCount > 0 && (
+        <StatusChip tone="warning">
+          {recoveryCount} {recoveryCount === 1 ? 'recovery' : 'recoveries'}
+        </StatusChip>
+      )}
+      {summary.map(({ status, count, options }) => (
+        <StatusChip key={status} tone={SUMMARY_TONES[status]}>
+          {count} {SUMMARY_LABELS[status]}
+          {options > count ? ` · ${options} options` : ''}
+        </StatusChip>
+      ))}
+    </span>
+  )
+}
+
+// Next steps: the Safe name and chain. The other Safe facts are in the avatar tooltip.
+function SafeTitle({ account, persona, size }: { account: Account; persona: Persona; size: number }) {
+  const wallet = isSignerOf(account, persona) ? getOwnerWallet(account) : undefined
+  return (
+    <SafeIdentity
+      address={account.iconAddress}
+      size={size}
+      className="flex min-w-0 items-center gap-3"
+      title={account.name}
+      details={[
+        { label: 'Network', value: account.network },
+        { label: 'Threshold', value: `${account.threshold} of ${account.owners.length} signers` },
+        { label: 'Next nonce', value: <span className="font-mono">#{account.nextNonce}</span> },
+        ...(wallet ? [{ label: 'You sign with', value: wallet.name }] : []),
+      ]}
+    >
+      <span className="truncate font-medium text-foreground">{account.name}</span>
+      <Badge variant="outline" className="shrink-0 gap-1 font-normal text-muted-foreground">
+        <img src={chainLogoUrl(account.chainId)} alt="" className="size-3.5 rounded-full" />
+        {account.network}
+      </Badge>
+    </SafeIdentity>
+  )
+}
+
+type SectionHeaderProps = Pick<
+  QueueSectionProps,
+  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'steps' | 'persona'
+> & {
+  recoveryCount?: number
+  // One table: the header is a band inside the table, with the chevron first.
+  inTable?: boolean
+}
+
+export function SectionHeader({
   section,
   collapsed,
   onToggle,
@@ -128,12 +201,9 @@ function SectionHeader({
   steps,
   persona,
   recoveryCount = 0,
-}: Pick<
-  QueueSectionProps,
-  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'steps' | 'persona'
-> & { recoveryCount?: number }) {
+  inTable = false,
+}: SectionHeaderProps) {
   const safeAccount = section.account
-  const wallet = safeAccount && isSignerOf(safeAccount, persona) ? getOwnerWallet(safeAccount) : undefined
   const conflicting = section.category === 'conflicting'
   const status = conflicting
     ? { ...CONFLICTING_META, tone: '' }
@@ -143,26 +213,38 @@ function SectionHeader({
   const count = conflicting
     ? new Set(section.items.map((tx) => `${tx.account}:${tx.nonce}`)).size
     : section.items.length
+  const toggle = (
+    <Button
+      size="icon-sm"
+      variant="ghost-muted"
+      aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${section.label}`}
+      aria-expanded={!collapsed}
+      aria-controls={`section-${section.id}`}
+    >
+      {inTable ? (
+        <ChevronDown className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
+      ) : collapsed ? (
+        <ChevronDown />
+      ) : (
+        <ChevronUp />
+      )}
+    </Button>
+  )
   return (
     <div
       data-slot="section-header"
-      className="group/section flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-foreground/[0.04] has-[:focus-visible]:bg-foreground/[0.04]"
+      className={`group/section flex cursor-pointer items-center gap-3 text-sm font-medium transition-colors ${inTable ? 'min-h-11 px-1' : 'rounded-lg px-3 py-2 hover:bg-foreground/[0.04] has-[:focus-visible]:bg-foreground/[0.04]'}`}
       onClick={onToggle}
     >
-      {safeAccount ? (
+      {inTable && toggle}
+      {safeAccount && steps ? (
+        <SafeTitle account={safeAccount} persona={persona} size={inTable ? 24 : 28} />
+      ) : safeAccount ? (
         <SafeIdentity address={safeAccount.iconAddress} size={32} className="flex min-w-0 items-center gap-3">
           <span className="flex min-w-0 flex-col">
             <span className="truncate">{section.label}</span>
             <span className="truncate text-xs font-normal text-muted-foreground">
               {safeAccount.network} · <span className="font-mono">{safeAccount.address}</span>
-              {steps && (
-                <>
-                  {' '}
-                  · {safeAccount.threshold} of {safeAccount.owners.length} · next nonce{' '}
-                  <span className="font-mono">#{safeAccount.nextNonce}</span>
-                  {wallet && ` · you sign with ${wallet.name}`}
-                </>
-              )}
             </span>
           </span>
         </SafeIdentity>
@@ -175,7 +257,7 @@ function SectionHeader({
                   <span
                     className={
                       steps
-                        ? SECTION_STYLES[section.category as Filter | 'conflicting']
+                        ? `${SECTION_STYLES[section.category as Filter | 'conflicting']} ${inTable ? 'ml-0 size-6' : ''}`
                         : `flex size-6 shrink-0 items-center justify-center rounded-md ${status.tone}`
                     }
                   />
@@ -198,16 +280,7 @@ function SectionHeader({
         </>
       )}
       <div className="ml-auto flex items-center gap-2">
-        {steps && safeAccount && (
-          <span className="text-xs font-normal text-muted-foreground">
-            {[
-              recoveryCount ? `${recoveryCount} ${recoveryCount === 1 ? 'recovery' : 'recoveries'}` : '',
-              summarise(section, persona),
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </span>
-        )}
+        {steps && safeAccount && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} />}
         {safeBatch && safeBatch.proposals.length > 1 && (
           <Button
             size="2xs"
@@ -220,33 +293,156 @@ function SectionHeader({
             Bulk execute {safeBatch.proposals.length}
           </Button>
         )}
-        <Button
-          size="icon-sm"
-          variant="ghost-muted"
-          aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${section.label}`}
-          aria-expanded={!collapsed}
-          aria-controls={`section-${section.id}`}
-        >
-          {collapsed ? <ChevronDown /> : <ChevronUp />}
-        </Button>
+        {!inTable && toggle}
       </div>
     </div>
   )
 }
 
-export function QueueSection({
+export type CollapseAll = { allCollapsed: boolean; onToggle: () => void }
+
+export function CollapseAllButton({ allCollapsed, onToggle, iconOnly }: CollapseAll & { iconOnly?: boolean }) {
+  const label = allCollapsed ? 'Expand all' : 'Collapse all'
+  const icon = allCollapsed ? <ChevronsUpDown /> : <ChevronsDownUp />
+  if (!iconOnly)
+    return (
+      <Button size="2xs" variant="ghost-muted" onClick={onToggle}>
+        {icon}
+        {label}
+      </Button>
+    )
+  // In the column header, the row hover shows the label. The row click toggles too.
+  return (
+    <Button
+      size="icon-xs"
+      variant="ghost-muted"
+      aria-label={label}
+      onClick={(event) => {
+        event.stopPropagation()
+        onToggle()
+      }}
+    >
+      {icon}
+    </Button>
+  )
+}
+
+export const getColumnWidths = (isWide: boolean, steps: boolean | undefined, showNoteText: boolean | undefined) =>
+  // When the note text shows, the note column fills the extra width.
+  showNoteText ? { ...columnWidths(isWide, steps), Note: undefined } : columnWidths(isWide, steps)
+
+// The pinned Action column shows its shadow only when content scrolls under it.
+export function useScrollOverflow(enabled: boolean | undefined, layoutKey: unknown) {
+  const scroller = useRef<HTMLDivElement>(null)
+  const [overflowing, setOverflowing] = useState(false)
+  useEffect(() => {
+    const container = scroller.current?.querySelector<HTMLElement>('[data-slot="table-container"]')
+    if (!enabled || !container) return
+    const update = () => setOverflowing(container.scrollLeft + container.clientWidth < container.scrollWidth - 1)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(container)
+    container.addEventListener('scroll', update, { passive: true })
+    return () => {
+      observer.disconnect()
+      container.removeEventListener('scroll', update)
+    }
+  }, [enabled, layoutKey])
+  return { scroller, overflowing }
+}
+
+export function QueueTableHead({
+  columns,
+  groupBy,
+  steps,
+  onGroupByChange,
+  collapse,
+}: Pick<QueueSectionProps, 'groupBy' | 'steps' | 'onGroupByChange'> & { columns: string[]; collapse?: CollapseAll }) {
+  const grouped = groupBy !== 'none'
+  return (
+    <TableHeader>
+      {/* One table: the whole column header expands or collapses every section. */}
+      <TableRow
+        data-no-hover
+        className={collapse ? 'group/head cursor-pointer' : undefined}
+        onClick={collapse?.onToggle}
+      >
+        {columns.map((label, index) => {
+          // Next steps: the view switch sets grouping. Column headers do not.
+          const groupTarget = steps
+            ? null
+            : label === 'Safe' && groupBy !== 'safe'
+              ? 'safe'
+              : label === 'Status' && !grouped
+                ? 'status'
+                : null
+          return (
+            <TableHead
+              key={label}
+              scope="col"
+              className={`text-xs text-muted-foreground ${collapse ? 'transition-colors group-hover/head:bg-foreground/[0.08] group-hover/head:text-foreground' : ''} ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
+            >
+              {label === 'Action' ? (
+                <span className="flex items-center justify-end gap-1 group-hover/head:[&_button]:text-foreground">
+                  <span className="sr-only">{label}</span>
+                  {collapse && (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        className="whitespace-nowrap opacity-0 transition-opacity group-hover/head:opacity-100"
+                      >
+                        {collapse.allCollapsed ? 'Expand all' : 'Collapse all'}
+                      </span>
+                      <CollapseAllButton {...collapse} iconOnly />
+                    </>
+                  )}
+                </span>
+              ) : groupTarget ? (
+                <span className="flex items-center gap-1">
+                  {label}
+                  <Tooltip delay={150}>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          size="icon-xs"
+                          variant="ghost-muted"
+                          aria-label={`Group by ${groupTarget === 'safe' ? 'Safe' : 'status'}`}
+                          onClick={() => onGroupByChange(groupTarget)}
+                        />
+                      }
+                    >
+                      <ListTree />
+                    </TooltipTrigger>
+                    <TooltipContent>Group by {groupTarget === 'safe' ? 'Safe' : 'status'}</TooltipContent>
+                  </Tooltip>
+                </span>
+              ) : (
+                label
+              )}
+            </TableHead>
+          )
+        })}
+      </TableRow>
+    </TableHeader>
+  )
+}
+
+export type QueueSectionRowsProps = Omit<
+  QueueSectionProps,
+  'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'onGroupByChange' | 'groupBy' | 'recoveries'
+> & { columns: string[]; safeRecoveries: ReturnType<RecoveryController['forAccount']>; recoveries?: RecoveryController }
+
+// The body rows of one section: its recoveries, then its proposals.
+export function QueueSectionRows({
   section,
   items,
   persona,
-  groupBy,
   steps,
   isWide,
   showNoteText,
-  collapsed,
-  onToggle,
-  safeBatch,
-  onBulkExecute,
-  onGroupByChange,
+  columns,
+  safeRecoveries,
+  recoveries,
   reviewId,
   cursorId,
   bulkHover,
@@ -259,31 +455,65 @@ export function QueueSection({
   onGoTo,
   onStartFlow,
   onMenuAction,
-  recoveries,
-}: QueueSectionProps) {
+}: QueueSectionRowsProps) {
+  const [conflictHover, setConflictHover] = useState<string | null>(null)
+  return (
+    <>
+      {safeRecoveries.length > 0 && recoveries && (
+        <>
+          <RecoveryNoticeRow columnCount={columns.length} count={safeRecoveries.length} />
+          {safeRecoveries.map((recovery) => (
+            <RecoveryRow key={recovery.id} recovery={recovery} columns={columns} controller={recoveries} />
+          ))}
+        </>
+      )}
+      {section.items.map((tx) => (
+        <QueueRow
+          key={tx.id}
+          conflictHover={conflictHover}
+          onConflictHover={setConflictHover}
+          tx={tx}
+          sectionItems={section.items}
+          items={items}
+          persona={persona}
+          steps={steps}
+          isWide={isWide}
+          showNoteText={showNoteText}
+          columns={columns}
+          selected={reviewId === tx.id}
+          cursor={cursorId === tx.id}
+          highlighted={bulkHover.includes(tx.id)}
+          replaceHover={replaceHover}
+          onReplaceHover={onReplaceHover}
+          onReview={onReview}
+          onSecondaryAction={onSecondaryAction}
+          remindedIds={remindedIds}
+          onRemind={onRemind}
+          onGoTo={onGoTo}
+          onStartFlow={onStartFlow}
+          onMenuAction={onMenuAction}
+        />
+      ))}
+      {!section.items.length && !safeRecoveries.length && (
+        <TableRow data-no-hover data-no-divider>
+          <TableCell colSpan={columns.length} className="py-6 text-center text-muted-foreground">
+            No matching proposals
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  )
+}
+
+export function QueueSection(props: QueueSectionProps) {
+  const { section, persona, groupBy, steps, isWide, showNoteText, collapsed, onToggle, safeBatch, onBulkExecute } =
+    props
   const grouped = groupBy !== 'none'
   const columns = getColumns(groupBy, isWide, steps)
   const safeRecoveries =
-    steps && groupBy === 'safe' && section.account ? (recoveries?.forAccount(section.account.id) ?? []) : []
-  // When the note text shows, the note column fills the extra width.
-  const widths = showNoteText ? { ...columnWidths(isWide, steps), Note: undefined } : columnWidths(isWide, steps)
-  const scroller = useRef<HTMLDivElement>(null)
-  const [conflictHover, setConflictHover] = useState<string | null>(null)
-  const [overflowing, setOverflowing] = useState(false)
-  // The pinned Action column shows its shadow only when content scrolls under it.
-  useEffect(() => {
-    const container = scroller.current?.querySelector<HTMLElement>('[data-slot="table-container"]')
-    if (!steps || !container) return
-    const update = () => setOverflowing(container.scrollLeft + container.clientWidth < container.scrollWidth - 1)
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(container)
-    container.addEventListener('scroll', update, { passive: true })
-    return () => {
-      observer.disconnect()
-      container.removeEventListener('scroll', update)
-    }
-  }, [steps, collapsed])
+    steps && groupBy === 'safe' && section.account ? (props.recoveries?.forAccount(section.account.id) ?? []) : []
+  const widths = getColumnWidths(isWide, steps, showNoteText)
+  const { scroller, overflowing } = useScrollOverflow(steps, collapsed)
   // Next steps: the header moves into its card after the collapse animation ends.
   const [headerInCard, setHeaderInCard] = useState(collapsed)
   useEffect(() => {
@@ -338,100 +568,14 @@ export function QueueSection({
                       <col key={label} className={widths[label]} />
                     ))}
                   </colgroup>
-                  <TableHeader>
-                    <TableRow data-no-hover>
-                      {columns.map((label, index) => {
-                        // Next steps: the view switch sets grouping. Column headers do not.
-                        const groupTarget = steps
-                          ? null
-                          : label === 'Safe' && groupBy !== 'safe'
-                            ? 'safe'
-                            : label === 'Status' && !grouped
-                              ? 'status'
-                              : null
-                        return (
-                          <TableHead
-                            key={label}
-                            scope="col"
-                            className={`text-xs text-muted-foreground ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
-                          >
-                            {label === 'Action' ? (
-                              <span className="sr-only">{label}</span>
-                            ) : groupTarget ? (
-                              <span className="flex items-center gap-1">
-                                {label}
-                                <Tooltip delay={150}>
-                                  <TooltipTrigger
-                                    render={
-                                      <Button
-                                        size="icon-xs"
-                                        variant="ghost-muted"
-                                        aria-label={`Group by ${groupTarget === 'safe' ? 'Safe' : 'status'}`}
-                                        onClick={() => onGroupByChange(groupTarget)}
-                                      />
-                                    }
-                                  >
-                                    <ListTree />
-                                  </TooltipTrigger>
-                                  <TooltipContent>Group by {groupTarget === 'safe' ? 'Safe' : 'status'}</TooltipContent>
-                                </Tooltip>
-                              </span>
-                            ) : (
-                              label
-                            )}
-                          </TableHead>
-                        )
-                      })}
-                    </TableRow>
-                  </TableHeader>
+                  <QueueTableHead
+                    columns={columns}
+                    groupBy={groupBy}
+                    steps={steps}
+                    onGroupByChange={props.onGroupByChange}
+                  />
                   <TableBody>
-                    {safeRecoveries.length > 0 && recoveries && (
-                      <>
-                        <RecoveryNoticeRow columnCount={columns.length} count={safeRecoveries.length} />
-                        {safeRecoveries.map((recovery) => (
-                          <RecoveryRow
-                            key={recovery.id}
-                            recovery={recovery}
-                            columns={columns}
-                            controller={recoveries}
-                          />
-                        ))}
-                      </>
-                    )}
-                    {section.items.map((tx) => (
-                      <QueueRow
-                        key={tx.id}
-                        conflictHover={conflictHover}
-                        onConflictHover={setConflictHover}
-                        tx={tx}
-                        sectionItems={section.items}
-                        items={items}
-                        persona={persona}
-                        steps={steps}
-                        isWide={isWide}
-                        showNoteText={showNoteText}
-                        columns={columns}
-                        selected={reviewId === tx.id}
-                        cursor={cursorId === tx.id}
-                        highlighted={bulkHover.includes(tx.id)}
-                        replaceHover={replaceHover}
-                        onReplaceHover={onReplaceHover}
-                        onReview={onReview}
-                        onSecondaryAction={onSecondaryAction}
-                        remindedIds={remindedIds}
-                        onRemind={onRemind}
-                        onGoTo={onGoTo}
-                        onStartFlow={onStartFlow}
-                        onMenuAction={onMenuAction}
-                      />
-                    ))}
-                    {!section.items.length && !safeRecoveries.length && (
-                      <TableRow data-no-hover data-no-divider>
-                        <TableCell colSpan={columns.length} className="py-6 text-center text-muted-foreground">
-                          No matching proposals
-                        </TableCell>
-                      </TableRow>
-                    )}
+                    <QueueSectionRows {...props} columns={columns} safeRecoveries={safeRecoveries} />
                   </TableBody>
                 </Table>
                 {!steps && (

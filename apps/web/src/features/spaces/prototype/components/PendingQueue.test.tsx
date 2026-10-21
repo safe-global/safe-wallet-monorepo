@@ -46,7 +46,7 @@ const allPending = () => within(screen.getByRole('region', { name: 'Queue' }))
 
 describe('queue design exploration', () => {
   it('defaults to a table with named columns and review actions without executing', () => {
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'Type',
@@ -70,7 +70,7 @@ describe('queue design exploration', () => {
     expect(table.getByRole('button', { name: 'Execute Batch · 14 actions' })).toBeInTheDocument()
   })
   it('keeps replace or cancel in the review panel without creating a proposal', () => {
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     expect(screen.queryByRole('button', { name: 'Replace or cancel Send to Globex Payroll' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Sign Send to Globex Payroll' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Replace or cancel' }))
@@ -80,7 +80,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).not.toHaveTextContent('Competing proposal created')
   })
   it('opens review instead of offering signing to a member who does not sign', () => {
-    render(<PendingQueue />, { routerProps: { query: { persona: 'member' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', persona: 'member' } } })
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.queryByRole('button', { name: 'Sign Send to Globex Payroll' })).not.toBeInTheDocument()
     expect(table.queryByRole('button', { name: 'Replace or cancel Send to Globex Payroll' })).not.toBeInTheDocument()
@@ -100,7 +100,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('Send to Globex Payroll')
   })
   it('opens proposal details in the shared side panel', () => {
-    render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status' } } })
     fireEvent.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     expect(screen.getByRole('dialog')).toBeVisible()
     expect(screen.getByRole('dialog')).not.toHaveTextContent(
@@ -109,7 +109,7 @@ describe('queue design exploration', () => {
     expect(within(screen.getByRole('dialog')).queryByRole('status')).not.toBeInTheDocument()
   })
   it('keeps rows compact and details out of the table', () => {
-    render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status' } } })
     expect(screen.getByRole('region', { name: 'Queue' })).toBeInTheDocument()
     expect(screen.queryByTestId('execution-reason')).not.toBeInTheDocument()
     fireEvent.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
@@ -121,7 +121,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('September contractor payouts')
   })
   it('shows competing proposals in the side panel', () => {
-    render(<PendingQueue />, { routerProps: { query: { groupBy: 'status', scenario: 'conflict' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status', scenario: 'conflict' } } })
     fireEvent.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
     fireEvent.click(screen.getByRole('button', { name: 'Competing proposals' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('Swap USDC → ETH')
@@ -179,7 +179,7 @@ describe('queue design exploration', () => {
     expect(labels.slice(0, conflicting)).not.toContain('Waiting on others transactions')
   })
   it('collapses one status without hiding proposals in other sections', () => {
-    render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status' } } })
     const section = within(screen.getByRole('table', { name: 'Ready to sign transactions' }))
     expect(section.getAllByRole('button', { name: /^Open / })).toHaveLength(3)
     fireEvent.click(screen.getByRole('button', { name: 'Collapse Ready to sign' }))
@@ -190,7 +190,7 @@ describe('queue design exploration', () => {
     expect(section.getAllByRole('button', { name: /^Open / })).toHaveLength(3)
   })
   it('shows each pending proposal once across four primary status sections', () => {
-    render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status' } } })
     expect(screen.getAllByRole('table').map((table) => table.getAttribute('aria-label'))).toEqual([
       'Ready to execute transactions',
       'Ready to sign transactions',
@@ -214,7 +214,9 @@ describe('queue design exploration', () => {
     expect(screen.queryByRole('button', { name: /^Remove .* section$/ })).not.toBeInTheDocument()
   })
   it('filters every section by multiple selected Safe accounts', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await toggleFilter(user, 'Safe account', 'Ops Payroll', 'Grants')
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(3)
     expect(screen.queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
@@ -228,13 +230,15 @@ describe('queue design exploration', () => {
     expect(sectionHeader('Collapse Blocked')).toHaveTextContent('0')
   })
   it('shows the queue without page tabs', () => {
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     expect(screen.queryByRole('tab', { name: 'History' })).not.toBeInTheDocument()
     expect(screen.queryByRole('tab', { name: 'Messages' })).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Queue' })).toBeVisible()
   })
   it('groups proposals by Safe in nonce order and preserves independent collapse states', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(screen.getByRole('button', { name: 'Collapse Ready to sign' }))
     await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
@@ -267,7 +271,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Expand Treasury Main' })).toHaveAttribute('aria-expanded', 'false')
   })
   it('shows a flat list without headers and preserves filters and collapse states', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(screen.getByRole('button', { name: 'Collapse Ready to sign' }))
     await chooseGrouping(user, 'None')
     await user.keyboard('{Escape}')
@@ -284,7 +290,9 @@ describe('queue design exploration', () => {
     expect(sectionHeader('Expand Ready to sign')).toHaveTextContent('1')
   })
   it('applies account selection and search to Safe groups', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
     await toggleFilter(user, 'Safe account', 'Ops Payroll', 'Grants')
@@ -297,7 +305,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Collapse Ops Payroll' })).toBeVisible()
   })
   it('labels each Safe group with only its name, network and address, and keeps it when collapsed', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'safe' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'safe' } },
+    })
     const header = sectionHeader('Collapse Treasury Main')
     expect(header).toHaveTextContent('Treasury MainEthereum · 0x8675…c3d2')
     await user.hover(within(header).getByText('Treasury Main'))
@@ -311,7 +321,9 @@ describe('queue design exploration', () => {
     expect(screen.queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
   })
   it('keeps blocker details accessible while the state filter hides the blocker row', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await toggleFilter(user, 'Status', 'Blocked')
     expect(allPending().queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
@@ -319,7 +331,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('Send to Globex Payroll')
   })
   it('shows signatures as a count with a gauge, keeping outstanding signers in the tooltip, and the note as an icon', () => {
-    const { unmount } = render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { unmount } = render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status' } } })
     const row = () => allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }).closest('tr')!
     const signatures = () => within(row()).getByRole('button', { name: /^2 of 3 signatures/ })
     expect(signatures()).toHaveTextContent(/^2\/3$/)
@@ -329,7 +341,7 @@ describe('queue design exploration', () => {
     expect(within(row()).getByRole('button', { name: 'Note for Send to Globex Payroll' })).toBeVisible()
     unmount()
     setViewport({ wide: false })
-    render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', groupBy: 'status' } } })
     expect(row()).not.toHaveTextContent('1 more from')
     expect(row()).not.toHaveTextContent('September contractor payouts')
     expect(
@@ -337,7 +349,7 @@ describe('queue design exploration', () => {
     ).toBeVisible()
   })
   it('shows the full off-chain note on hover and focus and opens review only on activation', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }).closest('tr')!
     const note = within(row).getByRole('button', { name: 'Note for Send to Globex Payroll' })
     await user.hover(note)
@@ -353,7 +365,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toBeVisible()
   })
   it('resets advanced transaction views when inspecting a dependency proposal', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
     await user.click(screen.getByRole('button', { name: 'Advanced transaction data' }))
     await user.click(screen.getByRole('tab', { name: 'JSON' }))
@@ -364,7 +378,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('tab', { name: 'Data' })).toHaveAttribute('aria-selected', 'true')
   })
   it('opens with every section collapsed and resets them for another proposal', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
     for (const name of ['Transaction summary', 'Note', 'Details', 'Earlier transactions', 'Advanced transaction data'])
       expect(screen.getByRole('button', { name })).toHaveAttribute('aria-expanded', 'false')
@@ -376,7 +392,9 @@ describe('queue design exploration', () => {
     expect(screen.queryByRole('button', { name: 'Open in Safe' })).not.toBeInTheDocument()
   })
   it('keeps the expanded audit log and actions in the fixed footer while sections scroll', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     const footer = screen.getByTestId('proposal-fixed-footer')
     const audit = within(footer).getByRole('button', { name: 'Signers' })
@@ -395,7 +413,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Execute in preview' })).toBeVisible()
   })
   it('confirms signing without executing a blocked proposal and keeps its note', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }))
     await user.click(screen.getByRole('button', { name: 'Review and sign' }))
     await user.click(screen.getByRole('button', { name: 'Sign in preview' }))
@@ -405,7 +425,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Blocked by #42' })).toBeDisabled()
   })
   it('executes after confirmation and unblocks the next nonce', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
     await user.click(screen.getByRole('button', { name: 'Review, sign and execute' }))
     await user.click(screen.getByRole('button', { name: 'Sign and execute in preview' }))
@@ -414,7 +436,9 @@ describe('queue design exploration', () => {
     expect(signerRow).toHaveTextContent('Ready to execute')
   })
   it('creates a cancellation competitor while retaining the original and its note', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
     await user.click(screen.getByRole('button', { name: 'Replace or cancel' }))
     await user.click(screen.getByRole('button', { name: 'Propose on-chain cancellation' }))
@@ -433,7 +457,9 @@ describe('queue design exploration', () => {
     ).toBeVisible()
   })
   it('shows remaining signatures and owner names in the fraction tooltip without opening details', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     const row = allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }).closest('tr')!
     const fraction = within(row).getByRole('button', { name: /^2 of 3 signatures/ })
     await user.hover(fraction)
@@ -444,7 +470,9 @@ describe('queue design exploration', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
   it('shows threshold met when the ready signature fraction receives keyboard focus', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     const row = allPending().getByRole('button', { name: 'Open Batch · 14 actions' }).closest('tr')!
     const network = within(row).getByRole('button', { name: 'Base' })
     act(() => network.focus())
@@ -455,7 +483,7 @@ describe('queue design exploration', () => {
   })
   it('identifies transfer, swap, and signer-change rows with transaction icons', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, {
-      routerProps: { query: { groupBy: 'status', scenario: 'conflict' } },
+      routerProps: { query: { option: 'queues', groupBy: 'status', scenario: 'conflict' } },
     })
     const transfer = allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }).closest('tr')!
     const swap = allPending().getByRole('button', { name: 'Open Swap USDC → ETH' }).closest('tr')!
@@ -479,14 +507,14 @@ describe('queue design exploration', () => {
   })
   it('uses the selected proposal type in the review panel icon', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, {
-      routerProps: { query: { groupBy: 'status', scenario: 'conflict' } },
+      routerProps: { query: { option: 'queues', groupBy: 'status', scenario: 'conflict' } },
     })
     await user.click(allPending().getByRole('button', { name: 'Open Swap USDC → ETH' }))
     expect(screen.getByRole('dialog').querySelector('svg.lucide-repeat-2')).toBeVisible()
     expect(screen.getByRole('dialog').querySelector('svg.lucide-arrow-up-right')).not.toBeInTheDocument()
   })
   it('keeps one primary button per row and opens replace or reject from the hover buttons', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }).closest('tr')!
     expect(within(row).getByRole('button', { name: 'Sign Send to Contoso Ltd' })).toBeInTheDocument()
     const replace = within(row).getByRole('button', { name: 'Replace Send to Contoso Ltd' })
@@ -504,7 +532,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Propose replacement in preview' })).toBeVisible()
   })
   it('drops the hover look once the drawer closes over a clicked row', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }).closest('tr')!
     const primary = within(row).getByRole('button', { name: 'Sign Send to Contoso Ltd' })
     fireEvent.mouseMove(row)
@@ -515,12 +543,12 @@ describe('queue design exploration', () => {
     expect(row.className).not.toContain('focus-within')
   })
   it('offers no replace or reject buttons to members who do not sign', () => {
-    render(<PendingQueue />, { routerProps: { query: { persona: 'member' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', persona: 'member' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }).closest('tr')!
     expect(within(row).queryByRole('button', { name: /^(Replace|Reject) / })).not.toBeInTheDocument()
   })
   it('gives the nonce its own column after the type, keeping the type icon first', () => {
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }).closest('tr')!
     const [type, nonce] = within(row).getAllByRole('cell')
     expect(type).toContainElement(within(row).getByRole('img', { name: 'Send' }))
@@ -528,7 +556,9 @@ describe('queue design exploration', () => {
     expect(nonce).toHaveAccessibleName('Nonce 44')
   })
   it('shows the action type and nonce with Safe context, hiding the repeated Safe in Safe grouping', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     const row = allPending().getByRole('button', { name: 'Open Send to Contoso Ltd' }).closest('tr')!
     expect(within(row).getByRole('img', { name: 'Send' })).toBeVisible()
     expect(within(row).getByLabelText('Nonce 44')).toBeVisible()
@@ -545,7 +575,9 @@ describe('queue design exploration', () => {
   })
   it('opens mobile details full screen with the signers open and full-height actions', async () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Filter/ })).toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
@@ -561,7 +593,7 @@ describe('queue design exploration', () => {
     expect(footer.getByRole('button', { name: 'Execute in preview' })).toHaveClass('h-12', 'shrink-0')
   })
   it('filters by network and clears all filters back to the default flat table', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     await toggleFilter(user, 'Network', 'Base', 'Arbitrum')
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(3)
     expect(allPending().queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
@@ -573,7 +605,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('table', { name: 'Pending transactions' })).toBeVisible()
   })
   it('keeps the amount under the type and shows the network and a note icon on wide screens', () => {
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const title = allPending().getByRole('button', { name: 'Open Send to Globex Payroll' })
     expect(title.closest('td')).toHaveTextContent('48.5 ETH')
     expect(title.closest('td')).not.toHaveTextContent('September contractor payouts')
@@ -582,7 +614,7 @@ describe('queue design exploration', () => {
     expect(within(title.closest('tr')!).getByRole('button', { name: 'Note for Send to Globex Payroll' })).toBeVisible()
   })
   it('shows the full Safe address when hovering any part of the Safe cell', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }).closest('tr')!
     expect(within(row).getByText('0x8675…c3d2')).toBeVisible()
     await user.hover(within(row).getByText('Treasury Main'))
@@ -594,7 +626,7 @@ describe('queue design exploration', () => {
   })
   it('drops the network and note columns below 1280px, moving the note beside the title', () => {
     setViewport({ wide: false })
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'Type',
@@ -618,7 +650,9 @@ describe('queue design exploration', () => {
     expect(within(row).getByRole('button', { name: 'Sign Send to Globex Payroll' })).toBeInTheDocument()
   })
   it('gives each status and each Safe its own labelled table, hiding Safe columns when grouped by Safe', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', groupBy: 'status' } },
+    })
     const statusColumns = ['Type', 'Nonce', 'Safe', 'Network', 'Signatures', 'Note', 'Status', 'Proposed', 'Action']
     expect(screen.getAllByRole('table')).toHaveLength(4)
     for (const table of screen.getAllByRole('table')) {
@@ -648,7 +682,7 @@ describe('queue design exploration', () => {
   it('keeps the full table on mobile with the transaction column pinned while rows scroll', () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
     setViewport({ wide: false })
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     const headers = table.getAllByRole('columnheader')
     expect(headers.map((header) => header.textContent)).toEqual([
@@ -668,14 +702,14 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Globex Payroll')
   })
   it('shows only the empty state when nothing is pending', () => {
-    render(<PendingQueue />, { routerProps: { query: { scenario: 'empty' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', scenario: 'empty' } } })
     expect(screen.getByRole('heading', { name: 'Nothing pending' })).toBeVisible()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByText('No matching proposals')).not.toBeInTheDocument()
   })
   it('keeps the signers open on short viewports and names no placeholder proposer', async () => {
     setViewport({ short: true })
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     const footer = within(screen.getByTestId('proposal-fixed-footer'))
     expect(footer.getByRole('button', { name: 'Signers' })).toHaveAttribute('aria-expanded', 'true')
@@ -683,7 +717,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('dialog')).not.toHaveTextContent('Proposer not supplied')
   })
   it('groups from the Safe and Status column headers, and switches from status to Safe groups', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     expect(screen.queryByRole('button', { name: 'Group by Safe' })).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Group by status' }))
     expect(screen.getAllByRole('table')).toHaveLength(4)
@@ -695,7 +729,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Collapse Treasury Main' })).toBeVisible()
   })
   it('shows grouping as an applied pill that returns to the default table when removed', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Group by status' }))
     const applied = within(screen.getByRole('group', { name: 'Applied filters' }))
@@ -708,7 +742,7 @@ describe('queue design exploration', () => {
   })
   describe('edge cases with many competing proposals', () => {
     const heavy = (query: Record<string, string> = {}) => ({
-      routerProps: { query: { scenario: 'conflict-heavy', ...query } },
+      routerProps: { query: { option: 'queues', scenario: 'conflict-heavy', ...query } },
     })
 
     it('keeps competing proposals together under one conflict sub-header', () => {
@@ -797,7 +831,7 @@ describe('queue design exploration', () => {
     const dialog = () => within(screen.getByRole('dialog'))
 
     it('summarises the transaction above the sections without repeating the amount', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />)
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
       await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
       await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
       const summary = within(screen.getByRole('group', { name: 'Transaction summary' }))
@@ -818,7 +852,7 @@ describe('queue design exploration', () => {
       expect(dialog().getByText(/Ana · 6 Oct, 09:15 · Off-chain, not verified/)).toBeVisible()
     })
     it('moves through the table with J/K and opens the highlighted row with Enter', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />)
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
       const titles = rowTitles()
       const cursorRow = () => document.querySelector('tr[data-cursor]')
       expect(cursorRow()).toBeNull()
@@ -831,7 +865,7 @@ describe('queue design exploration', () => {
       expect(cursorRow()).toBeNull()
     })
     it('shows the position only in full screen, next to the drawer controls', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />)
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
       const titles = rowTitles()
       await user.click(allPending().getByRole('button', { name: `Open ${titles[0]}` }))
       expect(dialog().getByText(`1 of ${titles.length}`)).toHaveClass('sr-only')
@@ -839,7 +873,7 @@ describe('queue design exploration', () => {
       expect(dialog().getByText(`1 of ${titles.length}`)).not.toHaveClass('sr-only')
     })
     it('repeats the row’s type and detail as the drawer title', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />)
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
       await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
       expect(dialog().getByText('Send')).toBeVisible()
       expect(dialog().getByText('48.5 ETH · $155,200')).toBeVisible()
@@ -854,7 +888,7 @@ describe('queue design exploration', () => {
       expect(dialog().getAllByText(/^14 actions/)).toHaveLength(1)
     })
     it('keeps the open sections and signers state while stepping with prev/next', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />)
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
       const titles = rowTitles()
       await user.click(allPending().getByRole('button', { name: `Open ${titles[0]}` }))
       await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
@@ -878,7 +912,7 @@ describe('queue design exploration', () => {
       expect(dialog().getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'false')
     })
     it('steps through transactions in table order with buttons and J/K', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />)
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
       const titles = rowTitles()
       await user.click(allPending().getByRole('button', { name: `Open ${titles[0]}` }))
       expect(dialog().getByText(`1 of ${titles.length}`)).toBeVisible()
@@ -894,7 +928,9 @@ describe('queue design exploration', () => {
       expect(dialog().getByRole('button', { name: 'Next transaction' })).toBeDisabled()
     })
     it('skips collapsed groups and ignores J while typing', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+      const { user } = renderWithUserEvent(<PendingQueue />, {
+        routerProps: { query: { option: 'queues', groupBy: 'status' } },
+      })
       await user.click(screen.getByRole('button', { name: 'Collapse Ready to sign' }))
       const titles = rowTitles()
       await user.click(allPending().getByRole('button', { name: `Open ${titles[0]}` }))
@@ -908,7 +944,9 @@ describe('queue design exploration', () => {
       expect(screen.getByRole('dialog')).toHaveAccessibleName(titles[0])
     })
     it('disables navigation for a proposal opened outside the visible list', async () => {
-      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+      const { user } = renderWithUserEvent(<PendingQueue />, {
+        routerProps: { query: { option: 'queues', groupBy: 'status' } },
+      })
       fireEvent.change(screen.getByRole('searchbox', { name: 'Find a proposal' }), {
         target: { value: 'Add signer Priya' },
       })
@@ -921,7 +959,9 @@ describe('queue design exploration', () => {
     })
   })
   it('filters by transaction type and shows it as an applied filter', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'conflict-heavy' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', scenario: 'conflict-heavy' } },
+    })
     await toggleFilter(user, 'Type', 'Batch')
     const titles = allPending()
       .getAllByRole('button', { name: /^Open / })
@@ -939,11 +979,11 @@ describe('queue design exploration', () => {
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(9)
   })
   it('opens the transaction from a shared link', () => {
-    render(<PendingQueue />, { routerProps: { query: { tx: 'treasury-42' } } })
+    render(<PendingQueue />, { routerProps: { query: { option: 'queues', tx: 'treasury-42' } } })
     expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Globex Payroll')
   })
   it('starts with no filters and narrows only when options are checked', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
     expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
     await openFilter(user, 'Safe account')
@@ -956,7 +996,9 @@ describe('queue design exploration', () => {
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(3)
   })
   it('combines quick status chips and keeps them in sync with the Status menu', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'realistic' } } })
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'queues', scenario: 'realistic' } },
+    })
     const quick = within(screen.getByRole('group', { name: 'Quick filters' }))
     const ready = quick.getByRole('button', { name: /^Ready to execute/ })
     const blocked = quick.getByRole('button', { name: /^Blocked/ })
@@ -970,14 +1012,14 @@ describe('queue design exploration', () => {
     await closeMenus(user)
   })
   it('groups from the menu without counting grouping as a filter', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues' } } })
     await chooseGrouping(user, 'Safe')
     expect(screen.getByRole('table', { name: 'Treasury Main transactions' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
   })
   describe('realistic scenario', () => {
     const renderRealistic = () =>
-      renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'realistic' } } })
+      renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'queues', scenario: 'realistic' } } })
     const rowFor = (label: string) =>
       allPending()
         .getByRole('button', { name: `Open ${label}` })

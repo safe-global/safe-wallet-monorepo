@@ -39,7 +39,8 @@ import { PrototypeFrame } from './PrototypeFrame'
 import { type GroupBy } from './shared'
 import { useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, QueueToolbar } from './QueueFilters/QueueFilters'
-import { QueueSection } from './QueueTable/QueueSection'
+import { CollapseAllButton, QueueSection } from './QueueTable/QueueSection'
+import { QueueGroupedTable } from './QueueTable/QueueGroupedTable'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
@@ -50,7 +51,7 @@ import { QueueError, QueueSkeleton } from './QueueStates'
 
 export default function PendingQueue() {
   const router = useRouter()
-  return <PendingQueueView key={`${router.query.scenario ?? 'everyday'}:${router.query.option ?? 'queues'}`} />
+  return <PendingQueueView key={`${router.query.scenario ?? 'everyday'}:${router.query.option ?? 'table'}`} />
 }
 
 function PendingQueueView() {
@@ -58,8 +59,14 @@ function PendingQueueView() {
   const isMobile = useIsMobile()
   const isWide = useMediaQuery('(min-width: 1280px)')
   const isExtraWide = useMediaQuery('(min-width: 2160px)')
+  // One table is the default direction.
   const direction: Direction =
-    router.query.option === 'inbox' || router.query.option === 'steps' ? router.query.option : 'queues'
+    router.query.option === 'queues' || router.query.option === 'inbox' || router.query.option === 'steps'
+      ? router.query.option
+      : 'table'
+  // One table builds on next steps. Only the table layout differs.
+  const steps = direction === 'steps' || direction === 'table'
+  const consolidated = direction === 'table'
   const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? 'everyday'
   const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
@@ -71,18 +78,32 @@ function PendingQueueView() {
     nextNonce: queue.nextNonces[account.id],
   }))
   const [groupBy, setGroupBy] = useState<GroupBy>(
-    router.query.groupBy === 'status' || router.query.groupBy === 'safe' || router.query.groupBy === 'none'
-      ? router.query.groupBy
-      : direction === 'steps'
-        ? 'safe'
-        : 'none',
+    consolidated
+      ? 'safe'
+      : router.query.groupBy === 'status' || router.query.groupBy === 'safe' || router.query.groupBy === 'none'
+        ? router.query.groupBy
+        : steps
+          ? 'safe'
+          : 'none',
   )
-  const steps = direction === 'steps'
   const unavailable = scenario === 'loading' || scenario === 'error'
-  const [collapsedSections, setCollapsedSections] = useState<string[]>([])
+  // Next steps: Safes with nothing for you start collapsed.
+  const idleSafeIds = () =>
+    steps
+      ? buildSections({ visible: items, accounts, accountFilter: [], persona, direction: 'steps', groupBy: 'safe' })
+          .filter((section) => section.urgency === undefined)
+          .map((section) => section.id)
+      : []
+  const [collapsedSections, setCollapsedSections] = useState<string[]>(idleSafeIds)
+  // Re-seed when the persona changes. The page does not remount for it.
+  const [seededPersona, setSeededPersona] = useState(persona)
+  if (seededPersona !== persona) {
+    setSeededPersona(persona)
+    setCollapsedSections(idleSafeIds())
+  }
   const [feedback, setFeedback] = useState('')
   const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
-  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, direction === 'steps')
+  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, steps)
   const recoveries = {
     ...allRecoveries,
     visible: filters.visibleRecoveries,
@@ -93,7 +114,7 @@ function PendingQueueView() {
   const [review, setReview] = useState<Proposal | null>(null)
   const [cursorId, setCursorId] = useState<string | null>(null)
   const [reviewSections, setReviewSections] = useState<string[]>([])
-  const [signersOpen, setSignersOpen] = useState(direction !== 'steps')
+  const [signersOpen, setSignersOpen] = useState(!steps)
   const [showTechnical, setShowTechnical] = useState(false)
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
@@ -120,7 +141,7 @@ function PendingQueueView() {
     setReplacement(null)
     if (!keepLayout) {
       setReviewSections([])
-      setSignersOpen(direction !== 'steps')
+      setSignersOpen(!steps)
     }
     setFeedback('')
     setCursorId(tx.id)
@@ -228,7 +249,7 @@ function PendingQueueView() {
     accounts,
     accountFilter: filters.accountFilter,
     persona,
-    direction,
+    direction: steps ? 'steps' : direction,
     groupBy,
   }).filter(
     (section) =>
@@ -239,13 +260,16 @@ function PendingQueueView() {
       recoveries.forAccount(section.account!.id).length > 0,
   )
   const isCollapsed = (id: string) => groupBy !== 'none' && collapsedSections.includes(id)
+  const toggleSection = (id: string) =>
+    setCollapsedSections((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]))
+  const allCollapsed = sections.length > 0 && sections.every((section) => isCollapsed(section.id))
+  const toggleAll = () => setCollapsedSections(allCollapsed ? [] : sections.map((section) => section.id))
+  const safeBatchFor = (section: { account?: { id: string } }) =>
+    section.account ? bulkBatches.find((batch) => batch.account.id === section.account?.id) : undefined
   // "Go to #N": open the section of the blocking transaction, then select it and open its review.
   const goTo = (tx: Proposal) => {
     const section = sections.find((candidate) => candidate.items.some((item) => item.id === tx.id))
-    if (section && isCollapsed(section.id))
-      setCollapsedSections((ids) =>
-        ids.includes(section.id) ? ids.filter((id) => id !== section.id) : [...ids, section.id],
-      )
+    if (section && isCollapsed(section.id)) toggleSection(section.id)
     reviewTx(tx)
   }
   const reviewOrder = sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items)
@@ -299,6 +323,30 @@ function PendingQueueView() {
   useEffect(() => {
     if (!review) document.querySelector('tr[data-cursor]')?.scrollIntoView?.({ block: 'nearest' })
   }, [cursorId, review])
+
+  const sectionProps = {
+    items,
+    persona,
+    groupBy,
+    steps,
+    isWide,
+    showNoteText: steps && isExtraWide,
+    onBulkExecute: setBulkScope,
+    onGroupByChange: setGroupBy,
+    reviewId: review?.id,
+    cursorId: review ? undefined : (cursorId ?? undefined),
+    bulkHover,
+    replaceHover,
+    onReplaceHover: setReplaceHover,
+    onReview: reviewTx,
+    onSecondaryAction: runSecondaryAction,
+    remindedIds,
+    onRemind: steps ? remindSigners : undefined,
+    onGoTo: steps ? goTo : undefined,
+    onStartFlow: steps ? startFlow : undefined,
+    onMenuAction: steps ? runMenuAction : undefined,
+    recoveries: steps ? recoveries : undefined,
+  }
 
   return (
     <div className="min-h-screen bg-secondary text-foreground">
@@ -372,6 +420,7 @@ function PendingQueueView() {
               groupBy={groupBy}
               onGroupByChange={setGroupBy}
               groupingAsView={steps}
+              hideViewSwitch={consolidated}
             />
             <AppliedFilters filters={filters} groupBy={groupBy} onGroupByChange={setGroupBy} groupingAsView={steps} />
             {!(steps && groupBy === 'safe') && <RecoveryPanel controller={recoveries} isWide={isWide} />}
@@ -401,46 +450,32 @@ function PendingQueueView() {
                 )}
               </Empty>
             )}
-            {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && (
+            {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && consolidated && (
+              <QueueGroupedTable
+                sections={sections}
+                isCollapsed={isCollapsed}
+                onToggle={toggleSection}
+                getSafeBatch={safeBatchFor}
+                collapse={{ allCollapsed, onToggle: toggleAll }}
+                {...sectionProps}
+              />
+            )}
+            {!unavailable && (filters.visible.length > 0 || recoveries.visible.length > 0) && !consolidated && (
               <div className={`flex flex-col ${steps ? 'gap-6' : 'gap-10'}`}>
+                {/* Next steps: right-aligned over the section chevrons. */}
+                {steps && groupBy !== 'none' && (
+                  <div className="-mb-4 flex justify-end">
+                    <CollapseAllButton allCollapsed={allCollapsed} onToggle={toggleAll} />
+                  </div>
+                )}
                 {sections.map((section) => (
                   <QueueSection
                     key={section.id}
                     section={section}
-                    items={items}
-                    persona={persona}
-                    groupBy={groupBy}
-                    steps={steps}
-                    isWide={isWide}
-                    showNoteText={steps && isExtraWide}
                     collapsed={isCollapsed(section.id)}
-                    onToggle={() =>
-                      setCollapsedSections(
-                        collapsedSections.includes(section.id)
-                          ? collapsedSections.filter((id) => id !== section.id)
-                          : [...collapsedSections, section.id],
-                      )
-                    }
-                    safeBatch={
-                      section.account
-                        ? bulkBatches.find((batch) => batch.account.id === section.account?.id)
-                        : undefined
-                    }
-                    onBulkExecute={setBulkScope}
-                    onGroupByChange={setGroupBy}
-                    reviewId={review?.id}
-                    cursorId={review ? undefined : (cursorId ?? undefined)}
-                    bulkHover={bulkHover}
-                    replaceHover={replaceHover}
-                    onReplaceHover={setReplaceHover}
-                    onReview={reviewTx}
-                    onSecondaryAction={runSecondaryAction}
-                    remindedIds={remindedIds}
-                    onRemind={steps ? remindSigners : undefined}
-                    onGoTo={steps ? goTo : undefined}
-                    onStartFlow={steps ? startFlow : undefined}
-                    onMenuAction={steps ? runMenuAction : undefined}
-                    recoveries={steps ? recoveries : undefined}
+                    onToggle={() => toggleSection(section.id)}
+                    safeBatch={safeBatchFor(section)}
+                    {...sectionProps}
                   />
                 ))}
               </div>

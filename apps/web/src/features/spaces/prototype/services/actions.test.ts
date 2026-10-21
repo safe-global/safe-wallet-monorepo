@@ -35,6 +35,16 @@ describe('signers outside the workspace', () => {
   })
 })
 
+describe('security lead', () => {
+  it('signs the last signature on Treasury and reminds on Grants, which they already signed', () => {
+    expect(getPrimaryAction(proposal('treasury-42'), items, 'security')).toMatchObject({
+      kind: 'flow',
+      flow: 'signAndExecute',
+    })
+    expect(getPrimaryAction(proposal('grants-8'), items, 'security', [], 'row').kind).toBe('remind')
+  })
+})
+
 describe('signer on one Safe', () => {
   it('signs only in the Safe they own', () => {
     expect(getPrimaryAction(proposal('payroll-18'), items, 'single').kind).toBe('flow')

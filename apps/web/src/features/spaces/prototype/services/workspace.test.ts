@@ -27,6 +27,7 @@ describe('getSignerStatus', () => {
     expect(getSignerStatus('owner', accounts)).toBe('Signs 2 of 3 Safes')
     expect(getSignerStatus('single', accounts)).toBe('Signs 1 Safe (Ops Payroll)')
     expect(getSignerStatus('member', accounts)).toBe('Not a signer')
+    expect(getSignerStatus('security', accounts)).toBe('Signs 2 of 3 Safes')
   })
 
   it('updates with the 20-Safe scenario', () => {

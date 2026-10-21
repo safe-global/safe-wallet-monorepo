@@ -1,105 +1,23 @@
-import { ChevronDown, ChevronUp, Plus } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import type { ReactNode } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { formatAuditDateTime } from '@/components/common/AuditLog'
-import Identicon from '@/components/common/Identicon'
 import { getMenuActions, getPrimaryAction, MENU_LABELS, type MenuAction } from '../../../services/actions'
-import { getCreatedAt, getCreator } from '../../../services/model'
-import { getNotSignerNote, getSignatureSummary, getSignerRows } from '../../../services/signers'
+import { getAccount } from '../../../services/model'
+import { getNotSignerNote, getSignatureSummary, toSignatureRows } from '../../../services/signers'
 import type { PreviewAction } from '../../../services/queue'
+import type { Wallet } from '../../../services/nextSteps'
 import type { Persona, Proposal } from '../../../types'
 import { CopyTransactionLink } from '../../ProposalDetails'
-import { SignedMark } from '../../QueueTable/SignerList'
+import { ActionRow, SignaturesFooter } from '../../Panel/SignaturesFooter'
 import type { ReviewLayout } from '../ReviewDrawer'
-
-// Same list as the signature tooltip: creator, signed, then not signed.
-export function SignersPanel({ tx, persona, layout }: { tx: Proposal; persona: Persona; layout: ReviewLayout }) {
-  const rows = getSignerRows(tx, persona)
-  const creator = getCreator(tx)
-  const toggle = () => layout.setSignersOpen(!layout.signersOpen)
-  return (
-    <section aria-label="Signatures">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          tabIndex={-1}
-          aria-hidden="true"
-          className="flex cursor-pointer items-baseline gap-2 py-4"
-          onClick={toggle}
-        >
-          <span className="text-sm font-medium">Signatures</span>
-          <span className="text-xs text-muted-foreground">{getSignatureSummary(tx)}</span>
-        </button>
-        <CopyTransactionLink proposal={tx} />
-        <button
-          type="button"
-          aria-label="Signatures"
-          aria-expanded={layout.signersOpen}
-          aria-controls="steps-signers"
-          className="flex flex-1 cursor-pointer items-center justify-end self-stretch rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          onClick={toggle}
-        >
-          {layout.signersOpen ? (
-            <ChevronUp className="size-4 text-muted-foreground" aria-hidden="true" />
-          ) : (
-            <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
-          )}
-        </button>
-      </div>
-      <ul
-        id="steps-signers"
-        hidden={!layout.signersOpen}
-        className="max-h-[24vh] space-y-2 overflow-y-auto overscroll-contain pb-3"
-      >
-        <li className="flex min-h-8 items-center gap-2 text-sm">
-          <Avatar size="xs" aria-hidden="true">
-            <AvatarFallback>
-              <Plus className="size-3.5" />
-            </AvatarFallback>
-          </Avatar>
-          <span className="min-w-0 flex-1 truncate">{creator ? `Created by ${creator}` : 'Created'}</span>
-          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-            {formatAuditDateTime(getCreatedAt(tx))}
-          </span>
-        </li>
-        {rows.map((row) => (
-          <li key={row.id} className="flex min-h-8 items-center gap-2 text-sm">
-            <span className={`flex shrink-0 ${row.signed ? '' : 'opacity-50'}`}>
-              <Identicon address={row.address} size={24} />
-            </span>
-            <span
-              className={`min-w-0 flex-1 truncate ${row.signed ? '' : 'text-muted-foreground'} ${row.name || row.label === 'You' ? '' : 'font-mono text-xs'}`}
-            >
-              {row.label}
-            </span>
-            <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
-              {row.signed && row.signedAt !== undefined ? formatAuditDateTime(row.signedAt) : 'Not signed yet'}
-              <SignedMark signed={row.signed} />
-            </span>
-          </li>
-        ))}
-      </ul>
-      {layout.signersOpen && getNotSignerNote(tx, persona) && (
-        <p className="pb-3 text-xs text-muted-foreground">{getNotSignerNote(tx, persona)}</p>
-      )}
-      <Separator className="mb-4" />
-    </section>
-  )
-}
 
 export function ConfirmStep({
   pendingAction,
+  wallet,
   onBack,
   onAction,
 }: {
   pendingAction: PreviewAction
+  wallet?: Wallet
   onBack: () => void
   onAction: (action: PreviewAction) => void
 }) {
@@ -112,7 +30,9 @@ export function ConfirmStep({
             ? 'Yours is the last signature. Execute now, or sign and let anyone execute later.'
             : 'Executing advances the nonce and replaces any conflicting transactions at the same nonce.'}
       </p>
-      <p className="text-xs text-muted-foreground">Simulated action · no wallet request</p>
+      <p className="text-xs text-muted-foreground">
+        {wallet && `You sign with ${wallet.name} · `}Simulated action · no wallet request
+      </p>
       <div className="flex flex-col gap-2">
         <Button className="w-full" onClick={() => onAction(pendingAction)}>
           {pendingAction === 'sign'
@@ -134,26 +54,32 @@ export function ConfirmStep({
   )
 }
 
-// Full-width actions in a stack, with a centred hint, as in the Policies drawers.
-export function StepsActions({
+// The shared signatures footer with the queue's actions: same rules as the row, extras in "More actions".
+export function StepsFooter({
   tx,
   items,
   persona,
   layout,
   remindedIds,
+  feedback,
   onReview,
   onRemind,
   onMenuAction,
+  children,
 }: {
   tx: Proposal
   items: Proposal[]
   persona: Persona
   layout: ReviewLayout
   remindedIds: string[]
+  feedback?: string
   onReview: (tx: Proposal) => void
   onRemind?: (tx: Proposal) => void
   onMenuAction?: (tx: Proposal, action: MenuAction) => void
+  children?: ReactNode
 }) {
+  const account = getAccount(tx)
+  const signed = tx.signers.filter((owner) => account.owners.includes(owner)).length
   const primary = getPrimaryAction(tx, items, persona, remindedIds)
   // The copy icon in the signatures header already copies the link.
   const menu = getMenuActions(tx, items, persona, primary).filter((action) => action !== 'copyLink')
@@ -164,41 +90,44 @@ export function StepsActions({
     else if (primary.kind === 'goTo') onReview(primary.target)
     else if (primary.kind === 'remind') onRemind?.(primary.target)
   }
-  const hint = 'hint' in primary ? primary.hint : undefined
+  const secondaryVariant: 'outline' | 'ghost' = primary.kind === 'review' ? 'outline' : 'ghost'
+  const secondary =
+    menu.length === 1
+      ? { label: menuLabel(menu[0]), variant: secondaryVariant, onClick: () => onMenuAction?.(tx, menu[0]) }
+      : menu.length > 1
+        ? {
+            label: 'More actions',
+            variant: secondaryVariant,
+            items: menu.map((action) => ({ label: menuLabel(action), onClick: () => onMenuAction?.(tx, action) })),
+          }
+        : undefined
   return (
-    <div className="flex flex-col gap-2">
-      {hint && <p className="text-center text-xs text-muted-foreground">{hint}</p>}
-      {primary.kind !== 'review' && (
-        <Button className="w-full" onClick={run}>
-          {primary.label}
-        </Button>
+    <SignaturesFooter
+      signed={signed}
+      required={account.threshold}
+      summary={getSignatureSummary(tx).split(' · ')[1]}
+      rows={toSignatureRows(tx, persona)}
+      chainId={account.chainId}
+      open={layout.signersOpen}
+      onOpenChange={layout.setSignersOpen}
+      onNotify={signed < account.threshold && onRemind ? () => onRemind(tx) : undefined}
+      notified={remindedIds.includes(tx.id)}
+      note={getNotSignerNote(tx, persona)}
+      copyLink={<CopyTransactionLink proposal={tx} />}
+      padding={24}
+    >
+      {feedback && (
+        <p role="status" className="mb-3 text-center text-xs text-muted-foreground">
+          {feedback}
+        </p>
       )}
-      {menu.length === 1 && (
-        <Button
-          variant={primary.kind === 'review' ? 'outline' : 'ghost'}
-          className="w-full"
-          onClick={() => onMenuAction?.(tx, menu[0])}
-        >
-          {menuLabel(menu[0])}
-        </Button>
+      {children ?? (
+        <ActionRow
+          hint={'hint' in primary ? primary.hint : undefined}
+          primary={primary.kind !== 'review' ? { label: primary.label, onClick: run } : undefined}
+          secondary={secondary}
+        />
       )}
-      {menu.length > 1 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant={primary.kind === 'review' ? 'outline' : 'ghost'} className="w-full" />}
-          >
-            More actions
-            <ChevronDown />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-auto min-w-56 whitespace-nowrap">
-            {menu.map((action) => (
-              <DropdownMenuItem key={action} onClick={() => onMenuAction?.(tx, action)}>
-                {menuLabel(action)}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </div>
+    </SignaturesFooter>
   )
 }

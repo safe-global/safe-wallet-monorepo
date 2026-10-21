@@ -4,7 +4,8 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import type { Direction, Persona, Scenario } from '../types'
-import { getPersonaLabel, PERSONAS } from '../services/personas'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenarioAccounts, shortAddress } from '../services/model'
 import { PixelAvatar } from './PixelAvatar'
 import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../services/workspace'
@@ -27,13 +28,18 @@ export const SCENARIOS: { value: Scenario; label: string }[] = [
 export type Hypernative = 'in' | 'out' | 'none'
 
 const personas = Object.keys(PERSONAS) as Persona[]
+const PRIORITY_GROUPS = [
+  { priority: 'primary', label: 'Primary personas' },
+  { priority: 'secondary', label: 'Secondary personas' },
+] as const
 
 function WorkspaceHeader({ scenario }: { scenario: Scenario }) {
-  const { plan, safes, members, signers, outside } = getWorkspaceProfile(scenario)
+  const { segment, plan, safes, members, signers, outside } = getWorkspaceProfile(scenario)
   return (
     <div className="sticky top-0 z-10 border-b border-border bg-popover px-3 pt-2 pb-3">
       <p className="text-sm font-medium text-foreground">Acme Inc · {plan.label}</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">
+      <p className="mt-0.5 text-xs text-muted-foreground">{segment}</p>
+      <p className="text-xs text-muted-foreground">
         {plan.seats ? `${safes} of ${plan.seats} Safe seats` : `${safes} Safes`} · {members} members · {signers} signers
         {outside ? `, ${outside} not in workspace` : ''}
       </p>
@@ -55,7 +61,7 @@ function PersonaList({ title, items }: { title: string; items: string[] }) {
 }
 
 function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenario }) {
-  const { name, role, admin, workflow, jobs, pains } = PERSONAS[persona]
+  const { name, role, family, priority, admin, jtbd, jobs, pains } = PERSONAS[persona]
   return (
     <span className="flex min-w-0 flex-1 flex-col gap-3 whitespace-normal">
       <span className="flex items-center gap-3">
@@ -64,13 +70,16 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
           <span className="font-medium">
             {name} · {role}
           </span>
-          <span className="text-xs text-muted-foreground">
-            {admin ? 'Admin' : 'Member'} · {getSignerStatus(persona, getScenarioAccounts(scenario))}
+          <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <Badge variant={priority === 'primary' ? 'info' : 'outline'}>{FAMILY_LABELS[family]}</Badge>
+            <span>
+              {admin ? 'Admin' : 'Member'} · {getSignerStatus(persona, getScenarioAccounts(scenario))}
+            </span>
           </span>
           <span className="font-mono text-xs text-muted-foreground">{shortAddress(getPersonaAddress(persona))}</span>
         </span>
       </span>
-      <span className="text-xs">{workflow}</span>
+      <span className="text-xs italic">“{jtbd}”</span>
       <PersonaList title="Jobs to be done" items={jobs} />
       <PersonaList title="Pain points" items={pains} />
     </span>
@@ -103,6 +112,7 @@ export function ScenarioBar({
             <TabsTrigger value="queues">A · Safe queues</TabsTrigger>
             <TabsTrigger value="inbox">B · Action inbox</TabsTrigger>
             <TabsTrigger value="steps">C · Next steps</TabsTrigger>
+            <TabsTrigger value="table">D · One table</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -160,13 +170,20 @@ export function ScenarioBar({
               className="w-[44rem] max-w-[calc(100vw-2rem)]"
             >
               <WorkspaceHeader scenario={scenario} />
-              <div className="grid gap-1.5 pt-1.5 sm:grid-cols-2">
-                {personas.map((value) => (
-                  <SelectItem key={value} value={value} className="items-start rounded-md p-4 pr-8">
-                    <PersonaCard persona={value} scenario={scenario} />
-                  </SelectItem>
-                ))}
-              </div>
+              {PRIORITY_GROUPS.map(({ priority, label }) => (
+                <div key={priority} className="pt-3">
+                  <p className="px-3 pb-1.5 text-xs font-medium text-muted-foreground">{label}</p>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    {personas
+                      .filter((value) => PERSONAS[value].priority === priority)
+                      .map((value) => (
+                        <SelectItem key={value} value={value} className="items-start rounded-md p-4 pr-8">
+                          <PersonaCard persona={value} scenario={scenario} />
+                        </SelectItem>
+                      ))}
+                  </div>
+                </div>
+              ))}
             </SelectContent>
           </Select>
           <Button

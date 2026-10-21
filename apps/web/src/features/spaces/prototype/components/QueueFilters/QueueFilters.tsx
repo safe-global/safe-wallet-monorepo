@@ -102,6 +102,8 @@ type QueueFiltersProps = {
   onGroupByChange: (groupBy: GroupBy) => void
   // Next steps: grouping is a view setting, not a filter.
   groupingAsView?: boolean
+  // One table: always by Safe. The Status and Safe filters cover the other view.
+  hideViewSwitch?: boolean
 }
 
 // Next steps statuses, in section order.
@@ -292,6 +294,7 @@ export function QueueToolbar({
   groupBy,
   onGroupByChange,
   groupingAsView,
+  hideViewSwitch,
 }: QueueFiltersProps) {
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -305,7 +308,7 @@ export function QueueToolbar({
       />
       {groupingAsView && (
         <>
-          <ViewSwitch groupBy={groupBy} onGroupByChange={onGroupByChange} />
+          {!hideViewSwitch && <ViewSwitch groupBy={groupBy} onGroupByChange={onGroupByChange} />}
           {/* The Status view already splits by status. */}
           {hasItems && groupBy !== 'status' && <StatusDropdown filters={filters} />}
           {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}

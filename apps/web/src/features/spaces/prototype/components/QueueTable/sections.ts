@@ -124,7 +124,8 @@ export const getColumns = (groupBy: GroupBy, isWide: boolean, steps = false) =>
         'Transaction',
         ...(groupBy !== 'safe' ? ['Safe'] : []),
         'With',
-        'Chain',
+        // Safe view: the Safe header already names the chain.
+        ...(groupBy !== 'safe' ? ['Chain'] : []),
         'Proposed',
         ...(isWide ? ['Note'] : []),
         'Signatures',

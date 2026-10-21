@@ -1,6 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { LockKeyhole } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -8,7 +7,9 @@ import { Input } from '@safe-global/views/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { DrawerList, DrawerSection } from '@/components/common/Drawer'
+import { DrawerList } from '@/components/common/Drawer'
+import { PanelAlert } from '../../Panel/PanelAlert'
+import { PanelLinkRow, PanelRow, PanelSection } from '../../Panel/PanelBody'
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import { getHeadline } from '../../../services/columns'
 import { getStatusHint } from '../../../services/actions'
@@ -43,8 +44,6 @@ const SECTION_TITLES: Record<Proposal['kind']['type'], string> = {
   rejection: 'On-chain rejection',
 }
 
-const Right = ({ children }: { children: ReactNode }) => <span className="flex min-w-0 justify-end">{children}</span>
-
 export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Proposal[]; persona: Persona }) {
   const state = getState(tx, persona)
   const conflicts = getConflicts(tx, items)
@@ -54,35 +53,38 @@ export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Prop
   return (
     <>
       {blocking && (
-        <Alert variant={state.waiting && !state.canSign ? 'warning' : 'subtle'} outlined={false}>
-          <AlertSeverityIcon variant={state.waiting && !state.canSign ? 'warning' : 'info'} />
-          <AlertTitle>
-            {state.canSign
+        <PanelAlert
+          tone={state.waiting && !state.canSign ? 'warning' : 'neutral'}
+          title={
+            state.canSign
               ? `Executes after #${getAccount(tx).nextNonce}`
               : state.waiting
                 ? getStepsStatus(tx, persona).label
-                : 'Waiting on others'}
-          </AlertTitle>
-          <AlertDescription>{getStatusHint(tx, items, persona)}</AlertDescription>
-        </Alert>
+                : 'Waiting on others'
+          }
+          description={getStatusHint(tx, items, persona)}
+        />
       )}
       {conflicts.length > 0 && (
-        <Alert variant="warning" outlined={false}>
-          <AlertSeverityIcon variant="warning" />
-          <AlertTitle>Conflicting transactions</AlertTitle>
-          <AlertDescription>
-            Option {optionIndex} of {conflicts.length + 1} at #{tx.nonce}. Only one can execute; executing it replaces
-            the others.{' '}
-            <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS}>Why did this happen?</ExternalLink>
-          </AlertDescription>
-        </Alert>
+        <PanelAlert
+          tone="warning"
+          title="Conflicting transactions"
+          description={
+            <>
+              Option {optionIndex} of {conflicts.length + 1} at #{tx.nonce}. Only one can execute; executing it replaces
+              the others.{' '}
+              <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS}>Why did this happen?</ExternalLink>
+            </>
+          }
+        />
       )}
       {getWarnings(tx).map((warning) => (
-        <Alert key={warning} variant="warning" outlined={false}>
-          <AlertSeverityIcon variant="warning" />
-          <AlertTitle>{WARNING_LABELS[warning]}</AlertTitle>
-          <AlertDescription>{WARNING_DETAILS[warning]}</AlertDescription>
-        </Alert>
+        <PanelAlert
+          key={warning}
+          tone="warning"
+          title={WARNING_LABELS[warning]}
+          description={WARNING_DETAILS[warning]}
+        />
       ))}
     </>
   )
@@ -93,81 +95,71 @@ export function SummarySection({ tx }: { tx: Proposal }) {
   const creatorId = tx.signers[0]
   const creator = creatorId ? getSignerIdentity(creatorId) : undefined
   return (
-    <DrawerSection collapsible title="Summary">
-      <DrawerList
-        mobileStack
-        items={[
-          {
-            label: 'Network',
-            content: (
-              <span className="flex items-center justify-end gap-2">
-                <Avatar size="xs">
-                  <AvatarImage src={chainLogoUrl(account.chainId)} alt="" />
-                  <AvatarFallback>{account.network[0]}</AvatarFallback>
-                </Avatar>
-                {account.network}
-              </span>
-            ),
-          },
-          { label: 'Proposed', content: `${formatDateTime(getCreatedAt(tx))} · ${tx.age}` },
-          {
-            label: 'Created by',
-            content: tx.proposedBy ? (
-              tx.proposedBy
-            ) : creator ? (
-              <Right>
-                <IdentityRow name={creator.name} address={creator.address} chainId={account.chainId} />
-              </Right>
-            ) : (
-              'Unknown'
-            ),
-          },
-        ]}
-      />
-    </DrawerSection>
+    <PanelSection collapsible title="Summary">
+      <PanelRow label="Network">
+        <span className="flex items-center justify-end gap-2">
+          <Avatar size="xs">
+            <AvatarImage src={chainLogoUrl(account.chainId)} alt="" />
+            <AvatarFallback>{account.network[0]}</AvatarFallback>
+          </Avatar>
+          {account.network}
+        </span>
+      </PanelRow>
+      <PanelRow label="Proposed">{`${formatDateTime(getCreatedAt(tx))} · ${tx.age}`}</PanelRow>
+      <PanelRow label="Created by" account={!tx.proposedBy && !!creator}>
+        {tx.proposedBy ? (
+          tx.proposedBy
+        ) : creator ? (
+          <IdentityRow name={creator.name} address={creator.address} chainId={account.chainId} />
+        ) : (
+          'Unknown'
+        )}
+      </PanelRow>
+    </PanelSection>
   )
 }
 
 export function WhatItDoesSection({ tx }: { tx: Proposal }) {
   const { kind } = tx
   return (
-    <DrawerSection
+    <PanelSection
       collapsible
       title={SECTION_TITLES[kind.type]}
       rightNode={kind.type === 'batch' ? `${kind.actions.length} actions` : undefined}
     >
-      <DrawerList
-        mobileStack
-        items={[
-          ...(tx.origin === 'replacement' ? [{ label: 'Proposed as', content: 'Replacement' }] : []),
-          // The flow block above shows the recipient and address.
-          ...getDetailItems(tx, true).filter((item) => item.label !== 'Recipient' && item.label !== 'Address'),
-        ]}
-      />
+      {[
+        ...(tx.origin === 'replacement' ? [{ label: 'Proposed as', content: 'Replacement' }] : []),
+        // The flow block above shows the recipient and address.
+        ...getDetailItems(tx, true).filter((item) => item.label !== 'Recipient' && item.label !== 'Address'),
+      ].map((item) => (
+        <PanelRow key={String(item.label)} label={item.label}>
+          {item.content}
+        </PanelRow>
+      ))}
       {kind.type === 'contract' && kind.steps && (
-        <ol className="list-decimal space-y-1 rounded-lg bg-muted p-3 pl-7 text-sm">
+        <ol className="list-decimal space-y-1 pl-4 text-sm">
           {kind.steps.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ol>
       )}
       {kind.type === 'batch' && <BatchActions actions={kind.actions} />}
-    </DrawerSection>
+    </PanelSection>
   )
 }
 
 export function NoteSection({ tx }: { tx: Proposal }) {
   if (!tx.note) return null
   return (
-    <DrawerSection collapsible title="Note">
-      <div className="space-y-2 rounded-lg bg-muted p-3">
+    <PanelSection collapsible title="Note">
+      <div className="space-y-2">
         <p className="text-sm leading-relaxed">{tx.note.text}</p>
         <p className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <LockKeyhole className="size-3" aria-hidden="true" />
           By {tx.note.author} · {tx.note.date} · Off-chain
         </p>
       </div>
-    </DrawerSection>
+    </PanelSection>
   )
 }
 
@@ -183,15 +175,11 @@ function QueueRow({
   onReview: (tx: Proposal) => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onReview(tx)}
-      className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-background/70 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-    >
+    <PanelLinkRow onClick={() => onReview(tx)}>
       <NonceMark tx={tx} persona={persona} competing={competing} />
-      <span className="min-w-0 flex-1 truncate">{getHeadline(tx)}</span>
+      <span className="min-w-0 flex-1 truncate text-sm">{getHeadline(tx)}</span>
       <StepsStatusChip tx={tx} persona={persona} />
-    </button>
+    </PanelLinkRow>
   )
 }
 
@@ -216,41 +204,37 @@ export function QueueContextSection({
   return (
     <>
       {earlier.length > 0 && (
-        <DrawerSection collapsible title="Runs after" rightNode={`${earlier.length} earlier`}>
-          <div className="rounded-lg bg-muted p-1">
-            {earlier.map((nonce) => {
-              const atNonce = items.filter((other) => other.account === tx.account && other.nonce === nonce)
-              return atNonce.length ? (
-                atNonce.map((other) => (
-                  <QueueRow
-                    key={other.id}
-                    tx={other}
-                    persona={persona}
-                    competing={atNonce.length - 1}
-                    onReview={onReview}
-                  />
-                ))
-              ) : (
-                <p key={nonce} className="px-2 py-2 text-sm text-warning-strong">
-                  #{nonce} has no proposal. Nothing after it can execute.
-                </p>
-              )
-            })}
-          </div>
-        </DrawerSection>
+        <PanelSection collapsible title="Runs after" rightNode={`${earlier.length} earlier`}>
+          {earlier.flatMap((nonce) => {
+            const atNonce = items.filter((other) => other.account === tx.account && other.nonce === nonce)
+            return atNonce.length ? (
+              atNonce.map((other) => (
+                <QueueRow
+                  key={other.id}
+                  tx={other}
+                  persona={persona}
+                  competing={atNonce.length - 1}
+                  onReview={onReview}
+                />
+              ))
+            ) : (
+              <p key={nonce} className="text-sm text-warning-strong">
+                #{nonce} has no proposal. Nothing after it can execute.
+              </p>
+            )
+          })}
+        </PanelSection>
       )}
       {conflicts.length > 0 && (
-        <DrawerSection
+        <PanelSection
           collapsible
           title="Conflicting transactions"
           rightNode={`#${tx.nonce} · ${conflicts.length + 1} options`}
         >
-          <div className="rounded-lg bg-muted p-1">
-            {conflicts.map((other) => (
-              <QueueRow key={other.id} tx={other} persona={persona} competing={conflicts.length} onReview={onReview} />
-            ))}
-          </div>
-        </DrawerSection>
+          {conflicts.map((other) => (
+            <QueueRow key={other.id} tx={other} persona={persona} competing={conflicts.length} onReview={onReview} />
+          ))}
+        </PanelSection>
       )}
     </>
   )
@@ -283,56 +267,57 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
   ].filter(Boolean)
   const issues = getWarnings(tx).length > 0
   return (
-    <DrawerSection collapsible title="Security">
-      <DrawerList
-        mobileStack
-        items={[
-          {
-            label: 'Simulation',
-            content:
-              simulation === 'idle' ? (
-                <Button size="xs" variant="outline" onClick={() => setSimulation('running')}>
-                  Simulate
-                </Button>
-              ) : simulation === 'running' ? (
-                'Simulating…'
-              ) : (
-                <span className={simulation === 'success' ? 'text-success-strong' : 'text-destructive'}>
-                  {simulation === 'success' ? 'Simulation successful' : 'Simulation failed'} ·{' '}
-                  <ExternalLink href="https://dashboard.tenderly.co" noIcon>
-                    Tenderly
-                  </ExternalLink>
-                </span>
-              ),
-          },
-          ...(hypernative === 'none'
-            ? []
-            : [
-                {
-                  label: 'Hypernative',
-                  content:
-                    hypernative === 'out' ? (
-                      <Button size="xs" variant="outline">
-                        Log in to view scan
-                      </Button>
-                    ) : (
-                      <span className={issues ? 'text-warning-strong' : 'text-success-strong'}>
-                        {issues ? 'Issues found' : 'No issues found'}
-                      </span>
-                    ),
-                },
-              ]),
-          {
-            label: 'Checks',
-            content: checks.length ? (
-              <span className="flex flex-wrap justify-end gap-1">{checks}</span>
+    <PanelSection collapsible title="Security">
+      {[
+        {
+          label: 'Simulation',
+          content:
+            simulation === 'idle' ? (
+              <Button size="xs" variant="outline" onClick={() => setSimulation('running')}>
+                Simulate
+              </Button>
+            ) : simulation === 'running' ? (
+              'Simulating…'
             ) : (
-              <span className="text-muted-foreground">No flags</span>
+              <span className={simulation === 'success' ? 'text-success-strong' : 'text-destructive'}>
+                {simulation === 'success' ? 'Simulation successful' : 'Simulation failed'} ·{' '}
+                <ExternalLink href="https://dashboard.tenderly.co" noIcon>
+                  Tenderly
+                </ExternalLink>
+              </span>
             ),
-          },
-        ]}
-      />
-    </DrawerSection>
+        },
+        ...(hypernative === 'none'
+          ? []
+          : [
+              {
+                label: 'Hypernative',
+                content:
+                  hypernative === 'out' ? (
+                    <Button size="xs" variant="outline">
+                      Log in to view scan
+                    </Button>
+                  ) : (
+                    <span className={issues ? 'text-warning-strong' : 'text-success-strong'}>
+                      {issues ? 'Issues found' : 'No issues found'}
+                    </span>
+                  ),
+              },
+            ]),
+        {
+          label: 'Checks',
+          content: checks.length ? (
+            <span className="flex flex-wrap justify-end gap-1">{checks}</span>
+          ) : (
+            <span className="text-muted-foreground">No flags</span>
+          ),
+        },
+      ].map((item) => (
+        <PanelRow key={item.label} label={item.label}>
+          {item.content}
+        </PanelRow>
+      ))}
+    </PanelSection>
   )
 }
 
@@ -343,7 +328,7 @@ const Mono = ({ value }: { value: string | number }) => (
 export function TransactionDataSection({ tx, open, onToggle }: { tx: Proposal; open: boolean; onToggle: () => void }) {
   const data = getTechnicalData(tx)
   return (
-    <DrawerSection collapsible title="Transaction data" open={open} onOpenChange={() => onToggle()}>
+    <PanelSection collapsible title="Transaction data" open={open} onOpenChange={() => onToggle()}>
       <div className="space-y-3">
         <Tabs defaultValue="data">
           <TabsList aria-label="Transaction data views">
@@ -398,7 +383,7 @@ export function TransactionDataSection({ tx, open, onToggle }: { tx: Proposal; o
           preview are placeholders.
         </p>
       </div>
-    </DrawerSection>
+    </PanelSection>
   )
 }
 
@@ -414,8 +399,8 @@ export function ChangeSection({
   const { replacement } = layout
   if (!layout.reject) return null
   return (
-    <DrawerSection collapsible title={replacement ? 'Replace with a transfer' : 'Reject'}>
-      <div className="space-y-3 rounded-lg bg-muted p-3">
+    <PanelSection collapsible title={replacement ? 'Replace with a transfer' : 'Reject'}>
+      <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
           {replacement
             ? `Sends a transfer at nonce #${tx.nonce} instead. It needs signatures and execution. Whichever executes first replaces the other.`
@@ -453,6 +438,6 @@ export function ChangeSection({
           </Button>
         </div>
       </div>
-    </DrawerSection>
+    </PanelSection>
   )
 }

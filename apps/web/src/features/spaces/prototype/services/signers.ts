@@ -1,5 +1,7 @@
+import { formatDateTime } from '@safe-global/utils/utils/date'
 import type { Persona, Proposal } from '../types'
-import { getAccount, getSignedAt, getSignerIdentity, shortAddress } from './model'
+import type { SignatureRow } from '../components/Panel/SignaturesFooter'
+import { getAccount, getCreatedAt, getCreator, getSignedAt, getSignerIdentity, shortAddress } from './model'
 import { isSignerOf, isYou } from './personas'
 
 export type SignerRow = {
@@ -45,3 +47,15 @@ export const getNotSignerNote = (tx: Proposal, persona: Persona) => {
   const account = getAccount(tx)
   return isSignerOf(account, persona) ? undefined : `You aren't a signer of ${account.name}.`
 }
+
+// Rows for the shared SignaturesFooter: created, signed in order, then still needed.
+export const toSignatureRows = (tx: Proposal, persona: Persona): SignatureRow[] => [
+  { kind: 'created', name: getCreator(tx) ?? 'Unknown', time: formatDateTime(getCreatedAt(tx)) },
+  ...getSignerRows(tx, persona).map((row): SignatureRow => {
+    const name = row.name ?? shortAddress(row.address)
+    const you = isYou(row.id, persona)
+    return row.signed
+      ? { kind: 'signed', name, address: row.address, time: formatDateTime(row.signedAt ?? 0), you }
+      : { kind: 'needed', name, address: row.address, you }
+  }),
+]

@@ -21,3 +21,7 @@ export const NextSteps: Story = { parameters: { nextjs: { router: { query: { opt
 export const ManySafes: Story = {
   parameters: { nextjs: { router: { query: { option: 'steps', scenario: 'many-safes' } } } },
 }
+export const OneTable: Story = { parameters: { nextjs: { router: { query: { option: 'table' } } } } }
+export const OneTableManySafes: Story = {
+  parameters: { nextjs: { router: { query: { option: 'table', scenario: 'many-safes' } } } },
+}

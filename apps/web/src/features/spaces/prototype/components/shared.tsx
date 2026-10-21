@@ -85,6 +85,7 @@ export function SafeIdentity({
   className,
   children,
   title,
+  details,
 }: {
   address: string
   size: number
@@ -92,6 +93,8 @@ export function SafeIdentity({
   children: ReactNode
   // Optional heading above the address.
   title?: string
+  // Optional facts listed below the address.
+  details?: { label: string; value: ReactNode }[]
 }) {
   const avatarRef = useRef<HTMLSpanElement>(null)
   return (
@@ -104,6 +107,16 @@ export function SafeIdentity({
       </TooltipTrigger>
       <TooltipContent anchor={avatarRef} className={title ? HINT_CLASS : 'break-all font-mono'}>
         {title ? <HintContent title={title} body={<span className="break-all font-mono">{address}</span>} /> : address}
+        {details && (
+          <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+            {details.map(({ label, value }) => (
+              <div key={label} className="contents">
+                <dt className="opacity-70">{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </TooltipContent>
     </Tooltip>
   )

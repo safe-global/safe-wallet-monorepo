@@ -11,9 +11,9 @@ export type Scenario =
   | 'loading'
   | 'error'
   | 'empty'
-export type Direction = 'queues' | 'inbox' | 'steps'
+export type Direction = 'queues' | 'inbox' | 'steps' | 'table'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
-export type Persona = 'owner' | 'single' | 'member' | 'admin'
+export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
 export type Account = {
   id: string
   name: string

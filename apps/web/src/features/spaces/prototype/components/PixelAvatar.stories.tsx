@@ -10,5 +10,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 export const Dev: Story = {}
 export const Sam: Story = { args: { persona: 'single' } }
+export const Jonas: Story = { args: { persona: 'security' } }
 export const Alex: Story = { args: { persona: 'member' } }
 export const Noor: Story = { args: { persona: 'admin' } }
