@@ -1,4 +1,5 @@
 import { createSafe, executeTransaction, openSafe, proposeTransaction } from './safe.mjs'
+import { addMessageToQueue } from './gateway.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
 import { waitUntil } from './indexing.mjs'
 import { addressOf, SEPOLIA, short } from './chain.mjs'
@@ -6,9 +7,11 @@ import { addressOf, SEPOLIA, short } from './chain.mjs'
 async function addPendingMessage(env, owners, safe, message) {
   const context = await openSafe(env, owners.owner4, addressOf(safe))
   const signed = await context.safe.signMessage(context.safe.createMessage(message))
-  await context.api.addMessage(context.safeAddress, { message, signature: signed.encodedSignatures() })
+  await addMessageToQueue(context, message, signed.encodedSignatures())
   await waitUntil(env, `${context.path}/messages`, (result) => result.results.some((item) => item.message === message))
 }
+
+const NOTE = 'Tx note one'
 
 // Rebuilds the staging Safes of the notes spec and an executed transfer that carries a note.
 export async function prepareNotesScenario(env, owners) {
@@ -20,14 +23,18 @@ export async function prepareNotesScenario(env, owners) {
       transactions: [{ to: owners.owner1.address, value: '1', data: '0x' }],
     })
     const { signed, hash } = await proposeTransaction(context, transaction, {
-      origin: JSON.stringify({ note: 'Tx note one' }),
+      origin: JSON.stringify({ note: NOTE }),
     })
+    // The Transaction Service copies the note from the Queue Service; an execution it indexes first has no note
+    await waitUntil(env, `${env.SAFE_TXS_BASE_URL}/v1/multisig-transactions/${hash}/`, (tx) =>
+      JSON.stringify(tx.origin).includes(NOTE),
+    )
     await executeTransaction(context, signed)
     const id = `multisig_${context.safeAddress}_${hash}`
     await waitUntil(
       env,
       `${env.SAFE_CGW_BASE_URL}/v1/chains/${SEPOLIA}/transactions/${id}`,
-      (details) => details.note === 'Tx note one' && details.txStatus === 'SUCCESS',
+      (details) => details.note === NOTE && details.txStatus === 'SUCCESS',
     )
     return {
       safes: { static: safes },

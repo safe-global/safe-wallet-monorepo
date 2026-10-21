@@ -24,7 +24,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
-import { SafenetChecksFeature } from '@/features/safenet-checks'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
 
@@ -63,6 +63,7 @@ export const SafeShieldContent = ({
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
@@ -158,8 +159,6 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          {shouldShowContent && <safenet.SafenetChecksSection />}
-
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
@@ -167,6 +166,9 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
+
+          {/* Safenet is the final check, including when the Pro rollout is off. */}
+          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
         </div>
 
         {showProSection && (
@@ -201,6 +203,9 @@ export const SafeShieldContent = ({
                 />
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
+
+              {isSafenetEnabled &&
+                (hasProFeatures ? <safenet.SafenetChecksSection /> : <safenet.SafenetChecksSection locked />)}
             </div>
           </div>
         )}

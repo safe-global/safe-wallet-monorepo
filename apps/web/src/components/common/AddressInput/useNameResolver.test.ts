@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import useNameResolver, { getEnsNotAvailableError } from './useNameResolver'
-import { _clearEnsHubProviders } from '@/hooks/useEnsHubProvider'
+import { _clearSharedReadOnlyProviders } from '@/hooks/wallets/sharedReadOnlyProvider'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 
@@ -48,7 +48,7 @@ const baseChain = chainBuilder().with({ chainId: '8453', shortName: 'base', isTe
 describe('useNameResolver', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    _clearEnsHubProviders()
+    _clearSharedReadOnlyProviders()
     mockUseCurrentChain.mockReturnValue(currentChain)
     mockUseChain.mockImplementation((chainId: string) => {
       if (chainId === '1') return mainnetChain

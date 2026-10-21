@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@/tests/test-utils'
+import { fireEvent, render, within } from '@/tests/test-utils'
 import Multisend from '.'
 import { Operation } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
@@ -6,6 +6,8 @@ import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { multiSendDefaultsToSelf } from '@safe-global/utils/utils/multiSend'
+import { basicTypesActions, multiSendTxDataBuilder } from '@/tests/builders/dataDecoded'
+import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 
 jest.mock('@/hooks/useSafeAddress')
 jest.mock('@safe-global/utils/utils/multiSend', () => ({
@@ -84,6 +86,30 @@ describe('Multisend', () => {
 
     expect(result.getByText('0x0000...0000')).toBeInTheDocument()
     expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
+  })
+
+  it('renders every action of a batch that uses every ABI type', () => {
+    const actions = basicTypesActions()
+    const result = render(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
+
+    fireEvent.click(result.getByTestId('expande-all-btn'))
+
+    const items = result.getAllByTestId('action-item')
+    expect(items).toHaveLength(actions.length)
+    items.forEach((item, index) => {
+      expect(within(item).getByText(actions[index].dataDecoded.method)).toBeInTheDocument()
+    })
+    expect(result.queryByText('Error parsing data')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing when the multiSend call has no parameters', () => {
+    const txData = transactionDataBuilder()
+      .with({ dataDecoded: { method: 'multiSend', parameters: [] } })
+      .build()
+
+    const { container } = render(<Multisend txData={txData} />)
+
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('resolves a zero-address inner action to the executing Safe when overridden (nested Safe)', () => {

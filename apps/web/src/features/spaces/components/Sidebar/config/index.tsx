@@ -29,12 +29,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     label: 'Dashboard',
     href: AppRoutes.spaces.index,
   },
-  // TODO: Activate when Spaces Transactions page is ready
-  // {
-  //   icon: ArrowRightLeft,
-  //   label: 'Transactions',
-  //   href: AppRoutes.spaces.transactions,
-  // },
+  {
+    icon: ArrowRightLeft,
+    label: 'Transactions',
+    href: AppRoutes.spaces.transactions,
+    activeMemberOnly: true,
+  },
   {
     icon: WalletCards,
     label: 'Safe accounts',

@@ -39,7 +39,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceCheck } from '@/features/spaces'
+import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -85,7 +85,7 @@ import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
-import { captureError, initObservability } from '@/services/observability'
+import { captureRenderError, initObservability } from '@/services/observability'
 import { DatadogProvider } from '@/services/observability/providers/datadog'
 import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel'
 import useMixpanel from '@/services/analytics/useMixpanel'
@@ -96,6 +96,7 @@ import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/feat
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
@@ -113,7 +114,7 @@ setStoreInstance(reduxStore)
 // be unmounted entirely while the require-login gate is keeping the user out
 // — otherwise they subscribe to tx/message events and surface pending-tx
 // toasts on the login page before the user has signed in.
-const SafeScopedSubscriptions = (): null => {
+export const SafeScopedSubscriptions = (): null => {
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -126,6 +127,7 @@ const SafeScopedSubscriptions = (): null => {
   useCounterfactualSafeSync()
   useInviteNotification()
   useSafeWorkspaceCheck()
+  useSafeWorkspaceAttach()
   return null
 }
 
@@ -155,10 +157,6 @@ const InitApp = (): ReactElement | null => {
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
 
-  const handleError = (error: Error, componentStack?: string) => {
-    captureError({ error, isUserFacing: true, tags: { componentStack } })
-  }
-
   const content = (
     <ShadcnProvider dark={isDarkMode}>
       <WalletProvider>
@@ -173,7 +171,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     </ShadcnProvider>
   )
 
-  return <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
+  return <ObservabilityErrorBoundary onError={captureRenderError}>{content}</ObservabilityErrorBoundary>
 }
 
 // Must render inside the Redux provider to read the step-up phase.
@@ -195,6 +193,9 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
       <AppProviders>
         <CaptchaProvider>
+          {/* Before InitApp and the page, so GA exists before their mount effects send events */}
+          <Analytics />
+
           <InitApp />
 
           <LazyWeb3Init />
@@ -217,8 +218,6 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <SpendingLimitsLoaderWrapper />
 
-          <Analytics />
-
           <PkModulePopup />
         </CaptchaProvider>
       </AppProviders>
@@ -226,4 +225,11 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
   )
 }
 
-export default SafeWalletApp
+// In dev the server renders every page as empty (see next.config.mjs), so the first client render must be empty too.
+const DevClientOnlyApp = (props: AppProps): ReactElement => (
+  <RenderAfterMount>
+    <SafeWalletApp {...props} />
+  </RenderAfterMount>
+)
+
+export default process.env.NODE_ENV === 'development' ? DevClientOnlyApp : SafeWalletApp

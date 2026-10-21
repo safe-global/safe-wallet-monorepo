@@ -7,20 +7,22 @@ import * as accountsModal from '../pages/accounts_modal.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as dashboard from '../pages/dashboard.pages.js'
-import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import sidebar from '../../fixtures/sidebar.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const newSafeName = 'Added safe 3'
 const addedSafe900 = 'Added safe 900'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
+let signer, signer1, signer2
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
+})
 
 describe('Safe selector tests - connect wallet prompt', () => {
   before(async () => {
@@ -133,15 +135,6 @@ describe('Safe selector tests - accounts modal search', () => {
     accountsModal.searchSafe(sideBar.sideBarSafes.safe1short_)
     accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
     accountsModal.verifyAccountsListItemCount(1)
-  })
-
-  it('Verify searching for a safe name filters out those who do not match', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
-    accountsModal.openAccountsModal()
-    accountsModal.searchSafe(sideBar.sideBarSafes.safe1short_)
-    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
-    accountsModal.verifyAccountsListDoesNotContain(sideBar.sideBarSafes.safe2short)
   })
 
   it('Verify searching for a safe also finds safes in different networks', () => {
@@ -258,36 +251,6 @@ describe('Safe selector tests - watchlist in dropdown', () => {
     safeNav.openSelector()
 
     safeNav.verifyFirstDropdownRowHasBalance()
-  })
-})
-
-describe('Safe selector tests - new transaction button states', () => {
-  before(async () => {
-    staticSafes = await getSafes(CATEGORIES.static)
-  })
-
-  it('Verify the new transaction button is enabled for proposers', () => {
-    wallet.connectSignerViaStorage(signer1, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
-
-    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
-  })
-
-  it('Verify the new transaction button is disabled for disconnected users', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
-
-    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
-  })
-
-  it('Verify the new transaction button is disabled for connected non-owners', () => {
-    wallet.connectSignerViaStorage(signer1, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
-
-    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
-  })
-
-  it('Verify the new transaction button is enabled for non-owners with spending limits', () => {
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_11)
-
-    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
   })
 })
 

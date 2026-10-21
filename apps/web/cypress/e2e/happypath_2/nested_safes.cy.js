@@ -10,10 +10,13 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as createTx from '../pages/create_tx.pages.js'
 import * as owner from '../pages/owners.pages'
 import nested from '../../fixtures/nested.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Nested safes happy path tests', () => {
   before(async () => {
@@ -33,16 +36,15 @@ describe('Nested safes happy path tests', () => {
     nsafes.completeIntroScreenSelectValid()
     nsafes.clickOnAddNestedSafeBtn()
     createTx.hasNonce()
-    createTx.changeNonce(3)
     nsafes.nameInputHasPlaceholder()
     nsafes.typeName(main.generateRandomString(51))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
     nsafes.typeName(safe)
     nsafes.clickOnAddNextBtn()
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.selectComboButtonOption('sign')
-    createTx.clickOnSignTransactionBtn()
-    createTx.clickViewTransaction()
+    createTx.signAndOpenExecuteStep()
+    createTx.clickOnExecuteLaterBtn()
+    createTx.clickOnTransactionItem(0)
     main.verifyValuesExist(createTx.transactionItem, [
       createTx.tx_status.execute,
       nsafes.nonfundAssetsActions[0],

@@ -1,7 +1,7 @@
 import stagingSafes from '../fixtures/safes/static.js'
 
 export function fixtureValue(key, fallback) {
-  return Cypress.env('SAFE_E2E_FIXTURES')?.[key] ?? fallback
+  return Cypress.expose('SAFE_E2E_FIXTURES')?.[key] ?? fallback
 }
 
 /** Properties that read the scenario fixtures `${namespace}.${name}` and fall back to the staging `defaults`. */
@@ -21,7 +21,7 @@ const addressOf = (safe) => safe.split(':').at(-1)
 
 // Staging static Safe addresses map to the Safes the scenario prepared under the same keys.
 function addressAliases() {
-  const prepared = Object.entries(Cypress.env('SAFE_E2E_SAFES')?.static ?? {}).filter(([key]) => stagingSafes[key])
+  const prepared = Object.entries(Cypress.expose('SAFE_E2E_SAFES')?.static ?? {}).filter(([key]) => stagingSafes[key])
   return Object.fromEntries(prepared.map(([key, safe]) => [addressOf(stagingSafes[key]), addressOf(safe)]))
 }
 

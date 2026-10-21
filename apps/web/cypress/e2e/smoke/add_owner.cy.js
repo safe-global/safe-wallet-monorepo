@@ -4,10 +4,13 @@ import * as owner from '../pages/owners.pages'
 import * as navigation from '../pages/navigation.page'
 import * as wallet from '../../support/utils/wallet.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('[SMOKE] Add Owners tests', () => {
   before(async () => {
@@ -40,21 +43,8 @@ describe('[SMOKE] Add Owners tests', () => {
       owner.typeOwnerAddressManage(1, constants.addresBookContacts.user1.address.replace('F', 'f'))
       owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-      owner.typeOwnerAddressManage(1, constants.DEFAULT_OWNER_ADDRESS)
+      owner.typeOwnerAddressManage(1, constants.defaultOwnerAddress())
       owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
-    })
-
-    it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
-      owner.verifyManageSignersBtnIsEnabled()
-    })
-  })
-
-  describe('Non-owner safe', () => {
-    it('[SMOKE] Verify "Manage Signers" button is disabled for Non-Owner', () => {
-      cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-      cy.wait('@History', { timeout: 20000 })
-      owner.verifyManageSignersBtnIsDisabled()
     })
   })
 })

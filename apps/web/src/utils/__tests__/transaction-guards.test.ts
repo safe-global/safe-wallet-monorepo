@@ -4,6 +4,7 @@ import {
   isExecTxData,
   isExecTxInfo,
   isMigrateToL2TxData,
+  isOneSignatureShort,
   isOnChainConfirmationTxData,
   isOnChainConfirmationTxInfo,
   isOnChainSignMessageTxData,
@@ -523,6 +524,22 @@ describe('transaction-guards', () => {
 
     it('returns 0 when there is no overview', () => {
       expect(getOwnerAwaitingConfirmations(undefined, walletAddress)).toBe(0)
+    })
+  })
+
+  describe('isOneSignatureShort', () => {
+    const threshold = faker.number.int({ min: 1, max: 10 })
+
+    it('returns true when one more signature reaches the threshold', () => {
+      expect(isOneSignatureShort(threshold - 1, threshold)).toBe(true)
+    })
+
+    it('returns false when more than one signature is missing', () => {
+      expect(isOneSignatureShort(threshold - 2, threshold)).toBe(false)
+    })
+
+    it('returns false when the threshold is already reached', () => {
+      expect(isOneSignatureShort(threshold, threshold)).toBe(false)
     })
   })
 })

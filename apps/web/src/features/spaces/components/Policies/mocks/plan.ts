@@ -4,7 +4,7 @@ import type { PolicyLock } from '@safe-global/views/features/spaces/components/P
 export const mockStarterPlan: Omit<PolicyLock, 'onUpgrade'> = {
   planName: 'Starter',
   workspaceName: 'Acme Inc',
-  lockedPolicies: ['spending-limit', 'proposer'],
+  lockedPolicies: ['spending-limit', 'proposer', 'recipient-allowlist'],
   accountCounts: {
     'spending-limit': { applied: 0, total: 6 },
     proposer: { applied: 0, total: 6 },

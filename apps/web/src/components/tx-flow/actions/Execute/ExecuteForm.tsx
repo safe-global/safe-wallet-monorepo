@@ -144,7 +144,7 @@ export const ExecuteForm = ({
     } catch (_err) {
       const err = asError(_err)
       const refusal = getGasPaymentRefusal(err, gasPayer)
-      if (isWalletRejection(err)) {
+      if (isWalletRejection(_err)) {
         setIsRejectedByUser(true)
       } else if (err instanceof RelaySimulationError) {
         setRelaySimError(err)

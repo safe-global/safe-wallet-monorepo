@@ -2,7 +2,7 @@ import type { DelegationOrigin } from '@/features/proposers/types'
 import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
+import { parseDelegation, parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
@@ -76,13 +76,13 @@ export async function createDelegationMessage(
       // Find the existing message for this delegate
       const existingMessage = messagesResult.results?.find((msg) => {
         if (msg.type !== 'MESSAGE') return false
-        const msgOrigin = parseDelegationOrigin(msg.origin)
+        const msgDelegation = parseDelegation(msg)
         const msgDelegate = (msg.message as { message?: { delegateAddress?: string } })?.message?.delegateAddress
-        return sameAddress(msgDelegate, typedDataDelegate) && msgOrigin !== null
+        return sameAddress(msgDelegate, typedDataDelegate) && msgDelegation !== null
       })
 
       if (existingMessage && existingMessage.type === 'MESSAGE') {
-        const existingAction = parseDelegationOrigin(existingMessage.origin)?.action
+        const existingAction = parseDelegation(existingMessage)?.action
 
         if (existingAction === requestedAction) {
           // Same action - confirm the existing message instead

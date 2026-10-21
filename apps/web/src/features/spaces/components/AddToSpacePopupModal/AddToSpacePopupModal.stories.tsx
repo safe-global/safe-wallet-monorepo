@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import { AddToSpacePopupModal } from './AddToSpacePopupModal'
 
 const meta = {

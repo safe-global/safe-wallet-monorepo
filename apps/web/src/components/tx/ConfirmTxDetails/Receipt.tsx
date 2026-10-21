@@ -156,7 +156,7 @@ export const Receipt = ({
 
                       <Typography
                         variant="paragraph-small"
-                        className="w-full [&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start"
+                        className="w-full text-right [&>*]:justify-end [&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start"
                       >
                         {toAddress}
                       </Typography>

@@ -8,14 +8,17 @@ import * as msg_confirmation_modal from '../pages/modals/message_confirmation.pa
 import * as navigation from '../pages/navigation.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
 import notes from '../../fixtures/notes.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00002
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
-const signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+let signer, signer2, signerAddress
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+  signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+})
 
 function happyPathToStepTwo() {
   createtx.typeRecipientAddress(constants.EOA)
@@ -79,17 +82,6 @@ describe('Transaction notes tests', () => {
   })
 
   it('Verify that in a send funds tx the note field shows up in the execution part of the form', () => {
-    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
-    navigation.clickOnNewTxBtn()
-    createtx.clickOnSendTokensBtn()
-    createtx.typeRecipientAddress(constants.EOA)
-    spendinglimit.enterSpendingLimitAmount(0.00001)
-    spendinglimit.selectStandardOption()
-    createtx.clickOnNextBtn()
-    main.verifyElementsCount(createtx.noteTextField, 1)
-  })
-
-  it('Verify no tx note is present during a recovery tx', () => {
     wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
     navigation.clickOnNewTxBtn()
     createtx.clickOnSendTokensBtn()

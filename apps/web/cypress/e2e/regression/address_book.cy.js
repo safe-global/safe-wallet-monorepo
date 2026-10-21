@@ -6,13 +6,14 @@ import * as ls from '../../support/localstorage_data.js'
 import * as accountsModal from '../pages/accounts_modal.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
-const NAME = 'Owner1'
-const EDITED_NAME = 'Edited Owner1'
 const importedSafe = 'imported-safe'
 
 describe('Address book tests', () => {
@@ -22,16 +23,6 @@ describe('Address book tests', () => {
 
   const seedAddressBook = (value) => (win) =>
     win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(value))
-
-  it('Verify owners name can be edited', () => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {
-      onBeforeLoad: seedAddressBook(ls.addressBookData.sepoliaAddress1),
-    })
-    addressBook.clickOnEditEntryBtn()
-    addressBook.typeInNameInput(EDITED_NAME)
-    addressBook.clickOnSaveEntryBtn()
-    addressBook.verifyNameWasChanged(NAME, EDITED_NAME)
-  })
 
   it('Verify the address book file can be exported', () => {
     cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, {

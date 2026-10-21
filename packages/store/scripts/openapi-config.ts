@@ -99,6 +99,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/entitlements.ts': {
       filterEndpoints: [/^entitlements/],
     },
+    '../src/gateway/AUTO_GENERATED/safenet.ts': {
+      filterEndpoints: [/^safenetChecks/],
+    },
   },
 }
 

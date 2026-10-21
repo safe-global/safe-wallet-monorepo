@@ -12,11 +12,12 @@ import { fixtureGetters } from '../../support/fixture.js'
 export const inputCurrencyInput = '[id="input-currency-input"]'
 export const outputCurrencyInput = '[id="output-currency-input"]'
 const tokenList = '[id="tokens-list"]'
+const currencySelectBtn = '.open-currency-select-button'
 export const swapBtn = '[id="swap-button"]'
 const exceedFeesChkbox = 'input[id="fees-exceed-checkbox"]'
 const settingsBtn = 'button[id="open-settings-dialog-button"]'
 const settingsBtnTwap = 'button[id^="menu-button--menu"]'
-export const assetsSwapBtn = '[data-testid="swap-btn"]'
+const assetsSwapBtn = '[data-testid="swap-btn"]'
 export const dashboardSwapBtn = '[data-testid="overview-swap-btn"]'
 export const customRecipient = 'div[id="recipient"]'
 const recipientToggle = 'span[id="toggle-recipient-mode-button"]'
@@ -365,29 +366,31 @@ export function verifySelectedInputCurrancy(option) {
   })
 }
 
-function selectCurrency(inputSelector, option) {
-  cy.get(inputSelector).within(() => {
-    cy.get('button')
-      .eq(0)
-      .invoke('text')
-      .then(($value) => {
-        cy.log('*** Currency value ' + $value)
-        if (!$value.includes(option)) {
-          cy.log('*** Currency value is different from specified')
-          cy.get('button').eq(0).trigger('mouseover').trigger('click')
-          cy.wrap(true).as('isAction')
-        } else {
-          cy.wrap(false).as('isAction')
-        }
-      })
-  })
+const TOKEN_LIST_OPEN_MS = 10000
+const TOKEN_LIST_OPEN_ATTEMPTS = 3
 
-  cy.get('@isAction').then((isAction) => {
-    if (isAction) {
-      cy.log('*** Clicking on token option')
+function openTokenList(inputSelector, attemptsLeft = TOKEN_LIST_OPEN_ATTEMPTS) {
+  cy.get(inputSelector).find(currencySelectBtn).trigger('mouseover').trigger('click')
+  cy.root().then(($root) =>
+    main
+      .pollUntil(() => $root.find(tokenList).length > 0, TOKEN_LIST_OPEN_MS)
+      .then((isOpen) => {
+        if (isOpen) return
+        expect(attemptsLeft, 'attempts left to open the token list').to.be.greaterThan(1)
+        openTokenList(inputSelector, attemptsLeft - 1)
+      }),
+  )
+}
+
+function selectCurrency(inputSelector, option) {
+  cy.get(inputSelector)
+    .find(currencySelectBtn)
+    .invoke('text')
+    .then((currentCurrency) => {
+      if (currentCurrency.includes(option)) return
+      openTokenList(inputSelector)
       cy.get(tokenList).find('span').contains(option).click()
-    }
-  })
+    })
 }
 
 export function selectInputCurrency(option) {

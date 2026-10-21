@@ -7,9 +7,6 @@ const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
 const closePreviewWindowBtn = 'button[aria-label*="Close"][aria-label*="preview"]'
 export const contractMethodIndex = '[name="contractMethodIndex"]'
-export const saveToLibraryBtn = 'button[aria-label="Save to Library"]'
-export const downloadBatchBtn = 'button[aria-label="Download batch"]'
-export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
@@ -35,34 +32,15 @@ export const enterAddressStr = /enter address or ens name/i
 export const addTransactionStr = /add new transaction/i
 export const createBatchStr = /create batch/i
 export const sendBatchStr = /send batch/i
-export const transactionDetailsStr = /transaction details/i
-export const addOwnerWithThreshold = /add signer with threshold/i
-export const enterABIStr = /Enter ABI/i
-export const toAddressStr = /to address/i
-export const tokenAmount = /ETH value */i
-export const dataStr = /data */i
-export const clearTransactionListStr = /Clear transaction list?/i
-export const confirmClearTransactionListStr = /Yes, clear/i
-export const cancelBtnStr = 'Cancel'
-export const confirmDeleteBtnStr = 'Yes, delete'
-export const backBtnStr = /Back/i
-export const simulateBtnStr = /Simulate/i
-export const reviewAndConfirmStr = /Review and confirm/i
+// The ABI field misses the ABI when keystrokes come with no delay (the Cypress 16 default).
 export const backToTransactionStr = /Back to Transaction Creation/i
-export const batchNameStr = /Batch name/i
-export const transactionLibraryStr = /Your transaction library/i
-export const noSavedBatchesStr = /You don't have any saved batches./i
-export const keepProxiABIStr = /Keep Proxy ABI/i
 export const selectAllRowsChbxStr = /Select All Rows checkbox/i
 export const selectRowChbxStr = /Select Row checkbox/i
 export const recipientStr = /recipient/i
 export const validRecipientAddressStr = /please enter a valid recipient address/i
 export const contractMethodSelector = 'input[id="contract-method-selector"]'
 export const testAddressValue2 = 'testAddressValue'
-export const testBooleanValue = 'testBooleanValue'
-export const testFallback = 'fallback'
 export const cowFallback = 'setFallbackHandler'
-export const customData = 'Custom hex data'
 export const testBooleanValue1 = '1 testBooleanValue'
 export const testBooleanValue2 = '2 testBooleanValue'
 export const testBooleanValue3 = '3 testBooleanValue'
@@ -76,29 +54,17 @@ export const nativeTransfer1 = /1 Send.*ETH to.*/
 export const testNativeTransfer = 'native transfer'
 
 export const newValueBool = 'newValue(bool):'
-export const ownerAddressStr = 'signer (address)'
-export const ownerAddressStr2 = 'signer(address)'
-export const thresholdStr = '_threshold (uint256) *'
-export const thresholdStr2 = '_threshold(uint256):'
 
 const appNotSupportedMsg = "The app doesn't support Safe App functionality"
-export const changedPropertiesStr = 'This batch contains some changed properties since you saved or downloaded it'
-export const anotherChainStr = 'This batch is from another Chain (1)!'
 export const useImplementationABI = 'Use Implementation ABI'
-export const addressNotValidStr = 'The address is not valid'
 export const transferEverythingStr = 'Transfer everything'
 export const noTokensSelectedStr = 'No tokens selected'
 export const reviewConfirmStr = 'Review and Confirm'
-export const requiredStr = 'Required'
-export const e3eTestStr = 'E2E test'
-export const createBtnStr = 'Create'
-export const warningStr = 'Warning'
-export const transferStr = 'Transfer'
-export const successStr = 'Success'
-export const failedStr = 'Failed'
 const blindSigningStr = 'This request involves blind signing'
 const enableBlindSigningStr = 'Enable blind signing'
 const blindSigningStr2 = 'blind signing'
+const blindSigningAllowedStr = 'Proceed with caution.'
+const blindSigningBlockedStr = 'If you wish to proceed, you must first'
 const signBtnStr = 'Sign'
 
 export const dummyTxStr = 'Trigger dummy tx (safe.txs.send)'
@@ -120,7 +86,6 @@ export const newAddressValueStr2 = 'newValue(address)'
 export const transactiobUilderHeadlinePreview = 'Transaction Builder'
 export const availableNetworksPreview = 'Available networks'
 export const connecttextPreview = 'Compose custom contract interactions and batch them into a single transaction'
-export const AddressEmptyCodeStr = 'AddressEmptyCode'
 export const gridItem = '[data-testid="app-permissions-item"]'
 export const linkNames = {
   wcLink: /Open WalletConnect/i,
@@ -129,9 +94,6 @@ export const linkNames = {
 const featuredAppsStr = /featured apps/i
 const pinnedAppsStr = 'My pinned apps'
 const pinnedAppsStrR = /my pinned apps/i
-
-export const abi =
-  '[{"inputs":[{"internalType":"address","name":"_singleton","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"stateMutability":"payable","type":"fallback"},{"inputs":[{"internalType":"address","name":"target","type":"address"}],"name":"AddressEmptyCode","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]'
 
 export const permissionCheckboxes = {
   camera: 'input[name="camera"]',
@@ -167,12 +129,10 @@ export function triggetOffChainTx() {
   cy.contains(dummyTxStr).click()
 }
 
-export function verifyBlindSigningEnabled(option) {
-  if (option) {
-    cy.contains(blindSigningStr).should('be.visible')
-  } else {
-    cy.contains(blindSigningStr).should('not.exist')
-  }
+// The warning shows in both states: blocking while the setting is off, a caution once it is on
+export function verifyBlindSigningWarning(settingEnabled) {
+  cy.contains(blindSigningStr).should('be.visible')
+  cy.contains(settingEnabled ? blindSigningAllowedStr : blindSigningBlockedStr).should('be.visible')
 }
 
 export function clickOnBlindSigningOption() {
@@ -180,7 +140,9 @@ export function clickOnBlindSigningOption() {
   // Navigating away from the open message flow asks to discard it. This used to be a
   // native confirm() that Cypress auto-accepted; the themed dialog needs a real click.
   cy.contains('button', 'Discard').click()
-  cy.contains(enableBlindSigningStr).click()
+  cy.contains('label', enableBlindSigningStr).parent().find('[role="checkbox"]').as('blindSigning')
+  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'false').click()
+  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'true')
 }
 
 export function triggetSignMsg() {
@@ -216,7 +178,6 @@ export function clickOnApp(app) {
   // link covering the card, so target that link directly. An app can render two cards
   // (featured + all apps), so take the first like cy.contains() used to.
   cy.get(`a[aria-label="Open ${app}"]`).first().click()
-  cy.wait(2000)
 }
 
 export function verifyNoAppsTextPresent() {

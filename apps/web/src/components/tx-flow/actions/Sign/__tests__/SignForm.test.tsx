@@ -136,6 +136,50 @@ describe('SignForm', () => {
     })
   })
 
+  it('reports a rejection that the wallet throws as a plain EIP-1193 object as a user rejection', async () => {
+    const setSubmitError = jest.fn()
+    const setIsRejectedByUser = jest.fn()
+
+    const { getByText } = render(
+      <SignForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{
+          ...defaultProps.txActions,
+          signTx: jest.fn().mockRejectedValue({ code: 4001, message: 'User rejected transaction' }),
+        }}
+      />,
+      { setSubmitError, setIsRejectedByUser },
+    )
+
+    fireEvent.click(getByText('Sign'))
+
+    await waitFor(() => expect(setIsRejectedByUser).toHaveBeenCalledWith(true))
+    expect(setSubmitError).not.toHaveBeenCalledWith(expect.any(Error))
+  })
+
+  it('reports any other plain RPC error as a submit error', async () => {
+    const setSubmitError = jest.fn()
+    const setIsRejectedByUser = jest.fn()
+
+    const { getByText } = render(
+      <SignForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{
+          ...defaultProps.txActions,
+          signTx: jest.fn().mockRejectedValue({ code: -32000, message: 'execution reverted' }),
+        }}
+      />,
+      { setSubmitError, setIsRejectedByUser },
+    )
+
+    fireEvent.click(getByText('Sign'))
+
+    await waitFor(() => expect(setSubmitError).toHaveBeenCalledWith(expect.any(Error)))
+    expect(setIsRejectedByUser).not.toHaveBeenCalledWith(true)
+  })
+
   it('closes the flow after signing when no execution follows', async () => {
     const signedTxId = 'multisig_0x1_0x2'
     const continueToExecute = jest.fn()

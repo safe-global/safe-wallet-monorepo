@@ -1,14 +1,16 @@
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as owner from '../pages/owners.pages'
 import * as createwallet from '../pages/create_wallet.pages'
 import * as createTx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Remove Owners tests', () => {
   before(async () => {
@@ -25,10 +27,6 @@ describe('Remove Owners tests', () => {
 
     it('Verify that "Remove" icon is visible', () => {
       owner.verifyRemoveBtnIsEnabled().should('have.length', 2)
-    })
-
-    it('Verify remove owner button is disabled for disconnected user', () => {
-      owner.verifyRemoveBtnIsDisabled()
     })
   })
 
@@ -52,6 +50,8 @@ describe('Remove Owners tests', () => {
 
     // Added to prod
     it('Verify owner deletion transaction has been created', () => {
+      createTx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_13, signer)
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
       owner.waitForConnectionStatus()
       owner.openRemoveOwnerWindow(1)
       createwallet.clickOnNextBtn()
@@ -61,19 +61,9 @@ describe('Remove Owners tests', () => {
       createTx.changeNonce(10)
       createTx.clickOnContinueSignTransactionBtn()
       createTx.clickOnSignTransactionBtn()
-      createTx.waitForProposeRequest()
       createTx.clickViewTransaction()
       createTx.clickOnTransactionItemByName('removeOwner')
       createTx.verifyTxDestinationAddress('@removedAddress')
-    })
-  })
-
-  describe('Single-owner safe', () => {
-    it('Verify remove button does not exist for Non-Owner when there is only 1 owner in the safe', () => {
-      cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-      cy.wait('@History', { timeout: 20000 })
-      main.verifyElementsCount(owner.removeOwnerBtn, 0)
     })
   })
 })

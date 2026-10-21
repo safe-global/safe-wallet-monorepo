@@ -4,13 +4,16 @@ import * as createtx from '../../e2e/pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as tx from '../../e2e/pages/transactions.page'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00002
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 function happyPathToStepTwo() {
   createtx.typeRecipientAddress(constants.EOA)
@@ -26,6 +29,7 @@ describe('Create transactions tests', () => {
 
   // Added to prod
   it('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
+    createtx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_6, signer)
     wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
@@ -34,7 +38,6 @@ describe('Create transactions tests', () => {
     createtx.changeNonce(14)
     cy.wait(1000)
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('sign')
     createtx.clickOnSignTransactionBtn()
     createtx.clickViewTransaction()
     createtx.verifySingleTxPage()
@@ -44,12 +47,14 @@ describe('Create transactions tests', () => {
 
   it('Verify relay is available on tx execution', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
+    createtx.cleanTransactionQueue(safe, signer)
+    tx.mockFreeDailyRelay()
     wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + safe)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     happyPathToStepTwo()
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('execute')
+    createtx.signAndOpenExecuteStep()
     cy.contains(tx.relayRemainingAttemptsStr).should('exist')
   })
 })

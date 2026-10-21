@@ -41,13 +41,13 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifyEmptyTxSection()
   })
 
-  it('[SMOKE] Verify that the last created tx in conflicting tx is showed in the widget', () => {
+  it('Verify that the last created tx in conflicting tx is showed in the widget', () => {
     cy.get(dashboard.pendingTxWidget, { timeout: 30000 }).should('be.visible')
     main.verifyElementsCount(dashboard.pendingTxItem, 1)
     dashboard.verifyDataInPendingTx(txData)
   })
 
-  it('[SMOKE] Verify that tx are displayed correctly in Pending tx section', () => {
+  it('Verify that tx are displayed correctly in Pending tx section', () => {
     cy.intercept('GET', constants.queuedEndpoint).as('getQueuedTransactions')
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_12)
     cy.wait('@getQueuedTransactions')

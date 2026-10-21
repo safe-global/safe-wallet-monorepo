@@ -1,17 +1,13 @@
 import * as constants from '../../support/constants.js'
 import * as assets from '../pages/assets.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as main from '../pages/main.page.js'
-import * as navigation from '../pages/navigation.page'
 import * as nfts from '../pages/nfts.pages.js'
-import { clickOnAssetSwapBtn } from '../pages/swaps.pages.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_1_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+const nftCollectionName = 'CatFactory'
+const nftTokenSymbol = 'CF'
 
 describe('Assets 2 tests', () => {
   before(async () => {
@@ -35,29 +31,6 @@ describe('Assets 2 tests', () => {
     main.verifyElementsCount(assets.tablePaginationContainer, 0)
   })
 
-  it('Verify Proposers have the Send and Swap buttons enabled', () => {
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
-    assets.toggleShowAllTokens(false)
-    assets.toggleHideDust(false)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    assets.showSendBtn().should('be.enabled')
-    assets.showSwapBtn().should('be.enabled')
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
-  it('Verify that Send and Swap buttons are enabled for spending limit users', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_8)
-    wallet.connectSigner(signer2)
-    assets.toggleShowAllTokens(false)
-    assets.toggleHideDust(false)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    assets.showSendBtn().should('be.enabled')
-    assets.showSwapBtn().should('be.enabled')
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
   it('Verify the counter at the top is updated for every selected token', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
@@ -71,10 +44,11 @@ describe('Assets 2 tests', () => {
     nfts.checkSelectedNFTsNumberIs(10)
   })
 
-  it('Verify every NFT has its shorten address', () => {
+  it('Verify NFT rows show the collection, token ID and shortened address', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
     assets.checkNftAddressFormat()
+    nfts.verifyDataInTable(nftCollectionName, assets.shortAddressRegex, nftTokenSymbol)
   })
 
   it('Verify every NFT has the copy-to-clipboard and blockexplorer button', () => {

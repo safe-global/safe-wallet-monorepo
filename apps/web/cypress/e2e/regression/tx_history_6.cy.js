@@ -1,6 +1,6 @@
-import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as createTx from '../pages/create_tx.pages.js'
+import * as txs from '../pages/transactions.page.js'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
@@ -20,7 +20,7 @@ describe('Tx history tests 6', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
+    txs.visitTxHistoryInSinglePage(staticSafes.SEP_STATIC_SAFE_7)
   })
 
   // Token receipt
