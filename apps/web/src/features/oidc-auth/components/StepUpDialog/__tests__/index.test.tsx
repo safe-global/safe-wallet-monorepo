@@ -64,9 +64,11 @@ describe('StepUpDialog', () => {
     expect(screen.queryByTestId('step-up-dialog')).not.toBeInTheDocument()
   })
 
-  it('opens the popup on Verify and resolves true once the popup reports an elevated session', async () => {
+  it('opens the popup on Next and resolves true once the popup reports an elevated session', async () => {
     const pending = openDialog()
 
+    expect(screen.getByRole('alertdialog', { name: 'Two-factor authentication required' })).toBeInTheDocument()
+    expect(screen.getByTestId('step-up-verify-button')).toHaveTextContent('Next')
     fireEvent.click(screen.getByTestId('step-up-verify-button'))
     expect(window.open).toHaveBeenCalledTimes(1)
     expect(screen.getByText(/Complete the verification in the new window/)).toBeInTheDocument()

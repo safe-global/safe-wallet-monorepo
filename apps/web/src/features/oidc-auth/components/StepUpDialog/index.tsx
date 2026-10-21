@@ -24,8 +24,8 @@ import { listenForStepUp, openStepUpPopup, startStepUp } from '../../utils/stepU
 
 const CONTENT: Record<Exclude<StepUpStatus, 'idle'>, { description: string; confirmLabel: string }> = {
   prompt: {
-    description: 'This action needs a recent check of your second factor. The verification opens in a new window.',
-    confirmLabel: 'Verify',
+    description: 'Enter a code from your authenticator app to continue. It opens in a new window.',
+    confirmLabel: 'Next',
   },
   waiting: {
     description: 'Complete the verification in the new window. This dialog closes when you finish.',
@@ -75,7 +75,7 @@ const StepUpDialog = (): ReactElement | null => {
           <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
             <ShieldCheck className="size-5" />
           </div>
-          <AlertDialogTitle>Verify your identity</AlertDialogTitle>
+          <AlertDialogTitle>Two-factor authentication required</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
 

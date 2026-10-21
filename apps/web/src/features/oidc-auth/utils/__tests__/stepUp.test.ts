@@ -67,6 +67,25 @@ describe('openStepUpPopup', () => {
     expect(target).toBe(STEP_UP_CHANNEL)
   })
 
+  it('should centre the popup over the current window', () => {
+    // jsdom defines these as plain values, not getters, so they are replaced and restored by hand.
+    const geometry = { screenX: 100, screenY: 50, outerWidth: 1280, outerHeight: 800 }
+    const originals = Object.keys(geometry).map((key) => [key, Object.getOwnPropertyDescriptor(window, key)] as const)
+    Object.entries(geometry).forEach(([key, value]) =>
+      Object.defineProperty(window, key, { value, configurable: true }),
+    )
+    const open = jest.spyOn(window, 'open').mockReturnValue(null)
+
+    try {
+      openStepUpPopup()
+      expect(open.mock.calls[0][2]).toBe('popup,width=480,height=720,left=500,top=90')
+    } finally {
+      originals.forEach(([key, descriptor]) =>
+        descriptor ? Object.defineProperty(window, key, descriptor) : Reflect.deleteProperty(window, key),
+      )
+    }
+  })
+
   it('should return null when the browser blocks the popup', () => {
     jest.spyOn(window, 'open').mockReturnValue(null)
 

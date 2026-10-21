@@ -17,7 +17,7 @@ async function markPage(page: Page): Promise<void> {
   await page.evaluate((marker) => Object.assign(window, { [marker]: true }), PAGE_MARKER)
 }
 
-/** Clicks Verify in the dialog that the last action opened, and returns the popup. */
+/** Clicks Next in the dialog that the last action opened, and returns the popup. */
 export async function clickVerify(page: Page): Promise<Page> {
   await expect(stepUpDialog(page)).toBeVisible()
   await markPage(page)
