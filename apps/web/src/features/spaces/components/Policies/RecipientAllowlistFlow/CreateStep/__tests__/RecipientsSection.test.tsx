@@ -159,6 +159,16 @@ describe('RecipientsSection', () => {
     expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [listed] })
   })
 
+  it('selects a deselected recipient again when it is added again', async () => {
+    const listed = recipient({ address: DRAFT_ADDRESS, selected: false })
+    const { user, onChange, values } = setup([listed])
+
+    await user.click(screen.getByRole('button', { name: 'Add a recipient' }))
+    await user.click(screen.getByRole('button', { name: 'confirm draft' }))
+
+    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [{ ...listed, name: 'Dave', selected: true }] })
+  })
+
   it('shows the callout and dismisses it', async () => {
     const { user, onDismissCallout } = setup([recipient({ name: 'Alice' })])
 
