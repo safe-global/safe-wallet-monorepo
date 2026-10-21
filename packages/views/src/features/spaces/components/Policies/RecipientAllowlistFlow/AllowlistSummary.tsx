@@ -8,7 +8,7 @@ import {
   SUMMARY_NO_ACCOUNT_DESCRIPTION,
   SUMMARY_NO_ACCOUNT_TITLE,
 } from './constants'
-import AllowlistAlert from './AllowlistAlert'
+import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 
 type AllowlistSummaryProps = {
   accountLabel?: string
@@ -36,7 +36,7 @@ const AllowlistSummary = ({ accountLabel, tokenSymbols, recipientNames }: Allowl
       : `To create an allowlist policy on ${accountLabel}, select at least one token and one recipient.`
 
   return (
-    <AllowlistAlert
+    <StatusAlert
       tone="info"
       aria-live="polite"
       title={title}

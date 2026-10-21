@@ -18,5 +18,3 @@ export const SUMMARY_NO_ACCOUNT_DESCRIPTION = 'Then choose which tokens it can s
 export const SUMMARY_DESCRIPTION = 'Anything you leave out will be blocked.'
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
 export const SUMMARY_DETAILS = `These changes take effect as soon as this transaction is executed. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
-
-export const CALLOUT_DISMISS_LABEL = 'Dismiss'

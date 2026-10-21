@@ -4,12 +4,13 @@ import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/componen
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { cn } from '@safe-global/views/utils/cn'
-import { CALLOUT_DISMISS_LABEL } from './constants'
 
-export type AllowlistAlertTone = 'error' | 'warning' | 'success' | 'info' | 'loading'
+const DISMISS_LABEL = 'Dismiss'
+
+export type StatusAlertTone = 'error' | 'warning' | 'success' | 'info' | 'loading'
 
 const TONE_ICONS: Record<
-  AllowlistAlertTone,
+  StatusAlertTone,
   { Icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>; className: string }
 > = {
   error: { Icon: CircleAlert, className: 'text-destructive' },
@@ -19,7 +20,7 @@ const TONE_ICONS: Record<
   loading: { Icon: Spinner, className: 'text-muted-foreground' },
 }
 
-const TONE_SURFACES: Record<AllowlistAlertTone, string> = {
+const TONE_SURFACES: Record<StatusAlertTone, string> = {
   error: 'bg-alert-error-surface border-alert-error-border',
   warning: 'bg-alert-warning-surface border-alert-warning-border',
   success: 'bg-alert-success-surface border-alert-success-border',
@@ -27,8 +28,8 @@ const TONE_SURFACES: Record<AllowlistAlertTone, string> = {
   loading: 'bg-muted border-border',
 }
 
-type AllowlistAlertProps = {
-  tone: AllowlistAlertTone
+export type StatusAlertProps = {
+  tone: StatusAlertTone
   title?: ReactNode
   description?: ReactNode
   /** Beside the text, e.g. a button leading to where the problem is fixed. */
@@ -39,8 +40,8 @@ type AllowlistAlertProps = {
   'data-testid'?: string
 }
 
-/** The policy flows' outlined banner: a tone icon, the text, and an optional dismiss or action. */
-const AllowlistAlert = ({
+/** An outlined banner: a tone icon, the text, and an optional dismiss or action. */
+const StatusAlert = ({
   tone,
   title,
   description,
@@ -49,7 +50,7 @@ const AllowlistAlert = ({
   className,
   'aria-live': ariaLive,
   'data-testid': testId,
-}: AllowlistAlertProps): ReactElement => {
+}: StatusAlertProps): ReactElement => {
   const { Icon, className: iconClassName } = TONE_ICONS[tone]
 
   return (
@@ -67,13 +68,7 @@ const AllowlistAlert = ({
         </div>
 
         {onDismiss && (
-          <Button
-            type="button"
-            variant="ghost-muted"
-            size="icon-xs"
-            aria-label={CALLOUT_DISMISS_LABEL}
-            onClick={onDismiss}
-          >
+          <Button type="button" variant="ghost-muted" size="icon-xs" aria-label={DISMISS_LABEL} onClick={onDismiss}>
             <X />
           </Button>
         )}
@@ -84,4 +79,4 @@ const AllowlistAlert = ({
   )
 }
 
-export default AllowlistAlert
+export default StatusAlert
