@@ -23,7 +23,7 @@ const Identicon = ({ address, size = 40 }: IdenticonProps): ReactElement => {
         width: `${size}px`,
         height: `${size}px`,
       }
-    } catch (e) {
+    } catch {
       return null
     }
   }, [address, size])

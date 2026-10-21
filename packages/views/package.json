@@ -16,6 +16,7 @@
     "@safe-global/store": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
     "@safe-global/utils": "workspace:^",
+    "blo": "^1.1.1",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

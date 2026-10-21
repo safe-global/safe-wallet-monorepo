@@ -13984,6 +13984,7 @@ __metadata:
     "@safe-global/store": "workspace:^"
     "@safe-global/types-kit": "npm:^4.0.1"
     "@safe-global/utils": "workspace:^"
+    blo: "npm:^1.1.1"
     class-variance-authority: "npm:^0.7.1"
     classnames: "npm:^2.5.1"
     clsx: "npm:^2.1.1"
