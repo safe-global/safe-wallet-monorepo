@@ -174,7 +174,7 @@ yarn workspace @safe-global/web storybook
 ## Project Notes
 
 - **Components Path**: `packages/views/src/components/ui/`
-- **Utility Path**: `apps/web/src/utils/cn.ts`
+- **Utility Path**: `packages/views/src/utils/cn.ts`
 - **Icon Library**: `lucide-react`
 
 See [reference.md](reference.md) for detailed component mappings and patterns.
