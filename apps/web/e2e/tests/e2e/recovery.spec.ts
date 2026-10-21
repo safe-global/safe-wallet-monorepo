@@ -134,7 +134,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     const recovery = new RecoveryPage(safePage)
     const review = new TxReviewPage(safePage)
     await safePage.goto(`${ROUTES.transactionsQueue}?safe=${safe.prefixedAddress}`)
-    await recovery.goToQueueButton.click()
+    await recovery.goToQueue()
     await recovery.cancel()
     await review.sign()
     await review.execute()
@@ -166,7 +166,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
 
     const recovery = new RecoveryPage(safePage)
     await safePage.goto(`${ROUTES.transactionsQueue}?safe=${safe.prefixedAddress}`)
-    await recovery.goToQueueButton.click()
+    await recovery.goToQueue()
     await recovery.execute()
 
     await expect
