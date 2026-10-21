@@ -47,15 +47,22 @@ If missing, ask:
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
 
-**Build it as views**, so developers can reuse the parts in the app as they are:
+**Build it as views.** Aim for code a developer can move into the app without reading it line by line: nearly every file is pure markup, and the little logic the prototype needs sits in one place.
 
 - Before writing new markup, look in `packages/views` for a view that already renders it, and reuse it.
-- Split the screen into small components, one per section (for example `SummaryCard`, `ChecksList`).
-- Each component gets everything it shows through props: data, labels and callbacks such as `onConfirm`. It only returns markup. Local UI state (`useState` for open/closed or the selected tab) is fine.
-- Keep the sample data in `index.tsx` or the story, never inside the sections.
+- Split the screen into small components, one per section (for example `SummaryCard`, `ChecksList`), each in its own file.
+- A section only turns props into markup. In a section, write only:
+  - markup and shadcn components;
+  - layout classes and variants;
+  - copy;
+  - `items.map(...)` over a prop;
+  - `cond && …` or `a ? b : c` on a prop.
+- A section does not compute, format, sort, filter or decide anything. Pass it the finished values: `"1,250.00 USDC"`, not a number to format. Handlers only call the callback prop they were given (`onClick={onConfirm}`).
+- The only state a section may hold is what the eye sees and nothing else reads: open or closed, hovered, the selected tab (`useState`). No effects, timers, `window` or `document`.
+- Everything else lives in `index.tsx`: the sample data, the prototype's state (the current step, which item is selected) and the callbacks that change it. `index.tsx` passes the results down as props. It is the only file a developer needs to read closely.
 - Do not import from the app (`@/…`), the store, hooks that fetch data, or analytics. The package's lint rejects them.
 
-This only changes where the code lives. The user sees the same Storybook story, so there is nothing to explain to them.
+If the prototype truly needs more logic in a section, add it; these are defaults, not hard limits. This only changes how the code is organised: the user sees the same Storybook story, so there is nothing to explain to them.
 
 **Styling Guidelines:**
 
