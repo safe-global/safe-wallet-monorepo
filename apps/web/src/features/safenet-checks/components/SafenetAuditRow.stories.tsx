@@ -81,5 +81,5 @@ export const MaliciousUnrecognised = story(
 )
 export const TimedOut = story(
   rejectedSnapshot(SAFENET_EXAMPLE_VOTES.openDispute, CheckStatus.TIMED_OUT),
-  'TIMED_OUT, example #8. Loading and UNAVAILABLE render no row.',
+  'TIMED_OUT, example #8. Loading, NO_CHECK and WINDOW_UNCERTAIN render no row.',
 )

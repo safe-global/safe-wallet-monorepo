@@ -7,8 +7,8 @@ import {
   type PublicCheckStatus,
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { STATUS_PRESENTATION } from '../statusPresentation'
+import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
+import { STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } from '../statusPresentation'
 import { useSafenetLinks } from '../useSafenetLinks'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
 
@@ -30,6 +30,13 @@ const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
   [CheckStatus.MALICIOUS]: 'var(--color-error-main)',
   [CheckStatus.TIMED_OUT]: 'var(--color-warning-main)',
 }
+
+// Neutral in dark mode; light mode keeps the sibling rows' default color.
+const UNAVAILABLE_STEP_COLOR = 'var(--color-text-secondary)'
+
+// The row appears only once the chain read resolves; the entrance animation
+// softens the late insert instead of popping it in one frame.
+const STEP_ENTRANCE = 'animate-in fade-in slide-in-from-top-1 duration-300'
 
 export type SafenetAuditRowProps = {
   safeTxHash: string | undefined
@@ -84,9 +91,7 @@ export const SafenetAuditRowView = ({
   )
 
   return (
-    // The row appears only once the chain read resolves; the entrance
-    // animation softens the late insert instead of popping it in one frame.
-    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
+    <div className={STEP_ENTRANCE}>
       <AuditRow
         label={label}
         actionType={STEP_ICON[publicStatus]}
@@ -100,7 +105,32 @@ export const SafenetAuditRowView = ({
   )
 }
 
-/** Renders nothing until a check has been observed — most transactions never had one. */
+export type SafenetUnavailableAuditRowViewProps = {
+  reason: ShownUnavailableReason
+  isLast?: boolean
+}
+
+/** Audit-log step for a check that could not be read: no verdict, no date, no link. */
+export const SafenetUnavailableAuditRowView = ({
+  reason,
+  isLast,
+}: SafenetUnavailableAuditRowViewProps): ReactElement => {
+  const isDarkMode = useDarkMode()
+
+  return (
+    <div className={STEP_ENTRANCE}>
+      <AuditRow
+        label={UNAVAILABLE_PRESENTATION[reason].label}
+        actionType="pending"
+        iconColor={isDarkMode ? UNAVAILABLE_STEP_COLOR : undefined}
+        actor="Safenet"
+        isLast={isLast}
+      />
+    </div>
+  )
+}
+
+/** Renders nothing until a check is observed or its read fails — most transactions never had one. */
 export const SafenetAuditRow = ({
   safeTxHash,
   chainId,
@@ -109,6 +139,9 @@ export const SafenetAuditRow = ({
 }: SafenetAuditRowProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
   if (!safeTxHash || !display) return null
+  if (display.publicStatus === CheckStatus.UNAVAILABLE) {
+    return <SafenetUnavailableAuditRowView reason={display.unavailableReason} isLast={isLast} />
+  }
 
   return (
     <SafenetAuditRowView

@@ -43,15 +43,30 @@ describe('SafenetAuditRow', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when no check was observed (UNAVAILABLE)', () => {
-    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.UNAVAILABLE })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.UNAVAILABLE, publicStatus: CheckStatus.UNAVAILABLE }),
-    )
+  it.each([
+    ['NO_CHECK', 'proven'],
+    ['WINDOW_UNCERTAIN', 'heuristic'],
+  ] as const)('renders nothing when the read found no check: %s', (unavailableReason, windowCoverage) => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.UNAVAILABLE,
+      windowCoverage,
+    })
+    mockUseSafenetCheck.mockReturnValue(view({ snapshot, unavailableReason }))
 
     const { container } = render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it("renders a neutral step by Safenet when Safenet's status could not be read", () => {
+    mockUseSafenetCheck.mockReturnValue(view({ unavailableReason: 'READ_FAILED' }))
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
+
+    expect(screen.getByText("Couldn't read Safenet status")).toBeInTheDocument()
+    expect(screen.getByText('By Safenet')).toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-explorer-link')).not.toBeInTheDocument()
   })
 
   it('renders a Simulating step by Safenet while the check is in flight', () => {
