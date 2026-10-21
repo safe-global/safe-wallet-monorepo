@@ -10,7 +10,7 @@ import {
   type AddPolicyOption,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 
-const SINGLE_COLUMN_MAX = 3
+const SINGLE_COLUMN_MAX = 4
 
 export interface AddPolicyDialogProps {
   open: boolean
