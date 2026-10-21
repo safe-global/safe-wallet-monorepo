@@ -10,11 +10,11 @@ import { hasSelectableSafeAccount, markAllowlistIneligibility } from '../safeAcc
 const SAFE_A = faker.finance.ethereumAddress()
 const SAFE_B = faker.finance.ethereumAddress()
 const SEPOLIA = '11155111'
-const MAINNET = '1'
+const GNOSIS_CHAIN = '100'
 
 const CHAINS = new Map([
   [SEPOLIA, { chainId: SEPOLIA, features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] }],
-  [MAINNET, { chainId: MAINNET, features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] }],
+  [GNOSIS_CHAIN, { chainId: GNOSIS_CHAIN, features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] }],
 ])
 
 const option = (chainId: string, address = SAFE_A, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
@@ -36,7 +36,7 @@ describe('markAllowlistIneligibility', () => {
   })
 
   it('disables a Safe on a chain without a policy guard deployment', () => {
-    const safe = option(MAINNET)
+    const safe = option(GNOSIS_CHAIN)
 
     const [row] = markAllowlistIneligibility([safe], CHAINS, versions([[safe, '1.5.0']]))
 
@@ -84,10 +84,10 @@ describe('markAllowlistIneligibility', () => {
 
   it('keeps a multichain group together with only its ineligible chains marked', () => {
     const sepolia = option(SEPOLIA)
-    const mainnet = option(MAINNET)
+    const gnosisChain = option(GNOSIS_CHAIN)
 
     const [group] = markAllowlistIneligibility(
-      groupSafeAccounts([sepolia, mainnet]),
+      groupSafeAccounts([sepolia, gnosisChain]),
       CHAINS,
       versions([[sepolia, '1.5.0']]),
     )
@@ -95,7 +95,7 @@ describe('markAllowlistIneligibility', () => {
     expect(
       isSafeAccountGroup(group) && group.accounts.map(({ chainId, ineligibleReason }) => [chainId, ineligibleReason]),
     ).toEqual([
-      [MAINNET, 'no-recipient-allowlists'],
+      [GNOSIS_CHAIN, 'no-recipient-allowlists'],
       [SEPOLIA, undefined],
     ])
   })
@@ -109,7 +109,7 @@ describe('hasSelectableSafeAccount', () => {
   })
 
   it('is false when every Safe is disabled', () => {
-    const entries = [option(MAINNET, SAFE_A, { ineligibleReason: 'no-recipient-allowlists' })]
+    const entries = [option(GNOSIS_CHAIN, SAFE_A, { ineligibleReason: 'no-recipient-allowlists' })]
 
     expect(hasSelectableSafeAccount(entries)).toBe(false)
   })
