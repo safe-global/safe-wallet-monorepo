@@ -1,19 +1,16 @@
 import type { ReactElement } from 'react'
-import NextLink from 'next/link'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Link } from '@safe-global/views/components/ui/link'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { AppRoutes } from '@/config/routes'
-import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
-import { AccountIdentity } from '../../components/AccountIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
-import GuardStatusBanner from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
+import GuardStatusBanner, {
+  type GuardStatus,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
+import AllowlistAlert from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistAlert'
 import {
   NESTED_SAFES_NOTICE_TITLE,
   getNestedSafesNoticeText,
@@ -24,12 +21,12 @@ import {
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
-const renderGuardAddress = (address: string) => <AccountIdentity address={address} showCopyButton />
+/** The guard states an allowlist can be set up on without a warning, so they get no banner. */
+const SILENT_GUARD_STATES: GuardStatus['status'][] = ['none', 'known']
 
 const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
   const { setScope } = useSafeScopeControls()
-  const spaceId = useUrlSpaceId()
   const scopeKey = useSafeScope()?.scopeKey
 
   const selectedSafe = findSafeAccount(accounts, scopeKey)
@@ -40,12 +37,6 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { guard, retry } = useGuardStatus(target)
 
   const isSettled = !isLoading && !isError
-  const settingsHref = selectedSafe?.chain
-    ? withSpaceIdInUrl(
-        `${AppRoutes.settings.modules}?safe=${selectedSafe.chain.shortName}:${selectedSafe.address}`,
-        spaceId,
-      )
-    : undefined
 
   return (
     <TxCard>
@@ -69,24 +60,18 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
         />
 
         {isSettled && hasWallet && !hasSelectableAccount && (
-          <Alert
-            variant="warning"
-            outlined={false}
-            className="*:data-[slot=alert-description]:text-muted-foreground"
+          <AllowlistAlert
+            tone="warning"
+            title={NO_ELIGIBLE_SAFES_TITLE}
+            description={NO_ELIGIBLE_SAFES_DESCRIPTION}
             data-testid="no-eligible-safes"
-          >
-            <AlertSeverityIcon variant="warning" />
-            <AlertTitle>{NO_ELIGIBLE_SAFES_TITLE}</AlertTitle>
-            <AlertDescription>{NO_ELIGIBLE_SAFES_DESCRIPTION}</AlertDescription>
-          </Alert>
+          />
         )}
 
-        {selectedSafe && guard && (
+        {selectedSafe && guard && !SILENT_GUARD_STATES.includes(guard.status) && (
           <GuardStatusBanner
             guard={guard}
             safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
-            settingsLink={settingsHref && <Link render={<NextLink href={settingsHref} />}>Go to Safe settings</Link>}
-            renderAddress={renderGuardAddress}
             onRetry={retry}
           />
         )}
