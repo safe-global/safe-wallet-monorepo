@@ -3,11 +3,14 @@ import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses
 import { RECIPIENT_DUPLICATE_ERROR, RECIPIENT_IS_SAFE_ERROR, RECIPIENT_RESERVED_ERROR } from '../constants'
 import type { AllowlistRecipient, AllowlistRule, RecipientAllowlistFormValues } from '../types'
 
-export const getFormTokenAddresses = (heldTokens: readonly string[], values: RecipientAllowlistFormValues): string[] =>
-  [...heldTokens, ...values.addedTokens].reduce<string[]>(
-    (tokens, token) => (tokens.some((existing) => sameAddress(existing, token)) ? tokens : [...tokens, token]),
+const uniqueAddresses = (addresses: readonly string[]): string[] =>
+  addresses.reduce<string[]>(
+    (unique, address) => (unique.some((existing) => sameAddress(existing, address)) ? unique : [...unique, address]),
     [],
   )
+
+export const getFormTokenAddresses = (heldTokens: readonly string[], values: RecipientAllowlistFormValues): string[] =>
+  uniqueAddresses([...heldTokens, ...values.addedTokens])
 
 export const getAllowedTokenAddresses = (
   heldTokens: readonly string[],
@@ -27,12 +30,12 @@ export const buildAllowlistRules = (
   heldTokens: readonly string[],
   values: RecipientAllowlistFormValues,
 ): AllowlistRule[] => {
-  const recipients = getSelectedRecipients(values).map((recipient) => checksumAddress(recipient.address))
+  const recipients = uniqueAddresses(getSelectedRecipients(values).map(({ address }) => checksumAddress(address)))
   if (recipients.length === 0) return []
 
   return getAllowedTokenAddresses(heldTokens, values).map((token) => ({
     tokenAddress: checksumAddress(token),
-    recipients,
+    recipients: [...recipients],
   }))
 }
 
