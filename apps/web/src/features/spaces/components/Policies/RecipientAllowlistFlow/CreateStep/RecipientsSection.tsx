@@ -20,6 +20,7 @@ import {
   RECIPIENTS_EMPTY_TEXT,
   RECIPIENTS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { addAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
 import type {
   AllowlistRecipient,
   RecipientAllowlistFormValues,
@@ -61,12 +62,8 @@ const RecipientsSection = ({
       ),
     })
 
-  const append = (added: AllowlistRecipient[]) => {
-    const fresh = added.filter(
-      ({ address }) => !recipients.some((recipient) => sameAddress(recipient.address, address)),
-    )
-    onChange({ ...values, recipients: [...recipients, ...fresh] })
-  }
+  const append = (added: AllowlistRecipient[]) =>
+    onChange({ ...values, recipients: addAllowlistRecipients(recipients, added) })
 
   const isInAddressBook = ({ address, fromAddressBook }: AllowlistRecipient) =>
     Boolean(fromAddressBook || (chainId && addressBook.has(address, chainId)))
