@@ -1,4 +1,5 @@
 import type { ColorPalette } from './types'
+import lightPalette from './light'
 
 /**
  * Unified dark mode color palette.
@@ -89,6 +90,8 @@ const darkPalette: ColorPalette = {
     textSecondary: '#A1A3A7',
     textBrand: '#12FF80',
   },
+  // The designs have no dark tag colours yet
+  tag: lightPalette.tag,
 }
 
 export default darkPalette
