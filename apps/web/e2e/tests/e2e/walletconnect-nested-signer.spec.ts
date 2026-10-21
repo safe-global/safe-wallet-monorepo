@@ -100,7 +100,8 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     await childReview.sign()
     await parentReview.sign()
     await parentReview.execute()
-    await parentReview.waitForExecution()
+    // The parent can execute the next request only once it has reloaded its nonce
+    await parentReview.waitForIndexing()
 
     const queue = new TxQueuePage(childPage)
     await queue.goto(pairing.child.prefixedAddress)
