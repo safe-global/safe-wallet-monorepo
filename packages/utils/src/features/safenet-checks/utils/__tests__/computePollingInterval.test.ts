@@ -105,6 +105,53 @@ describe('computePollingInterval', () => {
       expect(computePollingInterval(unavailable)).toBe(0)
     })
 
+    describe('a check requested long after the transaction was created', () => {
+      const NOW = SUBMITTED + 20 * 60_000
+
+      it('polls slowly inside the grace window of the request', () => {
+        expect(
+          computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED, requestedAtMs: NOW - 60_000, nowMs: NOW }),
+        ).toBe(UNAVAILABLE_GRACE_POLL_MS)
+      })
+
+      it('stops without a request', () => {
+        expect(computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED, nowMs: NOW })).toBe(0)
+      })
+
+      it('stops once the request is older than the grace window', () => {
+        expect(
+          computePollingInterval({
+            ...unavailable,
+            submittedAtMs: SUBMITTED,
+            requestedAtMs: NOW - UNAVAILABLE_GRACE_MS,
+            nowMs: NOW,
+          }),
+        ).toBe(0)
+      })
+
+      it('polls from the request even when the submission is stamped in the future', () => {
+        expect(
+          computePollingInterval({
+            ...unavailable,
+            submittedAtMs: NOW + 3_600_000,
+            requestedAtMs: NOW - 60_000,
+            nowMs: NOW,
+          }),
+        ).toBe(UNAVAILABLE_GRACE_POLL_MS)
+      })
+
+      it('stops on a request stamped in the future', () => {
+        expect(
+          computePollingInterval({
+            ...unavailable,
+            submittedAtMs: SUBMITTED,
+            requestedAtMs: NOW + 3_600_000,
+            nowMs: NOW,
+          }),
+        ).toBe(0)
+      })
+    })
+
     it('keeps the grace window while a pinned snapshot is present', () => {
       // NO_CHECK arrives with a snapshot and its head block; the window still
       // applies, since the missing check is what polling waits for.
