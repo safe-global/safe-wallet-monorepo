@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react'
 import { ChevronRight, Info, LockKeyhole, ShieldAlert, ShieldCheck, ShieldEllipsis } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
-import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
@@ -37,6 +36,7 @@ import type { Hypernative } from '../../ScenarioBar'
 import type { Replacement, ReviewLayout } from '../ReviewDrawer'
 import { IdentityRow } from './IdentityRow'
 import { getFlowRows } from './Flow'
+import { getRiskFlags, RiskFlagBadge } from '../../RiskFlag'
 
 const SECTION_TITLES: Record<Proposal['kind']['type'], string> = {
   transfer: 'Transfer',
@@ -82,34 +82,6 @@ export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Prop
       ))}
     </>
   )
-}
-
-// Production shows these chips first in the expanded row. Warnings also get an alert at the top of the drawer.
-const getRiskFlags = (tx: Proposal) => {
-  const { kind } = tx
-  return [
-    tx.proposedBy && tx.signers.length === 0 && (
-      <Badge key="untrusted" variant="destructive">
-        Untrusted transaction
-      </Badge>
-    ),
-    kind.type === 'batch' &&
-      kind.delegateCall &&
-      (kind.delegateCall === 'untrusted' ? (
-        <Badge key="delegate" variant="warning">
-          Unexpected delegate call
-        </Badge>
-      ) : (
-        <Badge key="delegate" variant="outline">
-          Delegate call
-        </Badge>
-      )),
-    kind.type === 'settings' && ['addOwner', 'removeOwner', 'changeThreshold'].includes(kind.change.kind) && (
-      <Badge key="policy" variant="warning">
-        Confirmation policy change
-      </Badge>
-    ),
-  ].filter(Boolean)
 }
 
 // Only Summary opens by default. Security and the type section also open when there's a warning to look at.
@@ -164,7 +136,6 @@ export function SummarySection({
   const account = getAccount(tx)
   const creatorId = tx.signers[0]
   const creator = creatorId ? getSignerIdentity(creatorId) : undefined
-  const flags = getRiskFlags(tx)
   return (
     <PanelSection
       collapsible
@@ -192,11 +163,6 @@ export function SummarySection({
           {row.content}
         </PanelRow>
       ))}
-      {flags.length > 0 && (
-        <PanelRow label="Flags">
-          <span className="flex flex-wrap justify-end gap-1">{flags}</span>
-        </PanelRow>
-      )}
       {/* The From avatar carries the network. Swaps have no From row, so they keep this one. */}
       {tx.kind.type === 'swap' && (
         <PanelRow label="Network">
@@ -376,7 +342,7 @@ function SecurityVerdict({
       : [hypernative === 'out' ? 'notRun' : getWarnings(tx).length > 0 ? 'issue' : ('passed' as CheckResult)]),
   ]
   const count = (result: CheckResult) => results.filter((item) => item === result).length
-  const issues = count('issue')
+  const issues = count('issue') + getRiskFlags(tx).filter((flag) => flag.issue).length
   const passed = `${count('passed')} of ${results.length}`
   const [Icon, tone, label] = issues
     ? [ShieldAlert, SAFENET_TONES.risk, `${issues} ${issues === 1 ? 'issue' : 'issues'}`]
@@ -405,15 +371,31 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
   const safenet = getSafenetCheck(tx)
   const SafenetIcon = SAFENET_ICONS[safenet]
   const issues = getWarnings(tx).length > 0
+  const flags = getRiskFlags(tx)
   return (
     <PanelSection
       collapsible
       // A proposer-created transaction has no signer behind it yet, so Security opens for it too.
-      defaultOpen={hasSecurityIssue(tx) || (!!tx.proposedBy && tx.signers.length === 0)}
+      defaultOpen={hasSecurityIssue(tx) || flags.some((flag) => flag.issue)}
       title="Security"
       rightNode={<SecurityVerdict tx={tx} hypernative={hypernative} simulation={simulation} />}
     >
       {[
+        ...(flags.length
+          ? [
+              {
+                key: 'Checks',
+                label: 'Checks',
+                content: (
+                  <span className="flex flex-wrap justify-end gap-1">
+                    {flags.map((flag) => (
+                      <RiskFlagBadge key={flag.key} flag={flag} />
+                    ))}
+                  </span>
+                ),
+              },
+            ]
+          : []),
         ...(hypernative === 'none'
           ? []
           : [

@@ -1025,7 +1025,7 @@ describe('queue design exploration', () => {
         .getByRole('button', { name: `Open ${label}` })
         .closest('tr')!
 
-    it('shows the RFC status words and a proposal pill', () => {
+    it('shows the RFC status words and an untrusted transaction flag', () => {
       renderRealistic()
       expect(rowFor('Send to Contoso Ltd')).toHaveTextContent('Blocked by #42')
       expect(rowFor('Send to Globex Payroll')).toHaveTextContent('Ready to sign')
@@ -1033,9 +1033,9 @@ describe('queue design exploration', () => {
         .getAllByRole('button', { name: 'Open Send to Tailspin Labs' })
         .map((button) => button.closest('tr')!)
       expect(grant).toHaveTextContent('Waiting on others')
-      expect(within(grant).queryByText('Proposal')).toBeNull()
+      expect(within(grant).queryByText('Untrusted transaction')).toBeNull()
       expect(unsigned).toHaveTextContent('Blocked by #8')
-      expect(within(unsigned).getByText('Proposal')).toBeVisible()
+      expect(within(unsigned).getByText('Untrusted transaction')).toBeVisible()
     })
     it('marks rows that need extra care and explains why', () => {
       renderRealistic()

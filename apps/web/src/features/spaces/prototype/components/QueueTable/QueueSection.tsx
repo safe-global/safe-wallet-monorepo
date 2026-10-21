@@ -179,6 +179,31 @@ type SectionHeaderProps = Pick<
   inTable?: boolean
 }
 
+// The chevron button. One table puts it in the Nonce column, so the Safe lines up with the type icons.
+export function SectionToggle({
+  section,
+  collapsed,
+  inTable = false,
+}: Pick<QueueSectionProps, 'section' | 'collapsed'> & { inTable?: boolean }) {
+  return (
+    <Button
+      size="icon-sm"
+      variant="ghost-muted"
+      aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${section.label}`}
+      aria-expanded={!collapsed}
+      aria-controls={`section-${section.id}`}
+    >
+      {inTable ? (
+        <ChevronDown className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
+      ) : collapsed ? (
+        <ChevronDown />
+      ) : (
+        <ChevronUp />
+      )}
+    </Button>
+  )
+}
+
 export function SectionHeader({
   section,
   collapsed,
@@ -200,30 +225,13 @@ export function SectionHeader({
   const count = conflicting
     ? new Set(section.items.map((tx) => `${tx.account}:${tx.nonce}`)).size
     : section.items.length
-  const toggle = (
-    <Button
-      size="icon-sm"
-      variant="ghost-muted"
-      aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${section.label}`}
-      aria-expanded={!collapsed}
-      aria-controls={`section-${section.id}`}
-    >
-      {inTable ? (
-        <ChevronDown className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
-      ) : collapsed ? (
-        <ChevronDown />
-      ) : (
-        <ChevronUp />
-      )}
-    </Button>
-  )
+  const toggle = <SectionToggle section={section} collapsed={collapsed} inTable={inTable} />
   return (
     <div
       data-slot="section-header"
-      className={`group/section flex cursor-pointer items-center gap-3 text-sm font-medium transition-colors ${inTable ? 'min-h-11 px-1' : 'rounded-lg px-3 py-2 hover:bg-foreground/[0.04] has-[:focus-visible]:bg-foreground/[0.04]'}`}
+      className={`group/section flex cursor-pointer items-center gap-3 text-sm font-medium transition-colors ${inTable ? 'min-h-11' : 'rounded-lg px-3 py-2 hover:bg-foreground/[0.04] has-[:focus-visible]:bg-foreground/[0.04]'}`}
       onClick={onToggle}
     >
-      {inTable && toggle}
       {safeAccount && steps ? (
         <SafeTitle account={safeAccount} persona={persona} size={inTable ? 24 : 28} />
       ) : safeAccount ? (
@@ -362,7 +370,7 @@ export function QueueTableHead({
             <TableHead
               key={label}
               scope="col"
-              className={`text-xs text-muted-foreground ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
+              className={`text-xs text-muted-foreground ${steps && label === 'Nonce' ? 'px-0! text-center' : ''} ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
             >
               {label === 'Action' ? (
                 <span className="flex items-center justify-end">
@@ -388,6 +396,9 @@ export function QueueTableHead({
                     <TooltipContent>Group by {groupTarget === 'safe' ? 'Safe' : 'status'}</TooltipContent>
                   </Tooltip>
                 </span>
+              ) : steps && label === 'With' ? (
+                // Next steps: the counterparty reads as part of the transaction, so its column has no visible title.
+                <span className="sr-only">{label}</span>
               ) : (
                 label
               )}

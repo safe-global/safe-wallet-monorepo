@@ -263,8 +263,8 @@ function SafeDropdown({ filters, accounts }: Pick<QueueFiltersProps, 'filters' |
             Sorted by actionable transactions
           </TooltipTrigger>
           <TooltipContent side="right" className="max-w-64 whitespace-normal">
-            Safes you can execute or sign on come first, most urgent at the top. Safes with nothing for you keep the
-            workspace order.
+            Safes you can act on come first, most urgent first, then the one waiting longest. The rest keep your
+            workspace order. The order updates when you reload or change filters.
           </TooltipContent>
         </Tooltip>
       }

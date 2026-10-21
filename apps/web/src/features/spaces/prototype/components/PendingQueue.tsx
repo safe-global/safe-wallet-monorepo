@@ -111,6 +111,24 @@ function PendingQueueView() {
     setSeededStatus(statusKey)
     if (statusKey) setCollapsedSections([])
   }
+  // Safe order is set on load and when the person or filters change. Acting on a transaction doesn't move its Safe.
+  const rankSafes = () => rankAccounts(accounts, items, persona).map((account) => account.id)
+  const [safeOrder, setSafeOrder] = useState(rankSafes)
+  const orderKey = [
+    persona,
+    statusKey,
+    filters.accountFilter,
+    filters.typeFilter,
+    filters.networkFilter,
+    filters.conflicting,
+    filters.search,
+  ].join('|')
+  const [seededOrder, setSeededOrder] = useState(orderKey)
+  if (seededOrder !== orderKey) {
+    setSeededOrder(orderKey)
+    setSafeOrder(rankSafes())
+  }
+  const orderedAccounts = safeOrder.flatMap((id) => accounts.filter((account) => account.id === id))
   const recoveries = {
     ...allRecoveries,
     visible: filters.visibleRecoveries,
@@ -258,6 +276,7 @@ function PendingQueueView() {
     persona,
     direction: steps ? 'steps' : direction,
     groupBy,
+    order: steps ? safeOrder : undefined,
   }).filter(
     (section) =>
       !steps ||
@@ -422,7 +441,7 @@ function PendingQueueView() {
             )}
             <QueueToolbar
               filters={filters}
-              accounts={steps ? rankAccounts(accounts, items, persona) : accounts}
+              accounts={steps ? orderedAccounts : accounts}
               hasItems={items.length > 0}
               groupBy={groupBy}
               onGroupByChange={setGroupBy}

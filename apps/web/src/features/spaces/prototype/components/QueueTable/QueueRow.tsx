@@ -37,6 +37,7 @@ import {
 } from '../../services/model'
 import type { Persona, Proposal } from '../../types'
 import { SignatureGauge } from './SignatureGauge'
+import { getRiskFlags, RiskFlagBadge } from '../RiskFlag'
 import { NonceLabel, NonceMark } from './NonceCell'
 import { SignerList } from './SignerList'
 import { getMenuActions, getPrimaryAction, getStatusHint, MENU_LABELS, type MenuAction } from '../../services/actions'
@@ -201,17 +202,20 @@ export function QueueRow({
           >
             <span
               aria-hidden="true"
-              className={`absolute left-[18px] w-3 border-l-[1.5px] border-[var(--warning-accent)] ${isLastOption ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]' : optionIndex === 1 ? 'top-[-22px] bottom-[-8px]' : 'top-[-30px] bottom-[-8px]'}`}
+              className={`absolute left-1/2 w-3 border-l-[1.5px] border-[var(--warning-accent)] ${isLastOption ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]' : optionIndex === 1 ? 'top-[-22px] bottom-[-8px]' : 'top-[-30px] bottom-[-8px]'}`}
             />
             {!isLastOption && (
               <span
                 aria-hidden="true"
-                className="absolute top-1/2 left-[18px] w-3 border-b-[1.5px] border-[var(--warning-accent)]"
+                className="absolute top-1/2 left-1/2 w-3 border-b-[1.5px] border-[var(--warning-accent)]"
               />
             )}
           </span>
         ) : (
-          <NonceLabel tx={tx} persona={persona} competing={conflicts.length} />
+          // Centred in the column, under the Safe chevron and the "Nonce" title.
+          <span className="flex justify-center">
+            <NonceLabel tx={tx} persona={persona} competing={conflicts.length} />
+          </span>
         )}
       </TableCell>
     ) : (
@@ -441,7 +445,11 @@ export function QueueRow({
               {getStatusLabel(tx, persona)}
             </Badge>
           )}
-          {tx.proposedBy && tx.signers.length === 0 && <Badge variant="outline">Proposal</Badge>}
+          {getRiskFlags(tx)
+            .filter((flag) => flag.key === 'untrusted')
+            .map((flag) => (
+              <RiskFlagBadge key={flag.key} flag={flag} />
+            ))}
           {conflicts.length > 0 && groupSize < 2 && (
             <Badge variant="warning">
               {conflicts.length + 1} {steps ? 'conflicting' : 'competing proposals'}
@@ -565,17 +573,21 @@ export function QueueRow({
     <Fragment>
       {startsGroup && (
         <TableRow data-no-hover data-no-divider>
-          <TableCell colSpan={columnCount} className="pt-4 pb-1">
+          {steps && (
+            <TableCell className="pt-4 pb-1">
+              <span className="flex justify-center text-xs">
+                <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
+              </span>
+            </TableCell>
+          )}
+          <TableCell colSpan={steps ? columnCount - 1 : columnCount} className="pt-4 pb-1">
             <div className="flex w-max flex-wrap items-center gap-x-2 gap-y-1 text-xs max-md:sticky max-md:left-4 max-md:w-[calc(100vw-5rem)] max-md:whitespace-normal">
               {steps ? (
                 <>
-                  <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
-                  <span className="font-medium">
-                    {columns.includes('Safe') ? account.name : `${groupSize} transactions`}
-                  </span>
+                  {columns.includes('Safe') && <span className="font-medium">{account.name}</span>}
                   <span className="text-muted-foreground">
-                    {columns.includes('Safe') ? `${groupSize} transactions · ` : ''}Only one can execute. Once it does,
-                    the {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
+                    Only 1/{groupSize} transactions can execute. Once it does, the{' '}
+                    {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
                   </span>
                 </>
               ) : (
@@ -593,7 +605,7 @@ export function QueueRow({
                 </>
               )}
               <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} className="text-muted-foreground" noIcon>
-                Why did this happen?
+                {steps ? 'Learn more' : 'Why did this happen?'}
               </ExternalLink>
             </div>
           </TableCell>

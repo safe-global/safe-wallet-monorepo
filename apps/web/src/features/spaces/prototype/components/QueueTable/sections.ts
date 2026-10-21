@@ -1,4 +1,4 @@
-import { clusterByNonce, getPrimaryStatus, getState } from '../../services/model'
+import { clusterByNonce, getCreatedAt, getPrimaryStatus, getState } from '../../services/model'
 import type { Account, Direction, Filter, Persona, Proposal } from '../../types'
 import { CONFLICTING_META, STATUS_META, STATUS_ORDER, type GroupBy } from '../shared'
 import { inSelection } from '../QueueFilters/useQueueFilters'
@@ -10,9 +10,11 @@ export type QueueSectionData = {
   label: string
   account?: Account
   items: Proposal[]
-  // Next steps: rank of the most urgent step in this Safe. Lower is more urgent.
-  urgency?: number
+  // Next steps: the most urgent step in this Safe, and when its oldest actionable transaction was proposed.
+  urgency?: Urgency
 }
+
+type Urgency = { rank: number; oldest: number }
 
 const byNonce = (a: Proposal, b: Proposal) => a.nonce - b.nonce
 
@@ -35,6 +37,7 @@ export function buildSections({
   persona,
   direction,
   groupBy,
+  order,
 }: {
   visible: Proposal[]
   accounts: Account[]
@@ -42,6 +45,8 @@ export function buildSections({
   persona: Persona
   direction: Direction
   groupBy: GroupBy
+  // Account ids in a fixed order, so acting on a transaction doesn't move its Safe.
+  order?: string[]
 }): QueueSectionData[] {
   const ordered = orderForDirection(visible, accounts, persona, direction)
   // Next steps: options at a conflicting nonce go to their own section.
@@ -88,10 +93,18 @@ export function buildSections({
   if (direction === 'steps' && groupBy === 'status') return clustered.filter((section) => section.items.length > 0)
   if (direction !== 'steps' || groupBy !== 'safe') return clustered
   const ranked = clustered.map((section) => ({ ...section, urgency: getUrgency(section.items, persona) }))
-  return ranked.sort((a, b) => (a.urgency ?? STEP_RANK.length) - (b.urgency ?? STEP_RANK.length))
+  if (order) {
+    const position = (section: QueueSectionData) => {
+      const index = order.indexOf(section.account?.id ?? '')
+      return index < 0 ? order.length : index
+    }
+    return ranked.sort((a, b) => position(a) - position(b))
+  }
+  // Array sort is stable, so ties keep the workspace order.
+  return ranked.sort((a, b) => compareUrgency(a.urgency, b.urgency))
 }
 
-// Safes that need you come first, by most urgent step. Other Safes keep their order.
+// Safes you can act on come first: most urgent step, then the one waiting longest. Other Safes keep their order.
 export const rankAccounts = (accounts: Account[], items: Proposal[], persona: Persona) =>
   accounts
     .map((account) => ({
@@ -101,15 +114,23 @@ export const rankAccounts = (accounts: Account[], items: Proposal[], persona: Pe
         persona,
       ),
     }))
-    .sort((a, b) => (a.urgency ?? STEP_RANK.length) - (b.urgency ?? STEP_RANK.length))
+    .sort((a, b) => compareUrgency(a.urgency, b.urgency))
     .map(({ account }) => account)
 
-const getUrgency = (items: Proposal[], persona: Persona) => {
-  const ranks = items.flatMap((tx) => {
+// Nonces are per Safe, so age, not nonce, breaks ties between Safes.
+const getUrgency = (items: Proposal[], persona: Persona): Urgency | undefined => {
+  const steps = items.flatMap((tx) => {
     const kind = getStepKind(tx, persona)
-    return kind ? [STEP_RANK.indexOf(kind)] : []
+    return kind ? [{ rank: STEP_RANK.indexOf(kind), created: getCreatedAt(tx) }] : []
   })
-  return ranks.length ? Math.min(...ranks) : undefined
+  if (!steps.length) return undefined
+  const rank = Math.min(...steps.map((step) => step.rank))
+  return { rank, oldest: Math.min(...steps.filter((step) => step.rank === rank).map((step) => step.created)) }
+}
+
+const compareUrgency = (a?: Urgency, b?: Urgency) => {
+  if (!a || !b) return a ? -1 : b ? 1 : 0
+  return a.rank - b.rank || a.oldest - b.oldest
 }
 
 const safeColumns = (groupBy: GroupBy, isWide: boolean) => [

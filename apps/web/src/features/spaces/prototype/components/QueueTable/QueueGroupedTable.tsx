@@ -7,6 +7,7 @@ import {
   QueueSectionRows,
   QueueTableHead,
   SectionHeader,
+  SectionToggle,
   useScrollOverflow,
   type CollapseAll,
   type QueueSectionProps,
@@ -62,10 +63,18 @@ export function QueueGroupedTable({
               return (
                 <Fragment key={section.id}>
                   <TableBody>
-                    <TableRow data-no-hover data-no-divider>
+                    <TableRow data-no-hover data-no-divider className="group/band">
                       <TableCell
-                        colSpan={columns.length}
-                        className="rounded-lg bg-foreground/[0.03] py-0! pl-2! pr-3! transition-colors hover:bg-foreground/[0.06]"
+                        className="cursor-pointer rounded-l-lg bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]"
+                        onClick={() => onToggle(section.id)}
+                      >
+                        <span className="flex justify-center">
+                          <SectionToggle section={section} collapsed={collapsed} inTable />
+                        </span>
+                      </TableCell>
+                      <TableCell
+                        colSpan={columns.length - 1}
+                        className="rounded-r-lg bg-foreground/[0.03] py-0! pr-3! transition-colors group-hover/band:bg-foreground/[0.06]"
                       >
                         <SectionHeader
                           inTable
