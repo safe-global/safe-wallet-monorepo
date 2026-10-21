@@ -67,6 +67,34 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByText('Alice Contractor')).toBeInTheDocument()
   })
 
+  it('finds a recipient name whatever the casing of the address book key', async () => {
+    const { user } = renderWithUserEvent(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockActiveAllowlist()}
+        viewer={MOCK_VIEWERS.signer}
+        names={{ [MOCK_ADDRESSES.alice.toLowerCase()]: 'Alice Contractor' }}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Show recipient details' }))
+
+    expect(screen.getByText('Alice Contractor')).toBeInTheDocument()
+  })
+
+  it('names the details toggle by what it will do, and closes the list again', async () => {
+    const { user } = setup(mockActiveAllowlist())
+
+    await user.click(screen.getByRole('button', { name: 'Show recipient details' }))
+
+    const toggle = screen.getByRole('button', { name: 'Hide recipient details' })
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+
+    await user.click(toggle)
+
+    expect(screen.getByRole('button', { name: 'Show recipient details' })).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('offers a signer Edit and Remove on an active allowlist, without a pending banner', () => {
     setup(mockActiveAllowlist())
 
@@ -117,6 +145,12 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
     expect(screen.getByText('Only signers of this Safe account can edit this allowlist.')).toBeInTheDocument()
+  })
+
+  it('disables Review transaction until the transaction link has loaded', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
   })
 
   it('offers the transaction link to a signer who has already signed', () => {
