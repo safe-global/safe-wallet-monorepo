@@ -3,6 +3,7 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
 } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
@@ -108,6 +109,14 @@ describe('resolveAllowlistDrawerState', () => {
       kind: 'scheduled',
       operation: 'update',
       ...expected,
+    })
+  })
+
+  it('should report a failed policy as failed without an outcome passed in', () => {
+    expect(resolveAllowlistDrawerState(mockFailedAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
+      kind: 'closed',
+      action: 'none',
+      bannerTitle: 'The transaction failed and can no longer be executed.',
     })
   })
 })

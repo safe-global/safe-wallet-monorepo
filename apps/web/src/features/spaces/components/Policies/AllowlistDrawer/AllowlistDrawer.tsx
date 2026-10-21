@@ -15,6 +15,7 @@ import { formatTimeToSign } from '@safe-global/views/features/spaces/components/
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import {
   getPolicyStatus,
+  type FailedAllowlistPolicy,
   type PolicyStatus,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -55,7 +56,8 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
 }
 
 type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
-  policy: QueuedAllowlistPolicy
+  /** A failed row from the table can be passed as is: the drawer reads the outcome from its status. */
+  policy: QueuedAllowlistPolicy | FailedAllowlistPolicy
   transactionLink?: string
   reviewTransactionHref?: LinkProps['href']
   /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
@@ -65,7 +67,7 @@ type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
 export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlistDrawerProps
 
 const isPendingDrawer = (props: AllowlistDrawerProps): props is PendingAllowlistDrawerProps =>
-  props.policy.status === 'pending'
+  props.policy.status !== 'active'
 
 /** An executed change still waits out the guard's delay, so it reads Pending rather than Activating. */
 const getOutcomeStatus = (outcome: PendingTxOutcome): PolicyStatus => (outcome === 'executed' ? 'pending' : 'failed')
@@ -79,7 +81,9 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
       ? getBlockExplorerLink(chain, policy.enforcement.guardAddress)?.href
       : undefined
 
-  const outcome = isPendingDrawer(props) ? props.outcome : undefined
+  const outcome = isPendingDrawer(props)
+    ? (props.outcome ?? (props.policy.status === 'failed' ? 'failed' : undefined))
+    : undefined
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
   const status = outcome ? getOutcomeStatus(outcome) : getPolicyStatus(policy)

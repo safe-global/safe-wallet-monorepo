@@ -4,6 +4,7 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockFailedAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
@@ -27,7 +28,7 @@ const SHARED = {
 }
 
 const setup = (policy: AllowlistDrawerPolicy, viewer: Viewer = MOCK_VIEWERS.signer) =>
-  policy.status === 'pending'
+  policy.status !== 'active'
     ? renderWithUserEvent(
         <AllowlistDrawer
           {...SHARED}
@@ -238,6 +239,15 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.getByText('Pending signatures')).toBeInTheDocument()
     expect(screen.queryByText('Time to sign')).not.toBeInTheDocument()
+  })
+
+  it('shows a failed row from the table as failed without an outcome passed in', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockFailedAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('The transaction failed and can no longer be executed.')
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('disables the Edit and Remove buttons until their flows are passed in', () => {

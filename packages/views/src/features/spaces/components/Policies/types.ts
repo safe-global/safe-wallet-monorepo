@@ -169,6 +169,7 @@ export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy |
 /** Still in the queue, as opposed to executed and waiting for the indexer. */
 export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
 export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending' }
+export type FailedAllowlistPolicy = PendingAllowlistPolicy & { status: 'failed' }
 
 export type PolicyStatus =
   'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending'

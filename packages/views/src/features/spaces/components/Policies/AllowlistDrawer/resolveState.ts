@@ -1,4 +1,10 @@
-import type { AllowlistPolicy, AllowlistScheduledChange, QueuedAllowlistPolicy } from '../types'
+import type {
+  AllowlistPolicy,
+  AllowlistScheduledChange,
+  FailedAllowlistPolicy,
+  PendingAllowlistPolicy,
+  QueuedAllowlistPolicy,
+} from '../types'
 import type {
   ActiveDrawerState,
   ClosedDrawerState,
@@ -40,7 +46,7 @@ export type AllowlistDrawerState = ActiveDrawerState | PendingDrawerState | Clos
 
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
 
-export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | QueuedAllowlistPolicy
+export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | QueuedAllowlistPolicy | FailedAllowlistPolicy
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
   if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
@@ -95,7 +101,7 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
-const resolveClosed = (policy: QueuedAllowlistPolicy, outcome: PendingTxOutcome): ClosedDrawerState => ({
+const resolveClosed = (policy: PendingAllowlistPolicy, outcome: PendingTxOutcome): ClosedDrawerState => ({
   kind: 'closed',
   operation: policy.operation,
   action: 'none',
@@ -109,6 +115,8 @@ export const resolveAllowlistDrawerState = (
   safeName: string,
   outcome?: PendingTxOutcome,
 ): AllowlistDrawerState => {
+  // A failed row needs no outcome passed in: its status already says how the transaction ended.
+  if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed')
   if (policy.status === 'pending') {
     return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
   }

@@ -5,6 +5,7 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
@@ -107,5 +108,7 @@ export const ChangePendingNoWallet: Story = {
 export const ChangePendingNotASigner: Story = {
   args: { policy: mockAllowlistChangePending(), viewer: MOCK_VIEWERS.nonSigner },
 }
+
+export const FailedSetup: Story = { args: { ...PENDING_ARGS, policy: mockFailedAllowlist() } }
 
 export const UnnamedRecipients: Story = { args: { names: undefined, safe: { address: MOCK_SAFES.treasury.address } } }
