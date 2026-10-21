@@ -10,7 +10,7 @@ import { Wallet, parseEther } from 'ethers'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
-import { seedNestedSafe, type SafeAddress, type SeededSafe } from '../../src/seed/safe'
+import { seedNestedSafe, type SeededSafe } from '../../src/seed/safe'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { ROUTES } from '../../src/data/constants'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
@@ -27,7 +27,7 @@ type NestedSignerFixtures = {
   /** Wallet A: Safe{Wallet} in its own browser context, without a connected wallet */
   childPage: Page
   /** The Safes, with wallet A's signer connected to the parent in wallet B */
-  pairing: { parent: SeededSafe; child: SafeAddress }
+  pairing: { parent: SeededSafe; child: SeededSafe }
 }
 
 const test = base.extend<NestedSignerFixtures>({
