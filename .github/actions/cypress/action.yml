@@ -4,19 +4,19 @@ description: 'Run Cypress'
 
 inputs:
   spec:
-    description: 'A glob pattern for which tests to run'
+    description: 'Spec globs or paths relative to apps/web, separated by commas or newlines'
     required: true
 
   group:
-    description: 'The name of the group (e.g. "smoke")'
-    required: true
+    description: 'The Cypress Cloud group name (e.g. "smoke"), used only when recording'
+    required: false
 
   project_id:
     description: 'Cypress cloud project id'
     required: false
 
   tag:
-    description: 'Cypress cloud tag key'
+    description: 'Cypress Cloud tag key; also names the failure artifact'
     required: false
 
   parallel:
@@ -25,21 +25,77 @@ inputs:
     default: 'true'
 
   record:
-    description: 'Record results to Cypress Cloud'
+    description: 'Record results to Cypress Cloud (needs CYPRESS_RECORD_KEY)'
     required: false
-    default: 'true'
+    default: 'false'
 
   container-index:
-    description: 'Container index for parallel runs (used for artifact naming)'
+    description: '1-based index of this container in the matrix'
     required: false
-    default: '0'
+    default: '1'
+
+  container-total:
+    description: 'Number of containers in the matrix; specs are split across them unless Cypress Cloud balances them'
+    required: false
+    default: '1'
 
 runs:
   using: 'composite'
   steps:
+    # Sorted round-robin split, so a container runs the same specs on every attempt.
+    - name: Select the specs for this container
+      id: specs
+      shell: bash
+      working-directory: apps/web
+      env:
+        SPEC: ${{ inputs.spec }}
+        INDEX: ${{ inputs.container-index }}
+        TOTAL: ${{ inputs.container-total }}
+        CLOUD_BALANCED: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
+      run: |
+        set -euo pipefail
+        shopt -s nullglob
+        if [ "$INDEX" -lt 1 ] || [ "$INDEX" -gt "$TOTAL" ]; then
+          echo "::error::container-index $INDEX is outside 1..$TOTAL"
+          exit 1
+        fi
+
+        all=()
+        while IFS= read -r pattern; do
+          pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+          pattern="${pattern%"${pattern##*[![:space:]]}"}"
+          [ -z "$pattern" ] && continue
+          matches=($pattern)
+          if [ "${#matches[@]}" -eq 0 ]; then
+            echo "::error::No spec file matches $pattern"
+            exit 1
+          fi
+          all+=("${matches[@]}")
+        done <<< "$(printf '%s' "$SPEC" | tr ',' '\n')"
+        if [ "${#all[@]}" -eq 0 ]; then
+          echo "::error::The spec input contains no globs or paths"
+          exit 1
+        fi
+        mapfile -t all < <(printf '%s\n' "${all[@]}" | LC_ALL=C sort -u)
+
+        selected=()
+        for i in "${!all[@]}"; do
+          if [ "$CLOUD_BALANCED" = true ] || [ $(( i % TOTAL )) -eq $(( INDEX - 1 )) ]; then
+            selected+=("${all[$i]}")
+          fi
+        done
+
+        echo "Container $INDEX of $TOTAL runs ${#selected[@]} of ${#all[@]} specs"
+        printf '%s\n' "${selected[@]}"
+        { echo "### Container $INDEX of $TOTAL: ${#selected[@]} of ${#all[@]} specs"; echo '```'
+          printf '%s\n' "${selected[@]}"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+        echo "spec=$(IFS=,; echo "${selected[*]}")" >> "$GITHUB_OUTPUT"
+
     - uses: $/.github/actions/yarn
+      if: steps.specs.outputs.spec != ''
 
     - name: Install Chrome
+      if: steps.specs.outputs.spec != ''
       uses: browser-actions/setup-chrome@v1.7.3
       with:
         chrome-version: '134'
@@ -48,6 +104,7 @@ runs:
     # Secrets (CYPRESS_*, BEAMER_DATA_E2E, NEXT_PUBLIC_*) come from the calling
     # workflow's `env:` block on the step that uses this action.
     - uses: $/.github/actions/build
+      if: steps.specs.outputs.spec != ''
       env:
         NODE_ENV: cypress
         # `next build` overrides NODE_ENV to 'production' in client bundles, so
@@ -55,9 +112,11 @@ runs:
         # NEXT_PUBLIC_ flag that does survive the build.
         NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
+    # An empty spec would make Cypress run every spec, so the steps above and below skip it.
     - uses: cypress-io/github-action@v6.10.9
+      if: steps.specs.outputs.spec != ''
       with:
-        spec: ${{ inputs.spec }}
+        spec: ${{ steps.specs.outputs.spec }}
         group: ${{ inputs.record == 'true' && inputs.group || '' }}
         parallel: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
         browser: ${{ steps.setup-chrome.outputs.chrome-path }}
@@ -73,3 +132,15 @@ runs:
         NODE_ENV: cypress
         GITHUB_TOKEN: ${{ github.token }}
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}
+
+    - name: Upload failure screenshots and JUnit reports
+      if: failure() && steps.specs.outputs.spec != ''
+      uses: actions/upload-artifact@v7.0.2
+      with:
+        name: cypress-${{ inputs.tag || 'results' }}-${{ inputs.container-index }}
+        path: |
+          apps/web/cypress/snapshots/actual/**
+          apps/web/reports/junit-*.xml
+        retention-days: 7
+        if-no-files-found: ignore
+        overwrite: true
