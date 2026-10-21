@@ -1,3 +1,5 @@
+import type { Erc20TransferRecipientDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+
 /**
  * The resolved policy shape the UI consumes. It mirrors the CGW response, except that
  * `token` is joined from the tokens endpoint and `remaining` is derived.
@@ -6,14 +8,17 @@
  * they live in the space address book and the frontend resolves them.
  */
 
-export type PolicyType = 'spending-limit' | 'recovery' | 'proposer'
+export type PolicyType = 'spending-limit' | 'recovery' | 'proposer' | 'allowlist'
 
 /**
  * How the policy is enforced. A proposer grant is enforced by no contract, so it has no module
  * address and nothing to link to. This is on the wire so that components can branch on it instead
  * of checking the policy type.
  */
-export type PolicyEnforcement = { via: 'module'; moduleAddress: string } | { via: 'offchain'; source: 'delegates' }
+export type PolicyEnforcement =
+  | { via: 'module'; moduleAddress: string }
+  | { via: 'guard'; guardAddress: string }
+  | { via: 'offchain'; source: 'delegates' }
 
 /** CGW has no Safe ID. A Safe is identified by its chain and its address. */
 export type PolicySafe = {
@@ -89,6 +94,18 @@ export type ProposerPolicyData = {
   proposers: Proposer[]
 }
 
+export type AllowlistRecipient = Erc20TransferRecipientDto
+
+/** CGW returns one `erc20-transfer` policy per token; the table shows one allowlist per Safe holding them all. */
+export type AllowlistEntry = {
+  token: PolicyTokenInfo
+  recipients: AllowlistRecipient[]
+}
+
+export type AllowlistPolicyData = {
+  entries: AllowlistEntry[]
+}
+
 type PolicyBase = {
   /** Stable across requests. Table rows and the open detail panel are keyed on it. */
   id: string
@@ -104,8 +121,9 @@ type PolicyBase = {
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type RecoveryPolicy = PolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPolicyData }
+export type AllowlistPolicy = PolicyBase & { type: 'allowlist'; data: AllowlistPolicyData }
 
-export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy
+export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | AllowlistPolicy
 
 /** What a queued Safe transaction would do to a policy once it executes. */
 export type PendingPolicyOperation = 'create' | 'update' | 'remove'
@@ -125,10 +143,12 @@ type PendingPolicyBase = PolicyBase & {
 /** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
 export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
-export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
+export type PendingAllowlistPolicy = PendingPolicyBase & { type: 'allowlist'; data: AllowlistPolicyData }
+export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy | PendingAllowlistPolicy
 
 /** Still in the queue, as opposed to executed and waiting for the indexer. */
 export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
+export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending' }
 
 export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
 
@@ -143,6 +163,9 @@ export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy,
 
 export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
   policy.type === 'proposer'
+
+export const isAllowlistPolicy = (policy: Policy): policy is Extract<Policy, { type: 'allowlist' }> =>
+  policy.type === 'allowlist'
 
 export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { type: 'recovery' }> =>
   policy.type === 'recovery'
