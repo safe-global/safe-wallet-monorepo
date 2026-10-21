@@ -63,9 +63,9 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
         }),
       )
     } catch (e) {
+      isAwaitingCacheSync.current = false
       if (isElevationRequiredError(e)) return
       console.error(e)
-      isAwaitingCacheSync.current = false
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }
   }
