@@ -1,6 +1,6 @@
-import type { ComponentType, ReactElement, ReactNode } from 'react'
-import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
+import type { ReactElement, ReactNode } from 'react'
+import { X } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { cn } from '@safe-global/views/utils/cn'
@@ -9,15 +9,19 @@ const DISMISS_LABEL = 'Dismiss'
 
 export type StatusAlertTone = 'error' | 'warning' | 'success' | 'info' | 'loading'
 
-const TONE_ICONS: Record<
-  StatusAlertTone,
-  { Icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>; className: string }
-> = {
-  error: { Icon: CircleAlert, className: 'text-destructive' },
-  warning: { Icon: TriangleAlert, className: 'text-warning-accent' },
-  success: { Icon: CircleCheck, className: 'text-success-strong' },
-  info: { Icon: Info, className: 'text-info-strong' },
-  loading: { Icon: Spinner, className: 'text-muted-foreground' },
+const TONE_SEVERITIES = {
+  error: 'destructive',
+  warning: 'warning',
+  success: 'success',
+  info: 'info',
+} as const satisfies Record<Exclude<StatusAlertTone, 'loading'>, string>
+
+const TONE_ICON_COLORS: Record<StatusAlertTone, string> = {
+  error: 'text-destructive',
+  warning: 'text-warning-accent',
+  success: 'text-success-strong',
+  info: 'text-info-strong',
+  loading: 'text-muted-foreground',
 }
 
 const TONE_SURFACES: Record<StatusAlertTone, string> = {
@@ -51,7 +55,7 @@ const StatusAlert = ({
   'aria-live': ariaLive,
   'data-testid': testId,
 }: StatusAlertProps): ReactElement => {
-  const { Icon, className: iconClassName } = TONE_ICONS[tone]
+  const iconClassName = cn('mt-0.5 size-4 shrink-0', TONE_ICON_COLORS[tone])
 
   return (
     <Alert
@@ -61,7 +65,11 @@ const StatusAlert = ({
       data-testid={testId}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3">
-        <Icon className={cn('mt-0.5 size-4 shrink-0', iconClassName)} aria-hidden />
+        {tone === 'loading' ? (
+          <Spinner className={iconClassName} aria-hidden />
+        ) : (
+          <AlertSeverityIcon variant={TONE_SEVERITIES[tone]} className={iconClassName} aria-hidden />
+        )}
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 leading-5">
           {title && <AlertTitle>{title}</AlertTitle>}
