@@ -91,6 +91,8 @@ describe('SpendingLimits', () => {
     expect(screen.getByText('Delete spending limit:')).toBeInTheDocument()
     expect(screen.getByText(beneficiary)).toBeInTheDocument()
     expect(screen.getByText('USDC')).toBeInTheDocument()
+    expect(screen.queryByText('Amount')).not.toBeInTheDocument()
+    expect(screen.queryByText('Raw Amount (in decimals)')).not.toBeInTheDocument()
     expect(screen.queryByText('Reset time')).not.toBeInTheDocument()
   })
 

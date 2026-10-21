@@ -301,15 +301,15 @@ describe('getTransactionType', () => {
     it('labels a module execution with the name of the contract it calls', () => {
       const tx = makeTx({
         txInfo: customTxInfo({
-          methodName: 'executeAllowanceTransfer',
-          to: { value: faker.finance.ethereumAddress(), name: 'AllowanceModule' },
+          methodName: 'someMethod',
+          to: { value: faker.finance.ethereumAddress(), name: 'Roles' },
         }),
         executionInfo: { type: 'MODULE', address: { value: faker.finance.ethereumAddress() } },
       })
 
       const result = getTransactionType(tx, {})
 
-      expect(result.text).toBe('AllowanceModule')
+      expect(result.text).toBe('Roles')
     })
   })
 })
