@@ -52,7 +52,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "cross-env": "^7.0.3",
     "cypress": "^16.1.1",
-    "eslint": "^9.29.0",
+    "eslint": "^9.39.4",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
     "jest-fixed-jsdom": "^0.0.11",
