@@ -1,27 +1,17 @@
 import type { ReactElement } from 'react'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Typography } from '@safe-global/views/components/ui/typography'
 
-const ELLIPSIS = '...'
+const VISIBLE_CHARS = 4
 
-/** A muted, monospaced short address. */
-const ShortAddress = ({ address }: { address: string }): ReactElement => {
-  const short = shortenAddress(address)
-  const ellipsisAt = short.indexOf(ELLIPSIS)
+/** A muted, monospaced short address, cut like `shortenAddress`. */
+const ShortAddress = ({ address }: { address: string }): ReactElement | null => {
+  if (!address) return null
 
   return (
     <Typography variant="paragraph-mini" color="muted" className="font-mono leading-[normal]">
-      {ellipsisAt === -1 ? (
-        short
-      ) : (
-        <>
-          {short.slice(0, ellipsisAt)}
-          {/* In a mono font every dot takes a full slot, so two of the three are drawn closer */}
-          <span className="tracking-[-0.25em]">{ELLIPSIS.slice(0, -1)}</span>
-          {ELLIPSIS.slice(-1)}
-          {short.slice(ellipsisAt + ELLIPSIS.length)}
-        </>
-      )}
+      {address.slice(0, VISIBLE_CHARS + 2)}
+      {/* In a mono font every dot takes a full slot, so two of the three are drawn closer */}
+      <span className="tracking-[-0.25em]">..</span>.{address.slice(-VISIBLE_CHARS)}
     </Typography>
   )
 }
