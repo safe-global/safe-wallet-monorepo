@@ -30,7 +30,7 @@ export default {
   /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
-  /** Messages (onchain/offchain) testing - Used in: messages_offchain.cy.js, messages_onchain.cy.js, messages_popup.cy.js, create_tx.cy.js */
+  /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js, create_tx.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Sidebar non-owner testing */
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
@@ -82,7 +82,7 @@ export default {
   SEP_STATIC_SAFE_24: 'sep:0x49DC5764961DA4864DC5469f16BC68a0F765f2F2',
   /** Replace owner testing - Used in: replace_owner.cy.js */
   SEP_STATIC_SAFE_25: 'sep:0x4ECFAa2E8cb4697bCD27bdC9Ce3E16f03F73124F',
-  /** Transaction notes and messages testing - Used in: tx_notes.cy.js, messages_offchain.cy.js */
+  /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
   /** TWAP and swap testing - Used in: twaps_integration.cy.js, twaps_history.cy.js */
   SEP_STATIC_SAFE_27: 'sep:0xC97FCf0B8890a5a7b1a1490d44Dc9EbE3cE04884',

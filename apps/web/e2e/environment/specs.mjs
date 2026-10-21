@@ -69,8 +69,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/load_safe_2.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1] },
   'cypress/e2e/regression/load_safe_3.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1, 137] },
   'cypress/e2e/regression/mass_payouts.cy.js': { scenario: 'prepareMassPayoutsScenario' },
-  'cypress/e2e/regression/messages_offchain.cy.js': { scenario: 'prepareOffchainMessagesScenario' },
-  'cypress/e2e/regression/messages_onchain.cy.js': { scenario: 'prepareOnchainMessagesScenario' },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/multichain_create_safe_flow.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
   'cypress/e2e/regression/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
