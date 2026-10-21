@@ -18,6 +18,8 @@ allowed-tools:
 
 Create a Storybook prototype from **$ARGUMENTS** using only shadcn/ui components.
 
+**Goal:** besides a good design, produce a diff that is a pleasure to review. A developer should be able to skim it, see that it is only markup and touches no business logic, and approve it quickly. Keep that goal in mind at every step.
+
 **Note:** All shadcn/ui components are already installed and available at `packages/views/src/components/ui/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`).
 
 ## Step 1: Gather Requirements
@@ -47,7 +49,7 @@ If missing, ask:
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
 
-**Build it as views.** Aim for code a developer can move into the app without reading it line by line: nearly every file is pure markup, and the little logic the prototype needs sits in one place.
+**Build it as views.** Nearly every file is pure markup, and the little logic the prototype needs sits in one place.
 
 - Before writing new markup, look in `packages/views` for a view that already renders it, and reuse it.
 - Split the screen into small components, one per section (for example `SummaryCard`, `ChecksList`), each in its own file.
