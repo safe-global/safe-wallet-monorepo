@@ -62,7 +62,8 @@ If missing, ask:
 - A section does not compute, format, sort, filter or decide anything. Pass it the finished values: `"1,250.00 USDC"`, not a number to format. Handlers only call the callback prop they were given (`onClick={onConfirm}`).
 - The only state a section may hold is what the eye sees and nothing else reads: open or closed, hovered, the selected tab (`useState`). No effects, timers, `window` or `document`.
 - Everything else lives in `index.tsx`: the sample data, the prototype's state (the current step, which item is selected) and the callbacks that change it. `index.tsx` passes the results down as props. It is the only file a developer needs to read closely.
-- Do not import from the app (`@/…`), the store, hooks that fetch data, or analytics. The package's lint rejects them.
+- Files in `packages/views` do not import from the app (`@/…`), the store, hooks that fetch data, or analytics. The package's lint rejects them.
+- If the prototype should show live data, that is fine: keep the sections in `packages/views` as above, and add one small container in `apps/web` (next to the feature it belongs to) that reads the live data and passes it to `index.tsx`. The container holds the hooks; the sections stay pure markup, so developers can pick them up as they are.
 
 If the prototype truly needs more logic in a section, add it; these are defaults, not hard limits. This only changes how the code is organised: the user sees the same Storybook story, so there is nothing to explain to them.
 
