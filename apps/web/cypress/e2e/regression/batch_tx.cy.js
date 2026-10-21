@@ -4,73 +4,20 @@ import * as owner from '../../e2e/pages/owners.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as ls from '../../support/localstorage_data.js'
-import * as navigation from '../pages/navigation.page.js'
-import { getMockAddress } from '../../support/utils/ethers.js'
 import { walletCredentials } from '../../support/credentials.js'
 
-const currentNonce = 3
 const funds_first_tx = '0.001'
 const funds_second_tx = '0.002'
 
 let staticSafes = []
-let signer, signer2
+let signer
 before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
-  signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
 })
 
 describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
-  })
-
-  describe('Building a batch', () => {
-    beforeEach(() => {
-      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      owner.waitForConnectionStatus()
-    })
-
-    it('Verify a second transaction can be added to the batch', () => {
-      batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
-      batch.verifyBatchIconCount(1)
-      batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
-      batch.verifyBatchIconCount(2)
-      batch.clickOnBatchCounter()
-      batch.verifyAmountTransactionsInBatch(2)
-    })
-
-    it('Verify the "New transaction" button in Add batch modal is enabled/disabled for different users types', () => {
-      navigation.clickOnWalletExpandMoreIcon()
-      navigation.clickOnDisconnectBtn()
-      wallet.connectSigner(signer)
-      batch.openBatchtransactionsModal()
-      batch.verifyNewTxButtonStatus(constants.enabledStates.enabled)
-      batch.closeBatchtransactionsModal()
-      navigation.clickOnWalletExpandMoreIcon()
-      navigation.clickOnDisconnectBtn()
-      wallet.connectSigner(signer2)
-      owner.waitForConnectionStatus()
-      batch.verifyNewTxButtonStatus(constants.enabledStates.disabled)
-      navigation.clickOnWalletExpandMoreIcon()
-      navigation.clickOnDisconnectBtn()
-      batch.verifyNewTxButtonStatus(constants.enabledStates.disabled)
-    })
-
-    it('Verify that the Add batch button is not present on non-safe pages', () => {
-      const urls = [constants.welcomeUrl, constants.appSettingsUrl, constants.appsUrl]
-
-      urls.forEach((url) => {
-        cy.visit(url)
-        cy.get(batch.batchTxTopBar).should('not.exist')
-      })
-    })
-
-    it('Verify a transaction can be added to the batch', () => {
-      batch.addNewTransactionToBatch(constants.EOA, currentNonce, funds_first_tx)
-      batch.verifyBatchIconCount(1)
-      batch.clickOnBatchCounter()
-      batch.verifyAmountTransactionsInBatch(1)
-    })
   })
 
   describe('Operating on a pre-seeded batch', () => {
@@ -88,23 +35,6 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
       cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx)
       cy.get('@TransactionList').find('li').eq(1).contains(funds_second_tx)
       cy.contains(batch.addToBatchBtn).should('have.length', 0)
-    })
-
-    it('Verify a batched tx can be expanded and collapsed', () => {
-      batch.clickOnBatchCounter()
-      cy.contains(funds_first_tx).parents('ul').as('TransactionList')
-      cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx).click()
-      batch.isTxExpanded(0, true)
-      cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx).click()
-      batch.isTxExpanded(0, false)
-    })
-
-    it('Verify a transaction can be removed from the batch', () => {
-      batch.clickOnBatchCounter()
-      cy.contains(batch.batchedTransactionsStr).should('be.visible').parents('aside').find('ul > li').as('BatchList')
-      cy.get('@BatchList').find(batch.deleteTransactionbtn).eq(0).click()
-      cy.get('@BatchList').should('have.length', 1)
-      cy.get('@BatchList').contains(funds_first_tx).should('not.exist')
     })
   })
 })

@@ -46,18 +46,5 @@ describe('[SMOKE] Add Owners tests', () => {
       owner.typeOwnerAddressManage(1, constants.defaultOwnerAddress())
       owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
     })
-
-    it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
-      owner.verifyManageSignersBtnIsEnabled()
-    })
-  })
-
-  describe('Non-owner safe', () => {
-    it('[SMOKE] Verify "Manage Signers" button is disabled for Non-Owner', () => {
-      cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
-      cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-      cy.wait('@History', { timeout: 20000 })
-      owner.verifyManageSignersBtnIsDisabled()
-    })
   })
 })

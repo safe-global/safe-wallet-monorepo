@@ -41,7 +41,7 @@ const SafeProAnnouncement = ({ location, onDismiss }: { location: SafeProBannerL
             size="lg"
             render={
               <a
-                onClick={() => trackSafeProBannerClick(location)}
+                onClick={() => trackSafeProBannerClick(location, SAFE_PRO_ANNOUNCEMENT_URL)}
                 href={SAFE_PRO_ANNOUNCEMENT_URL}
                 target="_blank"
                 rel="noopener noreferrer"

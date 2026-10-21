@@ -23,14 +23,14 @@ export default {
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
   /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, mass_payouts.cy.js, spending_limits.cy.js */
   SEP_STATIC_SAFE_6: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
-  /** Queue delete/reject testing - Used in: tx_queue_delete_btn.cy.js, tx_queue_reject_btn.cy.js */
+  /** Queue replace testing - Used in: tx_queue_replace_btn.cy.js */
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js, mass_payouts.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
   /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
-  /** Messages (onchain/offchain) testing - Used in: messages_offchain.cy.js, messages_onchain.cy.js, messages_popup.cy.js, create_tx.cy.js */
+  /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js, create_tx.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Sidebar non-owner testing */
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
@@ -82,7 +82,7 @@ export default {
   SEP_STATIC_SAFE_24: 'sep:0x49DC5764961DA4864DC5469f16BC68a0F765f2F2',
   /** Replace owner testing - Used in: replace_owner.cy.js */
   SEP_STATIC_SAFE_25: 'sep:0x4ECFAa2E8cb4697bCD27bdC9Ce3E16f03F73124F',
-  /** Transaction notes and messages testing - Used in: tx_notes.cy.js, messages_offchain.cy.js */
+  /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
   /** TWAP and swap testing - Used in: twaps_integration.cy.js, twaps_history.cy.js */
   SEP_STATIC_SAFE_27: 'sep:0xC97FCf0B8890a5a7b1a1490d44Dc9EbE3cE04884',
@@ -111,8 +111,6 @@ export default {
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
   /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
   SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
-  /** Queue reject testing - Used in: tx_queue_reject_btn.cy.js */
-  SEP_STATIC_SAFE_37: 'sep:0x4B8A8Ca9F0002a850CB2c81b205a6D7429a22DEe',
   /** Transaction history filter testing - Used in: tx_history_filter_2.cy.js */
   SEP_STATIC_SAFE_38: 'sep:0x30aeC11779d29dB096C434D4e72E77276EB01BdE',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */

@@ -75,4 +75,11 @@ describe('ExpandableTransactionItem', () => {
     await userEvent.click(trigger)
     expect(mockMountSpy).toHaveBeenCalledTimes(1)
   })
+
+  it('renders a nested row that keeps its own nonce', () => {
+    const { getByTestId, getByText } = render(<ExpandableTransactionItem item={mockTransaction} isNested />)
+
+    expect(getByTestId('transaction-item').closest('[data-slot="accordion-item"]')).toHaveClass('listItemNested')
+    expect(getByText('7')).toBeInTheDocument()
+  })
 })

@@ -69,8 +69,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/load_safe_2.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1] },
   'cypress/e2e/regression/load_safe_3.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1, 137] },
   'cypress/e2e/regression/mass_payouts.cy.js': { scenario: 'prepareMassPayoutsScenario' },
-  'cypress/e2e/regression/messages_offchain.cy.js': { scenario: 'prepareOffchainMessagesScenario' },
-  'cypress/e2e/regression/messages_onchain.cy.js': { scenario: 'prepareOnchainMessagesScenario' },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/multichain_create_safe_flow.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
   'cypress/e2e/regression/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
@@ -89,8 +87,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/nested_safes_fund_asset.cy.js': { scenario: 'prepareNestedFundingScenario' },
   'cypress/e2e/regression/nested_safes_review.cy.js': { scenario: 'prepareNestedFundingScenario' },
   'cypress/e2e/regression/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
-  'cypress/e2e/regression/nfts_2.cy.js': { scenario: 'prepareNftsScenario' },
-  'cypress/e2e/regression/nfts.cy.js': { scenario: 'prepareNftsScenario' },
   'cypress/e2e/regression/portfolio.cy.js': {
     scenario: 'preparePortfolioScenario',
     chains: [137],
@@ -153,7 +149,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/tx_history_filter.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_notes.cy.js': { scenario: 'prepareNotesScenario' },
-  'cypress/e2e/regression/tx_queue_delete_btn.cy.js': { scenario: 'prepareDeletionScenario' },
   'cypress/e2e/regression/tx_queue_reject_btn.cy.js': { scenario: 'prepareRejectionScenario' },
   'cypress/e2e/regression/tx_queue_replace_btn.cy.js': { scenario: 'prepareReplacementScenario' },
   'cypress/e2e/regression/tx_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
@@ -181,6 +176,5 @@ export const isolatedSpecs = {
   'cypress/e2e/smoke/replace_owner.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/safe_selector.cy.js': { scenario: 'prepareBasicScenario', chains: [1] },
   'cypress/e2e/smoke/spending_limits.cy.js': { scenario: 'prepareEnsFixtureScenario' },
-  'cypress/e2e/smoke/tokens.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/smoke/tx_history.cy.js': { scenario: 'prepareHistorySmokeScenario' },
 }

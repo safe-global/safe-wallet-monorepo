@@ -4,14 +4,13 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { SAFE_PRO_INTRO_URL } from '@/config/constants'
 import { MixpanelEventParams } from '@/services/analytics'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
-import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
+import { SAFE_PRO_HEADLINE } from '../../utils/safeProHeadline'
 
 const SafeProBanner = ({
   className,
@@ -20,14 +19,13 @@ const SafeProBanner = ({
   className?: string
   location?: SafeProBannerLocation
 }) => {
-  const isLive = useIsSafeProEnabled()
   useTrackOnce(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: location })
 
   return (
     <Card
       as="a"
-      href={SAFE_PRO_ANNOUNCEMENT_URL}
-      onClick={() => trackSafeProBannerClick(location)}
+      href={SAFE_PRO_INTRO_URL}
+      onClick={() => trackSafeProBannerClick(location, SAFE_PRO_INTRO_URL)}
       target="_blank"
       rel="noopener noreferrer"
       size="none"
@@ -41,7 +39,7 @@ const SafeProBanner = ({
             New
           </Badge>
           <Typography variant="paragraph-small-bold" className="truncate">
-            {safeProMoveHeadline(isLive)}
+            {SAFE_PRO_HEADLINE}
           </Typography>
         </div>
 
