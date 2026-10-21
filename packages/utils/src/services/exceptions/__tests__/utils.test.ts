@@ -60,6 +60,35 @@ describe('utils', () => {
       expect(result.message).not.toContain('[object Object]')
     })
 
+    it('keeps the numeric code of a plain object and nothing else', () => {
+      const thrown = { code: 4001, message: 'User rejected the request', privateKey: 'secret123' }
+
+      const result = asError(thrown)
+
+      expect(result.code).toBe(4001)
+      expect(result.message).toBe('Non-Error object of type: object (code 4001)')
+      expect(result.message).not.toContain('User rejected')
+      expect(result.message).not.toContain('secret123')
+    })
+
+    it('keeps an identifier-like string code of a plain object', () => {
+      const result = asError({ code: 'ACTION_REJECTED' })
+
+      expect(result.code).toBe('ACTION_REJECTED')
+      expect(result.message).toBe('Non-Error object of type: object (code ACTION_REJECTED)')
+    })
+
+    it.each([
+      ['free text', { code: 'word1 word2 word3 secret phrase' }],
+      ['a fraction', { code: 1.5 }],
+      ['an object', { code: { privateKey: 'secret123' } }],
+    ])('drops a code that is %s', (_, thrown) => {
+      const result = asError(thrown)
+
+      expect(result.code).toBeUndefined()
+      expect(result.message).toBe('Non-Error object of type: object')
+    })
+
     it('should preserve status code for FetchBaseQueryError', () => {
       const thrown: FetchBaseQueryError = {
         status: 401,

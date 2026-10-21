@@ -8,6 +8,19 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 interface ErrorWithStatus extends Error {
   status?: number | string
+  code?: number | string
+}
+
+// Wallet and RPC error codes are short identifiers (4001, ACTION_REJECTED), so they carry no secrets
+const ERROR_CODE_RE = /^[A-Za-z0-9_]{1,64}$/
+
+const safeErrorCode = (thrown: unknown): number | string | undefined => {
+  if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) return undefined
+
+  const { code } = thrown as { code?: unknown }
+  if (typeof code === 'number' && Number.isInteger(code)) return code
+  if (typeof code === 'string' && ERROR_CODE_RE.test(code)) return code
+  return undefined
 }
 
 const isFetchBaseQueryError = (error: unknown): error is FetchBaseQueryError => {
@@ -80,7 +93,14 @@ export const asError = (thrown: unknown): ErrorWithStatus => {
     message = `Non-Error object of type: ${typeof thrown}${Array.isArray(thrown) ? ' (array)' : ''}`
   }
 
-  return new Error(message) as ErrorWithStatus
+  const code = safeErrorCode(thrown)
+  if (code === undefined) {
+    return new Error(message) as ErrorWithStatus
+  }
+
+  const error = new Error(`${message} (code ${code})`) as ErrorWithStatus
+  error.code = code
+  return error
 }
 
 /** CGW SDK errors flatten the HTTP status into the message: "CGW error - 422: ..." */
