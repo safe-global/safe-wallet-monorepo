@@ -9,6 +9,7 @@ import {
   getDelegateTypedData,
   hashDelegateTypedData,
   isQueueServiceDelegateTypedData,
+  normalizeDelegateTypedData,
 } from '@safe-global/utils/services/delegates'
 import type { DelegateAction, DelegateTypedData } from '@safe-global/utils/services/delegates'
 import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
@@ -87,8 +88,24 @@ type ProposerDelegation = {
   signer: JsonRpcSigner
 }
 
-/** The v1 message on transaction-service chains for eth_sign wallets, eth_sign over the delegate hash on queue-service chains, typed data otherwise. */
-export const signProposerDelegation = ({
+// A contract wallet (e.g. a Safe connected via WalletConnect) returns its own signature format, which the services only attribute to it inside a v=0 contract signature.
+const signProposerTypedDataAsContract = async (
+  chain: DelegateChain,
+  proposerAddress: string,
+  safeAddress: string,
+  action: DelegateAction,
+  signer: JsonRpcSigner,
+) => {
+  const typedData = normalizeDelegateTypedData(getDelegateTypedData(chain, proposerAddress, safeAddress, action))
+  const signature: string = await signer.provider.send('eth_signTypedData_v4', [
+    signer.address.toLowerCase(),
+    JSON.stringify(typedData),
+  ])
+  return encodeEIP1271Signature(signer.address, signature)
+}
+
+/** The v1 message on transaction-service chains for eth_sign wallets, eth_sign over the delegate hash on queue-service chains, an EIP-1271 contract signature for contract wallets, typed data otherwise. */
+export const signProposerDelegation = async ({
   chain,
   wallet,
   proposerAddress,
@@ -98,6 +115,9 @@ export const signProposerDelegation = ({
 }: ProposerDelegation): Promise<string> => {
   if (usesV1DelegateEndpoint(chain, wallet)) return signProposerData(proposerAddress, signer)
   if (isEthSignWallet(wallet)) return ethSignProposerTypedDataHash(chain, proposerAddress, safeAddress, action, signer)
+  if (await isSmartContractWallet(chain.chainId, wallet.address)) {
+    return signProposerTypedDataAsContract(chain, proposerAddress, safeAddress, action, signer)
+  }
   return signProposerTypedData(chain, proposerAddress, safeAddress, action, signer)
 }
 

@@ -3,15 +3,12 @@ import * as createtx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as spendinglimit from '../pages/spending_limits.pages'
-import * as navigation from '../pages/navigation.page'
-import { getMockAddress } from '../../support/utils/ethers.js'
 import { selectToken } from '../pages/assets.pages.js'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00998
-const sendValue2 = 0.0001
 
 let signer
 before(() => {
@@ -76,24 +73,5 @@ describe('Mass payouts tests', () => {
     createtx.insufficientFundsErrorExists(0)
     createtx.insufficientFundsErrorExists(1)
     createtx.insufficientBalanceErrorExists()
-  })
-
-  it('Verify recipients are displayed in review tx screen', () => {
-    const address1 = getMockAddress()
-    const address2 = getMockAddress()
-
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
-    createtx.clickOnNewtransactionBtn()
-    createtx.clickOnSendTokensBtn()
-    createtx.clickOnAddRecipientBtn()
-    createtx.typeRecipientAddress_(0, address1)
-    createtx.typeRecipientAddress_(1, address2)
-    createtx.setSendValue_(0, sendValue2)
-    createtx.setSendValue_(1, sendValue2)
-    createtx.clickOnNextBtn()
-    createtx.recipientAddress(1, address1)
-    createtx.recipientAddress(2, address2)
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
   })
 })

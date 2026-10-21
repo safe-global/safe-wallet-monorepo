@@ -33,6 +33,8 @@ cypress/
 
 The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + happypath_2 + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
 
+CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
+
 ## Visual regression tests (Argos E2E)
 
 All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
@@ -149,7 +151,7 @@ Adding a `data-testid` to a component:
 
 ## Isolated regression
 
-The isolated CI workflow runs registered specs against local Anvil, CGW and TXS: pull requests run the assets, Spaces basic flow and rejection specs; a manual dispatch runs any selection, by default every registered spec, in parallel shards. Shared Cypress support prepares SDK scenario data through a Node task in isolated mode; preserve staging defaults for ordinary runs. Keep generated owner keys in memory and wait for CGW-visible state before browser assertions. Each shard runs its specs in one Cypress process; the config process creates new owners before every spec.
+The isolated CI workflow runs registered specs against local Anvil, CGW, TXS and Queue Service: pull requests run every registered spec in six parallel shards; a manual dispatch runs any selection, by default every registered spec. Shared Cypress support prepares SDK scenario data through a Node task in isolated mode; preserve staging defaults for ordinary runs. Keep generated owner keys in memory and wait for CGW-visible state before browser assertions. Each shard runs its specs in one Cypress process; the config process creates new owners before every spec.
 
 Use `yarn workspace @safe-global/web e2e:env cypress` after starting the backend and wallet. `SAFE_E2E_SPECS` selects registered specs, `SAFE_E2E_WEB_URL` overrides the wallet URL, and `SAFE_E2E_BROWSER` selects a Chromium executable (default: Chrome). The runner clears `e2e/environment/artifacts/cypress` once per invocation and retains per-spec videos, screenshots and JUnit reports. Backend cleanup belongs to the calling CI workflow and must run after failures. See [local setup](../e2e/docs/ISOLATED_ENVIRONMENT.md).
 

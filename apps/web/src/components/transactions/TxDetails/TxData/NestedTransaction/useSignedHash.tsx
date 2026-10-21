@@ -5,19 +5,18 @@ import { isOnChainConfirmationTxData } from '@/utils/transaction-guards'
 
 const safeInterface = Safe__factory.createInterface()
 
-export const useSignedHash = (txData?: TransactionData | null) => {
-  const signedHash = useMemo(() => {
-    if (!isOnChainConfirmationTxData(txData)) {
-      return
-    }
-
-    const params = txData?.hexData ? safeInterface.decodeFunctionData('approveHash', txData?.hexData) : undefined
-    if (!params || params.length !== 1 || typeof params[0] !== 'string') {
-      return
-    }
-
-    return params[0]
-  }, [txData])
-
-  return signedHash
+const decodeApprovedHash = (hexData: string): string | undefined => {
+  try {
+    const [hash] = safeInterface.decodeFunctionData('approveHash', hexData)
+    return typeof hash === 'string' ? hash : undefined
+  } catch {
+    // Anyone can queue calldata with the approveHash selector and a malformed argument
+    return undefined
+  }
 }
+
+export const useSignedHash = (txData?: TransactionData | null): string | undefined =>
+  useMemo(() => {
+    if (!txData?.hexData || !isOnChainConfirmationTxData(txData)) return undefined
+    return decodeApprovedHash(txData.hexData)
+  }, [txData])

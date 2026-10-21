@@ -10,11 +10,9 @@ import { rebuildStagingSafes, stagingSafes } from './staging-safes.mjs'
 import { trustToken } from './tokens.mjs'
 import { waitUntil } from './indexing.mjs'
 
-// Staging CoW Protocol transactions; the local CoW API mock (infra/scripts/cow_api.py) serves their orders.
+// Staging CoW Protocol transactions; the local CoW API mock (infra/mocks/cow-api.ts) serves their orders.
 const staging = JSON.parse(readFileSync(new URL('./cow-transactions.json', import.meta.url), 'utf8'))
-const recorded = JSON.parse(
-  readFileSync(new URL('../infra/scripts/cow_api_orders.json', import.meta.url), 'utf8'),
-).orders
+const recorded = JSON.parse(readFileSync(new URL('../infra/mocks/cow-api-orders.json', import.meta.url), 'utf8')).orders
 
 const MULTICALL3 = '0xcA11bde05977b3631167028862bE2a173976CA11'
 const { owner4, sepoliaOwner2 } = stagingOwners
@@ -110,7 +108,7 @@ async function registerCowContracts(env) {
 // The UID of a recorded order placed by the local Safe; the mock finds the order by its validTo.
 export function localOrderUid(validTo, safeAddress, orders = recorded) {
   const order = orders.find((candidate) => candidate.validTo === validTo)
-  if (!order) throw new Error(`No recorded CoW order has validTo ${validTo}; record it in cow_api_orders.json`)
+  if (!order) throw new Error(`No recorded CoW order has validTo ${validTo}; record it in cow-api-orders.json`)
   const { uid } = order
   return `${uid.slice(0, 66)}${safeAddress.slice(2).toLowerCase()}${uid.slice(-8)}`
 }
@@ -227,8 +225,8 @@ async function settleOrder(env, provider, safeAddress, payer, { validTo, sold, b
     await provider.send('anvil_setCode', [SETTLEMENT, settlementCode])
   }
   await runInLocalService(env, 'cow-api', [
-    'python',
-    '/cow_api.py',
+    'node',
+    '/mocks/cow-api.ts',
     'register-settlement',
     receipt.hash,
     localOrderUid(validTo, safeAddress),

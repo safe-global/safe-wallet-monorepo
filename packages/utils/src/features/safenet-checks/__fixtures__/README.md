@@ -20,12 +20,14 @@ The reader tests use the raw logs through JSON-RPC and verify the real signature
 That deployment emitted a seven-field `NewRequest`. Those logs are removed from the capture,
 because the decoder reads only the current eight-field form (with `daoFeeShare`).
 
-The active defaults use Consensus `0x73b4BDc3112Dfb86085cDD84f26Ab908B20A4A84`,
-Coordinator `0xC6B34dA4c99C043A093214D58423a8bE39585B78`, and Oracle
-`0xB83c4b66e752D947c1F55fd703b7937e21e401E4` on chain 100.
+The active defaults use the Aegis deployment on chain 100: Consensus
+`0xc855761D619f6002923507cE68B84d7689C2aa96`, Coordinator
+`0xC6B34dA4c99C043A093214D58423a8bE39585B78`, and Oracle `0x4F61B8832978e83b80D69551AEf07557DBE41d03`.
 Council denial (`DisputeResolved` outcome `RESOLVED_DENIED` = 4) maps to `MALICIOUS` without another
 `OracleResult`. Approval still requires a verified attestation.
-Frozen disputes use `TIMED_OUT`; polling retains their arbitration deadline for late council results.
-Explicit timeouts and out-of-scope events use `TIMED_OUT`.
-The reader, snapshot, and cache identity remain unchanged. Checks without an on-chain
+An open dispute (`DisputeTriggered` with no ruling) is `DISPUTED`. Its ruling arrives weeks later, outside every log
+window, so the reader asks the oracle with `getRequest` while a dispute is open and maps `RESOLVED_DENIED` to `MALICIOUS`,
+`TIMED_OUT` to `TIMED_OUT`; `FROZEN` stays `DISPUTED`.
+Explicit timeouts, out-of-scope events and an approved ruling without an attestation use `TIMED_OUT`.
+The snapshot and cache identity remain unchanged. Checks without an on-chain
 deadline retain fast polling; no elapsed-block deadline is inferred from their first event.

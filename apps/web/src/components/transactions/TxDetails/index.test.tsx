@@ -4,7 +4,8 @@ import { CheckStatus, type Hex } from '@safe-global/utils/features/safenet-check
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import { buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
+import { basicTypesActions, multiSendTxDataBuilder, multiSendTxInfo } from '@/tests/builders/dataDecoded'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import * as useChainsModule from '@/hooks/useChains'
@@ -37,6 +38,36 @@ const renderDetails = (safenetEnabled: boolean) => {
 
   render(<TxDetails txSummary={safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()} />)
 }
+
+describe('TxDetails decoded data', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('renders every action of a batch that uses every ABI type', async () => {
+    const actions = basicTypesActions()
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`, () =>
+        HttpResponse.json(
+          transactionDetailsBuilder()
+            .with({
+              txInfo: multiSendTxInfo(actions.length),
+              txData: multiSendTxDataBuilder(actions).build(),
+              detailedExecutionInfo: multisigExecutionDetailsBuilder().build(),
+            })
+            .build(),
+        ),
+      ),
+    )
+
+    render(<TxDetails txSummary={safeTxSummaryBuilder().build()} />)
+    fireEvent.click(await screen.findByTestId('expande-all-btn'))
+
+    expect(screen.getAllByTestId('action-item')).toHaveLength(actions.length)
+    expect(screen.queryByText('Error parsing data')).not.toBeInTheDocument()
+  })
+})
 
 describe('TxDetails Safenet card', () => {
   afterEach(() => {
