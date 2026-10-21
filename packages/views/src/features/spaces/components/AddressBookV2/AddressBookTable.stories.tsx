@@ -7,7 +7,6 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import AddressBookTable from './AddressBookTable'
 import { LOCAL_CONTACTS, WORKSPACE_CONTACTS } from './mocks/fixtures'
-import { FULL_PERMISSIONS, NO_PERMISSIONS } from './types'
 
 /**
  * Contact (name + full address) · Chains · Added by · ⋮. Every column but the menu sorts. Below the
@@ -20,7 +19,6 @@ const meta = {
   decorators: [(Story) => <TableCard>{Story()}</TableCard>],
   args: {
     contacts: WORKSPACE_CONTACTS,
-    permissions: FULL_PERMISSIONS,
     renderAvatar: (address: string) => <Identicon address={address} size={24} />,
     getExplorerLink: (address: string) => ({
       href: `https://etherscan.io/address/${address}`,
@@ -37,7 +35,7 @@ type Story = StoryObj<typeof meta>
 export const Admin: Story = {}
 
 /** A member or an invitee may not change workspace contacts, so there is no ⋮ menu. */
-export const ReadOnly: Story = { args: { permissions: NO_PERMISSIONS } }
+export const ReadOnly: Story = { args: { onEdit: undefined, onDelete: undefined } }
 
 /** This browser's local book: no Added by, a share action per row, and shared contacts dimmed. */
 export const LocalBook: Story = {

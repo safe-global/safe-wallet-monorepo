@@ -6,7 +6,6 @@ export type AddressBookToolbarProps = {
   onQueryChange: (query: string) => void
   /** Beside the search, such as the Filters dropdown. */
   filters?: ReactNode
-  /** Right-aligned: Import, Export, Import signers, then the primary Add contact. */
   actions?: ReactNode
 }
 

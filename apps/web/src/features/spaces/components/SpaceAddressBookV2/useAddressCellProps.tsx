@@ -4,7 +4,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 
 const renderAvatar = (address: string) => <Identicon address={address} size={24} />
 
-/** The identicon and the current chain's explorer link that both tables show for each address. */
 const useAddressCellProps = () => {
   const chain = useCurrentChain()
 

@@ -6,19 +6,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import type { AddressBookPermissions } from './types'
 
 type ContactRowActionsProps = {
   name: string
-  permissions: AddressBookPermissions
   onEdit?: () => void
   onDelete?: () => void
 }
 
-/** Row actions behind one three-dot menu. Renders nothing when the member may do none of them. */
-const ContactRowActions = ({ name, permissions, onEdit, onDelete }: ContactRowActionsProps) => {
-  const { canEdit, canDelete } = permissions
-  if (!canEdit && !canDelete) return null
+const ContactRowActions = ({ name, onEdit, onDelete }: ContactRowActionsProps) => {
+  if (!onEdit && !onDelete) return null
 
   return (
     <DropdownMenu>
@@ -30,13 +26,13 @@ const ContactRowActions = ({ name, permissions, onEdit, onDelete }: ContactRowAc
         }
       />
       <DropdownMenuContent align="end">
-        {canEdit && (
+        {onEdit && (
           <DropdownMenuItem onClick={onEdit}>
             <Pencil />
             Edit contact
           </DropdownMenuItem>
         )}
-        {canDelete && (
+        {onDelete && (
           <DropdownMenuItem variant="destructive" onClick={onDelete}>
             <Trash2 />
             Delete contact

@@ -7,19 +7,22 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import { filterContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/filters'
-import {
-  FULL_PERMISSIONS,
-  type AddressBookContact,
-} from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import useAllAddressBooks from '@/hooks/useAllAddressBooks'
+import { useAppDispatch, type AppThunk } from '@/store'
+import { removeAddressBookEntry, selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
 import AddLocalContact from '../SpaceAddressBook/AddLocalContact'
 import AddToWorkspaceButton from '../SpaceAddressBook/AddToWorkspaceButton'
 import RequestToAddButton from '../SpaceAddressBook/RequestToAddButton'
 import DeleteLocalContactDialog from './DeleteLocalContactDialog'
 import useAddressCellProps from './useAddressCellProps'
+import { staleCasingKeys } from './utils'
 
-type OpenDialog = { type: 'edit' | 'delete'; contact: AddressBookContact }
+type OpenDialog =
+  | { type: 'edit'; contact: AddressBookContact; before: AddressBookState }
+  | { type: 'delete'; contact: AddressBookContact }
 
 type LocalContactsProps = {
   contacts: AddressBookContact[]
@@ -32,6 +35,15 @@ type LocalContactsProps = {
 }
 
 const chainIdsOf = (contact: AddressBookContact) => contact.chains.map((chain) => chain.chainId)
+
+const removeStaleCasings =
+  (contact: AddressBookContact, before: AddressBookState): AppThunk =>
+  (dispatch, getState) => {
+    const after = selectAllAddressBooks(getState())
+    for (const key of staleCasingKeys(before, after, contact.address, chainIdsOf(contact))) {
+      dispatch(removeAddressBookEntry(key))
+    }
+  }
 
 const AlreadyShared = ({ isCompact }: { isCompact: boolean }) => (
   <Tooltip>
@@ -60,8 +72,10 @@ const LocalContacts = ({
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
   const addressCellProps = useAddressCellProps()
+  const localBooks = useAllAddressBooks()
+  const dispatch = useAppDispatch()
 
-  const visibleContacts = useMemo(() => filterContacts(contacts, query), [contacts, query])
+  const visibleContacts = useMemo(() => searchContacts(contacts, query), [contacts, query])
   const pendingAddresses = useMemo(
     () => new Set(pendingRequests.map((request) => request.address.toLowerCase())),
     [pendingRequests],
@@ -79,6 +93,11 @@ const LocalContacts = ({
   }
 
   const closeDialog = () => setDialog(undefined)
+
+  const closeEditDialog = (contact: AddressBookContact, before: AddressBookState) => {
+    dispatch(removeStaleCasings(contact, before))
+    closeDialog()
+  }
 
   if (contacts.length === 0) {
     return (
@@ -98,10 +117,9 @@ const LocalContacts = ({
         ) : (
           <AddressBookTable
             contacts={visibleContacts}
-            permissions={FULL_PERMISSIONS}
             book="local"
             {...addressCellProps}
-            onEdit={(contact) => setDialog({ type: 'edit', contact })}
+            onEdit={(contact) => setDialog({ type: 'edit', contact, before: localBooks })}
             onDelete={(contact) => setDialog({ type: 'delete', contact })}
             renderRowAction={renderShareAction}
           />
@@ -110,19 +128,14 @@ const LocalContacts = ({
 
       {dialog?.type === 'edit' && (
         <EntryDialog
-          handleClose={closeDialog}
+          handleClose={() => closeEditDialog(dialog.contact, dialog.before)}
           defaultValues={{ name: dialog.contact.name, address: dialog.contact.address }}
           disableAddressInput
           chainIds={chainIdsOf(dialog.contact)}
         />
       )}
       {dialog?.type === 'delete' && (
-        <DeleteLocalContactDialog
-          name={dialog.contact.name}
-          address={dialog.contact.address}
-          chainIds={chainIdsOf(dialog.contact)}
-          onClose={closeDialog}
-        />
+        <DeleteLocalContactDialog name={dialog.contact.name} address={dialog.contact.address} onClose={closeDialog} />
       )}
     </div>
   )

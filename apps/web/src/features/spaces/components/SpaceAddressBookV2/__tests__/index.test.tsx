@@ -17,6 +17,9 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getStoreInstance } from '@/store'
+import type * as Store from '@/store'
+import type * as AddressBookSlice from '@/store/addressBookSlice'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import { downloadCsv } from '../../../utils/addressBookCsv'
@@ -102,11 +105,30 @@ jest.mock('../../SpaceAddressBook/RequestToAddButton', () => {
   return RequestToAddButton
 })
 jest.mock('@/components/address-book/EntryDialog', () => {
-  const EntryDialog = ({ defaultValues, chainIds }: { defaultValues: { name: string }; chainIds: string[] }) => (
-    <div role="dialog">
-      Editing local {defaultValues.name} on {chainIds.join(',')}
-    </div>
-  )
+  const { useAppDispatch } = jest.requireActual<typeof Store>('@/store')
+  const { upsertAddressBookEntries } = jest.requireActual<typeof AddressBookSlice>('@/store/addressBookSlice')
+  const EntryDialog = ({
+    handleClose,
+    defaultValues,
+    chainIds,
+  }: {
+    handleClose: () => void
+    defaultValues: { name: string; address: string }
+    chainIds: string[]
+  }) => {
+    const dispatch = useAppDispatch()
+    const save = () => {
+      dispatch(upsertAddressBookEntries({ chainIds, address: defaultValues.address, name: 'Renamed' }))
+      handleClose()
+    }
+    return (
+      <div role="dialog">
+        Editing local {defaultValues.name} on {chainIds.join(',')}
+        <button onClick={save}>Save</button>
+        <button onClick={handleClose}>Cancel</button>
+      </div>
+    )
+  }
   return EntryDialog
 })
 
@@ -178,11 +200,14 @@ const openRowMenu = async (name: string) => {
   await waitFor(() => expect(screen.getByRole('menu')).toBeInTheDocument())
 }
 
+const localBook = () => getStoreInstance().getState().addressBook
+
 const openLocalTab = () => userEvent.click(screen.getByRole('tab', { name: /^Local contacts/ }))
 
 describe('SpaceAddressBookV2', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    window.localStorage.clear()
     mockIsMobile.mockReturnValue(false)
     mockRole('admin')
     mockPrivateAddressBook(true)
@@ -503,6 +528,50 @@ describe('SpaceAddressBookV2', () => {
 
       expect(await screen.findByTestId('address-book-empty')).toHaveTextContent('No local contacts yet')
       expect(screen.getByRole('tab', { name: 'Local contacts (0)' })).toBeInTheDocument()
+    })
+
+    it('deletes a local contact saved under several casings of its address', async () => {
+      renderAddressBook({
+        '1': { [hardwareWallet]: 'Hardware wallet', [hardwareWallet.toLowerCase()]: 'Hardware wallet' },
+        '100': { [hardwareWallet.toLowerCase()]: 'Hardware wallet' },
+      })
+      await openLocalTab()
+      await openRowMenu('Hardware wallet')
+      await userEvent.click(screen.getByRole('menuitem', { name: 'Delete contact' }))
+      await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Delete' }))
+
+      expect(await screen.findByTestId('address-book-empty')).toBeInTheDocument()
+      expect(localBook()).toEqual({})
+    })
+
+    it('renames a local contact saved under several casings to one entry per chain', async () => {
+      renderAddressBook({
+        '1': { [hardwareWallet]: 'Hardware wallet' },
+        '100': { [hardwareWallet.toLowerCase()]: 'Hardware wallet', [hardwareWallet]: 'Hardware wallet' },
+      })
+      await openLocalTab()
+      await openRowMenu('Hardware wallet')
+      await userEvent.click(screen.getByRole('menuitem', { name: 'Edit contact' }))
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save' }))
+
+      expect(localBook()).toEqual({
+        '1': { [hardwareWallet]: 'Renamed' },
+        '100': { [hardwareWallet]: 'Renamed' },
+      })
+    })
+
+    it('leaves the local address book as it was when an edit is cancelled', async () => {
+      const book = {
+        '1': { [hardwareWallet]: 'Hardware wallet' },
+        '100': { [hardwareWallet.toLowerCase()]: 'Hardware wallet' },
+      }
+      renderAddressBook(book)
+      await openLocalTab()
+      await openRowMenu('Hardware wallet')
+      await userEvent.click(screen.getByRole('menuitem', { name: 'Edit contact' }))
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }))
+
+      expect(localBook()).toEqual(book)
     })
 
     it('offers to add the first local contact', async () => {

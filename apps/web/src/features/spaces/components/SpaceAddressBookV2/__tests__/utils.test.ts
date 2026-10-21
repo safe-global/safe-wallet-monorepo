@@ -3,7 +3,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
-import { toLocalContacts, toWorkspaceContacts } from '../utils'
+import { staleCasingKeys, storedKeysOf, toLocalContacts, toWorkspaceContacts } from '../utils'
 
 const itemBuilder = () =>
   Builder.new<SpaceAddressBookItemDto>().with({
@@ -90,7 +90,6 @@ describe('toLocalContacts', () => {
           { chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png', shortName: mainnet.shortName },
           { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null, shortName: gnosis.shortName },
         ],
-        isLocal: true,
         isShared: false,
       },
     ])
@@ -134,5 +133,63 @@ describe('toLocalContacts', () => {
       ['Hardware wallet', false],
       ['Treasury', true],
     ])
+  })
+})
+
+describe('storedKeysOf', () => {
+  const address = checksumAddress(faker.finance.ethereumAddress())
+  const other = checksumAddress(faker.finance.ethereumAddress())
+
+  it('finds every casing of the address on every chain', () => {
+    const keys = storedKeysOf(
+      {
+        '1': { [address]: 'Hardware wallet', [address.toLowerCase()]: 'Hw', [other]: 'Other' },
+        '100': { [address.toLowerCase()]: 'Hardware wallet' },
+      },
+      address.toLowerCase(),
+    )
+
+    expect(keys).toEqual([
+      { chainId: '1', address },
+      { chainId: '1', address: address.toLowerCase() },
+      { chainId: '100', address: address.toLowerCase() },
+    ])
+  })
+
+  it('looks only at the chains it is given', () => {
+    const keys = storedKeysOf(
+      { '1': { [address]: 'Hardware wallet' }, '100': { [address]: 'Hardware wallet' } },
+      address,
+      ['100'],
+    )
+
+    expect(keys).toEqual([{ chainId: '100', address }])
+  })
+})
+
+describe('staleCasingKeys', () => {
+  const address = checksumAddress(faker.finance.ethereumAddress())
+  const lower = address.toLowerCase()
+  const before = { '1': { [address]: 'Hardware wallet' }, '100': { [lower]: 'Hardware wallet' } }
+
+  it('returns the other casings once the address was saved under one of them', () => {
+    const after = { '1': { [address]: 'Renamed' }, '100': { [lower]: 'Hardware wallet', [address]: 'Renamed' } }
+
+    expect(staleCasingKeys(before, after, address, ['1', '100'])).toEqual([{ chainId: '100', address: lower }])
+  })
+
+  it('returns nothing when nothing was saved', () => {
+    expect(staleCasingKeys(before, before, address, ['1', '100'])).toEqual([])
+  })
+
+  it('leaves chains outside the contact alone', () => {
+    const books = { ...before, '5': { [lower]: 'Elsewhere' } }
+    const after = {
+      ...books,
+      '1': { [address]: 'Renamed' },
+      '100': { [lower]: 'Hardware wallet', [address]: 'Renamed' },
+    }
+
+    expect(staleCasingKeys(books, after, address, ['1', '100'])).toEqual([{ chainId: '100', address: lower }])
   })
 })

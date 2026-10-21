@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ContactRowActions from '../ContactRowActions'
-import { FULL_PERMISSIONS, NO_PERMISSIONS } from '../types'
 
 const openMenu = async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Actions for Treasury' }))
@@ -11,24 +10,24 @@ const openMenu = async () => {
 const menuItems = () => screen.getAllByRole('menuitem').map((item) => item.textContent)
 
 describe('ContactRowActions', () => {
-  it('renders nothing without any permission', () => {
-    const { container } = render(<ContactRowActions name="Treasury" permissions={NO_PERMISSIONS} />)
+  it('renders nothing without any action', () => {
+    const { container } = render(<ContactRowActions name="Treasury" />)
 
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('offers only the actions the member may take', async () => {
-    render(<ContactRowActions name="Treasury" permissions={{ canEdit: false, canDelete: true }} />)
+  it('offers only the actions it is given', async () => {
+    render(<ContactRowActions name="Treasury" onDelete={jest.fn()} />)
 
     await openMenu()
 
     expect(menuItems()).toEqual(['Delete contact'])
   })
 
-  it('offers an admin every action and fires its callback', async () => {
+  it('offers every action it is given and fires its callback', async () => {
     const onEdit = jest.fn()
     const onDelete = jest.fn()
-    render(<ContactRowActions name="Treasury" permissions={FULL_PERMISSIONS} onEdit={onEdit} onDelete={onDelete} />)
+    render(<ContactRowActions name="Treasury" onEdit={onEdit} onDelete={onDelete} />)
 
     await openMenu()
     expect(menuItems()).toEqual(['Edit contact', 'Delete contact'])

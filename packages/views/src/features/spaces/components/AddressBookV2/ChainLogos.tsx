@@ -17,7 +17,7 @@ const ChainLogo = ({ chain }: { chain: ChainInfo }) =>
     </span>
   )
 
-/** Overlapping chain logos, "+N" past three; every chain name on hover. */
+/** Overlapping chain logos with a "+N" overflow; every chain name on hover. */
 const ChainLogos = ({ chains }: { chains: ChainInfo[] }) => {
   const visible = chains.slice(0, MAX_VISIBLE)
   const rest = chains.length - visible.length

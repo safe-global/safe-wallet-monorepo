@@ -4,11 +4,7 @@ import { cn } from '@safe-global/views/utils/cn'
 
 const GROUP_SIZE = 4
 
-/**
- * The full 42-character address, checksummed, split into groups of four hex characters. The first
- * and last group carry full contrast; the middle groups are muted so the eye lands on the parts that
- * tell look-alike addresses apart. Never shortened: in the compact table it wraps between groups instead.
- */
+/** Never shortened; the first and last groups stand out because they tell look-alike addresses apart. */
 const GroupedAddress = ({ address, className }: { address: string; className?: string }) => {
   const checksummed = checksumAddress(address)
   const isValid = isAddress(checksummed)

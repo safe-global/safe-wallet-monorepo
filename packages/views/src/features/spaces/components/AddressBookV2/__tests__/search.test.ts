@@ -1,11 +1,11 @@
-import { filterContacts } from '../filters'
+import { searchContacts } from '../search'
 import { ADDRESSES, WORKSPACE_CONTACTS } from '../mocks/fixtures'
 
-const names = (query: string) => filterContacts(WORKSPACE_CONTACTS, query).map((contact) => contact.name)
+const names = (query: string) => searchContacts(WORKSPACE_CONTACTS, query).map((contact) => contact.name)
 
-describe('filterContacts', () => {
+describe('searchContacts', () => {
   it('keeps every contact for a blank query', () => {
-    expect(filterContacts(WORKSPACE_CONTACTS, '   ')).toEqual(WORKSPACE_CONTACTS)
+    expect(searchContacts(WORKSPACE_CONTACTS, '   ')).toEqual(WORKSPACE_CONTACTS)
   })
 
   it('matches part of the name, ignoring case', () => {
@@ -21,6 +21,6 @@ describe('filterContacts', () => {
   })
 
   it('keeps no contact when nothing matches', () => {
-    expect(filterContacts(WORKSPACE_CONTACTS, 'no such contact')).toEqual([])
+    expect(searchContacts(WORKSPACE_CONTACTS, 'no such contact')).toEqual([])
   })
 })

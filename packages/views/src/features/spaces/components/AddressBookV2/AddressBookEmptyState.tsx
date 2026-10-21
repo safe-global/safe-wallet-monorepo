@@ -28,7 +28,6 @@ const EMPTY_BOOK = {
   },
 }
 
-/** Inside the table card: a book with no contacts yet, or a search that matches none. */
 const AddressBookEmptyState = (props: AddressBookEmptyStateProps) => {
   if (props.kind === 'no-results') {
     return (

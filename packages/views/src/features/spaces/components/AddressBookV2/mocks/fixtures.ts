@@ -66,7 +66,7 @@ export const WORKSPACE_CONTACTS: AddressBookContact[] = [
 ]
 
 export const LOCAL_CONTACTS: AddressBookContact[] = [
-  { address: ADDRESSES.hardwareWallet, name: 'My hardware wallet', chains: [ethereum, base], isLocal: true },
-  { address: ADDRESSES.treasuryLookAlike, name: 'Old treasury', chains: [ethereum], isLocal: true },
-  { address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum], isLocal: true, isShared: true },
+  { address: ADDRESSES.hardwareWallet, name: 'My hardware wallet', chains: [ethereum, base] },
+  { address: ADDRESSES.treasuryLookAlike, name: 'Old treasury', chains: [ethereum] },
+  { address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum], isShared: true },
 ]

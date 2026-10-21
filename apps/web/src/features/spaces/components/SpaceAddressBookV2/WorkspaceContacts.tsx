@@ -7,12 +7,8 @@ import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import { filterContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/filters'
-import {
-  FULL_PERMISSIONS,
-  NO_PERMISSIONS,
-  type AddressBookContact,
-} from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
 import useChains from '@/hooks/useChains'
@@ -49,7 +45,7 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
     () => toWorkspaceContacts(items, configs, resolveMemberName),
     [items, configs, resolveMemberName],
   )
-  const visibleContacts = useMemo(() => filterContacts(contacts, query), [contacts, query])
+  const visibleContacts = useMemo(() => searchContacts(contacts, query), [contacts, query])
 
   const openDialog = (type: OpenDialog['type'], contact: AddressBookContact) => {
     const entry = items.find((item) => item.address === contact.address)
@@ -142,10 +138,9 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
         ) : (
           <AddressBookTable
             contacts={visibleContacts}
-            permissions={isAdmin ? FULL_PERMISSIONS : NO_PERMISSIONS}
             {...addressCellProps}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
+            onEdit={isAdmin ? handleEdit : undefined}
+            onDelete={isAdmin ? handleDelete : undefined}
           />
         )}
       </TableCard>

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
@@ -8,7 +8,7 @@ import { getInitials } from '@safe-global/views/components/common/AccountRow/uti
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
-import type { AddressBookContact, AddressBookPermissions } from './types'
+import type { AddressBookContact } from './types'
 
 const AddedBy = ({ name }: { name?: string }) =>
   name ? (
@@ -29,13 +29,13 @@ const AddedBy = ({ name }: { name?: string }) =>
 
 export type AddressBookTableProps = {
   contacts: AddressBookContact[]
-  permissions: AddressBookPermissions
   /** The workspace book shows Added by; the local book does not have it. */
   book?: 'workspace' | 'local'
   /** The identicon for an address. Defaults to a neutral gradient avatar. */
   renderAvatar?: (address: string) => ReactNode
   /** The block explorer page of an address. Without it the row has no explorer link. */
   getExplorerLink?: (address: string) => { href: string; title: string } | undefined
+  /** Each callback adds its item to the row menu; with neither there is no menu. */
   onEdit?: (contact: AddressBookContact) => void
   onDelete?: (contact: AddressBookContact) => void
   /** A control before the row menu, such as "Add to Workspace" on a local contact. */
@@ -43,13 +43,8 @@ export type AddressBookTableProps = {
   pageSize?: number
 }
 
-/**
- * The address book table: Contact (name and full address) · Chains · Added by · ⋮. Below the summed
- * column minimums it goes compact: Contact and the actions stay, the rest folds into a row detail.
- */
 const AddressBookTable = ({
   contacts,
-  permissions,
   book = 'workspace',
   renderAvatar,
   getExplorerLink,
@@ -58,7 +53,27 @@ const AddressBookTable = ({
   renderRowAction,
   pageSize,
 }: AddressBookTableProps) => {
-  const isWorkspace = book === 'workspace'
+  const chainsColumn: DataTableColumn<AddressBookContact> = {
+    id: 'chains',
+    header: 'Chains',
+    width: '20%',
+    priority: 'secondary',
+    minWidth: 90,
+    sortValue: (contact) => contact.chains.length,
+    cell: (contact) => <ChainLogos chains={contact.chains} />,
+  }
+
+  const addedByColumn: DataTableColumn<AddressBookContact> = {
+    id: 'added-by',
+    header: 'Added by',
+    width: '20%',
+    priority: 'secondary',
+    minWidth: 120,
+    sortValue: (contact) => contact.addedBy?.toLowerCase() ?? null,
+    cell: (contact) => <AddedBy name={contact.addedBy} />,
+  }
+
+  const secondaryColumns = book === 'workspace' ? [chainsColumn, addedByColumn] : [chainsColumn]
 
   const columns: DataTableColumn<AddressBookContact>[] = [
     {
@@ -74,35 +89,14 @@ const AddressBookTable = ({
         <ContactCell
           name={contact.name}
           address={contact.address}
-          isLocal={contact.isLocal}
+          isLocal={book === 'local'}
           isCompact={isCompact}
           avatar={renderAvatar?.(contact.address)}
           explorerLink={getExplorerLink?.(contact.address)}
         />
       ),
     },
-    {
-      id: 'chains',
-      header: 'Chains',
-      width: '20%',
-      priority: 'secondary',
-      minWidth: 90,
-      sortValue: (contact) => contact.chains.length,
-      cell: (contact) => <ChainLogos chains={contact.chains} />,
-    },
-    ...(isWorkspace
-      ? ([
-          {
-            id: 'added-by',
-            header: 'Added by',
-            width: '20%',
-            priority: 'secondary',
-            minWidth: 120,
-            sortValue: (contact) => contact.addedBy?.toLowerCase() ?? null,
-            cell: (contact) => <AddedBy name={contact.addedBy} />,
-          },
-        ] satisfies DataTableColumn<AddressBookContact>[])
-      : []),
+    ...secondaryColumns,
     {
       id: 'actions',
       width: 'fit',
@@ -114,30 +108,22 @@ const AddressBookTable = ({
           {renderRowAction?.(contact, { isCompact })}
           <ContactRowActions
             name={contact.name}
-            permissions={permissions}
-            onEdit={() => onEdit?.(contact)}
-            onDelete={() => onDelete?.(contact)}
+            onEdit={onEdit && (() => onEdit(contact))}
+            onDelete={onDelete && (() => onDelete(contact))}
           />
         </span>
       ),
     },
   ]
 
-  // The compact layout drops the secondary columns; this row detail brings them back per row.
   const renderRowDetail = (contact: AddressBookContact) => (
     <dl className="grid grid-cols-[5rem_1fr] items-center gap-x-2 gap-y-2 text-sm">
-      <dt className="text-muted-foreground">Chains</dt>
-      <dd>
-        <ChainLogos chains={contact.chains} />
-      </dd>
-      {isWorkspace && (
-        <>
-          <dt className="text-muted-foreground">Added by</dt>
-          <dd>
-            <AddedBy name={contact.addedBy} />
-          </dd>
-        </>
-      )}
+      {secondaryColumns.map((column) => (
+        <Fragment key={column.id}>
+          <dt className="text-muted-foreground">{column.header}</dt>
+          <dd>{column.cell(contact, { isCompact: true })}</dd>
+        </Fragment>
+      ))}
     </dl>
   )
 
