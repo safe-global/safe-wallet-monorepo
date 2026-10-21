@@ -9,7 +9,7 @@ import {
   AllowlistEmptyItem,
   AllowlistSection,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
-import DismissibleCallout from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/DismissibleCallout'
+import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
 import { TokenGroupError } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
 import { getFormTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
@@ -136,6 +136,7 @@ const TokensSection = ({
     >
       {hasAccount && !isCalloutDismissed && (
         <DismissibleCallout
+          className="mb-1"
           title={TOKENS_CALLOUT_TITLE}
           description={TOKENS_CALLOUT_DESCRIPTION}
           onDismiss={onDismissCallout}
