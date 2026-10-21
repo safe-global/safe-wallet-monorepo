@@ -11,7 +11,9 @@ import {
   STORY_SUBMITTED_AT,
   exampleSnapshot,
   inProgressWithDeadline,
+  openDisputeSnapshot,
   rejectedSnapshot,
+  timedOutDisputeSnapshot,
 } from './storyExamples'
 
 faker.seed(456)
@@ -63,9 +65,10 @@ export const RiskDetected: Story = {
   args: { publicStatus: CheckStatus.MALICIOUS, snapshot: rejectedSnapshot(SAFENET_EXAMPLE_VOTES.approvalAndSpender) },
 }
 
+export const UnderReview: Story = {
+  args: { publicStatus: CheckStatus.DISPUTED, snapshot: openDisputeSnapshot() },
+}
+
 export const CheckFailed: Story = {
-  args: {
-    publicStatus: CheckStatus.TIMED_OUT,
-    snapshot: rejectedSnapshot(SAFENET_EXAMPLE_VOTES.openDispute, CheckStatus.TIMED_OUT),
-  },
+  args: { publicStatus: CheckStatus.TIMED_OUT, snapshot: timedOutDisputeSnapshot() },
 }

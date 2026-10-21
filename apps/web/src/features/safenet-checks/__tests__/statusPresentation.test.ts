@@ -59,6 +59,23 @@ describe('resolvePresentation', () => {
     // poll restores it, so the section stays out rather than showing a stub.
     expect(resolvePresentation(status, undefined, false)).toBeUndefined()
   })
+
+  it('shows an open dispute as under review, with warning severity and the approved copy', () => {
+    expect(resolvePresentation(CheckStatus.DISPUTED, undefined, true)).toEqual({
+      severity: Severity.WARN,
+      label: 'Under review',
+      copy: 'A sentinel flagged this transaction, and the dispute is open. Safenet will publish a final ruling.',
+      muted: false,
+    })
+  })
+
+  it('keeps the failure copy for a check that timed out', () => {
+    expect(resolvePresentation(CheckStatus.TIMED_OUT, undefined, true)).toMatchObject({
+      severity: Severity.ERROR,
+      label: 'Check failed',
+      copy: 'Safenet check is unavailable. You can still continue.',
+    })
+  })
 })
 
 describe('getSafenetExplorerUrl', () => {
