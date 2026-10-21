@@ -63,7 +63,7 @@ describe('openStepUpPopup', () => {
     const [href, target] = open.mock.calls[0]
     const url = getAuthorizeUrl(String(href))
     expect(url.searchParams.get('elevate')).toBe('true')
-    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/step-up-complete.html')
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/step-up-complete')
     expect(target).toBe(STEP_UP_CHANNEL)
   })
 
