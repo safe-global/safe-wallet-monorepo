@@ -284,6 +284,10 @@ const fleetProposals = (): Proposal[] => {
     id: `fleet-${account}-reject`,
   })
   const untrusted = (tx: Proposal): Proposal => ({ ...tx, proposedBy: `Proposer · ${tx.recipient.split(' · ')[1]}` })
+  const noted = (tx: Proposal, text: string, author: string, date: string): Proposal => ({
+    ...tx,
+    note: { text, author, date },
+  })
   const addPriya: TransactionKind = { type: 'settings', change: { kind: 'addOwner', owner: 'Priya' } }
   const priya = 'Priya · 0x3e1b…09cd'
   return [
@@ -296,23 +300,48 @@ const fleetProposals = (): Proposal[] => {
       }),
       emergency:
         'Monitoring flagged unusual outflows from the bridge router. Pausing stops every bridge transfer until the council unpauses it.',
+      note: {
+        text: 'Paging the council now. Unpause only after the bridge team signs off.',
+        author: 'Jonas',
+        date: '21 Oct, 11:50',
+      },
     },
-    at('treasury-ethereum', 0, 'Audit firm · 0x2c4d…8e1f', '180,000 USDC', ['Dev', 'Ana'], '12d ago'),
+    noted(
+      at('treasury-ethereum', 0, 'Audit firm · 0x2c4d…8e1f', '180,000 USDC', ['Dev', 'Ana'], '12d ago'),
+      'Final audit milestone. Finance approved the invoice.',
+      'Ana',
+      '14 Oct, 10:05',
+    ),
     reject('treasury-ethereum', ['Max'], '1d ago'),
     at('treasury-ethereum', 1, 'Coinbase Prime · 0x7a9b…c210', '2,000 ETH', ['Dev'], '9d ago'),
     at('treasury-base', 0, 'Coinbase Prime · 0x7a9b…c210', '250,000 USDC', ['Ana', 'Max'], '6h ago'),
-    at('market-making-ethereum', 0, 'Market making Ethereum policy', '', ['Max'], '3d ago', {
-      type: 'settings',
-      change: { kind: 'changeThreshold', threshold: 1 },
-    }),
-    reject('market-making-ethereum', ['Kai'], '1d ago'),
-    at('liquidity-arbitrum', 0, 'CoW Swap · USDC → ETH', '400,000 USDC', ['Dev'], '3h ago', {
-      type: 'swap',
-      sell: '400,000 USDC',
-      buy: '124.8 ETH',
-      order: 'market',
-      expiry: 'Expires in 20h',
-    }),
+    noted(
+      at('market-making-ethereum', 0, 'Market making Ethereum policy', '', ['Max'], '3d ago', {
+        type: 'settings',
+        change: { kind: 'changeThreshold', threshold: 1 },
+      }),
+      'Temporary, for the market maker rotation. We revert it next week.',
+      'Max',
+      '18 Oct, 16:40',
+    ),
+    noted(
+      reject('market-making-ethereum', ['Kai'], '1d ago'),
+      'Rejecting the drop to 1 signature. Too risky for this Safe.',
+      'Kai',
+      '20 Oct, 10:30',
+    ),
+    noted(
+      at('liquidity-arbitrum', 0, 'CoW Swap · USDC → ETH', '400,000 USDC', ['Dev'], '3h ago', {
+        type: 'swap',
+        sell: '400,000 USDC',
+        buy: '124.8 ETH',
+        order: 'market',
+        expiry: 'Expires in 20h',
+      }),
+      'Rebalance before the next incentives epoch.',
+      'Dev',
+      '21 Oct, 09:15',
+    ),
     {
       ...at('liquidity-arbitrum', 0, 'Uniswap v4 · ETH/USDC', '400,000 USDC', ['Ana'], '2h ago'),
       id: 'fleet-liquidity-arbitrum-alt',
@@ -320,13 +349,28 @@ const fleetProposals = (): Proposal[] => {
     untrusted(at('liquidity-base', 0, 'Unknown · 0x9f3e…77c1', '480,000 USDT', [], '35m ago')),
     untrusted(at('grants-optimism', 0, 'Unknown · 0x1d0c…a3e9', '120,000 USDC', [], '2h ago')),
     untrusted(at('keepers-arbitrum', 0, 'Unknown · 0x5b7e…c0d4', '60 ETH', [], '5h ago')),
-    at('vesting-ethereum', 0, 'Investor unlock · 0x77fe…2c10', '2,000,000 SAFE', ['Max', 'Jonas'], '15d ago'),
-    at('grants-base', 0, '14 recipients · Batch transfer', '310,000 USDC', ['Ana'], '8d ago', {
-      type: 'batch',
-      actions: generateBatchActions(14, 'Grantee'),
-    }),
+    noted(
+      at('vesting-ethereum', 0, 'Investor unlock · 0x77fe…2c10', '2,000,000 SAFE', ['Max', 'Jonas'], '15d ago'),
+      'Unlock from the vesting schedule.',
+      'Max',
+      '6 Oct, 12:00',
+    ),
+    noted(
+      at('grants-base', 0, '14 recipients · Batch transfer', '310,000 USDC', ['Ana'], '8d ago', {
+        type: 'batch',
+        actions: generateBatchActions(14, 'Grantee'),
+      }),
+      'Grants round 2. Waiting on Lena since last week.',
+      'Ana',
+      '13 Oct, 15:20',
+    ),
     at('bridge-escrow-optimism', 0, priya, '', ['Jonas'], '10d ago', addPriya),
-    at('bridge-escrow-ethereum', 0, priya, '', ['Jonas', 'Lena', 'Theo'], '1d ago', addPriya),
+    noted(
+      at('bridge-escrow-ethereum', 0, priya, '', ['Jonas', 'Lena', 'Theo'], '1d ago', addPriya),
+      'Priya replaces Theo on the bridge escrows. Same change on every chain.',
+      'Jonas',
+      '20 Oct, 11:00',
+    ),
     at('bridge-escrow-base', 0, priya, '', ['Jonas'], '1d ago', addPriya),
     at('security-council-arbitrum', 0, 'Timelock guard', '', ['Jonas'], '2d ago', {
       type: 'settings',
@@ -334,10 +378,15 @@ const fleetProposals = (): Proposal[] => {
     }),
     at('liquidity-ethereum', 0, 'Uniswap v4 · ETH/USDC', '1,200 ETH', ['Dev', 'Ana'], '2h ago'),
     at('market-making-arbitrum', 0, 'Litware Markets · 0x51c7…9a02', '1,000,000 USDC', ['Max'], '30m ago'),
-    at('payroll-base', 0, '31 recipients · Batch transfer', '412,000 USDC', ['Ana'], '4h ago', {
-      type: 'batch',
-      actions: generateBatchActions(31, 'Employee'),
-    }),
+    noted(
+      at('payroll-base', 0, '31 recipients · Batch transfer', '412,000 USDC', ['Ana'], '4h ago', {
+        type: 'batch',
+        actions: generateBatchActions(31, 'Employee'),
+      }),
+      'October payroll. Three new hires this month, please check them.',
+      'Ana',
+      '21 Oct, 08:30',
+    ),
     at('payroll-gnosis', 0, '18 recipients · Batch transfer', '96,500 EURe', ['Dev', 'Ana'], '3h ago', {
       type: 'batch',
       actions: generateBatchActions(18, 'Employee'),
