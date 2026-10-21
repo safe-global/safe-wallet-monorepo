@@ -20,6 +20,12 @@ describe('DismissibleCallout', () => {
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 
+  it('passes an action through', () => {
+    render(<DismissibleCallout title="Tip" action={<button type="button">Open</button>} onDismiss={jest.fn()} />)
+
+    expect(screen.getByRole('button', { name: 'Open' })).toBeInTheDocument()
+  })
+
   it('uses the tone it is given', () => {
     render(<DismissibleCallout tone="info" title="Tip" onDismiss={jest.fn()} data-testid="callout" />)
 
