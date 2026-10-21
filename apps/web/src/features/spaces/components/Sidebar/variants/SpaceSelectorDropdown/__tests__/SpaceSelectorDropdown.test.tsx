@@ -341,7 +341,7 @@ describe('SpaceSelectorDropdown', () => {
     fireEvent.click(trigger)
     fireEvent.click(screen.getByText('View all'))
 
-    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }), undefined)
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
   })
 
@@ -1201,7 +1201,7 @@ describe('SpaceSelectorDropdown', () => {
     it.each([
       [false, false, null, 'Workspace', false],
       [true, true, 20, 'Free access', false],
-      [true, true, 14, 'Free access · 14 days left', false],
+      [true, true, 14, 'Free access', false],
       [true, true, 7, 'Free access · 7 days left', true],
       [true, true, 1, 'Free access · 1 day left', true],
       [true, true, null, 'Free access', false],

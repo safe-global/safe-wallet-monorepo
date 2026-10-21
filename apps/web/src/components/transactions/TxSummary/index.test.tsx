@@ -51,6 +51,23 @@ const mockTransactionInHistory = {
   transaction: { ...mockTransaction.transaction, txStatus: TransactionStatus.SUCCESS },
 }
 
+const SIGN_MESSAGE_LIB_NAME = 'Safe: SignMessageLib 1.3.0'
+
+const mockSignMessageLibTxInHistory = {
+  ...mockTransactionInHistory,
+  transaction: {
+    ...mockTransactionInHistory.transaction,
+    txInfo: {
+      type: TransactionInfoType.CUSTOM,
+      to: { value: '0x98FFBBF51bb33A056B08ddf711f289936AafF717', name: SIGN_MESSAGE_LIB_NAME },
+      dataSize: '100',
+      value: '0',
+      isCancellation: false,
+      methodName: 'signMessage',
+    },
+  } as unknown as Transaction,
+}
+
 describe('TxSummary', () => {
   it('should display a nonce if transaction is not grouped', () => {
     const { getByText } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
@@ -157,6 +174,15 @@ describe('TxSummary', () => {
     const { getByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
     const statusCell = getByTestId('tx-status-label').closest<HTMLElement>('[style*="grid-area"]')
     expect(statusCell?.style.gridArea).toBe('actions')
+  })
+
+  it('should display the contract, the method and the success status of an executed SignMessageLib transaction', () => {
+    jest.spyOn(pending, 'default').mockReturnValue(false)
+    const { getByTestId } = render(<TxSummary item={mockSignMessageLibTxInHistory} isConflictGroup={false} />)
+
+    expect(getByTestId('tx-type')).toHaveTextContent(SIGN_MESSAGE_LIB_NAME)
+    expect(getByTestId('tx-info')).toHaveTextContent('signMessage')
+    expect(getByTestId('tx-status-label')).toHaveTextContent('Success')
   })
 
   it('should not display a status label if transaction is in queue and not pending', () => {

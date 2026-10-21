@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { RootState } from '@/store'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import SafeWorkspaceSignInDialog from './index'
 
 const signedOutState = {

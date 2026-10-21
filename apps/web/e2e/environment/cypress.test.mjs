@@ -55,7 +55,7 @@ test('selects only registered specs and supports a focused local rerun', () => {
 })
 
 test('rejects unknown or empty spec selection instead of running staging-dependent specs', () => {
-  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_delete_btn', 'tx_queue_delete_btn,']) {
+  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_replace_btn', 'tx_queue_replace_btn,']) {
     assert.throws(() => selectCypressSpecs(selection), /No isolated scenario/)
   }
 })

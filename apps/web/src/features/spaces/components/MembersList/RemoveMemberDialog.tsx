@@ -11,7 +11,6 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const RemoveMemberDialog = ({
@@ -29,7 +28,6 @@ const RemoveMemberDialog = ({
   const dispatch = useAppDispatch()
   const [deleteMember] = useMembersRemoveUserV1Mutation()
   const [errorMessage, setErrorMessage] = useState<string>('')
-  const { membership } = useCurrentMemberProfile()
   const isDarkMode = useDarkMode()
 
   const handleConfirm = async () => {
@@ -41,11 +39,6 @@ const RemoveMemberDialog = ({
       if (error) {
         throw error
       }
-
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_REMOVED, label: spaceId ?? undefined },
-        { workspace_id: spaceId, removed_by_role: membership?.role.toLowerCase() },
-      )
 
       dispatch(
         showNotification({

@@ -3,6 +3,7 @@ import * as space from '../pages/spaces.page.js'
 import * as wallet from '../../support/utils/wallet.js'
 import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 import { walletCredentials } from '../../support/credentials.js'
+import * as spendinglimit from '../pages/spending_limits.pages.js'
 
 let owner
 before(() => {
@@ -11,7 +12,7 @@ before(() => {
 
 describe('Spaces dashboard tests', () => {
   beforeEach(() => {
-    wallet.connectSignerViaStorage(owner, constants.spacesUrl)
+    wallet.connectSignerViaStorage(owner, constants.spacesUrl, { extraStorage: spendinglimit.safeProOffStorage })
     space.clickOnSignInBtn()
     space.waitForSpacesWelcomeReady()
     space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
@@ -162,7 +163,7 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
 
 describe('Spaces empty dashboard tests', () => {
   beforeEach(() => {
-    wallet.connectSignerViaStorage(owner, constants.spacesUrl)
+    wallet.connectSignerViaStorage(owner, constants.spacesUrl, { extraStorage: spendinglimit.safeProOffStorage })
     space.clickOnSignInBtn()
     space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.uuid)
   })

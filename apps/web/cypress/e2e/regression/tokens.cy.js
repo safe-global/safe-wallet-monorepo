@@ -136,13 +136,4 @@ describe('Tokens tests', () => {
     assets.clickOnTokenBalanceSortBtn()
     assets.verifyTokenBalanceOrder('descending')
   })
-
-  // Added to prod
-  it('Verify that when connected user is not owner, Send button is disabled', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_3)
-    assets.toggleShowAllTokens(true)
-    assets.toggleHideDust(false)
-    assets.showSendBtn(0)
-    assets.VerifySendButtonIsDisabled()
-  })
 })

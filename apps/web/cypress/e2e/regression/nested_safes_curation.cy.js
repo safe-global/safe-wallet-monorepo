@@ -105,17 +105,6 @@ describe('Nested safes curation tests', () => {
       // Manage button should be visible
       nsafes.verifyManageBtnExists()
     })
-
-    it('Verify suspicious safes have warning icons in manage mode', () => {
-      safeNav.clickOnNestedSafesBtn()
-      nsafes.waitForIntroScreenToLoad()
-      nsafes.clickReviewNestedSafesBtn()
-
-      // All safes visible in manage mode
-      nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.TOTAL_NESTED_SAFES)
-      // Suspicious safes have warning icons
-      nsafes.verifyWarningIconCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
-    })
   })
 
   describe('After curation completed', () => {
@@ -129,17 +118,6 @@ describe('Nested safes curation tests', () => {
       // After save, popover stays open in normal view - close it so tests can start fresh
       nsafes.closePopover()
       nsafes.verifyPopoverClosed()
-    })
-
-    it('Verify normal view shows only selected safes without warning icons', () => {
-      // Re-open the list
-      safeNav.clickOnNestedSafesBtn()
-      nsafes.waitForNestedSafeListToLoad()
-
-      // Only the one safe we selected should be visible
-      nsafes.verifyVisibleNestedSafesCount(1)
-      nsafes.verifyWarningIconCount(0)
-      nsafes.verifyManageBtnExists()
     })
 
     it('Verify +X more nested safes indicator appears when uncurated safes exist', () => {

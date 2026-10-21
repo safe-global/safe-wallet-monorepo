@@ -14,8 +14,8 @@ const termsCheckbox = '[data-slot="checkbox"]'
 // Once opened, Base UI select popups stay mounted after closing — scope to the open one.
 const openSelectContent = '[data-slot="select-content"][data-open]'
 const selectItem = '[data-slot="select-item"]'
-export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
-export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
+const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
+const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
 const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
 const startRecoveryBtn = '[data-testid="start-recovery"]'
 const recoveryDelaySelect = '[data-testid="recovery-delay-select"]'
@@ -25,10 +25,9 @@ const goToQueueBtn = '[data-testid="queue-btn"]'
 const executeBtn = '[data-testid="execute-btn"]'
 const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
-const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const recoveryModalTitle = 'How does recovery work'
+const RECOVERY_STATE_TIMEOUT_MS = 60000
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',
@@ -57,9 +56,6 @@ export function verifyRecovererConfirmationData(data) {
 
 export function verifyRecoveryTableDisplayed() {
   cy.get(tableContainer).should('be.visible')
-}
-export function clickOnExecuteRecoveryCancelBtn() {
-  cy.get(executeFormBtn).click()
 }
 export function cancelRecoveryTx() {
   cy.get(txDate).click()
@@ -135,8 +131,14 @@ export function agreeToTerms() {
   })
 }
 
-export function verifyRecovererAdded(address) {
-  main.verifyValuesExist(tableContainer, address)
+export function verifyRecovererAdded(addresses) {
+  addresses.forEach((address) => {
+    cy.get(tableContainer, { timeout: RECOVERY_STATE_TIMEOUT_MS }).should('contain', address)
+  })
+}
+
+export function verifySetupRecoveryBtnVisible() {
+  cy.get(setupRecoveryBtn, { timeout: RECOVERY_STATE_TIMEOUT_MS }).should('be.visible')
 }
 
 export function clearRecoverers() {
@@ -145,7 +147,7 @@ export function clearRecoverers() {
       cy.get(removeRecovererBtn).each(($btn) => {
         cy.wrap($btn).click()
         clickOnNextBtn()
-        tx.executeFlow_1()
+        tx.signAndExecuteWithConnectedWallet()
       })
     }
   })
@@ -163,19 +165,6 @@ export function enterOwnerAddress(address) {
   safe.inputOwnerAddress(0, address)
 }
 
-const RECOVERY_PROPOSAL_TIMEOUT_MS = 7000
-
-// The proposal modal shows once the recovery state loads, and only for a guardian who did not dismiss it.
-export function postponeRecovery() {
-  main
-    .pollUntil(() => Cypress.$(postponeRecoveryBtn).length > 0, RECOVERY_PROPOSAL_TIMEOUT_MS)
-    .then((shown) => {
-      if (!shown) return
-      cy.get(postponeRecoveryBtn).click()
-      cy.get(postponeRecoveryBtn).should('not.exist')
-    })
-}
-
 export function clickOnRecoverLaterBtn() {
   cy.get(postponeRecoveryBtn).click()
   cy.get(postponeRecoveryBtn).should('not.exist')
@@ -189,13 +178,8 @@ export function verifyRecoveryProposalCard() {
   cy.get(recoveryProposalCard).should('be.visible')
 }
 
-export function verifyRecoveryModalDisplayed() {
-  cy.contains(recoveryModalTitle).should('be.visible')
-}
-
 export function deleteRecoveryModule() {
   cy.get(moduleRemoveIcon).click()
   main.acceptCookies()
-  clickOnNextBtn()
-  tx.executeFlow_1()
+  tx.signAndExecuteWithConnectedWallet()
 }

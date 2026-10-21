@@ -1,5 +1,4 @@
 import Track from '@/components/common/Track'
-import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
@@ -39,11 +38,6 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
     setTxFlow(<RecoverAccountFlow />)
   }
 
-  const handleRecoverWithTracking = () => {
-    trackEvent(RECOVERY_EVENTS.START_RECOVERY)
-    handleRecover()
-  }
-
   const icon = (
     <img
       src={`/images/common/propose-recovery-${isDarkMode ? 'dark' : 'light'}.svg`}
@@ -54,9 +48,11 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const recoveryButton = (
-    <Button data-testid="start-recovery" variant="default" onClick={handleRecoverWithTracking} className={css.button}>
-      Start recovery
-    </Button>
+    <Track {...RECOVERY_EVENTS.START_RECOVERY}>
+      <Button data-testid="start-recovery" variant="default" onClick={handleRecover} className={css.button}>
+        Start recovery
+      </Button>
+    </Track>
   )
 
   if (orientation === 'horizontal') {
@@ -102,16 +98,11 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
       <Separator className="mx-[calc(-1*var(--space-4))]" />
 
       <div className="flex justify-end gap-0 md:gap-2">
-        <Button
-          variant="ghost"
-          data-testid="postpone-recovery-btn"
-          onClick={() => {
-            trackEvent(RECOVERY_EVENTS.DISMISS_PROPOSAL_CARD)
-            onClose?.()
-          }}
-        >
-          I&apos;ll do it later
-        </Button>
+        <Track {...RECOVERY_EVENTS.DISMISS_PROPOSAL_CARD}>
+          <Button variant="ghost" data-testid="postpone-recovery-btn" onClick={() => onClose?.()}>
+            I&apos;ll do it later
+          </Button>
+        </Track>
         {recoveryButton}
       </div>
     </Card>

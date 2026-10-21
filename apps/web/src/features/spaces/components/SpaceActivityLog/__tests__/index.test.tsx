@@ -221,7 +221,7 @@ describe('SpaceActivityLog', () => {
     const { rerender } = render(<SpaceActivityLog />)
     rerender(<SpaceActivityLog />)
 
-    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_VIEWED, undefined)
     expect(trackEvent).toHaveBeenCalledTimes(1)
   })
 

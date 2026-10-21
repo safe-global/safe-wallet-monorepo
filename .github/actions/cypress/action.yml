@@ -37,17 +37,17 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: ./.github/actions/yarn
+    - uses: $/.github/actions/yarn
 
     - name: Install Chrome
-      uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
+      uses: browser-actions/setup-chrome@v1.7.3
       with:
         chrome-version: '134'
       id: setup-chrome
 
     # Secrets (CYPRESS_*, BEAMER_DATA_E2E, NEXT_PUBLIC_*) come from the calling
     # workflow's `env:` block on the step that uses this action.
-    - uses: ./.github/actions/build
+    - uses: $/.github/actions/build
       env:
         NODE_ENV: cypress
         # `next build` overrides NODE_ENV to 'production' in client bundles, so
@@ -55,7 +55,7 @@ runs:
         # NEXT_PUBLIC_ flag that does survive the build.
         NEXT_PUBLIC_IS_TEST_E2E: 'true'
 
-    - uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
+    - uses: cypress-io/github-action@v6.10.9
       with:
         spec: ${{ inputs.spec }}
         group: ${{ inputs.record == 'true' && inputs.group || '' }}

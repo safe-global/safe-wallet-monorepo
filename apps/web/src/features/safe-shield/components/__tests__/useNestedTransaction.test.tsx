@@ -1,7 +1,29 @@
+import { faker } from '@faker-js/faker'
+import { getAddress } from 'ethers'
+import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { renderHook, waitFor } from '@/tests/test-utils'
+import { chainBuilder } from '@/tests/builders/chains'
+import { safeInfoBuilder } from '@/tests/builders/safe'
+import { safeTxBuilder, safeTxDataBuilder } from '@/tests/builders/safeTx'
+import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 
-import { detectNestedTransaction } from '../useNestedTransaction'
+import { detectNestedTransaction, useNestedTransaction } from '../useNestedTransaction'
+
+jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
+  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
+  getSafeInfo: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/transactions'),
+  useTransactionsGetTransactionByIdV1Query: jest.fn(),
+}))
+
+const mockGetSafeInfo = getSafeInfo as jest.Mock
+const mockUseTxByIdQuery = useTransactionsGetTransactionByIdV1Query as jest.Mock
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -51,6 +73,74 @@ describe('detectNestedTransaction', () => {
     expect(detectNestedTransaction(safeTx)).toBeNull()
   })
 })
+
+describe('useNestedTransaction', () => {
+  const chain = chainBuilder().build()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockGetSafeInfo.mockResolvedValue(safeInfoBuilder().build())
+    mockUseTxByIdQuery.mockReturnValue({ data: transactionDetailsBuilder().build(), isLoading: false })
+  })
+
+  it('keeps the nested data when the same transaction is reloaded', async () => {
+    const createdTx = buildApproveHashTx(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
+    const reloadedTx = safeTxBuilder()
+      .with({ data: { ...createdTx.data, to: getAddress(createdTx.data.to) } })
+      .build()
+
+    const { result, rerender } = renderHook(({ safeTx }) => useNestedTransaction(safeTx, chain), {
+      initialProps: { safeTx: createdTx },
+    })
+
+    await waitFor(() => {
+      expect(result.current.isNested).toBe(true)
+    })
+    const { nestedSafeTx } = result.current
+
+    rerender({ safeTx: reloadedTx })
+
+    expect(result.current.isNested).toBe(true)
+    expect(result.current.isNestedLoading).toBe(false)
+    expect(result.current.nestedSafeTx).toBe(nestedSafeTx)
+    expect(mockGetSafeInfo).toHaveBeenCalledTimes(1)
+  })
+
+  it('detects the nested transaction again when the approved hash changes', async () => {
+    const createdTx = buildApproveHashTx(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
+    const otherHash = faker.string.hexadecimal({ length: 64, casing: 'lower' })
+    const otherTx = safeTxBuilder()
+      .with({ data: { ...createdTx.data, data: encodeApproveHash(otherHash) } })
+      .build()
+
+    const { result, rerender } = renderHook(({ safeTx }) => useNestedTransaction(safeTx, chain), {
+      initialProps: { safeTx: createdTx },
+    })
+
+    await waitFor(() => {
+      expect(result.current.isNested).toBe(true)
+    })
+
+    rerender({ safeTx: otherTx })
+
+    await waitFor(() => {
+      expect(mockGetSafeInfo).toHaveBeenCalledTimes(2)
+    })
+    expect(mockUseTxByIdQuery).toHaveBeenLastCalledWith(
+      { chainId: chain.chainId, id: otherHash },
+      expect.objectContaining({ skip: false }),
+    )
+  })
+})
+
+const buildApproveHashTx = (hash: string): SafeTransaction =>
+  safeTxBuilder()
+    .with({
+      data: safeTxDataBuilder()
+        .with({ to: faker.finance.ethereumAddress(), data: encodeApproveHash(hash) })
+        .build(),
+    })
+    .build()
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),

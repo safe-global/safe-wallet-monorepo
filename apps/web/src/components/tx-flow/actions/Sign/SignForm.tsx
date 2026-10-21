@@ -79,7 +79,7 @@ export const SignForm = ({
       ;({ txId: resultTxId, isNestedSigning } = await signTx(safeTx, txId, origin))
     } catch (_err) {
       const err = asError(_err)
-      if (isWalletRejection(err)) {
+      if (isWalletRejection(_err)) {
         setIsRejectedByUser(true)
       } else {
         trackError(Errors._804, err)
