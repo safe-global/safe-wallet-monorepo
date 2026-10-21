@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import StatusAlert, { type StatusAlertProps } from '@safe-global/views/components/common/StatusAlert'
 
-type DismissibleCalloutProps = Pick<StatusAlertProps, 'title' | 'description' | 'className' | 'data-testid'> & {
+type DismissibleCalloutProps = Omit<StatusAlertProps, 'tone' | 'onDismiss'> & {
   tone?: StatusAlertProps['tone']
   onDismiss: () => void
 }
