@@ -33,8 +33,8 @@ const SelectableChip = ({
     {children}
     {selected && (
       <span className="ml-2 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted">
-        <Check className="size-3 group-hover/toggle:hidden" aria-hidden />
-        <X className="hidden size-3 group-hover/toggle:block" aria-hidden />
+        <Check className="size-3 group-hover/toggle:hidden group-focus-visible/toggle:hidden" aria-hidden />
+        <X className="hidden size-3 group-hover/toggle:block group-focus-visible/toggle:block" aria-hidden />
       </span>
     )}
   </Toggle>
