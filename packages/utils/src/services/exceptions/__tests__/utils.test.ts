@@ -71,16 +71,11 @@ describe('utils', () => {
       expect(result.message).not.toContain('secret123')
     })
 
-    it('keeps an identifier-like string code of a plain object', () => {
-      const result = asError({ code: 'ACTION_REJECTED' })
-
-      expect(result.code).toBe('ACTION_REJECTED')
-      expect(result.message).toBe('Non-Error object of type: object (code ACTION_REJECTED)')
-    })
-
     it.each([
-      ['free text', { code: 'word1 word2 word3 secret phrase' }],
+      ['a string', { code: 'ACTION_REJECTED' }],
+      ['a private key', { code: 'a'.repeat(64) }],
       ['a fraction', { code: 1.5 }],
+      ['an unsafe integer', { code: Number.MAX_SAFE_INTEGER + 1 }],
       ['an object', { code: { privateKey: 'secret123' } }],
     ])('drops a code that is %s', (_, thrown) => {
       const result = asError(thrown)

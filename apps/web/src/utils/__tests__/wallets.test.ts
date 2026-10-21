@@ -127,7 +127,6 @@ describe('wallets', () => {
 
     it('detects a plain-object rejection after asError converts it', () => {
       expect(isWalletRejection(asError({ code: 4001, message: 'User rejected transaction' }))).toBe(true)
-      expect(isWalletRejection(asError({ code: 'ACTION_REJECTED' }))).toBe(true)
     })
 
     it('detects an EIP-1193 rejection code on an Error', () => {

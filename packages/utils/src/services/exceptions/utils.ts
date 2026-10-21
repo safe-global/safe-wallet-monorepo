@@ -8,19 +8,15 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 interface ErrorWithStatus extends Error {
   status?: number | string
-  code?: number | string
+  code?: number
 }
 
-// Wallet and RPC error codes are short identifiers (4001, ACTION_REJECTED), so they carry no secrets
-const ERROR_CODE_RE = /^[A-Za-z0-9_]{1,64}$/
-
-const safeErrorCode = (thrown: unknown): number | string | undefined => {
+// EIP-1193 and JSON-RPC codes are safe integers, which cannot hold a secret; any other code could
+const safeIntegerCode = (thrown: unknown): number | undefined => {
   if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) return undefined
 
   const { code } = thrown as { code?: unknown }
-  if (typeof code === 'number' && Number.isInteger(code)) return code
-  if (typeof code === 'string' && ERROR_CODE_RE.test(code)) return code
-  return undefined
+  return typeof code === 'number' && Number.isSafeInteger(code) ? code : undefined
 }
 
 const isFetchBaseQueryError = (error: unknown): error is FetchBaseQueryError => {
@@ -93,7 +89,7 @@ export const asError = (thrown: unknown): ErrorWithStatus => {
     message = `Non-Error object of type: ${typeof thrown}${Array.isArray(thrown) ? ' (array)' : ''}`
   }
 
-  const code = safeErrorCode(thrown)
+  const code = safeIntegerCode(thrown)
   if (code === undefined) {
     return new Error(message) as ErrorWithStatus
   }
