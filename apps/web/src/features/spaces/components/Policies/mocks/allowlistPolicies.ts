@@ -53,6 +53,10 @@ export const mockPendingAllowlist = (overrides: Partial<QueuedAllowlistPolicy> =
 export const mockFullySignedPendingAllowlist = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-full', confirmationsSubmitted: 2 })
 
+/** Its signing window closed before every signature was in. */
+export const mockExpiredPendingAllowlist = (): QueuedAllowlistPolicy =>
+  mockPendingAllowlist({ id: '0xallowlist-expired', expiresAt: secondsFromNow(-DAY) })
+
 export const mockPendingAllowlistUpdate = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-update', operation: 'update' })
 

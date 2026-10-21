@@ -15,7 +15,6 @@ import type {
 import {
   ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
-  PENDING_OUTCOME_TITLE,
   connectHelper,
   executeLine,
   signedAndWaitingLine,
@@ -25,6 +24,7 @@ import {
   CANCEL_CONNECT_HELPER,
   CANCEL_NOT_A_SIGNER_HELPER,
   NOT_A_SIGNER_HELPER,
+  OUTCOME_TITLE,
   PENDING_BANNER_TITLE,
   SCHEDULED_BANNER_LINE,
   SCHEDULED_BANNER_TITLE,
@@ -47,6 +47,19 @@ export type AllowlistDrawerState = ActiveDrawerState | PendingDrawerState | Clos
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
 
 export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | QueuedAllowlistPolicy | FailedAllowlistPolicy
+
+/** `expired`: the signing window closed before the transaction executed. */
+export type AllowlistTxOutcome = PendingTxOutcome | 'expired'
+
+/** The outcome a row carries on its own: a failed status, or a pending one whose signing window has closed. */
+export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: number): AllowlistTxOutcome | undefined => {
+  if (policy.status === 'failed') return 'failed'
+  if (policy.status === 'pending' && policy.expiresAt !== undefined && policy.expiresAt * 1_000 <= nowMs) {
+    return 'expired'
+  }
+
+  return undefined
+}
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
   if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
@@ -101,11 +114,11 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
-const resolveClosed = (policy: PendingAllowlistPolicy, outcome: PendingTxOutcome): ClosedDrawerState => ({
+const resolveClosed = (policy: PendingAllowlistPolicy, outcome: AllowlistTxOutcome): ClosedDrawerState => ({
   kind: 'closed',
   operation: policy.operation,
   action: 'none',
-  bannerTitle: PENDING_OUTCOME_TITLE[outcome],
+  bannerTitle: OUTCOME_TITLE[outcome],
   bannerLine2: outcomeLine(outcome, policy.operation),
 })
 
@@ -113,9 +126,8 @@ export const resolveAllowlistDrawerState = (
   policy: AllowlistDrawerPolicy,
   viewer: Viewer,
   safeName: string,
-  outcome?: PendingTxOutcome,
+  outcome: AllowlistTxOutcome | undefined = inferAllowlistOutcome(policy, Date.now()),
 ): AllowlistDrawerState => {
-  // A failed row needs no outcome passed in: its status already says how the transaction ended.
   if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed')
   if (policy.status === 'pending') {
     return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)

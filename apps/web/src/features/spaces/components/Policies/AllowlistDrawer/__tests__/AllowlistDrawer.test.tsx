@@ -4,6 +4,7 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockExpiredPendingAllowlist,
   mockFailedAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
@@ -169,6 +170,26 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+  })
+
+  it.each(['replaced', 'deleted'] as const)('reports a %s transaction with no failure alert or chip', (outcome) => {
+    render(
+      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome={outcome} />,
+    )
+
+    expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
+    expect(screen.queryByText('Failed')).not.toBeInTheDocument()
+    expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  it('closes an expired transaction with no chip and no action', () => {
+    setup(mockExpiredPendingAllowlist())
+
+    expect(screen.getByText('The transaction expired and can no longer be signed.')).toBeInTheDocument()
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+    expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('keeps the removed badges once a removal has executed', () => {

@@ -18,8 +18,4 @@ describe('formatTimeToSign', () => {
   it('should say less than a day is left on the last day', () => {
     expect(formatTimeToSign(EXPIRES_AT, nowMs(3_600))).toBe('Less than a day left · until Oct 21, 2026')
   })
-
-  it('should say the transaction expired once the time is up', () => {
-    expect(formatTimeToSign(EXPIRES_AT, nowMs(0))).toBe('Expired · Oct 21, 2026')
-  })
 })

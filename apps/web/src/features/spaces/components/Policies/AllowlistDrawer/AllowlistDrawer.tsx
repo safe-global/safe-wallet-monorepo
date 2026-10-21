@@ -19,13 +19,12 @@ import {
   type PolicyStatus,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import type {
-  PendingTxOutcome,
-  Viewer,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
+  inferAllowlistOutcome,
   resolveAllowlistDrawerState,
   type ActiveAllowlistPolicy,
+  type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
@@ -61,7 +60,7 @@ type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   transactionLink?: string
   reviewTransactionHref?: LinkProps['href']
   /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
-  outcome?: PendingTxOutcome
+  outcome?: AllowlistTxOutcome
 }
 
 export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlistDrawerProps
@@ -69,8 +68,14 @@ export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlist
 const isPendingDrawer = (props: AllowlistDrawerProps): props is PendingAllowlistDrawerProps =>
   props.policy.status !== 'active'
 
-/** An executed change still waits out the guard's delay, so it reads Pending rather than Activating. */
-const getOutcomeStatus = (outcome: PendingTxOutcome): PolicyStatus => (outcome === 'executed' ? 'pending' : 'failed')
+/** Executed reads Pending rather than Activating: the change still waits out the guard's delay. */
+const OUTCOME_STATUS: Record<AllowlistTxOutcome, PolicyStatus | null> = {
+  executed: 'pending',
+  failed: 'failed',
+  replaced: null,
+  deleted: null,
+  expired: null,
+}
 
 const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const { open, onClose, policy, viewer, safe, overview, names, onConnectWallet } = props
@@ -81,12 +86,11 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
       ? getBlockExplorerLink(chain, policy.enforcement.guardAddress)?.href
       : undefined
 
-  const outcome = isPendingDrawer(props)
-    ? (props.outcome ?? (props.policy.status === 'failed' ? 'failed' : undefined))
-    : undefined
+  const now = Date.now()
+  const outcome = isPendingDrawer(props) ? (props.outcome ?? inferAllowlistOutcome(props.policy, now)) : undefined
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
-  const status = outcome ? getOutcomeStatus(outcome) : getPolicyStatus(policy)
+  const status = outcome ? OUTCOME_STATUS[outcome] : getPolicyStatus(policy)
   const isRemoved = state.kind !== 'active' && state.operation === 'remove'
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
@@ -106,9 +110,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
                 signed={state.signed}
                 required={state.required}
                 timeToSign={
-                  policy.status === 'pending' && policy.expiresAt
-                    ? formatTimeToSign(policy.expiresAt, Date.now())
-                    : undefined
+                  policy.status === 'pending' && policy.expiresAt ? formatTimeToSign(policy.expiresAt, now) : undefined
                 }
               />
             </>
@@ -117,14 +119,14 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             <ScheduledBanner
               title={state.bannerTitle}
               line2={state.bannerLine2}
-              appliesAt={formatAppliesAt(policy.scheduledChange.appliesAt, Date.now())}
+              appliesAt={formatAppliesAt(policy.scheduledChange.appliesAt, now)}
             />
           )}
           {state.kind === 'closed' &&
-            (outcome === 'executed' ? (
-              <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
-            ) : (
+            (outcome === 'failed' ? (
               <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />
+            ) : (
+              <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ))}
           <AllowlistRecipients recipients={getAllowlistRecipients(policy.data)} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />

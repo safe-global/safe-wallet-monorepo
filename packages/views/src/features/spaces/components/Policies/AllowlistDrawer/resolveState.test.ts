@@ -3,11 +3,12 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockExpiredPendingAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
 } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
-import { resolveAllowlistDrawerState } from './resolveState'
+import { inferAllowlistOutcome, resolveAllowlistDrawerState } from './resolveState'
 
 describe('resolveAllowlistDrawerState', () => {
   it('should let a signer manage an active allowlist', () => {
@@ -79,6 +80,16 @@ describe('resolveAllowlistDrawerState', () => {
       'Close this panel to see the current policies.',
     ],
     ['deleted', 'The transaction was deleted.', 'Close this panel to see the current policies.'],
+    [
+      'replaced',
+      'Another transaction used this nonce, so this one can no longer be executed.',
+      'Close this panel to see the current policies.',
+    ],
+    [
+      'expired',
+      'The transaction expired and can no longer be signed.',
+      'Close this panel to see the current policies.',
+    ],
   ] as const)('should, once the transaction was %s, report it with no action', (outcome, bannerTitle, bannerLine2) => {
     expect(resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll', outcome)).toEqual({
       kind: 'closed',
@@ -118,5 +129,31 @@ describe('resolveAllowlistDrawerState', () => {
       action: 'none',
       bannerTitle: 'The transaction failed and can no longer be executed.',
     })
+  })
+
+  it('should close an expired pending transaction without an outcome passed in', () => {
+    expect(resolveAllowlistDrawerState(mockExpiredPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
+      kind: 'closed',
+      action: 'none',
+      bannerTitle: 'The transaction expired and can no longer be signed.',
+    })
+  })
+})
+
+describe('inferAllowlistOutcome', () => {
+  const NOW_MS = 1_792_584_000_000
+
+  it('should read a failed status as failed', () => {
+    expect(inferAllowlistOutcome(mockFailedAllowlist(), NOW_MS)).toBe('failed')
+  })
+
+  it('should read a pending transaction as expired once its signing window has closed', () => {
+    expect(inferAllowlistOutcome(mockPendingAllowlist({ expiresAt: NOW_MS / 1_000 }), NOW_MS)).toBe('expired')
+  })
+
+  it('should infer nothing while the signing window is open or unknown', () => {
+    expect(inferAllowlistOutcome(mockPendingAllowlist({ expiresAt: NOW_MS / 1_000 + 1 }), NOW_MS)).toBeUndefined()
+    expect(inferAllowlistOutcome(mockPendingAllowlist({ expiresAt: undefined }), NOW_MS)).toBeUndefined()
+    expect(inferAllowlistOutcome(mockActiveAllowlist(), NOW_MS)).toBeUndefined()
   })
 })

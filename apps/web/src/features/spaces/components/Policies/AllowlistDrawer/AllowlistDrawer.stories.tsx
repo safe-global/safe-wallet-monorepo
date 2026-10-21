@@ -5,6 +5,7 @@ import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockExpiredPendingAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
@@ -95,6 +96,10 @@ export const PendingReplaced: Story = {
 
 export const PendingDeleted: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'deleted' },
+}
+
+export const PendingExpired: Story = {
+  args: { ...PENDING_ARGS, policy: mockExpiredPendingAllowlist(), viewer: MOCK_VIEWERS.signer },
 }
 
 export const Activating: Story = { args: { policy: mockActivatingAllowlist() } }

@@ -1,5 +1,6 @@
 import type { PendingPolicyOperation } from '../types'
-import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
+import type { AllowlistTxOutcome } from './resolveState'
+import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
 
 export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   create: 'The allowlist is not active as the transaction is not yet executed.',
@@ -16,7 +17,12 @@ const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
   remove: 'The allowlist is removed after the 24-hour delay.',
 }
 
-export const outcomeLine = (outcome: PendingTxOutcome, operation: PendingPolicyOperation): string =>
+export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
+  ...PENDING_OUTCOME_TITLE,
+  expired: 'The transaction expired and can no longer be signed.',
+}
+
+export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string =>
   outcome === 'executed' ? EXECUTED_LINE[operation] : 'Close this panel to see the current policies.'
 
 export const SCHEDULED_BANNER_TITLE = 'Change pending'
