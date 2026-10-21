@@ -46,7 +46,6 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import { AccountPanel, type AccountDialog, type AccountState } from './m2AccountPanel'
 import {
-  getAllowlistAccountKeys,
   getPolicyRows,
   PoliciesByPolicyPage,
   PoliciesOverviewPage,
@@ -163,6 +162,10 @@ type PrototypeState = {
   editInitialChoices: SetupChoices | null
   /** Edit only: the setup's own account and choices, put back when the edit ends, since the edit borrows both. */
   editRestore: Pick<PrototypeState, 'setupAccountKey' | 'choices'> | null
+  /** Edit reached from Create by picking an account that already has an allowlist: the account stays changeable. */
+  editFromCreate: boolean
+  /** The setup's first execution just finished: its side panel confirms it once, until closed. */
+  justActivated: boolean
 }
 
 const WIZARD_DEFAULTS: Pick<PrototypeState, 'choices' | 'preflight'> = {
@@ -186,6 +189,8 @@ const INITIAL_STATE: PrototypeState = {
   wizardMode: 'create',
   editInitialChoices: null,
   editRestore: null,
+  editFromCreate: false,
+  justActivated: false,
   ...WIZARD_DEFAULTS,
 }
 
@@ -194,6 +199,7 @@ const EDIT_ENDED: Partial<PrototypeState> = {
   wizardMode: 'create',
   editInitialChoices: null,
   editRestore: null,
+  editFromCreate: false,
   wizardStep: 0,
 }
 
@@ -218,6 +224,7 @@ const WIZARD: Partial<PrototypeState> = {
   wizardMode: 'create',
   editInitialChoices: null,
   editRestore: null,
+  editFromCreate: false,
   ...NOT_STARTED,
   ...ON_PAYMENTS,
 }
@@ -361,6 +368,23 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
     ],
   },
   {
+    // The edit flow on Payments' live allowlist, opened as its side panel's Edit does.
+    heading: 'Edit allowlist',
+    jumps: [
+      { label: 'Edit · Create', view: 'by-policy', state: { ...EDIT, wizardStep: 0 } },
+      {
+        label: 'Edit · Review (2 changes)',
+        view: 'by-policy',
+        state: { ...EDIT, wizardStep: REVIEW_STEP, choices: EDIT_TWO_CHANGES },
+      },
+      {
+        label: 'Edit · Execute',
+        view: 'by-policy',
+        state: { ...EDIT, wizardStep: EXECUTE_STEP, choices: EDIT_TWO_CHANGES },
+      },
+    ],
+  },
+  {
     // Create with the account failing one of its pre-setup checks.
     heading: 'Create · account checks',
     jumps: [
@@ -368,17 +392,11 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
         label: 'Unknown policy installed',
         state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'other-guard' },
       },
-      {
-        label: 'Allowlist already installed',
-        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'policy-guard' },
-      },
+      // Picking an account that already has an allowlist turns Create into an edit of it, the account still changeable.
+      { label: 'Account already has an allowlist', view: 'by-policy', state: { ...EDIT, editFromCreate: true } },
       {
         label: 'Safe account needs an update',
         state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'old-version' },
-      },
-      {
-        label: 'Pending transactions',
-        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'pending-transactions' },
       },
     ],
   },
@@ -387,6 +405,7 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
     heading: 'Allowlist side panel',
     jumps: [
       allowlistPanel('Active · signer', LIVE_SETUP, { viewer: 'signer' }),
+      allowlistPanel('Active · just activated', { ...LIVE_SETUP, justActivated: true }, { viewer: 'signer' }),
       allowlistPanel(
         'Active · spending limits not covered',
         { ...LIVE_SETUP, choices: { ...DEFAULT_CHOICES, applyToSpendingLimits: false } },
@@ -400,7 +419,7 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
       allowlistPanel('Pending · not a signer', PENDING_SETUP, { viewer: 'non-signer' }),
       allowlistPanel('Pending · fully signed', SIGNED_SETUP, { viewer: 'non-signer' }),
       allowlistPanel('Pending · removal', PENDING_SETUP, { viewer: 'signer', operation: 'remove' }, 'tom'),
-      allowlistPanel('Executed', PENDING_SETUP, { viewer: 'signer', outcome: 'executed' }),
+      allowlistPanel('Executed · 24h delay', PENDING_SETUP, { viewer: 'signer', outcome: 'executed' }),
       allowlistPanel('Failed', PENDING_SETUP, { viewer: 'signer', outcome: 'failed' }),
       allowlistPanel('Replaced', PENDING_SETUP, { viewer: 'signer', outcome: 'replaced' }),
       allowlistPanel('Deleted', PENDING_SETUP, { viewer: 'signer', outcome: 'deleted' }),
@@ -579,14 +598,9 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
         jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'other-guard' } },
       },
       {
-        id: 'create-policy-guard',
-        label: 'Failure · Allowlist already installed',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'policy-guard' } },
-      },
-      {
-        id: 'create-pending-transactions',
-        label: 'Failure · Pending transactions',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'pending-transactions' } },
+        id: 'create-existing-allowlist',
+        label: 'Account already has an allowlist (edit)',
+        jump: { view: 'by-policy', state: { ...EDIT, editFromCreate: true } },
       },
     ],
   },
@@ -959,8 +973,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     stopExecution()
     update({ ...backToPaymentsPanel, account: 'executing', dialog: undefined, wizardStep: 0 })
     executionTimer.current = setTimeout(() => {
-      update({ account: 'enforcing' })
-      toast('Successfully executed.')
+      update({ account: 'enforcing', justActivated: true })
     }, EXECUTION_TIME_MS)
   }
 
@@ -980,6 +993,8 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           wizardMode: 'create',
           editInitialChoices: null,
           editRestore: null,
+          editFromCreate: false,
+          justActivated: false,
           ...WIZARD_DEFAULTS,
           ...patch,
         }))
@@ -1000,8 +1015,8 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   const isSetupRowEdit = state.policyId === SETUP_ROW_ID
 
   /** Sign in edit mode: the setup's allowlist keeps the new choices as a change pending; any other account is unchanged. */
+  // No toast when landing on the table: the side panel that opens already shows the new state.
   const signEdit = () => {
-    toast('Successfully added to queue.')
     update({
       screen: 'overview',
       panelKey: null,
@@ -1015,21 +1030,59 @@ const GuardSetupFlowPrototype = (): ReactElement => {
 
   const closeWizard = () =>
     state.wizardMode === 'edit'
-      ? update({ screen: 'overview', panelKey: null, ...EDIT_ENDED, ...(state.editRestore ?? {}) })
+      ? update({
+          screen: 'overview',
+          panelKey: null,
+          // An edit started from Create had no panel open, so closing goes back to the plain table.
+          ...(state.editFromCreate ? { policyId: null } : {}),
+          ...EDIT_ENDED,
+          ...(state.editRestore ?? {}),
+        })
       : update(backToPaymentsPanel)
 
   /** Edit in a live allowlist's panel: the create flow on that account, starting from the allowlist as it is. */
+  /** A live allowlist's tokens and recipients as form choices: for Edit, and for Create on an account that has one. */
+  const choicesFromAllowlist = (row: PolicyRow): SetupChoices =>
+    row.id === SETUP_ROW_ID
+      ? state.choices
+      : {
+          recipients: row.people.map(({ name, address }) => ({ name, address, selected: true })),
+          addedTokens: [],
+          keptConflicts: [],
+          blockedSettings: [],
+          ...getAllowlistSettings(row.account),
+        }
+
+  /** Picking an account with an allowlist prefills its current rules; leaving it starts over with an empty form. */
+  const pickSetupAccount = (account: M2Account) => {
+    const existing = getPolicyRows(payments).find(
+      (row) => row.type === 'allowlist' && getAccountKey(row.account) === getAccountKey(account),
+    )
+    // An account with an allowlist turns the setup into an edit of it, prefilled, the account still changeable.
+    if (existing) {
+      const liveChoices = choicesFromAllowlist(existing)
+      update({
+        setupAccountKey: getAccountKey(account),
+        wizardMode: 'edit',
+        editFromCreate: true,
+        policyId: existing.id,
+        choices: liveChoices,
+        editInitialChoices: liveChoices,
+        editRestore: state.editFromCreate ? state.editRestore : { setupAccountKey: null, choices: FRESH_CHOICES },
+      })
+      return
+    }
+    // Back to an account without one: a fresh create again.
+    update({
+      setupAccountKey: getAccountKey(account),
+      ...(state.editFromCreate
+        ? { ...EDIT_ENDED, policyId: null, choices: FRESH_CHOICES, wizardStep: state.wizardStep }
+        : {}),
+    })
+  }
+
   const editAllowlist = (row: PolicyRow) => {
-    const initialChoices: SetupChoices =
-      row.id === SETUP_ROW_ID
-        ? state.choices
-        : {
-            recipients: row.people.map(({ name, address }) => ({ name, address, selected: true })),
-            addedTokens: [],
-            keptConflicts: [],
-            blockedSettings: [],
-            ...getAllowlistSettings(row.account),
-          }
+    const initialChoices = choicesFromAllowlist(row)
 
     update({
       screen: 'wizard',
@@ -1058,9 +1111,9 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         ? state.signedBy
         : [...state.signedBy, viewer]
 
-    toast(isNewSetup ? 'Successfully added to queue.' : 'Successfully signed.')
-
+    // Only when the flow goes on to Execute; landing on the table, the opened side panel shows the new state.
     if (signedBy.length >= setupTarget.threshold) {
+      toast(isNewSetup ? 'Successfully added to queue.' : 'Successfully signed.')
       update({ account: 'ready', signedBy, wizardStep: EXECUTE_STEP })
       return
     }
@@ -1103,6 +1156,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   const startAllowlist = () =>
     update({
       ...WIZARD_DEFAULTS,
+      ...EDIT_ENDED,
       choices: FRESH_CHOICES,
       screen: 'wizard',
       addPolicyOpen: false,
@@ -1157,7 +1211,8 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         spendingLimitBlockedTokens={BLOCKED_SPENDING_LIMIT_TOKENS}
         paymentsExcludedTokens={state.choices.excludedTokens}
         paymentsAppliesToSpendingLimits={state.choices.applyToSpendingLimits}
-        onClose={() => update({ policyId: null, panelScenario: null })}
+        justActivated={isSetupRow && state.justActivated}
+        onClose={() => update({ policyId: null, panelScenario: null, justActivated: false })}
         // Only the new allowlist is driven by the prototype: Confirm reviews it, Execute opens the execute step.
         onConfirm={isSetupRow ? () => openWizardAt(REVIEW_STEP) : undefined}
         onExecute={isSetupRow ? () => openWizardAt(EXECUTE_STEP) : undefined}
@@ -1218,8 +1273,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         <FullScreenFlow>
           <SetUpPoliciesFlow
             account={setupAccount}
-            onAccountChange={(account) => update({ setupAccountKey: getAccountKey(account) })}
-            disabledAccountKeys={getAllowlistAccountKeys(payments)}
+            onAccountChange={pickSetupAccount}
             step={state.wizardStep}
             onStepChange={(wizardStep) => update({ wizardStep })}
             choices={state.choices}
@@ -1230,6 +1284,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             onExecute={execute}
             onClose={closeWizard}
             mode={state.wizardMode}
+            isAccountLocked={state.wizardMode === 'edit' && !state.editFromCreate}
             initialChoices={state.editInitialChoices ?? undefined}
             topBar={<FlowTopBar />}
           />

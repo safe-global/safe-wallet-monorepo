@@ -441,6 +441,14 @@ const GEIST_MONO_URL = 'https://fonts.googleapis.com/css2?family=Geist+Mono:wght
 
 // The app loads no Geist Mono and EthHashInfo has no font prop, so the prototype sets the mono font for its pages.
 const PROTOTYPE_CSS = `
+/* M1's side panels (spending limit, proposer) draw their header icon on green; match the table's white tile and grey icon. */
+[data-slot='sheet-content'] .bg-success-subtle:has(> svg.text-success-strong) {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+}
+[data-slot='sheet-content'] .bg-success-subtle > svg.text-success-strong {
+  color: var(--muted-foreground);
+}
 /* Toasts sit beside an open side panel instead of over it: the floating Drawer is 440px (700px when lg) plus its 12px inset. */
 [data-m2-toasts] > div {
   transition: right 200ms ease-in-out;

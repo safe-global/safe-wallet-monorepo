@@ -79,7 +79,7 @@ const meta = {
     initialStep: { control: { type: 'number', min: 0, max: WIZARD_STEP_NAMES.length - 1 } },
     preflight: {
       control: 'select',
-      options: ['ready', 'old-version', 'other-guard', 'policy-guard', 'pending-transactions'],
+      options: ['ready', 'old-version', 'other-guard'],
     },
   },
 } satisfies Meta<typeof WizardStory>
@@ -103,16 +103,6 @@ export const CreateOldVersion: Story = {
 /** Create blocked: an unknown policy is installed and has to be removed first. */
 export const CreateAnotherGuard: Story = {
   args: { preflight: 'other-guard' },
-}
-
-/** Create blocked: the account already has an allowlist, so that one is edited or deleted instead. */
-export const CreateExistingPolicyGuard: Story = {
-  args: { preflight: 'policy-guard' },
-}
-
-/** Create blocked: transactions are still queued. */
-export const CreatePendingTransactions: Story = {
-  args: { preflight: 'pending-transactions' },
 }
 
 /** No payment history: Continue stays disabled until a recipient is added. */

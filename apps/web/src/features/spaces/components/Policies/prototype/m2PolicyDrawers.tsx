@@ -69,8 +69,8 @@ const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | n
 
   return (
     <DrawerHeader>
-      <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
-        <Icon className="size-4 text-success-strong" />
+      <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-card">
+        <Icon className="size-4 text-muted-foreground" />
       </div>
       <DrawerTitle size="lg">{POLICY_ROW_LABELS[row.type]}</DrawerTitle>
       <div className="ml-auto">{status && <RowStatusChip status={status} />}</div>
@@ -341,11 +341,17 @@ const OPERATION_TAIL: Record<PanelOperation, string> = {
   remove: 'to remove it',
 }
 
-// Every change to the allowlist waits out the guard's 24‑hour delay after execution.
-const EXECUTED_LINE: Record<PanelOperation, string> = {
-  create: 'The allowlist applies after the 24‑hour delay.',
-  update: 'The new recipients apply after the 24‑hour delay.',
-  remove: 'The allowlist is removed after the 24‑hour delay.',
+const DELAY_MS = 24 * 60 * 60 * 1000
+
+/** "Oct 22, 2026 · 14:30 UTC", the date format the side panels already use. */
+const formatUtc = (date: Date): string =>
+  `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })} · ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' })} UTC`
+
+// Every change to the allowlist waits out the 24‑hour delay after execution; the prototype counts it from now.
+const EXECUTED_LINE: Record<PanelOperation, (at: string) => string> = {
+  create: (at) => `The allowlist becomes active after the 24‑hour delay, on ${at}.`,
+  update: (at) => `The new rules apply after the 24‑hour delay, on ${at}.`,
+  remove: (at) => `The allowlist is removed after the 24‑hour delay, on ${at}.`,
 }
 
 const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this allowlist.'
@@ -462,7 +468,7 @@ const StatusSection = ({ row, state }: { row: PolicyRow; state: PanelState }): R
           title={PENDING_OUTCOME_TITLE[state.outcome]}
           description={
             state.outcome === 'executed'
-              ? EXECUTED_LINE[state.operation]
+              ? EXECUTED_LINE[state.operation](formatUtc(new Date(Date.now() + DELAY_MS)))
               : 'Close this panel to see the current policies.'
           }
         />
@@ -574,6 +580,7 @@ const AllowlistDrawer = ({
   scenario,
   excludedTokens,
   appliesToSpendingLimits,
+  justActivated = false,
   onClose,
   ...handlers
 }: M2DrawerHandlers & {
@@ -585,6 +592,8 @@ const AllowlistDrawer = ({
   excludedTokens: string[]
   /** Whether the account's spending limits follow the allowlist too. */
   appliesToSpendingLimits: boolean
+  /** The first execution just finished: confirm it once at the top of the panel. */
+  justActivated?: boolean
   onClose: () => void
 }): ReactElement => {
   // A signer already in the transaction's signatures has signed, whichever state was picked.
@@ -603,6 +612,13 @@ const AllowlistDrawer = ({
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
+          {justActivated && state.kind === 'live' && (
+            <M2Alert
+              tone="success"
+              title="Your allowlist is now active"
+              description={`${row.account.name} can only send the allowed tokens to the ${row.people.length} allowed ${row.people.length === 1 ? 'recipient' : 'recipients'}. Further changes will take 24 hours to apply.`}
+            />
+          )}
           <StatusSection row={row} state={state} />
           <RecipientList recipients={row.people} isRemoved={isRemoved} />
           <TokenList tokens={tokens} isRemoved={isRemoved} />
@@ -632,6 +648,8 @@ export type PolicyDrawerProps = M2DrawerHandlers & {
   paymentsExcludedTokens?: string[]
   /** Allowlist on Payments only: its setup's "Apply the allowlist to existing policies" switch. */
   paymentsAppliesToSpendingLimits?: boolean
+  /** The setup allowlist's first execution just finished. */
+  justActivated?: boolean
   /** A blocked spending limit's "See policy here": opens the allowlist on that account. */
   onOpenAllowlist?: (account: M2Account) => void
   onClose: () => void
@@ -646,6 +664,7 @@ export const PolicyDrawer = ({
   spendingLimitBlockedTokens = [],
   paymentsExcludedTokens = [],
   paymentsAppliesToSpendingLimits = true,
+  justActivated = false,
   onOpenAllowlist,
   onClose,
   ...handlers
@@ -724,6 +743,7 @@ export const PolicyDrawer = ({
               ? paymentsAppliesToSpendingLimits
               : getAllowlistSettings(row.account).applyToSpendingLimits
           }
+          justActivated={justActivated}
           onClose={onClose}
           {...handlers}
         />

@@ -45,8 +45,8 @@ const SpendingLimitHeader = ({
 
   return (
     <DrawerHeader>
-      <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
-        <Icon className="size-4 text-success-strong" />
+      <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-card">
+        <Icon className="size-4 text-muted-foreground" />
       </div>
       <DrawerTitle size="lg">{getPolicyLabel(policy)}</DrawerTitle>
       <div className="ml-auto">
