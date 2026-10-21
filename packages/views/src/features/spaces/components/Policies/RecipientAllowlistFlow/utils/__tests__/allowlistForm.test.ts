@@ -4,6 +4,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { RECIPIENT_DUPLICATE_ERROR, RECIPIENT_IS_SAFE_ERROR, RECIPIENT_RESERVED_ERROR } from '../../constants'
 import { createDefaultAllowlistValues, type AllowlistRecipient, type RecipientAllowlistFormValues } from '../../types'
 import {
+  addAllowlistRecipients,
   buildAllowlistRules,
   getAllowedTokenAddresses,
   getFormTokenAddresses,
@@ -167,6 +168,37 @@ describe('allowlistForm', () => {
 
     it('accepts a fresh address', () => {
       expect(validateAllowlistRecipient(address(), { safeAddress, existing: [recipient()] })).toBeUndefined()
+    })
+
+    it('accepts a recipient that is listed but deselected', () => {
+      const existing = recipient({ selected: false })
+
+      expect(validateAllowlistRecipient(existing.address, { safeAddress, existing: [existing] })).toBeUndefined()
+    })
+  })
+
+  describe('addAllowlistRecipients', () => {
+    it('appends new recipients after the listed ones', () => {
+      const listed = recipient()
+      const added = recipient()
+
+      expect(addAllowlistRecipients([listed], [added])).toEqual([listed, added])
+    })
+
+    it('selects a deselected recipient again instead of listing it twice', () => {
+      const listed = recipient({ selected: false })
+
+      expect(
+        addAllowlistRecipients([listed], [{ address: listed.address.toLowerCase(), name: 'Alice', selected: true }]),
+      ).toEqual([{ ...listed, name: 'Alice', selected: true }])
+    })
+
+    it('keeps the name a listed recipient already has', () => {
+      const listed = recipient({ name: 'Alice', selected: false })
+
+      expect(addAllowlistRecipients([listed], [{ ...listed, name: 'Bob', selected: true }])).toEqual([
+        { ...listed, selected: true },
+      ])
     })
   })
 })
