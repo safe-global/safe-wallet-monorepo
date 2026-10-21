@@ -13,7 +13,15 @@ const STEP_UP_COMPLETE_PATH = '/step-up-complete.htm'
 /** Also hardcoded in `public/step-up-complete.js`. */
 export const STEP_UP_CHANNEL = 'safe-step-up'
 
-const POPUP_FEATURES = 'popup,width=480,height=720'
+const POPUP_WIDTH = 480
+const POPUP_HEIGHT = 720
+
+/** Centred over this window; browsers that ignore the position, such as mobile ones, still open the popup. */
+const getPopupFeatures = (): string => {
+  const left = Math.round(window.screenX + (window.outerWidth - POPUP_WIDTH) / 2)
+  const top = Math.round(window.screenY + (window.outerHeight - POPUP_HEIGHT) / 2)
+  return `popup,width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top}`
+}
 
 export type StepUpOutcome = 'elevated' | 'cancelled' | 'failed'
 
@@ -38,7 +46,7 @@ export const startStepUp = (): void => {
 /** Must run in a click handler, or the browser blocks the popup. Null when it is blocked. */
 export const openStepUpPopup = (): Window | null => {
   const returnUrl = new URL(STEP_UP_COMPLETE_PATH, window.location.origin).toString()
-  return window.open(getStepUpUrl(returnUrl), STEP_UP_CHANNEL, POPUP_FEATURES)
+  return window.open(getStepUpUrl(returnUrl), STEP_UP_CHANNEL, getPopupFeatures())
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
