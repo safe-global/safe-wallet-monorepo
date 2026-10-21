@@ -40,7 +40,7 @@ export const ChooserRow = ({
         '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
         disabled
           ? 'cursor-not-allowed opacity-50'
-          : 'cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:[&_svg]:text-green-500',
+          : 'cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:[&_svg]:text-icon-hover',
       )}
     >
       <span className="shrink-0">{icon}</span>
