@@ -121,6 +121,7 @@ export const getDetailItems = (proposal: Proposal, extended = false): { label: s
         },
         { label: 'Expiry', content: kind.expiry },
         { label: 'Status', content: kind.expired ? 'Expired' : 'Open' },
+        { label: 'Via', content: getRecipientName(proposal) },
         ...(extended
           ? [
               { label: 'Filled', content: '0%' },
@@ -222,13 +223,14 @@ export function ProposalDetails({ proposal }: { proposal: Proposal }) {
   )
 }
 
-export function BatchActions({ actions }: { actions: BatchAction[] }) {
+export function BatchActions({ actions, heading }: { actions: BatchAction[]; heading?: ReactNode }) {
   const [showAll, setShowAll] = useState(false)
   const [expanded, setExpanded] = useState<string[]>([])
   const shown = showAll ? actions : actions.slice(0, INITIAL_ACTIONS)
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-end gap-1">
+        {heading && <span className="mr-auto text-sm font-medium">{heading}</span>}
         <Button
           variant="ghost"
           size="xs"

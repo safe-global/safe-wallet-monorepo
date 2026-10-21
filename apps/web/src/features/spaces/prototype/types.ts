@@ -58,5 +58,5 @@ export type Proposal = {
   kind: TransactionKind
   origin?: 'replacement'
   proposedBy?: string
-  note?: { text: string; author: string; date: string }
+  note?: { text: string; author: string; date: string; onchain?: boolean }
 }

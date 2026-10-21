@@ -13,11 +13,16 @@ import type { ReviewLayout } from '../ReviewDrawer'
 export function ConfirmStep({
   pendingAction,
   wallet,
+  conflicts = 0,
+  nonce,
   onBack,
   onAction,
 }: {
   pendingAction: PreviewAction
   wallet?: Wallet
+  // Other transactions at this nonce. Executing makes them invalid.
+  conflicts?: number
+  nonce?: number
   onBack: () => void
   onAction: (action: PreviewAction) => void
 }) {
@@ -28,8 +33,13 @@ export function ConfirmStep({
           ? 'Add your preview signature to this proposal.'
           : pendingAction === 'signAndExecute'
             ? 'Yours is the last signature. Execute now, or sign and let anyone execute later.'
-            : 'Executing advances the nonce and replaces any conflicting transactions at the same nonce.'}
+            : 'Executing advances the nonce.'}
       </p>
+      {pendingAction !== 'sign' && conflicts > 0 && (
+        <p className="text-sm text-warning-strong">
+          Executing this makes {conflicts} other {conflicts === 1 ? 'transaction' : 'transactions'} at #{nonce} invalid.
+        </p>
+      )}
       <p className="text-xs text-muted-foreground">
         {wallet && `You sign with ${wallet.name} · `}Simulated action · no wallet request
       </p>

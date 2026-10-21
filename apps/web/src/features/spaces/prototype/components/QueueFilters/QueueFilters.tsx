@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Check, ChevronDown, Info, LifeBuoy, ListFilter, Plus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
@@ -274,17 +274,42 @@ function SafeDropdown({ filters, accounts }: Pick<QueueFiltersProps, 'filters' |
   )
 }
 
+// Same search-in-menu pattern as the production network picker (ChainSelectorBlock).
+const SAFE_SEARCH_FROM = 6
+
 function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filters' | 'accounts'>) {
-  return accounts.map((account) => (
-    <FilterOption
-      key={account.id}
-      label={account.name}
-      checked={filters.accountFilter.includes(account.id)}
-      count={filters.optionCount('accounts', (tx) => tx.account === account.id)}
-      icon={<Identicon address={account.iconAddress} size={16} />}
-      onToggle={() => filters.toggleAccount(account.id)}
-    />
-  ))
+  const [search, setSearch] = useState('')
+  const query = search.trim().toLowerCase()
+  const shown = query ? accounts.filter((account) => account.name.toLowerCase().includes(query)) : accounts
+  return (
+    <>
+      {accounts.length >= SAFE_SEARCH_FROM && (
+        <SearchInput
+          variant="surface"
+          className="m-1 w-[calc(100%-0.5rem)]"
+          placeholder="Search Safes"
+          aria-label="Search Safes"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onClear={() => setSearch('')}
+          // The menu takes every printable key for its typeahead. Escape still closes it.
+          onKeyDown={(event) => event.key !== 'Escape' && event.stopPropagation()}
+          autoComplete="off"
+        />
+      )}
+      {shown.map((account) => (
+        <FilterOption
+          key={account.id}
+          label={account.name}
+          checked={filters.accountFilter.includes(account.id)}
+          count={filters.optionCount('accounts', (tx) => tx.account === account.id)}
+          icon={<Identicon address={account.iconAddress} size={16} />}
+          onToggle={() => filters.toggleAccount(account.id)}
+        />
+      ))}
+      {query && !shown.length && <p className="px-2 py-1.5 text-sm text-muted-foreground">No Safes match</p>}
+    </>
+  )
 }
 
 export function QueueToolbar({

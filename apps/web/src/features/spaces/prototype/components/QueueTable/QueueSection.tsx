@@ -17,10 +17,8 @@ import {
   SafeIdentity,
   STATUS_META,
   STATUS_ORDER,
-  StatusChip,
   chainLogoUrl,
   type GroupBy,
-  type StatusTone,
 } from '../shared'
 import { QueueRow } from './QueueRow'
 import { getColumns, type QueueSectionData } from './sections'
@@ -105,13 +103,6 @@ const SUMMARY_LABELS = {
   waiting: 'blocked',
 } as const
 
-const SUMMARY_TONES: Record<Filter, StatusTone> = {
-  ready: 'success',
-  sign: 'success',
-  awaiting: 'secondary',
-  waiting: 'secondary',
-}
-
 // Proposals at the same nonce count once. Only one can execute.
 export const getSummary = (section: QueueSectionData, persona: Persona) => {
   const rows = new Map<Filter, number>()
@@ -142,18 +133,14 @@ function SafeSummary({
   if (!summary.length && !recoveryCount)
     return <span className="text-xs font-normal text-muted-foreground">No pending transactions</span>
   return (
-    <span className="flex flex-wrap items-center justify-end gap-1.5">
+    <span className="truncate text-xs font-normal tabular-nums text-muted-foreground">
       {recoveryCount > 0 && (
-        <StatusChip tone="warning">
+        <span className="text-warning-strong">
           {recoveryCount} {recoveryCount === 1 ? 'recovery' : 'recoveries'}
-        </StatusChip>
+          {summary.length > 0 && ' · '}
+        </span>
       )}
-      {summary.map(({ status, count, options }) => (
-        <StatusChip key={status} tone={SUMMARY_TONES[status]}>
-          {count} {SUMMARY_LABELS[status]}
-          {options > count ? ` · ${options} options` : ''}
-        </StatusChip>
-      ))}
+      {summary.map(({ status, count }) => `${count} ${SUMMARY_LABELS[status]}`).join(' · ')}
     </span>
   )
 }
@@ -280,7 +267,10 @@ export function SectionHeader({
         </>
       )}
       <div className="ml-auto flex items-center gap-2">
-        {steps && safeAccount && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} />}
+        {/* Open Safes show each status in their rows. */}
+        {steps && safeAccount && collapsed && (
+          <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} />
+        )}
         {safeBatch && safeBatch.proposals.length > 1 && (
           <Button
             size="2xs"
@@ -311,19 +301,16 @@ export function CollapseAllButton({ allCollapsed, onToggle, iconOnly }: Collapse
         {label}
       </Button>
     )
-  // In the column header, the row hover shows the label. The row click toggles too.
+  // Column header: chevrons always, outline and word on header hover. The wrapper undoes the header's capitals.
   return (
-    <Button
-      size="icon-xs"
-      variant="ghost-muted"
-      aria-label={label}
-      onClick={(event) => {
-        event.stopPropagation()
-        onToggle()
-      }}
-    >
-      {icon}
-    </Button>
+    <span className="normal-case [&>button]:border-transparent [&>button]:shadow-none group-hover/head:[&>button]:border-border group-hover/head:[&>button]:shadow-xs group-focus-within/head:[&>button]:border-border group-focus-within/head:[&>button]:shadow-xs">
+      <Button size="2xs" variant="outline" aria-label={label} onClick={onToggle}>
+        <span className="opacity-0 transition-opacity group-hover/head:opacity-100 group-focus-within/head:opacity-100">
+          {allCollapsed ? 'Expand' : 'Collapse'}
+        </span>
+        {icon}
+      </Button>
+    </span>
   )
 }
 
@@ -361,12 +348,7 @@ export function QueueTableHead({
   const grouped = groupBy !== 'none'
   return (
     <TableHeader>
-      {/* One table: the whole column header expands or collapses every section. */}
-      <TableRow
-        data-no-hover
-        className={collapse ? 'group/head cursor-pointer' : undefined}
-        onClick={collapse?.onToggle}
-      >
+      <TableRow data-no-hover className={collapse ? 'group/head' : undefined}>
         {columns.map((label, index) => {
           // Next steps: the view switch sets grouping. Column headers do not.
           const groupTarget = steps
@@ -380,22 +362,12 @@ export function QueueTableHead({
             <TableHead
               key={label}
               scope="col"
-              className={`text-xs text-muted-foreground ${collapse ? 'transition-colors group-hover/head:bg-foreground/[0.08] group-hover/head:text-foreground' : ''} ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
+              className={`text-xs text-muted-foreground ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${steps && label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
             >
               {label === 'Action' ? (
-                <span className="flex items-center justify-end gap-1 group-hover/head:[&_button]:text-foreground">
+                <span className="flex items-center justify-end">
                   <span className="sr-only">{label}</span>
-                  {collapse && (
-                    <>
-                      <span
-                        aria-hidden="true"
-                        className="whitespace-nowrap opacity-0 transition-opacity group-hover/head:opacity-100"
-                      >
-                        {collapse.allCollapsed ? 'Expand all' : 'Collapse all'}
-                      </span>
-                      <CollapseAllButton {...collapse} iconOnly />
-                    </>
-                  )}
+                  {collapse && <CollapseAllButton {...collapse} iconOnly />}
                 </span>
               ) : groupTarget ? (
                 <span className="flex items-center gap-1">

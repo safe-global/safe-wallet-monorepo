@@ -1,37 +1,42 @@
-import { useEffect, useState } from 'react'
-import { LockKeyhole } from 'lucide-react'
+import { Fragment, useEffect, useState, type ReactNode } from 'react'
+import { ChevronRight, Info, LockKeyhole, ShieldAlert, ShieldCheck, ShieldEllipsis } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import { DrawerList } from '@/components/common/Drawer'
 import { PanelAlert } from '../../Panel/PanelAlert'
-import { PanelLinkRow, PanelRow, PanelSection } from '../../Panel/PanelBody'
+import { TOOLTIP_TIMING } from '../../Panel/SharedDrawerHeader'
+import { Divider, Frame, PanelLinkRow, PanelRow, PanelSection } from '../../Panel/PanelBody'
 import { formatDateTime } from '@safe-global/utils/utils/date'
-import { getHeadline } from '../../../services/columns'
-import { getStatusHint } from '../../../services/actions'
+import { getActionBreakdown, getHeadline } from '../../../services/columns'
 import {
   getAccount,
   getConflicts,
   getCreatedAt,
+  getSignatureCount,
   getSignerIdentity,
   getState,
-  getStepsStatus,
   getWarnings,
   WARNING_DETAILS,
   WARNING_LABELS,
 } from '../../../services/model'
-import { getTechnicalData } from '../../../services/technical'
+import { getMethodName, getTechnicalData } from '../../../services/technical'
+import { getSafenetCheck, SAFENET_LABELS, SAFENET_URL } from '../../../services/safenet'
 import type { Persona, Proposal } from '../../../types'
 import { BatchActions, getDetailItems } from '../../ProposalDetails'
+import { chainLogoUrl } from '../../shared'
 import { NonceMark } from '../../QueueTable/NonceCell'
-import { chainLogoUrl, StepsStatusChip } from '../../shared'
 import type { Hypernative } from '../../ScenarioBar'
 import type { Replacement, ReviewLayout } from '../ReviewDrawer'
 import { IdentityRow } from './IdentityRow'
+import { getFlowRows } from './Flow'
 
 const SECTION_TITLES: Record<Proposal['kind']['type'], string> = {
   transfer: 'Transfer',
@@ -44,38 +49,27 @@ const SECTION_TITLES: Record<Proposal['kind']['type'], string> = {
   rejection: 'On-chain rejection',
 }
 
+// Earlier nonces this transaction waits on, at most 10.
+const getEarlierNonces = (tx: Proposal, persona: Persona) => {
+  const { nextNonce } = getAccount(tx)
+  return getState(tx, persona).waiting
+    ? Array.from({ length: Math.min(tx.nonce - nextNonce, 10) }, (_, index) => nextNonce + index)
+    : []
+}
+
+const atNonce = (tx: Proposal, items: Proposal[], nonce: number) =>
+  items.filter((other) => other.account === tx.account && other.nonce === nonce)
+
+// Queue order lives in Summary. Alerts are for risks, and for a missing nonce, which stops the whole queue.
 export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Proposal[]; persona: Persona }) {
-  const state = getState(tx, persona)
-  const conflicts = getConflicts(tx, items)
-  const options = items.filter((other) => other.account === tx.account && other.nonce === tx.nonce)
-  const optionIndex = options.indexOf(tx) + 1
-  const blocking = state.waiting || (!state.canSign && !state.ready)
+  const gap = getEarlierNonces(tx, persona).find((nonce) => !atNonce(tx, items, nonce).length)
   return (
     <>
-      {blocking && (
-        <PanelAlert
-          tone={state.waiting && !state.canSign ? 'warning' : 'neutral'}
-          title={
-            state.canSign
-              ? `Executes after #${getAccount(tx).nextNonce}`
-              : state.waiting
-                ? getStepsStatus(tx, persona).label
-                : 'Waiting on others'
-          }
-          description={getStatusHint(tx, items, persona)}
-        />
-      )}
-      {conflicts.length > 0 && (
+      {gap !== undefined && (
         <PanelAlert
           tone="warning"
-          title="Conflicting transactions"
-          description={
-            <>
-              Option {optionIndex} of {conflicts.length + 1} at #{tx.nonce}. Only one can execute; executing it replaces
-              the others.{' '}
-              <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS}>Why did this happen?</ExternalLink>
-            </>
-          }
+          title={`#${gap} has no proposal`}
+          description={`Nothing after #${gap} can execute until a transaction uses that nonce.`}
         />
       )}
       {getWarnings(tx).map((warning) => (
@@ -90,27 +84,137 @@ export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Prop
   )
 }
 
-export function SummarySection({ tx }: { tx: Proposal }) {
+// Production shows these chips first in the expanded row. Warnings also get an alert at the top of the drawer.
+const getRiskFlags = (tx: Proposal) => {
+  const { kind } = tx
+  return [
+    tx.proposedBy && tx.signers.length === 0 && (
+      <Badge key="untrusted" variant="destructive">
+        Untrusted transaction
+      </Badge>
+    ),
+    kind.type === 'batch' &&
+      kind.delegateCall &&
+      (kind.delegateCall === 'untrusted' ? (
+        <Badge key="delegate" variant="warning">
+          Unexpected delegate call
+        </Badge>
+      ) : (
+        <Badge key="delegate" variant="outline">
+          Delegate call
+        </Badge>
+      )),
+    kind.type === 'settings' && ['addOwner', 'removeOwner', 'changeThreshold'].includes(kind.change.kind) && (
+      <Badge key="policy" variant="warning">
+        Confirmation policy change
+      </Badge>
+    ),
+  ].filter(Boolean)
+}
+
+// Only Summary opens by default. Security and the type section also open when there's a warning to look at.
+const hasSecurityIssue = (tx: Proposal) => getWarnings(tx).length > 0 || getSafenetCheck(tx) === 'risk'
+
+// Types whose details are a list or a long block get their own section. The rest fit in Summary.
+const hasOwnSection = (tx: Proposal) =>
+  tx.kind.type === 'batch' || tx.kind.type === 'swap' || (tx.kind.type === 'contract' && !!tx.kind.steps)
+
+const getTypeRows = (tx: Proposal, extended: boolean) => {
+  const hidden = [
+    'Recipient',
+    'Token',
+    'From',
+    'To',
+    'Fees',
+    'Change',
+    ...(tx.kind.type === 'settings' ? [] : ['Address']),
+    ...(tx.kind.type === 'batch' ? ['Call', 'Operation', 'Total value'] : []),
+  ]
+  return [
+    ...(tx.origin === 'replacement' ? [{ label: 'Proposed as', content: 'Replacement' }] : []),
+    ...getDetailItems(tx, extended).filter((item) => !hidden.includes(String(item.label))),
+  ]
+}
+
+const Warning = ({ children }: { children: ReactNode }) => <span className="text-warning-strong">{children}</span>
+
+const getSectionSummary = (tx: Proposal) => {
+  const { kind } = tx
+  if (kind.type === 'batch') return getActionBreakdown(kind.actions)
+  if (kind.type === 'swap') return kind.expired ? <Warning>Expired</Warning> : 'Open'
+  if (kind.type === 'contract') return kind.verified ? 'Verified' : <Warning>Unverified</Warning>
+  return undefined
+}
+
+const MethodName = ({ method }: { method: string }) => <code className="font-mono text-xs">{method}</code>
+
+export function SummarySection({
+  tx,
+  items,
+  persona,
+  status,
+  onReview,
+}: {
+  tx: Proposal
+  items: Proposal[]
+  persona: Persona
+  status?: ReactNode
+  onReview: (tx: Proposal) => void
+}) {
   const account = getAccount(tx)
   const creatorId = tx.signers[0]
   const creator = creatorId ? getSignerIdentity(creatorId) : undefined
+  const flags = getRiskFlags(tx)
   return (
-    <PanelSection collapsible title="Summary">
-      <PanelRow label="Network">
-        <span className="flex items-center justify-end gap-2">
-          <Avatar size="xs">
-            <AvatarImage src={chainLogoUrl(account.chainId)} alt="" />
-            <AvatarFallback>{account.network[0]}</AvatarFallback>
-          </Avatar>
-          {account.network}
-        </span>
-      </PanelRow>
+    <PanelSection
+      collapsible
+      title="Summary"
+      rightNode={status}
+      callout={<BlockedCallout tx={tx} items={items} persona={persona} onReview={onReview} />}
+      footer={<ConflictNotice tx={tx} items={items} onReview={onReview} />}
+    >
+      {getFlowRows(tx).map((row) =>
+        row.top ? (
+          <div key={row.label} className="flex items-start justify-between gap-2">
+            <Typography variant="paragraph-small-medium" className="flex h-6 shrink-0 items-center">
+              {row.label}
+            </Typography>
+            {row.content}
+          </div>
+        ) : (
+          <PanelRow key={row.label} label={row.label}>
+            {row.content}
+          </PanelRow>
+        ),
+      )}
+      {(hasOwnSection(tx) ? [] : getTypeRows(tx, false)).map((row) => (
+        <PanelRow key={String(row.label)} label={row.label}>
+          {row.content}
+        </PanelRow>
+      ))}
+      {flags.length > 0 && (
+        <PanelRow label="Flags">
+          <span className="flex flex-wrap justify-end gap-1">{flags}</span>
+        </PanelRow>
+      )}
+      {/* The From avatar carries the network. Swaps have no From row, so they keep this one. */}
+      {tx.kind.type === 'swap' && (
+        <PanelRow label="Network">
+          <span className="flex items-center justify-end gap-2">
+            <Avatar size="xs" className="size-5">
+              <AvatarImage src={chainLogoUrl(account.chainId)} alt="" />
+              <AvatarFallback>{account.network[0]}</AvatarFallback>
+            </Avatar>
+            {account.network}
+          </span>
+        </PanelRow>
+      )}
       <PanelRow label="Proposed">{`${formatDateTime(getCreatedAt(tx))} · ${tx.age}`}</PanelRow>
-      <PanelRow label="Created by" account={!tx.proposedBy && !!creator}>
+      <PanelRow label="Created by">
         {tx.proposedBy ? (
           tx.proposedBy
         ) : creator ? (
-          <IdentityRow name={creator.name} address={creator.address} chainId={account.chainId} />
+          <IdentityRow inline name={creator.name} address={creator.address} chainId={account.chainId} />
         ) : (
           'Unknown'
         )}
@@ -121,17 +225,15 @@ export function SummarySection({ tx }: { tx: Proposal }) {
 
 export function WhatItDoesSection({ tx }: { tx: Proposal }) {
   const { kind } = tx
+  if (!hasOwnSection(tx)) return null
   return (
     <PanelSection
       collapsible
+      defaultOpen={hasSecurityIssue(tx)}
       title={SECTION_TITLES[kind.type]}
-      rightNode={kind.type === 'batch' ? `${kind.actions.length} actions` : undefined}
+      rightNode={getSectionSummary(tx)}
     >
-      {[
-        ...(tx.origin === 'replacement' ? [{ label: 'Proposed as', content: 'Replacement' }] : []),
-        // The flow block above shows the recipient and address.
-        ...getDetailItems(tx, true).filter((item) => item.label !== 'Recipient' && item.label !== 'Address'),
-      ].map((item) => (
+      {getTypeRows(tx, true).map((item) => (
         <PanelRow key={String(item.label)} label={item.label}>
           {item.content}
         </PanelRow>
@@ -143,7 +245,7 @@ export function WhatItDoesSection({ tx }: { tx: Proposal }) {
           ))}
         </ol>
       )}
-      {kind.type === 'batch' && <BatchActions actions={kind.actions} />}
+      {kind.type === 'batch' && <BatchActions actions={kind.actions} heading="All actions" />}
     </PanelSection>
   )
 }
@@ -151,96 +253,145 @@ export function WhatItDoesSection({ tx }: { tx: Proposal }) {
 export function NoteSection({ tx }: { tx: Proposal }) {
   if (!tx.note) return null
   return (
-    <PanelSection collapsible title="Note">
+    <PanelSection collapsible defaultOpen={false} title="Note" rightNode={tx.note.onchain ? 'On-chain' : 'Off-chain'}>
       <div className="space-y-2">
         <p className="text-sm leading-relaxed">{tx.note.text}</p>
         <p className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <LockKeyhole className="size-3" aria-hidden="true" />
-          By {tx.note.author} · {tx.note.date} · Off-chain
+          By {tx.note.author} · {tx.note.date}
         </p>
       </div>
     </PanelSection>
   )
 }
 
-function QueueRow({
-  tx,
-  persona,
-  competing,
-  onReview,
-}: {
-  tx: Proposal
-  persona: Persona
-  competing?: number
-  onReview: (tx: Proposal) => void
-}) {
+// What the earliest blocker needs, from this persona's point of view.
+const getBlockerStep = (next: Proposal, persona: Persona) => {
+  const { ready, canSign, missing } = getState(next, persona)
+  if (ready) return `Execute #${next.nonce} first.`
+  if (canSign) return `Sign #${next.nonce} first.`
+  return `Waiting on ${missing} ${missing === 1 ? 'signer' : 'signers'} for #${next.nonce}.`
+}
+
+// Above the Summary rows: the earliest transaction this one waits on.
+function BlockedCallout({ tx, items, persona, onReview }: QueueProps) {
+  const earlierNonces = getEarlierNonces(tx, persona)
+  const next = earlierNonces.flatMap((nonce) => atNonce(tx, items, nonce))[0]
+  if (!next) return null
   return (
-    <PanelLinkRow onClick={() => onReview(tx)}>
-      <NonceMark tx={tx} persona={persona} competing={competing} />
-      <span className="min-w-0 flex-1 truncate text-sm">{getHeadline(tx)}</span>
-      <StepsStatusChip tx={tx} persona={persona} />
-    </PanelLinkRow>
+    <button
+      type="button"
+      onClick={() => onReview(next)}
+      className="group/callout flex w-full items-center gap-3 rounded-lg bg-muted px-3 py-2.5 text-left transition-colors hover:bg-foreground/[0.07] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="flex items-baseline gap-2 text-sm font-medium">
+          Runs after #{next.nonce}
+          {earlierNonces.length > 1 && (
+            <span className="text-xs font-normal text-muted-foreground">+{earlierNonces.length - 1} earlier</span>
+          )}
+        </span>
+        <span className="block truncate text-xs text-muted-foreground">
+          {getHeadline(next)} · {getBlockerStep(next, persona)}
+        </span>
+      </span>
+      <ChevronRight
+        className="size-4 shrink-0 text-muted-foreground group-hover/callout:text-foreground"
+        aria-hidden="true"
+      />
+    </button>
   )
 }
 
-export function QueueContextSection({
-  tx,
-  items,
-  persona,
-  onReview,
-}: {
-  tx: Proposal
-  items: Proposal[]
-  persona: Persona
-  onReview: (tx: Proposal) => void
-}) {
-  const state = getState(tx, persona)
-  const { nextNonce } = getAccount(tx)
+type QueueProps = { tx: Proposal; items: Proposal[]; persona: Persona; onReview: (tx: Proposal) => void }
+
+// Below the Summary rows: the other transactions at this nonce.
+function ConflictNotice({ tx, items, onReview }: Omit<QueueProps, 'persona'>) {
   const conflicts = getConflicts(tx, items)
-  const earlier = state.waiting
-    ? Array.from({ length: Math.min(tx.nonce - nextNonce, 10) }, (_, index) => nextNonce + index)
-    : []
-  if (!earlier.length && !conflicts.length) return null
+  if (!conflicts.length) return null
   return (
-    <>
-      {earlier.length > 0 && (
-        <PanelSection collapsible title="Runs after" rightNode={`${earlier.length} earlier`}>
-          {earlier.flatMap((nonce) => {
-            const atNonce = items.filter((other) => other.account === tx.account && other.nonce === nonce)
-            return atNonce.length ? (
-              atNonce.map((other) => (
-                <QueueRow
-                  key={other.id}
-                  tx={other}
-                  persona={persona}
-                  competing={atNonce.length - 1}
-                  onReview={onReview}
-                />
-              ))
-            ) : (
-              <p key={nonce} className="text-sm text-warning-strong">
-                #{nonce} has no proposal. Nothing after it can execute.
-              </p>
-            )
-          })}
-        </PanelSection>
-      )}
-      {conflicts.length > 0 && (
-        <PanelSection
-          collapsible
-          title="Conflicting transactions"
-          rightNode={`#${tx.nonce} · ${conflicts.length + 1} options`}
-        >
-          {conflicts.map((other) => (
-            <QueueRow key={other.id} tx={other} persona={persona} competing={conflicts.length} onReview={onReview} />
-          ))}
-        </PanelSection>
-      )}
-    </>
+    <div className="flex flex-col gap-2">
+      <div className="rounded-lg border border-(--warning-accent)/40 bg-warning-subtle px-3 py-2.5">
+        <p className="text-sm font-medium text-warning-strong">
+          {conflicts.length + 1} transactions at #{tx.nonce}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Only one can execute. Once it does, the {conflicts.length === 1 ? 'other becomes' : 'others become'} invalid.
+        </p>
+      </div>
+      <Frame className="flex w-full flex-col">
+        {conflicts.map((other, index) => (
+          <Fragment key={other.id}>
+            {index > 0 && <Divider />}
+            <div className="px-3 py-3">
+              <PanelLinkRow onClick={() => onReview(other)}>
+                <NonceMark tx={other} />
+                <span className="min-w-0 flex-1 truncate text-sm">{getHeadline(other)}</span>
+                <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                  {getSignatureCount(other)} of {getAccount(other).threshold} signed
+                </span>
+              </PanelLinkRow>
+            </div>
+          </Fragment>
+        ))}
+      </Frame>
+    </div>
   )
 }
 
 type Simulation = 'idle' | 'running' | 'success' | 'failed'
+
+const SAFENET_ICONS = { notStarted: ShieldEllipsis, checking: ShieldEllipsis, passed: ShieldCheck, risk: ShieldAlert }
+const SAFENET_TONES = {
+  notStarted: 'text-muted-foreground',
+  checking: 'text-muted-foreground',
+  passed: 'text-success-strong',
+  risk: 'text-warning-strong',
+}
+
+type CheckResult = 'notRun' | 'running' | 'passed' | 'issue'
+
+// "2 of 3 passed". Issues, then running checks, win over the count.
+function SecurityVerdict({
+  tx,
+  hypernative,
+  simulation,
+}: {
+  tx: Proposal
+  hypernative: Hypernative
+  simulation: Simulation
+}) {
+  const safenet = getSafenetCheck(tx)
+  const results: CheckResult[] = [
+    safenet === 'notStarted' ? 'notRun' : safenet === 'checking' ? 'running' : safenet === 'risk' ? 'issue' : 'passed',
+    simulation === 'idle'
+      ? 'notRun'
+      : simulation === 'running'
+        ? 'running'
+        : simulation === 'failed'
+          ? 'issue'
+          : 'passed',
+    ...(hypernative === 'none'
+      ? []
+      : [hypernative === 'out' ? 'notRun' : getWarnings(tx).length > 0 ? 'issue' : ('passed' as CheckResult)]),
+  ]
+  const count = (result: CheckResult) => results.filter((item) => item === result).length
+  const issues = count('issue')
+  const passed = `${count('passed')} of ${results.length}`
+  const [Icon, tone, label] = issues
+    ? [ShieldAlert, SAFENET_TONES.risk, `${issues} ${issues === 1 ? 'issue' : 'issues'}`]
+    : count('running')
+      ? [ShieldEllipsis, SAFENET_TONES.checking, `Checking… ${passed}`]
+      : count('passed') === results.length
+        ? [ShieldCheck, SAFENET_TONES.passed, `${passed} passed`]
+        : [ShieldEllipsis, SAFENET_TONES.notStarted, `${passed} passed`]
+  return (
+    <span className={`flex items-center gap-1 tabular-nums ${tone}`}>
+      <Icon className="size-3.5" aria-hidden="true" />
+      {label}
+    </span>
+  )
+}
 
 export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative: Hypernative }) {
   const [simulation, setSimulation] = useState<Simulation>('idle')
@@ -251,25 +402,38 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
     const timer = setTimeout(() => setSimulation(fails ? 'failed' : 'success'), 800)
     return () => clearTimeout(timer)
   }, [simulation, tx])
-  const { kind } = tx
-  const checks = [
-    tx.proposedBy && tx.signers.length === 0 && <Badge variant="destructive">Untrusted transaction</Badge>,
-    kind.type === 'batch' &&
-      kind.delegateCall &&
-      (kind.delegateCall === 'untrusted' ? (
-        <Badge variant="warning">Unexpected delegate call</Badge>
-      ) : (
-        <Badge variant="outline">Delegate call</Badge>
-      )),
-    kind.type === 'settings' && ['addOwner', 'removeOwner', 'changeThreshold'].includes(kind.change.kind) && (
-      <Badge variant="warning">Confirmation policy change</Badge>
-    ),
-  ].filter(Boolean)
+  const safenet = getSafenetCheck(tx)
+  const SafenetIcon = SAFENET_ICONS[safenet]
   const issues = getWarnings(tx).length > 0
   return (
-    <PanelSection collapsible title="Security">
+    <PanelSection
+      collapsible
+      // A proposer-created transaction has no signer behind it yet, so Security opens for it too.
+      defaultOpen={hasSecurityIssue(tx) || (!!tx.proposedBy && tx.signers.length === 0)}
+      title="Security"
+      rightNode={<SecurityVerdict tx={tx} hypernative={hypernative} simulation={simulation} />}
+    >
       {[
+        ...(hypernative === 'none'
+          ? []
+          : [
+              {
+                key: 'Hypernative',
+                label: 'Hypernative',
+                content:
+                  hypernative === 'out' ? (
+                    <Button size="xs" variant="outline">
+                      Log in to view scan
+                    </Button>
+                  ) : (
+                    <span className={issues ? 'text-warning-strong' : 'text-success-strong'}>
+                      {issues ? 'Issues found' : 'No issues found'}
+                    </span>
+                  ),
+              },
+            ]),
         {
+          key: 'Simulation',
           label: 'Simulation',
           content:
             simulation === 'idle' ? (
@@ -287,33 +451,36 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
               </span>
             ),
         },
-        ...(hypernative === 'none'
-          ? []
-          : [
-              {
-                label: 'Hypernative',
-                content:
-                  hypernative === 'out' ? (
-                    <Button size="xs" variant="outline">
-                      Log in to view scan
-                    </Button>
-                  ) : (
-                    <span className={issues ? 'text-warning-strong' : 'text-success-strong'}>
-                      {issues ? 'Issues found' : 'No issues found'}
-                    </span>
-                  ),
-              },
-            ]),
         {
-          label: 'Checks',
-          content: checks.length ? (
-            <span className="flex flex-wrap justify-end gap-1">{checks}</span>
-          ) : (
-            <span className="text-muted-foreground">No flags</span>
+          key: 'Safenet',
+          label: (
+            <span className="flex items-center gap-1.5">
+              <SafenetLogo role="img" aria-label="Safenet" className="h-2.5 w-auto text-foreground" />
+              <Tooltip {...TOOLTIP_TIMING}>
+                <TooltipTrigger
+                  aria-label="About Safenet"
+                  className="flex cursor-default text-muted-foreground hover:text-foreground"
+                >
+                  <Info className="size-3.5" strokeWidth={ICON_STROKE} aria-hidden="true" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-64 whitespace-normal">
+                  Independent checks by Safenet validators ·{' '}
+                  <ExternalLink href={SAFENET_URL} noIcon className="text-background underline">
+                    Learn more
+                  </ExternalLink>
+                </TooltipContent>
+              </Tooltip>
+            </span>
+          ),
+          content: (
+            <span className={`flex items-center gap-1.5 ${SAFENET_TONES[safenet]}`}>
+              <SafenetIcon className="size-4" aria-hidden="true" />
+              {SAFENET_LABELS[safenet]}
+            </span>
           ),
         },
       ].map((item) => (
-        <PanelRow key={item.label} label={item.label}>
+        <PanelRow key={item.key} label={item.label}>
           {item.content}
         </PanelRow>
       ))}
@@ -327,9 +494,22 @@ const Mono = ({ value }: { value: string | number }) => (
 
 export function TransactionDataSection({ tx, open, onToggle }: { tx: Proposal; open: boolean; onToggle: () => void }) {
   const data = getTechnicalData(tx)
+  const method = getMethodName(tx)
   return (
-    <PanelSection collapsible title="Transaction data" open={open} onOpenChange={() => onToggle()}>
+    <PanelSection
+      collapsible
+      title="Transaction data"
+      open={open}
+      onOpenChange={() => onToggle()}
+      rightNode={method && <MethodName method={method} />}
+    >
       <div className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Cross-verify your transaction data with{' '}
+          <ExternalLink href="https://safeutils.openzeppelin.com">Safe Utils</ExternalLink> and{' '}
+          <ExternalLink href="https://transaction-decoder.pages.dev">Transaction Decoder</ExternalLink>. Values in this
+          preview are placeholders.
+        </p>
         <Tabs defaultValue="data">
           <TabsList aria-label="Transaction data views">
             <TabsTrigger value="data">Data</TabsTrigger>
@@ -376,12 +556,6 @@ export function TransactionDataSection({ tx, open, onToggle }: { tx: Proposal; o
             </pre>
           </TabsContent>
         </Tabs>
-        <p className="text-xs text-muted-foreground">
-          Cross-verify your transaction data with{' '}
-          <ExternalLink href="https://safeutils.openzeppelin.com">Safe Utils</ExternalLink> and{' '}
-          <ExternalLink href="https://transaction-decoder.pages.dev">Transaction Decoder</ExternalLink>. Values in this
-          preview are placeholders.
-        </p>
       </div>
     </PanelSection>
   )
@@ -403,7 +577,7 @@ export function ChangeSection({
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
           {replacement
-            ? `Sends a transfer at nonce #${tx.nonce} instead. It needs signatures and execution. Whichever executes first replaces the other.`
+            ? `Sends a transfer at nonce #${tx.nonce} instead. It needs signatures and execution. Only one of the two can execute.`
             : `Creates an on-chain rejection at nonce #${tx.nonce}. It needs ${getAccount(tx).threshold} signatures and execution like any transaction. Once it executes, this proposal can't.`}
         </p>
         {replacement &&

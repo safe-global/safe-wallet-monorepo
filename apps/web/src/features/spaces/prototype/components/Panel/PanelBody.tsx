@@ -67,12 +67,20 @@ type SectionProps = {
   rightNode?: ReactNode
   // Queue: passed to DrawerSection so long sections can fold.
   collapsible?: boolean
+  defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }
 
-export const PanelSection = ({ children, ...section }: SectionProps & { children: ReactNode }): ReactElement => (
+// Queue: `callout` sits above the frame and `footer` below it, e.g. why the transaction can't execute yet.
+export const PanelSection = ({
+  children,
+  callout,
+  footer,
+  ...section
+}: SectionProps & { children: ReactNode; callout?: ReactNode; footer?: ReactNode }): ReactElement => (
   <DrawerSection {...section}>
+    {callout}
     <Frame className="flex w-full flex-col">
       {Children.toArray(children).map((row, index) => (
         <Fragment key={index}>
@@ -81,6 +89,7 @@ export const PanelSection = ({ children, ...section }: SectionProps & { children
         </Fragment>
       ))}
     </Frame>
+    {footer}
   </DrawerSection>
 )
 

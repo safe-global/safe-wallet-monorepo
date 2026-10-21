@@ -104,6 +104,13 @@ function PendingQueueView() {
   const [feedback, setFeedback] = useState('')
   const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
   const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, steps)
+  // A new status filter opens every Safe. Clearing it leaves them as they are.
+  const statusKey = filters.stateFilter.join(',')
+  const [seededStatus, setSeededStatus] = useState(statusKey)
+  if (seededStatus !== statusKey) {
+    setSeededStatus(statusKey)
+    if (statusKey) setCollapsedSections([])
+  }
   const recoveries = {
     ...allRecoveries,
     visible: filters.visibleRecoveries,

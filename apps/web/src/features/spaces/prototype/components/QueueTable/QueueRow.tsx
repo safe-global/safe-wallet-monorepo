@@ -145,8 +145,7 @@ export function QueueRow({
   const primaryLabel = primary.label
   const counterpartyHint = getCounterpartyHint(tx)
   const columnCount = columns.length
-  const optionLabel = steps && groupSize > 1 ? `Option ${optionIndex} of ${groupSize}` : ''
-  const detail = [optionLabel, getDetail(tx)].filter(Boolean).join(' · ')
+  const detail = getDetail(tx)
   const review = (event: { stopPropagation: () => void }) => {
     event.stopPropagation()
     onReview(tx)
@@ -572,11 +571,11 @@ export function QueueRow({
                 <>
                   <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
                   <span className="font-medium">
-                    {columns.includes('Safe') ? account.name : `${groupSize} options`}
+                    {columns.includes('Safe') ? account.name : `${groupSize} transactions`}
                   </span>
                   <span className="text-muted-foreground">
-                    {columns.includes('Safe') ? `${groupSize} options · ` : ''}Only one can execute; executing it
-                    replaces the others.
+                    {columns.includes('Safe') ? `${groupSize} transactions · ` : ''}Only one can execute. Once it does,
+                    the {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
                   </span>
                 </>
               ) : (
@@ -588,7 +587,9 @@ export function QueueRow({
                     <ListFilter className="size-3" />
                   </span>
                   <span className="font-medium">{conflicts.length + 1} competing proposals</span>
-                  <span className="text-muted-foreground">Executing one replaces the others.</span>
+                  <span className="text-muted-foreground">
+                    Only one can execute. Once it does, the others become invalid.
+                  </span>
                 </>
               )}
               <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} className="text-muted-foreground" noIcon>

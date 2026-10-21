@@ -1,7 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { getAccount, getState, getStepsStatus } from '../../services/model'
+import { getAccount, getState } from '../../services/model'
 import type { Filter, Persona, Proposal } from '../../types'
-import { HINT_CLASS, HintContent, type StatusTone } from '../shared'
+import { HINT_CLASS, HintContent } from '../shared'
 
 export type NonceState = 'now' | 'sign' | 'waiting' | 'blocked'
 
@@ -12,14 +12,6 @@ export const getNonceState = (tx: Proposal, persona: Persona): NonceState => {
   return state.waiting ? 'blocked' : 'waiting'
 }
 
-// Status dot colours match the status chips. Conflicts are amber.
-const DOT: Record<StatusTone | 'conflict', string> = {
-  success: 'bg-badge-dot-success',
-  warning: 'bg-badge-dot-warning',
-  destructive: 'bg-destructive',
-  secondary: 'bg-muted-foreground',
-  conflict: 'bg-badge-dot-warning',
-}
 // Grey by default. Dark when the row is hovered or selected.
 const LABEL = 'flex h-6 shrink-0 items-center gap-1.5 text-sm tabular-nums transition-colors'
 const ROW_COLOR =
@@ -63,10 +55,6 @@ const hint = (tx: Proposal, state: NonceState, competing: number) => {
   return competing ? `${base} ${competing + 1} conflicting transactions share this nonce; only one can execute.` : base
 }
 
-const Dot = ({ tone }: { tone: StatusTone | 'conflict' }) => (
-  <span className={`size-1.5 shrink-0 rounded-full ${DOT[tone]}`} aria-hidden="true" />
-)
-
 export function NonceLabel({ tx, persona, competing }: { tx: Proposal; persona: Persona; competing: number }) {
   const state = getNonceState(tx, persona)
   const text = hint(tx, state, competing)
@@ -77,7 +65,6 @@ export function NonceLabel({ tx, persona, competing }: { tx: Proposal; persona: 
         onClick={(event) => event.stopPropagation()}
         className={`${LABEL} ${ROW_COLOR}`}
       >
-        <Dot tone={competing ? 'conflict' : getStepsStatus(tx, persona).tone} />
         {tx.nonce}
       </TooltipTrigger>
       <TooltipContent className={HINT_CLASS}>
@@ -90,24 +77,19 @@ export function NonceLabel({ tx, persona, competing }: { tx: Proposal; persona: 
   )
 }
 
-// NonceLabel without a tooltip, for use inside buttons and headers.
-// `group`: a conflict group. Its dot is amber. `active`: one of its options is hovered.
+// NonceLabel without a tooltip. No dot: the status chip carries the colour. `active`: an option is hovered.
 export function NonceMark({
   tx,
-  persona,
-  competing = 0,
-  group = false,
   active = false,
 }: {
   tx: Proposal
-  persona: Persona
+  persona?: Persona
   competing?: number
   group?: boolean
   active?: boolean
 }) {
   return (
     <span className={`${LABEL} ${active ? 'text-foreground' : ROW_COLOR}`} aria-label={`Nonce ${tx.nonce}`} role="img">
-      <Dot tone={group || competing ? 'conflict' : getStepsStatus(tx, persona).tone} />
       {tx.nonce}
     </span>
   )

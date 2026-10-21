@@ -10,6 +10,10 @@ const hex = (seed: string, length: number) => {
   }).join('')
 }
 
+// Fills in a fixture's short address ("0x90ab…12ef"), keeping both ends.
+export const getFullAddress = (short: string) =>
+  short.includes('…') ? `${short.slice(0, 6)}${hex(short, 32)}${short.split('…')[1]}` : short
+
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export const getTechnicalData = (tx: Proposal) => {
@@ -35,5 +39,38 @@ export const getTechnicalData = (tx: Proposal) => {
     domainHash: `0x${hex(`${account.id}:domain`, 64)}`,
     messageHash: `0x${hex(`${tx.id}:message`, 64)}`,
     safeTxHash: `0x${hex(`${tx.id}:safeTxHash`, 64)}`,
+  }
+}
+
+const SETTINGS_METHODS: Record<string, string> = {
+  addOwner: 'addOwnerWithThreshold',
+  removeOwner: 'removeOwner',
+  changeThreshold: 'changeThreshold',
+  enableModule: 'enableModule',
+  setGuard: 'setGuard',
+  setFallbackHandler: 'setFallbackHandler',
+  updateVersion: 'changeMasterCopy',
+}
+
+// Native transfers and rejections have no method.
+export const getMethodName = (tx: Proposal): string | undefined => {
+  const { kind } = tx
+  switch (kind.type) {
+    case 'transfer':
+      return tx.amount.endsWith('ETH') ? undefined : 'transfer'
+    case 'swap':
+      return 'setPreSignature'
+    case 'bridge':
+      return undefined
+    case 'batch':
+      return 'multiSend'
+    case 'contract':
+      return kind.method
+    case 'settings':
+      return SETTINGS_METHODS[kind.change.kind]
+    case 'nested':
+      return 'approveHash'
+    case 'rejection':
+      return undefined
   }
 }

@@ -1,10 +1,11 @@
-import type { Proposal } from '../types'
+import type { BatchAction, Proposal } from '../types'
 import {
   getAccount,
   getRecipientAddress,
   getRecipientName,
   getSignerIdentity,
   getTransactionLabel,
+  shortAddress,
   type TypeLabel,
 } from './model'
 
@@ -74,6 +75,8 @@ export type Counterparty = {
   tone?: 'warning' | 'success'
 }
 
+const MULTISEND = { name: 'MultiSendCallOnly 1.4.1', address: '0x40a2…3a1e' }
+
 export const getCounterpartyCell = (tx: Proposal): Counterparty => {
   const { kind } = tx
   const account = getAccount(tx)
@@ -101,13 +104,19 @@ export const getCounterpartyCell = (tx: Proposal): Counterparty => {
       return kind.verified
         ? { ...named(kind.contract, 'Verified contract'), tone: 'success' }
         : { ...named(kind.contract, 'Unverified contract'), tone: 'warning' }
-    case 'batch':
-      return kind.delegateCall
-        ? {
-            ...named(getRecipientName(tx), 'Delegate call'),
-            tone: kind.delegateCall === 'untrusted' ? 'warning' : undefined,
+    case 'batch': {
+      const contract = recipientAddress?.startsWith('0x')
+        ? named(getRecipientName(tx))
+        : {
+            name: MULTISEND.name,
+            avatar: MULTISEND.address,
+            detail: shortAddress(MULTISEND.address),
+            address: MULTISEND.address,
           }
-        : named(getRecipientName(tx))
+      return kind.delegateCall
+        ? { ...contract, detail: 'Delegate call', tone: kind.delegateCall === 'untrusted' ? 'warning' : undefined }
+        : contract
+    }
     case 'nested':
       return named(kind.parentSafe, 'Parent Safe')
   }
@@ -150,4 +159,26 @@ export const getCounterpartyHint = (tx: Proposal): { title: string; body: string
     case 'nested':
       return { title: 'Parent Safe', body: 'The Safe whose transaction this one approves.' }
   }
+}
+
+// Fixtures name every recipient, so this lists the ones treated as not in the address book.
+const NEW_RECIPIENTS = ['Exchange deposit', 'Whitehat']
+export const isNewRecipient = (tx: Proposal) =>
+  tx.kind.type === 'transfer' && !tx.kind.toSelf && NEW_RECIPIENTS.includes(getRecipientName(tx))
+
+const METHOD_NOUNS: Record<string, [string, string]> = {
+  transfer: ['transfer', 'transfers'],
+  approve: ['approval', 'approvals'],
+}
+
+// "12 transfers · 2 approvals"
+export const getActionBreakdown = (actions: BatchAction[]) => {
+  const counts = new Map<string, number>()
+  actions.forEach(({ method }) => counts.set(method, (counts.get(method) ?? 0) + 1))
+  return [...counts]
+    .map(([method, count]) => {
+      const noun = METHOD_NOUNS[method]
+      return noun ? `${count} ${noun[count === 1 ? 0 : 1]}` : `${count} ${method}`
+    })
+    .join(' · ')
 }
