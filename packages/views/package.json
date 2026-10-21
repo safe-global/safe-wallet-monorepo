@@ -12,7 +12,7 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@hello-pangea/dnd": "^18.0.1",
-    "@safe-global/protocol-kit": "^8.0.7",
+    "@safe-global/protocol-kit": "^8.0.8",
     "@safe-global/store": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
     "@safe-global/utils": "workspace:^",
