@@ -81,10 +81,6 @@ export class AssetsPage {
     return row.getByTestId('table-cell-actions').getByRole('button', { name: 'Send' })
   }
 
-  swapButton(row: Locator): Locator {
-    return row.getByTestId('table-cell-actions').getByRole('button', { name: 'Swap' })
-  }
-
   tokenSymbol(row: Locator): Locator {
     return row.getByTestId('token-symbol')
   }

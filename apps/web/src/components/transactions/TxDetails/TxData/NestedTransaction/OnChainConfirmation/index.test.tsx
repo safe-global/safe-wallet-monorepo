@@ -155,6 +155,18 @@ describe('OnChainConfirmation', () => {
     expect(screen.getByText('Could not load details on hash to approve.')).toBeInTheDocument()
   })
 
+  it('renders an error for approveHash calldata with a malformed argument', () => {
+    mockUseTxByIdQuery.mockReturnValue({ data: undefined, error: undefined })
+
+    render(
+      <TxFlowContext.Provider value={{ ...initialContext, data: {} }}>
+        <OnChainConfirmation data={{ ...approveHashTxData, hexData: concat([APPROVE_HASH_SELECTOR, '0x1234']) }} />
+      </TxFlowContext.Provider>,
+    )
+
+    expect(screen.getByText('Could not load details on hash to approve.')).toBeInTheDocument()
+  })
+
   it('renders a skeleton while the service lookup is pending and no envelope is available', () => {
     mockUseTxByIdQuery.mockReturnValue({ data: undefined, error: undefined })
 

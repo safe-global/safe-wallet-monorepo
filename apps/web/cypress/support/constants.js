@@ -11,20 +11,13 @@ export const GOERLI_TEST_SAFE = 'gor:0x97d314157727D517A706B5D08507A1f9B44AaaE9'
 export const SEPOLIA_TEST_SAFE_6 = 'sep:0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1'
 
 export const SEPOLIA_CONTRACT_SHORT = '0x11AB...34aF'
-export const SEPOLIA_RECIPIENT_ADDR_SHORT = '0x4DD4...7bde'
 // Need clarification/refactor: TEST_SAFE / GNO_TEST_SAFE
 export const GNO_TEST_SAFE = 'gno:0xB8d760a90a5ed54D3c2b3EFC231277e99188642A'
 export const TEST_SAFE = 'gor:0x04f8b1EA3cBB315b87ced0E32deb5a43cC151a91'
 export const EOA = '0x03042B890b99552b60A073F808100517fb148F60'
 export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
-export const SAFE_APP_ADDRESS_2 = '0x49d4450977E2c95362C13D3a31a09311E0Ea26A6'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
-// Isolated runs generate OWNER_4; staging runs keep the staging wallet.
-export const DEFAULT_OWNER_ADDRESS = Cypress.env('SAFE_E2E_ISOLATED')
-  ? JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS')).OWNER_4_WALLET_ADDRESS
-  : '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
-// Below is also used in sidebar tests as a beneficiary
-export const SPENDING_LIMIT_ADDRESS_2 = '0x52835f11E348605E9D791Ec09380a3224526d538'
+export { defaultOwnerAddress } from './credentials.js'
 // AllowanceModule contract addresses — keyed by contract version, not by network
 export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
 export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
@@ -60,7 +53,7 @@ export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = Cypress.env('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
+export const TX_Builder_url = Cypress.expose('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
@@ -105,13 +98,13 @@ export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = (
-  Cypress.env('SAFE_TXS_BASE_URL') || 'https://safe-transaction-sepolia.staging.5afe.dev/api'
+  Cypress.expose('SAFE_TXS_BASE_URL') || 'https://safe-transaction-sepolia.staging.5afe.dev/api'
 ).replace(/\/$/, '')
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
 export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl =
-  (Cypress.env('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
+  (Cypress.expose('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
 export const stagingCGWUrlv2 = `${stagingCGWUrl}v2`
 export const stagingCGWChains = '/chains/'
@@ -124,12 +117,11 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 
 export const usersEndpoint = '**/v1/users'
 export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
-export const spacesEndpoint = '**/**/spaces*'
+export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
 export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
-export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
@@ -148,7 +140,7 @@ export const portfolioEndpoint = '**/v1/portfolio/**'
 export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
 export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
 export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
-export const delegatesEndpoint = '**/v2/chains/*/delegates*'
+export const delegatesEndpoint = /\/v[23]\/chains\/\d+\/delegates\?/
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -161,10 +153,6 @@ export const safeContractVersions = {
 
 export const commonThresholds = {
   oneOfOne: '1 out of 1 signer',
-}
-export const TXActionNames = {
-  resetAllowance: 'resetAllowance',
-  setAllowance: 'setAllowance',
 }
 
 export const networkKeys = {
@@ -315,9 +303,10 @@ export const chainFeatures = {
   staking: 'STAKING',
   earn: 'EARN',
   spaces: 'SPACES',
+  proposerGating: 'PROPOSER_GATING',
 }
 
-export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')
+export const CURRENT_COOKIE_TERMS_VERSION = Cypress.expose('CURRENT_COOKIE_TERMS_VERSION')
 
 export const localStorageKeys = {
   SAFE_v2__addressBook: 'SAFE_v2__addressBook',

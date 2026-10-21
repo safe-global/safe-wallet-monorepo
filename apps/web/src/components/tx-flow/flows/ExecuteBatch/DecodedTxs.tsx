@@ -11,14 +11,18 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { useState } from 'react'
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 
+type DecodableTx = TransactionDetails & { txData: NonNullable<TransactionDetails['txData']> }
+
 const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
 
   if (!txs) return null
 
+  const decodableTxs = txs.filter((transaction): transaction is DecodableTx => !!transaction.txData)
+
   return (
     <>
-      <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={txs.length} compact />
+      <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={decodableTxs.length} compact />
 
       <Card variant="muted" size="none" className="mt-2">
         <CardContent>
@@ -27,9 +31,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
               16px less the 8px inset, which keeps the two concentric. */}
           <div className="p-2">
             <div className="flex flex-col divide-y divide-border overflow-hidden rounded-sm">
-              {txs.map((transaction, idx) => {
-                if (!transaction.txData) return null
-
+              {decodableTxs.map((transaction, idx) => {
                 const onChange = (_: SyntheticEvent, expanded: boolean) => {
                   setOpenMap((prev) => ({
                     ...prev,

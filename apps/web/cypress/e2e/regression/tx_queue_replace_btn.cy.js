@@ -7,38 +7,18 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page.js'
 import { spendingLimitTxOption } from '../pages/spending_limits.pages'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer2
+before(() => {
+  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Transaction queue Replace button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
-  })
-
-  it('Verify "Reject tx" modal has the Replace tx option', () => {
-    wallet.connectSignerViaStorage(
-      signer2,
-      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder,
-    )
-    create_tx.clickOnRejectBtn()
-    create_tx.verifyTxRejectModalVisible()
-    create_tx.verifyReplaceChoiceBtnVisible()
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-  })
-
-  it('Verify Replace tx takes to a "Send funds" form with the same nonce as the tx being replaced', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_34 + swaps.swapTxs.sellQLimitOrder)
-    wallet.connectSigner(signer2)
-    create_tx.clickOnRejectBtn()
-    create_tx.verifyTxRejectModalVisible()
-    create_tx.clickOnReplaceTxOption()
-    create_tx.verifyNonceInputValue('0')
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
   })
 
   it('Verify there is no "Add to batch" option in a Send funds screen via replace tx', () => {

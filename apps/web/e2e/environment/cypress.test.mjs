@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { cypressEnvironment, isRemoteBackendHost, planShards, selectCypressSpecs } from './cypress.mjs'
+import {
+  cypressEnvironment,
+  exposedValues,
+  forkShardCount,
+  isRemoteBackendHost,
+  isRemoteBackendRequest,
+  planShards,
+  selectCypressSpecs,
+} from './cypress.mjs'
 import { isolatedSpecs } from './specs.mjs'
 import { createOwners } from './scenarios/safe.mjs'
 import { Wallet, verifyMessage } from 'ethers'
@@ -33,6 +41,21 @@ test('blocks remote backend hosts without treating the static asset CDN as a tra
   }
 })
 
+test('lets the hosted CoW widget read the chain through its own RPC while the wallet must stay local', () => {
+  const rpc = 'https://eth-sepolia.g.alchemy.com/v2/key'
+  assert.equal(isRemoteBackendRequest(rpc, { origin: 'https://swap.cow.fi' }), false)
+  assert.equal(isRemoteBackendRequest(rpc, { origin: 'https://staging.swap.cow.fi' }), false)
+  assert.equal(isRemoteBackendRequest(rpc, { referer: 'https://swap.cow.fi/' }), false)
+  assert.equal(isRemoteBackendRequest(rpc, { origin: 'http://localhost:8080' }), true)
+  assert.equal(isRemoteBackendRequest(rpc, { referer: 'http://localhost:8080/swap' }), true)
+  assert.equal(isRemoteBackendRequest(rpc), true)
+})
+
+test('blocks a Safe backend request from the hosted CoW widget', () => {
+  const cgw = 'https://safe-client.safe.global/v1/chains'
+  assert.equal(isRemoteBackendRequest(cgw, { referer: 'https://swap.cow.fi/' }), true)
+})
+
 const assets = 'cypress/e2e/regression/assets.cy.js'
 const assetsSmoke = 'cypress/e2e/smoke/assets.cy.js'
 const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
@@ -48,7 +71,7 @@ test('selects only registered specs and supports a focused local rerun', () => {
 })
 
 test('rejects unknown or empty spec selection instead of running staging-dependent specs', () => {
-  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_delete_btn', 'tx_queue_delete_btn,']) {
+  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_replace_btn', 'tx_queue_replace_btn,']) {
     assert.throws(() => selectCypressSpecs(selection), /No isolated scenario/)
   }
 })
@@ -87,6 +110,21 @@ test('preserves path prefixes and excludes remote credentials in isolated browse
   assert.equal(result.FORK_RPC_URL, undefined)
   assert.equal(result.SEPOLIA_FORK_RPC_URL, undefined)
   assert.equal(result.CYPRESS_WALLET_CREDENTIALS, undefined)
+})
+
+test('exposes only the public values to the browser', () => {
+  const isolated = exposedValues(cypressEnvironment(local))
+  assert.deepEqual(Object.keys(isolated).sort(), [
+    'SAFE_CGW_BASE_URL',
+    'SAFE_E2E_ISOLATED',
+    'SAFE_TXS_BASE_URL',
+    'TX_BUILDER_URL',
+  ])
+  const staging = exposedValues(
+    cypressEnvironment({ CYPRESS_WALLET_CREDENTIALS: 'secret', INFURA_API_KEY: 'secret', BEAMER_DATA_E2E: '{}' }),
+  )
+  assert.deepEqual(staging, { BEAMER_DATA_E2E: '{}' })
+  assert.deepEqual(exposedValues({}), {})
 })
 
 test('points isolated Safe App specs at the locally served Transaction Builder', () => {
@@ -138,17 +176,53 @@ test('retains legacy configuration without forwarding archive provider credentia
   )
 })
 
-test('plans shards that keep specs needing extra forks apart and cover every spec once', () => {
+test('plans shards that cover every spec once and start forks only where a spec needs them', () => {
   const specs = Object.keys(isolatedSpecs)
   const needsForks = (spec) => Boolean(isolatedSpecs[spec].chains)
   const shards = planShards(specs, 6)
-  assert.ok(shards.length <= 7)
+  assert.equal(shards.length, 6)
   assert.deepEqual(shards.flatMap(({ specs }) => specs).sort(), [...specs].sort())
   for (const shard of shards) {
-    const forkShard = shard.specs.some(needsForks)
-    assert.ok(shard.specs.every((spec) => needsForks(spec) === forkShard))
-    assert.equal(shard.chains.length > 0, forkShard)
+    assert.equal(shard.chains.length > 0, shard.specs.some(needsForks))
   }
   assert.deepEqual(planShards([assets], 4), [{ specs: [assets], chains: [] }])
   assert.throws(() => planShards(specs, 0), /positive integer/)
+})
+
+test('fills the fork shards with plain specs so that all shards cost about the same', () => {
+  const registry = Object.fromEntries([
+    ...Array.from({ length: 97 }, (_, index) => [`cypress/e2e/test/plain-${index}.cy.js`, {}]),
+    ...Array.from({ length: 17 }, (_, index) => [`cypress/e2e/test/fork-${index}.cy.js`, { chains: [1] }]),
+  ])
+  const cost = ({ specs }) => {
+    const forks = specs.filter((spec) => registry[spec].chains).length
+    return specs.length - forks + (forks ? forks * 1.2 + 2.5 : 0)
+  }
+  const costs = planShards(Object.keys(registry), 6, registry).map(cost)
+  assert.ok(Math.max(...costs) - Math.min(...costs) <= 1.2, `unbalanced shards: ${costs}`)
+  assert.ok(Math.max(...costs) <= 21)
+})
+
+test('gives the slower fork specs enough shards that they do not hold up the run', () => {
+  // 97 plain and 17 fork specs, as in CI: one fork shard would cost 22.9 against an average of 20.4.
+  assert.equal(forkShardCount(97, 17, 6), 2)
+  assert.equal(forkShardCount(97, 17, 8), 2)
+  assert.equal(forkShardCount(97, 0, 6), 0)
+  assert.equal(forkShardCount(0, 17, 6), 6)
+  assert.equal(forkShardCount(3, 1, 1), 1)
+})
+
+test('keeps fork specs that need the same forks in the same shard', () => {
+  const registry = {
+    'cypress/e2e/test/plain.cy.js': {},
+    'cypress/e2e/test/mainnet-a.cy.js': { chains: [1] },
+    'cypress/e2e/test/polygon-a.cy.js': { chains: [137] },
+    'cypress/e2e/test/mainnet-b.cy.js': { chains: [1] },
+    'cypress/e2e/test/polygon-b.cy.js': { chains: [137] },
+  }
+  const forkShards = planShards(Object.keys(registry), 3, registry).filter(({ chains }) => chains.length)
+  assert.deepEqual(
+    forkShards.map(({ chains }) => chains),
+    [['mainnet'], ['polygon']],
+  )
 })

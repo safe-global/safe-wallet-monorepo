@@ -14,7 +14,7 @@ import { test, expect } from '../../src/fixtures/test.fixture'
 import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
-import { SAFES, DROPDOWN_LOCAL_CONTACTS } from '../../src/data/constants'
+import { DROPDOWN_LOCAL_CONTACTS } from '../../src/data/constants'
 
 const [FIRST_CONTACT, SECOND_CONTACT] = DROPDOWN_LOCAL_CONTACTS
 
@@ -23,15 +23,16 @@ test.describe('Send tokens — keyboard navigation', { tag: '@regression' }, () 
     safePage,
     walletPage,
     credentials,
+    safes,
   }, testInfo) => {
-    testInfo.annotations.push({ type: 'safe-address', description: SAFES.SEP_OWNER_4_SAFE })
+    testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_OWNER_4_SAFE })
 
     await seedLocalAddressBook(safePage, [FIRST_CONTACT, SECOND_CONTACT])
 
     const home = new HomePage(safePage)
     const sendTokens = new SendTokensPage(safePage)
 
-    await home.goto(SAFES.SEP_OWNER_4_SAFE)
+    await home.goto(safes.SEP_OWNER_4_SAFE)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()

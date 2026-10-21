@@ -49,6 +49,9 @@ export function pollUntil(isReady, timeout) {
   )
 }
 
+// NameInput can miss its 50-character error when keystrokes come with no delay (the Cypress 16 default).
+export const nameTypingOptions = { delay: 10 }
+
 /** Waits for the page to settle before Argos captures the screenshot. */
 export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)
@@ -59,15 +62,15 @@ export function acceptWidgetDisclaimer() {
 }
 
 /**
- * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * Intercepts the chains list endpoint to inject and/or remove a feature flag for a specific chain,
  * and optionally aliases the feature's data endpoint for use with cy.wait().
  *
  * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
  *
  * @param {object} options
  * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
- * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
- * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.removeFlag]  - Feature flag to remove (before adding `addFlag`, if any)
  * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
  * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
  */
@@ -77,7 +80,7 @@ export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint,
       const applyFlags = (chain) => {
         let features = chain.features || []
         if (removeFlag) features = features.filter((f) => f !== removeFlag)
-        if (!features.includes(addFlag)) features.push(addFlag)
+        if (addFlag && !features.includes(addFlag)) features.push(addFlag)
         return { ...chain, features }
       }
 
@@ -113,12 +116,13 @@ export function selectDropdownOption(itemSelector, text) {
 export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
   const attempt = (left) => {
     getTrigger().trigger('mouseenter', { force: true })
-    cy.wait(300)
-    getTrigger().then(($trigger) => {
-      if ($trigger.attr('data-popup-open') !== undefined) return
-      if (left <= 0) throw new Error('Tooltip never opened')
-      attempt(left - 1)
-    })
+    getTrigger().then(($trigger) =>
+      pollUntil(() => $trigger.attr('data-popup-open') !== undefined, 2000).then((opened) => {
+        if (opened) return
+        if (left <= 0) throw new Error('Tooltip never opened')
+        attempt(left - 1)
+      }),
+    )
   }
   attempt(retries)
 }
@@ -223,39 +227,20 @@ export const getRelayRemainingAttempts = (safeAddress) => {
       headers: {
         accept: 'application/json',
       },
+      failOnStatusCode: false,
     })
-    .then((response) => {
-      console.log('Remaining relay attempts: ', response.body.remaining)
-      return response.body.remaining
-    })
+    .then((response) => (response.status === 200 ? response.body.remaining : 0))
 }
 
 export function verifyNonceChange(safeAddress, expectedNonce, retries = 30, delay = 10000) {
-  let attempts = 0
-
-  function checkNonce() {
-    return fetchCurrentNonce(safeAddress).then((newNonce) => {
-      console.log(`Attempt ${attempts + 1}: newNonce = ${newNonce}, expectedNonce = ${expectedNonce}`)
-
-      if (newNonce === expectedNonce) {
-        console.log('Nonce matches the expected value')
-        expect(newNonce).to.equal(expectedNonce)
-        return
-      }
-
-      attempts += 1
-      if (attempts < retries) {
-        return new Promise((resolve) => {
-          setTimeout(resolve, delay)
-        }).then(checkNonce)
-      } else {
-        console.error(`Nonce did not change to expected value after ${retries} attempts`)
-        return Promise.reject(new Error(`Nonce did not change to expected value after ${retries} attempts`))
-      }
-    })
-  }
-
-  return checkNonce()
+  fetchCurrentNonce(safeAddress).then((newNonce) => {
+    if (newNonce === expectedNonce || retries <= 1) {
+      expect(newNonce, 'Safe nonce').to.equal(expectedNonce)
+      return
+    }
+    cy.wait(delay)
+    verifyNonceChange(safeAddress, expectedNonce, retries - 1, delay)
+  })
 }
 
 export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {

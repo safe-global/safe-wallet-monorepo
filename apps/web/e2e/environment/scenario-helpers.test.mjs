@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { test } from 'node:test'
 import { AbiCoder, Interface, dataSlice, getAddress } from 'ethers'
 import { addressOf, multiSend, short } from './scenarios/chain.mjs'
 import { localOrderUid, replayed } from './scenarios/cow.mjs'
 import { creationCode } from './scenarios/dashboard.mjs'
+import { LEDGER_TEST_MNEMONIC, ledgerOwner } from './scenarios/ledger.mjs'
 import { poll } from './scenarios/indexing.mjs'
 import { approvedHashSignatures } from './scenarios/staging.mjs'
 
@@ -69,4 +71,10 @@ test('polls until ready and otherwise reports the last answer', async (t) => {
   assert.equal(await poll(url, async (response) => response.ok, Date.now() + 600), 'status 503')
   status = 200
   assert.equal(await poll(url, async (response) => response.ok, Date.now() + 600), undefined)
+})
+
+test('derives the Ledger owner from the seed of the emulator in Compose', () => {
+  const compose = readFileSync(new URL('./infra/docker-compose.test.yml', import.meta.url), 'utf8')
+  assert.equal(/LEDGER_SEED: (.+)/.exec(compose)?.[1], LEDGER_TEST_MNEMONIC)
+  assert.equal(ledgerOwner.address, '0x70f4aC46DC07075f1a4D4D3c767e863021449c95')
 })

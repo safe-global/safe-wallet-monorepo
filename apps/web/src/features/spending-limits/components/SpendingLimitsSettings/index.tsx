@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 import AddIcon from '@/public/images/common/add.svg'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { NoSpendingLimits } from '@safe-global/views/features/spending-limits/components/SpendingLimitsSettings/NoSpendingLimits'
 import { SpendingLimitsTable } from './SpendingLimitsTable'
 import { useHasFeature } from '@/hooks/useChains'
@@ -21,7 +22,12 @@ const SpendingLimitsSettings = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const isEnabled = useHasFeature(FEATURES.SPENDING_LIMIT)
   const isSupported = useIsSpendingLimitSupported()
-  const { mustUpgradeToSafePro, isLoading: isPlanLoading, upgradeHref } = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
+  const {
+    mustUpgradeToSafePro,
+    isLoading: isPlanLoading,
+    upgradeHref,
+    showProTag,
+  } = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
 
   // Read data from store (loaded on app start via SpendingLimitsLoader)
   const spendingLimits = useAppSelector(selectSpendingLimits)
@@ -33,12 +39,19 @@ const SpendingLimitsSettings = () => {
         <Track {...SETTINGS_EVENTS.SPENDING_LIMIT.NEW_LIMIT}>
           <Button
             data-testid="new-spending-limit"
+            variant="outline"
+            size="lg"
             onClick={() => setTxFlow(<NewSpendingLimitFlow />)}
             className="my-4"
             disabled={!isOk}
           >
             <AddIcon className="size-4" />
-            New spending limit
+            Add spending limit
+            {showProTag && (
+              <span className="block h-5 w-8" role="img" aria-label="Safe Pro" data-testid="pro-tag">
+                <ProChip className="size-full" />
+              </span>
+            )}
           </Button>
         </Track>
       )}

@@ -17,8 +17,7 @@ jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
 }))
 jest.mock('../../../hooks/billing/useStartCheckout', () => ({
   useStartCheckout: (spaceId?: string, returnPathname?: string) => ({
-    startCheckout: (paymentLinkId: string, props: unknown) =>
-      mockStartCheckout(spaceId, returnPathname, paymentLinkId, props),
+    startCheckout: (paymentLinkId: string) => mockStartCheckout(spaceId, returnPathname, paymentLinkId),
     isRedirecting: false,
     isError: false,
     ...mockCheckoutState,
@@ -130,12 +129,7 @@ describe('ClaimTrialModal', () => {
     expect(onBack).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business', {
-      'Target Plan': 'business',
-      Seats: 20,
-      'Billing Period': 'monthly',
-      ...LOGIN_ENTRY,
-    })
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
@@ -171,12 +165,7 @@ describe('ClaimTrialModal', () => {
     expect(onBack).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
-    expect(mockStartCheckout).toHaveBeenCalledWith(
-      SPACE_ID,
-      '/welcome/select-safes',
-      'pl_business',
-      expect.objectContaining({ 'Entry Point': 'create_workspace' }),
-    )
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_business')
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
@@ -197,14 +186,7 @@ describe('ClaimTrialModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     fireEvent.click(screen.getByText('step-continue'))
 
-    await waitFor(() =>
-      expect(mockStartCheckout).toHaveBeenCalledWith(
-        SPACE_ID,
-        '/welcome/select-safes',
-        'pl_starter',
-        expect.objectContaining({ 'Target Plan': 'starter', Seats: 2, ...LOGIN_ENTRY }),
-      ),
-    )
+    await waitFor(() => expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_starter'))
     expect(mockRemoveSafes).toHaveBeenCalledWith({
       spaceId: SPACE_ID,
       deleteSpaceSafesDto: { safes: [{ chainId: '1', address: '0xB' }] },

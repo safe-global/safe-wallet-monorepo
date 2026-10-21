@@ -1,6 +1,13 @@
-import { LockKeyholeOpen, MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'lucide-react'
+import {
+  LockKeyholeOpen,
+  MessageSquarePlus,
+  ShieldCheck,
+  UserRoundPen,
+  WalletCards,
+  type LucideIcon,
+} from 'lucide-react'
 
-export type AddPolicyId = 'spending-limit' | 'proposer' | 'suggestion' | 'recovery'
+export type AddPolicyId = 'spending-limit' | 'proposer' | 'suggestion' | 'recovery' | 'recipient-allowlist'
 
 export interface AddPolicyOption {
   id: AddPolicyId
@@ -37,4 +44,11 @@ export const RECOVERY_POLICY_OPTION: AddPolicyOption = {
   title: 'Account recovery',
   description: 'Let recoverers restore access to your Safe Account.',
   Icon: LockKeyholeOpen,
+}
+
+export const RECIPIENT_ALLOWLIST_POLICY_OPTION: AddPolicyOption = {
+  id: 'recipient-allowlist',
+  title: 'Recipient allowlist',
+  description: 'Only let funds go to addresses you approve.',
+  Icon: ShieldCheck,
 }

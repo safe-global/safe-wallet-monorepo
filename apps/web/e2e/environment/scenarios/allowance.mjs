@@ -14,13 +14,13 @@ export const allowanceCall = (method, args) => ({
   data: allowanceInterface.encodeFunctionData(method, args),
 })
 
-/** Calls that enable the module on `safeAddress` and give each delegate a native-token allowance, in order. */
+/** Calls that enable the module on `safeAddress` and give each delegate an allowance of `token` (native by default), in order. */
 export function allowanceSetupCalls(safeAddress, allowances) {
   return [
     { to: safeAddress, data: safeInterface.encodeFunctionData('enableModule', [ALLOWANCE_MODULE]) },
-    ...allowances.flatMap(({ delegate, amount }) => [
+    ...allowances.flatMap(({ delegate, amount, token = ZeroAddress }) => [
       allowanceCall('addDelegate', [delegate]),
-      allowanceCall('setAllowance', [delegate, ZeroAddress, amount, 0, 0]),
+      allowanceCall('setAllowance', [delegate, token, amount, 0, 0]),
     ]),
   ]
 }

@@ -147,6 +147,7 @@ export const AuditRow = ({
                     onKeyDown={handleKeyDown}
                     role="button"
                     tabIndex={0}
+                    aria-label={`Copy address ${address}`}
                   >
                     <Typography variant="paragraph-mini" className={`${css.actorText} text-muted-foreground`}>
                       By {displayText}

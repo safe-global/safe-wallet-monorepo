@@ -14,8 +14,6 @@ import {
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -101,7 +99,6 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         )
         return
       }
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
           message: 'Contact added to Workspace address book',
@@ -125,7 +122,6 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return
       }
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED)
       dispatch(showNotification({ message: 'Request rejected', variant: 'success', groupKey: 'reject-success' }))
     } catch {
       dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'reject-error' }))
@@ -158,7 +154,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       // wraps into the width that frees up instead of truncating.
       cell: (req, { isCompact }) => (
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
+          <span className="inline-flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 overflow-hidden">
             <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
             {spaceAddresses.has(req.address.toLowerCase()) && (
               <Tooltip>
@@ -182,7 +178,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'chains',
       header: 'Chains',
-      width: '20%',
+      width: '15%',
       priority: 'secondary',
       minWidth: 90,
       cell: renderChains,
@@ -190,14 +186,14 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '20%',
+      width: '30%',
       priority: 'secondary',
       minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
       id: 'actions',
-      width: '15%',
+      width: '10%',
       align: 'end',
       minWidth: 80,
       cell: (req) =>

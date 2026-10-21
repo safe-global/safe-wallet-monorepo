@@ -5,9 +5,12 @@ import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as ls from '../../support/localstorage_data.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 let staticSafes = []
 
 describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
@@ -191,19 +194,11 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // 5. Tenderly Simulation
   // ========================================
 
-  it('[Tenderly Simulation] Verify that tenderly section is presented in the safe shield', () => {
-    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.tenderlySimulation, signer)
-
-    copilot.verifyTenderlySimulation()
-    cy.get(copilot.tenderlySimulation).should('contain.text', 'Transaction simulation')
-    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('be.visible')
-    cy.contains('Run').should('be.visible')
-  })
-
   it('[Tenderly Simulation] Verify success simulation state', () => {
     copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.tenderlySimulation, signer)
 
     copilot.verifyTenderlySimulation()
+    cy.get(copilot.tenderlySimulation).should('contain.text', 'Transaction simulation')
     cy.get(copilot.tenderlySimulation, { timeout: 15000 }).find(copilot.runSimulationBtn).click()
     cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('contain.text', 'Running...')
     cy.contains('Simulation successful', { timeout: 10000 }).should('be.visible')

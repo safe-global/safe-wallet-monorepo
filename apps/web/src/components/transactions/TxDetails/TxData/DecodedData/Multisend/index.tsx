@@ -66,7 +66,7 @@ const Multisend = ({
   const defaultsToSelf = !!multiSendAddress && multiSendDefaultsToSelf(multiSendAddress, chainId)
 
   // multiSend method receives one parameter `transactions`
-  const multiSendTransactions = txData?.dataDecoded?.parameters?.[0].valueDecoded
+  const multiSendTransactions = txData?.dataDecoded?.parameters?.[0]?.valueDecoded
 
   useEffect(() => {
     // Initialise whether each transaction should be expanded or not

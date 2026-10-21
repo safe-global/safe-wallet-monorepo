@@ -14,6 +14,6 @@ export type PolicyLock = {
   /** The policies the plan does not include. Setting one up leads to the upgrade. */
   lockedPolicies: PolicyId[]
   /** Without it the locked tiles show no counter. */
-  accountCounts?: Record<PolicyId, PolicyAccountCount>
+  accountCounts?: Partial<Record<PolicyId, PolicyAccountCount>>
   onUpgrade: () => void
 }

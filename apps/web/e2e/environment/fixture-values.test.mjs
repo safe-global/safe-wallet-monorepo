@@ -10,7 +10,7 @@ function fixtureEnvironment(t) {
   Object.defineProperty(globalThis, 'Cypress', {
     configurable: true,
     value: {
-      env(key, ...values) {
+      expose(key, ...values) {
         if (values.length) env[key] = values[0]
         return env[key]
       },

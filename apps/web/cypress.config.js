@@ -3,8 +3,9 @@ import 'dotenv/config'
 import * as fs from 'fs'
 import { registerArgosTask } from '@argos-ci/cypress/task'
 import { version } from './src/markdown/terms/version.js'
-import { cypressEnvironment } from './e2e/environment/cypress.mjs'
+import { cypressEnvironment, exposedValues } from './e2e/environment/cypress.mjs'
 import { isolatedSpecs } from './e2e/environment/specs.mjs'
+import { esbuildPreprocessor } from './cypress/plugins/esbuild-preprocessor.js'
 
 function setupArgosPlugin(on, config) {
   registerArgosTask(on, config, {
@@ -38,6 +39,8 @@ function setupHeadlessViewport(on, isolated) {
   })
 }
 
+const environment = cypressEnvironment(process.env)
+
 // Each spec asks for its data through the prepareSafeScenario task before its own hooks run.
 async function registerIsolatedScenarios(on, config) {
   const { createScenarioFixtures } = await import('./e2e/environment/fixtures.mjs')
@@ -46,8 +49,11 @@ async function registerIsolatedScenarios(on, config) {
   const scenarioFixtures = await createScenarioFixtures(config.fixturesFolder)
   config.fixturesFolder = scenarioFixtures.directory
   config.hosts = { ...config.hosts, '*.safe-e2e.test': '127.0.0.1' }
-  const owners = createOwners()
-  config.env.CYPRESS_WALLET_CREDENTIALS = JSON.stringify(owners.credentials)
+  // Every spec gets its own owners, although one Cypress process runs all specs of a shard.
+  let owners = createOwners()
+  on('before:spec', () => {
+    owners = createOwners()
+  })
   config.taskTimeout = 600000
   on('task', {
     async prepareSafeScenario(spec) {
@@ -57,7 +63,7 @@ async function registerIsolatedScenarios(on, config) {
       const { files, ...scenario } = await prepare(config.env, owners)
       await scenarioFixtures.prepare(files)
       console.log(`Prepared the scenario for ${spec} in ${((Date.now() - started) / 1000).toFixed(1)} s`)
-      return scenario
+      return { ...scenario, credentials: owners.credentials }
     },
   })
   return scenarioFixtures
@@ -80,8 +86,8 @@ export default defineConfig({
     viewportHeight: 800,
     async setupNodeEvents(on, config) {
       let scenarioFixtures
-      config.env.CURRENT_COOKIE_TERMS_VERSION = version
 
+      on('file:preprocessor', esbuildPreprocessor)
       setupArgosPlugin(on, config)
       setupHeadlessViewport(on, config.env.SAFE_E2E_ISOLATED)
 
@@ -97,6 +103,9 @@ export default defineConfig({
       })
 
       on('after:spec', async (spec, results) => {
+        results?.tests
+          ?.filter((test) => test.state === 'failed')
+          .forEach((test) => console.log(`\n✖ ${test.title.join(' > ')}\n${test.displayError}\n`))
         await scenarioFixtures?.cleanup()
         if (!config.env.SAFE_E2E_ISOLATED && results && results.video) {
           const failures = results.tests.some((test) => test.attempts.some((attempt) => attempt.state === 'failed'))
@@ -108,15 +117,16 @@ export default defineConfig({
 
       return config
     },
-    env: cypressEnvironment(process.env),
+    env: environment,
     baseUrl: 'http://localhost:3000',
     testIsolation: false,
     hideXHR: true,
     defaultCommandTimeout: 10000,
     pageLoadTimeout: 60000,
-    experimentalMemoryManagement: true,
     numTestsKeptInMemory: 0,
   },
 
   chromeWebSecurity: false,
+  forceHttp1: environment.SAFE_E2E_ISOLATED !== true,
+  expose: { ...exposedValues(environment), CURRENT_COOKIE_TERMS_VERSION: version },
 })

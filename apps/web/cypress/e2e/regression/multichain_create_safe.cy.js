@@ -6,9 +6,12 @@ import * as createtx from '../pages/create_tx.pages.js'
 import * as tx from '../pages/transactions.page.js'
 import * as owner from '../pages/owners.pages'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Multichain safe creation tests', () => {
   beforeEach(() => {
@@ -35,6 +38,7 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that Relay is available for one safe creation', () => {
+    tx.mockFreeDailyRelay()
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.sepolia)
     createwallet.clickOnNetwrokCheckbox()

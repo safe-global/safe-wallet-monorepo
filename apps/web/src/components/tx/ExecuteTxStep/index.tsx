@@ -14,7 +14,9 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { Execute } from '@/components/tx-flow/actions/Execute'
+import SubmitErrors from '@/components/tx-flow/actions/SubmitErrors'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
+import ErrorMessage from '../ErrorMessage'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import useChainId from '@/hooks/useChainId'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
@@ -23,14 +25,14 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
 
 /**
- * Execute step for a fully signed transaction: after the sign step of a 1/n Safe, or straight from
- * the queue. The transaction is reloaded from the gateway so gas is estimated against the real
- * signatures before executing.
+ * Execute step for a fully signed transaction: after the signature that completes the threshold, or
+ * straight from the queue. The transaction is reloaded from the gateway so gas is estimated against
+ * the real signatures before executing.
  */
 export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean }) => {
   const chainId = useChainId()
   const scope = useSafeScope()
-  const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { safeTx, safeTxError, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { txId, onPrev } = useContext(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
@@ -49,6 +51,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   useEffect(() => {
     if (!txId) return
     if (txSenderScope && !txSenderScope.sdk) return
+    setSafeTxError(undefined)
     createExistingTx(chainId, txId, undefined, txSenderScope)
       .then((signedTx) => {
         setSafeTx(signedTx)
@@ -66,7 +69,11 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   return (
     <TxFlowStep title="Execute transaction" fixedNonce hideBack>
       <TxCard contentPadding="compactBottom">
-        {!safeTx || !isReloaded ? (
+        {safeTxError && !isReloaded ? (
+          <ErrorMessage error={safeTxError}>
+            Could not load the signed transaction. Try again from the queue.
+          </ErrorMessage>
+        ) : !safeTx || !isReloaded ? (
           <div className="flex items-center justify-center py-10">
             <Spinner className="size-6" />
           </div>
@@ -85,6 +92,8 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
             </Alert>
 
             <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} txInfo={txPreview?.txInfo} outlined />
+
+            <SubmitErrors />
 
             <Execute
               options={EXECUTE_OPTIONS}
