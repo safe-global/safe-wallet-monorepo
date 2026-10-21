@@ -213,6 +213,27 @@
   --color-badge-warning-strong: var(--badge-warning-strong);
   --color-badge-dot-success: var(--badge-dot-success);
   --color-badge-dot-warning: var(--badge-dot-warning);
+  /* Tag colours from the @safe-global/theme `tag` palette (vars.css), see components/ui/tag.tsx. */
+  --color-tag-default: var(--color-tag-default-background);
+  --color-tag-default-foreground: var(--color-tag-default-text);
+  --color-tag-slate: var(--color-tag-slate-background);
+  --color-tag-slate-foreground: var(--color-tag-slate-text);
+  --color-tag-clay: var(--color-tag-clay-background);
+  --color-tag-clay-foreground: var(--color-tag-clay-text);
+  --color-tag-rose: var(--color-tag-rose-background);
+  --color-tag-rose-foreground: var(--color-tag-rose-text);
+  --color-tag-orchid: var(--color-tag-orchid-background);
+  --color-tag-orchid-foreground: var(--color-tag-orchid-text);
+  --color-tag-lilac: var(--color-tag-lilac-background);
+  --color-tag-lilac-foreground: var(--color-tag-lilac-text);
+  --color-tag-iris: var(--color-tag-iris-background);
+  --color-tag-iris-foreground: var(--color-tag-iris-text);
+  --color-tag-cobalt: var(--color-tag-cobalt-background);
+  --color-tag-cobalt-foreground: var(--color-tag-cobalt-text);
+  --color-tag-sky: var(--color-tag-sky-background);
+  --color-tag-sky-foreground: var(--color-tag-sky-text);
+  --color-tag-lagoon: var(--color-tag-lagoon-background);
+  --color-tag-lagoon-foreground: var(--color-tag-lagoon-text);
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);
