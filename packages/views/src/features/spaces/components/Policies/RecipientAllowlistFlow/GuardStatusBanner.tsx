@@ -4,7 +4,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import AllowlistAlert from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistAlert'
+import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 
 export type GuardSlotName = 'transaction' | 'module'
 
@@ -38,7 +38,7 @@ const Banner = ({
   children: ReactNode
   action?: ReactNode
 }): ReactElement => (
-  <AllowlistAlert
+  <StatusAlert
     tone={BANNER_TONES[variant]}
     title={title}
     description={<div className="flex flex-col gap-3">{children}</div>}
@@ -51,7 +51,7 @@ const GuardStatusBanner = ({ guard, safeName, onRetry }: GuardStatusBannerProps)
   switch (guard.status) {
     case 'loading':
       return (
-        <AllowlistAlert
+        <StatusAlert
           tone="loading"
           title={`Checking guards on ${safeName}…`}
           aria-live="polite"

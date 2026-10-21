@@ -10,7 +10,7 @@ import { useGuardStatus } from '../hooks/useGuardStatus'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
-import AllowlistAlert from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistAlert'
+import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import {
   NESTED_SAFES_NOTICE_TITLE,
   getNestedSafesNoticeText,
@@ -60,7 +60,7 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
         />
 
         {isSettled && hasWallet && !hasSelectableAccount && (
-          <AllowlistAlert
+          <StatusAlert
             tone="warning"
             title={NO_ELIGIBLE_SAFES_TITLE}
             description={NO_ELIGIBLE_SAFES_DESCRIPTION}
