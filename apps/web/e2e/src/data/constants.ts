@@ -121,6 +121,7 @@ export const ROUTES = {
   transactions: '/transactions',
   transactionsQueue: '/transactions/queue',
   transactionsHistory: '/transactions/history',
+  transactionsMessages: '/transactions/messages',
   settings: '/settings',
   settingsSetup: '/settings/setup',
   addressBook: '/address-book',
