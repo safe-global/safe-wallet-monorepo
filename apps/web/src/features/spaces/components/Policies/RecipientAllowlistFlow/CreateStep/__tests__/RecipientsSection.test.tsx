@@ -25,8 +25,16 @@ jest.mock('../AddFromAddressBook', () => ({
 let mockDraftName: string | undefined = 'Dave'
 jest.mock('../RecipientDraftRow', () => ({
   __esModule: true,
-  default: ({ onAdd, onCancel }: { onAdd: (recipient: AllowlistRecipient) => void; onCancel: () => void }) => (
-    <div>
+  default: ({
+    onAdd,
+    onCancel,
+    autoFocus,
+  }: {
+    onAdd: (recipient: AllowlistRecipient) => void
+    onCancel: () => void
+    autoFocus?: boolean
+  }) => (
+    <div data-testid="draft-row" data-autofocus={Boolean(autoFocus)}>
       <button onClick={() => onAdd({ address: DRAFT_ADDRESS, name: mockDraftName, selected: true })}>
         confirm draft
       </button>
@@ -117,6 +125,15 @@ describe('RecipientsSection', () => {
     expect(screen.getByText('confirm draft')).toBeInTheDocument()
     await user.click(screen.getByText('cancel draft'))
     expect(screen.queryByText('confirm draft')).not.toBeInTheDocument()
+  })
+
+  it('focuses only a draft row the user opened', async () => {
+    const { user } = setup([])
+
+    expect(screen.getByTestId('draft-row')).toHaveAttribute('data-autofocus', 'false')
+    await user.click(screen.getByText('cancel draft'))
+    await user.click(screen.getByRole('button', { name: 'Add a recipient' }))
+    expect(screen.getByTestId('draft-row')).toHaveAttribute('data-autofocus', 'true')
   })
 
   it('hides Add a recipient while the draft row is open', async () => {
