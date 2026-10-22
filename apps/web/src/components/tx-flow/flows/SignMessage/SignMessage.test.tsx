@@ -569,6 +569,28 @@ describe('SignMessage', () => {
 
       expect(proposalSpy).toHaveBeenCalledWith(expect.objectContaining({ safeSignerAddress: signerAddress }))
     })
+
+    it('confirms a message that another owner proposed with the address of the signer Safe', () => {
+      mockSigner({ isConnectedSafe: true, version: '1.5.0' })
+      const proposedMessage = {
+        type: 'MESSAGE',
+        messageHash: '0x456',
+        confirmations: [{ owner: { value: zeroPadValue('0x02', 20) } }],
+        confirmationsRequired: 2,
+        confirmationsSubmitted: 1,
+      } as unknown as MessageItem
+      jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [proposedMessage, jest.fn(), undefined])
+      const confirmationSpy = jest
+        .spyOn(sender, 'dispatchSafeMsgConfirmation')
+        .mockImplementation(() => Promise.resolve())
+
+      const { getByText } = renderSignMessage()
+      act(() => {
+        fireEvent.click(getByText('Sign'))
+      })
+
+      expect(confirmationSpy).toHaveBeenCalledWith(expect.objectContaining({ safeSignerAddress: signerAddress }))
+    })
   })
 
   it('displays a success message if the message has already been signed', async () => {
