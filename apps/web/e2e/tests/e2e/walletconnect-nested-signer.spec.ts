@@ -15,6 +15,7 @@ import { short } from '../../environment/scenarios/chain.mjs'
 import { CHAIN_IDS, ROUTES } from '../../src/data/constants'
 import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
 import { isValidSafeSignature } from '../../src/chain/signatures'
+import { confirmPendingMessage } from '../../src/seed/messages'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { WalletPage } from '../../src/pages/wallet.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -24,6 +25,8 @@ import { balanceOf } from '../../src/chain/balances'
 import { transactionsIn } from '../../src/api/transaction-items'
 
 const AMOUNT = '0.01'
+// A wallet sees another owner's message signature on its next Safe info poll (POLLING_INTERVAL, 15 s)
+const OTHER_OWNER_SIGNATURE_TIMEOUT_MS = 60_000
 
 type NestedSignerFixtures = {
   /** The owners and thresholds of the seeded Safes; 1/1 over 1/1 by default */
@@ -183,6 +186,70 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       const { result: signature } = answer as { result: string }
       const safeAddress = pairing.child.address
       expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(true)
+    })
+
+    test.describe('and a 2/2 child of OWNER_4 and the parent', () => {
+      test.use({ nestedSafes: { child: { withOwner4: true, threshold: 2, safeVersion: '1.5.0' } } })
+
+      test('should combine the contract signature of the parent with the signature of OWNER_4', async ({
+        safePage,
+        childPage,
+        journey,
+        pairing,
+        childDapp,
+      }) => {
+        const message = `Safe E2E nested message ${Date.now()}`
+        const response = childDapp.request('personal_sign', [message, pairing.child.address])
+        const childReview = new TxReviewPage(childPage)
+        await childReview.riskConfirmation.click()
+        await childReview.signMessageButton.click()
+        await new TxReviewPage(safePage).signMessage()
+        // The parent's signature proposes the message at 1/2; OWNER_4 adds the second one
+        await confirmPendingMessage(journey.env, pairing.child.address, journey.owners.owner4)
+        await childReview.signedMessageContinueButton.click({ timeout: OTHER_OWNER_SIGNATURE_TIMEOUT_MS })
+
+        const { result: signature } = (await response) as { result: string }
+        const safeAddress = pairing.child.address
+        expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(
+          true,
+        )
+      })
+    })
+
+    test.describe('and a 2/2 parent of OWNER_4 and OWNER_1', () => {
+      test.use({
+        nestedSafes: {
+          parent: { ownerCount: 2, threshold: 2 },
+          child: { withOwner4: false, threshold: 1, safeVersion: '1.5.0' },
+        },
+      })
+
+      test('should sign for the child once both owners of the parent signed the parent message', async ({
+        safePage,
+        childPage,
+        journey,
+        pairing,
+        childDapp,
+      }) => {
+        const message = `Safe E2E nested message ${Date.now()}`
+        const response = childDapp.request('personal_sign', [message, pairing.child.address])
+        const childReview = new TxReviewPage(childPage)
+        const parentReview = new TxReviewPage(safePage)
+        await childReview.riskConfirmation.click()
+        await childReview.signMessageButton.click()
+        await parentReview.riskConfirmation.click()
+        await parentReview.signMessageButton.click()
+        // OWNER_4 signed the parent's message at 1/2; OWNER_1 adds the second one, then wallet B answers wallet A
+        await confirmPendingMessage(journey.env, pairing.parent.address, journey.owners.owner1)
+        await parentReview.signedMessageContinueButton.click({ timeout: OTHER_OWNER_SIGNATURE_TIMEOUT_MS })
+        await childReview.signedMessageContinueButton.click()
+
+        const { result: signature } = (await response) as { result: string }
+        const safeAddress = pairing.child.address
+        expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(
+          true,
+        )
+      })
     })
   })
 })
