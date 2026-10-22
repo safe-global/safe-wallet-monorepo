@@ -5,10 +5,9 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { createDefaultAllowlistValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import type { RecipientAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
-import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
+import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import TokensSection from '../TokensSection'
 
-jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../TokenDraftRow', () => ({
   __esModule: true,
   default: ({
@@ -31,8 +30,6 @@ jest.mock('../TokenDraftRow', () => ({
   ),
 }))
 
-const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
-
 const USDC = '0x00000000000000000000000000000000000000a1'
 const DAI = '0x00000000000000000000000000000000000000b2'
 const NO_SYMBOL = '0x00000000000000000000000000000000000000c3'
@@ -49,8 +46,10 @@ const ETH = option(ZERO_ADDRESS, 'ETH')
 const USDC_OPTION = option(USDC, 'USDC')
 const DAI_OPTION = option(DAI, 'DAI', 'popular')
 
-const hold = (options: TokenOption[], overrides: Partial<ReturnType<typeof useHeldTokenAddresses>> = {}) =>
-  mockHeld.mockReturnValue({
+let heldTokens: HeldTokenAddresses
+
+const hold = (options: TokenOption[], overrides: Partial<HeldTokenAddresses> = {}) => {
+  heldTokens = {
     addresses: options.filter((o) => o.group === 'held').map((o) => o.address),
     options,
     isLoading: false,
@@ -61,7 +60,8 @@ const hold = (options: TokenOption[], overrides: Partial<ReturnType<typeof useHe
     refetchPopular: jest.fn(),
     identityKey: '1:0x1',
     ...overrides,
-  })
+  }
+}
 
 const setup = (
   values: RecipientAllowlistFormValues = createDefaultAllowlistValues(),
@@ -73,6 +73,7 @@ const setup = (
     <TokensSection
       values={values}
       onChange={onChange}
+      heldTokens={heldTokens}
       hasAccount={props.hasAccount ?? true}
       isCalloutDismissed={props.isCalloutDismissed ?? false}
       onDismissCallout={onDismissCallout}
