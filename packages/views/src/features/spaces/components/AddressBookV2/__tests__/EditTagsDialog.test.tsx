@@ -7,15 +7,15 @@ import EditTagsDialog from '../EditTagsDialog'
 const vendor = spaceAddressBookTagBuilder().with({ id: 1, name: 'Vendor' }).build()
 const internal = spaceAddressBookTagBuilder().with({ id: 2, name: 'Internal' }).build()
 
-const buildContact = (tags: string[]) => ({
+const buildContact = (tagIds: number[]) => ({
   name: faker.person.fullName(),
   address: faker.finance.ethereumAddress(),
-  tags,
+  tagIds,
 })
 
 const renderDialog = (props: Partial<Parameters<typeof EditTagsDialog>[0]> = {}) => {
   const onSave = jest.fn()
-  const contact = buildContact(['Vendor'])
+  const contact = buildContact([vendor.id])
   render(
     <EditTagsDialog
       contact={contact}
@@ -46,10 +46,14 @@ describe('EditTagsDialog', () => {
     await userEvent.keyboard('{Escape}')
     await userEvent.click(screen.getByTestId('save-tags-btn'))
 
-    expect(onSave).toHaveBeenCalledWith([
-      { name: 'Vendor', color: vendor.color },
-      { name: 'Internal', color: internal.color },
-    ])
+    expect(onSave).toHaveBeenCalledWith([vendor.id, internal.id])
+  })
+
+  it('leaves out a tag the workspace no longer has', () => {
+    renderDialog({ contact: buildContact([vendor.id, 99]) })
+
+    expect(screen.getAllByTestId('tag-chip').map((chip) => chip.textContent)).toEqual(['Vendor'])
+    expect(screen.getByTestId('save-tags-btn')).toBeDisabled()
   })
 
   it('shows the error CGW returned', () => {

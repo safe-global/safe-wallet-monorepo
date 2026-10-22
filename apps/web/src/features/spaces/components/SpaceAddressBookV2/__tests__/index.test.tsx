@@ -86,13 +86,13 @@ jest.mock('../../SpaceAddressBook/EditContactDialog', () => {
 const mockSaveContactTags = jest.fn()
 const mockRenameTag = jest.fn()
 const mockDeleteTag = jest.fn()
+const mockCreateTag = jest.fn()
 jest.mock('../useTagActions', () => ({
   __esModule: true,
   default: () => ({
     saveContactTags: mockSaveContactTags,
     isSavingContactTags: false,
-    renameTag: mockRenameTag,
-    deleteTag: mockDeleteTag,
+    tagActions: { onCreate: mockCreateTag, onRename: mockRenameTag, onDelete: mockDeleteTag },
   }),
 }))
 jest.mock('../../SpaceAddressBook/DeleteContactDialog', () => {
@@ -499,7 +499,7 @@ describe('SpaceAddressBookV2', () => {
       mockWorkspaceBook({ items: [treasury, northwind], tags: [{ ...internal, contactCount: 2 }] })
       rerender(<SpaceAddressBookV2 />)
 
-      expect(screen.getByTestId('filters-count')).toHaveTextContent('1')
+      expect(screen.getByTestId('tag-select-count')).toHaveTextContent('1')
       expect(visibleNames()).toEqual([expect.stringContaining('Treasury'), expect.stringContaining('Northwind')])
     })
 
@@ -551,7 +551,7 @@ describe('SpaceAddressBookV2', () => {
       const { rerender } = renderAddressBook()
       await openFilters()
       await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
-      expect(screen.getByTestId('filters-count')).toHaveTextContent('1')
+      expect(screen.getByTestId('tag-select-count')).toHaveTextContent('1')
 
       mockWorkspaceBook({
         items: [
@@ -563,7 +563,7 @@ describe('SpaceAddressBookV2', () => {
       })
       rerender(<SpaceAddressBookV2 />)
 
-      expect(screen.queryByTestId('filters-count')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('tag-select-count')).not.toBeInTheDocument()
     })
 
     it("saves a contact's tags from the row menu", async () => {
@@ -580,7 +580,7 @@ describe('SpaceAddressBookV2', () => {
       await userEvent.keyboard('{Escape}')
       await userEvent.click(screen.getByTestId('save-tags-btn'))
 
-      expect(mockSaveContactTags).toHaveBeenCalledWith(northwind.address, { tags: ['Internal'], tagColors: [] })
+      expect(mockSaveContactTags).toHaveBeenCalledWith(northwind.address, ['Internal'])
       await waitFor(() => expect(screen.queryByText('Edit tags')).not.toBeInTheDocument())
     })
 

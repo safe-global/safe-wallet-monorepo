@@ -209,7 +209,6 @@ describe('workspaceTrackingListener', () => {
             [MixpanelEventParams.LOCATION]: 'row_menu',
             [MixpanelEventParams.TAGS_ADDED]: 2,
             [MixpanelEventParams.TAGS_REMOVED]: 1,
-            [MixpanelEventParams.TAGS_CREATED]: 1,
             [MixpanelEventParams.MEMBER_ROLE]: 'ADMIN',
           },
         ],
@@ -264,6 +263,14 @@ describe('workspaceTrackingListener', () => {
       ])
     })
 
+    it('tracks a created tag', () => {
+      run(mutation('addressBooksCreateTagV1', { spaceId, createTagDto: { name: 'EU' } }))
+
+      expect(jest.mocked(trackEvent).mock.calls).toEqual([
+        [SPACE_EVENTS.TAG_CREATED, { [MixpanelEventParams.MEMBER_ROLE]: 'ADMIN' }],
+      ])
+    })
+
     it('tracks a delete with how many contacts had the tag', () => {
       run(mutation('addressBooksDeleteTagV1', { spaceId, tagId: vendor.id }))
 
@@ -287,10 +294,9 @@ describe('workspaceTrackingListener', () => {
 
 describe('countTagChanges', () => {
   it('counts names case-insensitively', () => {
-    expect(countTagChanges(['Vendor', 'EU'], ['vendor', 'Payroll'], ['VENDOR', 'eu'])).toEqual({
+    expect(countTagChanges(['Vendor', 'EU'], ['vendor', 'Payroll'])).toEqual({
       [MixpanelEventParams.TAGS_ADDED]: 1,
       [MixpanelEventParams.TAGS_REMOVED]: 1,
-      [MixpanelEventParams.TAGS_CREATED]: 1,
     })
   })
 })

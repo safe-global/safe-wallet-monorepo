@@ -1,6 +1,6 @@
 import { useState, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import FacetFilter, { type FacetOption } from './index'
+import { FacetOptionList, type FacetOption } from './index'
 
 const categoryOptions: FacetOption[] = [
   { value: 'workspace-safe', label: 'Workspace Safe', count: 4 },
@@ -25,12 +25,16 @@ const tagOptions: FacetOption[] = [
 const Controlled = ({
   initial = [],
   ...props
-}: Omit<ComponentProps<typeof FacetFilter>, 'value' | 'onChange'> & { initial?: string[] }) => {
+}: Omit<ComponentProps<typeof FacetOptionList>, 'value' | 'onChange'> & { initial?: string[] }) => {
   const [value, setValue] = useState<string[]>(initial)
-  return <FacetFilter {...props} value={value} onChange={setValue} />
+  return (
+    <div className="border-border w-64 rounded-md border p-1">
+      <FacetOptionList {...props} value={value} onChange={setValue} />
+    </div>
+  )
 }
 
-const EditableTags = (props: Omit<ComponentProps<typeof FacetFilter>, 'value' | 'onChange' | 'options'>) => {
+const EditableTags = (props: Omit<ComponentProps<typeof FacetOptionList>, 'value' | 'onChange' | 'options'>) => {
   const [options, setOptions] = useState(tagOptions)
   const [value, setValue] = useState<string[]>(['Vendor'])
 
@@ -49,23 +53,25 @@ const EditableTags = (props: Omit<ComponentProps<typeof FacetFilter>, 'value' | 
   }
 
   return (
-    <FacetFilter
-      {...props}
-      options={options}
-      value={value}
-      onChange={setValue}
-      onRenameOption={rename}
-      onDeleteOption={remove}
-      deleteConfirmation={(option) => `Remove ‘${option.value}’ from ${option.count ?? 0} contacts?`}
-    />
+    <div className="border-border w-64 rounded-md border p-1">
+      <FacetOptionList
+        {...props}
+        options={options}
+        value={value}
+        onChange={setValue}
+        onRenameOption={rename}
+        onDeleteOption={remove}
+        deleteConfirmation={(option) => `Remove ‘${option.value}’ from ${option.count ?? 0} contacts?`}
+      />
+    </div>
   )
 }
 
 const meta = {
-  title: 'Components/Common/FacetFilter',
-  component: FacetFilter,
+  title: 'Components/Common/FacetOptionList',
+  component: FacetOptionList,
   parameters: { layout: 'padded' },
-} satisfies Meta<typeof FacetFilter>
+} satisfies Meta<typeof FacetOptionList>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -85,10 +91,6 @@ export const WithSelection: Story = {
 export const SearchableWithCreate: Story = {
   args: { label: 'Tags', options: tagOptions, value: [], onChange: () => {}, onCreate: () => {} },
   render: (args) => <Controlled {...args} initial={['Internal']} searchPlaceholder="Search or create a tag" />,
-}
-
-export const Disabled: Story = {
-  args: { label: 'Category', options: categoryOptions, value: [], onChange: () => {}, disabled: true },
 }
 
 /** Hover an option to rename or delete it in place: the workspace Tags filter for admins. */

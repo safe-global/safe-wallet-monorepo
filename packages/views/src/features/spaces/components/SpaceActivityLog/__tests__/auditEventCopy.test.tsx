@@ -147,6 +147,12 @@ describe('getAuditEventDescription', () => {
       'changed the tags of 0x1111111111111111111111111111111111111111 from no tags to Vendor',
     ],
     [
+      'ADDRESS_BOOK_TAG_CREATED',
+      { eventType: 'ADDRESS_BOOK_TAG_CREATED' as const, payload: { name: 'Vendor', color: 'cobalt' } },
+      'created the tag Vendor',
+    ],
+    ['ADDRESS_BOOK_TAG_CREATED (missing name)', { eventType: 'ADDRESS_BOOK_TAG_CREATED' as const }, 'created a tag'],
+    [
       'ADDRESS_BOOK_TAG_RENAMED',
       {
         eventType: 'ADDRESS_BOOK_TAG_RENAMED' as const,

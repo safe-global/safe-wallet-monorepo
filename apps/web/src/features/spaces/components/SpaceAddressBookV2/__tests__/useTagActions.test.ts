@@ -5,12 +5,14 @@ import useTagActions from '../useTagActions'
 const SPACE_ID = '7'
 const mockDispatch = jest.fn()
 const mockSetContactTags = jest.fn()
+const mockCreateTag = jest.fn()
 const mockRenameTag = jest.fn()
 const mockDeleteTag = jest.fn()
 const elevationRequired = { status: 403, data: { code: 'elevation_required' } }
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksSetContactTagsV1Mutation: () => [mockSetContactTags, { isLoading: false }],
+  useAddressBooksCreateTagV1Mutation: () => [mockCreateTag],
   useAddressBooksRenameTagV1Mutation: () => [mockRenameTag],
   useAddressBooksDeleteTagV1Mutation: () => [mockDeleteTag],
 }))
@@ -38,7 +40,7 @@ describe('useTagActions', () => {
     it('sends the full set of tags for the contact and confirms', async () => {
       mockSetContactTags.mockResolvedValue({ data: {} })
 
-      const result = await setup().saveContactTags('0xabc', { tags: ['Vendor'], tagColors: [] })
+      const result = await setup().saveContactTags('0xabc', ['Vendor'])
 
       expect(mockSetContactTags).toHaveBeenCalledWith({
         spaceId: SPACE_ID,
@@ -50,22 +52,10 @@ describe('useTagActions', () => {
       )
     })
 
-    it('sends the colours picked for the tags it creates', async () => {
-      mockSetContactTags.mockResolvedValue({ data: {} })
-      const tagColors = [{ name: 'EU', color: 'rose' as const }]
-
-      await setup().saveContactTags('0xabc', { tags: ['Vendor', 'EU'], tagColors })
-
-      expect(mockSetContactTags).toHaveBeenCalledWith({
-        spaceId: SPACE_ID,
-        setContactTagsDto: { items: [{ address: '0xabc', tags: ['Vendor', 'EU'] }], tagColors },
-      })
-    })
-
     it('returns the error CGW gave', async () => {
       mockSetContactTags.mockResolvedValue({ error: { status: 422, data: { message: 'Too many tags' } } })
 
-      expect(await setup().saveContactTags('0xabc', { tags: ['Vendor'], tagColors: [] })).toEqual({
+      expect(await setup().saveContactTags('0xabc', ['Vendor'])).toEqual({
         saved: false,
         error: 'Too many tags',
       })
@@ -74,10 +64,41 @@ describe('useTagActions', () => {
     it('shows no error while the request waits for step-up', async () => {
       mockSetContactTags.mockResolvedValue({ error: elevationRequired })
 
-      expect(await setup().saveContactTags('0xabc', { tags: ['Vendor'], tagColors: [] })).toEqual({
+      expect(await setup().saveContactTags('0xabc', ['Vendor'])).toEqual({
         saved: false,
         error: undefined,
       })
+    })
+  })
+
+  describe('createTag', () => {
+    it('creates the tag with the normalized name and returns it', async () => {
+      const created = spaceAddressBookTagBuilder().with({ name: 'Key vendors', contactCount: 0 }).build()
+      mockCreateTag.mockResolvedValue({ data: { spaceUuid: SPACE_ID, data: [], tags: [vendor, created] } })
+
+      const result = await setup().createTag('  Key   vendors ')
+
+      expect(mockCreateTag).toHaveBeenCalledWith({ spaceId: SPACE_ID, createTagDto: { name: 'Key vendors' } })
+      expect(result).toEqual({ tag: created })
+    })
+
+    it('explains an invalid name without a request', async () => {
+      expect(await setup().createTag('=SUM(1)')).toEqual({ error: 'Tags cannot start with =, +, - or @' })
+      expect(mockCreateTag).not.toHaveBeenCalled()
+    })
+
+    it('returns the error CGW gave, such as a name the workspace already has', async () => {
+      mockCreateTag.mockResolvedValue({
+        error: { status: 409, data: { message: 'A tag with this name already exists.' } },
+      })
+
+      expect(await setup().createTag('Vendor')).toEqual({ error: 'A tag with this name already exists.' })
+    })
+
+    it('shows no error while the request waits for step-up', async () => {
+      mockCreateTag.mockResolvedValue({ error: elevationRequired })
+
+      expect(await setup().createTag('Vendor')).toEqual({ error: undefined })
     })
   })
 

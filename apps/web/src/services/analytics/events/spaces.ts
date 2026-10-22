@@ -321,6 +321,10 @@ export const SPACE_EVENTS = {
     action: 'Contact tags updated',
     category: SPACE_CATEGORY,
   },
+  TAG_CREATED: {
+    action: 'Tag created',
+    category: SPACE_CATEGORY,
+  },
   TAG_RENAMED: {
     action: 'Tag renamed',
     category: SPACE_CATEGORY,

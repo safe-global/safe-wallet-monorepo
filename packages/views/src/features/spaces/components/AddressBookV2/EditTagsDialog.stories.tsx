@@ -6,7 +6,7 @@ const meta = {
   title: 'Features/Spaces/AddressBookV2/EditTagsDialog',
   component: EditTagsDialog,
   args: {
-    contact: { name: 'Northwind Logistics', address: ADDRESSES.northwind, tags: ['Vendor'] },
+    contact: { name: 'Northwind Logistics', address: ADDRESSES.northwind, tagIds: [2] },
     workspaceTags: WORKSPACE_TAGS,
     onSave: () => {},
     onClose: () => {},

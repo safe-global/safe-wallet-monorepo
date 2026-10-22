@@ -33,9 +33,12 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: { EDIT_ADDRESS_SUBMIT: { action: 'Edit address submit', category: 'spaces' } },
 }))
 
+const mockCreateTag = jest.fn()
 jest.mock('../../SpaceAddressBookV2/useTagActions', () => ({
   __esModule: true,
-  default: () => ({ renameTag: jest.fn(), deleteTag: jest.fn() }),
+  default: () => ({
+    tagActions: { onCreate: mockCreateTag, onRename: jest.fn(), onDelete: jest.fn() },
+  }),
 }))
 
 jest.mock('@/hooks/useChains', () => ({

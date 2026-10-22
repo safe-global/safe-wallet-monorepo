@@ -30,10 +30,10 @@ const AddContact = ({ label = 'Add contact', workspaceTags, onTagLimitReached }:
       validateCharset
       workspaceTags={workspaceTags}
       onTagLimitReached={onTagLimitReached}
-      submit={({ tagColors, ...item }, sid) =>
+      submit={(item, sid) =>
         upsertAddressBook({
           spaceId: sid,
-          upsertAddressBookItemsDto: { items: [item], ...(tagColors?.length ? { tagColors } : {}) },
+          upsertAddressBookItemsDto: { items: [item] },
         })
       }
       onSubmitStart={() => trackEvent({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })}

@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import TagPicker from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagPicker'
+import TagSelect from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagSelect'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { TAGS_DISCLAIMER } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
 import useTagActions from '../SpaceAddressBookV2/useTagActions'
@@ -13,7 +13,7 @@ type TagsFieldProps = {
 /** The contact's tags in the Add and Edit contact forms. */
 const TagsField = ({ workspaceTags, onLimitReached }: TagsFieldProps) => {
   const { control } = useFormContext<ContactField>()
-  const { renameTag, deleteTag } = useTagActions()
+  const { tagActions } = useTagActions()
 
   return (
     <div>
@@ -23,12 +23,13 @@ const TagsField = ({ workspaceTags, onLimitReached }: TagsFieldProps) => {
         name="tags"
         control={control}
         render={({ field }) => (
-          <TagPicker
+          <TagSelect
+            mode="assign"
+            tags={workspaceTags}
             value={field.value}
             onChange={field.onChange}
-            workspaceTags={workspaceTags}
+            actions={tagActions}
             onLimitReached={onLimitReached}
-            tagEditing={{ onRename: async (tag, name) => (await renameTag(tag, name)).error, onDelete: deleteTag }}
           />
         )}
       />

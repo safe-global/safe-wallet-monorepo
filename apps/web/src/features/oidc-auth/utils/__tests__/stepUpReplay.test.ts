@@ -45,6 +45,9 @@ describe('getReplayableAction', () => {
     expect(getReplayableAction(rejectedMutation('addressBooksDeleteByAddressV1', {}))?.endpoint).toBe(
       'addressBooksDeleteByAddressV1',
     )
+    expect(getReplayableAction(rejectedMutation('addressBooksCreateTagV1', {}))?.endpoint).toBe(
+      'addressBooksCreateTagV1',
+    )
     expect(getReplayableAction(rejectedMutation('addressBooksSetContactTagsV1', {}))?.endpoint).toBe(
       'addressBooksSetContactTagsV1',
     )

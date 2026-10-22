@@ -214,6 +214,16 @@ export function getAuditEventDescription(
         </>
       )
     }
+    case 'ADDRESS_BOOK_TAG_CREATED': {
+      const name = asString(payload.name)
+      return name ? (
+        <>
+          created the tag <Em>{name}</Em>
+        </>
+      ) : (
+        'created a tag'
+      )
+    }
     case 'ADDRESS_BOOK_TAG_RENAMED': {
       const oldName = asString(payload.oldName)
       const newName = asString(payload.newName)

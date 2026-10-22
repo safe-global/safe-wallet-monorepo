@@ -1,10 +1,8 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { Check, ChevronDown, Pencil, Trash2, X } from 'lucide-react'
+import { Check, Pencil, Trash2, X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Badge } from '@safe-global/views/components/ui/badge'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Input } from '@safe-global/views/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { cn } from '@safe-global/views/utils/cn'
 
@@ -40,11 +38,6 @@ export type FacetOptionListProps<V extends string = string> = {
   /** Adds a delete action to each option, confirmed inline with `deleteConfirmation`. */
   onDeleteOption?: (value: V) => Promise<void> | void
   deleteConfirmation?: (option: FacetOption<V>) => string
-}
-
-export type FacetFilterProps<V extends string = string> = FacetOptionListProps<V> & {
-  disabled?: boolean
-  'data-testid'?: string
 }
 
 const SEARCHABLE_THRESHOLD = 8
@@ -290,48 +283,3 @@ export function FacetOptionList<V extends string = string>({
     </>
   )
 }
-
-/**
- * A searchable multi-select with checkboxes and a count per option, in its own dropdown. Selection
- * does not close the popover, so several options can be ticked in a row.
- */
-function FacetFilter<V extends string = string>({
-  disabled,
-  'data-testid': testId,
-  ...listProps
-}: FacetFilterProps<V>) {
-  const [open, setOpen] = useState(false)
-  const { label, value, onChange } = listProps
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={<Button variant="outline" size="sm" disabled={disabled} data-testid={testId} />}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        {label}
-        {value.length > 0 && (
-          <Badge variant="secondary" size="sm" data-testid="facet-filter-count">
-            {value.length}
-          </Badge>
-        )}
-        <ChevronDown className="text-muted-foreground size-4" aria-hidden="true" />
-      </PopoverTrigger>
-
-      <PopoverContent align="start" sideOffset={4} className="flex w-64 flex-col gap-1 p-1">
-        <FacetOptionList {...listProps} />
-
-        {value.length > 0 && (
-          <div className="border-border border-t pt-1">
-            <Button variant="ghost" size="sm" className="w-full" onClick={() => onChange([])}>
-              Clear
-            </Button>
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-export default FacetFilter

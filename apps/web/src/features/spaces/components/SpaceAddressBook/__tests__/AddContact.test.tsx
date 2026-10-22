@@ -75,22 +75,15 @@ describe('AddContact', () => {
     expect(lastProps?.onTagLimitReached).toBe(onTagLimitReached)
   })
 
-  it('sends the tags picked for a new contact, with the colours of the tags it creates', async () => {
+  it('sends the tags picked for a new contact', async () => {
     mockUpsertAddressBook.mockResolvedValue({})
     render(<AddContact />)
-    const tagColors = [{ name: 'EU', color: 'rose' }]
 
-    await lastProps!.submit(
-      { name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor', 'EU'], tagColors },
-      MOCK_SPACE_UUID,
-    )
+    await lastProps!.submit({ name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor'] }, MOCK_SPACE_UUID)
 
     expect(mockUpsertAddressBook).toHaveBeenCalledWith({
       spaceId: MOCK_SPACE_UUID,
-      upsertAddressBookItemsDto: {
-        items: [{ name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor', 'EU'] }],
-        tagColors,
-      },
+      upsertAddressBookItemsDto: { items: [{ name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor'] }] },
     })
   })
 

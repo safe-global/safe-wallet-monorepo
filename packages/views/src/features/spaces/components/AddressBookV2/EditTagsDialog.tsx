@@ -5,20 +5,18 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import GroupedAddress from './GroupedAddress'
-import TagPicker from './tags/TagPicker'
-import { toTagChoices, type TagChoice } from './tags/tagColor'
-import { TAGS_DISCLAIMER, sameTagNames } from './tags/tagRules'
-import type { TagEditing } from './tags/TagOptionList'
+import TagSelect, { type TagActions } from './tags/TagSelect'
+import { TAGS_DISCLAIMER } from './tags/tagRules'
 import type { WorkspaceTag } from './types'
 
 type EditTagsDialogProps = {
-  contact: { name: string; address: string; tags: string[] }
+  contact: { name: string; address: string; tagIds: number[] }
   workspaceTags: WorkspaceTag[]
-  onSave: (tags: TagChoice[]) => void
+  onSave: (tagIds: number[]) => void
   onClose: () => void
   onLimitReached?: () => void
-  /** Rename and delete a workspace tag from the picker; they apply at once, not on save. */
-  tagEditing?: TagEditing<WorkspaceTag>
+  /** Create, rename and delete from the picker; they apply at once, not on save. */
+  tagActions?: TagActions
   isSubmitting?: boolean
   error?: string
 }
@@ -30,12 +28,15 @@ const EditTagsDialog = ({
   onSave,
   onClose,
   onLimitReached,
-  tagEditing,
+  tagActions,
   isSubmitting = false,
   error,
 }: EditTagsDialogProps) => {
-  const [tags, setTags] = useState<TagChoice[]>(() => toTagChoices(contact.tags, workspaceTags))
-  const names = tags.map((tag) => tag.name)
+  const [tagIds, setTagIds] = useState<number[]>(contact.tagIds)
+  const existing = (ids: number[]) => ids.filter((id) => workspaceTags.some((tag) => tag.id === id))
+  const selected = existing(tagIds)
+  const saved = existing(contact.tagIds)
+  const isUnchanged = selected.length === saved.length && selected.every((id) => saved.includes(id))
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -48,12 +49,13 @@ const EditTagsDialog = ({
             <Typography variant="paragraph-bold">{contact.name}</Typography>
             <GroupedAddress address={contact.address} />
           </div>
-          <TagPicker
-            value={tags}
-            onChange={setTags}
-            workspaceTags={workspaceTags}
+          <TagSelect
+            mode="assign"
+            tags={workspaceTags}
+            value={tagIds}
+            onChange={setTagIds}
+            actions={tagActions}
             onLimitReached={onLimitReached}
-            tagEditing={tagEditing}
           />
           <Typography variant="paragraph-small" className="text-muted-foreground">
             {TAGS_DISCLAIMER}
@@ -71,8 +73,8 @@ const EditTagsDialog = ({
           </Button>
           <Button
             size="submit"
-            onClick={() => onSave(tags)}
-            disabled={sameTagNames(names, contact.tags) || isSubmitting}
+            onClick={() => onSave(selected)}
+            disabled={isUnchanged || isSubmitting}
             data-testid="save-tags-btn"
           >
             {isSubmitting ? <Spinner /> : 'Save'}

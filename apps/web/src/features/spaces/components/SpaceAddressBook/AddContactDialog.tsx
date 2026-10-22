@@ -22,14 +22,15 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import { toTagRequest, type TagChoice } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagColor'
+import { tagNamesOf } from '../SpaceAddressBookV2/utils'
 import TagsField from './TagsField'
 
 export type ContactField = {
   name: string
   address: string
   networks: Chain[]
-  tags: TagChoice[]
+  /** Workspace tag ids. */
+  tags: number[]
 }
 
 export type AddContactItem = {
@@ -37,8 +38,6 @@ export type AddContactItem = {
   address: string
   chainIds: string[]
   tags?: string[]
-  /** The colours picked for the tags the save creates. */
-  tagColors?: TagChoice[]
 }
 
 type AddContactDialogProps = {
@@ -116,7 +115,7 @@ const AddContactDialog = ({
       name: validateCharset ? sanitizeName(data.name) : data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
-      ...(workspaceTags && data.tags.length > 0 && toTagRequest(data.tags, workspaceTags)),
+      ...(workspaceTags && data.tags.length > 0 && { tags: tagNamesOf(data.tags, workspaceTags) }),
     }
 
     try {

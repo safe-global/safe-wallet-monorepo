@@ -87,14 +87,11 @@ describe('toWorkspaceContacts', () => {
 })
 
 describe('tagNamesOf', () => {
-  it("names the contact's tags in its own order", () => {
+  it('names the tags in the given order and leaves out an id the workspace no longer has', () => {
     const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
     const payroll = spaceAddressBookTagBuilder().with({ id: 2 }).build()
-    const item = itemBuilder()
-      .with({ tagIds: [2, 1] })
-      .build()
 
-    expect(tagNamesOf(item, [vendor, payroll])).toEqual([payroll.name, vendor.name])
+    expect(tagNamesOf([2, 99, 1], [vendor, payroll])).toEqual([payroll.name, vendor.name])
   })
 })
 

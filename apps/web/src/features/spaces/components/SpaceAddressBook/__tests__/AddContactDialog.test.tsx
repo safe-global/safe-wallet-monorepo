@@ -21,9 +21,12 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
+const mockCreateTag = jest.fn()
 jest.mock('../../SpaceAddressBookV2/useTagActions', () => ({
   __esModule: true,
-  default: () => ({ renameTag: jest.fn(), deleteTag: jest.fn() }),
+  default: () => ({
+    tagActions: { onCreate: mockCreateTag, onRename: jest.fn(), onDelete: jest.fn() },
+  }),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -255,25 +258,17 @@ describe('AddContactDialog', () => {
   })
 
   describe('tags', () => {
-    it('submits the colour picked for a tag it creates', async () => {
-      const submit = jest.fn().mockResolvedValue({})
-      render(<AddContactDialog {...baseProps} submit={submit} workspaceTags={[]} />)
+    it('creates a new tag at once from the Tags field', async () => {
+      mockCreateTag.mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} workspaceTags={[]} />)
       openDialog()
-      fillRequiredFields()
 
       await userEvent.click(screen.getByTestId('tag-picker'))
       await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
       await userEvent.type(screen.getByRole('searchbox'), 'Vendor')
       await userEvent.click(screen.getByRole('option', { name: /Create/ }))
-      await userEvent.keyboard('{Escape}')
-      const submitButton = screen.getByRole('button', { name: 'Add contact' })
-      await waitFor(() => expect(submitButton).not.toBeDisabled())
-      fireEvent.click(submitButton)
 
-      await waitFor(() => expect(submit).toHaveBeenCalled())
-      const [[item]] = submit.mock.calls
-      expect(item.tags).toEqual(['Vendor'])
-      expect(item.tagColors).toEqual([{ name: 'Vendor', color: expect.any(String) }])
+      expect(mockCreateTag).toHaveBeenCalledWith('Vendor')
     })
 
     it('has no Tags field without workspace tags, as for a local contact', () => {
@@ -300,7 +295,7 @@ describe('AddContactDialog', () => {
 
       await waitFor(() =>
         expect(submit).toHaveBeenCalledWith(
-          { name: 'Alice', address: '0xabc', chainIds: ['1', '137'], tags: ['Vendor'], tagColors: [] },
+          { name: 'Alice', address: '0xabc', chainIds: ['1', '137'], tags: ['Vendor'] },
           '42',
         ),
       )

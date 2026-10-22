@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import FacetFilter, { type FacetOption } from './index'
+import { FacetOptionList, type FacetOption } from './index'
 
 const options: FacetOption[] = [
   { value: 'safe', label: 'Workspace account', count: 3 },
@@ -8,27 +8,19 @@ const options: FacetOption[] = [
   { value: 'external', label: 'External', count: 12 },
 ]
 
-const openFilter = async () => {
-  await userEvent.click(screen.getByRole('button', { name: /Role/ }))
-  await waitFor(() => expect(screen.getByRole('listbox', { name: 'Role' })).toBeInTheDocument())
-}
-
-describe('FacetFilter', () => {
+describe('FacetOptionList', () => {
   it('lists the options with their counts when opened', async () => {
-    render(<FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} />)
-
-    await openFilter()
+    render(<FacetOptionList label="Role" options={options} value={[]} onChange={jest.fn()} />)
 
     expect(screen.getByRole('option', { name: /Workspace account/ })).toHaveTextContent('3')
     expect(screen.getByRole('option', { name: /Signer/ })).toHaveTextContent('5')
     expect(screen.getByRole('option', { name: /External/ })).toHaveTextContent('12')
   })
 
-  it('toggles an option and keeps the popover open', async () => {
+  it('toggles an option', async () => {
     const onChange = jest.fn()
-    render(<FacetFilter label="Role" options={options} value={['safe']} onChange={onChange} />)
+    render(<FacetOptionList label="Role" options={options} value={['safe']} onChange={onChange} />)
 
-    await openFilter()
     expect(screen.getByRole('option', { name: /Workspace account/ })).toHaveAttribute('aria-selected', 'true')
 
     await userEvent.click(screen.getByRole('option', { name: /Signer/ }))
@@ -39,16 +31,9 @@ describe('FacetFilter', () => {
     expect(onChange).toHaveBeenCalledWith([])
   })
 
-  it('shows the number of selected options on the trigger', () => {
-    render(<FacetFilter label="Role" options={options} value={['safe', 'external']} onChange={jest.fn()} />)
-
-    expect(screen.getByTestId('facet-filter-count')).toHaveTextContent('2')
-  })
-
   it('filters the options by the search text', async () => {
-    render(<FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} searchable />)
+    render(<FacetOptionList label="Role" options={options} value={[]} onChange={jest.fn()} searchable />)
 
-    await openFilter()
     await userEvent.type(screen.getByRole('searchbox'), 'sign')
 
     expect(screen.getByRole('option', { name: /Signer/ })).toBeInTheDocument()
@@ -58,10 +43,9 @@ describe('FacetFilter', () => {
   it('offers to create an unknown value when onCreate is provided', async () => {
     const onCreate = jest.fn()
     render(
-      <FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} searchable onCreate={onCreate} />,
+      <FacetOptionList label="Role" options={options} value={[]} onChange={jest.fn()} searchable onCreate={onCreate} />,
     )
 
-    await openFilter()
     await userEvent.type(screen.getByRole('searchbox'), 'Vendor')
     await userEvent.click(screen.getByRole('option', { name: /Create/ }))
 
@@ -70,32 +54,33 @@ describe('FacetFilter', () => {
 
   it('does not offer to create a value that already exists, ignoring case', async () => {
     render(
-      <FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} searchable onCreate={jest.fn()} />,
+      <FacetOptionList
+        label="Role"
+        options={options}
+        value={[]}
+        onChange={jest.fn()}
+        searchable
+        onCreate={jest.fn()}
+      />,
     )
 
-    await openFilter()
     await userEvent.type(screen.getByRole('searchbox'), 'signer')
 
     expect(screen.queryByRole('option', { name: /Create/ })).not.toBeInTheDocument()
   })
 
-  it('clears the selection from the footer', async () => {
-    const onChange = jest.fn()
-    render(<FacetFilter label="Role" options={options} value={['safe']} onChange={onChange} />)
-
-    await openFilter()
-    await userEvent.click(screen.getByRole('button', { name: 'Clear' }))
-
-    expect(onChange).toHaveBeenCalledWith([])
-  })
-
   it('renames an option on Enter with the trimmed text and closes the editor', async () => {
     const onRenameOption = jest.fn().mockResolvedValue(undefined)
     render(
-      <FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} onRenameOption={onRenameOption} />,
+      <FacetOptionList
+        label="Role"
+        options={options}
+        value={[]}
+        onChange={jest.fn()}
+        onRenameOption={onRenameOption}
+      />,
     )
 
-    await openFilter()
     await userEvent.click(screen.getByRole('button', { name: 'Rename Signer' }))
     const input = screen.getByTestId('facet-option-rename-input')
     expect(input).toHaveValue('Signer')
@@ -110,10 +95,15 @@ describe('FacetFilter', () => {
   it('keeps the editor open and shows the error when the rename is rejected', async () => {
     const onRenameOption = jest.fn().mockResolvedValue('Tags cannot be empty')
     render(
-      <FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} onRenameOption={onRenameOption} />,
+      <FacetOptionList
+        label="Role"
+        options={options}
+        value={[]}
+        onChange={jest.fn()}
+        onRenameOption={onRenameOption}
+      />,
     )
 
-    await openFilter()
     await userEvent.click(screen.getByRole('button', { name: 'Rename Signer' }))
     await userEvent.clear(screen.getByTestId('facet-option-rename-input'))
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
@@ -125,10 +115,15 @@ describe('FacetFilter', () => {
   it('cancels the rename on Escape without calling the handler', async () => {
     const onRenameOption = jest.fn()
     render(
-      <FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} onRenameOption={onRenameOption} />,
+      <FacetOptionList
+        label="Role"
+        options={options}
+        value={[]}
+        onChange={jest.fn()}
+        onRenameOption={onRenameOption}
+      />,
     )
 
-    await openFilter()
     await userEvent.click(screen.getByRole('button', { name: 'Rename Signer' }))
     await userEvent.type(screen.getByTestId('facet-option-rename-input'), ' 2{Escape}')
 
@@ -140,7 +135,7 @@ describe('FacetFilter', () => {
   it('asks for confirmation before deleting an option', async () => {
     const onDeleteOption = jest.fn()
     render(
-      <FacetFilter
+      <FacetOptionList
         label="Role"
         options={options}
         value={[]}
@@ -150,7 +145,6 @@ describe('FacetFilter', () => {
       />,
     )
 
-    await openFilter()
     await userEvent.click(screen.getByRole('button', { name: 'Delete External' }))
     expect(screen.getByText('Remove external from 12 contacts?')).toBeInTheDocument()
 
@@ -166,9 +160,7 @@ describe('FacetFilter', () => {
   })
 
   it('shows no rename or delete actions without handlers', async () => {
-    render(<FacetFilter label="Role" options={options} value={[]} onChange={jest.fn()} />)
-
-    await openFilter()
+    render(<FacetOptionList label="Role" options={options} value={[]} onChange={jest.fn()} />)
 
     expect(screen.queryByRole('button', { name: /^Rename/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^Delete/ })).not.toBeInTheDocument()

@@ -26,8 +26,6 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { sameTagNames } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
-import { toTagChoices, toTagRequest } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagColor'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { tagNamesOf } from '../SpaceAddressBookV2/utils'
 import TagsField from './TagsField'
@@ -56,7 +54,8 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
     })
     .filter(Boolean)
 
-  const defaultTags = workspaceTags ? toTagChoices(tagNamesOf(entry, workspaceTags), workspaceTags) : []
+  const existingTagIds = (ids: number[]) => ids.filter((id) => workspaceTags?.some((tag) => tag.id === id))
+  const defaultTags = existingTagIds(entry.tagIds)
 
   const defaultValues = {
     name: entry.name,
@@ -78,10 +77,8 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
   const watchedName = watch('name')
   const watchedNetworks = watch('networks')
   const watchedTags = watch('tags')
-  const tagsChanged = !sameTagNames(
-    watchedTags.map((tag) => tag.name),
-    defaultTags.map((tag) => tag.name),
-  )
+  const currentTags = existingTagIds(watchedTags)
+  const tagsChanged = currentTags.length !== defaultTags.length || currentTags.some((id) => !defaultTags.includes(id))
 
   // Check if any changes were made
   const hasChanges = useMemo(() => {
@@ -105,8 +102,7 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
 
-    const { tags, tagColors } =
-      workspaceTags && tagsChanged ? toTagRequest(data.tags, workspaceTags) : { tags: undefined, tagColors: [] }
+    const tags = workspaceTags && tagsChanged ? tagNamesOf(data.tags, workspaceTags) : undefined
     const addressBookItem = {
       name: sanitizeName(data.name),
       address: data.address,
@@ -120,7 +116,7 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
 
       const result = await upsertAddressBook({
         spaceId: spaceId ?? '',
-        upsertAddressBookItemsDto: { items: [addressBookItem], ...(tagColors.length > 0 ? { tagColors } : {}) },
+        upsertAddressBookItemsDto: { items: [addressBookItem] },
       })
 
       if (isElevationRequiredError(result.error)) return

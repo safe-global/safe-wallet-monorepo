@@ -29,9 +29,9 @@ export const toWorkspaceContacts = (
   }))
 }
 
-/** The names of a contact's tags, for the tag pickers. */
-export const tagNamesOf = (item: SpaceAddressBookItemDto, tags: SpaceAddressBookTagDto[]): string[] =>
-  item.tagIds.flatMap((id) => tags.find((tag) => tag.id === id)?.name ?? [])
+/** The names of the given tags, in that order; an id the workspace no longer has is left out. */
+export const tagNamesOf = (tagIds: number[], tags: SpaceAddressBookTagDto[]): string[] =>
+  tagIds.flatMap((id) => tags.find((tag) => tag.id === id)?.name ?? [])
 
 /** This browser's contacts, one per address across chains; those the workspace already has go last. */
 export const toLocalContacts = (

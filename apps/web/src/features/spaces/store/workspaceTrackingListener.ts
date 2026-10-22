@@ -11,11 +11,10 @@ type TagChangeLocation = 'row_menu' | 'add_contact' | 'edit_contact'
 const countNotIn = (names: string[], others: string[]) =>
   names.filter((name) => !others.some((other) => sameTagName(name, other))).length
 
-/** Tags added to and removed from a contact, and how many of the added ones the workspace didn't have. */
-export const countTagChanges = (oldNames: string[], newNames: string[], workspaceTagNames: string[]) => ({
+/** Tags added to and removed from a contact. */
+export const countTagChanges = (oldNames: string[], newNames: string[]) => ({
   [MixpanelEventParams.TAGS_ADDED]: countNotIn(newNames, oldNames),
   [MixpanelEventParams.TAGS_REMOVED]: countNotIn(oldNames, newNames),
-  [MixpanelEventParams.TAGS_CREATED]: countNotIn(newNames, workspaceTagNames),
 })
 
 export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
@@ -186,11 +185,7 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
       const oldNames = workspaceTags.filter((tag) => contact?.tagIds.includes(tag.id)).map((tag) => tag.name)
       trackEvent(SPACE_EVENTS.CONTACT_TAGS_UPDATED, {
         [MixpanelEventParams.LOCATION]: locationOf(!contact),
-        ...countTagChanges(
-          oldNames,
-          tags,
-          workspaceTags.map((tag) => tag.name),
-        ),
+        ...countTagChanges(oldNames, tags),
         [MixpanelEventParams.MEMBER_ROLE]: memberRole(state, spaceId),
       })
     })
@@ -212,6 +207,16 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
       trackContactTags(getOriginalState(), spaceId, upsertAddressBookItemsDto.items, (isNewContact) =>
         isNewContact ? 'add_contact' : 'edit_contact',
       )
+    },
+  })
+
+  startListening({
+    matcher: endpoints.addressBooksCreateTagV1.matchFulfilled,
+    effect: ({ meta }, { getOriginalState }) => {
+      const { spaceId } = meta.arg.originalArgs
+      trackEvent(SPACE_EVENTS.TAG_CREATED, {
+        [MixpanelEventParams.MEMBER_ROLE]: memberRole(getOriginalState(), spaceId),
+      })
     },
   })
 
