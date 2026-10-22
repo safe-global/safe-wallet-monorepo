@@ -39,9 +39,16 @@ type RecipientDraftRowProps = {
   existing: readonly AllowlistRecipient[]
   onAdd: (recipient: AllowlistRecipient) => void
   onCancel: () => void
+  autoFocus?: boolean
 }
 
-const RecipientDraftRow = ({ safeAddress, existing, onAdd, onCancel }: RecipientDraftRowProps): ReactElement => {
+const RecipientDraftRow = ({
+  safeAddress,
+  existing,
+  onAdd,
+  onCancel,
+  autoFocus,
+}: RecipientDraftRowProps): ReactElement => {
   const methods = useForm<DraftFields>({ mode: 'onChange', defaultValues: { name: '', address: '' } })
   const [step, setStep] = useState<'name' | 'address'>('name')
   const address = methods.watch('address')
@@ -82,6 +89,7 @@ const RecipientDraftRow = ({ safeAddress, existing, onAdd, onCancel }: Recipient
               className="min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
               placeholder={RECIPIENT_NAME_LABEL}
               aria-label={RECIPIENT_NAME_LABEL}
+              autoFocus={autoFocus}
               {...methods.register('name')}
             />
           ) : (
