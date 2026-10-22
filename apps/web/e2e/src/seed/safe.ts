@@ -54,8 +54,8 @@ export async function seedQueuedTransfer(
 type NestedSafeOptions = {
   /** The parent's owners: OWNER_4, and OWNER_1 for 2 */
   parent?: { ownerCount: 1 | 2; threshold: 1 | 2 }
-  /** The child's owners: the parent, and OWNER_4 too with `withOwner4` */
-  child?: { withOwner4: boolean; threshold: 1 | 2 }
+  /** The child's owners: the parent, and OWNER_4 too with `withOwner4`; Safe 1.4.1 unless `safeVersion` is set */
+  child?: { withOwner4: boolean; threshold: 1 | 2; safeVersion?: '1.4.1' | '1.5.0' }
 }
 
 /**
@@ -75,6 +75,7 @@ export async function seedNestedSafe(
   const address = await createSafeAddress(env, owners, {
     threshold: childOptions.threshold,
     ownerAddresses: childOwners,
+    safeVersion: childOptions.safeVersion,
   })
   const { env: scenarioEnv, chainId } = parent.context
   await waitUntil(

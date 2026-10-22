@@ -6,13 +6,15 @@
  * connects no private key: it pairs through the onboard WalletConnect module.
  */
 import type { Page } from '@playwright/test'
-import { Wallet, parseEther } from 'ethers'
+import { Wallet, hashMessage, parseEther } from 'ethers'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedNestedSafe, type SeededSafe } from '../../src/seed/safe'
 import { short } from '../../environment/scenarios/chain.mjs'
-import { ROUTES } from '../../src/data/constants'
+import { CHAIN_IDS, ROUTES } from '../../src/data/constants'
+import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
+import { isValidSafeSignature } from '../../src/chain/signatures'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { WalletPage } from '../../src/pages/wallet.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -24,13 +26,18 @@ import { transactionsIn } from '../../src/api/transaction-items'
 const AMOUNT = '0.01'
 
 type NestedSignerFixtures = {
+  /** The owners and thresholds of the seeded Safes; 1/1 over 1/1 by default */
+  nestedSafes: Parameters<typeof seedNestedSafe>[1]
   /** Wallet A: Safe{Wallet} in its own browser context, without a connected wallet */
   childPage: Page
   /** The Safes, with wallet A's signer connected to the parent in wallet B */
   pairing: { parent: SeededSafe; child: SeededSafe }
+  /** A dApp in a session with wallet A, the child Safe's wallet */
+  childDapp: WalletConnectDapp
 }
 
 const test = base.extend<NestedSignerFixtures>({
+  nestedSafes: [{}, { option: true }],
   childPage: async ({ browser }, provide, testInfo) => {
     const context = await browser.newContext({
       baseURL: testInfo.project.use.baseURL,
@@ -49,8 +56,8 @@ const test = base.extend<NestedSignerFixtures>({
     }
   },
 
-  pairing: async ({ safePage, childPage, journey }, provide) => {
-    const { parent, child } = await seedNestedSafe(journey)
+  pairing: async ({ safePage, childPage, journey, nestedSafes }, provide) => {
+    const { parent, child } = await seedNestedSafe(journey, nestedSafes)
     await safePage.goto(`${ROUTES.home}?safe=${parent.prefixedAddress}`)
     await new WalletPage(safePage).accountCenter.waitFor({ state: 'visible' })
     await childPage.goto(`${ROUTES.home}?safe=${child.prefixedAddress}`)
@@ -61,6 +68,25 @@ const test = base.extend<NestedSignerFixtures>({
     await parentWalletConnect.approveButton.click()
 
     await provide({ parent, child })
+  },
+
+  childDapp: async ({ childPage, pairing }, provide, testInfo) => {
+    await expect(new WalletPage(childPage).accountCenter).toContainText(short(pairing.parent.address))
+    const dapp = await WalletConnectDapp.start(CHAIN_IDS.sepolia)
+    try {
+      const childWalletConnect = new WalletConnectPage(childPage)
+      await childWalletConnect.pair(await dapp.connect())
+      await childWalletConnect.proposal(DAPP_NAME).waitFor({ state: 'visible' })
+      await childWalletConnect.approveButton.click()
+      await dapp.waitForSession()
+      await provide(dapp)
+    } finally {
+      // The test's final status is known only here, after it ran
+      if (testInfo.status !== testInfo.expectedStatus) {
+        await testInfo.attach('walletconnect-dapp-log', { body: dapp.log.join('\n'), contentType: 'text/plain' })
+      }
+      await dapp.close()
+    }
   },
 })
 
@@ -131,5 +157,32 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
 
     await expect(childPage.getByText('User rejected signing.')).toBeVisible()
     expect(transactionsIn(await safeApiClient.getQueuedTransactions(pairing.child.address))).toEqual([])
+  })
+
+  test.describe('with a child Safe 1.5.0', () => {
+    // Below 1.5.0 a Safe asks a contract owner about the message preimage, so only 1.5.0 children can work
+    test.use({ nestedSafes: { child: { withOwner4: false, threshold: 1, safeVersion: '1.5.0' } } })
+
+    test('should give a dApp of the child Safe a signature that the child accepts when the parent signs the message', async ({
+      safePage,
+      childPage,
+      journey,
+      pairing,
+      childDapp,
+    }) => {
+      const message = `Safe E2E nested message ${Date.now()}`
+      const response = childDapp.request('personal_sign', [message, pairing.child.address])
+      const childReview = new TxReviewPage(childPage)
+      await childReview.riskConfirmation.click()
+      await childReview.signMessageButton.click()
+      await new TxReviewPage(safePage).signMessage()
+      await childReview.signedMessageContinueButton.click()
+
+      const answer = await response
+      expect(answer).toEqual({ result: expect.stringMatching(/^0x[0-9a-f]+$/) })
+      const { result: signature } = answer as { result: string }
+      const safeAddress = pairing.child.address
+      expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(true)
+    })
   })
 })
