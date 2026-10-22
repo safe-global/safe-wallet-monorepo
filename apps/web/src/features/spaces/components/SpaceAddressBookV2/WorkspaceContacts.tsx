@@ -7,9 +7,8 @@ import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import ContactFiltersDropdown, {
-  type TagEditing,
-} from '@safe-global/views/features/spaces/components/AddressBookV2/ContactFiltersDropdown'
+import ContactFiltersDropdown from '@safe-global/views/features/spaces/components/AddressBookV2/ContactFiltersDropdown'
+import type { TagEditing } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagOptionList'
 import EditTagsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/EditTagsDialog'
 import { filterByTags, searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
@@ -103,7 +102,7 @@ const WorkspaceContacts = ({
     if (saved) setDialog(undefined)
   }
 
-  const tagEditing: TagEditing | undefined = isInvited
+  const tagEditing: TagEditing<SpaceAddressBookTagDto> | undefined = isInvited
     ? undefined
     : {
         onRename: async (tag, name) => {
@@ -238,6 +237,7 @@ const WorkspaceContacts = ({
           onSave={(choices) => handleSaveTags(dialog.entry, choices)}
           onClose={() => setDialog(undefined)}
           onLimitReached={() => trackTagLimitReached('row_menu')}
+          tagEditing={tagEditing}
           isSubmitting={isSavingContactTags}
           error={tagsError}
         />

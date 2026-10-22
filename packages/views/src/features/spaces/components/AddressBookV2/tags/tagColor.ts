@@ -1,7 +1,7 @@
 import type { ContactTag, WorkspaceTag } from '../types'
 import { sameTagName } from './tagRules'
 
-type TagColor = ContactTag['color']
+export type TagColor = ContactTag['color']
 
 // Spelled out in full so Tailwind finds the classes; the colours are the theme's `tag` tokens.
 export const TAG_COLOR_CLASSES: Record<TagColor, { chip: string; dot: string }> = {

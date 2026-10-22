@@ -33,6 +33,11 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: { EDIT_ADDRESS_SUBMIT: { action: 'Edit address submit', category: 'spaces' } },
 }))
 
+jest.mock('../../SpaceAddressBookV2/useTagActions', () => ({
+  __esModule: true,
+  default: () => ({ renameTag: jest.fn(), deleteTag: jest.fn() }),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: [{ chainId: '1', chainName: 'Ethereum' }] }),

@@ -21,6 +21,11 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('../../SpaceAddressBookV2/useTagActions', () => ({
+  __esModule: true,
+  default: () => ({ renameTag: jest.fn(), deleteTag: jest.fn() }),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({

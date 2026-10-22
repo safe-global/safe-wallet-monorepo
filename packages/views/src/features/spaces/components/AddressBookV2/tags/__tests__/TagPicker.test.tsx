@@ -152,4 +152,171 @@ describe('TagPicker', () => {
 
     expect(screen.getByRole('option', { name: /Brand new/ })).toHaveAttribute('aria-selected', 'true')
   })
+
+  describe('rename and delete', () => {
+    const editing = () => ({
+      onRename: jest.fn().mockResolvedValue(undefined),
+      onDelete: jest.fn().mockResolvedValue(undefined),
+    })
+
+    const rename = async (from: string, to: string) => {
+      await userEvent.click(screen.getByRole('button', { name: `Rename ${from}` }))
+      await userEvent.clear(screen.getByTestId('facet-option-rename-input'))
+      await userEvent.type(screen.getByTestId('facet-option-rename-input'), `${to}{Enter}`)
+    }
+
+    const remove = async (name: string) => {
+      await userEvent.click(screen.getByRole('button', { name: `Delete ${name}` }))
+      await userEvent.click(screen.getByTestId('facet-option-confirm-delete'))
+    }
+
+    it('offers neither without tag editing', async () => {
+      render(<TagPicker value={[]} onChange={jest.fn()} workspaceTags={workspaceTags} />)
+
+      await open()
+
+      expect(screen.queryByRole('button', { name: 'Rename Vendor' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Delete Vendor' })).not.toBeInTheDocument()
+    })
+
+    it('shows how many contacts have each tag', async () => {
+      render(<TagPicker value={[]} onChange={jest.fn()} workspaceTags={[{ ...vendor, contactCount: 4 }]} />)
+
+      await open()
+
+      expect(screen.getByRole('option', { name: /Vendor\s*4/ })).toBeInTheDocument()
+    })
+
+    it('renames a selected workspace tag and keeps it selected in its colour', async () => {
+      const tagEditing = editing()
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[choice(vendor)]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await rename('Vendor', 'Supplier')
+
+      expect(tagEditing.onRename).toHaveBeenCalledWith(vendor, 'Supplier')
+      expect(onChange).toHaveBeenCalledWith([{ name: 'Supplier', color: vendor.color }])
+    })
+
+    it('takes the remaining tag when a rename merges two selected tags', async () => {
+      const tagEditing = editing()
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[choice(vendor), choice(internal)]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await rename('Vendor', 'internal')
+
+      expect(onChange).toHaveBeenCalledWith([choice(internal)])
+    })
+
+    it('leaves the selection alone when an unselected tag is renamed', async () => {
+      const tagEditing = editing()
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[choice(internal)]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await rename('Vendor', 'Internal')
+
+      expect(tagEditing.onRename).toHaveBeenCalledWith(vendor, 'Internal')
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('keeps the editor open with the error a rename was refused with', async () => {
+      const tagEditing = { ...editing(), onRename: jest.fn().mockResolvedValue('Too many requests') }
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[choice(vendor)]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await rename('Vendor', 'Supplier')
+
+      expect(screen.getByText('Too many requests')).toBeInTheDocument()
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('renames a tag created here without asking CGW', async () => {
+      const tagEditing = editing()
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[{ name: 'Brand new', color: 'sky' }]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await rename('Brand new', 'Renamed')
+
+      expect(tagEditing.onRename).not.toHaveBeenCalled()
+      expect(onChange).toHaveBeenCalledWith([{ name: 'Renamed', color: 'sky' }])
+    })
+
+    it('deletes a selected workspace tag and drops it from the selection', async () => {
+      const tagEditing = editing()
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[choice(vendor), choice(internal)]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await remove('Vendor')
+
+      expect(tagEditing.onDelete).toHaveBeenCalledWith(vendor)
+      expect(onChange).toHaveBeenCalledWith([choice(internal)])
+    })
+
+    it('drops a tag created here without asking CGW', async () => {
+      const tagEditing = editing()
+      const onChange = jest.fn()
+      render(
+        <TagPicker
+          value={[{ name: 'Brand new', color: 'sky' }]}
+          onChange={onChange}
+          workspaceTags={workspaceTags}
+          tagEditing={tagEditing}
+        />,
+      )
+
+      await open()
+      await remove('Brand new')
+
+      expect(tagEditing.onDelete).not.toHaveBeenCalled()
+      expect(onChange).toHaveBeenCalledWith([])
+    })
+  })
 })

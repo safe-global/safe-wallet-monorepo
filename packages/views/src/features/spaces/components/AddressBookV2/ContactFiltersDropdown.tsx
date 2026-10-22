@@ -3,15 +3,8 @@ import { ChevronDown, ListFilter } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
-import { FacetOptionList, type FacetOption } from '@safe-global/views/components/common/FacetFilter'
-import { TagChip } from './tags/TagChip'
+import TagOptionList, { type TagEditing } from './tags/TagOptionList'
 import type { WorkspaceTag } from './types'
-
-export type TagEditing = {
-  /** Resolves to an error message to keep the editor open, or `undefined` once renamed. */
-  onRename: (tag: WorkspaceTag, name: string) => Promise<string | undefined>
-  onDelete: (tag: WorkspaceTag) => Promise<void>
-}
 
 export type ContactFiltersDropdownProps = {
   tags: WorkspaceTag[]
@@ -20,17 +13,8 @@ export type ContactFiltersDropdownProps = {
   /** When the dropdown closes after the user changed the selection; a rename or delete that changes it doesn't count. */
   onSelectionCommitted?: (tagIds: number[]) => void
   /** Rename and delete a tag across the workspace; without it the tags are read-only. */
-  tagEditing?: TagEditing
+  tagEditing?: TagEditing<WorkspaceTag>
 }
-
-const SectionHeading = ({ children }: { children: string }) => (
-  <p className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">{children}</p>
-)
-
-const deleteConfirmation = (tag: WorkspaceTag): string =>
-  tag.contactCount > 0
-    ? `Delete ‘${tag.name}’ from ${tag.contactCount} ${tag.contactCount === 1 ? 'contact' : 'contacts'}?`
-    : `Delete ‘${tag.name}’?`
 
 const sameIds = (a: number[], b: number[]) => a.length === b.length && a.every((id) => b.includes(id))
 
@@ -44,7 +28,6 @@ const ContactFiltersDropdown = ({
   const [open, setOpen] = useState(false)
   const selectionAtOpen = useRef(selectedTagIds)
   const isChangedByUser = useRef(false)
-  const tagById = (value: string) => tags.find((tag) => String(tag.id) === value)
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
@@ -61,11 +44,12 @@ const ContactFiltersDropdown = ({
     onSelectedTagIdsChange(tagIds)
   }
 
-  const options: FacetOption[] = tags.map((tag) => ({
+  const options = tags.map((tag) => ({
     value: String(tag.id),
-    label: <TagChip name={tag.name} color={tag.color} />,
-    searchText: tag.name,
-    count: tag.contactCount,
+    name: tag.name,
+    color: tag.color,
+    contactCount: tag.contactCount,
+    tag,
   }))
 
   return (
@@ -86,33 +70,11 @@ const ContactFiltersDropdown = ({
       </PopoverTrigger>
 
       <PopoverContent align="start" sideOffset={4} className="flex w-72 flex-col gap-1 p-1">
-        <SectionHeading>Tags</SectionHeading>
-        <FacetOptionList
-          label="Tags"
+        <TagOptionList
           options={options}
           value={selectedTagIds.map(String)}
           onChange={(next) => select(next.map(Number))}
-          searchable
-          searchPlaceholder="Search tags"
-          emptyText="No tags yet"
-          onRenameOption={
-            tagEditing &&
-            ((value, name) => {
-              const tag = tagById(value)
-              return tag ? tagEditing.onRename(tag, name) : undefined
-            })
-          }
-          onDeleteOption={
-            tagEditing &&
-            (async (value) => {
-              const tag = tagById(value)
-              if (tag) await tagEditing.onDelete(tag)
-            })
-          }
-          deleteConfirmation={(option) => {
-            const tag = tagById(option.value)
-            return tag ? deleteConfirmation(tag) : `Delete ‘${option.searchText}’?`
-          }}
+          tagEditing={tagEditing}
         />
 
         {selectedTagIds.length > 0 && (

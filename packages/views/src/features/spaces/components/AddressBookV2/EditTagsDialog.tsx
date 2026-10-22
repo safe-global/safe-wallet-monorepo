@@ -8,6 +8,7 @@ import GroupedAddress from './GroupedAddress'
 import TagPicker from './tags/TagPicker'
 import { toTagChoices, type TagChoice } from './tags/tagColor'
 import { TAGS_DISCLAIMER, sameTagNames } from './tags/tagRules'
+import type { TagEditing } from './tags/TagOptionList'
 import type { WorkspaceTag } from './types'
 
 type EditTagsDialogProps = {
@@ -16,6 +17,8 @@ type EditTagsDialogProps = {
   onSave: (tags: TagChoice[]) => void
   onClose: () => void
   onLimitReached?: () => void
+  /** Rename and delete a workspace tag from the picker; they apply at once, not on save. */
+  tagEditing?: TagEditing<WorkspaceTag>
   isSubmitting?: boolean
   error?: string
 }
@@ -27,6 +30,7 @@ const EditTagsDialog = ({
   onSave,
   onClose,
   onLimitReached,
+  tagEditing,
   isSubmitting = false,
   error,
 }: EditTagsDialogProps) => {
@@ -44,7 +48,13 @@ const EditTagsDialog = ({
             <Typography variant="paragraph-bold">{contact.name}</Typography>
             <GroupedAddress address={contact.address} />
           </div>
-          <TagPicker value={tags} onChange={setTags} workspaceTags={workspaceTags} onLimitReached={onLimitReached} />
+          <TagPicker
+            value={tags}
+            onChange={setTags}
+            workspaceTags={workspaceTags}
+            onLimitReached={onLimitReached}
+            tagEditing={tagEditing}
+          />
           <Typography variant="paragraph-small" className="text-muted-foreground">
             {TAGS_DISCLAIMER}
           </Typography>
