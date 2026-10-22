@@ -42,7 +42,6 @@ export type StatusAlertProps = {
   action?: ReactNode
   onDismiss?: () => void
   className?: string
-  'aria-live'?: 'polite'
   'data-testid'?: string
 }
 
@@ -54,7 +53,6 @@ const StatusAlert = ({
   action,
   onDismiss,
   className,
-  'aria-live': ariaLive,
   'data-testid': testId,
 }: StatusAlertProps): ReactElement => {
   const iconClassName = cn('mt-0.5 size-4 shrink-0', TONE_ICON_COLORS[tone])
@@ -65,7 +63,6 @@ const StatusAlert = ({
       outlined={false}
       className={cn('flex items-center gap-4', TONE_BORDERS[tone], className)}
       role={tone === 'error' ? 'alert' : 'status'}
-      aria-live={ariaLive}
       data-testid={testId}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3">

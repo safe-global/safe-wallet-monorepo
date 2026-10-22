@@ -3,7 +3,6 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
-import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 
 export type GuardSlotName = 'transaction' | 'module'
@@ -47,32 +46,15 @@ const Banner = ({
   />
 )
 
-const GuardStatusBanner = ({ guard, safeName, onRetry }: GuardStatusBannerProps): ReactElement => {
+const GuardStatusBanner = ({ guard, safeName, onRetry }: GuardStatusBannerProps): ReactElement | null => {
   switch (guard.status) {
     case 'loading':
-      return (
-        <StatusAlert
-          tone="loading"
-          title={`Checking guards on ${safeName}…`}
-          aria-live="polite"
-          data-testid="guard-status-loading"
-        />
-      )
+      return <StatusAlert tone="loading" title={`Checking guards on ${safeName}…`} data-testid="guard-status-loading" />
 
+    // Setup works without a warning in these states
     case 'none':
-      return (
-        <Banner variant="info" title="The Safe policy guard isn't enabled yet">
-          This transaction also enables it, so the recipient allowlist is active right after execution.
-        </Banner>
-      )
-
     case 'known':
-      return (
-        <Banner variant="success" title="The Safe policy guard is already enabled">
-          Only the policy change is sent. It waits {POLICY_CHANGE_DELAY}, then needs an activation step before it
-          applies.
-        </Banner>
-      )
+      return null
 
     case 'unknown':
       return (

@@ -19,7 +19,7 @@ const meta = {
   args: {
     safeName: 'Treasury',
     onRetry: fn(),
-    guard: { status: 'none' },
+    guard: { status: 'loading' },
   },
 } satisfies Meta<typeof GuardStatusBanner>
 
@@ -28,10 +28,6 @@ type Story = StoryObj<typeof meta>
 
 /** The animated spinner would make every snapshot differ. */
 export const Loading: Story = { args: { guard: { status: 'loading' } }, tags: ['skip-visual-test'] }
-
-export const NoGuard: Story = { args: { guard: { status: 'none' } } }
-
-export const PolicyGuardEnabled: Story = { args: { guard: { status: 'known' } } }
 
 export const UnknownGuard: Story = {
   args: { guard: { status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] } },

@@ -1,5 +1,13 @@
+import { cloneElement, type ReactElement, type ReactNode } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import AllowlistSummary from '../AllowlistSummary'
+
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children, render }: { children: ReactNode; render: ReactElement }) =>
+    cloneElement(render, {}, children),
+  TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+}))
 
 describe('AllowlistSummary', () => {
   it('asks for a Safe account when none is picked', () => {
@@ -64,5 +72,21 @@ describe('AllowlistSummary', () => {
     render(<AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B']} recipientNames={['Alice']} />)
 
     expect(screen.getByText('Payments on Sepolia will only be able to send A and B to Alice.')).toBeInTheDocument()
+  })
+
+  it('says the changes apply on execution when the policy guard is not enabled yet', () => {
+    render(<AllowlistSummary accountLabel="Payments" tokenSymbols={['A']} recipientNames={['Alice']} />)
+
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+      'These changes take effect as soon as this transaction is executed.',
+    )
+  })
+
+  it('says the changes wait 24 hours and need activation when the policy guard is already enabled', () => {
+    render(<AllowlistSummary accountLabel="Payments" tokenSymbols={['A']} recipientNames={['Alice']} isGuardEnabled />)
+
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+      'The Safe policy guard is already enabled, so these changes wait 24 hours after execution, then need an activation step before they apply.',
+    )
   })
 })

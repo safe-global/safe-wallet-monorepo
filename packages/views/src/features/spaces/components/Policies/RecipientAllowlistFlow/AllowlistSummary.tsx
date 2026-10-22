@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import {
   SUMMARY_DESCRIPTION,
   SUMMARY_DETAILS,
+  SUMMARY_DETAILS_GUARD_ENABLED,
   SUMMARY_DETAILS_LABEL,
   SUMMARY_NO_ACCOUNT_DESCRIPTION,
   SUMMARY_NO_ACCOUNT_TITLE,
@@ -14,6 +15,7 @@ type AllowlistSummaryProps = {
   accountLabel?: string
   tokenSymbols: string[]
   recipientNames: string[]
+  isGuardEnabled?: boolean
 }
 
 const MAX_LISTED_TOKENS = 3
@@ -27,7 +29,12 @@ const describeTokens = (symbols: string[]): string => {
 
 const describeRecipients = (names: string[]): string => (names.length === 1 ? names[0] : `${names.length} recipients`)
 
-const AllowlistSummary = ({ accountLabel, tokenSymbols, recipientNames }: AllowlistSummaryProps): ReactElement => {
+const AllowlistSummary = ({
+  accountLabel,
+  tokenSymbols,
+  recipientNames,
+  isGuardEnabled = false,
+}: AllowlistSummaryProps): ReactElement => {
   const isComplete = tokenSymbols.length > 0 && recipientNames.length > 0
 
   const title = !accountLabel
@@ -39,7 +46,6 @@ const AllowlistSummary = ({ accountLabel, tokenSymbols, recipientNames }: Allowl
   return (
     <StatusAlert
       tone="info"
-      aria-live="polite"
       title={title}
       description={
         accountLabel ? (
@@ -57,7 +63,9 @@ const AllowlistSummary = ({ accountLabel, tokenSymbols, recipientNames }: Allowl
               >
                 <InfoIcon className="size-3.5" aria-hidden />
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">{SUMMARY_DETAILS}</TooltipContent>
+              <TooltipContent className="max-w-xs">
+                {isGuardEnabled ? SUMMARY_DETAILS_GUARD_ENABLED : SUMMARY_DETAILS}
+              </TooltipContent>
             </Tooltip>
           </>
         ) : (
