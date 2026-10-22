@@ -21,6 +21,7 @@ import RecipientAllowlistFlow from './RecipientAllowlistFlow'
 import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import AllowlistDetails from './AllowlistDetails'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -35,6 +36,7 @@ import {
   REQUEST_POLICY_FORM_WIDTH,
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
+  isAllowlistPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -91,7 +93,14 @@ const Policies = ({
   const isSettled = !isLoading && !isError
 
   const selectPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
+    // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
+    if (
+      isProposerPolicy(policy) ||
+      isSpendingLimitPolicy(policy) ||
+      (isAllowlistPolicy(policy) && policy.status === 'active')
+    ) {
+      setOpenPolicy(policy)
+    }
   }, [])
 
   const closeDetails = useCallback(() => setOpenPolicy(null), [])
@@ -258,6 +267,10 @@ const Policies = ({
 
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
+      )}
+
+      {openedPolicy && isAllowlistPolicy(openedPolicy) && openedPolicy.status === 'active' && (
+        <AllowlistDetails policy={openedPolicy} onClose={closeDetails} />
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (

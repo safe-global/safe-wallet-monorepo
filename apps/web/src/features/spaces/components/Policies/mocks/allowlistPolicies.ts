@@ -35,6 +35,10 @@ export const mockAllowlistPolicy = (overrides: Partial<AllowlistPolicy> = {}): A
 
 export const mockActiveAllowlist = (): AllowlistPolicy & { status: 'active' } => asActivePolicy(mockAllowlistPolicy())
 
+/** The guard is not in both slots, so the row reads "Not enforced". */
+export const mockUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(mockAllowlistPolicy({ id: '0xallowlist-unenforced', enabled: false }))
+
 /** Queued and short of its threshold. */
 export const mockPendingAllowlist = (overrides: Partial<QueuedAllowlistPolicy> = {}): QueuedAllowlistPolicy => ({
   ...mockAllowlistPolicy({ id: '0xallowlist-pending', safe: MOCK_SAFES.payroll }),

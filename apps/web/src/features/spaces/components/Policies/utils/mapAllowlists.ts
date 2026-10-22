@@ -36,6 +36,7 @@ const isAllowlistDto = (dto: ActivePolicyDto): dto is AllowlistDto =>
 const isAllowlistData = (data: ActivePolicyDto['data']): data is Erc20TransferPolicyDataDto => 'tokenAddress' in data
 
 /** CGW calls a policy enabled when either slot holds the guard, but an empty slot leaves one path unchecked. */
+// TODO(WA-3964): tell a partly enforced guard (one slot) apart from a missing one, and show it in the UI.
 const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard && !!guards.moduleGuard
 
 const toNativeRecipient = ({ target, selector, operation }: PolicyAccessDto): string | null => {

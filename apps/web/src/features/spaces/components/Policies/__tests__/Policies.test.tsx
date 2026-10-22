@@ -21,6 +21,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../mocks/policies'
+import { mockActiveAllowlist, mockPendingAllowlist } from '../mocks/allowlistPolicies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import { mockWallet } from '@/tests/mocks/hooks'
@@ -614,6 +615,20 @@ describe('Policies', () => {
       fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
 
       expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    })
+
+    it('should, when an active allowlist row is clicked, open its side panel', () => {
+      render(<Policies policies={[mockActiveAllowlist()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
+    })
+
+    it('should, when a pending allowlist row is clicked, open no panel yet', () => {
+      render(<Policies policies={[mockPendingAllowlist()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
     })
 
     it('should hold one open panel at a time, so a second row replaces the first', () => {

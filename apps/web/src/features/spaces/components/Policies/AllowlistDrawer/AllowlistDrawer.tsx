@@ -91,7 +91,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
   const status = outcome ? OUTCOME_STATUS[outcome] : getPolicyStatus(policy)
-  const isRemoved = state.kind !== 'active' && state.operation === 'remove'
+  const isRemoved = 'operation' in state && state.operation === 'remove'
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
     : { onEdit: props.onEdit, onRemove: props.onRemove, onCancelChange: props.onCancelChange }
@@ -115,6 +115,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               />
             </>
           )}
+          {state.kind === 'unenforced' && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {state.kind === 'scheduled' && policy.status === 'active' && policy.scheduledChange && (
             <ScheduledBanner
               title={state.bannerTitle}
@@ -137,7 +138,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
             chainId={policy.safe.chainId}
-            enforcedBy={{ label: overview.enforcedBy, href: enforcedByHref }}
+            enforcedBy={state.kind === 'unenforced' ? undefined : { label: overview.enforcedBy, href: enforcedByHref }}
           />
         </div>
       </DrawerBody>

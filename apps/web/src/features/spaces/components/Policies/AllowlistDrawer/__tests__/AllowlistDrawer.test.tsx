@@ -9,6 +9,7 @@ import {
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
+  mockUnenforcedAllowlist,
 } from '../../mocks/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type { AllowlistDrawerPolicy } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
@@ -310,5 +311,16 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
+  })
+
+  it('says the guard is removed on an unenforced allowlist, hides who enforces it and offers no action', () => {
+    setup(mockUnenforcedAllowlist())
+
+    expect(screen.getByText('Safe policy guard removed')).toBeInTheDocument()
+    expect(screen.getByText('Allowlist not applied as the guard is removed.')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-unenforced')).toHaveTextContent('Not enforced')
+    expect(screen.queryByText('Enforced by')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
   })
 })

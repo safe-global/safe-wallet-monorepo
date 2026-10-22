@@ -11,6 +11,7 @@ import {
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
+  mockUnenforcedAllowlist,
 } from '../mocks/allowlistPolicies'
 import { createMockStory } from '@/stories/mocks'
 import AllowlistDrawer from './AllowlistDrawer'
@@ -103,6 +104,8 @@ export const PendingExpired: Story = {
 }
 
 export const Activating: Story = { args: { policy: mockActivatingAllowlist() } }
+
+export const Unenforced: Story = { args: { policy: mockUnenforcedAllowlist() } }
 
 export const ChangePending: Story = { args: { policy: mockAllowlistChangePending() } }
 
