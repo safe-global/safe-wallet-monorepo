@@ -54,6 +54,16 @@ describe('ExecuteTxButton', () => {
     expect(getExecuteButton()).toBeDisabled()
   })
 
+  it('keeps its usual size unless the dense row size is asked for', () => {
+    const { rerender } = render(<ExecuteTxButton txSummary={nextTx} compact />)
+
+    expect(getExecuteButton()).not.toHaveClass('h-6')
+
+    rerender(<ExecuteTxButton txSummary={nextTx} compact dense />)
+
+    expect(getExecuteButton()).toHaveClass('h-6', 'w-20')
+  })
+
   it('opens the confirm flow unwrapped on a Safe-level page', () => {
     const [txFlow, onClose, shouldWarn] = clickExecute()
 

@@ -6,13 +6,11 @@ import {
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import TxList from '@/components/transactions/TxList'
 import InfiniteScroll from '@/components/common/InfiniteScroll'
-import { TxRowSafeContext } from '@/components/transactions/TxSummary/TxRowSafeContext'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
-import { getNextCursor, mergeQueueRuns } from './utils'
+import SpaceQueueTable from './SpaceQueueTable'
+import { getNextCursor, groupQueueBySafe } from './utils'
 
 const FIRST_PAGE = ''
 
@@ -66,7 +64,7 @@ const SpaceQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
     return loaded
   }, [cursors, pages])
 
-  const runs = useMemo(() => mergeQueueRuns(loadedPages), [loadedPages])
+  const sections = useMemo(() => groupQueueBySafe(loadedPages), [loadedPages])
   const lastCursor = cursors[cursors.length - 1]
   const hasError = failedCursors.has(lastCursor)
   const isLoading = !hasError && loadedPages.length < cursors.length
@@ -93,21 +91,9 @@ const SpaceQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
         </Typography>
       )}
 
-      {runs.map((run, index) => (
-        <SafeScopeProvider
-          key={`${run.chainId}:${run.safeAddress}:${index}`}
-          initial={{ chainId: run.chainId, safeAddress: run.safeAddress }}
-          pollSafeInfo={false}
-        >
-          <TxRowSafeContext.Provider value={{ chainId: run.chainId, safeAddress: run.safeAddress }}>
-            <div data-testid="space-queue-safe-run">
-              <TxList items={run.items} />
-            </div>
-          </TxRowSafeContext.Provider>
-        </SafeScopeProvider>
-      ))}
+      {sections.length > 0 && <SpaceQueueTable sections={sections} />}
 
-      {!isLoading && !hasError && runs.length === 0 && (
+      {!isLoading && !hasError && sections.length === 0 && (
         <PagePlaceholder
           img={<NoTransactionsIcon />}
           text="Pending transactions of your Safe accounts will appear here"
