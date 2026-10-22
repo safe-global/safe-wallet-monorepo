@@ -28,6 +28,7 @@ export const playwrightSpecs = {
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
+  'regression/contract-signature-execute.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
