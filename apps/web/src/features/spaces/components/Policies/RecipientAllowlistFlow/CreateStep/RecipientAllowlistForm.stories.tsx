@@ -11,6 +11,9 @@ import {
   type AllowlistRecipient,
   type RecipientAllowlistFormValues,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import GuardStatusBanner, {
+  type GuardStatus,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
@@ -20,6 +23,7 @@ const DEV = '0x1F2504De05f5167650bE5B28c472601Be434b60A'
 const LOCAL_CONTACT = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const USDT = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+const FOREIGN_GUARD = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
 
 const efSafeTarget: SafeScopeTarget = { chainId: '1', safeAddress: EF_SAFE }
 const account = { chainId: '1', address: EF_SAFE, label: 'Treasury' }
@@ -69,12 +73,14 @@ type StoryProps = {
   initialValues?: RecipientAllowlistFormValues
   hasAccount?: boolean
   showSections?: boolean
+  guard?: GuardStatus
 }
 
 const StatefulForm = ({
   initialValues = createDefaultAllowlistValues(),
   hasAccount = true,
   showSections = true,
+  guard,
 }: StoryProps) => {
   const [values, setValues] = useState(initialValues)
   const [dismissedCallouts, setDismissedCallouts] = useState({ tokens: false, recipients: false })
@@ -88,7 +94,9 @@ const StatefulForm = ({
         showSections={showSections}
         dismissedCallouts={dismissedCallouts}
         onDismissCallout={(section: CalloutSection) => setDismissedCallouts((prev) => ({ ...prev, [section]: true }))}
-      />
+      >
+        {guard && <GuardStatusBanner guard={guard} safeName={account.label} />}
+      </RecipientAllowlistForm>
     </SafeScopeProvider>
   )
 }
@@ -138,7 +146,10 @@ export const CreateTwentyTokensTwentyRecipients: Story = {
 
 /** The guard is not in a state that allows an allowlist: the sections are hidden and the banner explains why. */
 export const GuardBlocked: Story = {
-  args: { showSections: false },
+  args: {
+    showSections: false,
+    guard: { status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] },
+  },
 }
 
 export const NoSafeSelected: Story = {
