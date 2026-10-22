@@ -1,6 +1,7 @@
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe } from '../../src/seed/safe'
+import { waitForNativeBalance } from '../../src/seed/tokens'
 import { AssetsPage } from '../../src/pages/assets.page'
 import { WalletPage } from '../../src/pages/wallet.page'
 
@@ -14,6 +15,7 @@ test.describe('Connected wallet that is not a signer', { tag: '@e2e' }, () => {
     journey,
   }, testInfo) => {
     const safe = await seedSafe(journey, { threshold: 1 })
+    await waitForNativeBalance(safe)
     testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
 
     const wallet = new WalletPage(safePage)
