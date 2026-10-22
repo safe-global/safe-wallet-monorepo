@@ -47,6 +47,69 @@ export const mockProposerDto = (overrides: Partial<ActivePolicyDto> = {}): Activ
   ...overrides,
 })
 
+const POLICY_CONTRACTS = {
+  policyContract: '0x25DDa3b8974a10E93ca188F9C149A42F938Bd187',
+  safePolicyGuard: '0x5202B1ebE100812437d47eae769e155945fbba6a',
+}
+
+const GUARD_SLOTS = { transactionGuard: POLICY_CONTRACTS, moduleGuard: POLICY_CONTRACTS }
+
+const TRANSFER_SELECTOR = '0xa9059cbb'
+
+export const mockErc20TransferDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'erc20-transfer',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: MOCK_TOKENS.usdc.address, selector: TRANSFER_SELECTOR, operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {
+    tokenAddress: MOCK_TOKENS.usdc.address,
+    recipients: [
+      { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },
+      { account: MOCK_ADDRESSES.bob, permission: 'ONCE' },
+    ],
+  },
+  ...overrides,
+})
+
+/** One allowed ETH recipient per policy, held in `access.target`. */
+export const mockNativeTransferDto = (
+  recipient: string = MOCK_ADDRESSES.alice,
+  overrides: Partial<ActivePolicyDto> = {},
+): ActivePolicyDto => ({
+  type: 'native-transfer',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: recipient, selector: '0x00000000', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** The treasury's allowlist: USDC and USDT, plus two ETH recipients. */
+export const mockTreasuryAllowlistDtos = (): ActivePolicyDto[] => [
+  mockErc20TransferDto(),
+  mockErc20TransferDto({
+    enforcement: {
+      via: 'guard',
+      guards: GUARD_SLOTS,
+      access: { target: MOCK_TOKENS.usdt.address, selector: TRANSFER_SELECTOR, operation: 'CALL' },
+    },
+    data: {
+      tokenAddress: MOCK_TOKENS.usdt.address,
+      recipients: [{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }],
+    },
+  }),
+  mockNativeTransferDto(MOCK_ADDRESSES.alice),
+  mockNativeTransferDto(MOCK_ADDRESSES.bob),
+]
+
 export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   type: 'ERC20',
   address: MOCK_TOKENS.usdc.address,
