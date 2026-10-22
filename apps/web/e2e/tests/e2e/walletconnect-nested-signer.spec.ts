@@ -6,16 +6,18 @@
  * connects no private key: it pairs through the onboard WalletConnect module.
  */
 import type { Page } from '@playwright/test'
-import { Interface, Wallet, parseEther } from 'ethers'
+import { Interface, Wallet, hashMessage, parseEther } from 'ethers'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
-import { isApprovedHash } from '../../src/chain/signatures'
 import { short } from '../../environment/scenarios/chain.mjs'
-import { ROUTES } from '../../src/data/constants'
+import { CHAIN_IDS, ROUTES } from '../../src/data/constants'
+import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
+import { isApprovedHash, isValidSafeSignature } from '../../src/chain/signatures'
+import { confirmPendingMessage } from '../../src/seed/messages'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { WalletPage } from '../../src/pages/wallet.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -37,6 +39,9 @@ async function queuedIn(safeApiClient: SafeApiClient, safe: SeededSafe): Promise
   return transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))
 }
 
+// A wallet sees another owner's message signature on its next Safe info poll (POLLING_INTERVAL, 15 s)
+const OTHER_OWNER_SIGNATURE_TIMEOUT_MS = 60_000
+
 type NestedSignerFixtures = {
   /** The owners and thresholds of the seeded Safes; 1/1 over 1/1 by default */
   nestedSafes: Parameters<typeof seedNestedSafe>[1]
@@ -44,11 +49,12 @@ type NestedSignerFixtures = {
   childPage: Page
   /** The Safes, with wallet A's signer connected to the parent in wallet B */
   pairing: { parent: SeededSafe; child: SeededSafe }
+  /** A dApp in a session with wallet A, the child Safe's wallet */
+  childDapp: WalletConnectDapp
 }
 
 const test = base.extend<NestedSignerFixtures>({
   nestedSafes: [{}, { option: true }],
-
   childPage: async ({ browser }, provide, testInfo) => {
     const context = await browser.newContext({
       baseURL: testInfo.project.use.baseURL,
@@ -79,6 +85,25 @@ const test = base.extend<NestedSignerFixtures>({
     await parentWalletConnect.approveButton.click()
 
     await provide({ parent, child })
+  },
+
+  childDapp: async ({ childPage, pairing }, provide, testInfo) => {
+    await expect(new WalletPage(childPage).accountCenter).toContainText(short(pairing.parent.address))
+    const dapp = await WalletConnectDapp.start(CHAIN_IDS.sepolia)
+    try {
+      const childWalletConnect = new WalletConnectPage(childPage)
+      await childWalletConnect.pair(await dapp.connect())
+      await childWalletConnect.proposal(DAPP_NAME).waitFor({ state: 'visible' })
+      await childWalletConnect.approveButton.click()
+      await dapp.waitForSession()
+      await provide(dapp)
+    } finally {
+      // The test's final status is known only here, after it ran
+      if (testInfo.status !== testInfo.expectedStatus) {
+        await testInfo.attach('walletconnect-dapp-log', { body: dapp.log.join('\n'), contentType: 'text/plain' })
+      }
+      await dapp.close()
+    }
   },
 })
 
@@ -212,6 +237,97 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       const childSafeTxHash = childTransaction.id.split('_')[2]
       // Exactly approveHash: the envelope with the child transaction never reaches the parent
       expect(details?.txData?.hexData).toBe(safeInterface.encodeFunctionData('approveHash', [childSafeTxHash]))
+    })
+  })
+
+  test.describe('with a child Safe 1.5.0', () => {
+    // Below 1.5.0 a Safe asks a contract owner about the message preimage, so only 1.5.0 children can work
+    test.use({ nestedSafes: { child: { withOwner4: false, threshold: 1, safeVersion: '1.5.0' } } })
+
+    test('should give a dApp of the child Safe a signature that the child accepts when the parent signs the message', async ({
+      safePage,
+      childPage,
+      journey,
+      pairing,
+      childDapp,
+    }) => {
+      const message = `Safe E2E nested message ${Date.now()}`
+      const response = childDapp.request('personal_sign', [message, pairing.child.address])
+      const childReview = new TxReviewPage(childPage)
+      await childReview.riskConfirmation.click()
+      await childReview.signMessageButton.click()
+      await new TxReviewPage(safePage).signMessage()
+      await childReview.signedMessageContinueButton.click()
+
+      const answer = await response
+      expect(answer).toEqual({ result: expect.stringMatching(/^0x[0-9a-f]+$/) })
+      const { result: signature } = answer as { result: string }
+      const safeAddress = pairing.child.address
+      expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(true)
+    })
+
+    test.describe('and a 2/2 child of OWNER_4 and the parent', () => {
+      test.use({ nestedSafes: { child: { withOwner4: true, threshold: 2, safeVersion: '1.5.0' } } })
+
+      test('should combine the contract signature of the parent with the signature of OWNER_4', async ({
+        safePage,
+        childPage,
+        journey,
+        pairing,
+        childDapp,
+      }) => {
+        const message = `Safe E2E nested message ${Date.now()}`
+        const response = childDapp.request('personal_sign', [message, pairing.child.address])
+        const childReview = new TxReviewPage(childPage)
+        await childReview.riskConfirmation.click()
+        await childReview.signMessageButton.click()
+        await new TxReviewPage(safePage).signMessage()
+        // The parent's signature proposes the message at 1/2; OWNER_4 adds the second one
+        await confirmPendingMessage(journey.env, pairing.child.address, journey.owners.owner4)
+        await childReview.signedMessageContinueButton.click({ timeout: OTHER_OWNER_SIGNATURE_TIMEOUT_MS })
+
+        const { result: signature } = (await response) as { result: string }
+        const safeAddress = pairing.child.address
+        expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(
+          true,
+        )
+      })
+    })
+
+    test.describe('and a 2/2 parent of OWNER_4 and OWNER_1', () => {
+      test.use({
+        nestedSafes: {
+          parent: { ownerCount: 2, threshold: 2 },
+          child: { withOwner4: false, threshold: 1, safeVersion: '1.5.0' },
+        },
+      })
+
+      test('should sign for the child once both owners of the parent signed the parent message', async ({
+        safePage,
+        childPage,
+        journey,
+        pairing,
+        childDapp,
+      }) => {
+        const message = `Safe E2E nested message ${Date.now()}`
+        const response = childDapp.request('personal_sign', [message, pairing.child.address])
+        const childReview = new TxReviewPage(childPage)
+        const parentReview = new TxReviewPage(safePage)
+        await childReview.riskConfirmation.click()
+        await childReview.signMessageButton.click()
+        await parentReview.riskConfirmation.click()
+        await parentReview.signMessageButton.click()
+        // OWNER_4 signed the parent's message at 1/2; OWNER_1 adds the second one, then wallet B answers wallet A
+        await confirmPendingMessage(journey.env, pairing.parent.address, journey.owners.owner1)
+        await parentReview.signedMessageContinueButton.click({ timeout: OTHER_OWNER_SIGNATURE_TIMEOUT_MS })
+        await childReview.signedMessageContinueButton.click()
+
+        const { result: signature } = (await response) as { result: string }
+        const safeAddress = pairing.child.address
+        expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(
+          true,
+        )
+      })
     })
   })
 })
