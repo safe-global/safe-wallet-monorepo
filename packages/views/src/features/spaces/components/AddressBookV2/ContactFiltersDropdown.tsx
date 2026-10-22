@@ -17,7 +17,7 @@ export type ContactFiltersDropdownProps = {
   tags: WorkspaceTag[]
   selectedTagIds: number[]
   onSelectedTagIdsChange: (tagIds: number[]) => void
-  /** When the dropdown closes with a different selection than it opened with. */
+  /** When the dropdown closes after the user changed the selection; a rename or delete that changes it doesn't count. */
   onSelectionCommitted?: (tagIds: number[]) => void
   /** Rename and delete a tag across the workspace; without it the tags are read-only. */
   tagEditing?: TagEditing
@@ -43,12 +43,22 @@ const ContactFiltersDropdown = ({
 }: ContactFiltersDropdownProps) => {
   const [open, setOpen] = useState(false)
   const selectionAtOpen = useRef(selectedTagIds)
+  const isChangedByUser = useRef(false)
   const tagById = (value: string) => tags.find((tag) => String(tag.id) === value)
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
-    if (isOpen) selectionAtOpen.current = selectedTagIds
-    else if (!sameIds(selectedTagIds, selectionAtOpen.current)) onSelectionCommitted?.(selectedTagIds)
+    if (isOpen) {
+      selectionAtOpen.current = selectedTagIds
+      isChangedByUser.current = false
+    } else if (isChangedByUser.current && !sameIds(selectedTagIds, selectionAtOpen.current)) {
+      onSelectionCommitted?.(selectedTagIds)
+    }
+  }
+
+  const select = (tagIds: number[]) => {
+    isChangedByUser.current = true
+    onSelectedTagIdsChange(tagIds)
   }
 
   const options: FacetOption[] = tags.map((tag) => ({
@@ -81,7 +91,7 @@ const ContactFiltersDropdown = ({
           label="Tags"
           options={options}
           value={selectedTagIds.map(String)}
-          onChange={(next) => onSelectedTagIdsChange(next.map(Number))}
+          onChange={(next) => select(next.map(Number))}
           searchable
           searchPlaceholder="Search tags"
           emptyText="No tags yet"
@@ -107,7 +117,7 @@ const ContactFiltersDropdown = ({
 
         {selectedTagIds.length > 0 && (
           <div className="border-border border-t pt-1">
-            <Button variant="ghost" size="sm" className="w-full" onClick={() => onSelectedTagIdsChange([])}>
+            <Button variant="ghost" size="sm" className="w-full" onClick={() => select([])}>
               Clear filters
             </Button>
           </div>

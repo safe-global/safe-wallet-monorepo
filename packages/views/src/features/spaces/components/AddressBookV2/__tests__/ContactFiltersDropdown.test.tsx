@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
@@ -53,22 +54,45 @@ describe('ContactFiltersDropdown', () => {
     expect(onSelectedTagIdsChange).toHaveBeenCalledWith([])
   })
 
-  it('reports the selection once it closes with a change', async () => {
+  it('reports the selection once it closes after the user changed it', async () => {
     const onSelectionCommitted = jest.fn()
-    const { rerender, onSelectedTagIdsChange } = renderDropdown({ onSelectionCommitted })
+    const Controlled = () => {
+      const [selected, setSelected] = useState<number[]>([])
+      return (
+        <ContactFiltersDropdown
+          tags={[vendor, internal]}
+          selectedTagIds={selected}
+          onSelectedTagIdsChange={setSelected}
+          onSelectionCommitted={onSelectionCommitted}
+        />
+      )
+    }
+    render(<Controlled />)
+
+    await open()
+    await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+    await userEvent.keyboard('{Escape}')
+
+    expect(onSelectionCommitted).toHaveBeenCalledTimes(1)
+    expect(onSelectionCommitted).toHaveBeenCalledWith([1])
+  })
+
+  it('reports nothing when a rename or delete changed the selection', async () => {
+    const onSelectionCommitted = jest.fn()
+    const { rerender, onSelectedTagIdsChange } = renderDropdown({ selectedTagIds: [1], onSelectionCommitted })
 
     await open()
     rerender(
       <ContactFiltersDropdown
-        tags={[vendor, internal]}
-        selectedTagIds={[1]}
+        tags={[internal]}
+        selectedTagIds={[2]}
         onSelectedTagIdsChange={onSelectedTagIdsChange}
         onSelectionCommitted={onSelectionCommitted}
       />,
     )
     await userEvent.keyboard('{Escape}')
 
-    expect(onSelectionCommitted).toHaveBeenCalledWith([1])
+    expect(onSelectionCommitted).not.toHaveBeenCalled()
   })
 
   it('reports nothing when it closes with the same selection', async () => {

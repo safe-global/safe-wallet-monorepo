@@ -17,7 +17,7 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
-import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
+import { buildSpaceAddressBookTags, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import { getStoreInstance } from '@/store'
 import type * as Store from '@/store'
 import type * as AddressBookSlice from '@/store/addressBookSlice'
@@ -501,6 +501,48 @@ describe('SpaceAddressBookV2', () => {
 
       expect(screen.getByTestId('filters-count')).toHaveTextContent('1')
       expect(visibleNames()).toEqual([expect.stringContaining('Treasury'), expect.stringContaining('Northwind')])
+    })
+
+    it('does not track filters a rename changed while the user changed nothing', async () => {
+      mockTaggedBook()
+      mockRenameTag.mockResolvedValue({ mergedIntoId: 2 })
+
+      const { rerender } = renderAddressBook()
+      await openFilters()
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+      await openFilters()
+      await userEvent.click(screen.getByRole('button', { name: 'Rename Vendor' }))
+      await userEvent.clear(screen.getByTestId('facet-option-rename-input'))
+      await userEvent.type(screen.getByTestId('facet-option-rename-input'), 'Internal{Enter}')
+      mockWorkspaceBook({
+        items: [
+          itemBuilder()
+            .with({ name: 'Treasury', tagIds: [2] })
+            .build(),
+        ],
+        tags: [{ ...internal, contactCount: 2 }],
+      })
+      rerender(<SpaceAddressBookV2 />)
+      await userEvent.keyboard('{Escape}')
+
+      const filterEvents = mockTrackEvent.mock.calls.filter(([event]) => event === SPACE_EVENTS.CONTACTS_FILTERED)
+      expect(filterEvents).toHaveLength(1)
+    })
+
+    it('tracks the workspace tag limit reached from the row menu', async () => {
+      const tags = buildSpaceAddressBookTags(8)
+      mockWorkspaceBook({ items: [itemBuilder().with({ name: 'Treasury' }).build()], tags })
+
+      renderAddressBook()
+      await openRowMenu('Treasury')
+      await userEvent.click(screen.getByRole('menuitem', { name: 'Edit tags' }))
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Tags/ }))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.type(screen.getByRole('searchbox', { name: /create a tag/ }), 'One too many')
+      await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.TAG_LIMIT_REACHED, { Location: 'row_menu' })
     })
 
     it('drops a deleted tag from the filters', async () => {
