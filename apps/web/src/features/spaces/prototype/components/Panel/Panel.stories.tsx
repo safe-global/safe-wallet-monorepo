@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ArrowUpRight } from 'lucide-react'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import { SharedDrawerHeader } from './SharedDrawerHeader'
 import { PanelLinkRow, PanelRow, PanelSection } from './PanelBody'
 import { PanelAlert } from './PanelAlert'
