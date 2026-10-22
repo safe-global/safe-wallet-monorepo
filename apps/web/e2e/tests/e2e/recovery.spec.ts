@@ -117,7 +117,8 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     await recovery.openActionRequiredPanel()
     await expect(recovery.inProgressCard).toBeVisible()
     await expect(recovery.inProgressCard).toContainText('Account recovery in progress')
-    await expect(recovery.inProgressCard).toContainText('1 day')
+    // Anvil can stamp blocks a few seconds ahead of the browser clock, so the 2-day cooldown can still read 2 days
+    await expect(recovery.inProgressCard).toContainText(/1 day|2 days/)
   })
 
   test('should skip the queued recovery when an owner cancels it', async ({ safePage, journey }, testInfo) => {
@@ -133,7 +134,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     const recovery = new RecoveryPage(safePage)
     const review = new TxReviewPage(safePage)
     await safePage.goto(`${ROUTES.transactionsQueue}?safe=${safe.prefixedAddress}`)
-    await recovery.goToQueueButton.click()
+    await recovery.goToQueue()
     await recovery.cancel()
     await review.sign()
     await review.execute()
@@ -165,7 +166,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
 
     const recovery = new RecoveryPage(safePage)
     await safePage.goto(`${ROUTES.transactionsQueue}?safe=${safe.prefixedAddress}`)
-    await recovery.goToQueueButton.click()
+    await recovery.goToQueue()
     await recovery.execute()
 
     await expect

@@ -99,6 +99,11 @@ export class TxReviewPage {
     await this.status.filter({ hasText: EXECUTED_STATUS }).waitFor({ timeout: EXECUTION_TIMEOUT_MS })
   }
 
+  /** Wait until the success screen reports the transaction as indexed; the app has then reloaded the Safe nonce */
+  async waitForIndexing(): Promise<void> {
+    await this.status.filter({ hasText: 'Transaction was successful' }).waitFor({ timeout: EXECUTION_TIMEOUT_MS })
+  }
+
   private async confirmRisk(): Promise<void> {
     await this.riskConfirmation.click({ timeout: REVIEW_LOAD_TIMEOUT_MS })
   }

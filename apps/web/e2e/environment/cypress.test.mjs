@@ -5,6 +5,7 @@ import {
   exposedValues,
   forkShardCount,
   isRemoteBackendHost,
+  isRemoteBackendRequest,
   planShards,
   selectCypressSpecs,
 } from './cypress.mjs'
@@ -38,6 +39,21 @@ test('blocks remote backend hosts without treating the static asset CDN as a tra
   ]) {
     assert.equal(isRemoteBackendHost(host), false, host)
   }
+})
+
+test('lets the hosted CoW widget read the chain through its own RPC while the wallet must stay local', () => {
+  const rpc = 'https://eth-sepolia.g.alchemy.com/v2/key'
+  assert.equal(isRemoteBackendRequest(rpc, { origin: 'https://swap.cow.fi' }), false)
+  assert.equal(isRemoteBackendRequest(rpc, { origin: 'https://staging.swap.cow.fi' }), false)
+  assert.equal(isRemoteBackendRequest(rpc, { referer: 'https://swap.cow.fi/' }), false)
+  assert.equal(isRemoteBackendRequest(rpc, { origin: 'http://localhost:8080' }), true)
+  assert.equal(isRemoteBackendRequest(rpc, { referer: 'http://localhost:8080/swap' }), true)
+  assert.equal(isRemoteBackendRequest(rpc), true)
+})
+
+test('blocks a Safe backend request from the hosted CoW widget', () => {
+  const cgw = 'https://safe-client.safe.global/v1/chains'
+  assert.equal(isRemoteBackendRequest(cgw, { referer: 'https://swap.cow.fi/' }), true)
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'

@@ -109,7 +109,7 @@ const buttonVariants = cva(
       },
       // Brand-green icon on a primary CTA (Safe Pro "Start free access" pattern).
       accentIcon: {
-        true: '[&_svg]:text-green-400 dark:[&_svg]:text-primary-foreground',
+        true: '[&_svg]:text-icon-brand dark:[&_svg]:text-primary-foreground',
       },
     },
     defaultVariants: {

@@ -47,6 +47,8 @@ export const SAFES = {
   SEP_OWNER_4_SAFE: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
   /** 1/4 Safe holding ETH plus six $0 test tokens, OWNER_4 is an owner — for assets-table tests (mirrors Cypress SEP_STATIC_SAFE_2) */
   SEP_ASSETS_SAFE: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
+  /** Safe with an executed transaction history — for tx history tests (mirrors Cypress SEP_STATIC_SAFE_7) */
+  SEP_HISTORY_SAFE: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   /** Isolated stack only (no staging Safe): 3/3 Safe of the emulated Ledger with a transfer that needs its signature */
   SEP_LEDGER_SIGN_SAFE: 'sep:0x0000000000000000000000000000000000000000',
   /** Isolated stack only (no staging Safe): 1/1 Safe of the emulated Ledger with a signed transfer to execute */
@@ -121,6 +123,7 @@ export const ROUTES = {
   transactions: '/transactions',
   transactionsQueue: '/transactions/queue',
   transactionsHistory: '/transactions/history',
+  transactionsMessages: '/transactions/messages',
   settings: '/settings',
   settingsSetup: '/settings/setup',
   addressBook: '/address-book',

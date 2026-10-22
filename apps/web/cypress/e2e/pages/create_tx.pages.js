@@ -39,7 +39,6 @@ const baseGas = '[data-testid="tx-base-gas"]'
 export const txDate = '[data-testid="tx-date"]'
 export const txType = '[data-testid="tx-type"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
-const spamTokenWarningIcon = '[data-testid="warning"]'
 const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
 const sendTokensBtn = '[data-testid="send-tokens-btn"]'
 export const replacementNewSigner = '[data-testid="new-owner"]'
@@ -533,17 +532,6 @@ export function collapseAllActions(data) {
 
 export function verifyActionListExists(data) {
   main.checkTextsExistWithinElement(transactionSideList, data)
-}
-
-export function verifySpamIconIsDisplayed(name, token) {
-  cy.get(transactionItem)
-    .filter(':contains("' + name + '")')
-    .filter(':contains("' + token + '")')
-    .then(($elements) => {
-      cy.wrap($elements.first()).then(($element) => {
-        cy.wrap($element).find(spamTokenWarningIcon).should('be.visible')
-      })
-    })
 }
 
 /**

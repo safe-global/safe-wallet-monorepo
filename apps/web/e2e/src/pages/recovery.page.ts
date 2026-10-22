@@ -92,6 +92,12 @@ export class RecoveryPage {
     }
   }
 
+  /** Leave the recovery modal for the queue; the modal closes only once the navigation is done */
+  async goToQueue(): Promise<void> {
+    await this.goToQueueButton.click()
+    await this.goToQueueButton.waitFor({ state: 'hidden' })
+  }
+
   /** Open the queued recovery and start its cancellation; the review opens */
   async cancel(): Promise<void> {
     await this.queuedRecoveries.click()

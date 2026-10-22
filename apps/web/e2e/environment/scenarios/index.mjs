@@ -12,10 +12,8 @@ import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as happypath from './happypath.mjs'
 import * as history from './history.mjs'
 import * as historyFilters from './history-filters.mjs'
-import * as historySmoke from './history-smoke.mjs'
 import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
-import * as messages from './messages.mjs'
 import * as nested from './nested.mjs'
 import * as notes from './notes.mjs'
 import * as owners from './owners.mjs'
@@ -44,10 +42,8 @@ const modules = [
   happypath,
   history,
   historyFilters,
-  historySmoke,
   historySummary,
   ledger,
-  messages,
   nested,
   notes,
   owners,

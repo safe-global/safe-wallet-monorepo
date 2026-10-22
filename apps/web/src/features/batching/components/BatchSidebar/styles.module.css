@@ -4,7 +4,8 @@
   align-items: stretch;
   position: relative;
   width: 100%;
-  min-height: 100%;
+  flex: 1;
+  min-height: 0;
   padding: var(--space-3);
   padding-bottom: var(--space-3);
 }
@@ -22,6 +23,8 @@
 
 .txs {
   width: 100%;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .txs ul {
