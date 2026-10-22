@@ -54,6 +54,13 @@ const RecipientsSection = ({
   const addressBook = useMergedAddressBooks(chainId)
   const [isDrafting, setIsDrafting] = useState(() => hasAccount && recipients.length === 0)
   const isDraftOpen = isDrafting && hasAccount
+  // Only a draft the user asked for takes focus; the one opened on load must not scroll the page to it.
+  const [isDraftRequested, setIsDraftRequested] = useState(false)
+
+  const openDraft = () => {
+    setIsDrafting(true)
+    setIsDraftRequested(true)
+  }
 
   const toggle = (address: string, selected: boolean) =>
     onChange({
@@ -126,6 +133,7 @@ const RecipientsSection = ({
                 setIsDrafting(false)
               }}
               onCancel={() => setIsDrafting(false)}
+              autoFocus={isDraftRequested}
             />
           )}
         </div>
@@ -133,7 +141,7 @@ const RecipientsSection = ({
 
       <div className="flex justify-end gap-2">
         {!isDraftOpen && (
-          <Button type="button" variant="ghost" size="sm" disabled={!hasAccount} onClick={() => setIsDrafting(true)}>
+          <Button type="button" variant="ghost" size="sm" disabled={!hasAccount} onClick={openDraft}>
             <Plus data-icon="inline-start" />
             {ADD_RECIPIENT_LABEL}
           </Button>
