@@ -21,11 +21,11 @@ export default {
   SEP_STATIC_SAFE_4: 'sep:0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   /** Address book and CSV import testing - Used in: constants.js (CSV entry), address_book tests */
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
-  /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, mass_payouts.cy.js, spending_limits.cy.js */
+  /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, spending_limits.cy.js */
   SEP_STATIC_SAFE_6: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
   /** Queue replace testing - Used in: tx_queue_replace_btn.cy.js */
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
-  /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js, mass_payouts.cy.js */
+  /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
   /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',

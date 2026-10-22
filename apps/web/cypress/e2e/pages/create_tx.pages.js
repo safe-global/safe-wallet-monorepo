@@ -83,15 +83,8 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
 const addrecipientBtn = '[data-testid="add-recipient-btn"]'
-const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
-const maxRecipientsReachedMsg = '[data-testid="max-recipients-reached"]'
-const recipientsCount = '[data-testid="recipients-count"]'
-const maxBtn = '[data-testid="max-btn"]'
-const tokenAmountSection = '[data-testid="token-amount-section"]'
-const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
 const proposeTransactionBtn = '[data-testid="sign-btn"]'
 
-const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
@@ -972,64 +965,8 @@ export function verifySuccessfulSimulation() {
   cy.get(simulateSuccess).should('exist')
 }
 
-export function insufficientBalanceErrorExists() {
-  cy.get(insufficientBalanceError).should('exist')
-}
-
-export function insufficientFundsErrorExists(index) {
-  cy.get(tokenAmountSection)
-    .eq(index)
-    .within(() => {
-      cy.get('label').should('contain.text', insufficientFundsErrorStr)
-    })
-}
-
-export function checkTokenValue(index, value) {
-  cy.get(amountInput_(index)).should('have.value', value)
-}
-export function clickOnMaxBtn(index) {
-  cy.get(maxBtn).eq(index).click()
-}
-
-export function verifyAddRecipientBtnIsVisible() {
-  cy.get(addrecipientBtn).should('be.visible')
-}
-
-export function verifyAddRecipientBtnDoesNotExist() {
-  main.verifyElementsCount(addrecipientBtn, 0)
-}
-
 export function clickOnAddRecipientBtn() {
   cy.get(addrecipientBtn).click()
-}
-
-export function clickOnRemoveRecipientBtn(index) {
-  cy.get(removeRecipientBtn).eq(index).click()
-}
-
-export function checkNumberOfRecipients(count) {
-  cy.get(recipientsCount).should('have.text', `${count}`)
-}
-
-export function checkMaxRecipientReached(attempt = 0) {
-  const maxAttempts = 4
-
-  cy.get('body').then(($body) => {
-    if ($body.find(maxRecipientsReachedMsg).length > 0) {
-      cy.get(maxRecipientsReachedMsg).should('exist')
-      cy.get(addrecipientBtn).should('be.disabled')
-      checkNumberOfRecipients('5/5')
-      return
-    }
-
-    if (attempt >= maxAttempts) {
-      throw new Error('Max attempts reached but message did not appear')
-    }
-
-    clickOnAddRecipientBtn()
-    checkNumberOfRecipients(`${attempt + 2}/5`)
-    checkMaxRecipientReached(attempt + 1)
-  })
 }
 
 export function selectComboButtonOption(option) {
