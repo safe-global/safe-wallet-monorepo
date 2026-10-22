@@ -8,7 +8,7 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 
 const AMOUNT = '0.001'
 
-test.describe('Execute a transaction that an owner Safe confirmed', { tag: '@e2e' }, () => {
+test.describe('Execute a transaction that an owner Safe confirmed', { tag: '@regression' }, () => {
   test.skip(!isIsolated, 'Seeds its own Safes on the isolated stack')
 
   test('should execute a transfer confirmed by an EOA signature and an EIP-1271 contract signature', async ({

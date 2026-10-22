@@ -18,7 +18,6 @@ export const playwrightSpecs = {
   'e2e/delete.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
-  'e2e/contract-signature-execute.spec.ts': {},
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
   'e2e/recovery.spec.ts': {},
@@ -27,6 +26,7 @@ export const playwrightSpecs = {
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
+  'regression/contract-signature-execute.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
