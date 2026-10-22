@@ -22,11 +22,14 @@ jest.mock('../AddFromAddressBook', () => ({
     </button>
   ),
 }))
+let mockDraftName: string | undefined = 'Dave'
 jest.mock('../RecipientDraftRow', () => ({
   __esModule: true,
   default: ({ onAdd, onCancel }: { onAdd: (recipient: AllowlistRecipient) => void; onCancel: () => void }) => (
     <div>
-      <button onClick={() => onAdd({ address: DRAFT_ADDRESS, name: 'Dave', selected: true })}>confirm draft</button>
+      <button onClick={() => onAdd({ address: DRAFT_ADDRESS, name: mockDraftName, selected: true })}>
+        confirm draft
+      </button>
       <button onClick={onCancel}>cancel draft</button>
     </div>
   ),
@@ -47,10 +50,20 @@ const recipient = (overrides: Partial<AllowlistRecipient> = {}): AllowlistRecipi
 
 const setup = (
   recipients: AllowlistRecipient[] = [],
-  props: { hasAccount?: boolean; isCalloutDismissed?: boolean; known?: string[] } = {},
+  props: {
+    hasAccount?: boolean
+    isCalloutDismissed?: boolean
+    known?: string[]
+    contactNames?: Record<string, string>
+  } = {},
 ) => {
   mockBooks.mockReturnValue({
+    list: [],
     has: (address: string) => (props.known ?? []).includes(address),
+    get: (address: string) => {
+      const name = props.contactNames?.[address]
+      return name ? { name, address } : undefined
+    },
   } as unknown as ReturnType<typeof useMergedAddressBooks>)
   const values: RecipientAllowlistFormValues = { ...createDefaultAllowlistValues(), recipients }
   const onChange = jest.fn()
@@ -70,6 +83,10 @@ const setup = (
 }
 
 describe('RecipientsSection', () => {
+  beforeEach(() => {
+    mockDraftName = 'Dave'
+  })
+
   it('shows the placeholder and disables both actions without an account', () => {
     setup([], { hasAccount: false })
 
@@ -167,6 +184,29 @@ describe('RecipientsSection', () => {
     await user.click(screen.getByRole('button', { name: 'confirm draft' }))
 
     expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [{ ...listed, name: 'Dave', selected: true }] })
+  })
+
+  it('names an unnamed draft after its address book contact', async () => {
+    mockDraftName = undefined
+    const { user, onChange, values } = setup([], { contactNames: { [DRAFT_ADDRESS]: 'Treasury' } })
+
+    await user.click(screen.getByText('confirm draft'))
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...values,
+      recipients: [{ address: DRAFT_ADDRESS, name: 'Treasury', selected: true }],
+    })
+  })
+
+  it('keeps the typed name over the address book name', async () => {
+    const { user, onChange, values } = setup([], { contactNames: { [DRAFT_ADDRESS]: 'Treasury' } })
+
+    await user.click(screen.getByText('confirm draft'))
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...values,
+      recipients: [{ address: DRAFT_ADDRESS, name: 'Dave', selected: true }],
+    })
   })
 
   it('shows the callout and dismisses it', async () => {
