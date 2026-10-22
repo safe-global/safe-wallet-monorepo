@@ -142,9 +142,7 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
-  'cypress/e2e/regression/tx_history_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/tx_history_5.cy.js': { scenario: 'prepareHistorySummaryScenario' },
-  'cypress/e2e/regression/tx_history_6.cy.js': { scenario: 'prepareHistorySummaryScenario' },
   'cypress/e2e/regression/tx_history_filter_2.cy.js': { scenario: 'prepareHistoryFiltersScenario' },
   'cypress/e2e/regression/tx_history_filter.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
@@ -176,5 +174,4 @@ export const isolatedSpecs = {
   'cypress/e2e/smoke/replace_owner.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/safe_selector.cy.js': { scenario: 'prepareBasicScenario', chains: [1] },
   'cypress/e2e/smoke/spending_limits.cy.js': { scenario: 'prepareEnsFixtureScenario' },
-  'cypress/e2e/smoke/tx_history.cy.js': { scenario: 'prepareHistorySmokeScenario' },
 }
