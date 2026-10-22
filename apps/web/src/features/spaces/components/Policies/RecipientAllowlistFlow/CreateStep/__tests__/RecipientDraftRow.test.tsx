@@ -108,6 +108,14 @@ describe('RecipientDraftRow', () => {
     expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
   })
 
+  it('keeps add disabled while the address is still empty', async () => {
+    const { user } = renderRow()
+
+    await goToAddressStep(user, 'Alice')
+
+    expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
+  })
+
   it('keeps add disabled for an invalid address', async () => {
     const { user } = renderRow()
 

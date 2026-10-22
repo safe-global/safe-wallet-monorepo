@@ -46,7 +46,8 @@ const RecipientDraftRow = ({ safeAddress, existing, onAdd, onCancel }: Recipient
   const [step, setStep] = useState<'name' | 'address'>('name')
   const address = methods.watch('address')
   const name = methods.watch('name').trim()
-  const isValid = methods.formState.isValid
+  const { isValid, isValidating } = methods.formState
+  const isAddressValid = step === 'address' && Boolean(address) && isValid && !isValidating
 
   const submitAddress = methods.handleSubmit(({ address: value }) => {
     onAdd({ name: name || undefined, address: checksumAddress(value), selected: true })
@@ -69,7 +70,7 @@ const RecipientDraftRow = ({ safeAddress, existing, onAdd, onCancel }: Recipient
     <div className={cn(ALLOWLIST_ROW_CLASSES, 'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring')}>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex items-center gap-2">
-          {step === 'address' && isValid ? (
+          {isAddressValid ? (
             <Identicon address={address} size={IDENTICON_SIZE} />
           ) : (
             <span className="size-6 shrink-0 rounded-full bg-muted" aria-hidden />
@@ -106,7 +107,7 @@ const RecipientDraftRow = ({ safeAddress, existing, onAdd, onCancel }: Recipient
             variant="ghost"
             size="icon"
             aria-label={step === 'name' ? RECIPIENT_NEXT_LABEL : RECIPIENT_ADD_CONFIRM_LABEL}
-            disabled={step === 'address' && !isValid}
+            disabled={step === 'address' && !isAddressValid}
           >
             <Check />
           </Button>

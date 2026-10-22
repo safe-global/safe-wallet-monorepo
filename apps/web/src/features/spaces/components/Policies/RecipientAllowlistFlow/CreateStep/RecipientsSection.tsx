@@ -49,10 +49,11 @@ const RecipientsSection = ({
   onDismissCallout,
 }: RecipientsSectionProps): ReactElement => {
   const { recipients } = values
-  const hasAccount = Boolean(safeAddress && chainId)
+  const account = safeAddress && chainId ? { safeAddress, chainId } : undefined
+  const hasAccount = Boolean(account)
   const addressBook = useMergedAddressBooks(chainId)
   const [isDrafting, setIsDrafting] = useState(() => hasAccount && recipients.length === 0)
-  const isDraftOpen = isDrafting && Boolean(safeAddress)
+  const isDraftOpen = isDrafting && hasAccount
 
   const toggle = (address: string, selected: boolean) =>
     onChange({
@@ -66,7 +67,7 @@ const RecipientsSection = ({
     onChange({ ...values, recipients: addAllowlistRecipients(recipients, added) })
 
   const isInAddressBook = ({ address, fromAddressBook }: AllowlistRecipient) =>
-    Boolean(fromAddressBook || (chainId && addressBook.has(address, chainId)))
+    Boolean(fromAddressBook || (account && addressBook.has(address, account.chainId)))
 
   return (
     <AllowlistSection title={RECIPIENTS_SECTION_TITLE} data-testid="allowlist-recipients-section">
@@ -82,10 +83,10 @@ const RecipientsSection = ({
 
       {!hasAccount && <AllowlistEmptyItem>{RECIPIENTS_EMPTY_TEXT}</AllowlistEmptyItem>}
 
-      {hasAccount && (recipients.length > 0 || isDrafting) && (
+      {account && (recipients.length > 0 || isDraftOpen) && (
         <div className="flex flex-col gap-3">
           {recipients.length > 0 && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
               {recipients.map((recipient) => {
                 const label = recipient.name || shortenAddress(recipient.address)
                 return (
@@ -114,12 +115,14 @@ const RecipientsSection = ({
               })}
             </div>
           )}
-          {isDraftOpen && safeAddress && (
+          {isDraftOpen && (
             <RecipientDraftRow
-              safeAddress={safeAddress}
+              safeAddress={account.safeAddress}
               existing={recipients}
               onAdd={(recipient) => {
-                append([recipient])
+                append([
+                  { ...recipient, name: recipient.name ?? addressBook.get(recipient.address, account.chainId)?.name },
+                ])
                 setIsDrafting(false)
               }}
               onCancel={() => setIsDrafting(false)}
@@ -135,8 +138,14 @@ const RecipientsSection = ({
             {ADD_RECIPIENT_LABEL}
           </Button>
         )}
-        {safeAddress && chainId ? (
-          <AddFromAddressBook chainId={chainId} safeAddress={safeAddress} existing={recipients} onAdd={append} />
+        {account ? (
+          <AddFromAddressBook
+            chainId={account.chainId}
+            safeAddress={account.safeAddress}
+            contacts={addressBook.list}
+            existing={recipients}
+            onAdd={append}
+          />
         ) : (
           <Button type="button" variant="outline" size="sm" disabled>
             {ADDRESS_BOOK_TRIGGER_LABEL}
