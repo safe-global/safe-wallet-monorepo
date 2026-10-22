@@ -44,11 +44,17 @@ jest.mock('@/components/common/AddressInput', () => {
 
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
 
-const renderRow = (existing: AllowlistRecipient[] = []) => {
+const renderRow = (existing: AllowlistRecipient[] = [], autoFocus?: boolean) => {
   const onAdd = jest.fn()
   const onCancel = jest.fn()
   const view = renderWithUserEvent(
-    <RecipientDraftRow safeAddress={safeAddress} existing={existing} onAdd={onAdd} onCancel={onCancel} />,
+    <RecipientDraftRow
+      safeAddress={safeAddress}
+      existing={existing}
+      onAdd={onAdd}
+      onCancel={onCancel}
+      autoFocus={autoFocus}
+    />,
   )
   return { onAdd, onCancel, ...view }
 }
@@ -123,6 +129,15 @@ describe('RecipientDraftRow', () => {
     await user.type(screen.getByLabelText('Address or ENS'), '0x123')
 
     expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
+  })
+
+  it('focuses the name field only when asked to', () => {
+    const { unmount } = renderRow([], true)
+    expect(screen.getByLabelText('Name (optional)')).toHaveFocus()
+    unmount()
+
+    renderRow()
+    expect(screen.getByLabelText('Name (optional)')).not.toHaveFocus()
   })
 
   it('cancels on Escape and on Remove', async () => {
