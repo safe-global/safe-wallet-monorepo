@@ -14,7 +14,8 @@ import {
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
-import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
+import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import RecipientAllowlistForm, { type RecipientAllowlistFormProps } from './RecipientAllowlistForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
@@ -87,18 +88,27 @@ const StatefulForm = ({
 
   return (
     <SafeScopeProvider initial={hasAccount ? efSafeTarget : undefined}>
-      <RecipientAllowlistForm
+      <ScopedForm
         values={values}
         onChange={setValues}
-        account={hasAccount ? account : undefined}
+        hasAccount={hasAccount}
         showSections={showSections}
         dismissedCallouts={dismissedCallouts}
-        onDismissCallout={(section: CalloutSection) => setDismissedCallouts((prev) => ({ ...prev, [section]: true }))}
+        onDismissCallout={(section) => setDismissedCallouts((prev) => ({ ...prev, [section]: true }))}
       >
         {guard && <GuardStatusBanner guard={guard} safeName={account.label} />}
-      </RecipientAllowlistForm>
+      </ScopedForm>
     </SafeScopeProvider>
   )
+}
+
+/** Reads the held tokens inside the scope, as CreateStep does. */
+const ScopedForm = ({
+  hasAccount,
+  ...props
+}: Omit<RecipientAllowlistFormProps, 'heldTokens' | 'account'> & { hasAccount: boolean }) => {
+  const heldTokens = useHeldTokenAddresses()
+  return <RecipientAllowlistForm {...props} heldTokens={heldTokens} account={hasAccount ? account : undefined} />
 }
 
 const setup = createMockStory({

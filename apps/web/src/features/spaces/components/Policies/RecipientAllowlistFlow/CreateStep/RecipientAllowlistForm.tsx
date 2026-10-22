@@ -7,7 +7,7 @@ import {
   getSelectedRecipients,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
 import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
-import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokensSection from './TokensSection'
 import RecipientsSection from './RecipientsSection'
 
@@ -16,6 +16,7 @@ export type CalloutSection = 'tokens' | 'recipients'
 export type RecipientAllowlistFormProps = {
   values: RecipientAllowlistFormValues
   onChange: (next: RecipientAllowlistFormValues) => void
+  heldTokens: HeldTokenAddresses
   account?: { chainId: string; address: string; label: string }
   /** False when the picked Safe cannot take an allowlist: only `children` show. */
   showSections: boolean
@@ -28,13 +29,14 @@ export type RecipientAllowlistFormProps = {
 const RecipientAllowlistForm = ({
   values,
   onChange,
+  heldTokens,
   account,
   showSections,
   dismissedCallouts,
   onDismissCallout,
   children,
 }: RecipientAllowlistFormProps): ReactElement => {
-  const { addresses, options } = useHeldTokenAddresses()
+  const { addresses, options } = heldTokens
 
   const tokenSymbols = useMemo(
     () =>
@@ -61,6 +63,7 @@ const RecipientAllowlistForm = ({
           <TokensSection
             values={values}
             onChange={onChange}
+            heldTokens={heldTokens}
             hasAccount={Boolean(account)}
             isCalloutDismissed={dismissedCallouts.tokens}
             onDismissCallout={() => onDismissCallout('tokens')}
