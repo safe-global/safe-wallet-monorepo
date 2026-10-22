@@ -2,18 +2,16 @@ import { faker } from '@faker-js/faker'
 import { SENTINEL_ADDRESS, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
-import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
+import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
 import type { AllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import AddFromAddressBook from '../AddFromAddressBook'
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
-  useMergedAddressBooks: jest.fn(),
 }))
 jest.mock('@/components/common/AddressBookInput/useWorkspaceName')
 
-const mockBooks = useMergedAddressBooks as jest.MockedFunction<typeof useMergedAddressBooks>
 const mockWorkspaceName = useWorkspaceName as jest.MockedFunction<typeof useWorkspaceName>
 
 const CHAIN_ID = '1'
@@ -33,10 +31,15 @@ const contact = (name: string, source: ContactSource, chainIds = [CHAIN_ID]): Ex
 })
 
 const setup = (contacts: ExtendedContact[], existing: AllowlistRecipient[] = []) => {
-  mockBooks.mockReturnValue({ list: contacts } as ReturnType<typeof useMergedAddressBooks>)
   const onAdd = jest.fn()
   const rendered = renderWithUserEvent(
-    <AddFromAddressBook chainId={CHAIN_ID} safeAddress={safeAddress} existing={existing} onAdd={onAdd} />,
+    <AddFromAddressBook
+      chainId={CHAIN_ID}
+      safeAddress={safeAddress}
+      contacts={contacts}
+      existing={existing}
+      onAdd={onAdd}
+    />,
   )
   return { ...rendered, onAdd }
 }
@@ -56,10 +59,19 @@ describe('AddFromAddressBook', () => {
 
     await open(user)
 
-    expect(screen.getByText('Contacts of Treasury ops')).toBeInTheDocument()
+    expect(screen.getByText('Treasury ops')).toBeInTheDocument()
     expect(screen.getByText('Local contacts')).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'Add Alice' })).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'Add Bob' })).toBeInTheDocument()
+  })
+
+  it('falls back to a generic Workspace label without a workspace name', async () => {
+    mockWorkspaceName.mockReturnValue(undefined)
+    const { user } = setup([contact('Alice', ContactSource.space)])
+
+    await open(user)
+
+    expect(screen.getByText(/Contacts of\s*your Workspace/)).toBeInTheDocument()
   })
 
   it('leaves out contacts of other chains and the Safe itself', async () => {
@@ -111,15 +123,30 @@ describe('AddFromAddressBook', () => {
     expect(screen.getByText('No contacts found.')).toBeInTheDocument()
   })
 
-  it('shows contacts already in the list checked and disabled', async () => {
+  it('shows selected recipients checked and disabled', async () => {
     const listed = contact('Alice', ContactSource.space)
-    const { user } = setup([listed], [{ address: listed.address.toLowerCase(), selected: false }])
+    const { user } = setup([listed], [{ address: listed.address.toLowerCase(), selected: true }])
 
     await open(user)
 
     const checkbox = screen.getByRole('checkbox', { name: 'Add Alice' })
     expect(checkbox).toBeChecked()
     expect(checkbox).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('lets a deselected recipient be picked again', async () => {
+    const listed = contact('Alice', ContactSource.space)
+    const { user, onAdd } = setup([listed], [{ address: listed.address, selected: false }])
+
+    await open(user)
+    const checkbox = screen.getByRole('checkbox', { name: 'Add Alice' })
+    expect(checkbox).not.toBeChecked()
+    await user.click(checkbox)
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Add' }))
+
+    expect(onAdd).toHaveBeenCalledWith([
+      { name: 'Alice', address: listed.address, fromAddressBook: true, selected: true },
+    ])
   })
 
   it('keeps Add disabled until a contact is picked, then passes the picked contacts', async () => {
@@ -144,12 +171,15 @@ describe('AddFromAddressBook', () => {
   })
 
   it('extends the scrolling area under the popup while it is open', async () => {
-    mockBooks.mockReturnValue({ list: [contact('Alice', ContactSource.space)] } as ReturnType<
-      typeof useMergedAddressBooks
-    >)
     const { user } = renderWithUserEvent(
       <div data-testid="scroller" style={{ overflowY: 'auto' }}>
-        <AddFromAddressBook chainId={CHAIN_ID} safeAddress={safeAddress} existing={[]} onAdd={jest.fn()} />
+        <AddFromAddressBook
+          chainId={CHAIN_ID}
+          safeAddress={safeAddress}
+          contacts={[contact('Alice', ContactSource.space)]}
+          existing={[]}
+          onAdd={jest.fn()}
+        />
       </div>,
     )
     const scroller = screen.getByTestId('scroller')
