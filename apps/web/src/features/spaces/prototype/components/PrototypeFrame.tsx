@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
-import { ArrowRightLeft, Menu, Search, Bell, User } from 'lucide-react'
+import { Menu, Search, Bell, User } from 'lucide-react'
 import {
   SidebarProvider,
   Sidebar,
@@ -20,12 +20,6 @@ import SafeLogo from '@/components/common/SafeLogo'
 import { Button } from '@safe-global/views/components/ui/button'
 import { usePrototypeDarkMode } from '../hooks/usePrototypeDarkMode'
 import { spacesMainNavigation, spacesSetupGroup } from '../../components/Sidebar/config'
-
-const navigation = [
-  spacesMainNavigation[0],
-  { icon: ArrowRightLeft, label: 'Transactions' },
-  ...spacesMainNavigation.slice(1),
-]
 
 export function PrototypeFrame({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -62,7 +56,7 @@ export function PrototypeFrame({ children }: { children: ReactNode }) {
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
-              {navigation.map((item) => (
+              {spacesMainNavigation.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                     disabled={item.label !== 'Transactions'}
