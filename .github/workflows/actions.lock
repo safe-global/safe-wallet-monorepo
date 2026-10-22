@@ -6,6 +6,9 @@ workflows:
     '.github/workflows/claude-code-review.yml':
         - 'actions/checkout@v7.0.1'
         - 'anthropics/claude-code-action@v1.0.248'
+    '.github/workflows/claude-security-review.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'anthropics/claude-code-security-review@0c6a49f1fa56a1d472575da86a94dbc1edb78eda'
     '.github/workflows/mobile-checks.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'

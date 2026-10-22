@@ -1,0 +1,55 @@
+name: Claude Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [dev, main]
+
+permissions: {}
+
+jobs:
+  security-review:
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: claude-security-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+
+      - name: Run Claude security review
+        id: security-review
+        uses: anthropics/claude-code-security-review@0c6a49f1fa56a1d472575da86a94dbc1edb78eda
+        with:
+          claude-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude-model: claude-opus-5-5
+          comment-pr: true
+          run-every-commit: true
+
+      - name: Request staff engineer review
+        if: steps.security-review.outputs.findings-count > 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          high=$(jq '[.[] | select((.severity // "HIGH") == "HIGH")] | length' findings.json)
+          if [ "$high" -eq 0 ]; then
+            exit 0
+          fi
+          for reviewer in PooyaRaki compojoom TimDaub; do
+            if [ "$reviewer" != "$PR_AUTHOR" ]; then
+              gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/requested_reviewers" -f "reviewers[]=$reviewer"
+            fi
+          done
