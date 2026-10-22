@@ -204,12 +204,17 @@ export function QueueRow({
           >
             <span className="flex min-w-0 items-center gap-2">
               <TransactionHead tx={tx} onRow />
-              <Counterparty tx={tx} />
+              {!columns.includes('To') && <Counterparty tx={tx} />}
             </span>
           </button>
           {warningMarker}
           {!isWide && noteButton}
         </div>
+      </TableCell>
+    ),
+    To: (
+      <TableCell className="py-2">
+        <Counterparty tx={tx} inColumn />
       </TableCell>
     ),
     Signatures: (

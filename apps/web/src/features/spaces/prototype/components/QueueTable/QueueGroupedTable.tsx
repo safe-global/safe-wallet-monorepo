@@ -31,9 +31,9 @@ export function QueueGroupedTable({
   collapse,
   ...props
 }: QueueGroupedTableProps) {
-  const { isWide, showNoteText, persona, recoveries } = props
-  const columns = getColumns(isWide)
-  const widths = getColumnWidths(showNoteText)
+  const { isWide, showNoteText, persona, recoveries, alignTo } = props
+  const columns = getColumns(isWide, alignTo)
+  const widths = getColumnWidths(showNoteText, alignTo)
   const { scroller, overflowing } = useScrollOverflow(sections.map((section) => isCollapsed(section.id)).join())
   return (
     <Card radius="xl" size="none">

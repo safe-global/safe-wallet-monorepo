@@ -3,7 +3,8 @@ import { CopyableParty } from '../CopyableParty'
 import { getCounterpartyCell, getCounterpartyJoin, getSummary, getSummaryHint } from '../../services/columns'
 import { getTypeLabel, shortAddress } from '../../services/model'
 import type { Proposal } from '../../types'
-import { HINT_CLASS, TypeTag } from '../shared'
+import { Tag } from '@safe-global/views/components/ui/tag'
+import { HINT_CLASS, ROW_TAG_FILL, TypeTag } from '../shared'
 
 // A name only when the address book has one. Otherwise the short address.
 const hasName = (name: string) => !!name && name !== 'Unknown' && !name.startsWith('0x')
@@ -32,15 +33,24 @@ export function TransactionHead({ tx, onRow = false }: { tx: Proposal; onRow?: b
   )
 }
 
-// The other party. Its tooltip copies the address.
-export function Counterparty({ tx }: { tx: Proposal }) {
+// The other party. Its tooltip copies the address. In its own column, "to" or "via" becomes a tag like the type.
+export function Counterparty({ tx, inColumn = false }: { tx: Proposal; inColumn?: boolean }) {
   const counterparty = getCounterpartyCell(tx)
   if (tx.kind.type === 'settings' || tx.kind.type === 'rejection' || counterparty.name === 'This Safe') return null
   const address = counterparty.address ?? counterparty.avatar
   const named = hasName(counterparty.name)
   return (
     <span className="flex min-w-0 items-center gap-2">
-      <span className="shrink-0 text-sm text-muted-foreground">{getCounterpartyJoin(tx)}</span>
+      {inColumn ? (
+        // Fixed width, so names line up whether the tag says To or Via.
+        <span className={`flex w-10 shrink-0 ${ROW_TAG_FILL}`}>
+          <Tag className="w-full justify-center">
+            {getCounterpartyJoin(tx).replace(/^./, (letter) => letter.toUpperCase())}
+          </Tag>
+        </span>
+      ) : (
+        <span className="shrink-0 text-sm text-muted-foreground">{getCounterpartyJoin(tx)}</span>
+      )}
       <CopyableParty
         name={named ? counterparty.name : short(address)}
         address={address}

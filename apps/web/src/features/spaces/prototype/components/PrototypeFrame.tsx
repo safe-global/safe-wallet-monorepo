@@ -92,25 +92,25 @@ export function PrototypeFrame({ children }: { children: ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <div className="min-w-0 flex-1">
-        <header className="@container flex flex-wrap items-start gap-y-2 px-6 pt-6 pb-4 bg-secondary dark:bg-background">
-          <div className="mr-2 md:hidden">
+        <header className="flex items-center gap-3 px-6 pt-6 pb-4 bg-secondary dark:bg-background">
+          <div className="md:hidden">
             <Button variant="ghost" size="icon" aria-label="Open sidebar menu" onClick={() => setMobileOpen(true)}>
               <Menu />
             </Button>
           </div>
-          <div className="flex h-14 shrink-0 items-center @max-[660px]:order-last @max-[660px]:basis-full">
+          <div className="flex h-14 min-w-0 flex-1 items-center">
             <Button
               variant="secondary"
               size="xl"
               disabled
-              className="w-64 justify-start md:w-80"
+              className="w-full max-w-80 justify-start"
               aria-label="Global search unavailable in preview"
             >
               <Search />
               Search for anything
             </Button>
           </div>
-          <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1 rounded-xl bg-card p-2 @max-[660px]:ml-0">
+          <div className="ml-auto flex shrink-0 items-center gap-1 rounded-xl bg-card p-2">
             <Button variant="ghost" size="icon" disabled aria-label="Notifications unavailable in preview">
               <Bell />
             </Button>

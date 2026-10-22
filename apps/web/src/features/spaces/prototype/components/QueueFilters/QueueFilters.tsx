@@ -265,113 +265,118 @@ function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filt
 
 export function QueueToolbar({ filters, accounts, hasItems, extraMenu }: QueueFiltersProps) {
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-3">
-      <SearchInput
-        className="min-w-48 flex-1"
-        aria-label="Find a proposal"
-        placeholder="Search Safes and transactions…"
-        value={filters.search}
-        onChange={(event) => filters.setSearch(event.target.value)}
-        onClear={() => filters.setSearch('')}
-      />
-      {hasItems && <StatusDropdown filters={filters} />}
-      {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}
-      <DropdownMenu>
-        <Tooltip delay={300}>
-          <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="outline" />} />}>
-            <ListFilter />
-            Filter
-          </TooltipTrigger>
-          <TooltipContent>All filters</TooltipContent>
-        </Tooltip>
-        <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <FilterSectionTitle title="Status" summary={filters.summaries.statuses} />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-60">
-              <StepsStatusOptions filters={filters} />
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <FilterSectionTitle title="Safe account" summary={filters.summaries.accounts} />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-64">
-              <SafeAccountOptions filters={filters} accounts={accounts} />
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <FilterSectionTitle title="Type" summary={filters.summaries.types} />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-60">
-              {TYPE_LABELS.map((type) => {
-                const TypeIcon = TYPE_ICONS[type]
-                return (
-                  <FilterOption
-                    key={type}
-                    label={type}
-                    checked={filters.typeFilter.includes(type)}
-                    count={filters.optionCount('types', (tx) => getTypeLabel(tx) === type)}
-                    icon={<TypeIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-                    onToggle={() => filters.toggleType(type)}
-                  />
-                )
-              })}
-              <FilterOption
-                label={RECOVERY_TYPE}
-                checked={filters.typeFilter.includes(RECOVERY_TYPE)}
-                count={filters.recoveryCount}
-                icon={<LifeBuoy className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-                onToggle={() => filters.toggleType(RECOVERY_TYPE)}
-              />
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <FilterSectionTitle title="Network" summary={filters.summaries.networks} />
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-56">
-              {filters.networks.map((network) => (
+    // Under 640px of content, search takes its own row and the buttons go below.
+    <div className="@container mb-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <SearchInput
+          className="min-w-48 flex-1 @max-[640px]:basis-full"
+          aria-label="Find a proposal"
+          placeholder="Search Safes and transactions…"
+          value={filters.search}
+          onChange={(event) => filters.setSearch(event.target.value)}
+          onClear={() => filters.setSearch('')}
+        />
+        {hasItems && <StatusDropdown filters={filters} />}
+        {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}
+        <DropdownMenu>
+          <Tooltip delay={300}>
+            <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="outline" />} />}>
+              <ListFilter />
+              Filter
+            </TooltipTrigger>
+            <TooltipContent>All filters</TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="end" className="w-60">
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FilterSectionTitle title="Status" summary={filters.summaries.statuses} />
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-60">
+                <StepsStatusOptions filters={filters} />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FilterSectionTitle title="Safe account" summary={filters.summaries.accounts} />
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-64">
+                <SafeAccountOptions filters={filters} accounts={accounts} />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FilterSectionTitle title="Type" summary={filters.summaries.types} />
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-60">
+                {TYPE_LABELS.map((type) => {
+                  const TypeIcon = TYPE_ICONS[type]
+                  return (
+                    <FilterOption
+                      key={type}
+                      label={type}
+                      checked={filters.typeFilter.includes(type)}
+                      count={filters.optionCount('types', (tx) => getTypeLabel(tx) === type)}
+                      icon={<TypeIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                      onToggle={() => filters.toggleType(type)}
+                    />
+                  )
+                })}
                 <FilterOption
-                  key={network}
-                  label={network}
-                  checked={filters.networkFilter.includes(network)}
-                  count={filters.optionCount('networks', (tx) => getAccount(tx).network === network)}
-                  icon={
-                    <Avatar className="size-4">
-                      <AvatarImage
-                        src={chainLogoUrl(accounts.find((account) => account.network === network)?.chainId)}
-                        alt=""
-                      />
-                      <AvatarFallback className="text-[10px]">{network[0]}</AvatarFallback>
-                    </Avatar>
-                  }
-                  onToggle={() => filters.toggleNetwork(network)}
+                  label={RECOVERY_TYPE}
+                  checked={filters.typeFilter.includes(RECOVERY_TYPE)}
+                  count={filters.recoveryCount}
+                  icon={<LifeBuoy className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                  onToggle={() => filters.toggleType(RECOVERY_TYPE)}
                 />
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          {extraMenu}
-          {filters.applied.length > 0 && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => filters.applied.forEach((filter) => filter.clear())}>
-                <span className="flex-1">Reset all filters</span>
-                <span className="text-xs tabular-nums text-muted-foreground">{filters.applied.length} applied</span>
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <Tooltip delay={300}>
-        <TooltipTrigger render={<Button size="action" aria-label="New transaction" />}>
-          <Plus className="text-green-500" aria-hidden="true" />
-          New
-        </TooltipTrigger>
-        <TooltipContent>New transaction</TooltipContent>
-      </Tooltip>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <FilterSectionTitle title="Network" summary={filters.summaries.networks} />
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-56">
+                {filters.networks.map((network) => (
+                  <FilterOption
+                    key={network}
+                    label={network}
+                    checked={filters.networkFilter.includes(network)}
+                    count={filters.optionCount('networks', (tx) => getAccount(tx).network === network)}
+                    icon={
+                      <Avatar className="size-4">
+                        <AvatarImage
+                          src={chainLogoUrl(accounts.find((account) => account.network === network)?.chainId)}
+                          alt=""
+                        />
+                        <AvatarFallback className="text-[10px]">{network[0]}</AvatarFallback>
+                      </Avatar>
+                    }
+                    onToggle={() => filters.toggleNetwork(network)}
+                  />
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            {extraMenu}
+            {filters.applied.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => filters.applied.forEach((filter) => filter.clear())}>
+                  <span className="flex-1">Reset all filters</span>
+                  <span className="text-xs tabular-nums text-muted-foreground">{filters.applied.length} applied</span>
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Tooltip delay={300}>
+          <TooltipTrigger
+            render={<Button size="action" aria-label="New transaction" className="@max-[640px]:ml-auto" />}
+          >
+            <Plus className="text-green-500" aria-hidden="true" />
+            New
+          </TooltipTrigger>
+          <TooltipContent>New transaction</TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   )
 }

@@ -9,14 +9,14 @@ import {
 } from '@/tests/test-utils'
 import PendingQueue from './PendingQueue'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
-import useMediaQuery from '@/hooks/useMediaQuery'
+import { useElementWidth } from '../hooks/useElementWidth'
 
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: jest.fn(() => false) }))
-jest.mock('@/hooks/useMediaQuery', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../hooks/useElementWidth', () => ({ useElementWidth: jest.fn() }))
 
-const WIDE = '(min-width: 1280px)'
+// Content width, which decides the wide columns.
 const setViewport = ({ wide = true }: { wide?: boolean } = {}) =>
-  jest.mocked(useMediaQuery).mockImplementation((query) => query === WIDE && wide)
+  jest.mocked(useElementWidth).mockReturnValue([{ current: null }, wide ? 1200 : 800])
 
 beforeEach(() => {
   jest.mocked(useIsMobile).mockReturnValue(false)
@@ -772,6 +772,17 @@ describe('queue design exploration', () => {
     expect(allPending().getAllByRole('button', { name: /^\d+ of \d+ signatures/ })).toHaveLength(count)
     await user.click(screen.getByRole('button', { name: /^Filter/ }))
     expect(screen.queryByRole('menuitem', { name: 'Proposal date' })).not.toBeInTheDocument()
+  })
+  it('gives the other party its own To column in option C', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'aligned' } } })
+    const headers = within(screen.getByRole('table', { name: 'Pending transactions' }))
+      .getAllByRole('columnheader')
+      .map((header) => header.textContent?.trim())
+    expect(headers.slice(0, 3)).toEqual(['Nonce', 'Transaction', 'To'])
+    const row = rowFor('Send to Globex Payroll')
+    const [, transaction, to] = within(row).getAllByRole('cell')
+    expect(transaction).not.toHaveTextContent('Globex Payroll')
+    expect(to).toHaveTextContent(/^ToGlobex Payroll$/)
   })
   it('opens the transaction from a shared link', () => {
     render(<PendingQueue />, { routerProps: { query: { tx: 'treasury-42' } } })

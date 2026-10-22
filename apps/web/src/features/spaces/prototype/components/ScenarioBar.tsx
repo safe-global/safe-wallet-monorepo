@@ -119,6 +119,7 @@ export function ScenarioBar({
           <TabsList aria-label="Design direction">
             <TabsTrigger value="table">A · One table</TabsTrigger>
             <TabsTrigger value="fleet">B · Fleet admin</TabsTrigger>
+            <TabsTrigger value="aligned">C · To column</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="ml-auto flex flex-wrap items-center gap-2">

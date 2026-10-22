@@ -77,9 +77,11 @@ const compareUrgency = (a?: Urgency, b?: Urgency) => {
 }
 
 // The Safe header already names the Safe and its chain.
-export const getColumns = (isWide: boolean) => [
+// Option C gives the other party its own column, so it lines up from row to row.
+export const getColumns = (isWide: boolean, alignTo = false) => [
   'Nonce',
   'Transaction',
+  ...(alignTo ? ['To'] : []),
   'Proposed',
   ...(isWide ? ['Note'] : []),
   'Signatures',

@@ -21,7 +21,7 @@ import {
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
-import useMediaQuery from '@/hooks/useMediaQuery'
+import { useElementWidth } from '../hooks/useElementWidth'
 import {
   getOutstandingSigners,
   getScenarioAccounts,
@@ -79,10 +79,13 @@ export default function PendingQueue() {
 function PendingQueueView() {
   const router = useRouter()
   const isMobile = useIsMobile()
-  const isWide = useMediaQuery('(min-width: 1280px)')
-  const isExtraWide = useMediaQuery('(min-width: 2160px)')
-  // The preview opens on option A. `?option=fleet` shows Fleet admin.
-  const direction: Direction = router.query.option === 'fleet' ? 'fleet' : 'table'
+  // Columns follow the content width, so opening the sidebar drops them too.
+  const [mainRef, contentWidth] = useElementWidth<HTMLElement>()
+  const isWide = contentWidth >= 1050
+  const isExtraWide = contentWidth >= 1880
+  // The preview opens on option A. `?option=fleet` shows Fleet admin, `?option=aligned` option C.
+  const direction: Direction =
+    router.query.option === 'fleet' ? 'fleet' : router.query.option === 'aligned' ? 'aligned' : 'table'
   const fleet = direction === 'fleet'
   const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? DEFAULT_SCENARIO
   const persona: Persona = parsePersona(router.query.persona)
@@ -467,27 +470,32 @@ function PendingQueueView() {
     onMenuAction: runMenuAction,
     recoveries,
     onOpenSafe: fleet ? (account: Account) => setSafeId(account.id) : undefined,
+    alignTo: direction === 'aligned',
   }
 
   return (
     <div className="min-h-screen bg-secondary text-foreground">
       <PrototypeFrame>
-        <main className="min-w-0 px-6 pb-8 pt-5">
+        <main ref={mainRef} className="@container min-w-0 px-6 pb-8 pt-5">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <Typography as="h1" variant="h3">
               Transactions
             </Typography>
             <div className="flex flex-wrap items-center gap-3">
               {hypernative === 'in' && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <ShieldCheck className="size-4 text-success-strong" aria-hidden="true" />
-                  Logged in to Hypernative
-                </span>
+                // Under 600px of content, only the shield shows. Its tooltip names it.
+                <Tooltip delay={300}>
+                  <TooltipTrigger render={<span className="flex items-center gap-1.5 text-xs text-muted-foreground" />}>
+                    <ShieldCheck className="size-4 text-success-strong" aria-hidden="true" />
+                    <span className="@max-[600px]:sr-only">Logged in to Hypernative</span>
+                  </TooltipTrigger>
+                  <TooltipContent>Logged in to Hypernative</TooltipContent>
+                </Tooltip>
               )}
               {hypernative === 'out' && (
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <ShieldAlert className="size-4 text-warning-strong" aria-hidden="true" />
-                  Hypernative not connected
+                  <span className="@max-[600px]:sr-only">Hypernative not connected</span>
                   <Button size="2xs" variant="outline">
                     Log in
                   </Button>

@@ -20,6 +20,7 @@ const STEPS_WIDTHS: Record<string, string> = {
   Nonce: 'w-16',
   // Type, what happens and the other party on one line.
   Transaction: 'w-[26rem]',
+  To: 'w-56',
   Safe: 'w-48',
   Chain: 'w-20',
   Proposed: 'w-24',
@@ -55,6 +56,8 @@ export type QueueSectionProps = {
   recoveries?: RecoveryController
   // Fleet admin: a button by the Safe name opens its registry record.
   onOpenSafe?: (account: Account) => void
+  // Option C: the other party gets its own column.
+  alignTo?: boolean
 }
 
 const SUMMARY_LABELS = {
@@ -224,8 +227,15 @@ export function CollapseAllButton({ allCollapsed, onToggle, count }: CollapseAll
 }
 
 // When the note text shows, the note column fills the extra width.
-export const getColumnWidths = (showNoteText: boolean | undefined): Record<string, string | undefined> =>
-  showNoteText ? { ...STEPS_WIDTHS, Note: undefined } : STEPS_WIDTHS
+export const getColumnWidths = (
+  showNoteText: boolean | undefined,
+  alignTo = false,
+): Record<string, string | undefined> => ({
+  ...STEPS_WIDTHS,
+  // Option C: the other party moves to its own column.
+  ...(alignTo ? { Transaction: 'w-72' } : {}),
+  ...(showNoteText ? { Note: undefined } : {}),
+})
 
 // The pinned Action column shows its shadow only when content scrolls under it.
 export function useScrollOverflow(layoutKey: unknown) {
@@ -262,6 +272,9 @@ export function QueueTableHead({ columns, collapse }: { columns: string[]; colla
                 <span className="sr-only">{label}</span>
                 {collapse && <CollapseAllButton {...collapse} />}
               </span>
+            ) : label === 'To' ? (
+              // Option C: the names speak for themselves, so the title is for screen readers only.
+              <span className="sr-only">{label}</span>
             ) : (
               label
             )}

@@ -13,7 +13,7 @@ export type Scenario =
   | 'loading'
   | 'error'
   | 'empty'
-export type Direction = 'table' | 'fleet'
+export type Direction = 'table' | 'fleet' | 'aligned'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
 export type Account = {
