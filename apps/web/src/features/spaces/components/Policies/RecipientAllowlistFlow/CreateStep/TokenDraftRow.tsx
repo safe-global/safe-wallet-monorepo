@@ -21,13 +21,13 @@ import {
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
+  TOKEN_ICON_SIZE,
+  TOKEN_SELECTOR_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import {
   ADD_TOKEN_CONFIRM_LABEL,
-  ADD_TOKEN_FIELD_LABEL,
   ADD_TOKEN_PLACEHOLDER,
   CANCEL_ADD_TOKEN_LABEL,
-  IDENTICON_SIZE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { ALLOWLIST_ROW_CLASSES } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -95,7 +95,7 @@ const TokenDraftRow = ({ options, onConfirm, onCancel }: TokenDraftRowProps): Re
       >
         <ComboboxInput
           autoFocus
-          aria-label={ADD_TOKEN_FIELD_LABEL}
+          aria-label={TOKEN_SELECTOR_LABEL}
           placeholder={ADD_TOKEN_PLACEHOLDER}
           autoComplete="off"
           spellCheck={false}
@@ -154,9 +154,9 @@ const TokenDraftRow = ({ options, onConfirm, onCancel }: TokenDraftRowProps): Re
                     const label = tokenOptionLabel(option)
                     return (
                       // The list's 4px inset and these 8px make the rows' 12px, so the icons share one column
-                      <ComboboxItem key={option.address} value={option} className="rounded-[10px] px-2">
+                      <ComboboxItem key={option.address} value={option} className="rounded-md px-2">
                         <span className="flex min-w-0 flex-1 items-center gap-3">
-                          <TokenIcon logoUri={option.logoUri} tokenSymbol={label} size={IDENTICON_SIZE} />
+                          <TokenIcon logoUri={option.logoUri} tokenSymbol={label} size={TOKEN_ICON_SIZE} />
                           <span className="flex min-w-0 flex-col text-left">
                             <Typography variant="paragraph-small-medium" as="span">
                               {label}
