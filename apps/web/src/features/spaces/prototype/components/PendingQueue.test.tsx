@@ -25,7 +25,7 @@ beforeEach(() => {
 
 jest.mock('./PrototypeFrame', () => ({ PrototypeFrame: ({ children }: { children: ReactNode }) => <>{children}</> }))
 
-// The preview opens on Fleet admin; these tests cover option A on the everyday queue unless they say otherwise.
+// These tests cover option A on the everyday queue unless they say otherwise.
 type RenderOptions = Parameters<typeof baseRender>[1]
 const withDefaults = (options: RenderOptions = {}): RenderOptions => ({
   ...options,
@@ -754,6 +754,25 @@ describe('queue design exploration', () => {
     expect(openRows()).toHaveLength(8)
     expect(screen.getByRole('button', { name: 'Expand Grants' })).toBeInTheDocument()
   })
+  it('opens on option A with the everyday queue when the link has no options', () => {
+    baseRender(<PendingQueue />)
+    expect(screen.getByRole('tab', { name: 'A · One table' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryByRole('group', { name: 'Fleet overview' })).not.toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('Everyday queue')
+  })
+  it('filters by signer in option A, without the Fleet admin Proposal date section', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />)
+    await openFilter(user, 'Signer')
+    const [first] = await screen.findAllByRole('menuitemcheckbox')
+    const name = first.textContent!.replace(/\d+$/, '').replace(/ \(.*\)$/, '')
+    const count = Number(first.textContent?.match(/\d+$/)?.[0])
+    fireEvent.click(first)
+    await closeMenus(user)
+    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(`Signer:${name}`)
+    expect(allPending().getAllByRole('button', { name: /^\d+ of \d+ signatures/ })).toHaveLength(count)
+    await user.click(screen.getByRole('button', { name: /^Filter/ }))
+    expect(screen.queryByRole('menuitem', { name: 'Proposal date' })).not.toBeInTheDocument()
+  })
   it('opens the transaction from a shared link', () => {
     render(<PendingQueue />, { routerProps: { query: { tx: 'treasury-42' } } })
     expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Globex Payroll')
@@ -863,16 +882,6 @@ describe('queue design exploration', () => {
   describe('fleet admin', () => {
     // The protocol fixture renders 50 Safes, which is slow under a full parallel run.
     const FLEET_TIMEOUT = 20_000
-    it(
-      'opens on Fleet admin with the Fleet admin scenario when the link has no options',
-      () => {
-        baseRender(<PendingQueue />)
-        expect(screen.getByRole('tab', { name: 'B · Fleet admin' })).toHaveAttribute('aria-selected', 'true')
-        expect(screen.getByRole('group', { name: 'Fleet overview' })).toBeVisible()
-        expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('Fleet admin')
-      },
-      FLEET_TIMEOUT,
-    )
     const renderFleet = () =>
       renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'fleet', scenario: 'protocol' } } })
     const pulse = (label: string) =>
@@ -886,11 +895,14 @@ describe('queue design exploration', () => {
         renderFleet()
         const counters = within(screen.getByRole('group', { name: 'Fleet overview' })).getAllByRole('button')
         expect(counters.map((counter) => counter.textContent?.replace(/^\d+\s*/, ''))).toEqual([
+          'Safes',
+          'Signers',
           'Conflicting',
+          'Blocked',
           'Untrusted',
           'Stale 7 days',
-          'Signers',
         ])
+        expect(pulse('Safes')).toHaveTextContent(/^50\s*Safes$/)
         expect(pulse('Conflicting')).toHaveTextContent(/^4\s*Conflicting$/)
         expect(pulse('Conflicting')).toHaveAttribute('aria-pressed', 'false')
       },
@@ -902,8 +914,7 @@ describe('queue design exploration', () => {
         const { user } = renderFleet()
         await user.click(pulse('Conflicting'))
         expect(pulse('Conflicting')).toHaveAttribute('aria-pressed', 'true')
-        // The card's highlight shows the filter, so there is no pill for it.
-        expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Status:Conflicting')
         const rows = openRows()
         expect(rows).toHaveLength(parseInt(pulse('Conflicting').textContent ?? ''))
         await user.click(screen.getByRole('button', { name: /^Status/ }))
@@ -920,9 +931,48 @@ describe('queue design exploration', () => {
       FLEET_TIMEOUT,
     )
     it(
+      'unselects a card when its filter tag is removed',
+      async () => {
+        const { user } = renderFleet()
+        await user.click(pulse('Untrusted'))
+        expect(openRows()).toHaveLength(parseInt(pulse('Untrusted').textContent ?? ''))
+        const applied = within(screen.getByRole('group', { name: 'Applied filters' }))
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Status:Untrusted')
+        await user.click(applied.getAllByRole('button')[0])
+        expect(pulse('Untrusted')).toHaveAttribute('aria-pressed', 'false')
+        expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+      },
+      FLEET_TIMEOUT,
+    )
+    it(
+      'keeps one card selected at a time',
+      async () => {
+        const { user } = renderFleet()
+        await user.click(pulse('Blocked'))
+        await user.click(pulse('Untrusted'))
+        expect(pulse('Blocked')).toHaveAttribute('aria-pressed', 'false')
+        expect(pulse('Untrusted')).toHaveAttribute('aria-pressed', 'true')
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(/^Status:UntrustedClear$/)
+        await user.click(pulse('Safes'))
+        expect(pulse('Untrusted')).toHaveAttribute('aria-pressed', 'false')
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(/^Show:Safes/)
+        expect(screen.getByRole('group', { name: 'Applied filters' })).not.toHaveTextContent('Status:')
+        await user.click(pulse('Blocked'))
+        expect(screen.queryByRole('table', { name: 'Safes in this workspace' })).not.toBeInTheDocument()
+        await user.click(screen.getByRole('button', { name: /^Status/ }))
+        expect(await screen.findByRole('menuitemcheckbox', { name: /^Blocked/ })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        )
+        expect(screen.getByRole('menuitemcheckbox', { name: /^Untrusted/ })).toHaveAttribute('aria-checked', 'false')
+      },
+      FLEET_TIMEOUT,
+    )
+    it(
       'explains why a transaction is urgent in the drawer',
       async () => {
         const { user } = renderFleet()
+        await user.click(screen.getByRole('button', { name: 'Expand Security council Ethereum' }))
         await user.click(allPending().getByRole('button', { name: /^Open Call pause/ }))
         const alert = within(screen.getByRole('dialog')).getAllByRole('alert')[0]
         expect(alert).toHaveTextContent('Urgent')
@@ -931,16 +981,20 @@ describe('queue design exploration', () => {
       FLEET_TIMEOUT,
     )
     it(
-      'keeps one fleet card selected at a time',
+      'swaps the queue for every Safe, with a tag to go back, and shows one Safe back in the queue',
       async () => {
         const { user } = renderFleet()
-        await user.click(pulse('Conflicting'))
-        await user.click(pulse('Stale 7 days'))
-        expect(pulse('Conflicting')).toHaveAttribute('aria-pressed', 'false')
-        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'true')
-        await user.click(pulse('Signers'))
-        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'false')
-        expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+        await user.click(pulse('Safes'))
+        expect(pulse('Safes')).toHaveAttribute('aria-pressed', 'true')
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Show:Safes')
+        const table = within(screen.getByRole('table', { name: 'Safes in this workspace' }))
+        const [show] = table
+          .getAllByRole('button', { name: 'Show' })
+          .filter((button) => !button.hasAttribute('disabled'))
+        await user.click(show)
+        expect(screen.queryByRole('table', { name: 'Safes in this workspace' })).not.toBeInTheDocument()
+        expect(pulse('Safes')).toHaveAttribute('aria-pressed', 'false')
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Safe:')
       },
       FLEET_TIMEOUT,
     )
@@ -964,23 +1018,35 @@ describe('queue design exploration', () => {
       FLEET_TIMEOUT,
     )
     it(
-      'toggles the Proposal date filter from the stale counter',
+      'opens a Safe from the Safes list, and links to a signer',
       async () => {
-        const { user } = renderFleet()
-        await user.click(pulse('Stale 7 days'))
-        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'true')
-        // The card's highlight shows the filter, so there is no pill for it.
-        expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
-        expect(openRows()).toHaveLength(parseInt(pulse('Stale 7 days').textContent ?? ''))
-        await openFilter(user, 'Proposal date')
-        expect(await screen.findByRole('menuitemcheckbox', { name: /^Older than 7 days/ })).toHaveAttribute(
-          'aria-checked',
-          'true',
-        )
-        await closeMenus(user)
-        await user.click(pulse('Stale 7 days'))
-        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'false')
-        expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+        const { user } = renderWithUserEvent(<PendingQueue />, {
+          routerProps: { query: { option: 'fleet', scenario: 'fleet' } },
+        })
+        await user.click(pulse('Safes'))
+        const table = within(screen.getByRole('table', { name: 'Safes in this workspace' }))
+        expect(table.getAllByRole('row')).toHaveLength(21)
+        await user.click(table.getByText('Payroll Base'))
+        const drawer = within(screen.getByRole('dialog', { name: 'Safe details' }))
+        expect(drawer.getByText('1 of 3 met')).toBeVisible()
+        expect(drawer.getByText('Waiting on Sam')).toBeVisible()
+        expect(drawer.getByText('Differs: adds Nadia, no Sam')).toBeVisible()
+        await user.click(drawer.getByRole('button', { name: /^Sam.*Browser wallet/ }))
+        const member = within(screen.getByRole('dialog', { name: 'Team member' }))
+        expect(member.getByText('No attestation on Payroll Base.')).toBeVisible()
+        expect(member.getByText('Browser wallet')).toBeVisible()
+      },
+      FLEET_TIMEOUT,
+    )
+    it(
+      'opens a Safe from its band in the queue',
+      async () => {
+        const { user } = renderWithUserEvent(<PendingQueue />, {
+          routerProps: { query: { option: 'fleet', scenario: 'fleet' } },
+        })
+        await user.click(screen.getByRole('button', { name: 'Details for Payroll Gnosis' }))
+        const drawer = within(screen.getByRole('dialog', { name: 'Safe details' }))
+        expect(drawer.getByText('Differs from Base')).toBeVisible()
       },
       FLEET_TIMEOUT,
     )

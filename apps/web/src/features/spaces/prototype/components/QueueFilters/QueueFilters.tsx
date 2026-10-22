@@ -19,10 +19,10 @@ import { Chip } from '@safe-global/views/components/ui/chip'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
-import { getAccount, getConflicts, getTypeLabel, TYPE_LABELS } from '../../services/model'
+import { getAccount, getTypeLabel, TYPE_LABELS } from '../../services/model'
 import type { Account, Filter } from '../../types'
-import { chainLogoUrl, CONFLICTING_META, RECOVERY_TYPE, STATUS_META, TYPE_ICONS } from '../shared'
-import type { QueueFilterState } from './useQueueFilters'
+import { chainLogoUrl, FLAG_META, FLAGS, RECOVERY_TYPE, STATUS_META, TYPE_ICONS } from '../shared'
+import { matchesFlag, type QueueFilterState } from './useQueueFilters'
 
 const APPLIED_PILL = 'h-7 bg-card pr-2.5 pl-3 shadow-xs transition-colors hover:bg-muted'
 export function FilterOption({
@@ -160,15 +160,21 @@ function StepsStatusOptions({ filters }: Pick<QueueFiltersProps, 'filters'>) {
           />
         )
       })}
-      {/* Conflicting narrows the statuses above. It does not add to them. */}
+      {/* Flags narrow the statuses above. They do not add to them. */}
       <DropdownMenuSeparator />
-      <FilterOption
-        label={CONFLICTING_META.short}
-        checked={filters.conflicting}
-        count={filters.optionCount('conflicting', (tx) => getConflicts(tx, filters.items).length > 0)}
-        icon={<CONFLICTING_META.icon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-        onToggle={filters.toggleConflicting}
-      />
+      {FLAGS.map((flag) => {
+        const meta = FLAG_META[flag]
+        return (
+          <FilterOption
+            key={flag}
+            label={meta.short}
+            checked={filters.flags.includes(flag)}
+            count={filters.optionCount('flags', (tx) => matchesFlag(tx, flag, filters.items))}
+            icon={<meta.icon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+            onToggle={() => filters.toggleFlag(flag)}
+          />
+        )
+      })}
     </>
   )
 }
@@ -176,7 +182,7 @@ function StepsStatusOptions({ filters }: Pick<QueueFiltersProps, 'filters'>) {
 function StatusDropdown({ filters }: Pick<QueueFiltersProps, 'filters'>) {
   const selected = [
     ...STEPS_STATUSES.filter(({ status }) => filters.stateFilter.includes(status)).map(({ label }) => label),
-    ...(filters.conflicting ? [CONFLICTING_META.short] : []),
+    ...FLAGS.filter((flag) => filters.flags.includes(flag)).map((flag) => FLAG_META[flag].short),
   ]
   return (
     <ToolbarDropdown

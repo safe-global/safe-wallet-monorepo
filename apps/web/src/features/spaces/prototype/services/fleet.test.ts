@@ -1,4 +1,6 @@
-import { getOpsKind, getPulse, getSignerLoad, isStale, pinEmergencies } from './fleet'
+import { getOpsKind, getSignerLoad, hasConflicts, isStale, pinConflicting } from './fleet'
+import { matchesFlag } from '../components/QueueFilters/useQueueFilters'
+import type { Flag } from '../components/shared'
 import { getScenario, getScenarioAccounts } from './model'
 import { rankAccounts } from '../components/QueueTable/sections'
 import type { Proposal } from '../types'
@@ -26,15 +28,8 @@ describe('fleet admin', () => {
     expect(isStale(tx('6d ago'))).toBe(false)
   })
 
-  it('shows the same fleet signals to everyone', () => {
-    const keys = (persona: Parameters<typeof getPulse>[1]) => getPulse(items, persona).map(({ key }) => key)
-    expect(keys('security')).toEqual(['conflicting', 'untrusted', 'stale'])
-    expect(keys('owner')).toEqual(keys('security'))
-  })
-
   it('counts conflicting proposals across the fleet', () => {
-    const conflicting = getPulse(items, 'owner').find(({ key }) => key === 'conflicting')?.count
-    expect(conflicting).toBe(4)
+    expect(items.filter((tx) => matchesFlag(tx, 'conflicting', items))).toHaveLength(4)
   })
 
   it('lists every signer, ranked by how many proposals wait on them', () => {
@@ -45,20 +40,12 @@ describe('fleet admin', () => {
     expect(load.every((signer, index) => index === 0 || load[index - 1].txs.length >= signer.txs.length)).toBe(true)
     expect(load.find((signer) => signer.id.startsWith('0x'))?.member).toBe(false)
   })
-
-  it('pins Safes with an emergency to the top and keeps the rest in order', () => {
-    expect(pinEmergencies(['treasury-ethereum', 'grants-base', 'security-ethereum'], items)).toEqual([
-      'security-ethereum',
-      'treasury-ethereum',
-      'grants-base',
-    ])
-  })
 })
 
 describe('fleet admin scenario', () => {
   const fleetItems = getScenario('fleet')
   const fleetAccounts = getScenarioAccounts('fleet')
-  const count = (key: string) => getPulse(fleetItems, 'owner').find((pulse) => pulse.key === key)?.count
+  const count = (flag: Flag) => fleetItems.filter((tx) => matchesFlag(tx, flag, fleetItems)).length
 
   it('has 20 Safes and 11 signers, with conflicts, untrusted and stale proposals', () => {
     expect(fleetAccounts).toHaveLength(20)
@@ -70,10 +57,17 @@ describe('fleet admin scenario', () => {
     expect(count('stale')).toBe(5)
   })
 
+  it('pins Safes with conflicting transactions to the top and keeps the rest in order', () => {
+    const ids = fleetAccounts.map((account) => account.id)
+    const conflicting = ids.filter((id) => hasConflicts(id, fleetItems))
+    expect(conflicting.length).toBeGreaterThan(0)
+    expect(pinConflicting(ids, fleetItems)).toEqual([...conflicting, ...ids.filter((id) => !conflicting.includes(id))])
+  })
+
   it.each(['owner', 'single', 'security', 'member', 'admin'] as const)(
     'puts five busy Safes at the top for %s',
     (persona) => {
-      const order = pinEmergencies(
+      const order = pinConflicting(
         rankAccounts(fleetAccounts, fleetItems, persona).map((account) => account.id),
         fleetItems,
       )

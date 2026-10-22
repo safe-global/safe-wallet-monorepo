@@ -77,6 +77,7 @@ export function QueueGroupedTable({
                           onBulkExecute={props.onBulkExecute}
                           persona={persona}
                           recoveryCount={safeRecoveries.length}
+                          onOpenSafe={props.onOpenSafe}
                         />
                       </TableCell>
                     </TableRow>

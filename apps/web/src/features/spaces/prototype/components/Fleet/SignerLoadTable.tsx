@@ -9,7 +9,7 @@ import { canInvite, isYou } from '../../services/personas'
 import type { SignerLoad } from '../../services/fleet'
 import type { Persona } from '../../types'
 
-const waitedFor = (since: number | undefined, now = Date.now()) => {
+export const waitedFor = (since: number | undefined, now = Date.now()) => {
   if (since === undefined) return '—'
   const hours = Math.floor((now - since) / 3_600_000)
   return hours < 24 ? `${Math.max(hours, 1)}h` : `${Math.floor(hours / 24)}d`

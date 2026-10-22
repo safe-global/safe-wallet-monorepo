@@ -13,6 +13,8 @@ import {
   Users,
   Layers,
   Split,
+  ShieldAlert,
+  CalendarClock,
   type LucideIcon,
   Info,
 } from 'lucide-react'
@@ -27,9 +29,17 @@ import type { Filter, Persona, Proposal } from '../types'
 
 // Blocked comes before Waiting on others: you can act on what blocks it.
 export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'waiting', 'awaiting']
-export const CONFLICTING_META = {
-  short: 'Conflicting',
-  icon: Split,
+// Status filters that narrow the statuses. Fleet admin cards share them.
+export type Flag = 'conflicting' | 'untrusted' | 'stale'
+export const FLAGS: Flag[] = ['conflicting', 'untrusted', 'stale']
+export const FLAG_META: Record<Flag, { short: string; icon: LucideIcon; hint: string }> = {
+  conflicting: {
+    short: 'Conflicting',
+    icon: Split,
+    hint: 'Proposals that share a nonce with another. Only one per nonce can execute.',
+  },
+  untrusted: { short: 'Untrusted', icon: ShieldAlert, hint: 'Unsigned proposals that anyone could have created.' },
+  stale: { short: 'Stale 7 days', icon: CalendarClock, hint: 'Proposed more than a week ago and still pending.' },
 }
 export const STATUS_META: Record<Filter, { label: string; icon: LucideIcon; tone: string }> = {
   ready: {

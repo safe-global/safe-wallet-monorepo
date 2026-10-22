@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
+import { ChevronDown, ChevronsDownUp, ChevronsUpDown, Info } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/components/ui/table'
@@ -53,6 +53,8 @@ export type QueueSectionProps = {
   onMenuAction?: (tx: Proposal, action: MenuAction) => void
   // Safe view: this Safe's recoveries show at the top of its table.
   recoveries?: RecoveryController
+  // Fleet admin: a button by the Safe name opens its registry record.
+  onOpenSafe?: (account: Account) => void
 }
 
 const SUMMARY_LABELS = {
@@ -105,7 +107,7 @@ function SafeSummary({
 }
 
 // The Safe name and chain. The other Safe facts are in the avatar tooltip.
-function SafeTitle({ account, persona, size }: { account: Account; persona: Persona; size: number }) {
+export function SafeTitle({ account, persona, size }: { account: Account; persona: Persona; size: number }) {
   const wallet = isSignerOf(account, persona) ? getOwnerWallet(account) : undefined
   return (
     <SafeIdentity
@@ -131,7 +133,7 @@ function SafeTitle({ account, persona, size }: { account: Account; persona: Pers
 
 type SectionHeaderProps = Pick<
   QueueSectionProps,
-  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'persona'
+  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'persona' | 'onOpenSafe'
 > & {
   recoveryCount?: number
 }
@@ -160,6 +162,7 @@ export function SectionHeader({
   onBulkExecute,
   persona,
   recoveryCount = 0,
+  onOpenSafe,
 }: SectionHeaderProps) {
   return (
     <div
@@ -168,6 +171,19 @@ export function SectionHeader({
       onClick={onToggle}
     >
       <SafeTitle account={section.account} persona={persona} size={24} />
+      {onOpenSafe && (
+        <Button
+          size="2xs"
+          variant="ghost"
+          aria-label={`Details for ${section.account.name}`}
+          onClick={(event) => {
+            event.stopPropagation()
+            onOpenSafe(section.account)
+          }}
+        >
+          <Info /> Details
+        </Button>
+      )}
       <div className="ml-auto flex items-center gap-2">
         {/* Open Safes show each status in their rows. */}
         {collapsed && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} />}

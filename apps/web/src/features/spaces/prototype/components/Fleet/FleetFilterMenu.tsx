@@ -12,7 +12,7 @@ import { PROPOSED_OPTIONS, proposedWithin, type ProposedWithin, type SignerLoad 
 import type { Persona, Proposal } from '../../types'
 import { FilterOption, FilterSectionTitle } from '../QueueFilters/QueueFilters'
 
-// Fleet admin: Signer and Proposal date sections in the Filter menu. Each takes one value.
+// Signer section in the Filter menu, for both options. Fleet admin also gets Proposal date. Each takes one value.
 export function FleetFilterMenu({
   items,
   load,
@@ -27,8 +27,9 @@ export function FleetFilterMenu({
   persona: Persona
   signer: string | null
   onSignerChange: (id: string | null) => void
-  proposed: ProposedWithin | null
-  onProposedChange: (value: ProposedWithin | null) => void
+  proposed?: ProposedWithin | null
+  // Leave out to hide the Proposal date section.
+  onProposedChange?: (value: ProposedWithin | null) => void
 }) {
   return (
     <>
@@ -50,23 +51,25 @@ export function FleetFilterMenu({
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>
-          <FilterSectionTitle title="Proposal date" summary={proposed ? '1' : undefined} />
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-56">
-          {PROPOSED_OPTIONS.map(({ value, label }) => (
-            <FilterOption
-              key={value}
-              label={label}
-              checked={proposed === value}
-              count={items.filter((tx) => proposedWithin(tx, value)).length}
-              icon={<CalendarClock className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
-              onToggle={() => onProposedChange(proposed === value ? null : value)}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
+      {onProposedChange && (
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <FilterSectionTitle title="Proposal date" summary={proposed ? '1' : undefined} />
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-56">
+            {PROPOSED_OPTIONS.map(({ value, label }) => (
+              <FilterOption
+                key={value}
+                label={label}
+                checked={proposed === value}
+                count={items.filter((tx) => proposedWithin(tx, value)).length}
+                icon={<CalendarClock className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                onToggle={() => onProposedChange(proposed === value ? null : value)}
+              />
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+      )}
     </>
   )
 }

@@ -30,15 +30,12 @@ import {
   getTransactionLabel,
 } from '../services/model'
 import {
-  getOpsKind,
-  getPulse,
   getSignerLoad,
-  pinEmergencies,
+  hasConflicts,
+  pinConflicting,
   PROPOSED_OPTIONS,
   proposedWithin,
-  PULSE,
   type ProposedWithin,
-  type PulseKey,
 } from '../services/fleet'
 import {
   applyPreviewAction,
@@ -51,10 +48,9 @@ import {
 import { getOutsiders, getRemindable, type MenuAction } from '../services/actions'
 import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
-import type { Direction, Persona, Proposal } from '../types'
+import type { Account, Direction, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
-import { CONFLICTING_META } from './shared'
-import { useQueueFilters } from './QueueFilters/useQueueFilters'
+import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueGroupedTable } from './QueueTable/QueueGroupedTable'
 import { buildSections, rankAccounts } from './QueueTable/sections'
@@ -64,17 +60,20 @@ import { SCENARIOS, ScenarioBar, type Hypernative } from './ScenarioBar'
 import { useRecoveries } from './Recovery/RecoveryPanel'
 import { RecoveryDrawer } from './Recovery/RecoveryDrawer'
 import { QueueError, QueueSkeleton } from './QueueStates'
-import { FleetPulse } from './Fleet/FleetPulse'
+import { FleetPulse, type FleetCardKey } from './Fleet/FleetPulse'
+import { SafeListTable } from './Fleet/SafeListTable'
+import { SafeDrawer } from './Fleet/SafeDrawer'
 import { FleetFilterMenu } from './Fleet/FleetFilterMenu'
 import { SignerLoadTable } from './Fleet/SignerLoadTable'
 import { MemberDrawer } from './Fleet/MemberDrawer'
 import { getMemberProfile } from '../services/members'
 
-const DEFAULT_SCENARIO = 'fleet'
+const DEFAULT_SCENARIO = 'everyday'
+const LIST_LABELS = { safes: 'Safes', signers: 'Signers' }
 
 export default function PendingQueue() {
   const router = useRouter()
-  return <PendingQueueView key={`${router.query.scenario ?? DEFAULT_SCENARIO}:${router.query.option ?? 'fleet'}`} />
+  return <PendingQueueView key={`${router.query.scenario ?? DEFAULT_SCENARIO}:${router.query.option ?? 'table'}`} />
 }
 
 function PendingQueueView() {
@@ -82,8 +81,8 @@ function PendingQueueView() {
   const isMobile = useIsMobile()
   const isWide = useMediaQuery('(min-width: 1280px)')
   const isExtraWide = useMediaQuery('(min-width: 2160px)')
-  // The preview opens on Fleet admin. `?option=table` shows option A.
-  const direction: Direction = router.query.option === 'table' ? 'table' : 'fleet'
+  // The preview opens on option A. `?option=fleet` shows Fleet admin.
+  const direction: Direction = router.query.option === 'fleet' ? 'fleet' : 'table'
   const fleet = direction === 'fleet'
   const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? DEFAULT_SCENARIO
   const persona: Persona = parsePersona(router.query.persona)
@@ -96,13 +95,10 @@ function PendingQueueView() {
     nextNonce: queue.nextNonces[account.id],
   }))
   const unavailable = scenario === 'loading' || scenario === 'error'
-  // Safes with nothing for you start collapsed. Fleet admin keeps emergencies open for everyone.
+  // Safes with nothing for you start collapsed. Fleet admin keeps conflicting Safes open for everyone.
   const idleSafeIds = () =>
     buildSections({ visible: items, accounts, accountFilter: [], persona })
-      .filter(
-        (section) =>
-          section.urgency === undefined && !(fleet && section.items.some((tx) => getOpsKind(tx) === 'emergency')),
-      )
+      .filter((section) => section.urgency === undefined && !(fleet && hasConflicts(section.account.id, items)))
       .map((section) => section.id)
   const [collapsedSections, setCollapsedSections] = useState<string[]>(idleSafeIds)
   // Re-seed when the persona changes. The page does not remount for it.
@@ -114,24 +110,21 @@ function PendingQueueView() {
   const [feedback, setFeedback] = useState('')
   const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
   const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, true)
-  // Fleet admin: a pulse counter or a signer narrows the queue on top of the toolbar filters.
-  const [pulseKey, setPulseKey] = useState<PulseKey | null>(null)
+  // A signer narrows the queue on top of the toolbar filters. Fleet admin adds Proposal date.
   const [signerFocus, setSignerFocus] = useState<string | null>(null)
-  const [showSigners, setShowSigners] = useState(false)
+  // Fleet admin: the Safes and Signers cards swap the queue for a list.
+  const [list, setList] = useState<'safes' | 'signers' | null>(null)
+  const [safeId, setSafeId] = useState<string | null>(null)
   const [memberId, setMemberId] = useState<string | null>(null)
   const [proposed, setProposed] = useState<ProposedWithin | null>(null)
-  // A card's own highlight shows its filter, so it gets no pill. The same filter from the Filter menu does.
-  const [fromCard, setFromCard] = useState(false)
-  const visible = fleet
-    ? filters.visible.filter(
-        (tx) =>
-          (!pulseKey || PULSE[pulseKey].match(tx, persona, items)) &&
-          (!signerFocus || (getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(signerFocus))) &&
-          (!proposed || proposedWithin(tx, proposed)),
-      )
-    : filters.visible
+  // Proposal date can only be set in Fleet admin. Switching option remounts the page, so it resets.
+  const visible = filters.visible.filter(
+    (tx) =>
+      (!signerFocus || (getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(signerFocus))) &&
+      (!proposed || proposedWithin(tx, proposed)),
+  )
   // A new status filter opens every Safe. Clearing it leaves them as they are.
-  const statusKey = [filters.stateFilter.join(','), pulseKey, signerFocus, proposed].join('|')
+  const statusKey = [filters.stateFilter.join(','), filters.flags.join(','), signerFocus, proposed].join('|')
   const [seededStatus, setSeededStatus] = useState(statusKey)
   if (seededStatus !== statusKey) {
     setSeededStatus(statusKey)
@@ -140,7 +133,7 @@ function PendingQueueView() {
   // Safe order is set on load and when the person or filters change. Acting on a transaction doesn't move its Safe.
   const rankSafes = () => {
     const ranked = rankAccounts(accounts, items, persona).map((account) => account.id)
-    return fleet ? pinEmergencies(ranked, items) : ranked
+    return fleet ? pinConflicting(ranked, items) : ranked
   }
   const [safeOrder, setSafeOrder] = useState(rankSafes)
   const orderKey = [
@@ -149,7 +142,7 @@ function PendingQueueView() {
     filters.accountFilter,
     filters.typeFilter,
     filters.networkFilter,
-    filters.conflicting,
+    filters.flags,
     filters.search,
   ].join('|')
   const [seededOrder, setSeededOrder] = useState(orderKey)
@@ -302,7 +295,7 @@ function PendingQueueView() {
     )
   }
 
-  const filtering = filters.applied.length > 0 || filters.search.length > 0 || !!pulseKey || !!signerFocus || !!proposed
+  const filtering = filters.applied.length > 0 || filters.search.length > 0 || !!signerFocus || !!proposed
   // While filtering, hide Safes with no matches.
   const sections = buildSections({
     visible,
@@ -311,11 +304,18 @@ function PendingQueueView() {
     persona,
     order: safeOrder,
   }).filter((section) => !filtering || section.items.length > 0 || recoveries.forAccount(section.account.id).length > 0)
-  const signerLoad = fleet ? getSignerLoad(filters.visible, accounts, persona) : []
+  const signerLoad = getSignerLoad(filters.visible, accounts, persona)
   const focusedLoad = signerLoad.find((signer) => signer.id === signerFocus)
   const fleetPills: AppliedPill[] = [
-    ...(pulseKey && !fromCard
-      ? [{ section: 'pulse', title: 'Fleet', values: [PULSE[pulseKey].label], clear: () => setPulseKey(null) }]
+    ...(list
+      ? [
+          {
+            section: 'list',
+            title: 'Show',
+            values: [LIST_LABELS[list]],
+            clear: () => setList(null),
+          },
+        ]
       : []),
     ...(signerFocus
       ? [
@@ -327,7 +327,7 @@ function PendingQueueView() {
           },
         ]
       : []),
-    ...(proposed && !(fromCard && proposed === 'stale')
+    ...(proposed
       ? [
           {
             section: 'proposed',
@@ -340,12 +340,40 @@ function PendingQueueView() {
   ]
   const resetFilters = () => {
     filters.reset()
-    setPulseKey(null)
+    setList(null)
     setSignerFocus(null)
     setProposed(null)
   }
-  const isCardActive = (key: PulseKey) =>
-    key === 'stale' ? proposed === 'stale' : key === 'conflicting' ? filters.conflicting : pulseKey === key
+  // Back to the queue, narrowed to one Safe and open.
+  const showSafe = (id: string) => {
+    setSafeId(null)
+    setList(null)
+    if (!filters.accountFilter.includes(id)) filters.toggleAccount(id)
+    setCollapsedSections((ids) => ids.filter((item) => item !== `safe-${id}`))
+  }
+  const isCardActive = (key: FleetCardKey) =>
+    key === 'safes' || key === 'signers'
+      ? list === key
+      : key === 'blocked'
+        ? filters.stateFilter.includes('waiting')
+        : filters.flags.includes(key)
+  // One card at a time. Filter cards set their Status filter, the others swap in their list.
+  const selectCard = (key: FleetCardKey) => {
+    const turnOn = !isCardActive(key)
+    setList(turnOn && (key === 'safes' || key === 'signers') ? key : null)
+    filters.setFlags(turnOn && (key === 'conflicting' || key === 'untrusted' || key === 'stale') ? [key] : [])
+    if (filters.stateFilter.includes('waiting') !== (turnOn && key === 'blocked')) filters.toggleStatus('waiting')
+  }
+  // Each card counts across the other filters, so checking one card doesn't zero the rest.
+  const cardCount = (match: (tx: Proposal) => boolean) => filters.optionCount(['statuses', 'flags'], match)
+  const cardCounts: Record<FleetCardKey, number> = {
+    safes: accounts.length,
+    signers: signerLoad.length,
+    conflicting: cardCount((tx) => matchesFlag(tx, 'conflicting', items)),
+    blocked: cardCount((tx) => filters.matches(tx, 'waiting')),
+    untrusted: cardCount((tx) => matchesFlag(tx, 'untrusted', items)),
+    stale: cardCount((tx) => matchesFlag(tx, 'stale', items)),
+  }
   const isCollapsed = (id: string) => collapsedSections.includes(id)
   const toggleSection = (id: string) =>
     setCollapsedSections((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]))
@@ -438,6 +466,7 @@ function PendingQueueView() {
     onStartFlow: startFlow,
     onMenuAction: runMenuAction,
     recoveries,
+    onOpenSafe: fleet ? (account: Account) => setSafeId(account.id) : undefined,
   }
 
   return (
@@ -505,61 +534,29 @@ function PendingQueueView() {
                 </AlertAction>
               </Alert>
             )}
-            {fleet && !unavailable && (
-              <FleetPulse
-                pulse={getPulse(items, persona, (match) => filters.optionCount('conflicting', match))}
-                isActive={(key) => !showSigners && isCardActive(key)}
-                onSelect={(key) => {
-                  // One card at a time. Stale and Conflicting are the Proposal date and Status filters, so they stay in sync.
-                  const turnOn = !isCardActive(key)
-                  setPulseKey(turnOn && key !== 'stale' && key !== 'conflicting' ? key : null)
-                  if (key === 'stale' || proposed === 'stale') setProposed(turnOn && key === 'stale' ? 'stale' : null)
-                  if (filters.conflicting !== (turnOn && key === 'conflicting')) filters.toggleConflicting()
-                  setFromCard(turnOn)
-                  setShowSigners(false)
-                }}
-                signers={{
-                  count: signerLoad.length,
-                  open: showSigners,
-                  onToggle: () => {
-                    if (!showSigners) {
-                      setPulseKey(null)
-                      if (proposed === 'stale') setProposed(null)
-                      if (fromCard && filters.conflicting) filters.toggleConflicting()
-                    }
-                    setShowSigners(!showSigners)
-                  },
-                }}
-              />
-            )}
+            {fleet && !unavailable && <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />}
             <QueueToolbar
               filters={filters}
               accounts={orderedAccounts}
               hasItems={items.length > 0}
               extraMenu={
-                fleet && (
-                  <FleetFilterMenu
-                    items={filters.visible}
-                    load={signerLoad}
-                    persona={persona}
-                    signer={signerFocus}
-                    onSignerChange={(id) => {
-                      setSignerFocus(id)
-                      setShowSigners(false)
-                    }}
-                    proposed={proposed}
-                    onProposedChange={(value) => {
-                      setProposed(value)
-                      setFromCard(false)
-                    }}
-                  />
-                )
+                <FleetFilterMenu
+                  items={filters.visible}
+                  load={signerLoad}
+                  persona={persona}
+                  signer={signerFocus}
+                  onSignerChange={(id) => {
+                    setSignerFocus(id)
+                    setList(null)
+                  }}
+                  proposed={proposed}
+                  onProposedChange={fleet ? setProposed : undefined}
+                />
               }
             />
             <AppliedFilters
               filters={filters}
               extra={fleetPills}
-              hidden={fromCard && filters.conflicting ? [CONFLICTING_META.short] : []}
               actions={
                 focusedLoad &&
                 !isYou(focusedLoad.id, persona) &&
@@ -583,7 +580,7 @@ function PendingQueueView() {
             />
             {scenario === 'loading' && <QueueSkeleton />}
             {scenario === 'error' && <QueueError onRetry={() => setOption({ scenario: 'everyday' })} />}
-            {!unavailable && !showSigners && !visible.length && !recoveries.visible.length && (
+            {!unavailable && !list && !visible.length && !recoveries.visible.length && (
               <Empty className="rounded-2xl border border-border bg-card">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -607,13 +604,24 @@ function PendingQueueView() {
                 )}
               </Empty>
             )}
-            {!unavailable && showSigners && (
+            {!unavailable && list === 'safes' && (
+              <SafeListTable
+                accounts={orderedAccounts}
+                scope={accounts}
+                items={visible}
+                persona={persona}
+                label="Safes in this workspace"
+                onOpen={(account) => setSafeId(account.id)}
+                onShow={showSafe}
+              />
+            )}
+            {!unavailable && list === 'signers' && (
               <SignerLoadTable
                 load={signerLoad}
                 persona={persona}
                 onShow={(id) => {
                   setSignerFocus(id)
-                  setShowSigners(false)
+                  setList(null)
                 }}
                 onOpen={setMemberId}
                 onRemind={({ id, txs }) =>
@@ -626,7 +634,7 @@ function PendingQueueView() {
                 }
               />
             )}
-            {!unavailable && !showSigners && (visible.length > 0 || recoveries.visible.length > 0) && (
+            {!unavailable && !list && (visible.length > 0 || recoveries.visible.length > 0) && (
               <QueueGroupedTable
                 sections={sections}
                 isCollapsed={isCollapsed}
@@ -641,7 +649,7 @@ function PendingQueueView() {
                 <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
                 transactions.
               </span>
-              {!isMobile && !showSigners && visible.length > 0 && (
+              {!isMobile && !list && visible.length > 0 && (
                 <span className="flex items-center gap-1">
                   <Kbd>J</Kbd>
                   <Kbd>K</Kbd> to move, <Kbd>Enter</Kbd> to open
@@ -701,6 +709,26 @@ function PendingQueueView() {
           onCancel={() => recoveries.open && recoveries.cancel(recoveries.open)}
           onClose={() => recoveries.setOpenId(null)}
         />
+        <SafeDrawer
+          account={accounts.find((account) => account.id === safeId) ?? null}
+          scope={accounts}
+          items={items}
+          onClose={() => setSafeId(null)}
+          onOpenSafe={(account) => setSafeId(account.id)}
+          onOpenMember={(id) => {
+            setSafeId(null)
+            setMemberId(id)
+          }}
+          onOpenTx={(tx) => {
+            setSafeId(null)
+            reviewTx(tx)
+          }}
+          onShowInQueue={(account) => showSafe(account.id)}
+          onAddPolicy={(account) => {
+            setSafeId(null)
+            setFeedback(`Add policy opens the Policies setup for ${account.name} in the product.`)
+          }}
+        />
         <MemberDrawer
           member={memberId ? getMemberProfile(memberId, accounts, items, persona) : null}
           persona={persona}
@@ -711,14 +739,12 @@ function PendingQueueView() {
           }}
           onOpenSafe={(account) => {
             setMemberId(null)
-            setShowSigners(false)
-            if (!filters.accountFilter.includes(account.id)) filters.toggleAccount(account.id)
-            setCollapsedSections((ids) => ids.filter((id) => id !== `safe-${account.id}`))
+            setSafeId(account.id)
           }}
           onShowInQueue={(id) => {
             setMemberId(null)
             setSignerFocus(id)
-            setShowSigners(false)
+            setList(null)
           }}
           onRemind={({ name, waiting }) =>
             setFeedback(

@@ -1,8 +1,7 @@
-import type { ReactNode } from 'react'
-import { Bell, ChevronRight, Filter, UserPlus } from 'lucide-react'
+import { Bell, Filter, UserPlus } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
 import {
   Drawer,
@@ -13,43 +12,12 @@ import {
   DrawerSection,
   DrawerTitle,
 } from '@/components/common/Drawer'
-import { getAccount, getTransactionLabel, shortAddress } from '../../services/model'
 import type { MemberProfile } from '../../services/members'
 import type { Account, Persona, Proposal } from '../../types'
 import { canInvite } from '../../services/personas'
 import { IdentityRow } from '../ReviewDrawer/steps/IdentityRow'
-
-function LinkRow({ title, detail, onClick }: { title: ReactNode; detail: ReactNode; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm">{title}</span>
-        <span className="block truncate text-xs text-muted-foreground">{detail}</span>
-      </span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground" strokeWidth={ICON_STROKE} aria-hidden="true" />
-    </button>
-  )
-}
-
-function TxList({ txs, empty, onOpenTx }: { txs: Proposal[]; empty: string; onOpenTx: (tx: Proposal) => void }) {
-  if (!txs.length) return <p className="px-2 text-sm text-muted-foreground">{empty}</p>
-  return (
-    <div className="flex flex-col">
-      {txs.map((tx) => (
-        <LinkRow
-          key={tx.id}
-          title={getTransactionLabel(tx)}
-          detail={`${getAccount(tx).name} · #${tx.nonce} · ${tx.age}`}
-          onClick={() => onOpenTx(tx)}
-        />
-      ))}
-    </div>
-  )
-}
+import { LinkRow, TxList } from './DrawerRows'
+import { AttestationBadge } from './RegistryBadges'
 
 // Fleet admin: everything about one team member, with links into the queue.
 export function MemberDrawer({
@@ -93,12 +61,27 @@ export function MemberDrawer({
       <DrawerBody>
         {member && (
           <div className="flex flex-col gap-6">
+            {member.issues.length > 0 && (
+              <Alert variant="warning" outlined={false}>
+                <AlertSeverityIcon variant="warning" />
+                <AlertTitle>Missing signer requirements</AlertTitle>
+                <AlertDescription>
+                  <ul className="flex flex-col gap-1">
+                    {member.issues.map((issue) => (
+                      <li key={issue}>{issue}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
             <DrawerList
               mobileStack
               items={[
                 { label: 'Address', content: <IdentityRow inline address={member.address} /> },
                 { label: 'Role', content: member.role },
-                { label: 'Signs', content: member.safes.length ? `${member.safes.length} Safes` : 'Not a signer' },
+                { label: 'Wallet', content: member.safes.length ? member.wallet : 'Not a signer' },
+                { label: 'Point of contact for', content: member.contactFor.join(', ') || '—' },
+                { label: 'Last signature', content: member.lastSigned ?? '—' },
               ]}
             />
             <DrawerSection
@@ -117,14 +100,19 @@ export function MemberDrawer({
             >
               <TxList txs={member.signed} empty="No pending signatures." onOpenTx={onOpenTx} />
             </DrawerSection>
-            <DrawerSection collapsible defaultOpen={false} title="Safes" rightNode={String(member.safes.length)}>
+            <DrawerSection
+              collapsible
+              title="Safes"
+              rightNode={`${member.attestations.filter(({ status }) => status === 'attested').length} of ${member.safes.length} attested`}
+            >
               {member.safes.length ? (
                 <div className="flex flex-col">
-                  {member.safes.map((account) => (
+                  {member.attestations.map(({ account, status }) => (
                     <LinkRow
                       key={account.id}
                       title={account.name}
-                      detail={`${account.network} · ${account.threshold} of ${account.owners.length} · ${shortAddress(account.iconAddress)}`}
+                      detail={`${account.network} · ${account.threshold} of ${account.owners.length}`}
+                      badge={<AttestationBadge status={status} />}
                       onClick={() => onOpenSafe(account)}
                     />
                   ))}
