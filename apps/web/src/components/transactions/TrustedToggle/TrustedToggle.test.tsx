@@ -1,4 +1,4 @@
-import { renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import * as useChains from '@/hooks/useChains'
 import useLoadTxHistory from '@/hooks/loadables/useLoadTxHistory'
@@ -44,7 +44,7 @@ describe('TrustedToggle', () => {
       expect(mockGetTxHistory).toHaveBeenLastCalledWith(safe.chainId, safe.address.value, false, false),
     )
 
-    await user.click(within(screen.getByTestId('toggle-untrusted')).getByRole('switch'))
+    await user.click(screen.getByRole('switch', { name: 'Hide suspicious' }))
 
     await waitFor(() => expect(mockGetTxHistory).toHaveBeenLastCalledWith(safe.chainId, safe.address.value, true, true))
   })
@@ -55,6 +55,6 @@ describe('TrustedToggle', () => {
 
     renderToggle(false)
 
-    expect(screen.queryByTestId('toggle-untrusted')).not.toBeInTheDocument()
+    expect(screen.queryByRole('switch', { name: 'Hide suspicious' })).not.toBeInTheDocument()
   })
 })
