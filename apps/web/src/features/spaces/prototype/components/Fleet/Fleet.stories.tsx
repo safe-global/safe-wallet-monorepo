@@ -34,7 +34,7 @@ function CardsPreview() {
 }
 
 const meta = {
-  title: 'Features/Spaces/Pending queue prototype/Fleet admin',
+  title: 'Features/Spaces/Pending queue prototype/Stat cards',
   component: CardsPreview,
   parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof CardsPreview>

@@ -43,7 +43,7 @@ import type { PreviewAction } from '../../services/queue'
 import { Counterparty, TransactionHead } from './TransactionLine'
 import { ExecutionChip, LockedChip } from './ExecutionStatus'
 import { canSpeedUp, getLockingTx, type Executions } from '../../services/execution'
-import { chainLogoUrl, HINT_CLASS, StatusChip, StepsStatusChip } from '../shared'
+import { ChainIcon, HINT_CLASS, StatusChip, StepsStatusChip } from '../shared'
 
 export type QueueRowProps = {
   tx: Proposal
@@ -221,7 +221,7 @@ export function QueueRow({
             aria-label={`Open ${getTransactionLabel(tx)}`}
           >
             <span className="flex min-w-0 items-center gap-2">
-              <TransactionHead tx={tx} onRow />
+              <TransactionHead tx={tx} onRow keepWidth={!columns.includes('To')} />
               {!columns.includes('To') && <Counterparty tx={tx} />}
             </span>
           </button>
@@ -231,11 +231,8 @@ export function QueueRow({
       </TableCell>
     ),
     Chain: (
-      <TableCell className="text-sm">
-        <span className="flex min-w-0 items-center gap-1.5">
-          <img src={chainLogoUrl(account.chainId)} alt="" className="size-4 shrink-0 rounded-full" />
-          <span className="truncate">{account.network}</span>
-        </span>
+      <TableCell>
+        <ChainIcon chainId={account.chainId} network={account.network} />
       </TableCell>
     ),
     To: (

@@ -23,11 +23,11 @@ const STEPS_WIDTHS: Record<string, string> = {
   Transaction: 'w-[22rem]',
   To: 'w-56',
   Safe: 'w-48',
-  Chain: 'w-32',
+  Chain: 'w-16',
   Proposed: 'w-24',
   Note: 'w-[68px]',
   Signatures: 'w-28',
-  Status: 'w-44',
+  Status: 'w-40',
   // Fixed widths make the table scroll before columns overlap.
   Action: 'w-36',
 }
@@ -251,7 +251,8 @@ export const getColumnWidths = (
 ): Record<string, string | undefined> => ({
   ...STEPS_WIDTHS,
   // Option C: the other party moves to its own column.
-  ...(alignTo ? { Transaction: 'w-72' } : {}),
+  // The Safe table: Transaction takes the space left, so the To column fits without scrolling.
+  ...(alignTo ? { Transaction: undefined } : {}),
   ...(showNoteText ? { Note: undefined } : {}),
 })
 

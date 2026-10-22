@@ -23,10 +23,18 @@ export function SummaryText({ tx }: { tx: Proposal }) {
   )
 }
 
-// Type tag and what happens. In a row it keeps its width, and the other party truncates instead.
-export function TransactionHead({ tx, onRow = false }: { tx: Proposal; onRow?: boolean }) {
+// Type tag and what happens. With the other party inline it keeps its width, and the other party truncates instead.
+export function TransactionHead({
+  tx,
+  onRow = false,
+  keepWidth = false,
+}: {
+  tx: Proposal
+  onRow?: boolean
+  keepWidth?: boolean
+}) {
   return (
-    <span className={`flex min-w-0 items-center gap-2 ${onRow ? 'shrink-0' : ''}`}>
+    <span className={`flex min-w-0 items-center gap-2 ${keepWidth ? 'shrink-0' : ''}`}>
       {tx.app ? <AppTag app={tx.app} onRow={onRow} /> : <TypeTag type={getTypeLabel(tx)} onRow={onRow} />}
       <SummaryText tx={tx} />
     </span>

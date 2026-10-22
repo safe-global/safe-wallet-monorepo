@@ -146,15 +146,14 @@ export function ScenarioBar({
         </div>
         <Tabs
           value={direction}
-          // Fleet admin opens on its own 20-Safe workspace.
+          // Stat cards (option B) open on the 20-Safe workspace.
           onValueChange={(value) =>
             onChange(value === 'fleet' ? { option: 'fleet', scenario: '20-safes' } : { option: String(value) })
           }
         >
           <TabsList aria-label="Design direction">
-            <TabsTrigger value="table">A · One table</TabsTrigger>
-            <TabsTrigger value="fleet">B · Fleet admin</TabsTrigger>
-            <TabsTrigger value="aligned">C · To column</TabsTrigger>
+            <TabsTrigger value="table">A · Safe table</TabsTrigger>
+            <TabsTrigger value="fleet">B · Stat cards</TabsTrigger>
           </TabsList>
         </Tabs>
         {/* Milestone 1 scope from the Oct 22 review: no side panel, no overview cards, no filter counts. */}

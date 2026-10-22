@@ -73,6 +73,7 @@ describe('queue design exploration', () => {
     expect(headers.slice(0, -1).map((header) => header.textContent)).toEqual([
       'Nonce',
       'Transaction',
+      'To',
       'Chain',
       'Proposed',
       'Note',
@@ -455,7 +456,7 @@ describe('queue design exploration', () => {
     expect(within(row).getByRole('img', { name: /^Settings\./ })).toBeVisible()
     expect(within(row).getByRole('button', { name: /^Nonce 43\. / })).toBeVisible()
     expect(row).not.toHaveTextContent('Treasury Main')
-    expect(within(row).getAllByRole('cell')[2]).toHaveTextContent(/^Ethereum$/)
+    expect(within(within(row).getAllByRole('cell')[3]).getByRole('img', { name: 'Ethereum' })).toBeVisible()
     expect(row).toHaveTextContent('Blocked by #42')
     expect(within(safeBand('Treasury Main')).queryByText('Ethereum')).toBeNull()
   })
@@ -489,7 +490,8 @@ describe('queue design exploration', () => {
   it('keeps the amount under the transaction and the note icon in its own column on wide screens', () => {
     render(<PendingQueue />)
     const title = allPending().getByRole('button', { name: 'Open Send to Globex Payroll' })
-    expect(title.closest('td')).toHaveTextContent(/^Send48\.5 ETHto.*Globex Payroll$/)
+    expect(title.closest('td')).toHaveTextContent(/^Send48\.5 ETH$/)
+    expect(title.closest('td')?.nextElementSibling).toHaveTextContent(/^To.*Globex Payroll$/)
     expect(title.closest('tr')).not.toHaveTextContent('September contractor payouts')
     const note = within(title.closest('tr')!).getByRole('button', { name: 'Note for Send to Globex Payroll' })
     expect(note).toBeVisible()
@@ -504,9 +506,9 @@ describe('queue design exploration', () => {
         .getAllByRole('columnheader')
         .slice(0, -1)
         .map((header) => header.textContent),
-    ).toEqual(['Nonce', 'Transaction', 'Chain', 'Proposed', 'Signatures', 'Status'])
+    ).toEqual(['Nonce', 'Transaction', 'To', 'Chain', 'Proposed', 'Signatures', 'Status'])
     const row = rowFor('Send to Globex Payroll')
-    const [nonce, , , proposed, , status] = within(row).getAllByRole('cell')
+    const [nonce, , , , proposed, , status] = within(row).getAllByRole('cell')
     expect(nonce).toHaveTextContent(/^42$/)
     expect(proposed).toHaveTextContent(/^3d ago$/)
     expect(status).toHaveTextContent(/^Sign$/)
@@ -521,12 +523,12 @@ describe('queue design exploration', () => {
     render(<PendingQueue />)
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     const headers = table.getAllByRole('columnheader')
-    expect(headers).toHaveLength(7)
+    expect(headers).toHaveLength(8)
     expect(headers[0]).toHaveClass('max-md:sticky', 'max-md:left-0')
     expect(headers.at(-1)).toHaveClass('sticky', 'right-0')
     const row = rowFor('Send to Globex Payroll')
     const cells = within(row).getAllByRole('cell')
-    expect(cells).toHaveLength(7)
+    expect(cells).toHaveLength(8)
     expect(cells[0]).toHaveClass('max-md:sticky', 'max-md:left-0', 'max-md:bg-card')
     expect(cells.at(-1)).toHaveClass('sticky', 'right-0')
     fireEvent.click(row)
@@ -767,7 +769,7 @@ describe('queue design exploration', () => {
   })
   it('opens on option A with 5 Safes when the link has no options', () => {
     baseRender(<PendingQueue />)
-    expect(screen.getByRole('tab', { name: 'A · One table' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'A · Safe table' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByRole('group', { name: 'Fleet overview' })).not.toBeInTheDocument()
     expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('5 Safes')
     expect(screen.getByRole('combobox', { name: 'State' })).toHaveTextContent('Normal')
@@ -785,7 +787,7 @@ describe('queue design exploration', () => {
     await user.click(screen.getByRole('button', { name: /^Filter/ }))
     expect(screen.queryByRole('menuitem', { name: 'Proposal date' })).not.toBeInTheDocument()
   })
-  it('gives the other party its own To column in option C', () => {
+  it('gives the other party its own To column, and opens old option C links on the Safe table', () => {
     render(<PendingQueue />, { routerProps: { query: { option: 'aligned' } } })
     const headers = within(screen.getByRole('table', { name: 'Pending transactions' }))
       .getAllByRole('columnheader')

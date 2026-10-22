@@ -3,7 +3,7 @@ export type Scenario =
   '1-safe' | '5-safes' | '10-safes' | '20-safes' | '50-safes' | 'everyday' | 'realistic' | 'conflict' | 'conflict-heavy'
 // A moment layered on any scenario.
 export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing'
-export type Direction = 'table' | 'fleet' | 'aligned'
+export type Direction = 'table' | 'fleet'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
 export type Account = {

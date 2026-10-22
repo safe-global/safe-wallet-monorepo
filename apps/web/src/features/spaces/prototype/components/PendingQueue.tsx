@@ -92,9 +92,8 @@ function PendingQueueView() {
   const [mainRef, contentWidth] = useElementWidth<HTMLElement>()
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
-  // The preview opens on option A. `?option=fleet` shows Fleet admin, `?option=aligned` option C.
-  const direction: Direction =
-    router.query.option === 'fleet' ? 'fleet' : router.query.option === 'aligned' ? 'aligned' : 'table'
+  // The preview opens on option A, the Safe table. `?option=fleet` shows Stat cards. Old `?option=aligned` links open A.
+  const direction: Direction = router.query.option === 'fleet' ? 'fleet' : 'table'
   const fleet = direction === 'fleet'
   // Milestone 1 (`?m1=1`): rows open the transaction page, with no side panel, overview cards or filter counts.
   const milestone1 = router.query.m1 === '1'
@@ -547,7 +546,7 @@ function PendingQueueView() {
     executions,
     now,
     onSpeedUp: speedUp,
-    alignTo: direction === 'aligned',
+    alignTo: direction === 'table',
   }
 
   return (

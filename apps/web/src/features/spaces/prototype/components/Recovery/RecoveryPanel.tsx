@@ -17,7 +17,7 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { knownAccounts } from '../../services/model'
 import { isSignerOf } from '../../services/personas'
 import type { Persona } from '../../types'
-import { chainLogoUrl, HINT_CLASS, HintContent, RECOVERY_TYPE, ROW_TAG_FILL, SafeIdentity, StatusChip } from '../shared'
+import { ChainIcon, HINT_CLASS, HintContent, RECOVERY_TYPE, ROW_TAG_FILL, SafeIdentity, StatusChip } from '../shared'
 import { SignatureGauge } from '../QueueTable/SignatureGauge'
 import { RecoveryMark } from './RecoveryMark'
 import { CopyableParty } from '../CopyableParty'
@@ -133,11 +133,8 @@ export function RecoveryRow({
     Note: <TableCell />,
     To: <TableCell />,
     Chain: (
-      <TableCell className="text-sm">
-        <span className="flex min-w-0 items-center gap-1.5">
-          <img src={chainLogoUrl(account.chainId)} alt="" className="size-4 shrink-0 rounded-full" />
-          <span className="truncate">{account.network}</span>
-        </span>
+      <TableCell>
+        <ChainIcon chainId={account.chainId} network={account.network} />
       </TableCell>
     ),
     Signatures: (
