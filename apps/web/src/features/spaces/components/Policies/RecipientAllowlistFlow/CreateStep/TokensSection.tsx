@@ -30,7 +30,7 @@ import {
   TOKENS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
-import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokenDraftRow from './TokenDraftRow'
 
 const SKELETON_CHIP_COUNT = 4
@@ -39,6 +39,7 @@ const RETRY_LABEL = 'Retry'
 type TokensSectionProps = {
   values: RecipientAllowlistFormValues
   onChange: (next: RecipientAllowlistFormValues) => void
+  heldTokens: HeldTokenAddresses
   hasAccount: boolean
   isCalloutDismissed: boolean
   onDismissCallout: () => void
@@ -68,6 +69,7 @@ const LoadErrorAlert = ({
 const TokensSection = ({
   values,
   onChange,
+  heldTokens,
   hasAccount,
   isCalloutDismissed,
   onDismissCallout,
@@ -82,7 +84,7 @@ const TokensSection = ({
     isPopularError,
     refetchPopular,
     identityKey,
-  } = useHeldTokenAddresses()
+  } = heldTokens
   // Keyed to the account it was opened for, so switching accounts closes the row
   const [addingFor, setAddingFor] = useState<string>()
   const isAdding = addingFor !== undefined && addingFor === identityKey

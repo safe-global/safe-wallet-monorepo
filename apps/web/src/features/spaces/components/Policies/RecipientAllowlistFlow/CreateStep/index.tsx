@@ -83,6 +83,7 @@ const CreateRecipientAllowlistPolicy = ({
         <RecipientAllowlistForm
           values={values}
           onChange={setValues}
+          heldTokens={heldTokens}
           account={
             selectedSafe && target
               ? {
