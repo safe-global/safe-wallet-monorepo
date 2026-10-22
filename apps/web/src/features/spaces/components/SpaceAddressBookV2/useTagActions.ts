@@ -12,7 +12,7 @@ import {
   validateTagName,
 } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import type { TagActions } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagSelect'
+import type { TagActions } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { useAppDispatch } from '@/store'

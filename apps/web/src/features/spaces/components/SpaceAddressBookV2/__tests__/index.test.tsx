@@ -499,7 +499,7 @@ describe('SpaceAddressBookV2', () => {
       mockWorkspaceBook({ items: [treasury, northwind], tags: [{ ...internal, contactCount: 2 }] })
       rerender(<SpaceAddressBookV2 />)
 
-      expect(screen.getByTestId('tag-select-count')).toHaveTextContent('1')
+      expect(screen.getByTestId('tag-menu-count')).toHaveTextContent('1')
       expect(visibleNames()).toEqual([expect.stringContaining('Treasury'), expect.stringContaining('Northwind')])
     })
 
@@ -551,7 +551,7 @@ describe('SpaceAddressBookV2', () => {
       const { rerender } = renderAddressBook()
       await openFilters()
       await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
-      expect(screen.getByTestId('tag-select-count')).toHaveTextContent('1')
+      expect(screen.getByTestId('tag-menu-count')).toHaveTextContent('1')
 
       mockWorkspaceBook({
         items: [
@@ -563,7 +563,7 @@ describe('SpaceAddressBookV2', () => {
       })
       rerender(<SpaceAddressBookV2 />)
 
-      expect(screen.queryByTestId('tag-select-count')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('tag-menu-count')).not.toBeInTheDocument()
     })
 
     it("saves a contact's tags from the row menu", async () => {

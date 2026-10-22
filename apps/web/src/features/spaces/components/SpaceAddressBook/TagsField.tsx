@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import TagSelect from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagSelect'
+import TagPicker from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagPicker'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { TAGS_DISCLAIMER } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
 import useTagActions from '../SpaceAddressBookV2/useTagActions'
@@ -23,8 +23,7 @@ const TagsField = ({ workspaceTags, onLimitReached }: TagsFieldProps) => {
         name="tags"
         control={control}
         render={({ field }) => (
-          <TagSelect
-            mode="assign"
+          <TagPicker
             tags={workspaceTags}
             value={field.value}
             onChange={field.onChange}

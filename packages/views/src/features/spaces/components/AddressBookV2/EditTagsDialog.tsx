@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import GroupedAddress from './GroupedAddress'
-import TagSelect, { type TagActions } from './tags/TagSelect'
+import TagPicker from './tags/TagPicker'
+import { existingTagIds, type TagActions } from './tags/TagMenu'
 import { TAGS_DISCLAIMER } from './tags/tagRules'
 import type { WorkspaceTag } from './types'
 
@@ -33,9 +34,8 @@ const EditTagsDialog = ({
   error,
 }: EditTagsDialogProps) => {
   const [tagIds, setTagIds] = useState<number[]>(contact.tagIds)
-  const existing = (ids: number[]) => ids.filter((id) => workspaceTags.some((tag) => tag.id === id))
-  const selected = existing(tagIds)
-  const saved = existing(contact.tagIds)
+  const selected = existingTagIds(tagIds, workspaceTags)
+  const saved = existingTagIds(contact.tagIds, workspaceTags)
   const isUnchanged = selected.length === saved.length && selected.every((id) => saved.includes(id))
 
   return (
@@ -49,8 +49,7 @@ const EditTagsDialog = ({
             <Typography variant="paragraph-bold">{contact.name}</Typography>
             <GroupedAddress address={contact.address} />
           </div>
-          <TagSelect
-            mode="assign"
+          <TagPicker
             tags={workspaceTags}
             value={tagIds}
             onChange={setTagIds}

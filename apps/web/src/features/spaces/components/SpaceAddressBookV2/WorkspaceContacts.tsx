@@ -7,7 +7,7 @@ import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import TagSelect from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagSelect'
+import TagFilterDropdown from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagFilterDropdown'
 import EditTagsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/EditTagsDialog'
 import { filterByTags, searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
@@ -164,14 +164,13 @@ const WorkspaceContacts = ({
         query={query}
         onQueryChange={setQuery}
         filters={
-          <TagSelect
-            mode="filter"
+          <TagFilterDropdown
             tags={tags}
             value={activeTagIds}
             onChange={setSelectedTagIds}
             actions={memberTagActions}
             onLimitReached={() => trackTagLimitReached('filters')}
-            onSelectionCommitted={(ids) =>
+            onFiltersChanged={(ids) =>
               trackEvent(SPACE_EVENTS.CONTACTS_FILTERED, { [MixpanelEventParams.TAG_COUNT]: ids.length })
             }
           />
