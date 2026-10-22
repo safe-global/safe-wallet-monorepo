@@ -19,9 +19,12 @@ import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 const ExecuteTxButton = ({
   txSummary,
   compact = false,
+  dense = false,
 }: {
   txSummary: Transaction
   compact?: boolean
+  // The Space queue table's 24px row action
+  dense?: boolean
 }): ReactElement => {
   const setTxFlow = useSetScopedTxFlow()
   const { safe } = useSafeInfo()
@@ -61,11 +64,12 @@ const ExecuteTxButton = ({
               onClick={onClick}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
-              variant="default"
+              variant={dense ? 'outline' : 'default'}
               disabled={!isOk || isDisabled}
               // `default` rather than `sm` in a queue row: this is the row's primary action, so it gets
               // the app's standard 36px control height instead of the 32px small one.
-              size={compact ? 'default' : 'action'}
+              size={dense ? '2xs' : compact ? 'default' : 'action'}
+              className={dense ? 'w-20' : undefined}
             >
               Execute
             </Button>

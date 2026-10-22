@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker'
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import type { ReactNode } from 'react'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type {
   SpaceQueuedItemPage,
@@ -15,25 +14,18 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceTransactionsGetTransactionQueueV1Query: jest.fn(),
 }))
 
-const mockScopeProps = jest.fn()
-jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
-  SafeScopeProvider: (props: { initial: unknown; pollSafeInfo: boolean; children: ReactNode }) => {
-    mockScopeProps({ initial: props.initial, pollSafeInfo: props.pollSafeInfo })
-    return <>{props.children}</>
-  },
+jest.mock('./SpaceQueueTable', () => ({
+  __esModule: true,
+  default: ({ sections }: { sections: SpaceQueueSafeItems[] }) => (
+    <>
+      {sections.map((section) => (
+        <div key={`${section.chainId}:${section.safeAddress}`} data-testid="space-queue-safe">
+          {section.items.length} items of {section.chainId}:{section.safeAddress}
+        </div>
+      ))}
+    </>
+  ),
 }))
-jest.mock('@/components/transactions/TxList', () => {
-  const { useTxRowSafe } = jest.requireActual('@/components/transactions/TxSummary/TxRowSafeContext')
-  const TxList = ({ items }: { items: unknown[] }) => {
-    const rowSafe = useTxRowSafe()
-    return (
-      <div data-testid="tx-list">
-        {items.length} items of {rowSafe?.chainId}:{rowSafe?.safeAddress}
-      </div>
-    )
-  }
-  return { __esModule: true, default: TxList }
-})
 jest.mock('@/components/common/InfiniteScroll', () => ({
   __esModule: true,
   default: ({ onLoadMore }: { onLoadMore: () => void }) => <button onClick={onLoadMore}>load more</button>,
@@ -72,20 +64,18 @@ describe('SpaceTransactionQueue', () => {
     }))
   }
 
-  it('renders every Safe run in its own scope, without polling, and names the Safe on its rows', () => {
-    mockPages({ '': page([run(chainId, safeA, 2), run(chainId, safeB, 1)]) })
+  it('renders one section per Safe, joining the runs of a Safe that appears more than once', () => {
+    mockPages({ '': page([run(chainId, safeA, 2), run(chainId, safeB, 1), run(chainId, safeA, 1)]) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    const lists = screen.getAllByTestId('tx-list')
-    expect(lists).toHaveLength(2)
-    expect(lists[0]).toHaveTextContent(`2 items of ${chainId}:${safeA}`)
-    expect(lists[1]).toHaveTextContent(`1 items of ${chainId}:${safeB}`)
-    expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeA }, pollSafeInfo: false })
-    expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeB }, pollSafeInfo: false })
+    const sections = screen.getAllByTestId('space-queue-safe')
+    expect(sections).toHaveLength(2)
+    expect(sections[0]).toHaveTextContent(`3 items of ${chainId}:${safeA}`)
+    expect(sections[1]).toHaveTextContent(`1 items of ${chainId}:${safeB}`)
   })
 
-  it('loads the next page by its cursor and merges a run that continues on it', () => {
+  it('loads the next page by its cursor and joins a Safe that continues on it', () => {
     const cursor = 'limit=20&offset=20'
     mockPages({
       '': page([run(chainId, safeA, 2)], {
@@ -98,8 +88,8 @@ describe('SpaceTransactionQueue', () => {
     fireEvent.click(screen.getByText('load more'))
 
     expect(mockQuery).toHaveBeenCalledWith({ spaceId, cursor })
-    expect(screen.getAllByTestId('space-queue-safe-run')).toHaveLength(1)
-    expect(screen.getByTestId('tx-list')).toHaveTextContent(`5 items of ${chainId}:${safeA}`)
+    expect(screen.getAllByTestId('space-queue-safe')).toHaveLength(1)
+    expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(`5 items of ${chainId}:${safeA}`)
     expect(screen.queryByText('load more')).not.toBeInTheDocument()
   })
 
@@ -134,6 +124,6 @@ describe('SpaceTransactionQueue', () => {
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
     expect(screen.getByText('Error loading transactions')).toBeInTheDocument()
-    expect(screen.queryByTestId('space-queue-safe-run')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
   })
 })

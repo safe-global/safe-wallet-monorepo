@@ -16,7 +16,16 @@ import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFl
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 
-const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; compact?: boolean }): ReactElement => {
+const SignTxButton = ({
+  txSummary,
+  compact = false,
+  dense = false,
+}: {
+  txSummary: Transaction
+  compact?: boolean
+  // The Space queue table's 24px row action
+  dense?: boolean
+}): ReactElement => {
   const setTxFlow = useSetScopedTxFlow()
   const wallet = useWallet()
   const nestedOwners = useNestedSafeOwners()
@@ -41,11 +50,12 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
             <Track {...TX_LIST_EVENTS.CONFIRM}>
               <Button
                 onClick={onClick}
-                variant={compact ? 'outline' : 'default'}
+                variant={compact || dense ? 'outline' : 'default'}
                 disabled={!isOk || isDisabled}
                 // Matches ExecuteTxButton — both sit in the same queue row slot, so a different height
                 // here would make Confirm and Execute rows inconsistent.
-                size={compact ? 'default' : 'action'}
+                size={dense ? '2xs' : compact ? 'default' : 'action'}
+                className={dense ? 'w-20' : undefined}
               >
                 Confirm
               </Button>
