@@ -73,4 +73,5 @@ export const playwrightSpecs = {
   },
   'e2e/walletconnect.spec.ts': {},
   'e2e/walletconnect-nested-signer.spec.ts': {},
+  'e2e/nested-signer.spec.ts': {},
 }

@@ -1,4 +1,5 @@
 import { type Page, type Locator } from '@playwright/test'
+import { short } from '../../environment/scenarios/chain.mjs'
 
 // The review loads the transaction, its decoding and the Safe Shield scan before it shows the checkbox
 const REVIEW_LOAD_TIMEOUT_MS = 60_000
@@ -9,6 +10,8 @@ export class TxReviewPage {
   /** Safe Shield flags a Safe that is not in the user's accounts, which every seeded Safe is */
   readonly riskConfirmation: Locator
   readonly continueButton: Locator
+  /** Shown to an owner of a parent Safe, which can sign for the child Safe */
+  readonly signerSelect: Locator
   readonly signButton: Locator
   readonly connectedWalletMethod: Locator
   readonly executeButton: Locator
@@ -30,6 +33,7 @@ export class TxReviewPage {
   constructor(page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
     this.continueButton = page.getByTestId('continue-sign-btn')
+    this.signerSelect = page.getByRole('combobox', { name: 'Signer account' })
     this.signButton = page.getByTestId('combo-submit-sign')
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
     this.executeButton = page.getByTestId('combo-submit-execute')
@@ -50,6 +54,11 @@ export class TxReviewPage {
     await this.confirmRisk()
     await this.continueButton.click()
     await this.signButton.click()
+  }
+
+  /** Wait until the signer select shows `address`; it fills in once CGW returns the wallet's Safes */
+  async waitForSigner(address: string): Promise<void> {
+    await this.signerSelect.filter({ hasText: short(address) }).waitFor({ timeout: REVIEW_LOAD_TIMEOUT_MS })
   }
 
   /** Execute a fully signed transaction with the connected wallet, not the relay */
