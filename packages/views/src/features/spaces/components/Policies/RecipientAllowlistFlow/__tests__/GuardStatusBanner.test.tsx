@@ -14,22 +14,10 @@ describe('GuardStatusBanner', () => {
     expect(screen.getByText('Checking guards on Treasury…')).toBeInTheDocument()
   })
 
-  it('says the transaction also enables the guard when there is none', () => {
-    renderBanner({ status: 'none' })
+  it.each<GuardStatus>([{ status: 'none' }, { status: 'known' }])('renders nothing for the $status state', (guard) => {
+    const { container } = renderBanner(guard)
 
-    expect(screen.getByTestId('guard-status-info')).toHaveTextContent("The Safe policy guard isn't enabled yet")
-    expect(screen.getByText(/active right after execution/)).toBeInTheDocument()
-  })
-
-  it('says only the policy change is sent when the policy guard is already enabled', () => {
-    renderBanner({ status: 'known' })
-
-    expect(screen.getByTestId('guard-status-success')).toHaveTextContent('The Safe policy guard is already enabled')
-    expect(
-      screen.getByText(
-        'Only the policy change is sent. It waits 24 hours, then needs an activation step before it applies.',
-      ),
-    ).toBeInTheDocument()
+    expect(container).toBeEmptyDOMElement()
   })
 
   it.each<[string, GuardStatus]>([

@@ -7,9 +7,7 @@ import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
-import GuardStatusBanner, {
-  type GuardStatus,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
+import GuardStatusBanner from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import {
   NESTED_SAFES_NOTICE_TITLE,
@@ -20,9 +18,6 @@ import {
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-
-/** The guard states an allowlist can be set up on without a warning, so they get no banner. */
-const SILENT_GUARD_STATES: GuardStatus['status'][] = ['none', 'known']
 
 const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
@@ -68,7 +63,7 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
           />
         )}
 
-        {selectedSafe && guard && !SILENT_GUARD_STATES.includes(guard.status) && (
+        {selectedSafe && guard && (
           <GuardStatusBanner
             guard={guard}
             safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}

@@ -16,4 +16,5 @@ export const SUMMARY_NO_ACCOUNT_TITLE = 'Pick a Safe account to start.'
 export const SUMMARY_NO_ACCOUNT_DESCRIPTION = 'Then choose which tokens it can send and who can receive them.'
 export const SUMMARY_DESCRIPTION = 'Anything you leave out will be blocked.'
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
+export const SUMMARY_DETAILS_GUARD_ENABLED = `The Safe policy guard is already enabled, so these changes wait ${POLICY_CHANGE_DELAY} after execution, then need an activation step before they apply.`
 export const SUMMARY_DETAILS = `These changes take effect as soon as this transaction is executed. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
