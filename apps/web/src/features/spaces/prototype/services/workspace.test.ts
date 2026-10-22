@@ -16,7 +16,7 @@ describe('getWorkspaceProfile', () => {
   })
 
   it('follows the scenario', () => {
-    expect(getWorkspaceProfile('many-safes').plan.label).toBe('Safe Pro Business (20 Safes)')
+    expect(getWorkspaceProfile('20-safes').plan.label).toBe('Safe Pro Business (20 Safes)')
   })
 })
 
@@ -30,8 +30,8 @@ describe('getSignerStatus', () => {
     expect(getSignerStatus('security', accounts)).toBe('Signs 2 of 3 Safes')
   })
 
-  it('updates with the 20-Safe scenario', () => {
-    expect(getSignerStatus('owner', getScenarioAccounts('many-safes'))).toBe('Signs 19 of 20 Safes')
+  it('updates with the 10-Safe scenario', () => {
+    expect(getSignerStatus('owner', getScenarioAccounts('10-safes'))).toBe('Signs 9 of 10 Safes')
   })
 })
 

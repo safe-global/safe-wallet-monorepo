@@ -1,4 +1,4 @@
-import { getMenuActions, getPrimaryAction, getRemindable } from './actions'
+import { getMenuActions, getMenuItems, getPrimaryAction, getRemindable } from './actions'
 import { getScenario } from './model'
 import { getNotSignerNote, getSignatureSummary } from './signers'
 
@@ -29,9 +29,17 @@ describe('signers outside the workspace', () => {
 
   it('offers Invite to admins only', () => {
     const tx = proposal('grants-8')
-    const primary = getPrimaryAction(tx, items, 'admin')
-    expect(getMenuActions(tx, items, 'admin', primary)).toContain('invite')
-    expect(getMenuActions(tx, items, 'member', getPrimaryAction(tx, items, 'member'))).not.toContain('invite')
+    expect(getMenuActions(tx, items, 'admin')).toContain('invite')
+    expect(getMenuActions(tx, items, 'member')).not.toContain('invite')
+  })
+
+  it('lists the same six actions in the same order for everyone, with a reason when one is off', () => {
+    const tx = proposal('grants-8')
+    const member = getMenuItems(tx, items, 'member')
+    expect(member.map((item) => item.action)).toEqual(['remind', 'replace', 'reject', 'copyLink', 'invite', 'delete'])
+    expect(getMenuItems(tx, items, 'admin').map((item) => item.action)).toEqual(member.map((item) => item.action))
+    expect(member.find((item) => item.action === 'invite')?.reason).toBe('Only workspace admins can invite signers.')
+    expect(member.find((item) => item.action === 'copyLink')?.reason).toBeUndefined()
   })
 })
 

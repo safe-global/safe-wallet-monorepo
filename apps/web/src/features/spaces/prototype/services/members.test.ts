@@ -1,8 +1,8 @@
 import { getMemberProfile } from './members'
 import { getScenario, getScenarioAccounts, UNNAMED_SIGNER } from './model'
 
-const items = getScenario('protocol')
-const accounts = getScenarioAccounts('protocol')
+const items = getScenario('50-safes')
+const accounts = getScenarioAccounts('50-safes')
 
 describe('member profile', () => {
   it('names a persona signer by role and lists what waits on them', () => {

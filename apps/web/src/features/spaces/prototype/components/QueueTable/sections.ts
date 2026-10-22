@@ -82,6 +82,8 @@ export const getColumns = (isWide: boolean, alignTo = false) => [
   'Nonce',
   'Transaction',
   ...(alignTo ? ['To'] : []),
+  // A chain column instead of splitting the queue by chain (Oct 22 review).
+  'Chain',
   'Proposed',
   ...(isWide ? ['Note'] : []),
   'Signatures',

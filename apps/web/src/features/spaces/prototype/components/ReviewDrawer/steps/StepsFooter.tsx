@@ -93,7 +93,10 @@ export function StepsFooter({
   const signed = tx.signers.filter((owner) => account.owners.includes(owner)).length
   const primary = getPrimaryAction(tx, items, persona, remindedIds)
   // The copy icon in the signatures header already copies the link.
-  const menu = getMenuActions(tx, items, persona, primary).filter((action) => action !== 'copyLink')
+  // The footer shows only what you can do, and not Remind when it's already the main button.
+  const menu = getMenuActions(tx, items, persona).filter(
+    (action) => action !== 'copyLink' && !(action === 'remind' && primary.kind === 'remind'),
+  )
   const menuLabel = (action: MenuAction) =>
     action === 'remind' && remindedIds.includes(tx.id) ? 'Remind signers again' : MENU_LABELS[action]
   const run = () => {

@@ -4,7 +4,7 @@ import { getRegistry, getSafeGroup } from './registry'
 import { getMemberProfile } from './members'
 import { getScenario } from './model'
 
-const accounts = getScenarioAccounts('fleet')
+const accounts = getScenarioAccounts('20-safes')
 const byId = (id: string) => accounts.find((account) => account.id === id)!
 const issues = (id: string) => getRequirementGaps(byId(id), accounts).map((issue) => issue.id)
 
@@ -42,7 +42,7 @@ describe('requirements', () => {
 
 describe('member profile', () => {
   it('lists missing attestations and the Safes a member is the contact for', () => {
-    const sam = getMemberProfile('Sam', accounts, getScenario('fleet'), 'owner')
+    const sam = getMemberProfile('Sam', accounts, getScenario('20-safes'), 'owner')
     expect(sam.issues).toEqual(['No attestation on Payroll Base.'])
     expect(sam.wallet).toBe('Browser wallet')
     expect(sam.contactFor).toEqual(['Payroll'])

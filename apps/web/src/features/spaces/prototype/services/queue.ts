@@ -1,5 +1,5 @@
 import { getAccount, getScenario, getScenarioAccounts, getState, knownAccounts } from './model'
-import type { Account, Persona, Proposal, Scenario } from '../types'
+import type { Account, Persona, Proposal, QueueState, Scenario } from '../types'
 import { getYou, isSignerOf } from './personas'
 
 export type PreviewQueue = {
@@ -10,8 +10,38 @@ export type PreviewQueue = {
 }
 export type PreviewAction = 'sign' | 'execute' | 'signAndExecute'
 
-export const createPreviewQueue = (scenario: Scenario): PreviewQueue => ({
-  items: getScenario(scenario),
+// The first fully signed transaction, which the Executing state starts with.
+export const getFirstReady = (items: Proposal[]) => items.find((tx) => getState(tx).ready)
+
+// States layer on any scenario. Partial loading drops the last Safe. Executing gives the running
+// transaction a rejection at its nonce, so the lock shows.
+export const applyQueueState = (items: Proposal[], scenario: Scenario, state: QueueState): Proposal[] => {
+  if (state === 'empty' || state === 'loading' || state === 'error') return []
+  if (state === 'partial') return items.filter((tx) => tx.account !== getScenarioAccounts(scenario).at(-1)?.id)
+  const running = state === 'executing' ? getFirstReady(items) : undefined
+  if (
+    !running ||
+    items.some((tx) => tx.id !== running.id && tx.account === running.account && tx.nonce === running.nonce)
+  )
+    return items
+  return [
+    ...items,
+    {
+      id: `${running.id}-reject`,
+      account: running.account,
+      nonce: running.nonce,
+      recipient: getAccount(running).name,
+      amount: '',
+      kind: { type: 'rejection' },
+      age: '3m ago',
+      signers: [getAccount(running).owners.at(-1)!],
+      eligible: true,
+    },
+  ]
+}
+
+export const createPreviewQueue = (scenario: Scenario, state: QueueState = 'normal'): PreviewQueue => ({
+  items: applyQueueState(getScenario(scenario), scenario, state),
   completed: [],
   nextProposalId: 1,
   nextNonces: Object.fromEntries(getScenarioAccounts(scenario).map((account) => [account.id, account.nextNonce])),

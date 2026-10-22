@@ -1,3 +1,4 @@
+import { getCounterpartyCell } from './columns'
 import {
   generateBatchActions,
   getAmountLabel,
@@ -139,9 +140,23 @@ describe('prototype queue state', () => {
     })
     it('keeps the everyday queue and adds competing sends and an unsigned proposal', () => {
       const items = getScenario('realistic')
-      expect(items.length).toBe(getScenario('everyday').length + 10)
+      expect(items.length).toBe(getScenario('everyday').length + 13)
       expect(getConflicts(real('treasury-47'), items).map((tx) => tx.id)).toEqual(['treasury-47-alt'])
       expect(real('grants-11')).toMatchObject({ signers: [], proposedBy: expect.stringContaining('Proposer') })
+    })
+    it('has contract calls from a Safe App, to a long unverified name, and to a contract with a logo', () => {
+      expect(real('grants-12')).toMatchObject({ app: { name: 'CoW Swap' }, kind: { method: 'setPreSignature' } })
+      expect(getCounterpartyCell(real('grants-13'))).toMatchObject({
+        name: 'InitializableImmutableAdminUpgradeabilityProxy',
+        tone: 'warning',
+        contract: true,
+        logo: undefined,
+      })
+      expect(getCounterpartyCell(real('grants-14'))).toMatchObject({
+        name: 'Aave v3 UNI',
+        contract: true,
+        logo: expect.stringContaining('/tokens/logos/'),
+      })
     })
     it('warns only on a delegate call to an untrusted target', () => {
       const tx = real('payroll-19')

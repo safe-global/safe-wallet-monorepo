@@ -1,4 +1,5 @@
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy, FileCode2 } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
@@ -12,6 +13,8 @@ export function CopyableParty({
   avatar = address,
   mono = false,
   tone,
+  logo,
+  contract = false,
 }: {
   name: string
   address: string
@@ -19,6 +22,9 @@ export function CopyableParty({
   // The name is itself a short address.
   mono?: boolean
   tone?: 'destructive'
+  // A contract shows its logo, or the code icon when it has none, as production does.
+  logo?: string
+  contract?: boolean
 }) {
   const [copied, copy] = useCopyToClipboard(address)
   const CopyIcon = copied ? Check : Copy
@@ -27,7 +33,16 @@ export function CopyableParty({
       <TooltipTrigger render={<span className="group/party flex min-w-0 shrink items-center gap-1.5" />}>
         {/* Grey until the row or the avatar is hovered, so colour doesn't compete with the type tag. */}
         <span className="flex shrink-0 grayscale transition-[filter] group-hover/transaction:grayscale-0 group-hover/party:grayscale-0">
-          <Identicon address={avatar} size={24} />
+          {contract ? (
+            <Avatar className="size-6">
+              {logo && <AvatarImage src={logo} alt="" />}
+              <AvatarFallback>
+                <FileCode2 className="size-3.5 text-muted-foreground" strokeWidth={ICON_STROKE} aria-hidden="true" />
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <Identicon address={avatar} size={24} />
+          )}
         </span>
         <span
           className={`truncate ${mono ? 'font-mono text-xs' : ''} ${tone === 'destructive' ? 'text-destructive' : ''}`}

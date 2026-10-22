@@ -6,6 +6,7 @@ import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/
 import type { BulkBatch, PreviewAction } from '../../services/queue'
 import type { MenuAction } from '../../services/actions'
 import type { Account, Filter, Persona, Proposal } from '../../types'
+import type { Executions } from '../../services/execution'
 import { SafeIdentity, STATUS_ORDER, chainLogoUrl } from '../shared'
 import { QueueRow } from './QueueRow'
 import type { QueueSectionData } from './sections'
@@ -19,10 +20,10 @@ import { getPrimaryStatus } from '../../services/model'
 const STEPS_WIDTHS: Record<string, string> = {
   Nonce: 'w-16',
   // Type, what happens and the other party on one line.
-  Transaction: 'w-[26rem]',
+  Transaction: 'w-[22rem]',
   To: 'w-56',
   Safe: 'w-48',
-  Chain: 'w-20',
+  Chain: 'w-32',
   Proposed: 'w-24',
   Note: 'w-[68px]',
   Signatures: 'w-28',
@@ -58,6 +59,10 @@ export type QueueSectionProps = {
   onOpenSafe?: (account: Account) => void
   // Option C: the other party gets its own column.
   alignTo?: boolean
+  // Transactions executing now, and the clock that drives their elapsed time.
+  executions?: Executions
+  now?: number
+  onSpeedUp?: (id: string) => void
 }
 
 const SUMMARY_LABELS = {
@@ -110,7 +115,18 @@ function SafeSummary({
 }
 
 // The Safe name and chain. The other Safe facts are in the avatar tooltip.
-export function SafeTitle({ account, persona, size }: { account: Account; persona: Persona; size: number }) {
+export function SafeTitle({
+  account,
+  persona,
+  size,
+  showNetwork = true,
+}: {
+  account: Account
+  persona: Persona
+  size: number
+  // Queue bands leave the network to the Chain column.
+  showNetwork?: boolean
+}) {
   const wallet = isSignerOf(account, persona) ? getOwnerWallet(account) : undefined
   return (
     <SafeIdentity
@@ -126,10 +142,12 @@ export function SafeTitle({ account, persona, size }: { account: Account; person
       ]}
     >
       <span className="truncate font-medium text-foreground">{account.name}</span>
-      <Badge variant="outline" className="shrink-0 gap-1 font-normal text-muted-foreground">
-        <img src={chainLogoUrl(account.chainId)} alt="" className="size-3.5 rounded-full" />
-        {account.network}
-      </Badge>
+      {showNetwork && (
+        <Badge variant="outline" className="shrink-0 gap-1 font-normal text-muted-foreground">
+          <img src={chainLogoUrl(account.chainId)} alt="" className="size-3.5 rounded-full" />
+          {account.network}
+        </Badge>
+      )}
     </SafeIdentity>
   )
 }
@@ -173,7 +191,7 @@ export function SectionHeader({
       className="group/section flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium transition-colors"
       onClick={onToggle}
     >
-      <SafeTitle account={section.account} persona={persona} size={24} />
+      <SafeTitle account={section.account} persona={persona} size={24} showNetwork={false} />
       {onOpenSafe && (
         <Button
           size="2xs"
@@ -311,6 +329,9 @@ export function QueueSectionRows({
   onGoTo,
   onStartFlow,
   onMenuAction,
+  executions,
+  now,
+  onSpeedUp,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
   return (
@@ -343,6 +364,9 @@ export function QueueSectionRows({
           onReview={onReview}
           remindedIds={remindedIds}
           onRemind={onRemind}
+          executions={executions}
+          now={now}
+          onSpeedUp={onSpeedUp}
           onGoTo={onGoTo}
           onStartFlow={onStartFlow}
           onMenuAction={onMenuAction}

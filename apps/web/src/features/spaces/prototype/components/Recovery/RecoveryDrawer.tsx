@@ -17,7 +17,7 @@ import {
   DrawerSubtitle,
   DrawerTitle,
 } from '@/components/common/Drawer'
-import { accounts } from '../../services/model'
+import { knownAccounts } from '../../services/model'
 import { HINT_CLASS, StatusChip } from '../shared'
 import { IdentityRow } from '../ReviewDrawer/steps/IdentityRow'
 import { RecoveryMark } from './RecoveryMark'
@@ -70,7 +70,7 @@ export function RecoveryDrawer({
   onClose: () => void
 }) {
   const [showData, setShowData] = useState(false)
-  const account = recovery ? accounts.find((candidate) => candidate.id === recovery.accountId) : undefined
+  const account = recovery ? knownAccounts.find((candidate) => candidate.id === recovery.accountId) : undefined
   const status = recovery ? getRecoveryStatus(recovery) : undefined
   return (
     <Drawer resizable mobileFullScreen open={!!recovery} onClose={onClose} ariaLabel="Account recovery">

@@ -13,7 +13,6 @@ import {
   Users,
   Layers,
   Split,
-  ShieldAlert,
   CalendarClock,
   type LucideIcon,
   Info,
@@ -25,20 +24,20 @@ import { Tag } from '@safe-global/views/components/ui/tag'
 import Identicon from '@/components/common/Identicon'
 import { getStepsStatus, type TypeLabel } from '../services/model'
 import { TYPE_HINTS } from '../services/columns'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import type { Filter, Persona, Proposal } from '../types'
 
 // Blocked comes before Waiting on others: you can act on what blocks it.
 export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'waiting', 'awaiting']
 // Status filters that narrow the statuses. Fleet admin cards share them.
-export type Flag = 'conflicting' | 'untrusted' | 'stale'
-export const FLAGS: Flag[] = ['conflicting', 'untrusted', 'stale']
+export type Flag = 'conflicting' | 'stale'
+export const FLAGS: Flag[] = ['conflicting', 'stale']
 export const FLAG_META: Record<Flag, { short: string; icon: LucideIcon; hint: string }> = {
   conflicting: {
     short: 'Conflicting',
     icon: Split,
     hint: 'Proposals that share a nonce with another. Only one per nonce can execute.',
   },
-  untrusted: { short: 'Untrusted', icon: ShieldAlert, hint: 'Unsigned proposals that anyone could have created.' },
   stale: { short: 'Stale 7 days', icon: CalendarClock, hint: 'Proposed more than a week ago and still pending.' },
 }
 export const STATUS_META: Record<Filter, { label: string; icon: LucideIcon; tone: string }> = {
@@ -168,6 +167,29 @@ export function StepsStatusChip({ tx, persona }: { tx: Proposal; persona: Person
 export const ROW_TAG_FILL = 'group-hover/transaction:*:bg-card group-data-[state=selected]/transaction:*:bg-card'
 
 // A transaction's type as a tag: its icon and name, like the Type filter. The tooltip says what the type means.
+// A transaction created in a Safe App shows the app in place of its type, as production does.
+export function AppTag({ app, onRow = false }: { app: { name: string; logo?: string }; onRow?: boolean }) {
+  return (
+    <Tooltip delay={150}>
+      <TooltipTrigger
+        render={<span className={`flex shrink-0 ${onRow ? ROW_TAG_FILL : ''}`} role="img" />}
+        aria-label={`${app.name}. Created in the ${app.name} Safe App.`}
+      >
+        <Tag>
+          <Avatar className="size-4">
+            {app.logo && <AvatarImage src={app.logo} alt="" />}
+            <AvatarFallback className="text-[10px]">{app.name[0]}</AvatarFallback>
+          </Avatar>
+          {app.name}
+        </Tag>
+      </TooltipTrigger>
+      <TooltipContent className={HINT_CLASS}>
+        <HintContent title={app.name} body={`Created in the ${app.name} Safe App. ${TYPE_HINTS.Contract}`} />
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 export function TypeTag({ type, onRow = false }: { type: TypeLabel; onRow?: boolean }) {
   const Icon = TYPE_ICONS[type]
   return (

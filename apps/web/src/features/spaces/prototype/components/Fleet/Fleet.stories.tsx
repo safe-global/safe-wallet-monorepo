@@ -9,8 +9,8 @@ import { SafeDrawer } from './SafeDrawer'
 import { MemberDrawer } from './MemberDrawer'
 import { SignerLoadTable } from './SignerLoadTable'
 
-const accounts = getScenarioAccounts('fleet')
-const items = getScenario('fleet')
+const accounts = getScenarioAccounts('20-safes')
+const items = getScenario('20-safes')
 const noop = () => {}
 
 function CardsPreview() {
@@ -20,7 +20,6 @@ function CardsPreview() {
     signers: 11,
     conflicting: 6,
     blocked: 22,
-    untrusted: 3,
     stale: 5,
   }
   return (

@@ -73,6 +73,7 @@ describe('queue design exploration', () => {
     expect(headers.slice(0, -1).map((header) => header.textContent)).toEqual([
       'Nonce',
       'Transaction',
+      'Chain',
       'Proposed',
       'Note',
       'Signatures',
@@ -116,14 +117,24 @@ describe('queue design exploration', () => {
     expect(dialog.queryByRole('button', { name: 'Sign' })).not.toBeInTheDocument()
     expect(dialog.getByRole('button', { name: 'Remind' })).toBeVisible()
   })
-  it('offers no replace or reject actions to members who do not sign', async () => {
+  it('shows members the same menu, with replace and reject disabled and explained', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { persona: 'member' } } })
     await user.click(screen.getByRole('button', { name: 'Expand Treasury Main' }))
     await user.click(screen.getByRole('button', { name: 'More actions for Send to Contoso Ltd' }))
-    expect((await screen.findAllByRole('menuitem')).map((item) => item.textContent)).toEqual([
+    const menu = await screen.findAllByRole('menuitem')
+    expect(menu.map((item) => item.textContent)).toEqual([
       'Remind signers',
+      'Replace with a transfer',
+      'Reject',
       'Copy link',
+      'Invite signers to workspace',
+      'Delete from queue',
     ])
+    expect(
+      menu.filter((item) => item.getAttribute('aria-disabled') !== 'true').map((item) => item.textContent),
+    ).toEqual(['Remind signers', 'Copy link'])
+    await user.hover(screen.getByRole('menuitem', { name: 'Reject' }).parentElement!)
+    expect(await screen.findByText('Only signers of this Safe can reject it.')).toBeVisible()
   })
 
   it('keeps dependency inspection available when earlier proposals are filtered out', async () => {
@@ -233,9 +244,9 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('button', { name: 'Collapse Ops Payroll' })).toBeVisible()
     expect(safeToggle('Grants')).not.toBeInTheDocument()
   })
-  it('labels each Safe band with its name and network, with details on hover and a summary when collapsed', async () => {
+  it('labels each Safe band with its name, with details on hover and a summary when collapsed', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
-    expect(safeBand('Treasury Main')).toHaveTextContent(/^Treasury MainEthereum$/)
+    expect(safeBand('Treasury Main')).toHaveTextContent(/^Treasury Main$/)
     await user.hover(within(safeBand('Treasury Main')).getByText('Treasury Main'))
     const tooltip = (await screen.findByText('0x867500000000000000000000000000000000c3d2')).closest(
       '[data-slot="tooltip-content"]',
@@ -244,7 +255,7 @@ describe('queue design exploration', () => {
     expect(tooltip).toHaveTextContent('Next nonce#42')
     await user.unhover(within(safeBand('Treasury Main')).getByText('Treasury Main'))
     await user.click(screen.getByRole('button', { name: 'Collapse Treasury Main' }))
-    expect(safeBand('Treasury Main')).toHaveTextContent('Treasury MainEthereum2 to sign · 1 blocked')
+    expect(safeBand('Treasury Main')).toHaveTextContent('Treasury Main2 to sign · 1 blocked')
     expect(screen.queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
   })
   it('keeps blocker details accessible while the Status filter hides the blocker row', async () => {
@@ -331,15 +342,13 @@ describe('queue design exploration', () => {
     await user.click(dialog.getByRole('button', { name: 'Note' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('Q4 vendor payment.')
   })
-  it('executes after confirmation and unblocks the next nonce', async () => {
+  it('submits after confirmation and shows Processing until it is indexed', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
     await user.click(allPending().getByRole('button', { name: 'Sign Send to Globex Payroll' }))
     await user.click(screen.getByRole('button', { name: 'Sign and execute in preview' }))
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Send to Globex Payroll executed in this preview. Next nonce is #43.',
-    )
-    expect(allPending().queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
-    expect(within(rowFor('Add signer Priya')).getByRole('button', { name: 'Execute Add signer Priya' })).toBeVisible()
+    expect(screen.getByRole('status')).toHaveTextContent('Send to Globex Payroll submitted in this preview.')
+    expect(rowFor('Send to Globex Payroll')).toHaveTextContent(/Processing 0:0\d/)
+    expect(rowFor('Add signer Priya')).toHaveTextContent('Blocked by #42')
   })
   it('creates a rejection competitor while retaining the original and its note', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
@@ -414,6 +423,8 @@ describe('queue design exploration', () => {
       'Replace with a transfer',
       'Reject',
       'Copy link',
+      'Invite signers to workspace',
+      'Delete from queue',
     ])
     await user.click(screen.getByRole('menuitem', { name: 'Replace with a transfer' }))
     expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Contoso Ltd')
@@ -438,15 +449,15 @@ describe('queue design exploration', () => {
     expect(within(nonce).getByRole('button', { name: /^Nonce 44\. / })).toBeInTheDocument()
     expect(transaction).toContainElement(within(row).getByRole('img', { name: /^Send\./ }))
   })
-  it('leaves the Safe and chain out of rows, since the Safe band names them', () => {
+  it('names the chain in its own column and leaves the Safe to its band', () => {
     render(<PendingQueue />)
     const row = rowFor('Add signer Priya')
     expect(within(row).getByRole('img', { name: /^Settings\./ })).toBeVisible()
     expect(within(row).getByRole('button', { name: /^Nonce 43\. / })).toBeVisible()
     expect(row).not.toHaveTextContent('Treasury Main')
-    expect(row).not.toHaveTextContent('Ethereum')
+    expect(within(row).getAllByRole('cell')[2]).toHaveTextContent(/^Ethereum$/)
     expect(row).toHaveTextContent('Blocked by #42')
-    expect(within(safeBand('Treasury Main')).getByText('Ethereum')).toBeVisible()
+    expect(within(safeBand('Treasury Main')).queryByText('Ethereum')).toBeNull()
   })
   it('opens mobile details full screen with the actions in the footer', async () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
@@ -493,9 +504,9 @@ describe('queue design exploration', () => {
         .getAllByRole('columnheader')
         .slice(0, -1)
         .map((header) => header.textContent),
-    ).toEqual(['Nonce', 'Transaction', 'Proposed', 'Signatures', 'Status'])
+    ).toEqual(['Nonce', 'Transaction', 'Chain', 'Proposed', 'Signatures', 'Status'])
     const row = rowFor('Send to Globex Payroll')
-    const [nonce, , proposed, , status] = within(row).getAllByRole('cell')
+    const [nonce, , , proposed, , status] = within(row).getAllByRole('cell')
     expect(nonce).toHaveTextContent(/^42$/)
     expect(proposed).toHaveTextContent(/^3d ago$/)
     expect(status).toHaveTextContent(/^Sign$/)
@@ -510,12 +521,12 @@ describe('queue design exploration', () => {
     render(<PendingQueue />)
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     const headers = table.getAllByRole('columnheader')
-    expect(headers).toHaveLength(6)
+    expect(headers).toHaveLength(7)
     expect(headers[0]).toHaveClass('max-md:sticky', 'max-md:left-0')
     expect(headers.at(-1)).toHaveClass('sticky', 'right-0')
     const row = rowFor('Send to Globex Payroll')
     const cells = within(row).getAllByRole('cell')
-    expect(cells).toHaveLength(6)
+    expect(cells).toHaveLength(7)
     expect(cells[0]).toHaveClass('max-md:sticky', 'max-md:left-0', 'max-md:bg-card')
     expect(cells.at(-1)).toHaveClass('sticky', 'right-0')
     fireEvent.click(row)
@@ -754,11 +765,12 @@ describe('queue design exploration', () => {
     expect(openRows()).toHaveLength(8)
     expect(screen.getByRole('button', { name: 'Expand Grants' })).toBeInTheDocument()
   })
-  it('opens on option A with the everyday queue when the link has no options', () => {
+  it('opens on option A with 5 Safes when the link has no options', () => {
     baseRender(<PendingQueue />)
     expect(screen.getByRole('tab', { name: 'A · One table' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByRole('group', { name: 'Fleet overview' })).not.toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('Everyday queue')
+    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('5 Safes')
+    expect(screen.getByRole('combobox', { name: 'State' })).toHaveTextContent('Normal')
   })
   it('filters by signer in option A, without the Fleet admin Proposal date section', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
@@ -783,6 +795,47 @@ describe('queue design exploration', () => {
     const [, transaction, to] = within(row).getAllByRole('cell')
     expect(transaction).not.toHaveTextContent('Globex Payroll')
     expect(to).toHaveTextContent(/^ToGlobex Payroll$/)
+  })
+  it('shows a stuck execution, locks its conflict, and finishes after Speed up', async () => {
+    jest.useFakeTimers()
+    try {
+      render(<PendingQueue />, { routerProps: { query: { scenario: 'executing' } } })
+      const batch = rowFor('Batch · 14 actions')
+      expect(batch).toHaveTextContent(/Processing 1:1\d/)
+      expect(rowFor('On-chain rejection')).toHaveTextContent('Locked')
+      expect(within(rowFor('On-chain rejection')).getByRole('button', { name: /locked$/ })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /1 executing/ })).toBeVisible()
+      fireEvent.click(within(batch).getByRole('button', { name: 'Speed up Batch · 14 actions' }))
+      await act(async () => {
+        jest.advanceTimersByTime(5_000)
+      })
+      expect(rowFor('Batch · 14 actions')).toHaveTextContent('Indexing')
+      await act(async () => {
+        jest.advanceTimersByTime(5_000)
+      })
+      expect(allPending().queryByRole('button', { name: 'Open Batch · 14 actions' })).toBeNull()
+      expect(allPending().queryByRole('button', { name: 'Open On-chain rejection' })).toBeNull()
+      expect(screen.getByRole('status')).toHaveTextContent('now invalid')
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+  it('scopes the Milestone 1 view: no side panel, no filter counts, and Sign runs straight away', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { m1: '1' } } })
+    await user.click(within(rowFor('Add signer Priya')).getByRole('button', { name: 'Open Add signer Priya' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('status')).toHaveTextContent('opens on its transaction page')
+    await user.click(within(rowFor('Send to Contoso Ltd')).getByRole('button', { name: 'Sign Send to Contoso Ltd' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('status')).toHaveTextContent('Signature added')
+    await openFilter(user, 'Safe account')
+    expect(await screen.findByRole('menuitemcheckbox', { name: /^Treasury Main/ })).toHaveTextContent(/^Treasury Main$/)
+  })
+  it('opens old scenario links on the closest scenario and state', () => {
+    render(<PendingQueue />, { routerProps: { query: { scenario: 'partial' } } })
+    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('5 Safes')
+    expect(screen.getByRole('combobox', { name: 'State' })).toHaveTextContent('Partial loading')
+    expect(screen.getByRole('alert')).toHaveTextContent('Showing proposals from 4 of 5 Safes')
   })
   it('opens the transaction from a shared link', () => {
     render(<PendingQueue />, { routerProps: { query: { tx: 'treasury-42' } } })
@@ -821,6 +874,17 @@ describe('queue design exploration', () => {
     const renderRealistic = () =>
       renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'realistic' } } })
 
+    it('shows the Safe App in place of the type, and contract logos or the code icon', async () => {
+      const { user } = renderRealistic()
+      await user.click(screen.getByRole('button', { name: 'Expand Grants' }))
+      const app = rowFor('Call setPreSignature on GPv2Settlement')
+      expect(within(app).getByRole('img', { name: /^CoW Swap\./ })).toBeVisible()
+      expect(within(app).queryByText('Contract')).toBeNull()
+      const proxy = rowFor('Call withdraw on InitializableImmutableAdminUpgradeabilityProxy')
+      expect(within(proxy).getByText('withdraw')).toBeVisible()
+      expect(within(proxy).getByText('InitializableImmutableAdminUpgradeabilityProxy')).toHaveClass('truncate')
+      expect(within(rowFor('Call approve on Aave v3 UNI')).getByText('Contract')).toBeVisible()
+    })
     it('shows the status words and an untrusted transaction flag', async () => {
       const { user } = renderRealistic()
       expect(rowFor('Add signer Priya')).toHaveTextContent('Blocked by #42')
@@ -894,7 +958,7 @@ describe('queue design exploration', () => {
     // The protocol fixture renders 50 Safes, which is slow under a full parallel run.
     const FLEET_TIMEOUT = 20_000
     const renderFleet = () =>
-      renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'fleet', scenario: 'protocol' } } })
+      renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'fleet', scenario: '50-safes' } } })
     const pulse = (label: string) =>
       within(screen.getByRole('group', { name: 'Fleet overview' })).getByRole('button', {
         name: new RegExp(label.replace(/[+.]/g, '\\$&')),
@@ -910,11 +974,10 @@ describe('queue design exploration', () => {
           'Signers',
           'Conflicting',
           'Blocked',
-          'Untrusted',
           'Stale 7 days',
         ])
         expect(pulse('Safes')).toHaveTextContent(/^50\s*Safes$/)
-        expect(pulse('Conflicting')).toHaveTextContent(/^4\s*Conflicting$/)
+        expect(pulse('Conflicting')).toHaveTextContent(/^7\s*Conflicting$/)
         expect(pulse('Conflicting')).toHaveAttribute('aria-pressed', 'false')
       },
       FLEET_TIMEOUT,
@@ -945,12 +1008,12 @@ describe('queue design exploration', () => {
       'unselects a card when its filter tag is removed',
       async () => {
         const { user } = renderFleet()
-        await user.click(pulse('Untrusted'))
-        expect(openRows()).toHaveLength(parseInt(pulse('Untrusted').textContent ?? ''))
+        await user.click(pulse('Stale 7 days'))
+        expect(openRows()).toHaveLength(parseInt(pulse('Stale 7 days').textContent ?? ''))
         const applied = within(screen.getByRole('group', { name: 'Applied filters' }))
-        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Status:Untrusted')
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Status:Stale 7 days')
         await user.click(applied.getAllByRole('button')[0])
-        expect(pulse('Untrusted')).toHaveAttribute('aria-pressed', 'false')
+        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'false')
         expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
       },
       FLEET_TIMEOUT,
@@ -960,12 +1023,12 @@ describe('queue design exploration', () => {
       async () => {
         const { user } = renderFleet()
         await user.click(pulse('Blocked'))
-        await user.click(pulse('Untrusted'))
+        await user.click(pulse('Stale 7 days'))
         expect(pulse('Blocked')).toHaveAttribute('aria-pressed', 'false')
-        expect(pulse('Untrusted')).toHaveAttribute('aria-pressed', 'true')
-        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(/^Status:UntrustedClear$/)
+        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'true')
+        expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(/^Status:Stale 7 daysClear$/)
         await user.click(pulse('Safes'))
-        expect(pulse('Untrusted')).toHaveAttribute('aria-pressed', 'false')
+        expect(pulse('Stale 7 days')).toHaveAttribute('aria-pressed', 'false')
         expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(/^Show:Safes/)
         expect(screen.getByRole('group', { name: 'Applied filters' })).not.toHaveTextContent('Status:')
         await user.click(pulse('Blocked'))
@@ -975,7 +1038,7 @@ describe('queue design exploration', () => {
           'aria-checked',
           'true',
         )
-        expect(screen.getByRole('menuitemcheckbox', { name: /^Untrusted/ })).toHaveAttribute('aria-checked', 'false')
+        expect(screen.getByRole('menuitemcheckbox', { name: /^Stale 7 days/ })).toHaveAttribute('aria-checked', 'false')
       },
       FLEET_TIMEOUT,
     )
@@ -1032,7 +1095,7 @@ describe('queue design exploration', () => {
       'opens a Safe from the Safes list, and links to a signer',
       async () => {
         const { user } = renderWithUserEvent(<PendingQueue />, {
-          routerProps: { query: { option: 'fleet', scenario: 'fleet' } },
+          routerProps: { query: { option: 'fleet', scenario: '20-safes' } },
         })
         await user.click(pulse('Safes'))
         const table = within(screen.getByRole('table', { name: 'Safes in this workspace' }))
@@ -1053,7 +1116,7 @@ describe('queue design exploration', () => {
       'opens a Safe from its band in the queue',
       async () => {
         const { user } = renderWithUserEvent(<PendingQueue />, {
-          routerProps: { query: { option: 'fleet', scenario: 'fleet' } },
+          routerProps: { query: { option: 'fleet', scenario: '20-safes' } },
         })
         await user.click(screen.getByRole('button', { name: 'Details for Payroll Gnosis' }))
         const drawer = within(screen.getByRole('dialog', { name: 'Safe details' }))

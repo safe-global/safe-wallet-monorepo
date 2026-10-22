@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 import { Check, ChevronDown, Info, LifeBuoy, ListFilter, Plus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
@@ -25,6 +25,9 @@ import { chainLogoUrl, FLAG_META, FLAGS, RECOVERY_TYPE, STATUS_META, TYPE_ICONS 
 import { matchesFlag, type QueueFilterState } from './useQueueFilters'
 
 const APPLIED_PILL = 'h-7 bg-card pr-2.5 pl-3 shadow-xs transition-colors hover:bg-muted'
+// Milestone 1 hides counts: they need queue service support across every Safe.
+export const FilterCountsContext = createContext(true)
+
 export function FilterOption({
   label,
   checked,
@@ -38,6 +41,7 @@ export function FilterOption({
   icon: ReactNode
   onToggle: () => void
 }) {
+  const showCounts = useContext(FilterCountsContext)
   return (
     <DropdownMenuCheckboxItem
       checked={checked}
@@ -55,7 +59,7 @@ export function FilterOption({
         {icon}
       </span>
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
+      {showCounts && <span className="text-xs tabular-nums text-muted-foreground">{count}</span>}
     </DropdownMenuCheckboxItem>
   )
 }

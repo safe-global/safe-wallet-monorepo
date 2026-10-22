@@ -150,6 +150,17 @@ export function SummarySection({ tx, status }: { tx: Proposal; status?: ReactNod
           <TypeTag type={getTypeLabel(tx)} />
         </span>
       </PanelRow>
+      {tx.app && (
+        <PanelRow label="App">
+          <span className="flex items-center justify-end gap-2">
+            <Avatar size="xs" className="size-5">
+              {tx.app.logo && <AvatarImage src={tx.app.logo} alt="" />}
+              <AvatarFallback>{tx.app.name[0]}</AvatarFallback>
+            </Avatar>
+            {tx.app.name}
+          </span>
+        </PanelRow>
+      )}
       <PanelRow label="Action">
         <SummaryText tx={tx} />
       </PanelRow>

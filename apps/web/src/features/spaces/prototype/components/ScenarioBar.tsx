@@ -3,29 +3,60 @@ import { Check, Copy, FlaskConical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
-import type { Direction, Persona, Scenario } from '../types'
+import type { Direction, Persona, QueueState, Scenario } from '../types'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
-import { getScenarioAccounts, shortAddress } from '../services/model'
+import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
 import { PixelAvatar } from './PixelAvatar'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../services/workspace'
 
+// Workspace sizes. From 20 Safes up, each one has every transaction type, recoveries and conflicts.
 export const SCENARIOS: { value: Scenario; label: string }[] = [
-  { value: 'fleet', label: 'Fleet admin' },
-  { value: 'everyday', label: 'Everyday queue' },
-  { value: 'realistic', label: 'Realistic mix' },
-  { value: 'conflict', label: 'Conflicting transactions' },
-  { value: 'conflict-heavy', label: 'Many conflicting' },
-  { value: 'conflict-mixed', label: 'Conflicts with mixed statuses' },
-  { value: 'gap', label: 'Missing dependency' },
-  { value: 'partial', label: 'Partial loading' },
-  { value: 'recovery', label: 'Account recovery' },
-  { value: 'many-safes', label: '20 Safes' },
-  { value: 'protocol', label: 'Protocol team · 50 Safes' },
+  { value: '1-safe', label: '1 Safe' },
+  { value: '5-safes', label: '5 Safes' },
+  { value: '10-safes', label: '10 Safes' },
+  { value: '20-safes', label: '20 Safes' },
+  { value: '50-safes', label: '50 Safes' },
+]
+// Hidden fixtures: old links and tests still open them.
+const HIDDEN_SCENARIOS: Scenario[] = ['everyday', 'realistic', 'conflict', 'conflict-heavy']
+const SCENARIO_LABELS = [...SCENARIOS, ...HIDDEN_SCENARIOS.map((value) => ({ value, label: 'Earlier fixture' }))]
+export const STATES: { value: QueueState; label: string }[] = [
+  { value: 'normal', label: 'Normal' },
   { value: 'loading', label: 'Loading' },
   { value: 'error', label: 'Failed to load' },
   { value: 'empty', label: 'Empty workspace' },
+  { value: 'partial', label: 'Partial loading' },
+  { value: 'executing', label: 'Executing' },
 ]
+export const DEFAULT_SCENARIO: Scenario = '5-safes'
+// Links from before the split keep working: removed scenarios open the closest size or state.
+const OLD_SCENARIOS: Record<string, { scenario: Scenario; state?: QueueState }> = {
+  fleet: { scenario: '20-safes' },
+  'many-safes': { scenario: '20-safes' },
+  recovery: { scenario: '20-safes' },
+  protocol: { scenario: '50-safes' },
+  gap: { scenario: DEFAULT_SCENARIO },
+  'conflict-mixed': { scenario: DEFAULT_SCENARIO },
+  loading: { scenario: DEFAULT_SCENARIO, state: 'loading' },
+  error: { scenario: DEFAULT_SCENARIO, state: 'error' },
+  empty: { scenario: DEFAULT_SCENARIO, state: 'empty' },
+  partial: { scenario: DEFAULT_SCENARIO, state: 'partial' },
+  executing: { scenario: DEFAULT_SCENARIO, state: 'executing' },
+}
+export const parseScenario = (query: { scenario?: unknown; state?: unknown }) => {
+  const value = typeof query.scenario === 'string' ? query.scenario : ''
+  const known = [...SCENARIOS.map((item) => item.value), ...HIDDEN_SCENARIOS].find((item) => item === value)
+  const old = OLD_SCENARIOS[value]
+  const state = STATES.find((item) => item.value === query.state)?.value ?? old?.state ?? 'normal'
+  return { scenario: known ?? old?.scenario ?? DEFAULT_SCENARIO, state }
+}
+const describeScenario = (scenario: Scenario) => {
+  const count = getScenario(scenario).length
+  return `${count} ${count === 1 ? 'transaction' : 'transactions'}`
+}
 
 export type Hypernative = 'in' | 'out' | 'none'
 
@@ -91,10 +122,14 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
 export function ScenarioBar({
   direction,
   scenario,
+  state,
   hypernative,
   persona,
+  milestone1,
   onChange,
 }: {
+  milestone1: boolean
+  state: QueueState
   direction: Direction
   scenario: Scenario
   hypernative: Hypernative
@@ -113,7 +148,7 @@ export function ScenarioBar({
           value={direction}
           // Fleet admin opens on its own 20-Safe workspace.
           onValueChange={(value) =>
-            onChange(value === 'fleet' ? { option: 'fleet', scenario: 'fleet' } : { option: String(value) })
+            onChange(value === 'fleet' ? { option: 'fleet', scenario: '20-safes' } : { option: String(value) })
           }
         >
           <TabsList aria-label="Design direction">
@@ -122,16 +157,49 @@ export function ScenarioBar({
             <TabsTrigger value="aligned">C · To column</TabsTrigger>
           </TabsList>
         </Tabs>
+        {/* Milestone 1 scope from the Oct 22 review: no side panel, no overview cards, no filter counts. */}
+        <Field orientation="horizontal" className="w-auto px-2">
+          <Switch
+            id="prototype-milestone-1"
+            checked={milestone1}
+            onCheckedChange={(checked) => onChange({ m1: checked ? '1' : '0' })}
+          />
+          <FieldLabel htmlFor="prototype-milestone-1" className="text-xs">
+            Milestone 1
+          </FieldLabel>
+        </Field>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <label className="sr-only" htmlFor="scenario">
             Scenario
           </label>
-          <Select value={scenario} items={SCENARIOS} onValueChange={(value) => value && onChange({ scenario: value })}>
+          <Select
+            value={scenario}
+            items={SCENARIO_LABELS}
+            onValueChange={(value) => value && onChange({ scenario: value })}
+          >
             <SelectTrigger id="scenario" size="sm" variant="ghost" aria-label="Scenario">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="w-auto min-w-(--anchor-width)">
               {SCENARIOS.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  <span className="flex w-full items-center justify-between gap-4">
+                    {item.label}
+                    <span className="text-xs text-muted-foreground">{describeScenario(item.value)}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <label className="sr-only" htmlFor="queue-state">
+            State
+          </label>
+          <Select value={state} items={STATES} onValueChange={(value) => value && onChange({ state: value })}>
+            <SelectTrigger id="queue-state" size="sm" variant="ghost" aria-label="State">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="w-auto min-w-(--anchor-width)">
+              {STATES.map((item) => (
                 <SelectItem key={item.value} value={item.value}>
                   {item.label}
                 </SelectItem>

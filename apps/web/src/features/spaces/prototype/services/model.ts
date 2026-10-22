@@ -204,14 +204,30 @@ export const fleetAccounts: Account[] = FLEET_SAFES.map(([name, network, owners,
   }
 })
 export const knownAccounts = [...accounts, ...manySafesAccounts, ...protocolAccounts, ...fleetAccounts]
+// 5 and 10 Safes add Safes from the many-Safes list to the everyday three.
+const FIVE_SAFES = ['market-making', 'security-council']
+const TEN_SAFES = [
+  'market-making',
+  'grants-committee',
+  'security-council',
+  'liquidity-ops',
+  'marketing',
+  'ecosystem-fund',
+  'bug-bounty',
+]
+const pick = (ids: string[]) => manySafesAccounts.filter((account) => ids.includes(account.id))
 export const getScenarioAccounts = (scenario: Scenario) =>
-  scenario === 'many-safes'
-    ? [...accounts, ...manySafesAccounts]
-    : scenario === 'protocol'
-      ? protocolAccounts
-      : scenario === 'fleet'
-        ? fleetAccounts
-        : accounts
+  scenario === '1-safe'
+    ? accounts.filter((account) => account.id === 'treasury')
+    : scenario === '5-safes'
+      ? [...accounts, ...pick(FIVE_SAFES)]
+      : scenario === '10-safes'
+        ? [...accounts, ...pick(TEN_SAFES)]
+        : scenario === '50-safes'
+          ? protocolAccounts
+          : scenario === '20-safes'
+            ? fleetAccounts
+            : accounts
 
 const queued = (
   account: string,
@@ -672,6 +688,8 @@ const proposals: Proposal[] = [
   },
 ]
 // A realistic mix: decoder gaps, delegate calls, competing sends and an unknown bridge network.
+// Public token logos, the same source the Policies prototype uses.
+const TOKEN_LOGOS = 'https://safe-transaction-assets.safe.global/tokens/logos'
 const realisticProposals: Proposal[] = [
   {
     id: 'treasury-45',
@@ -808,6 +826,52 @@ const realisticProposals: Proposal[] = [
     eligible: true,
     proposedBy: 'Proposer · 0x8f1c…22d0',
   },
+  // Contract calls as production shows them: from a Safe App, to an unknown contract with a long name, and to a known one.
+  {
+    id: 'grants-12',
+    account: 'grants',
+    nonce: 12,
+    recipient: 'GPv2Settlement · 0x9008…ab41',
+    amount: '',
+    kind: { type: 'contract', contract: 'GPv2Settlement', method: 'setPreSignature', verified: true },
+    app: { name: 'CoW Swap', logo: `${TOKEN_LOGOS}/0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB.png` },
+    age: '12m ago',
+    signers: ['Ana'],
+    eligible: true,
+  },
+  {
+    id: 'grants-13',
+    account: 'grants',
+    nonce: 13,
+    recipient: 'InitializableImmutableAdminUpgradeabilityProxy · 0x87870…a2e2',
+    amount: '',
+    kind: {
+      type: 'contract',
+      contract: 'InitializableImmutableAdminUpgradeabilityProxy',
+      method: 'withdraw',
+      verified: false,
+    },
+    age: '8m ago',
+    signers: [],
+    eligible: true,
+  },
+  {
+    id: 'grants-14',
+    account: 'grants',
+    nonce: 14,
+    recipient: 'Aave v3 UNI · 0xf6d2…cab1',
+    amount: '',
+    kind: {
+      type: 'contract',
+      contract: 'Aave v3 UNI',
+      method: 'approve',
+      verified: true,
+      logo: `${TOKEN_LOGOS}/0x4da27a545c0c5B758a6BA100e3a049001de870f5.png`,
+    },
+    age: '5m ago',
+    signers: [],
+    eligible: true,
+  },
 ]
 export const getAccount = (tx: Proposal) => {
   const account = knownAccounts.find((account) => account.id === tx.account)!
@@ -834,12 +898,98 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
     finalSignature: canSign && missing === 1 && tx.nonce === account.nextNonce,
   }
 }
+// 20 and 50 Safes: one of each type the others lack, plus a conflict between three transactions.
+// They go at the end of a few queues, so they also show waiting on earlier nonces.
+type MixTemplate = Pick<Proposal, 'recipient' | 'amount' | 'kind' | 'age'> & Pick<Partial<Proposal>, 'app' | 'fiat'>
+const MIX: MixTemplate[] = [
+  {
+    recipient: 'GPv2Settlement · 0x9008…ab41',
+    amount: '',
+    kind: { type: 'contract', contract: 'GPv2Settlement', method: 'setPreSignature', verified: true },
+    app: { name: 'CoW Swap', logo: `${TOKEN_LOGOS}/0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB.png` },
+    age: '12m ago',
+  },
+  {
+    recipient: 'InitializableImmutableAdminUpgradeabilityProxy · 0x87870…a2e2',
+    amount: '',
+    kind: {
+      type: 'contract',
+      contract: 'InitializableImmutableAdminUpgradeabilityProxy',
+      method: 'withdraw',
+      verified: false,
+    },
+    age: '8m ago',
+  },
+  {
+    recipient: 'Aave v3 UNI · 0xf6d2…cab1',
+    amount: '',
+    kind: {
+      type: 'contract',
+      contract: 'Aave v3 UNI',
+      method: 'approve',
+      verified: true,
+      logo: `${TOKEN_LOGOS}/0x4da27a545c0c5B758a6BA100e3a049001de870f5.png`,
+    },
+    age: '5m ago',
+  },
+  {
+    recipient: 'Across Spoke Pool · 0x5c7b…c5f1',
+    amount: '25 ETH',
+    fiat: '$80,000',
+    kind: { type: 'bridge', sell: '25 ETH', destination: 'Base', destinationChainId: '8453', fees: '0.01 ETH' },
+    age: '1h ago',
+  },
+  {
+    recipient: 'Treasury Ethereum',
+    amount: '',
+    kind: { type: 'nested', parentSafe: 'Treasury Ethereum', parentNonce: 3 },
+    age: '30m ago',
+  },
+]
+const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => {
+  const all = [...items]
+  const nextFree = (account: Account) =>
+    Math.max(account.nextNonce - 1, ...all.filter((tx) => tx.account === account.id).map((tx) => tx.nonce)) + 1
+  const add = (account: Account, template: MixTemplate, nonce: number, suffix: string) =>
+    all.push({
+      ...template,
+      id: `${account.id}-mix-${suffix}`,
+      account: account.id,
+      nonce,
+      signers: [account.owners[0]],
+      eligible: true,
+    })
+  MIX.forEach((template, index) => {
+    const account = scenarioAccounts[(index * 3 + 1) % scenarioAccounts.length]
+    add(account, template, nextFree(account), String(index))
+  })
+  // Three transactions at one nonce: two sends and the rejection that cancels them.
+  const account = scenarioAccounts[2 % scenarioAccounts.length]
+  const nonce = nextFree(account)
+  const send = (amount: string): MixTemplate => ({
+    recipient: 'Northwind · 0x2b9c…71e0',
+    amount,
+    kind: { type: 'transfer' },
+    age: '3h ago',
+  })
+  add(account, send('50,000 USDC'), nonce, 'a')
+  add(account, send('45,000 USDC'), nonce, 'b')
+  add(account, { recipient: account.name, amount: '', kind: { type: 'rejection' }, age: '20m ago' }, nonce, 'c')
+  return all
+}
+
 export const getScenario = (scenario: Scenario): Proposal[] => {
-  if (scenario === 'empty' || scenario === 'loading' || scenario === 'error') return []
   const items = proposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))
-  if (scenario === 'many-safes') return [...items, ...manySafesProposals()]
-  if (scenario === 'protocol') return protocolProposals()
-  if (scenario === 'fleet') return fleetProposals()
+  const realistic = () => [...items, ...realisticProposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))]
+  const withSafes = (ids: string[]) => manySafesProposals().filter((tx) => ids.includes(tx.account))
+  if (scenario === '1-safe')
+    return realistic()
+      .filter((tx) => tx.account === 'treasury' || tx.id === 'grants-12')
+      .map((tx) => (tx.id === 'grants-12' ? { ...tx, id: 'treasury-49', account: 'treasury', nonce: 49 } : tx))
+  if (scenario === '5-safes') return [...realistic(), ...withSafes(FIVE_SAFES)]
+  if (scenario === '10-safes') return [...realistic(), ...withSafes(TEN_SAFES)]
+  if (scenario === '20-safes') return withMix(fleetProposals(), fleetAccounts)
+  if (scenario === '50-safes') return withMix(protocolProposals(), protocolAccounts)
   if (scenario === 'conflict')
     items.push({
       id: 'treasury-42-swap',
@@ -896,47 +1046,7 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
       },
     ]
   }
-  if (scenario === 'conflict-mixed')
-    return [
-      ...items.map((tx) => (tx.id === 'treasury-42' ? { ...tx, signers: ['Ana', 'Max', 'Jonas'] } : tx)),
-      {
-        id: 'treasury-42-swap',
-        account: 'treasury',
-        nonce: 42,
-        recipient: 'CoW Swap · USDC → ETH',
-        amount: '200,000 USDC',
-        kind: { type: 'swap', sell: '200,000 USDC', buy: '62.4 ETH', order: 'market', expiry: 'Expires in 18h' },
-        age: '2d ago',
-        signers: ['Max'],
-        eligible: true,
-      },
-      {
-        id: 'treasury-42-owner',
-        account: 'treasury',
-        nonce: 42,
-        recipient: 'Marco · 0x7d2e…41ab',
-        amount: '',
-        kind: { type: 'settings', change: { kind: 'addOwner', owner: 'Marco' } },
-        age: '1d ago',
-        signers: ['Dev', 'Lena'],
-        eligible: true,
-      },
-      {
-        id: 'treasury-43-threshold',
-        account: 'treasury',
-        nonce: 43,
-        recipient: 'Treasury Main policy',
-        amount: '',
-        kind: { type: 'settings', change: { kind: 'changeThreshold', threshold: 2 } },
-        age: '5h ago',
-        signers: ['Jonas'],
-        eligible: true,
-      },
-    ]
-  if (scenario === 'realistic')
-    return [...items, ...realisticProposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))]
-  if (scenario === 'gap') return items.filter((tx) => tx.id !== 'treasury-42')
-  if (scenario === 'partial') return items.filter((tx) => tx.account !== 'grants')
+  if (scenario === 'realistic') return realistic()
   return items
 }
 export const getPrimaryStatus = (tx: Proposal, persona: Persona): Filter => {

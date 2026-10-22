@@ -16,7 +16,7 @@ const TONES: Record<Tone, { hover: string; active: string }> = {
     active: 'bg-success-subtle text-success-strong',
   },
 }
-export type FleetCardKey = 'safes' | 'signers' | 'conflicting' | 'blocked' | 'untrusted' | 'stale'
+export type FleetCardKey = 'safes' | 'signers' | 'conflicting' | 'blocked' | 'stale'
 // Safes and Signers swap the queue for a list. The rest are shortcuts to Status filters.
 const CARDS: { key: FleetCardKey; label: (count: number) => string; hint: string; tone: Tone }[] = [
   {
@@ -38,7 +38,6 @@ const CARDS: { key: FleetCardKey; label: (count: number) => string; hint: string
     hint: 'Waiting on an earlier transaction in the same Safe to execute first.',
     tone: 'warning',
   },
-  { key: 'untrusted', label: () => FLAG_META.untrusted.short, hint: FLAG_META.untrusted.hint, tone: 'warning' },
   { key: 'stale', label: () => FLAG_META.stale.short, hint: FLAG_META.stale.hint, tone: 'warning' },
 ]
 
@@ -98,7 +97,7 @@ export function FleetPulse({
   onSelect: (key: FleetCardKey) => void
 }) {
   return (
-    <div role="group" aria-label="Fleet overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+    <div role="group" aria-label="Fleet overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
       {CARDS.map(({ key, label, hint, tone }) => (
         <PulseCard
           key={key}

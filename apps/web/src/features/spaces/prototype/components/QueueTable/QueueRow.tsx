@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { Badge } from '@safe-global/views/components/ui/badge'
@@ -30,10 +31,19 @@ import { SignatureGauge } from './SignatureGauge'
 import { getRiskFlags, RiskFlagBadge } from '../RiskFlag'
 import { NonceLabel, NonceMark } from './NonceCell'
 import { SignerList } from './SignerList'
-import { getMenuActions, getPrimaryAction, getStatusHint, MENU_LABELS, type MenuAction } from '../../services/actions'
+import {
+  getMenuItems,
+  getPrimaryAction,
+  getStatusHint,
+  MENU_LABELS,
+  RARE_MENU_ACTIONS,
+  type MenuAction,
+} from '../../services/actions'
 import type { PreviewAction } from '../../services/queue'
 import { Counterparty, TransactionHead } from './TransactionLine'
-import { HINT_CLASS, StatusChip, StepsStatusChip } from '../shared'
+import { ExecutionChip, LockedChip } from './ExecutionStatus'
+import { canSpeedUp, getLockingTx, type Executions } from '../../services/execution'
+import { chainLogoUrl, HINT_CLASS, StatusChip, StepsStatusChip } from '../shared'
 
 export type QueueRowProps = {
   tx: Proposal
@@ -61,6 +71,9 @@ export type QueueRowProps = {
   // The hovered conflict group, as `account:nonce`.
   conflictHover?: string | null
   onConflictHover?: (key: string | null) => void
+  executions?: Executions
+  now?: number
+  onSpeedUp?: (id: string) => void
 }
 
 export function QueueRow({
@@ -84,12 +97,17 @@ export function QueueRow({
   onMenuAction,
   conflictHover,
   onConflictHover,
+  executions = {},
+  now = Date.now(),
+  onSpeedUp,
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
   // The drawer covers the row, so mouseleave does not fire. mousemove resets the hover.
   useEffect(() => setHovered(false), [selected])
   const conflicts = getConflicts(tx, items)
+  const execution = executions[tx.id]
+  const lockedBy = execution ? undefined : getLockingTx(tx, items, executions)
   const sameNonce = (other: Proposal) => other.account === tx.account && other.nonce === tx.nonce
   const groupSize = sectionItems.filter(sameNonce).length
   const optionIndex = sectionItems.filter(sameNonce).indexOf(tx) + 1
@@ -102,7 +120,7 @@ export function QueueRow({
   const reminded = remindedIds.includes(tx.id)
   // Shared action rules set the main button, the menu and the status hint.
   const primaryAction = getPrimaryAction(tx, items, persona, remindedIds, 'row')
-  const menuActions = getMenuActions(tx, items, persona, primaryAction)
+  const menuItems = getMenuItems(tx, items, persona)
   const statusHint = getStatusHint(tx, items, persona)
   const stop = (run: () => void) => (event: { stopPropagation: () => void }) => {
     event.stopPropagation()
@@ -212,6 +230,14 @@ export function QueueRow({
         </div>
       </TableCell>
     ),
+    Chain: (
+      <TableCell className="text-sm">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <img src={chainLogoUrl(account.chainId)} alt="" className="size-4 shrink-0 rounded-full" />
+          <span className="truncate">{account.network}</span>
+        </span>
+      </TableCell>
+    ),
     To: (
       <TableCell className="py-2">
         <Counterparty tx={tx} inColumn />
@@ -265,28 +291,35 @@ export function QueueRow({
     Status: (
       <TableCell>
         <div className="flex flex-wrap items-center gap-1.5">
-          <Tooltip delay={150}>
-            <TooltipTrigger
-              render={<span />}
-              aria-label={`${getStepsStatus(tx, persona).label}. ${statusHint}`}
-              onClick={(event) => event.stopPropagation()}
-            >
-              {willBeReplaced ? (
-                <StatusChip tone="secondary">Would be replaced</StatusChip>
-              ) : (
-                <StepsStatusChip tx={tx} persona={persona} />
-              )}
-            </TooltipTrigger>
-            <TooltipContent>
-              {willBeReplaced ? 'Replaced if the option you are pointing at executes.' : statusHint}
-            </TooltipContent>
-          </Tooltip>
+          {execution ? (
+            <ExecutionChip execution={execution} now={now} />
+          ) : lockedBy ? (
+            <LockedChip by={lockedBy} />
+          ) : (
+            <Tooltip delay={150}>
+              <TooltipTrigger
+                render={<span />}
+                aria-label={`${getStepsStatus(tx, persona).label}. ${statusHint}`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                {willBeReplaced ? (
+                  <StatusChip tone="secondary">Would be replaced</StatusChip>
+                ) : (
+                  <StepsStatusChip tx={tx} persona={persona} />
+                )}
+              </TooltipTrigger>
+              <TooltipContent>
+                {willBeReplaced ? 'Replaced if the option you are pointing at executes.' : statusHint}
+              </TooltipContent>
+            </Tooltip>
+          )}
           {getRiskFlags(tx)
             .filter((flag) => flag.key === 'untrusted')
             .map((flag) => (
               <RiskFlagBadge key={flag.key} flag={flag} />
             ))}
-          {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">{conflicts.length + 1} conflicting</Badge>}
+          {/* Grouped conflicts carry the badge on their group header instead. */}
+          {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">Conflicting</Badge>}
         </div>
       </TableCell>
     ),
@@ -303,7 +336,36 @@ export function QueueRow({
     Action: (
       <TableCell className="sticky right-0 z-10 bg-card group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]">
         <div className="flex items-center justify-end gap-1">
-          {primaryAction.kind === 'review' && !primary.hint ? (
+          {execution ? (
+            canSpeedUp(execution, now) ? (
+              <Button
+                size="2xs"
+                variant="default"
+                className="w-20"
+                aria-label={`Speed up ${getTransactionLabel(tx)}`}
+                onClick={stop(() => onSpeedUp?.(tx.id))}
+              >
+                Speed up
+              </Button>
+            ) : (
+              <span className="w-20" aria-hidden="true" />
+            )
+          ) : lockedBy ? (
+            <Tooltip delay={150}>
+              <TooltipTrigger render={<span className="flex" />}>
+                <Button
+                  size="2xs"
+                  variant="outline"
+                  className="w-20"
+                  disabled
+                  aria-label={`${primaryLabel} ${getTransactionLabel(tx)}, locked`}
+                >
+                  {primaryLabel}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Available if #{lockedBy.nonce} fails.</TooltipContent>
+            </Tooltip>
+          ) : primaryAction.kind === 'review' && !primary.hint ? (
             // No main button when there is nothing to do. The row still opens the drawer.
             <span className="w-20" aria-hidden="true" />
           ) : primary.hint ? (
@@ -361,11 +423,29 @@ export function QueueRow({
               className="w-auto min-w-40 whitespace-nowrap"
               onClick={(event) => event.stopPropagation()}
             >
-              {menuActions.map((action) => (
-                <DropdownMenuItem key={action} onClick={() => onMenuAction?.(tx, action)}>
-                  {action === 'remind' && reminded ? 'Remind signers again' : MENU_LABELS[action]}
-                </DropdownMenuItem>
-              ))}
+              {menuItems.map(({ action, reason }, index) => {
+                const label = action === 'remind' && reminded ? 'Remind signers again' : MENU_LABELS[action]
+                const divider = index > 0 && action === RARE_MENU_ACTIONS[0] && <DropdownMenuSeparator />
+                const item = reason ? (
+                  // Disabled items ignore the pointer, so the wrapper holds the tooltip.
+                  <Tooltip delay={150}>
+                    <TooltipTrigger render={<div />}>
+                      <DropdownMenuItem disabled>{label}</DropdownMenuItem>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className={HINT_CLASS}>
+                      {reason}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <DropdownMenuItem onClick={() => onMenuAction?.(tx, action)}>{label}</DropdownMenuItem>
+                )
+                return (
+                  <Fragment key={action}>
+                    {divider}
+                    {item}
+                  </Fragment>
+                )
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -384,6 +464,8 @@ export function QueueRow({
           </TableCell>
           <TableCell colSpan={columnCount - 1} className="pt-4 pb-1">
             <div className="flex w-max flex-wrap items-center gap-x-2 gap-y-1 text-xs max-md:sticky max-md:left-4 max-md:w-[calc(100vw-5rem)] max-md:whitespace-normal">
+              {/* Orange, so the conflict reads at a glance (Oct 22 review). */}
+              <Badge variant="warning">Conflicting</Badge>
               <span className="text-muted-foreground">
                 Only 1/{groupSize} transactions can execute. Once it does, the{' '}
                 {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
@@ -406,7 +488,8 @@ export function QueueRow({
           setHovered(false)
           if (groupSize > 1) onConflictHover?.(null)
         }}
-        className={`group/transaction relative h-14 cursor-pointer data-[state=selected]:bg-transparent [&:has(:focus-visible)>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted || cursor ? '[&>td]:bg-muted' : ''}`}
+        data-executing={execution ? true : undefined}
+        className={`group/transaction relative h-14 cursor-pointer data-[executing]:[&>td]:bg-info-subtle/40 data-[state=selected]:bg-transparent [&:has(:focus-visible)>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted || cursor ? '[&>td]:bg-muted' : ''}`}
       >
         {columns.map((label) => (
           <Fragment key={label}>{cells[label]}</Fragment>

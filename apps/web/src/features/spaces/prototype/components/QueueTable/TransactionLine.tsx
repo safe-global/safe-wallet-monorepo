@@ -4,7 +4,7 @@ import { getCounterpartyCell, getCounterpartyJoin, getSummary, getSummaryHint } 
 import { getTypeLabel, shortAddress } from '../../services/model'
 import type { Proposal } from '../../types'
 import { Tag } from '@safe-global/views/components/ui/tag'
-import { HINT_CLASS, ROW_TAG_FILL, TypeTag } from '../shared'
+import { AppTag, HINT_CLASS, ROW_TAG_FILL, TypeTag } from '../shared'
 
 // A name only when the address book has one. Otherwise the short address.
 const hasName = (name: string) => !!name && name !== 'Unknown' && !name.startsWith('0x')
@@ -23,11 +23,11 @@ export function SummaryText({ tx }: { tx: Proposal }) {
   )
 }
 
-// Type tag and what happens.
+// Type tag and what happens. In a row it keeps its width, and the other party truncates instead.
 export function TransactionHead({ tx, onRow = false }: { tx: Proposal; onRow?: boolean }) {
   return (
-    <span className="flex min-w-0 items-center gap-2">
-      <TypeTag type={getTypeLabel(tx)} onRow={onRow} />
+    <span className={`flex min-w-0 items-center gap-2 ${onRow ? 'shrink-0' : ''}`}>
+      {tx.app ? <AppTag app={tx.app} onRow={onRow} /> : <TypeTag type={getTypeLabel(tx)} onRow={onRow} />}
       <SummaryText tx={tx} />
     </span>
   )
@@ -39,8 +39,9 @@ export function Counterparty({ tx, inColumn = false }: { tx: Proposal; inColumn?
   if (tx.kind.type === 'settings' || tx.kind.type === 'rejection' || counterparty.name === 'This Safe') return null
   const address = counterparty.address ?? counterparty.avatar
   const named = hasName(counterparty.name)
+  // Inline, the other party stops at 14rem so the action stays readable. Its tooltip has the full name.
   return (
-    <span className="flex min-w-0 items-center gap-2">
+    <span className={`flex min-w-0 items-center gap-2 ${inColumn ? '' : 'max-w-56'}`}>
       {inColumn ? (
         // Fixed width, so names line up whether the tag says To or Via.
         <span className={`flex w-10 shrink-0 ${ROW_TAG_FILL}`}>
@@ -56,6 +57,8 @@ export function Counterparty({ tx, inColumn = false }: { tx: Proposal; inColumn?
         address={address}
         avatar={counterparty.avatar}
         mono={!named}
+        logo={counterparty.logo}
+        contract={counterparty.contract}
       />
     </span>
   )

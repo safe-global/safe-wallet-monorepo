@@ -1,6 +1,5 @@
 import { Fragment, useState, type ReactNode } from 'react'
 import { LifeBuoy, MoreHorizontal } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -15,7 +14,7 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { accounts } from '../../services/model'
+import { knownAccounts } from '../../services/model'
 import { isSignerOf } from '../../services/personas'
 import type { Persona } from '../../types'
 import { chainLogoUrl, HINT_CLASS, HintContent, RECOVERY_TYPE, ROW_TAG_FILL, SafeIdentity, StatusChip } from '../shared'
@@ -70,7 +69,7 @@ export function RecoveryRow({
   controller: RecoveryController
 }) {
   const { getPrimary, canCancel, cancel, setOpenId } = controller
-  const account = accounts.find((candidate) => candidate.id === recovery.accountId)!
+  const account = knownAccounts.find((candidate) => candidate.id === recovery.accountId)!
   const status = getRecoveryStatus(recovery)
   const progress = getReviewProgress(recovery)
   const primary = getPrimary(recovery)
@@ -123,19 +122,6 @@ export function RecoveryRow({
         </SafeIdentity>
       </TableCell>
     ),
-    Chain: (
-      <TableCell>
-        <Tooltip delay={150}>
-          <TooltipTrigger className="flex" aria-label={account.network} onClick={(event) => event.stopPropagation()}>
-            <Avatar size="xs">
-              <AvatarImage src={chainLogoUrl(account.chainId)} alt={account.network} />
-              <AvatarFallback>{account.network[0]}</AvatarFallback>
-            </Avatar>
-          </TooltipTrigger>
-          <TooltipContent>{account.network}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-    ),
     Proposed: (
       <TableCell className="text-sm">
         <Tooltip delay={150}>
@@ -145,6 +131,15 @@ export function RecoveryRow({
       </TableCell>
     ),
     Note: <TableCell />,
+    To: <TableCell />,
+    Chain: (
+      <TableCell className="text-sm">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <img src={chainLogoUrl(account.chainId)} alt="" className="size-4 shrink-0 rounded-full" />
+          <span className="truncate">{account.network}</span>
+        </span>
+      </TableCell>
+    ),
     Signatures: (
       <TableCell className="py-1">
         <Tooltip delay={150}>
@@ -254,18 +249,21 @@ export function RecoveryNoticeRow({ columnCount, count }: { columnCount: number;
 
 export function useRecoveries({
   enabled,
+  accountIds,
   persona,
   onFeedback,
 }: {
   enabled: boolean
+  // The Safes the three recoveries go on.
+  accountIds?: string[]
   persona: Persona
   onFeedback: (message: string) => void
 }) {
-  const [items, setItems] = useState(() => (enabled ? createRecoveries() : []))
+  const [items, setItems] = useState(() => (enabled ? createRecoveries(Date.now(), accountIds) : []))
   const [openId, setOpenId] = useState<string | null>(null)
   const update = (id: string, state: RecoveryState) =>
     setItems((current) => current.map((item) => (item.id === id ? { ...item, state } : item)))
-  const accountOf = (recovery: Recovery) => accounts.find((candidate) => candidate.id === recovery.accountId)!
+  const accountOf = (recovery: Recovery) => knownAccounts.find((candidate) => candidate.id === recovery.accountId)!
   const cancel = (recovery: Recovery) => {
     update(recovery.id, 'cancelling')
     onFeedback(

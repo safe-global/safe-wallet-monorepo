@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/com
 import { DrawerList } from '@/components/common/Drawer'
 import { formatAuditDateTime, useCopyToClipboard } from '@/components/common/AuditLog'
 import Identicon from '@/components/common/Identicon'
-import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
   getAccount,
@@ -103,7 +103,14 @@ export const getDetailItems = (proposal: Proposal, extended = false): { label: s
           label: 'Call',
           content: (
             <span className="flex flex-wrap items-center gap-1.5 md:justify-end">
-              <Code>{kind.method}</Code> on {kind.contract}
+              <Code>{kind.method}</Code> on
+              {kind.logo && (
+                <Avatar className="size-5">
+                  <AvatarImage src={kind.logo} alt="" />
+                  <AvatarFallback>{kind.contract[0]}</AvatarFallback>
+                </Avatar>
+              )}
+              <span className="break-all">{kind.contract}</span>
               <Badge variant={kind.verified ? 'outline' : 'warning'}>{kind.verified ? 'Verified' : 'Unverified'}</Badge>
             </span>
           ),

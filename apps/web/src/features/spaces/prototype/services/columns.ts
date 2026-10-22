@@ -103,6 +103,9 @@ export type Counterparty = {
   // Shown in the avatar tooltip, as in the Safe column.
   address?: string
   tone?: 'warning' | 'success'
+  // Contracts: the logo when known, otherwise the code icon instead of an identicon.
+  logo?: string
+  contract?: boolean
 }
 
 const MULTISEND = { name: 'MultiSendCallOnly 1.4.1', address: '0x40a2…3a1e' }
@@ -131,9 +134,12 @@ export const getCounterpartyCell = (tx: Proposal): Counterparty => {
         ? named(getRecipientName(tx), `To ${kind.destination}`)
         : { ...named(getRecipientName(tx), 'To an unknown network'), tone: 'warning' }
     case 'contract':
-      return kind.verified
-        ? { ...named(kind.contract, 'Verified contract'), tone: 'success' }
-        : { ...named(kind.contract, 'Unverified contract'), tone: 'warning' }
+      return {
+        ...named(kind.contract, kind.verified ? 'Verified contract' : 'Unverified contract'),
+        tone: kind.verified ? 'success' : 'warning',
+        logo: kind.logo,
+        contract: true,
+      }
     case 'batch': {
       const contract = recipientAddress?.startsWith('0x')
         ? named(getRecipientName(tx))

@@ -22,10 +22,14 @@ export type Recovery = {
 const HOUR = 3_600_000
 const DAY = 24 * HOUR
 
-export const createRecoveries = (now = Date.now()): Recovery[] => [
+// The three recoveries go on the given Safes, the everyday three by default.
+export const createRecoveries = (
+  now = Date.now(),
+  [first, second, third]: string[] = ['treasury', 'payroll', 'grants'],
+): Recovery[] => [
   {
-    id: 'treasury-recovery',
-    accountId: 'treasury',
+    id: `${first}-recovery`,
+    accountId: first,
     newSigners: ['0x9f2c000000000000000000000000000000002ab0', '0x44de00000000000000000000000000000000c0e1'],
     threshold: 2,
     recoverer: { name: 'Recovery partner', address: '0x7a3e0000000000000000000000000000000091c4' },
@@ -38,8 +42,8 @@ export const createRecoveries = (now = Date.now()): Recovery[] => [
     state: 'review',
   },
   {
-    id: 'payroll-recovery',
-    accountId: 'payroll',
+    id: `${second}-recovery`,
+    accountId: second,
     newSigners: ['0x51b0000000000000000000000000000000003e77'],
     threshold: 1,
     recoverer: { name: 'Unknown recoverer', address: '0xbad0000000000000000000000000000000000ffe' },
@@ -53,8 +57,8 @@ export const createRecoveries = (now = Date.now()): Recovery[] => [
     state: 'review',
   },
   {
-    id: 'grants-recovery',
-    accountId: 'grants',
+    id: `${third}-recovery`,
+    accountId: third,
     newSigners: ['0x2c1800000000000000000000000000000000aa02', '0x6f30000000000000000000000000000000005d19'],
     threshold: 2,
     recoverer: { name: 'Lena (backup wallet)', address: '0x2c1800000000000000000000000000000000aa02' },

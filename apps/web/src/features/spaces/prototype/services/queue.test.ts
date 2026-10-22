@@ -1,9 +1,10 @@
-import { getState } from './model'
+import { getScenario, getScenarioAccounts, getState } from './model'
 import {
   applyPreviewAction,
   BULK_EXECUTE_LIMIT,
   createPreviewQueue,
   executePreviewBatches,
+  getFirstReady,
   getBulkExecutable,
   proposePreviewAlternative,
 } from './queue'
@@ -108,5 +109,39 @@ describe('preview queue actions', () => {
     expect(next.completed.map((tx) => tx.id)).toEqual(['payroll-17', 'payroll-18'])
     expect(next.nextNonces.payroll).toBe(19)
     expect(next.items.filter((tx) => tx.account === 'treasury' && tx.nonce === 42)).toHaveLength(4)
+  })
+})
+
+describe('scenarios and states', () => {
+  it.each(['20-safes', '50-safes'] as const)('has every transaction type in %s', (scenario) => {
+    const items = getScenario(scenario)
+    const types = new Set(items.map((tx) => tx.kind.type))
+    for (const type of ['transfer', 'swap', 'bridge', 'batch', 'contract', 'settings', 'nested', 'rejection'])
+      expect(types).toContain(type)
+    expect(items.some((tx) => tx.app)).toBe(true)
+    expect(items.some((tx) => tx.kind.type === 'contract' && !tx.kind.verified)).toBe(true)
+    const threeWay = items.filter(
+      (tx) => tx.id.includes('-mix-') && tx.nonce === items.find((t) => t.id.endsWith('-mix-a'))?.nonce,
+    )
+    expect(threeWay.filter((tx) => tx.account === threeWay[0].account)).toHaveLength(3)
+  })
+
+  it('has as many Safes as its name says', () => {
+    expect(getScenarioAccounts('1-safe')).toHaveLength(1)
+    expect(getScenarioAccounts('5-safes')).toHaveLength(5)
+    expect(getScenarioAccounts('10-safes')).toHaveLength(10)
+    expect(getScenarioAccounts('20-safes')).toHaveLength(20)
+    expect(getScenarioAccounts('50-safes')).toHaveLength(50)
+  })
+
+  it('layers states on any scenario', () => {
+    expect(createPreviewQueue('20-safes', 'empty').items).toEqual([])
+    const lastSafe = getScenarioAccounts('20-safes').at(-1)!.id
+    expect(createPreviewQueue('20-safes', 'partial').items.some((tx) => tx.account === lastSafe)).toBe(false)
+    const running = getFirstReady(getScenario('20-safes'))!
+    const executing = createPreviewQueue('20-safes', 'executing').items
+    expect(
+      executing.filter((tx) => tx.account === running.account && tx.nonce === running.nonce).length,
+    ).toBeGreaterThan(1)
   })
 })

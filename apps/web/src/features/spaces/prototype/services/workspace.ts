@@ -25,7 +25,7 @@ export const getWorkspaceProfile = (scenario: Scenario) => {
   return {
     // The fixture workspace is a crypto-native company running its own treasury, payroll and grants.
     segment:
-      scenario === 'protocol' || scenario === 'fleet'
+      scenario === '50-safes' || scenario === '20-safes'
         ? `Protocol team · ${new Set(accounts.map((account) => account.network)).size} chains`
         : 'Crypto-native company · Manages onchain capital',
     plan: getPlan(accounts.length),

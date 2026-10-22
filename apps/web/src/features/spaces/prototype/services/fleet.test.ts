@@ -1,3 +1,4 @@
+import { isUntrusted } from '../components/RiskFlag'
 import { getOpsKind, getSignerLoad, hasConflicts, isStale, pinConflicting } from './fleet'
 import { matchesFlag } from '../components/QueueFilters/useQueueFilters'
 import type { Flag } from '../components/shared'
@@ -5,8 +6,8 @@ import { getScenario, getScenarioAccounts } from './model'
 import { rankAccounts } from '../components/QueueTable/sections'
 import type { Proposal } from '../types'
 
-const items = getScenario('protocol')
-const accounts = getScenarioAccounts('protocol')
+const items = getScenario('50-safes')
+const accounts = getScenarioAccounts('50-safes')
 const byId = (id: string) => items.find((tx) => tx.id.startsWith(id))!
 
 describe('fleet admin', () => {
@@ -29,7 +30,8 @@ describe('fleet admin', () => {
   })
 
   it('counts conflicting proposals across the fleet', () => {
-    expect(items.filter((tx) => matchesFlag(tx, 'conflicting', items))).toHaveLength(4)
+    // Two pairs, plus the three-way conflict from the mix.
+    expect(items.filter((tx) => matchesFlag(tx, 'conflicting', items))).toHaveLength(7)
   })
 
   it('lists every signer, ranked by how many proposals wait on them', () => {
@@ -43,8 +45,8 @@ describe('fleet admin', () => {
 })
 
 describe('fleet admin scenario', () => {
-  const fleetItems = getScenario('fleet')
-  const fleetAccounts = getScenarioAccounts('fleet')
+  const fleetItems = getScenario('20-safes')
+  const fleetAccounts = getScenarioAccounts('20-safes')
   const count = (flag: Flag) => fleetItems.filter((tx) => matchesFlag(tx, flag, fleetItems)).length
 
   it('has 20 Safes and 11 signers, with conflicts, untrusted and stale proposals', () => {
@@ -53,7 +55,7 @@ describe('fleet admin scenario', () => {
     expect(fleetItems.every((tx) => fleetAccounts.some((account) => account.id === tx.account))).toBe(true)
     expect(new Set(fleetItems.map((tx) => tx.id)).size).toBe(fleetItems.length)
     expect(count('conflicting')).toBeGreaterThanOrEqual(4)
-    expect(count('untrusted')).toBe(3)
+    expect(fleetItems.filter(isUntrusted)).toHaveLength(3)
     expect(count('stale')).toBe(5)
   })
 

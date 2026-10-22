@@ -105,20 +105,58 @@ export const getPrimaryAction = (
   return { kind: 'review', label: 'Review' }
 }
 
-export const getMenuActions = (tx: Proposal, items: Proposal[], persona: Persona, primary: PrimaryAction) => {
+export type MenuItem = { action: MenuAction; reason?: string }
+// Actions most people can take come first. Invite (admins) and Delete (the proposer) are rarer, so they go last.
+const MENU_ORDER: MenuAction[] = ['remind', 'replace', 'reject', 'copyLink', 'invite', 'delete']
+export const RARE_MENU_ACTIONS: MenuAction[] = ['invite', 'delete']
+
+// Every row has the same menu in the same order. An action you can't take is disabled, with the reason.
+export const getMenuItems = (tx: Proposal, items: Proposal[], persona: Persona): MenuItem[] => {
   const owner = isSignerOf(getAccount(tx), persona)
-  const conflicts = getConflicts(tx, items)
+  const missing = getState(tx, persona).missing
+  const outsiders = missing > 0 ? getOutsiders(tx, persona) : []
+  const rejectionExists = [tx, ...getConflicts(tx, items)].some((other) => other.kind.type === 'rejection')
+  const reasons: Record<MenuAction, string | undefined> = {
+    remind:
+      missing === 0
+        ? 'All signatures are in.'
+        : getRemindable(tx, persona).length > 0
+          ? undefined
+          : outsiders.length > 0
+            ? "The missing signers aren't in the workspace yet. Invite them first."
+            : 'Only your signature is missing.',
+    invite: !canInvite(persona)
+      ? 'Only workspace admins can invite signers.'
+      : missing === 0
+        ? 'All signatures are in.'
+        : outsiders.length === 0
+          ? 'Every missing signer is already in the workspace.'
+          : undefined,
+    replace: owner ? undefined : 'Only signers of this Safe can replace it.',
+    reject: !owner
+      ? 'Only signers of this Safe can reject it.'
+      : rejectionExists
+        ? 'A rejection at this nonce already exists.'
+        : undefined,
+    delete: getDeleteBlock(tx, items, persona),
+    copyLink: undefined,
+  }
+  return MENU_ORDER.map((action) => ({ action, reason: reasons[action] }))
+}
+
+// The actions you can take, for the drawer footer.
+export const getMenuActions = (tx: Proposal, items: Proposal[], persona: Persona) =>
+  getMenuItems(tx, items, persona)
+    .filter((item) => !item.reason)
+    .map((item) => item.action)
+
+// Production: only the proposer can delete, and only the last nonce or a duplicate. Undefined when allowed.
+export const getDeleteBlock = (tx: Proposal, items: Proposal[], persona: Persona) => {
+  if (getCreator(tx) !== getYou(persona)) return 'Only the person who proposed it can delete it.'
   const lastInSafe = !items.some((other) => other.account === tx.account && other.nonce > tx.nonce)
-  const rejectionExists = [tx, ...conflicts].some((other) => other.kind.type === 'rejection')
-  return [
-    canRemind(tx, persona) && !(primary.kind === 'remind' && primary.target.id === tx.id) && 'remind',
-    canInvite(persona) && getState(tx, persona).missing > 0 && getOutsiders(tx, persona).length > 0 && 'invite',
-    owner && 'replace',
-    owner && !rejectionExists && 'reject',
-    // Production: only the proposer can delete, and only the last nonce or a duplicate.
-    getCreator(tx) === getYou(persona) && (lastInSafe || conflicts.length > 0) && 'delete',
-    'copyLink',
-  ].filter((action): action is MenuAction => !!action)
+  if (!lastInSafe && getConflicts(tx, items).length === 0)
+    return 'Delete the later transactions first, or replace this one.'
+  return undefined
 }
 
 // Status hint: the current state, then the next step.

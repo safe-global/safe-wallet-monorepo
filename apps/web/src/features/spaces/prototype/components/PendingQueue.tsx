@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Bell, Check, CircleHelp, ShieldAlert, ShieldCheck, UserPlus } from 'lucide-react'
+import { Bell, Check, CircleHelp, LoaderCircle, ShieldAlert, ShieldCheck, UserPlus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
@@ -23,6 +23,7 @@ import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { useElementWidth } from '../hooks/useElementWidth'
 import {
+  getConflicts,
   getOutstandingSigners,
   getScenarioAccounts,
   getSignerName,
@@ -46,17 +47,25 @@ import {
   type PreviewAction,
 } from '../services/queue'
 import { getOutsiders, getRemindable, type MenuAction } from '../services/actions'
+import {
+  advanceExecution,
+  getLockingTx,
+  getInitialExecutions,
+  speedUpExecution,
+  startExecution,
+  type Executions,
+} from '../services/execution'
 import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
 import type { Account, Direction, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
-import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
+import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueGroupedTable } from './QueueTable/QueueGroupedTable'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
-import { SCENARIOS, ScenarioBar, type Hypernative } from './ScenarioBar'
+import { parseScenario, ScenarioBar, type Hypernative } from './ScenarioBar'
 import { useRecoveries } from './Recovery/RecoveryPanel'
 import { RecoveryDrawer } from './Recovery/RecoveryDrawer'
 import { QueueError, QueueSkeleton } from './QueueStates'
@@ -68,12 +77,12 @@ import { SignerLoadTable } from './Fleet/SignerLoadTable'
 import { MemberDrawer } from './Fleet/MemberDrawer'
 import { getMemberProfile } from '../services/members'
 
-const DEFAULT_SCENARIO = 'everyday'
 const LIST_LABELS = { safes: 'Safes', signers: 'Signers' }
 
 export default function PendingQueue() {
   const router = useRouter()
-  return <PendingQueueView key={`${router.query.scenario ?? DEFAULT_SCENARIO}:${router.query.option ?? 'table'}`} />
+  const { scenario, state } = parseScenario(router.query)
+  return <PendingQueueView key={`${scenario}:${state}:${router.query.option ?? 'table'}`} />
 }
 
 function PendingQueueView() {
@@ -87,17 +96,28 @@ function PendingQueueView() {
   const direction: Direction =
     router.query.option === 'fleet' ? 'fleet' : router.query.option === 'aligned' ? 'aligned' : 'table'
   const fleet = direction === 'fleet'
-  const scenario = SCENARIOS.find((item) => item.value === router.query.scenario)?.value ?? DEFAULT_SCENARIO
+  // Milestone 1 (`?m1=1`): rows open the transaction page, with no side panel, overview cards or filter counts.
+  const milestone1 = router.query.m1 === '1'
+  const { scenario, state } = parseScenario(router.query)
   const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
 
-  const [queue, setQueue] = useState(() => createPreviewQueue(scenario))
+  const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state))
+  // Execute runs through Processing and Indexing before the queue updates.
+  const [executions, setExecutions] = useState<Executions>(() => getInitialExecutions(queue.items, state, Date.now()))
+  const [now, setNow] = useState(() => Date.now())
+  const executing = Object.keys(executions).length > 0
+  useEffect(() => {
+    if (!executing) return
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [executing])
   const items = queue.items
   const accounts = getScenarioAccounts(scenario).map((account) => ({
     ...account,
     nextNonce: queue.nextNonces[account.id],
   }))
-  const unavailable = scenario === 'loading' || scenario === 'error'
+  const unavailable = state === 'loading' || state === 'error'
   // Safes with nothing for you start collapsed. Fleet admin keeps conflicting Safes open for everyone.
   const idleSafeIds = () =>
     buildSections({ visible: items, accounts, accountFilter: [], persona })
@@ -111,7 +131,15 @@ function PendingQueueView() {
     setCollapsedSections(idleSafeIds())
   }
   const [feedback, setFeedback] = useState('')
-  const allRecoveries = useRecoveries({ enabled: scenario === 'recovery', persona, onFeedback: setFeedback })
+  // Recoveries come with the 20 and 50 Safe mixes, on their first three Safes.
+  const allRecoveries = useRecoveries({
+    enabled: (scenario === '20-safes' || scenario === '50-safes') && state === 'normal',
+    accountIds: getScenarioAccounts(scenario)
+      .slice(0, 3)
+      .map((account) => account.id),
+    persona,
+    onFeedback: setFeedback,
+  })
   const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, true)
   // A signer narrows the queue on top of the toolbar filters. Fleet admin adds Proposal date.
   const [signerFocus, setSignerFocus] = useState<string | null>(null)
@@ -183,7 +211,10 @@ function PendingQueueView() {
 
   const [bulkScope, setBulkScope] = useState<string | null>(null)
   const [bulkHover, setBulkHover] = useState<string[]>([])
-  const bulkBatches = getBulkExecutable(items)
+  // A transaction that is executing, or locked by one, can't join a bulk execute.
+  const bulkBatches = getBulkExecutable(
+    items.filter((tx) => !executions[tx.id] && !getLockingTx(tx, items, executions)),
+  )
   const bulkIds = bulkBatches.flatMap((batch) => batch.proposals.map((tx) => tx.id))
   const reviewBatches =
     bulkScope === null ? [] : bulkBatches.filter((batch) => bulkScope === 'all' || batch.account.id === bulkScope)
@@ -223,6 +254,11 @@ function PendingQueueView() {
     )
   }
 
+  const openTxPage = (tx: Proposal) => {
+    setCursorId(tx.id)
+    setFeedback(`${getTransactionLabel(tx)} opens on its transaction page in the product.`)
+  }
+
   // Sign and Execute open the drawer confirm step. It replaces the production flow.
   const startFlow = (tx: Proposal, flow: PreviewAction) => {
     reviewTx(tx)
@@ -257,22 +293,60 @@ function PendingQueueView() {
     )
   }
 
-  const performAction = (action: PreviewAction) => {
-    if (!review) return
-    const updated = applyPreviewAction(queue, review.id, persona, action)
-    if (updated === queue) {
+  const performAction = (action: PreviewAction, target = review) => {
+    if (!target) return
+    const updated = applyPreviewAction(queue, target.id, persona, action)
+    if (updated === queue || executions[target.id]) {
       setFeedback('This action is no longer available. Review the current queue state.')
       setPendingAction(null)
       return
     }
-    setQueue(updated)
     setPendingAction(null)
     if (action === 'sign') {
-      setReview(updated.items.find((item) => item.id === review.id) ?? null)
+      setQueue(updated)
+      if (review) setReview(updated.items.find((item) => item.id === target.id) ?? null)
       setFeedback('Signature added in this preview. Execution may still need other signatures or earlier transactions.')
-    } else {
-      setReview(null)
-      setFeedback(`${getTransactionLabel(review)} executed in this preview. Next nonce is #${review.nonce + 1}.`)
+      return
+    }
+    // The transaction stays in the queue while it executes. Sign and execute adds your signature first.
+    const signed = action === 'signAndExecute' ? applyPreviewAction(queue, target.id, persona, 'sign') : queue
+    setQueue(signed)
+    setExecutions({ ...executions, [target.id]: startExecution(target.id, Date.now()) })
+    setNow(Date.now())
+    setReview(null)
+    setFeedback(`${getTransactionLabel(target)} submitted in this preview. The queue updates once it's indexed.`)
+  }
+  const speedUp = (id: string) => {
+    setExecutions({ ...executions, [id]: speedUpExecution(executions[id], Date.now()) })
+    setFeedback('Speed up sent in this preview. The same transaction is resubmitted with a higher fee.')
+  }
+  // Each tick moves executions on. One that finishes indexing leaves the queue, with any conflicts at its nonce.
+  const [advancedAt, setAdvancedAt] = useState(now)
+  if (advancedAt !== now) {
+    setAdvancedAt(now)
+    let next = queue
+    const remaining: Executions = {}
+    const finished: Proposal[] = []
+    for (const [id, execution] of Object.entries(executions)) {
+      const result = advanceExecution(execution, now)
+      const tx = next.items.find((item) => item.id === id)
+      if (result !== 'done' && tx) remaining[id] = result
+      else if (tx) {
+        next = applyPreviewAction(next, id, persona, 'execute')
+        finished.push(tx)
+      }
+    }
+    const ids = Object.keys(executions)
+    if (ids.length !== Object.keys(remaining).length || ids.some((id) => remaining[id] !== executions[id]))
+      setExecutions(remaining)
+    if (finished.length) {
+      setQueue(next)
+      if (review && finished.some((tx) => tx.id === review.id)) setReview(null)
+      const [tx] = finished
+      const invalid = getConflicts(tx, queue.items).length
+      setFeedback(
+        `${getTransactionLabel(tx)} executed in this preview. Next nonce is #${tx.nonce + 1}.${invalid ? ` ${invalid === 1 ? 'The conflicting transaction is' : `${invalid} conflicting transactions are`} now invalid.` : ''}`,
+      )
     }
   }
 
@@ -364,7 +438,7 @@ function PendingQueueView() {
   const selectCard = (key: FleetCardKey) => {
     const turnOn = !isCardActive(key)
     setList(turnOn && (key === 'safes' || key === 'signers') ? key : null)
-    filters.setFlags(turnOn && (key === 'conflicting' || key === 'untrusted' || key === 'stale') ? [key] : [])
+    filters.setFlags(turnOn && (key === 'conflicting' || key === 'stale') ? [key] : [])
     if (filters.stateFilter.includes('waiting') !== (turnOn && key === 'blocked')) filters.toggleStatus('waiting')
   }
   // Each card counts across the other filters, so checking one card doesn't zero the rest.
@@ -374,7 +448,6 @@ function PendingQueueView() {
     signers: signerLoad.length,
     conflicting: cardCount((tx) => matchesFlag(tx, 'conflicting', items)),
     blocked: cardCount((tx) => filters.matches(tx, 'waiting')),
-    untrusted: cardCount((tx) => matchesFlag(tx, 'untrusted', items)),
     stale: cardCount((tx) => matchesFlag(tx, 'stale', items)),
   }
   const isCollapsed = (id: string) => collapsedSections.includes(id)
@@ -438,10 +511,10 @@ function PendingQueueView() {
   const openedLink = useRef<string>(undefined)
   useEffect(() => {
     const linked = queue.items.find((tx) => tx.id === linkedTx)
-    if (!linked || openedLink.current === linkedTx) return
+    if (!linked || openedLink.current === linkedTx || milestone1) return
     openedLink.current = linkedTx
     setReview(linked)
-  }, [linkedTx, queue.items])
+  }, [linkedTx, queue.items, milestone1])
 
   useEffect(() => {
     document.querySelector('tr[data-state="selected"]')?.scrollIntoView?.({ block: 'nearest' })
@@ -462,215 +535,247 @@ function PendingQueueView() {
     bulkHover,
     replaceHover,
     onReplaceHover: setReplaceHover,
-    onReview: reviewTx,
+    // Milestone 1 has no side panel. A row opens the transaction page, and Sign or Execute runs the existing flow.
+    onReview: milestone1 ? openTxPage : reviewTx,
     remindedIds,
     onRemind: remindSigners,
     onGoTo: goTo,
-    onStartFlow: startFlow,
+    onStartFlow: milestone1 ? (tx: Proposal, flow: PreviewAction) => performAction(flow, tx) : startFlow,
     onMenuAction: runMenuAction,
     recoveries,
     onOpenSafe: fleet ? (account: Account) => setSafeId(account.id) : undefined,
+    executions,
+    now,
+    onSpeedUp: speedUp,
     alignTo: direction === 'aligned',
   }
 
   return (
     <div className="min-h-screen bg-secondary text-foreground">
       <PrototypeFrame>
-        <main ref={mainRef} className="@container min-w-0 px-6 pb-8 pt-5">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <Typography as="h1" variant="h3">
-              Transactions
-            </Typography>
-            <div className="flex flex-wrap items-center gap-3">
-              {hypernative === 'in' && (
-                // Under 600px of content, only the shield shows. Its tooltip names it.
-                <Tooltip delay={300}>
-                  <TooltipTrigger render={<span className="flex items-center gap-1.5 text-xs text-muted-foreground" />}>
-                    <ShieldCheck className="size-4 text-success-strong" aria-hidden="true" />
-                    <span className="@max-[600px]:sr-only">Logged in to Hypernative</span>
-                  </TooltipTrigger>
-                  <TooltipContent>Logged in to Hypernative</TooltipContent>
-                </Tooltip>
-              )}
-              {hypernative === 'out' && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <ShieldAlert className="size-4 text-warning-strong" aria-hidden="true" />
-                  <span className="@max-[600px]:sr-only">Hypernative not connected</span>
-                  <Button size="2xs" variant="outline">
-                    Log in
-                  </Button>
-                </span>
-              )}
-              {bulkIds.length > 1 && (
-                <Tooltip delay={150}>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        onClick={() => setBulkScope('all')}
-                        onMouseEnter={() => setBulkHover(bulkIds)}
-                        onMouseLeave={() => setBulkHover([])}
-                        onFocus={() => setBulkHover(bulkIds)}
-                        onBlur={() => setBulkHover([])}
-                      />
-                    }
+        <FilterCountsContext.Provider value={!milestone1}>
+          <main ref={mainRef} className="@container min-w-0 px-6 pb-8 pt-5">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <Typography as="h1" variant="h3">
+                Transactions
+              </Typography>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* With many Safes the executing row can be off screen. This jumps to it. */}
+                {executing && (
+                  <Button
+                    size="2xs"
+                    variant="outline"
+                    onClick={() => {
+                      const tx = items.find((item) => executions[item.id])
+                      if (!tx) return
+                      setCollapsedSections((ids) => ids.filter((id) => id !== `safe-${tx.account}`))
+                      setCursorId(tx.id)
+                    }}
                   >
-                    Bulk execute {bulkIds.length} transactions
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs whitespace-normal">
-                    Only fully signed transactions with consecutive nonces are included, as one batch per Safe.
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
-          {feedback && !review && (
-            <p role="status" className="mb-4 text-sm">
-              {feedback}
-            </p>
-          )}
-          <section aria-label="Queue">
-            {scenario === 'partial' && (
-              <Alert variant="warning" outlined={false} className="mb-5">
-                <AlertSeverityIcon variant="warning" />
-                <AlertTitle>Grants is unavailable</AlertTitle>
-                <AlertDescription>Showing proposals from 2 of 3 Safes. Counts are partial.</AlertDescription>
-                <AlertAction>
-                  <Button variant="outline" size="sm" onClick={() => setOption({ scenario: 'everyday' })}>
-                    Retry loading
+                    <LoaderCircle className="animate-spin" aria-hidden="true" />
+                    {Object.keys(executions).length} executing
                   </Button>
-                </AlertAction>
-              </Alert>
+                )}
+                {hypernative === 'in' && (
+                  // Under 600px of content, only the shield shows. Its tooltip names it.
+                  <Tooltip delay={300}>
+                    <TooltipTrigger
+                      render={<span className="flex items-center gap-1.5 text-xs text-muted-foreground" />}
+                    >
+                      <ShieldCheck className="size-4 text-success-strong" aria-hidden="true" />
+                      <span className="@max-[600px]:sr-only">Logged in to Hypernative</span>
+                    </TooltipTrigger>
+                    <TooltipContent>Logged in to Hypernative</TooltipContent>
+                  </Tooltip>
+                )}
+                {hypernative === 'out' && (
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <ShieldAlert className="size-4 text-warning-strong" aria-hidden="true" />
+                    <span className="@max-[600px]:sr-only">Hypernative not connected</span>
+                    <Button size="2xs" variant="outline">
+                      Log in
+                    </Button>
+                  </span>
+                )}
+                {bulkIds.length > 1 && (
+                  <Tooltip delay={150}>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          onClick={() => setBulkScope('all')}
+                          onMouseEnter={() => setBulkHover(bulkIds)}
+                          onMouseLeave={() => setBulkHover([])}
+                          onFocus={() => setBulkHover(bulkIds)}
+                          onBlur={() => setBulkHover([])}
+                        />
+                      }
+                    >
+                      Bulk execute {bulkIds.length} transactions
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs whitespace-normal">
+                      Only fully signed transactions with consecutive nonces are included, as one batch per Safe.
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
+            {feedback && !review && (
+              <p role="status" className="mb-4 text-sm">
+                {feedback}
+              </p>
             )}
-            {fleet && !unavailable && <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />}
-            <QueueToolbar
-              filters={filters}
-              accounts={orderedAccounts}
-              hasItems={items.length > 0}
-              extraMenu={
-                <FleetFilterMenu
-                  items={filters.visible}
+            <section aria-label="Queue">
+              {state === 'partial' && (
+                <Alert variant="warning" outlined={false} className="mb-5">
+                  <AlertSeverityIcon variant="warning" />
+                  <AlertTitle>{accounts.at(-1)?.name} is unavailable</AlertTitle>
+                  <AlertDescription>
+                    Showing proposals from {accounts.length - 1} of {accounts.length} Safes. Counts are partial.
+                  </AlertDescription>
+                  <AlertAction>
+                    <Button variant="outline" size="sm" onClick={() => setOption({ state: 'normal' })}>
+                      Retry loading
+                    </Button>
+                  </AlertAction>
+                </Alert>
+              )}
+              {fleet && !milestone1 && !unavailable && (
+                <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />
+              )}
+              <QueueToolbar
+                filters={filters}
+                accounts={orderedAccounts}
+                hasItems={items.length > 0}
+                extraMenu={
+                  <FleetFilterMenu
+                    items={filters.visible}
+                    load={signerLoad}
+                    persona={persona}
+                    signer={signerFocus}
+                    onSignerChange={(id) => {
+                      setSignerFocus(id)
+                      setList(null)
+                    }}
+                    proposed={proposed}
+                    onProposedChange={fleet ? setProposed : undefined}
+                  />
+                }
+              />
+              <AppliedFilters
+                filters={filters}
+                extra={fleetPills}
+                actions={
+                  focusedLoad &&
+                  !isYou(focusedLoad.id, persona) &&
+                  (focusedLoad.member || canInvite(persona)) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setFeedback(
+                          focusedLoad.member
+                            ? `Reminder sent to ${getSignerName(focusedLoad.id)} for ${focusedLoad.txs.length} ${focusedLoad.txs.length === 1 ? 'transaction' : 'transactions'} in this preview.`
+                            : `Invite sent to ${getSignerName(focusedLoad.id)} in this preview. They get reminders once they join.`,
+                        )
+                      }
+                    >
+                      {focusedLoad.member ? <Bell /> : <UserPlus />}
+                      {focusedLoad.member ? 'Remind' : 'Invite'} {getSignerName(focusedLoad.id)}
+                    </Button>
+                  )
+                }
+              />
+              {state === 'loading' && <QueueSkeleton />}
+              {state === 'error' && <QueueError onRetry={() => setOption({ state: 'normal' })} />}
+              {!unavailable && !list && !visible.length && !recoveries.visible.length && (
+                <Empty className="rounded-2xl border border-border bg-card">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Check />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      <h2>{items.length ? 'No proposals match these filters' : 'Nothing pending'}</h2>
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {items.length
+                        ? 'Try another Safe or clear your filters.'
+                        : 'New proposals will appear here for your team to review.'}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  {items.length > 0 && (
+                    <EmptyContent>
+                      <Button variant="outline" onClick={resetFilters}>
+                        Clear filters
+                      </Button>
+                    </EmptyContent>
+                  )}
+                </Empty>
+              )}
+              {!unavailable && list === 'safes' && (
+                <SafeListTable
+                  accounts={orderedAccounts}
+                  scope={accounts}
+                  items={visible}
+                  persona={persona}
+                  label="Safes in this workspace"
+                  onOpen={(account) => setSafeId(account.id)}
+                  onShow={showSafe}
+                />
+              )}
+              {!unavailable && list === 'signers' && (
+                <SignerLoadTable
                   load={signerLoad}
                   persona={persona}
-                  signer={signerFocus}
-                  onSignerChange={(id) => {
+                  onShow={(id) => {
                     setSignerFocus(id)
                     setList(null)
                   }}
-                  proposed={proposed}
-                  onProposedChange={fleet ? setProposed : undefined}
+                  onOpen={setMemberId}
+                  onRemind={({ id, txs }) =>
+                    setFeedback(
+                      `Reminder sent to ${getSignerName(id)} for ${txs.length} ${txs.length === 1 ? 'transaction' : 'transactions'} in this preview.`,
+                    )
+                  }
+                  onInvite={({ id }) =>
+                    setFeedback(
+                      `Invite sent to ${getSignerName(id)} in this preview. They get reminders once they join.`,
+                    )
+                  }
                 />
-              }
-            />
-            <AppliedFilters
-              filters={filters}
-              extra={fleetPills}
-              actions={
-                focusedLoad &&
-                !isYou(focusedLoad.id, persona) &&
-                (focusedLoad.member || canInvite(persona)) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setFeedback(
-                        focusedLoad.member
-                          ? `Reminder sent to ${getSignerName(focusedLoad.id)} for ${focusedLoad.txs.length} ${focusedLoad.txs.length === 1 ? 'transaction' : 'transactions'} in this preview.`
-                          : `Invite sent to ${getSignerName(focusedLoad.id)} in this preview. They get reminders once they join.`,
-                      )
-                    }
-                  >
-                    {focusedLoad.member ? <Bell /> : <UserPlus />}
-                    {focusedLoad.member ? 'Remind' : 'Invite'} {getSignerName(focusedLoad.id)}
-                  </Button>
-                )
-              }
-            />
-            {scenario === 'loading' && <QueueSkeleton />}
-            {scenario === 'error' && <QueueError onRetry={() => setOption({ scenario: 'everyday' })} />}
-            {!unavailable && !list && !visible.length && !recoveries.visible.length && (
-              <Empty className="rounded-2xl border border-border bg-card">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Check />
-                  </EmptyMedia>
-                  <EmptyTitle>
-                    <h2>{items.length ? 'No proposals match these filters' : 'Nothing pending'}</h2>
-                  </EmptyTitle>
-                  <EmptyDescription>
-                    {items.length
-                      ? 'Try another Safe or clear your filters.'
-                      : 'New proposals will appear here for your team to review.'}
-                  </EmptyDescription>
-                </EmptyHeader>
-                {items.length > 0 && (
-                  <EmptyContent>
-                    <Button variant="outline" onClick={resetFilters}>
-                      Clear filters
-                    </Button>
-                  </EmptyContent>
-                )}
-              </Empty>
-            )}
-            {!unavailable && list === 'safes' && (
-              <SafeListTable
-                accounts={orderedAccounts}
-                scope={accounts}
-                items={visible}
-                persona={persona}
-                label="Safes in this workspace"
-                onOpen={(account) => setSafeId(account.id)}
-                onShow={showSafe}
-              />
-            )}
-            {!unavailable && list === 'signers' && (
-              <SignerLoadTable
-                load={signerLoad}
-                persona={persona}
-                onShow={(id) => {
-                  setSignerFocus(id)
-                  setList(null)
-                }}
-                onOpen={setMemberId}
-                onRemind={({ id, txs }) =>
-                  setFeedback(
-                    `Reminder sent to ${getSignerName(id)} for ${txs.length} ${txs.length === 1 ? 'transaction' : 'transactions'} in this preview.`,
-                  )
-                }
-                onInvite={({ id }) =>
-                  setFeedback(`Invite sent to ${getSignerName(id)} in this preview. They get reminders once they join.`)
-                }
-              />
-            )}
-            {!unavailable && !list && (visible.length > 0 || recoveries.visible.length > 0) && (
-              <QueueGroupedTable
-                sections={sections}
-                isCollapsed={isCollapsed}
-                onToggle={toggleSection}
-                getSafeBatch={safeBatchFor}
-                collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
-                {...sectionProps}
-              />
-            )}
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
-                transactions.
-              </span>
-              {!isMobile && !list && visible.length > 0 && (
-                <span className="flex items-center gap-1">
-                  <Kbd>J</Kbd>
-                  <Kbd>K</Kbd> to move, <Kbd>Enter</Kbd> to open
-                </span>
               )}
-            </div>
-          </section>
-        </main>
+              {!unavailable && !list && (visible.length > 0 || recoveries.visible.length > 0) && (
+                <QueueGroupedTable
+                  sections={sections}
+                  isCollapsed={isCollapsed}
+                  onToggle={toggleSection}
+                  getSafeBatch={safeBatchFor}
+                  collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
+                  {...sectionProps}
+                />
+              )}
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
+                  transactions.
+                </span>
+                {!isMobile && !list && visible.length > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Kbd>J</Kbd>
+                    <Kbd>K</Kbd> to move, <Kbd>Enter</Kbd> to open
+                  </span>
+                )}
+              </div>
+            </section>
+          </main>
+        </FilterCountsContext.Provider>
         <ScenarioBar
           direction={direction}
           scenario={scenario}
+          state={state}
           hypernative={hypernative}
           persona={persona}
+          milestone1={milestone1}
           onChange={setOption}
         />
         <ReviewDrawer

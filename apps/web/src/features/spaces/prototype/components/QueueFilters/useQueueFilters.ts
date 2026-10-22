@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  accounts as allAccounts,
+  knownAccounts,
   getAccount,
   getConflicts,
   getTransactionLabel,
@@ -10,7 +10,6 @@ import {
 import type { Account, Filter, Persona, Proposal } from '../../types'
 import { FLAG_META, FLAGS, RECOVERY_TYPE, STATUS_META, type Flag } from '../shared'
 import { getRecoveryHeadline, type Recovery } from '../Recovery/recoveryData'
-import { isUntrusted } from '../RiskFlag'
 import { isStale } from '../../services/fleet'
 
 export type FilterSection = 'accounts' | 'networks' | 'types' | 'statuses' | 'flags'
@@ -28,7 +27,7 @@ export const toggled = <T>(selection: T[], value: T) =>
 const summarise = (values: string[]) => (values.length === 0 ? undefined : String(values.length))
 
 export const matchesFlag = (tx: Proposal, flag: Flag, items: Proposal[]) =>
-  flag === 'conflicting' ? getConflicts(tx, items).length > 0 : flag === 'untrusted' ? isUntrusted(tx) : isStale(tx)
+  flag === 'conflicting' ? getConflicts(tx, items).length > 0 : isStale(tx)
 
 export function useQueueFilters(
   items: Proposal[],
@@ -64,7 +63,7 @@ export function useQueueFilters(
 
   // Recoveries are outside the nonce queue. They match only Ready to execute, never a flag.
   const recoveryPasses = (recovery: Recovery, skip?: FilterSection) => {
-    const account = allAccounts.find((candidate) => candidate.id === recovery.accountId)!
+    const account = knownAccounts.find((candidate) => candidate.id === recovery.accountId)!
     return (
       (skip === 'accounts' || inSelection(accountFilter, account.id)) &&
       (skip === 'networks' || inSelection(networkFilter, account.network)) &&
