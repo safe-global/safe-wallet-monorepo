@@ -30,7 +30,4 @@ export const DESELECT_ALL_LABEL = 'Deselect all'
 export const ADD_TOKEN_LABEL = 'Add a token'
 export const CANCEL_ADD_TOKEN_LABEL = 'Cancel adding a token'
 export const ADD_TOKEN_CONFIRM_LABEL = 'Add token'
-export const ADD_TOKEN_FIELD_LABEL = 'Token'
 export const ADD_TOKEN_PLACEHOLDER = 'Search by name or address'
-
-export const IDENTICON_SIZE = 24

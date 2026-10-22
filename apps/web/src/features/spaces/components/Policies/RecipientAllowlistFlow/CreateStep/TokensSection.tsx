@@ -10,14 +10,17 @@ import {
   AllowlistSection,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
+import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
-import { TokenGroupError } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
+import {
+  POPULAR_LOAD_ERROR_TEXT,
+  TOKEN_ICON_SIZE,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import { getFormTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
 import type { RecipientAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import {
   ADD_TOKEN_LABEL,
   DESELECT_ALL_LABEL,
-  IDENTICON_SIZE,
   SELECT_ALL_LABEL,
   TOKENS_CALLOUT_DESCRIPTION,
   TOKENS_CALLOUT_TITLE,
@@ -31,6 +34,7 @@ import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
 import TokenDraftRow from './TokenDraftRow'
 
 const SKELETON_CHIP_COUNT = 4
+const RETRY_LABEL = 'Retry'
 
 type TokensSectionProps = {
   values: RecipientAllowlistFormValues
@@ -40,6 +44,27 @@ type TokensSectionProps = {
   onDismissCallout: () => void
 }
 
+const LoadErrorAlert = ({
+  message,
+  onRetry,
+  'data-testid': testId,
+}: {
+  message: string
+  onRetry: () => void
+  'data-testid': string
+}): ReactElement => (
+  <StatusAlert
+    tone="error"
+    description={message}
+    action={
+      <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+        {RETRY_LABEL}
+      </Button>
+    }
+    data-testid={testId}
+  />
+)
+
 const TokensSection = ({
   values,
   onChange,
@@ -47,8 +72,23 @@ const TokensSection = ({
   isCalloutDismissed,
   onDismissCallout,
 }: TokensSectionProps): ReactElement => {
-  const { addresses, options, isLoading, isError, refetch } = useHeldTokenAddresses()
-  const [isAdding, setIsAdding] = useState(false)
+  const {
+    addresses,
+    options,
+    isLoading,
+    isError,
+    refetch,
+    isPopularLoading,
+    isPopularError,
+    refetchPopular,
+    identityKey,
+  } = useHeldTokenAddresses()
+  // Keyed to the account it was opened for, so switching accounts closes the row
+  const [addingFor, setAddingFor] = useState<string>()
+  const isAdding = addingFor !== undefined && addingFor === identityKey
+  const closeAdding = () => setAddingFor(undefined)
+  const hasLoadError = isError && addresses.length === 0
+  const showsChips = hasAccount && !isLoading && !hasLoadError
 
   const tokens = useMemo(() => getFormTokenAddresses(addresses, values), [addresses, values])
   const isExcluded = (address: string) => values.excludedTokens.some((excluded) => sameAddress(excluded, address))
@@ -78,7 +118,7 @@ const TokensSection = ({
       addedTokens: [...values.addedTokens, address],
       excludedTokens: values.excludedTokens.filter((excluded) => !sameAddress(excluded, address)),
     })
-    setIsAdding(false)
+    closeAdding()
   }
 
   const renderBody = () => {
@@ -95,15 +135,8 @@ const TokensSection = ({
         </div>
       )
     }
-    if (isError && addresses.length === 0) {
-      return (
-        <TokenGroupError
-          label={TOKENS_SECTION_TITLE}
-          message={TOKENS_LOAD_ERROR_TEXT}
-          onRetry={refetch}
-          data-testid="allowlist-tokens-error"
-        />
-      )
+    if (hasLoadError) {
+      return <LoadErrorAlert message={TOKENS_LOAD_ERROR_TEXT} onRetry={refetch} data-testid="allowlist-tokens-error" />
     }
     if (tokens.length === 0) return <AllowlistEmptyItem>{TOKENS_EMPTY_TEXT}</AllowlistEmptyItem>
     return (
@@ -119,7 +152,7 @@ const TokensSection = ({
               aria-label={`Allow ${label}`}
               className="w-full min-w-0 justify-start"
             >
-              <TokenIcon logoUri={option?.logoUri} tokenSymbol={label} size={IDENTICON_SIZE} />
+              <TokenIcon logoUri={option?.logoUri} tokenSymbol={label} size={TOKEN_ICON_SIZE} />
               <span className="min-w-0 flex-1 truncate text-left">{label}</span>
             </SelectableChip>
           )
@@ -146,10 +179,18 @@ const TokensSection = ({
 
       {renderBody()}
 
-      {isAdding && <TokenDraftRow options={addable} onConfirm={add} onCancel={() => setIsAdding(false)} />}
+      {hasAccount && isPopularError && (
+        <LoadErrorAlert
+          message={POPULAR_LOAD_ERROR_TEXT}
+          onRetry={refetchPopular}
+          data-testid="allowlist-popular-tokens-error"
+        />
+      )}
+
+      {isAdding && <TokenDraftRow options={addable} onConfirm={add} onCancel={closeAdding} />}
 
       <div className="flex items-center justify-between gap-2">
-        {hasAccount && !isLoading && !isError && tokens.length > 0 ? (
+        {showsChips && tokens.length > 0 ? (
           <Button type="button" variant="ghost" size="sm" onClick={() => setAll(!isAllSelected)}>
             {isAllSelected ? DESELECT_ALL_LABEL : SELECT_ALL_LABEL}
           </Button>
@@ -160,8 +201,8 @@ const TokensSection = ({
           type="button"
           variant="outline"
           size="sm"
-          disabled={!hasAccount || addable.length === 0}
-          onClick={() => setIsAdding(true)}
+          disabled={!showsChips || isPopularLoading || addable.length === 0}
+          onClick={() => setAddingFor(identityKey)}
         >
           <Plus data-icon="inline-start" />
           {ADD_TOKEN_LABEL}

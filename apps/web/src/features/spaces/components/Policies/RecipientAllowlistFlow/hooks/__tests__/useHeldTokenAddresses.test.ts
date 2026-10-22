@@ -56,4 +56,14 @@ describe('useHeldTokenAddresses', () => {
     result.current.refetch()
     expect(refetch).toHaveBeenCalled()
   })
+
+  it('passes the popular list state and the account identity through', () => {
+    read({ isPopularLoading: true, isPopularError: true, identityKey: '1:0xabc' })
+
+    const { result } = renderHook(() => useHeldTokenAddresses())
+
+    expect(result.current.isPopularLoading).toBe(true)
+    expect(result.current.isPopularError).toBe(true)
+    expect(result.current.identityKey).toBe('1:0xabc')
+  })
 })

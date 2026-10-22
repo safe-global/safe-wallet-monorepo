@@ -1,25 +1,22 @@
 import { useMemo } from 'react'
-import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
+import useSpendingLimitTokenOptions, {
+  type TokenOptionsResult,
+} from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 
-type HeldTokenAddresses = {
+type HeldTokenAddresses = TokenOptionsResult & {
   addresses: string[]
-  /** Every group, so a token added from the popular list still resolves its symbol and icon. */
-  options: TokenOption[]
-  isLoading: boolean
-  isError: boolean
-  refetch: () => void
 }
 
 const useHeldTokenAddresses = (): HeldTokenAddresses => {
-  const { options, isLoading, isError, refetch } = useSpendingLimitTokenOptions()
+  const result = useSpendingLimitTokenOptions()
+  const { options } = result
 
   const addresses = useMemo(
     () => options.filter((option) => option.group === 'held').map((option) => option.address),
     [options],
   )
 
-  return { addresses, options, isLoading, isError, refetch }
+  return { ...result, addresses }
 }
 
 export default useHeldTokenAddresses
