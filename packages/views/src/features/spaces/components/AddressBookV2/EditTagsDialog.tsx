@@ -6,7 +6,6 @@ import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import GroupedAddress from './GroupedAddress'
 import TagPicker from './tags/TagPicker'
-import { TagChips } from './tags/TagChip'
 import { toTagChoices, type TagChoice } from './tags/tagColor'
 import { TAGS_DISCLAIMER, sameTagNames } from './tags/tagRules'
 import type { WorkspaceTag } from './types'
@@ -45,10 +44,7 @@ const EditTagsDialog = ({
             <Typography variant="paragraph-bold">{contact.name}</Typography>
             <GroupedAddress address={contact.address} />
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <TagPicker value={tags} onChange={setTags} workspaceTags={workspaceTags} onLimitReached={onLimitReached} />
-            <TagChips tags={tags} />
-          </div>
+          <TagPicker value={tags} onChange={setTags} workspaceTags={workspaceTags} onLimitReached={onLimitReached} />
           <Typography variant="paragraph-small" className="text-muted-foreground">
             {TAGS_DISCLAIMER}
           </Typography>

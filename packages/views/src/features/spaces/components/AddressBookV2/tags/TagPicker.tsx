@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import FacetFilter, { type FacetOption } from '@safe-global/views/components/common/FacetFilter'
-import { TagChip } from './TagChip'
+import { TagChip, TagChips } from './TagChip'
 import { pickFreeColor, type TagChoice } from './tagColor'
 import {
   CONTACT_TAG_LIMIT_MESSAGE,
@@ -22,7 +22,7 @@ export type TagPickerProps = {
   disabled?: boolean
 }
 
-/** Pick an existing tag or type to create one; a tag that breaks a rule is explained before the request. */
+/** Pick an existing tag or type to create one, with the picked tags beside it; a tag that breaks a rule is explained before the request. */
 const TagPicker = ({ value, onChange, workspaceTags, onLimitReached, disabled }: TagPickerProps) => {
   const [error, setError] = useState<string>()
 
@@ -70,19 +70,22 @@ const TagPicker = ({ value, onChange, workspaceTags, onLimitReached, disabled }:
   }
 
   return (
-    <div className="flex flex-col items-start gap-1">
-      <FacetFilter
-        label="Tags"
-        options={options}
-        value={value.map((choice) => choice.name)}
-        onChange={handleChange}
-        onCreate={handleCreate}
-        searchable
-        searchPlaceholder="Search or create a tag"
-        emptyText="No tags yet. Type to create one."
-        disabled={disabled}
-        data-testid="tag-picker"
-      />
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <FacetFilter
+          label="Tags"
+          options={options}
+          value={value.map((choice) => choice.name)}
+          onChange={handleChange}
+          onCreate={handleCreate}
+          searchable
+          searchPlaceholder="Search or create a tag"
+          emptyText="No tags yet. Type to create one."
+          disabled={disabled}
+          data-testid="tag-picker"
+        />
+        <TagChips tags={value} />
+      </div>
       {error && (
         <p className="text-destructive text-xs" role="alert" data-testid="tag-picker-error">
           {error}

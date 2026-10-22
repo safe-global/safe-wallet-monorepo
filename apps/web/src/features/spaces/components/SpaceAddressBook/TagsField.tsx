@@ -1,6 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import TagPicker from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagPicker'
-import { TagChips } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagChip'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { TAGS_DISCLAIMER } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
 import type { ContactField } from './AddContactDialog'
@@ -22,15 +21,12 @@ const TagsField = ({ workspaceTags, onLimitReached }: TagsFieldProps) => {
         name="tags"
         control={control}
         render={({ field }) => (
-          <div className="flex flex-wrap items-center gap-2">
-            <TagPicker
-              value={field.value}
-              onChange={field.onChange}
-              workspaceTags={workspaceTags}
-              onLimitReached={onLimitReached}
-            />
-            <TagChips tags={field.value} />
-          </div>
+          <TagPicker
+            value={field.value}
+            onChange={field.onChange}
+            workspaceTags={workspaceTags}
+            onLimitReached={onLimitReached}
+          />
         )}
       />
     </div>
