@@ -52,7 +52,6 @@ export const ADDRESS_BOOK_EMPTY_TEXT = 'No contacts found.'
 export const ADDRESS_BOOK_CONFIRM_LABEL = 'Add'
 export const LOCAL_CONTACTS_LABEL = 'Local contacts'
 export const LOCAL_CONTACTS_TOOLTIP = "Saved in this browser only. Other members of the Workspace can't see them."
-export const getSpaceContactsLabel = (spaceName: string): string => `Contacts of ${spaceName}`
 export const getSpaceContactsTooltip = (spaceName: string): string =>
   `Shared with everyone in ${spaceName}. Only Workspace admins can add or change these contacts.`
 export const FALLBACK_SPACE_NAME = 'your Workspace'

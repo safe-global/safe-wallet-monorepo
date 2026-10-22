@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Building2, HardDrive, Info, type LucideIcon } from 'lucide-react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
+import { SENTINEL_ADDRESS, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
@@ -16,7 +16,6 @@ import {
   ADDRESS_BOOK_TRIGGER_LABEL,
   FALLBACK_SPACE_NAME,
   IDENTICON_SIZE,
-  getSpaceContactsLabel,
   getSpaceContactsTooltip,
   LOCAL_CONTACTS_LABEL,
   LOCAL_CONTACTS_TOOLTIP,
@@ -25,12 +24,13 @@ import ShortAddress from '@safe-global/views/features/spaces/components/Policies
 import type { AllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import Identicon from '@/components/common/Identicon'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
-import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
+import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import { useAddressBookSearch } from '@/features/spaces'
 
 type AddFromAddressBookProps = {
   chainId: string
   safeAddress: string
+  contacts: readonly ExtendedContact[]
   existing: readonly AllowlistRecipient[]
   onAdd: (recipients: AllowlistRecipient[]) => void
 }
@@ -43,7 +43,13 @@ const CONTACT_LIST_CLASSES = [
 
 const ContactDivider = (): ReactElement => <div className="h-px bg-border/60" aria-hidden />
 
-type ContactGroup = { id: ContactSource; Icon: LucideIcon; label: string; tooltip: string; contacts: ExtendedContact[] }
+type ContactGroup = {
+  id: ContactSource
+  Icon: LucideIcon
+  label: ReactNode
+  tooltip: string
+  contacts: ExtendedContact[]
+}
 
 const GroupHeader = ({
   Icon,
@@ -54,7 +60,7 @@ const GroupHeader = ({
   <div className="sticky top-0 z-10 bg-popover pb-1">
     <div className="flex h-10 items-center gap-1.5 rounded-lg bg-muted px-4 text-xs leading-4 font-semibold text-muted-foreground uppercase">
       <Icon className="size-3.5 shrink-0" aria-hidden />
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="flex min-w-0 items-center gap-1 truncate">{label}</span>
       <Tooltip>
         <TooltipTrigger render={<Info className="size-3.5 shrink-0 cursor-help" />} />
         <TooltipContent>{tooltip}</TooltipContent>
@@ -63,6 +69,8 @@ const GroupHeader = ({
     </div>
   </div>
 )
+
+const isReserved = (address: string) => sameAddress(address, ZERO_ADDRESS) || sameAddress(address, SENTINEL_ADDRESS)
 
 const POPUP_OFFSET = 4
 const POPUP_SCROLL_MARGIN = 16
@@ -85,25 +93,30 @@ const scrollPopupIntoView = (trigger: HTMLElement, popup: HTMLElement, container
   scroller.scrollBy({ top: overflow, behavior: 'smooth' })
 }
 
-const AddFromAddressBook = ({ chainId, safeAddress, existing, onAdd }: AddFromAddressBookProps): ReactElement => {
+const AddFromAddressBook = ({
+  chainId,
+  safeAddress,
+  contacts,
+  existing,
+  onAdd,
+}: AddFromAddressBookProps): ReactElement => {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<string[]>([])
   const popupRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const [spacerHost, setSpacerHost] = useState<HTMLElement | null>(null)
-  const { list } = useMergedAddressBooks(chainId)
-  const workspaceName = useWorkspaceName() ?? FALLBACK_SPACE_NAME
+  const workspaceName = useWorkspaceName()
 
   const candidates = useMemo(
     () =>
-      list.filter(
+      contacts.filter(
         (contact) =>
           contact.chainIds.includes(chainId) &&
           !sameAddress(contact.address, safeAddress) &&
-          !addressIsNotReserved()(contact.address),
+          !isReserved(contact.address),
       ),
-    [list, chainId, safeAddress],
+    [contacts, chainId, safeAddress],
   )
   const matches = useAddressBookSearch(candidates, query.trim())
 
@@ -113,8 +126,20 @@ const AddFromAddressBook = ({ chainId, safeAddress, existing, onAdd }: AddFromAd
         {
           id: ContactSource.space,
           Icon: Building2,
-          label: getSpaceContactsLabel(workspaceName),
-          tooltip: getSpaceContactsTooltip(workspaceName),
+          label: (
+            <>
+              Contacts of
+              {workspaceName ? (
+                // A pill, not plain text: a crafted workspace name can't pass for UI copy.
+                <span className="truncate rounded border border-border bg-background px-1 normal-case">
+                  {workspaceName}
+                </span>
+              ) : (
+                FALLBACK_SPACE_NAME
+              )}
+            </>
+          ),
+          tooltip: getSpaceContactsTooltip(workspaceName ?? FALLBACK_SPACE_NAME),
         },
         { id: ContactSource.local, Icon: HardDrive, label: LOCAL_CONTACTS_LABEL, tooltip: LOCAL_CONTACTS_TOOLTIP },
       ]
@@ -142,7 +167,8 @@ const AddFromAddressBook = ({ chainId, safeAddress, existing, onAdd }: AddFromAd
     return () => cancelAnimationFrame(frame)
   }, [spacerHost])
 
-  const isListed = (address: string) => existing.some((recipient) => sameAddress(recipient.address, address))
+  const isListed = (address: string) =>
+    existing.some((recipient) => recipient.selected && sameAddress(recipient.address, address))
 
   const handleOpenChange = (next: boolean) => {
     setIsOpen(next)
