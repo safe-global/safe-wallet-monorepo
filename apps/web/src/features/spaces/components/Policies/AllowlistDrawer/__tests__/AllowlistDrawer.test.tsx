@@ -190,7 +190,7 @@ describe('AllowlistDrawer', () => {
     )
 
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
-    expect(screen.getByText('The allowlist applies after the 24-hour delay.')).toBeInTheDocument()
+    expect(screen.getByText('The allowlist becomes active after the 24-hour delay.')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
   })

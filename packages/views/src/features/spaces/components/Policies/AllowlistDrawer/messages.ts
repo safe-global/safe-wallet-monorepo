@@ -12,8 +12,8 @@ export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit t
 
 // Every change to the allowlist waits out the guard's 24-hour delay after execution.
 const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
-  create: 'The allowlist applies after the 24-hour delay.',
-  update: 'The new recipients apply after the 24-hour delay.',
+  create: 'The allowlist becomes active after the 24-hour delay.',
+  update: 'The new rules apply after the 24-hour delay.',
   remove: 'The allowlist is removed after the 24-hour delay.',
 }
 
