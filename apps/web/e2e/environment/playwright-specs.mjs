@@ -15,6 +15,7 @@ export const playwrightSpecs = {
   },
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
+  'e2e/connected-non-owner.spec.ts': {},
   'e2e/delete.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
@@ -73,4 +74,5 @@ export const playwrightSpecs = {
   },
   'e2e/walletconnect.spec.ts': {},
   'e2e/walletconnect-nested-signer.spec.ts': {},
+  'e2e/nested-signer.spec.ts': {},
 }

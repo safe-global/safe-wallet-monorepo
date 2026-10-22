@@ -749,4 +749,74 @@ describe('CreateTokenTransfer', () => {
       expect(alert).not.toHaveClass('bg-card')
     })
   })
+
+  describe('Max with a spending limit', () => {
+    const TEN_USDC = '10000000'
+
+    const givenSpendingLimitLeft = (amount: bigint) => {
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: TEN_USDC,
+            tokenInfo: {
+              address: USDC_ADDRESS,
+              decimals: 6,
+              logoUri: '',
+              name: 'USD Coin',
+              symbol: 'USDC',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({ balances, loaded: true, loading: false, error: undefined })
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: amount,
+      }))
+    }
+
+    const clickMax = (type: TokenTransferType) => {
+      const data = { recipients: [{ recipient: '', tokenAddress: USDC_ADDRESS, amount: '' }], type }
+      const { getByTestId } = render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={data} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      fireEvent.click(getByTestId('max-btn'))
+      return getByTestId('token-amount-field')
+    }
+
+    it('fills in the amount left on the spending limit for a spending limit transaction', async () => {
+      givenSpendingLimitLeft(2_500_000n)
+
+      const amountField = clickMax(TokenTransferType.spendingLimit)
+
+      await waitFor(() => expect(amountField).toHaveValue('2.5'))
+    })
+
+    it('fills in the whole balance for a standard transaction', async () => {
+      givenSpendingLimitLeft(2_500_000n)
+
+      const amountField = clickMax(TokenTransferType.multiSig)
+
+      await waitFor(() => expect(amountField).toHaveValue('10'))
+    })
+
+    it('fills in the balance when the spending limit is larger than the balance', async () => {
+      givenSpendingLimitLeft(50_000_000n)
+
+      const amountField = clickMax(TokenTransferType.spendingLimit)
+
+      await waitFor(() => expect(amountField).toHaveValue('10'))
+    })
+  })
 })
