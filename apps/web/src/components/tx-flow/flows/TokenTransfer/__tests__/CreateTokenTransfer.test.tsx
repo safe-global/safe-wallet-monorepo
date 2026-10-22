@@ -771,4 +771,119 @@ describe('CreateTokenTransfer', () => {
       await waitFor(() => expect(amountField).toHaveValue('10'))
     })
   })
+
+  describe('Mass payout recipients', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const ONE_ETH = '1000000000000000000'
+
+    const givenMassPayouts = (enabled: boolean) => {
+      useHasFeatureSpy.mockImplementation((feature) => enabled && feature === FEATURES.MASS_PAYOUTS)
+    }
+
+    const renderForm = (type = TokenTransferType.multiSig) => {
+      const data = { recipients: [{ recipient: '', tokenAddress: ZERO_ADDRESS, amount: '' }], type }
+      return render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={data} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+    }
+
+    beforeEach(() => {
+      givenMassPayouts(true)
+
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: ONE_ETH,
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: '',
+              name: 'Ether',
+              symbol: 'ETH',
+              type: TokenType.NATIVE_TOKEN,
+            },
+            fiatBalance: '1000',
+            fiatConversion: '1000',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({ balances, loaded: true, loading: false, error: undefined })
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: 0n,
+      }))
+    })
+
+    it('offers to add a recipient when mass payouts are enabled', () => {
+      const { getByTestId } = renderForm()
+
+      expect(getByTestId('add-recipient-btn')).toBeEnabled()
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+    })
+
+    it('does not offer to add a recipient when mass payouts are disabled', () => {
+      givenMassPayouts(false)
+
+      const { queryByTestId } = renderForm()
+
+      expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
+    })
+
+    it('does not offer to add a recipient for a spending limit transaction', () => {
+      const { queryByTestId } = renderForm(TokenTransferType.spendingLimit)
+
+      expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
+    })
+
+    it('stops at 5 recipients', () => {
+      const { getByTestId, getAllByTestId } = renderForm()
+
+      for (let i = 0; i < 4; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(5)
+      expect(getByTestId('recipients-count')).toHaveTextContent('5/5')
+      expect(getByTestId('add-recipient-btn')).toBeDisabled()
+    })
+
+    it('removes a recipient', () => {
+      const { getByTestId, getAllByTestId } = renderForm()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      expect(getByTestId('recipients-count')).toHaveTextContent('2/5')
+
+      fireEvent.click(getAllByTestId('remove-recipient-btn')[0])
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(1)
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+    })
+
+    it('fills in the whole balance when Max is clicked for the second recipient', async () => {
+      const { getByTestId, getAllByTestId } = renderForm()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      fireEvent.click(getAllByTestId('max-btn')[1])
+
+      await waitFor(() => expect(getAllByTestId('token-amount-field')[1]).toHaveValue('1'))
+    })
+
+    it('marks every recipient and the form as insufficient when two recipients send the whole balance', async () => {
+      const { getByTestId, getAllByTestId, getAllByText } = renderForm()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      fireEvent.click(getAllByTestId('max-btn')[0])
+      fireEvent.click(getAllByTestId('max-btn')[1])
+
+      await waitFor(() => expect(getByTestId('insufficient-balance-error')).toBeInTheDocument())
+      await waitFor(() => expect(getAllByText('Insufficient funds')).toHaveLength(2))
+    })
+  })
 })
