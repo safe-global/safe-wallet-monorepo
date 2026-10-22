@@ -13,7 +13,7 @@ import { formatAppliesAt, getPendingStatusDetail } from '../policyStatusDetail'
 
 describe('getPendingStatusDetail', () => {
   it('should count the signatures while some are still missing', () => {
-    expect(getPendingStatusDetail(mockPendingAllowlist())).toBe('1 of 2 signed')
+    expect(getPendingStatusDetail(mockPendingAllowlist())).toBe('1 of 2 signatures')
   })
 
   it('should say the transaction is ready to execute once every signature is in', () => {
@@ -21,7 +21,7 @@ describe('getPendingStatusDetail', () => {
   })
 
   it('should describe a pending spending limit the same way', () => {
-    expect(getPendingStatusDetail(mockPendingPolicy())).toBe('1 of 2 signed')
+    expect(getPendingStatusDetail(mockPendingPolicy())).toBe('1 of 2 signatures')
   })
 
   it('should return nothing for an active or activating policy', () => {
