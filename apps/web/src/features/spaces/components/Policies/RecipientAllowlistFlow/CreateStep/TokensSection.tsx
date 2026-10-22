@@ -189,6 +189,14 @@ const TokensSection = ({
         />
       )}
 
+      {hasAccount && isError && addresses.length > 0 && (
+        <LoadErrorAlert
+          message={TOKENS_LOAD_ERROR_TEXT}
+          onRetry={refetch}
+          data-testid="allowlist-tokens-refetch-error"
+        />
+      )}
+
       {isAdding && <TokenDraftRow options={addable} onConfirm={add} onCancel={closeAdding} />}
 
       <div className="flex items-center justify-between gap-2">
