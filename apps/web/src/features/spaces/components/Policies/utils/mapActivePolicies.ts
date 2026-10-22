@@ -10,7 +10,10 @@ import type {
   ProposerPolicy,
   SpendingLimitPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
+import { toAllowlists, type NativeTokenResolver } from './mapAllowlists'
 import { toPolicyToken } from './toPolicyToken'
+
+export type { NativeTokenResolver }
 
 const toAllowance = (allowance: SpendingLimitAllowanceDto): PolicyAllowance => {
   const remaining = BigInt(allowance.amount) - BigInt(allowance.spent)
@@ -86,8 +89,15 @@ const toPolicies = (dto: ActivePolicyDto): Policy[] => {
  * Turns the gateway's active policies into the shapes the Policies table renders.
  *
  * @param dtos - Active policies as the gateway returns them; an allowance without token metadata falls back to base units.
+ * @param resolveNativeToken - The chain's native coin; without it, an allowlist leaves out its ETH entry.
  * @returns One entry per policy the page can render. Left out: a policy of a type the page does not
  *   render, one whose data has another type's shape, and a spending limit whose allowances are all
  *   gone — deleting the last allowance leaves the module enabled, so the gateway keeps returning it.
  */
-export const mapActivePolicies = (dtos: ActivePolicyDto[]): Policy[] => dtos.flatMap(toPolicies)
+export const mapActivePolicies = (
+  dtos: ActivePolicyDto[],
+  resolveNativeToken: NativeTokenResolver = () => undefined,
+): Policy[] => [
+  ...dtos.flatMap(toPolicies),
+  ...toAllowlists(dtos, resolveNativeToken).map((policy) => ({ ...policy, status: 'active' as const })),
+]

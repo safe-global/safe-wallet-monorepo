@@ -1,6 +1,20 @@
-import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
+import type { ActivePolicyDto, GuardSlotsDto, PolicyAccessDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import {
+  isAllowlistPolicy,
+  type AllowlistRecipient,
+  type PolicyTokenInfo,
+} from '@safe-global/views/features/spaces/components/Policies/types'
+import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import {
+  mockErc20TransferDto,
+  mockNativeTransferDto,
+  mockProposerDto,
+  mockSpendingLimitDto,
+  mockTreasuryAllowlistDtos,
+} from '../../mocks/activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
-import { mapActivePolicies } from '../mapActivePolicies'
+import { mapActivePolicies, type NativeTokenResolver } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {
   it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {
@@ -132,5 +146,144 @@ describe('mapActivePolicies', () => {
     dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
 
     expect(mapActivePolicies([dto])).toEqual([])
+  })
+
+  describe('allowlists', () => {
+    const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: 'eth.png' }
+    const resolveNativeToken = () => ETH
+    const GUARD = '0x5202B1ebE100812437d47eae769e155945fbba6a'
+    const CONTRACTS = { policyContract: '0x25DDa3b8974a10E93ca188F9C149A42F938Bd187', safePolicyGuard: GUARD }
+
+    const withGuards = (dto: ActivePolicyDto, guards: GuardSlotsDto): ActivePolicyDto => {
+      if (dto.enforcement.via !== 'guard') throw new Error('expected a guard policy')
+      return { ...dto, enforcement: { ...dto.enforcement, guards } }
+    }
+
+    const withAccess = (dto: ActivePolicyDto, access: Partial<PolicyAccessDto>): ActivePolicyDto => {
+      if (dto.enforcement.via !== 'guard') throw new Error('expected a guard policy')
+      return { ...dto, enforcement: { ...dto.enforcement, access: { ...dto.enforcement.access, ...access } } }
+    }
+
+    const usdtDto = (recipients: AllowlistRecipient[]) =>
+      mockErc20TransferDto({ data: { tokenAddress: MOCK_TOKENS.usdt.address, recipients } })
+
+    const toAllowlists = (dtos: ActivePolicyDto[], resolver: NativeTokenResolver = resolveNativeToken) =>
+      mapActivePolicies(dtos, resolver).filter(isAllowlistPolicy)
+
+    it('groups every token and ETH recipient on a Safe into one row', () => {
+      const [policy, ...rest] = toAllowlists(mockTreasuryAllowlistDtos())
+
+      expect(rest).toEqual([])
+      expect(policy).toMatchObject({
+        id: `allowlist:${MOCK_SAFES.treasury.chainId}:${MOCK_SAFES.treasury.address.toLowerCase()}`,
+        type: 'allowlist',
+        status: 'active',
+        safe: MOCK_SAFES.treasury,
+        enforcement: { via: 'guard', guardAddress: GUARD },
+        enabled: true,
+      })
+      expect(policy.data.entries.map((entry) => entry.token.address)).toEqual([
+        ZERO_ADDRESS,
+        MOCK_TOKENS.usdc.address,
+        MOCK_TOKENS.usdt.address,
+      ])
+    })
+
+    it('gives each Safe its own row', () => {
+      const policies = toAllowlists([mockErc20TransferDto(), mockErc20TransferDto({ safe: MOCK_SAFES.payroll })])
+
+      expect(policies.map((policy) => policy.safe)).toEqual([MOCK_SAFES.treasury, MOCK_SAFES.payroll])
+    })
+
+    it('shows a token with transfer and transferFrom policies once, with their recipients merged', () => {
+      const transfer = usdtDto([{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }])
+      const transferFrom = withAccess(
+        usdtDto([
+          { account: MOCK_ADDRESSES.alice.toLowerCase(), permission: 'ALWAYS' },
+          { account: MOCK_ADDRESSES.bob, permission: 'ONCE' },
+        ]),
+        { selector: '0x23b872dd' },
+      )
+
+      const [policy] = toAllowlists([transfer, transferFrom])
+
+      expect(policy.data.entries).toEqual([
+        {
+          token: { address: MOCK_TOKENS.usdt.address, symbol: '0xdAC1...1ec7', decimals: 0, logoUri: null },
+          recipients: [
+            { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },
+            { account: MOCK_ADDRESSES.bob, permission: 'ONCE' },
+          ],
+        },
+      ])
+    })
+
+    it('reads ETH recipients from the access target and allows them always', () => {
+      const [policy] = toAllowlists([
+        mockNativeTransferDto(MOCK_ADDRESSES.alice),
+        mockNativeTransferDto(MOCK_ADDRESSES.bob),
+      ])
+
+      expect(policy.data.entries).toEqual([
+        {
+          token: ETH,
+          recipients: [
+            { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },
+            { account: MOCK_ADDRESSES.bob, permission: 'ALWAYS' },
+          ],
+        },
+      ])
+    })
+
+    it('leaves out the ETH entry when the chain config is not loaded', () => {
+      const [policy] = toAllowlists([mockErc20TransferDto(), mockNativeTransferDto()], () => undefined)
+
+      expect(policy.data.entries.map((entry) => entry.token.address)).toEqual([MOCK_TOKENS.usdc.address])
+    })
+
+    it.each([
+      ['the target is the zero address', { target: ZERO_ADDRESS }],
+      ['the selector is not a plain transfer', { selector: '0xa9059cbb' }],
+      ['the operation is a delegatecall', { operation: 'DELEGATECALL' as const }],
+    ])('skips a native-transfer policy when %s', (_, access) => {
+      const [policy] = toAllowlists([mockErc20TransferDto(), withAccess(mockNativeTransferDto(), access)])
+
+      expect(policy.data.entries.map((entry) => entry.token.address)).toEqual([MOCK_TOKENS.usdc.address])
+    })
+
+    it('takes the guard address from the module slot when the transaction slot is empty', () => {
+      const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), { moduleGuard: CONTRACTS })])
+
+      expect(policy.enforcement).toEqual({ via: 'guard', guardAddress: GUARD })
+    })
+
+    it('takes the guard address from the deployment when no slot holds the guard', () => {
+      const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), {})])
+
+      expect(policy.enforcement).toEqual({
+        via: 'guard',
+        guardAddress: getPolicyGuardAddress(MOCK_SAFES.treasury.chainId),
+      })
+    })
+
+    it.each<[string, GuardSlotsDto, boolean]>([
+      ['both slots', { transactionGuard: CONTRACTS, moduleGuard: CONTRACTS }, true],
+      ['only the transaction slot', { transactionGuard: CONTRACTS }, false],
+      ['only the module slot', { moduleGuard: CONTRACTS }, false],
+      ['no slot', {}, false],
+    ])('marks the allowlist enabled only when the guard is in both slots: %s', (_, guards, enabled) => {
+      const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), guards)])
+
+      expect(policy.enabled).toBe(enabled)
+    })
+
+    it('marks the whole row not enabled when one of its policies is not enforced', () => {
+      const [policy] = toAllowlists([
+        mockErc20TransferDto(),
+        withGuards(mockNativeTransferDto(), { transactionGuard: CONTRACTS }),
+      ])
+
+      expect(policy.enabled).toBe(false)
+    })
   })
 })
