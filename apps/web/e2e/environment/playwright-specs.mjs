@@ -66,6 +66,11 @@ export const playwrightSpecs = {
   },
   'smoke/dashboard.spec.ts': { scenarios: ['prepareBasicScenario'], safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' } },
   'smoke/landing.spec.ts': {},
+  // The basic Safe's history holds its creation, a "Success" row
+  'smoke/tx-history.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_HISTORY_SAFE: 'SEP_STATIC_SAFE_7' },
+  },
   'e2e/walletconnect.spec.ts': {},
   'e2e/walletconnect-nested-signer.spec.ts': {},
 }
