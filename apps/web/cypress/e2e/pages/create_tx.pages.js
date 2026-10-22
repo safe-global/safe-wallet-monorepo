@@ -111,8 +111,6 @@ const noTxFoundStr = (type) => `0 ${type} transactions found`
 const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
 const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
-const bulkConfirmationText = (tx) =>
-  `This transaction batches a total of ${tx} transactions from your queue into a single Ethereum transaction`
 
 const disabledBultExecuteBtnTooltip =
   'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce'
@@ -120,10 +118,8 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 
 const bulkExecuteBtnStr = 'Bulk execute'
 
-const batchModalTitle = 'Batch'
 const gasLimit21000 = 'Gas limit must be at least 21000'
 export const swapOrder = 'Swap order settlement'
-export const bulkTxs = 'Bulk transactions'
 export const txStr = 'Transactions'
 export const txDetailsStr = 'Transaction details'
 export const settingsStr = 'Settings'
@@ -944,15 +940,6 @@ export function verifyReplacedSigner(newSignerName) {
 function verifyBulkActions(actions) {
   actions.forEach((action) => {
     cy.contains(action).should('exist')
-  })
-}
-
-export function verifyBulkConfirmationScreen(tx, actions) {
-  cy.contains(bulkConfirmationText(tx))
-  verifyBulkActions(actions)
-  cy.get(modal.modalHeader).within(() => {
-    cy.contains(batchModalTitle).should('exist')
-    cy.get('svg').should('exist')
   })
 }
 
