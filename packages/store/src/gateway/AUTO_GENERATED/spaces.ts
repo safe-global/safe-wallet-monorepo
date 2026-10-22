@@ -35,6 +35,14 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      addressBooksCreateTagV1: build.mutation<AddressBooksCreateTagV1ApiResponse, AddressBooksCreateTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags`,
+          method: 'POST',
+          body: queryArg.createTagDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       addressBooksRenameTagV1: build.mutation<AddressBooksRenameTagV1ApiResponse, AddressBooksRenameTagV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/address-book/tags/${queryArg.tagId}`,
@@ -280,6 +288,13 @@ export type AddressBooksSetContactTagsV1ApiArg = {
   /** The entries to tag, each with its full set of tag names */
   setContactTagsDto: SetContactTagsDto
 }
+export type AddressBooksCreateTagV1ApiResponse = /** status 201 Tag created successfully */ SpaceAddressBookDto
+export type AddressBooksCreateTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** The tag name */
+  createTagDto: CreateTagDto
+}
 export type AddressBooksRenameTagV1ApiResponse = /** status 200 Tag renamed successfully */ SpaceAddressBookDto
 export type AddressBooksRenameTagV1ApiArg = {
   /** Space UUID containing the address book */
@@ -518,10 +533,6 @@ export type SpaceAddressBookDto = {
   /** All tags defined in the workspace address book */
   tags: SpaceAddressBookTagDto[]
 }
-export type TagColorChoice = {
-  name: string
-  color: 'slate' | 'clay' | 'rose' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon'
-}
 export type AddressBookItem = {
   name: string
   address: string
@@ -530,8 +541,6 @@ export type AddressBookItem = {
   tags?: string[]
 }
 export type UpsertAddressBookItemsDto = {
-  /** Colours for the tags this request creates. Ignored for tags the space already has; a colour another tag already uses is replaced by a free one */
-  tagColors?: TagColorChoice[]
   items: AddressBookItem[]
 }
 export type SetContactTagsItem = {
@@ -540,10 +549,12 @@ export type SetContactTagsItem = {
   tags: string[]
 }
 export type SetContactTagsDto = {
-  /** Colours for the tags this request creates. Ignored for tags the space already has; a colour another tag already uses is replaced by a free one */
-  tagColors?: TagColorChoice[]
   /** At most as many entries as the address book can hold, each address at most once */
   items: SetContactTagsItem[]
+}
+export type CreateTagDto = {
+  /** 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  name: string
 }
 export type RenameTagDto = {
   /** 'Workspace Safe' and 'Signer' aren't allowed, in any case */
@@ -644,6 +655,7 @@ export type SpaceAuditLogEntryDto = {
     | 'ADDRESS_BOOK_REQUEST_CREATED'
     | 'ADDRESS_BOOK_REQUEST_REJECTED'
     | 'ADDRESS_BOOK_TAGS_UPDATED'
+    | 'ADDRESS_BOOK_TAG_CREATED'
     | 'ADDRESS_BOOK_TAG_RENAMED'
     | 'ADDRESS_BOOK_TAG_DELETED'
   actorUserId: number
@@ -1042,6 +1054,7 @@ export const {
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   useAddressBooksSetContactTagsV1Mutation,
+  useAddressBooksCreateTagV1Mutation,
   useAddressBooksRenameTagV1Mutation,
   useAddressBooksDeleteTagV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
