@@ -2,13 +2,14 @@ import { useContext, useState, type ReactElement } from 'react'
 import NextLink from 'next/link'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
-import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { chainLabel, findSafeAccount } from '../../SafeAccountSelector/utils'
 import { SafeIdentity } from '../../components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
@@ -71,6 +72,8 @@ const CreateRecipientAllowlistPolicy = ({
 
   const heldTokens = useHeldTokenAddresses()
 
+  useSafeShieldForAddressPoisoning(values.recipients.map((recipient) => recipient.address))
+
   // Reset during render, not in an effect, so the remounted recipients section never sees the old Safe's values.
   const [trackedScopeKey, setTrackedScopeKey] = useState(scopeKey)
   if (trackedScopeKey !== scopeKey) {
@@ -89,6 +92,7 @@ const CreateRecipientAllowlistPolicy = ({
         spaceId,
       )
     : undefined
+  const safeName = selectedSafe && (selectedSafe.name || shortenAddress(selectedSafe.address))
 
   return (
     <TxCard>
@@ -98,14 +102,11 @@ const CreateRecipientAllowlistPolicy = ({
           onChange={setValues}
           heldTokens={heldTokens}
           account={
-            selectedSafe && target
+            selectedSafe && safeName && target
               ? {
                   chainId: selectedSafe.chainId,
                   address: selectedSafe.address,
-                  label: getAllowlistAccountLabel(
-                    selectedSafe.name || shortenAddress(selectedSafe.address),
-                    selectedSafe.chain?.chainName ?? selectedSafe.chainId,
-                  ),
+                  label: getAllowlistAccountLabel(safeName, chainLabel(selectedSafe)),
                 }
               : undefined
           }
@@ -140,10 +141,10 @@ const CreateRecipientAllowlistPolicy = ({
             />
           )}
 
-          {selectedSafe && guard && (
+          {safeName && guard && (
             <GuardStatusBanner
               guard={guard}
-              safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
+              safeName={safeName}
               settingsLink={
                 settingsHref && (
                   <Button variant="outline" render={<NextLink href={settingsHref} />}>
