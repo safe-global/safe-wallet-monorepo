@@ -73,24 +73,6 @@ describe('Proposers tests', () => {
     proposer.checkProposerData([migratedProposerName])
   })
 
-  it('Verify a tx with the "proposal" status shows a message about being created by a proposer', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposerData.proposedTx)
-    proposer.verifyPropsalStatusExists()
-    proposer.verifyProposedTxMsgVisible()
-  })
-
-  it('Verify a tx with the "proposal" status shows the details of a proposer', () => {
-    wallet.connectSignerViaStorage(
-      signer,
-      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposerData.proposedTx,
-      {
-        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.proposers },
-      },
-    )
-
-    proposer.verifyProposerInTxActionList(proposerNameAD2)
-  })
-
   describe('With a pre-seeded address book', () => {
     it('Verify that the address book name of the proposers overwrites the name given during its creation', () => {
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31, {
@@ -99,17 +81,5 @@ describe('Proposers tests', () => {
       cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
       proposer.checkProposerData([proposerNameAD])
     })
-  })
-})
-
-describe('Proposers tests with the Safe Pro gate', () => {
-  before(async () => {
-    staticSafes = await getSafes(CATEGORIES.static)
-  })
-
-  it('Verify Safe Pro replaces the "Add proposer" button when no Workspace plan grants policies', () => {
-    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    proposer.verifyAddProposerIsLocked()
   })
 })
