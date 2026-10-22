@@ -3,6 +3,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import {
   createDefaultAllowlistValues,
   type AllowlistRecipient,
@@ -24,6 +25,7 @@ const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
 
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
+jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -58,6 +60,7 @@ const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction
 >
 const mockUseGuardStatus = useGuardStatus as jest.MockedFunction<typeof useGuardStatus>
 const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
+const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<typeof useSafeShieldForAddressPoisoning>
 
 const holdNative = (overrides: Partial<ReturnType<typeof useHeldTokenAddresses>> = {}) =>
   mockHeld.mockReturnValue({
@@ -204,6 +207,18 @@ describe('CreateRecipientAllowlistPolicy', () => {
       ...completeValues(),
       rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }],
     })
+  })
+
+  it('runs the address-poisoning check on every recipient', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(mockPoisoning).toHaveBeenLastCalledWith([])
+
+    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
+
+    expect(mockPoisoning).toHaveBeenLastCalledWith([RECIPIENT])
   })
 
   it('keeps Next disabled while the held tokens load', () => {
