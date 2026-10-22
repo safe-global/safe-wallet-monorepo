@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`./Drawer.stories Full 1`] = `
+exports[`./Drawer.stories CustomHeader 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
@@ -35,13 +35,174 @@ exports[`./Drawer.stories Full 1`] = `
         tabindex="0"
       />
       <div
-        aria-label="Full drawer"
+        aria-label="Drawer with its own header"
         class="data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-[var(--color-background-main)] p-0"
         data-base-ui-focusable=""
         data-open=""
         data-side="right"
         data-slot="sheet-content"
         id="_r_0_"
+        role="dialog"
+        style="--nested-dialogs: 0; width: min(440px * , * calc(100vw - 24px));"
+        tabindex="-1"
+      >
+        <div
+          aria-label="Resize panel"
+          aria-orientation="vertical"
+          aria-valuemax="1000"
+          aria-valuemin="360"
+          aria-valuenow="440"
+          class="resizeHandle"
+          role="separator"
+          tabindex="0"
+        />
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <div
+            class="flex items-center gap-3 px-6 pt-6"
+          >
+            <span
+              class="m-0 text-sm font-semibold truncate leading-tight"
+              data-slot="typography"
+              data-variant="paragraph-small-bold"
+            >
+              Custom header
+            </span>
+            <span
+              class="flex-1"
+            />
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Expand
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              1
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              2
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              3
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              4
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              5
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              6
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+          </div>
+        </div>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Drawer.stories Full 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_5_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Full drawer"
+        class="data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-[var(--color-background-main)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_3_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -167,7 +328,7 @@ exports[`./Drawer.stories List 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_5_"
+      id="_r_8_"
     >
       <div
         aria-hidden="true"
@@ -198,7 +359,7 @@ exports[`./Drawer.stories List 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_3_"
+        id="_r_6_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -430,7 +591,7 @@ exports[`./Drawer.stories LongContent 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_8_"
+      id="_r_b_"
     >
       <div
         aria-hidden="true"
@@ -461,7 +622,7 @@ exports[`./Drawer.stories LongContent 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_6_"
+        id="_r_9_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -818,7 +979,7 @@ exports[`./Drawer.stories Mobile 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_b_"
+      id="_r_e_"
     >
       <div
         aria-hidden="true"
@@ -849,7 +1010,7 @@ exports[`./Drawer.stories Mobile 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_9_"
+        id="_r_c_"
         role="dialog"
         style="--nested-dialogs: 0; width: min(700px * , * calc(100vw - 24px));"
         tabindex="-1"
@@ -1089,7 +1250,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_e_"
+      id="_r_h_"
     >
       <div
         aria-hidden="true"
@@ -1120,7 +1281,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_c_"
+        id="_r_f_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1211,7 +1372,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_h_"
+      id="_r_k_"
     >
       <div
         aria-hidden="true"
@@ -1242,7 +1403,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_f_"
+        id="_r_i_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1344,7 +1505,7 @@ exports[`./Drawer.stories Resizable 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_k_"
+      id="_r_n_"
     >
       <div
         aria-hidden="true"
@@ -1375,7 +1536,7 @@ exports[`./Drawer.stories Resizable 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_i_"
+        id="_r_l_"
         role="dialog"
         style="--nested-dialogs: 0; width: min(700px * , * calc(100vw - 24px));"
         tabindex="-1"
@@ -1615,7 +1776,7 @@ exports[`./Drawer.stories Responsive 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_n_"
+      id="_r_q_"
     >
       <div
         aria-hidden="true"
@@ -1646,7 +1807,7 @@ exports[`./Drawer.stories Responsive 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_l_"
+        id="_r_o_"
         role="dialog"
         style="--nested-dialogs: 0; width: min(700px * , * calc(100vw - 24px));"
         tabindex="-1"
@@ -1886,7 +2047,7 @@ exports[`./Drawer.stories Sections 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_q_"
+      id="_r_t_"
     >
       <div
         aria-hidden="true"
@@ -1917,7 +2078,7 @@ exports[`./Drawer.stories Sections 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_o_"
+        id="_r_r_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -2006,7 +2167,7 @@ exports[`./Drawer.stories Sections 1`] = `
                   class="flex items-center justify-between gap-2"
                 >
                   <button
-                    aria-controls="base-ui-_r_r_"
+                    aria-controls="base-ui-_r_u_"
                     aria-disabled="false"
                     aria-expanded="true"
                     class="-mx-1 flex min-h-6 flex-1 cursor-pointer items-center gap-1 rounded-sm px-1 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -2052,7 +2213,7 @@ exports[`./Drawer.stories Sections 1`] = `
                   class="flex flex-col gap-2"
                   data-open=""
                   data-slot="collapsible-content"
-                  id="base-ui-_r_r_"
+                  id="base-ui-_r_u_"
                   style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                 >
                   <div
@@ -2165,7 +2326,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_v_"
+      id="_r_12_"
     >
       <div
         aria-hidden="true"
@@ -2196,7 +2357,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_t_"
+        id="_r_10_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -2298,7 +2459,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_12_"
+      id="_r_15_"
     >
       <div
         aria-hidden="true"
@@ -2329,7 +2490,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_10_"
+        id="_r_13_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
