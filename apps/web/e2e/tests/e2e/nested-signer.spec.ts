@@ -8,7 +8,7 @@ import type { Page } from '@playwright/test'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
-import { seedNestedSafe, type SeededSafe } from '../../src/seed/safe'
+import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
@@ -120,5 +120,74 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     expect(await queuedIn(safeApiClient, child)).toEqual([])
     expect(await queuedIn(safeApiClient, parent)).toEqual([])
     expect((await safeApiClient.getSafeInfo(parent.address)).nonce).toBe(0)
+  })
+
+  test('should add the parent Safe as the second confirmation of a transfer that the owner already signed', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }, testInfo) => {
+    const recipient = Wallet.createRandom().address
+    const { owner4 } = journey.owners
+    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
+    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const seeded = await seedQueuedTransfer(child, { nonce: 0, recipient, amount: AMOUNT })
+    const review = new TxReviewPage(safePage)
+    const queue = new TxQueuePage(safePage)
+
+    await queue.goto(child.prefixedAddress)
+    await queue.confirm(0)
+    await review.waitForSigner(parent.address)
+    await review.signerSelect.click()
+    await expect(review.signerOption(owner4.address)).toContainText('Already signed')
+    await safePage.keyboard.press('Escape')
+    await review.sign()
+
+    await expect(new NestedTxSuccessPage(safePage).status).toHaveText('One more step in the parent Safe')
+    await expect.poll(async () => (await queuedIn(safeApiClient, parent)).length).toBe(1)
+    const [parentTransaction] = await queuedIn(safeApiClient, parent)
+    const parentDetails = await safeApiClient.findTransaction(parentTransaction.id)
+    expect(parentDetails?.txData?.hexData).toBe(safeInterface.encodeFunctionData('approveHash', [seeded.safeTxHash]))
+    expect((await queuedIn(safeApiClient, child)).map(safeTxHashOf)).toEqual([seeded.safeTxHash])
+
+    await queue.goto(parent.prefixedAddress)
+    await queue.execute(0)
+    await review.continueAndExecute()
+    await review.waitForExecution()
+
+    await expect
+      .poll(async () => (await queuedIn(safeApiClient, child)).map(confirmationsOf), {
+        timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
+      })
+      .toEqual([2])
+    await queue.goto(child.prefixedAddress)
+    await expect(queue.transactionWithNonce(0)).toContainText('2/2')
+    await queue.execute(0)
+    await review.continueAndExecute()
+    await review.waitForExecution()
+
+    await expect.poll(async () => (await safeApiClient.getSafeInfo(child.address)).nonce).toBe(1)
+    expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
+  })
+
+  test('should sign through the parent Safe when the owner picks it instead of signing directly', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }, testInfo) => {
+    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
+    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const review = new TxReviewPage(safePage)
+
+    await reviewTransfer(safePage, child, Wallet.createRandom().address)
+    await review.waitForSigner(journey.owners.owner4.address)
+    await review.chooseSigner(parent.address)
+    await review.waitForSigner(parent.address)
+    await review.sign()
+
+    await expect(new NestedTxSuccessPage(safePage).status).toHaveText('One more step in the parent Safe')
+    await expect(safePage.getByText('approveHash', { exact: true })).toBeVisible()
+    await expect.poll(async () => (await queuedIn(safeApiClient, parent)).length).toBe(1)
+    expect((await queuedIn(safeApiClient, child)).map(confirmationsOf)).toEqual([0])
   })
 })
