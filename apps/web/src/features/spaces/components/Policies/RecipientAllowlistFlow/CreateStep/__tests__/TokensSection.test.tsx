@@ -56,6 +56,10 @@ const hold = (options: TokenOption[], overrides: Partial<ReturnType<typeof useHe
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
+    isPopularLoading: false,
+    isPopularError: false,
+    refetchPopular: jest.fn(),
+    identityKey: '1:0x1',
     ...overrides,
   })
 
@@ -65,16 +69,17 @@ const setup = (
 ) => {
   const onChange = jest.fn()
   const onDismissCallout = jest.fn()
-  render(
+  const ui = () => (
     <TokensSection
       values={values}
       onChange={onChange}
       hasAccount={props.hasAccount ?? true}
       isCalloutDismissed={props.isCalloutDismissed ?? false}
       onDismissCallout={onDismissCallout}
-    />,
+    />
   )
-  return { onChange, onDismissCallout }
+  const { rerender } = render(ui())
+  return { onChange, onDismissCallout, rerender: () => rerender(ui()) }
 }
 
 describe('TokensSection', () => {
@@ -193,25 +198,57 @@ describe('TokensSection', () => {
 
     expect(refetch).toHaveBeenCalled()
     expect(screen.queryByText('Tokens in this account will show here.')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Which tokens can be sent')).toHaveLength(1)
   })
 
-  it('keeps loaded chips visible when a refetch fails', () => {
+  it('keeps loaded chips and "Deselect all" when a refetch fails', () => {
     hold([ETH, USDC_OPTION], { isError: true })
     setup()
 
     expect(screen.queryByTestId('allowlist-tokens-error')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Allow ETH' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Deselect all' })).toBeInTheDocument()
   })
 
   it.each([
     ['loading', { isLoading: true }],
     ['failed', { isError: true }],
-  ])('hides "Select all" while the tokens are %s', (_, overrides) => {
-    hold([ETH, USDC_OPTION], overrides)
+  ])('hides "Select all" and disables "Add a token" while the tokens are %s', (_, overrides) => {
+    hold([DAI_OPTION], overrides)
     setup()
 
     expect(screen.queryByRole('button', { name: /select all/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /deselect all/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add a token' })).toBeDisabled()
+  })
+
+  it('disables "Add a token" while the popular tokens load', () => {
+    hold([ETH, DAI_OPTION], { isPopularLoading: true })
+    setup()
+
+    expect(screen.getByRole('button', { name: 'Add a token' })).toBeDisabled()
+  })
+
+  it('offers a retry when the popular tokens fail to load', async () => {
+    const refetchPopular = jest.fn()
+    hold([ETH, USDC_OPTION], { isPopularError: true, refetchPopular })
+    setup()
+
+    expect(screen.getByText("Couldn't load popular tokens")).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(refetchPopular).toHaveBeenCalled()
+  })
+
+  it('closes the add-token row when the account changes', async () => {
+    const { rerender } = setup()
+    await userEvent.click(screen.getByRole('button', { name: 'Add a token' }))
+    expect(screen.getByRole('button', { name: 'pick DAI' })).toBeInTheDocument()
+
+    hold([ETH, USDC_OPTION, DAI_OPTION], { identityKey: '1:0x2' })
+    rerender()
+
+    expect(screen.queryByRole('button', { name: 'pick DAI' })).not.toBeInTheDocument()
   })
 
   it('shows the callout and dismisses it', async () => {
