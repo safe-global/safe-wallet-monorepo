@@ -13,6 +13,8 @@ export class TxReviewPage {
   /** Shown to an owner of a parent Safe, which can sign for the child Safe */
   readonly signerSelect: Locator
   readonly signButton: Locator
+  /** A proposer who is not a signer gets this button in place of the sign step */
+  readonly proposeButton: Locator
   readonly connectedWalletMethod: Locator
   readonly executeButton: Locator
   /** The spending-limit review has no signing step, only this button */
@@ -35,6 +37,7 @@ export class TxReviewPage {
     this.continueButton = page.getByTestId('continue-sign-btn')
     this.signerSelect = page.getByRole('combobox', { name: 'Signer account' })
     this.signButton = page.getByTestId('combo-submit-sign')
+    this.proposeButton = page.getByRole('button', { name: 'Propose transaction' })
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
@@ -70,6 +73,13 @@ export class TxReviewPage {
   async chooseSigner(address: string): Promise<void> {
     await this.signerSelect.click({ timeout: REVIEW_LOAD_TIMEOUT_MS })
     await this.signerOption(address).click()
+  }
+
+  /** Confirm the risk, continue from the review and propose the transaction as a proposer, without a signature */
+  async propose(): Promise<void> {
+    await this.confirmRisk()
+    await this.continueButton.click()
+    await this.proposeButton.click()
   }
 
   /** Execute a fully signed transaction with the connected wallet, not the relay */
