@@ -19,7 +19,7 @@ import * as gtfHooks from '@/features/gtf'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { act, fireEvent, waitFor } from '@testing-library/react'
+import { act, fireEvent, waitFor, within } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -599,6 +599,59 @@ describe('CreateTokenTransfer', () => {
       const maxReached = getByTestId('max-recipients-reached')
       expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-foreground')
       expect(maxReached).not.toHaveClass('bg-card')
+    })
+
+    const addRecipients = (getByTestId: (id: string) => HTMLElement, count: number) => {
+      for (let i = 0; i < count; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+    }
+
+    it('recommends CSV Airdrop for more than 5 recipients once a second recipient is added', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      addRecipients(getByTestId, 1)
+
+      expect(getByTestId('csv-airdrop-hint')).toHaveTextContent(
+        'If you want to add more than 5 recipients, use CSV Airdrop',
+      )
+    })
+
+    it('recommends CSV Airdrop when no more recipients can be added', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      addRecipients(getByTestId, 4)
+
+      expect(getByTestId('max-recipients-reached')).toHaveTextContent(
+        /No more recipients can be added\.\s*Please use CSV Airdrop/,
+      )
+    })
+
+    it.each([
+      ['the hint', 1, 'csv-airdrop-hint'],
+      ['the max recipients alert', 4, 'max-recipients-reached'],
+    ])('opens the CSV Airdrop app from %s', (_, added, alertTestId) => {
+      const { getByTestId } = renderCreateTokenTransfer()
+      addRecipients(getByTestId, added)
+
+      fireEvent.click(within(getByTestId(alertTestId)).getByRole('button', { name: 'CSV Airdrop' }))
+
+      expect(getByTestId('csvairdrop-dialog')).toHaveTextContent('Use CSV Airdrop')
+      expect(getByTestId('open-app-btn')).toHaveAttribute(
+        'href',
+        expect.stringContaining(encodeURIComponent(csvApp.url)),
+      )
+    })
+
+    it('does not recommend CSV Airdrop when the chain has no CSV Airdrop app', () => {
+      useRemoteSafeAppsSpy.mockReturnValue([[], undefined, false])
+      const { getByTestId, queryByTestId, queryByText } = renderCreateTokenTransfer()
+
+      addRecipients(getByTestId, 4)
+
+      expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
+      expect(getByTestId('max-recipients-reached')).toHaveTextContent('No more recipients can be added.')
+      expect(queryByText('CSV Airdrop')).not.toBeInTheDocument()
     })
   })
 
