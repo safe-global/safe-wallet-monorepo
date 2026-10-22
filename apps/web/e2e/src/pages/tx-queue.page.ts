@@ -62,6 +62,11 @@ export class TxQueuePage {
     await this.confirmDeleteButton.click()
   }
 
+  /** Confirm the transaction whose page is open; its review opens */
+  async confirmOpenTransaction(): Promise<void> {
+    await this.page.getByTestId('tx-actions').getByRole('button', { name: 'Confirm' }).click()
+  }
+
   /** Confirm the queued transaction at `nonce` from its queue row; its review opens */
   async confirm(nonce: number): Promise<void> {
     await this.transactionWithNonce(nonce).getByRole('button', { name: 'Confirm' }).click()

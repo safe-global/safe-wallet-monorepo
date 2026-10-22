@@ -18,6 +18,7 @@ import { NestedTxSuccessPage } from '../../src/pages/nested-tx-success.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
+import { WalletPage } from '../../src/pages/wallet.page'
 
 const AMOUNT = '0.01'
 // The Queue Service adds the parent's on-chain approval when the Transaction Service has indexed it
@@ -30,6 +31,9 @@ const safeTxHashOf = (transaction: Transaction): string => transaction.id.split(
 
 const confirmationsOf = (transaction: Transaction): number | undefined =>
   transaction.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.confirmationsSubmitted : undefined
+
+const isRejection = (transaction: Transaction): boolean =>
+  transaction.txInfo.type === 'Custom' && transaction.txInfo.isCancellation
 
 async function queuedIn(safeApiClient: SafeApiClient, safe: SeededSafe): Promise<Transaction[]> {
   return transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))
@@ -189,5 +193,92 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await expect(safePage.getByText('approveHash', { exact: true })).toBeVisible()
     await expect.poll(async () => (await queuedIn(safeApiClient, parent)).length).toBe(1)
     expect((await queuedIn(safeApiClient, child)).map(confirmationsOf)).toEqual([0])
+  })
+
+  test('should execute the approval once a second owner of a 2/2 parent Safe confirms it', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }, testInfo) => {
+    const { parent, child } = await seedNestedSafe(journey, { parent: { ownerCount: 2, threshold: 2 } })
+    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const review = new TxReviewPage(safePage)
+    const queue = new TxQueuePage(safePage)
+    const wallet = new WalletPage(safePage)
+
+    await reviewTransfer(safePage, child, Wallet.createRandom().address)
+    await review.waitForSigner(parent.address)
+    await review.sign()
+
+    await expect(new NestedTxSuccessPage(safePage).status).toHaveText('One more step in the parent Safe')
+    await expect.poll(async () => (await queuedIn(safeApiClient, parent)).map(confirmationsOf)).toEqual([1])
+    const [childTransaction] = await queuedIn(safeApiClient, child)
+    expect(confirmationsOf(childTransaction)).toBe(0)
+
+    await queue.goto(parent.prefixedAddress)
+    await wallet.disconnect()
+    await wallet.connectWallet(journey.owners.owner1.privateKey)
+    await expect(queue.transactionWithNonce(0)).toContainText('1/2')
+    await queue.confirm(0)
+    await review.sign()
+    await review.execute()
+    await review.waitForExecution()
+
+    expect(
+      await isApprovedHash(journey.env, {
+        safeAddress: child.address,
+        owner: parent.address,
+        hash: safeTxHashOf(childTransaction),
+      }),
+    ).toBe(true)
+    await expect
+      .poll(async () => (await queuedIn(safeApiClient, child)).map(confirmationsOf), {
+        timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
+      })
+      .toEqual([1])
+  })
+
+  test('should execute an on-chain rejection of a child transfer that the parent Safe signs', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }, testInfo) => {
+    const recipient = Wallet.createRandom().address
+    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
+    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const transfer = await seedQueuedTransfer(child, { nonce: 0, recipient, amount: AMOUNT })
+    const review = new TxReviewPage(safePage)
+    const queue = new TxQueuePage(safePage)
+
+    await queue.openTransaction(child.prefixedAddress, transfer.txId)
+    await queue.reject()
+    await review.waitForSigner(journey.owners.owner4.address)
+    await review.chooseSigner(parent.address)
+    await review.waitForSigner(parent.address)
+    await review.sign()
+
+    await expect(new NestedTxSuccessPage(safePage).status).toHaveText('One more step in the parent Safe')
+    await expect.poll(async () => (await queuedIn(safeApiClient, parent)).length).toBe(1)
+    await queue.goto(parent.prefixedAddress)
+    await queue.execute(0)
+    await review.continueAndExecute()
+    await review.waitForExecution()
+
+    await expect
+      .poll(async () => (await queuedIn(safeApiClient, child)).filter(isRejection).map(confirmationsOf), {
+        timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
+      })
+      .toEqual([1])
+    const [rejection] = (await queuedIn(safeApiClient, child)).filter(isRejection)
+    await queue.openTransaction(child.prefixedAddress, rejection.id)
+    await queue.confirmOpenTransaction()
+    await review.waitForSigner(journey.owners.owner4.address)
+    await review.sign()
+    await review.execute()
+    await review.waitForExecution()
+
+    await expect.poll(async () => (await safeApiClient.getSafeInfo(child.address)).nonce).toBe(1)
+    await expect.poll(async () => await queuedIn(safeApiClient, child)).toEqual([])
+    expect(await balanceOf(journey.env, recipient)).toBe(0n)
   })
 })
