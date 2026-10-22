@@ -204,10 +204,10 @@ export function SectionHeader({
   )
 }
 
-export type CollapseAll = { allCollapsed: boolean; onToggle: () => void }
+export type CollapseAll = { allCollapsed: boolean; onToggle: () => void; count?: number }
 
 // Column header: chevrons always, outline and word on header hover. The wrapper undoes the header's capitals.
-export function CollapseAllButton({ allCollapsed, onToggle }: CollapseAll) {
+export function CollapseAllButton({ allCollapsed, onToggle, count }: CollapseAll) {
   const label = allCollapsed ? 'Expand all' : 'Collapse all'
   const icon = allCollapsed ? <ChevronsUpDown /> : <ChevronsDownUp />
   return (
@@ -215,6 +215,7 @@ export function CollapseAllButton({ allCollapsed, onToggle }: CollapseAll) {
       <Button size="2xs" variant="outline" aria-label={label} onClick={onToggle}>
         <span className="opacity-0 transition-opacity group-hover/head:opacity-100 group-focus-within/head:opacity-100">
           {allCollapsed ? 'Expand' : 'Collapse'}
+          {count !== undefined && ` ${count} ${count === 1 ? 'Safe' : 'Safes'}`}
         </span>
         {icon}
       </Button>

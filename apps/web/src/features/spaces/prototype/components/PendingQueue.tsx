@@ -640,7 +640,7 @@ function PendingQueueView() {
                 isCollapsed={isCollapsed}
                 onToggle={toggleSection}
                 getSafeBatch={safeBatchFor}
-                collapse={{ allCollapsed, onToggle: toggleAll }}
+                collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
                 {...sectionProps}
               />
             )}

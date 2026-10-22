@@ -27,6 +27,7 @@ function QueueTablePreview({ scenario = 'everyday', isWide = true }: { scenario?
         collapse={{
           allCollapsed,
           onToggle: () => setCollapsed(allCollapsed ? [] : sections.map((section) => section.id)),
+          count: sections.length,
         }}
         items={items}
         persona="owner"
