@@ -3,15 +3,15 @@ import { fn } from 'storybook/test'
 import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../mocks/policies'
 import {
   mockActivatingAllowlist,
-  mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockCgwAllowlist,
+  mockCgwUnenforcedAllowlist,
   mockExpiredPendingAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
-  mockUnenforcedAllowlist,
 } from '../mocks/allowlistPolicies'
 import { createMockStory } from '@/stories/mocks'
 import AllowlistDrawer from './AllowlistDrawer'
@@ -41,7 +41,7 @@ const meta = {
     onRemove: fn(),
     onCancelChange: fn(),
     onConnectWallet: fn(),
-    policy: mockActiveAllowlist(),
+    policy: mockCgwAllowlist(),
     viewer: MOCK_VIEWERS.signer,
   },
 } satisfies Meta<typeof AllowlistDrawer>
@@ -105,7 +105,7 @@ export const PendingExpired: Story = {
 
 export const Activating: Story = { args: { policy: mockActivatingAllowlist() } }
 
-export const Unenforced: Story = { args: { policy: mockUnenforcedAllowlist() } }
+export const Unenforced: Story = { args: { policy: mockCgwUnenforcedAllowlist() } }
 
 export const ChangePending: Story = { args: { policy: mockAllowlistChangePending() } }
 

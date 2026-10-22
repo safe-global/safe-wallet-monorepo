@@ -1,9 +1,15 @@
-import type {
-  AllowlistPolicy,
-  AllowlistRecipient,
-  FailedAllowlistPolicy,
-  QueuedAllowlistPolicy,
+import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import {
+  isAllowlistPolicy,
+  type AllowlistPolicy,
+  type AllowlistRecipient,
+  type FailedAllowlistPolicy,
+  type PolicyTokenInfo,
+  type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
+import { mapActivePolicies } from '../utils/mapActivePolicies'
+import { TRANSACTION_GUARD_ONLY, mockTreasuryAllowlistDtos } from './activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, asActivePolicy } from './policies'
 
 const POLICY_GUARD = '0x1a4F7b8C9d0E1f2A3b4C5d6E7f8091A2b3C4c802'
@@ -34,6 +40,26 @@ export const mockAllowlistPolicy = (overrides: Partial<AllowlistPolicy> = {}): A
 })
 
 export const mockActiveAllowlist = (): AllowlistPolicy & { status: 'active' } => asActivePolicy(mockAllowlistPolicy())
+
+const MOCK_ETH: PolicyTokenInfo = {
+  address: ZERO_ADDRESS,
+  symbol: 'ETH',
+  decimals: 18,
+  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+}
+
+/** The treasury's allowlist as CGW sends it: ERC20 tokens by address only, ETH named by the chain config. */
+export const mockCgwAllowlist = (
+  dtos: ActivePolicyDto[] = mockTreasuryAllowlistDtos(),
+): AllowlistPolicy & { status: 'active' } => {
+  const policy = mapActivePolicies(dtos, () => MOCK_ETH).find(isAllowlistPolicy)
+  if (policy?.status !== 'active') throw new Error('The DTOs map to no active allowlist')
+
+  return policy
+}
+
+export const mockCgwUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  mockCgwAllowlist(mockTreasuryAllowlistDtos(TRANSACTION_GUARD_ONLY))
 
 /** The guard is not in both slots, so the row reads "Not enforced". */
 export const mockUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>

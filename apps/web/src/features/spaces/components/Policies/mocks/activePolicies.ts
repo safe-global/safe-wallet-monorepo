@@ -1,4 +1,8 @@
-import type { ActivePolicyDto, Erc20TokenMetadataDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  ActivePolicyDto,
+  Erc20TokenMetadataDto,
+  GuardSlotsDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from './policies'
 
 /** Shaped like the CGW `policies/active` response. */
@@ -92,23 +96,30 @@ export const mockNativeTransferDto = (
   ...overrides,
 })
 
+/** The guard in the transaction slot only, so the allowlist reads "Not enforced". */
+export const TRANSACTION_GUARD_ONLY: GuardSlotsDto = { transactionGuard: POLICY_CONTRACTS }
+
+const withGuards = (dto: ActivePolicyDto, guards: GuardSlotsDto): ActivePolicyDto =>
+  dto.enforcement.via === 'guard' ? { ...dto, enforcement: { ...dto.enforcement, guards } } : dto
+
 /** The treasury's allowlist: USDC and USDT, plus two ETH recipients. */
-export const mockTreasuryAllowlistDtos = (): ActivePolicyDto[] => [
-  mockErc20TransferDto(),
-  mockErc20TransferDto({
-    enforcement: {
-      via: 'guard',
-      guards: GUARD_SLOTS,
-      access: { target: MOCK_TOKENS.usdt.address, selector: TRANSFER_SELECTOR, operation: 'CALL' },
-    },
-    data: {
-      tokenAddress: MOCK_TOKENS.usdt.address,
-      recipients: [{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }],
-    },
-  }),
-  mockNativeTransferDto(MOCK_ADDRESSES.alice),
-  mockNativeTransferDto(MOCK_ADDRESSES.bob),
-]
+export const mockTreasuryAllowlistDtos = (guards: GuardSlotsDto = GUARD_SLOTS): ActivePolicyDto[] =>
+  [
+    mockErc20TransferDto(),
+    mockErc20TransferDto({
+      enforcement: {
+        via: 'guard',
+        guards: GUARD_SLOTS,
+        access: { target: MOCK_TOKENS.usdt.address, selector: TRANSFER_SELECTOR, operation: 'CALL' },
+      },
+      data: {
+        tokenAddress: MOCK_TOKENS.usdt.address,
+        recipients: [{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }],
+      },
+    }),
+    mockNativeTransferDto(MOCK_ADDRESSES.alice),
+    mockNativeTransferDto(MOCK_ADDRESSES.bob),
+  ].map((dto) => withGuards(dto, guards))
 
 export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   type: 'ERC20',
