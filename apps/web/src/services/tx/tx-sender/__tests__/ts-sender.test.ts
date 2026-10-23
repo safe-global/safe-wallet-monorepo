@@ -43,6 +43,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { requestSafenetCheck } from '@/features/safenet-checks/services'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
@@ -55,6 +56,7 @@ jest.mock('../../extractTxInfo', () => ({
     signatures: [],
   })),
 }))
+jest.mock('@/features/safenet-checks/services', () => ({ requestSafenetCheck: jest.fn() }))
 
 // Mock Safe SDK
 const mockSafeSDK = {
@@ -260,6 +262,7 @@ describe('txSender', () => {
         chainId: '4',
         safeAddress: '0x123',
       })
+      expect(requestSafenetCheck).toHaveBeenCalledWith(expect.objectContaining({ isFirstSignature: true }))
     })
 
     it('should fail to propose a new tx', async () => {
@@ -342,6 +345,7 @@ describe('txSender', () => {
         chainId: '4',
         safeAddress: SAFE_ADDRESS,
       })
+      expect(requestSafenetCheck).toHaveBeenCalledWith(expect.objectContaining({ isFirstSignature: false }))
     })
 
     it('should look up the signature by sender regardless of address casing', async () => {
