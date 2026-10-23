@@ -6,6 +6,9 @@ import {
   createApplyConfigurationTx,
   createFirstSetupTxs,
   createRequestConfigurationTx,
+  createSetGuardTx,
+  createSetModuleGuardTx,
+  describeSetupCall,
   getConfigurationRoot,
 } from '../policyGuardEncoders'
 
@@ -48,6 +51,17 @@ describe('createFirstSetupTxs', () => {
     expect(decoded[0].selector).toBe('0xa9059cbb')
     expect(Number(decoded[0].operation)).toBe(OperationType.Call)
     expect(decoded[0].data).toBe('0x1234')
+  })
+})
+
+describe('createSetGuardTx / createSetModuleGuardTx', () => {
+  it('target the Safe with the guard address', () => {
+    const guardTx = createSetGuardTx(safeAddress, guardAddress)
+    const moduleTx = createSetModuleGuardTx(safeAddress, guardAddress)
+    expect([guardTx.to, moduleTx.to]).toEqual([safeAddress, safeAddress])
+    expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
+    expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
+    expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(guardAddress)
   })
 })
 
@@ -100,5 +114,31 @@ describe('getConfigurationRoot vs applyConfiguration', () => {
   it('hashes exactly the arguments applyConfiguration sends, as the contract recomputes them', () => {
     const { data } = createApplyConfigurationTx(guardAddress, configurations)
     expect(getConfigurationRoot(configurations)).toBe(keccak256(`0x${data.slice(10)}`))
+  })
+})
+
+describe('describeSetupCall', () => {
+  it('names the guard calls without params', () => {
+    const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+    const request = createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+
+    expect(describeSetupCall(configure)).toEqual({ method: 'configureImmediately', target: 'guard' })
+    expect(describeSetupCall(request)).toEqual({ method: 'requestConfiguration', target: 'guard' })
+  })
+
+  it.each([
+    ['setGuard', 'guard', createSetGuardTx],
+    ['setModuleGuard', 'moduleGuard', createSetModuleGuardTx],
+  ] as const)('names %s with the guard it sets', (method, name, create) => {
+    expect(describeSetupCall(create(safeAddress, guardAddress))).toEqual({
+      method,
+      target: 'safe',
+      param: { name, value: guardAddress },
+    })
+  })
+
+  it('returns undefined for a call it does not know', () => {
+    expect(describeSetupCall({ data: '0xa9059cbb' })).toBeUndefined()
+    expect(describeSetupCall({ data: '0x' })).toBeUndefined()
   })
 })
