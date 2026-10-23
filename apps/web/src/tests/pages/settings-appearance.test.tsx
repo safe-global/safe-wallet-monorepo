@@ -1,24 +1,29 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor } from '@/tests/test-utils'
+import local from '@/services/local-storage/local'
 import { initialState as settingsInitialState } from '@/store/settingsSlice'
 import Appearance from '@/pages/settings/appearance'
 
 jest.mock('@/components/settings/SettingsHeader', () => ({ __esModule: true, default: () => null }))
 
-const renderWithDarkMode = (darkMode: boolean) =>
-  render(<Appearance />, {
-    initialReduxState: { settings: { ...settingsInitialState, theme: { ...settingsInitialState.theme, darkMode } } },
-  })
+const storeDarkMode = (darkMode: boolean) =>
+  local.setItem('settings', { ...settingsInitialState, theme: { ...settingsInitialState.theme, darkMode } })
 
 describe('Settings → Appearance', () => {
-  it('shows dark mode as on when the stored settings ask for it', () => {
-    renderWithDarkMode(true)
+  afterEach(() => localStorage.clear())
 
-    expect(screen.getByRole('switch', { name: 'Dark mode' })).toBeChecked()
+  it('shows dark mode as on when the persisted settings ask for it', async () => {
+    storeDarkMode(true)
+
+    render(<Appearance />)
+
+    await waitFor(() => expect(screen.getByRole('switch', { name: 'Dark mode' })).toBeChecked())
   })
 
-  it('shows dark mode as off when the stored settings turn it off', () => {
-    renderWithDarkMode(false)
+  it('shows dark mode as off when the persisted settings turn it off', async () => {
+    storeDarkMode(false)
 
-    expect(screen.getByRole('switch', { name: 'Dark mode' })).not.toBeChecked()
+    render(<Appearance />)
+
+    await waitFor(() => expect(screen.getByRole('switch', { name: 'Dark mode' })).not.toBeChecked())
   })
 })
