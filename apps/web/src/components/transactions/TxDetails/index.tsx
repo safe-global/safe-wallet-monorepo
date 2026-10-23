@@ -28,7 +28,7 @@ import classNames from 'classnames'
 import css from './styles.module.css'
 import { Card } from '@safe-global/views/components/ui/card'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
 import SignTxButton from '@/components/transactions/SignTxButton'
 import RejectTxButton from '@/components/transactions/RejectTxButton'
@@ -48,6 +48,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HypernativeFeature } from '@/features/hypernative'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -111,6 +112,12 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const { safe } = useSafeInfo()
 
   const isModuleExecution = isModuleDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+  const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
+  const safenetInfo =
+    isSafenetEnabled && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+      ? txDetails.detailedExecutionInfo
+      : undefined
   const showAuditLog =
     (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && (!isUnsigned || !!proposer)) ||
     isModuleExecution ||
@@ -132,7 +139,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           )}
 
           <div className={css.txData}>
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <TxData
                 txData={txDetails.txData}
                 txInfo={txDetails.txInfo}
@@ -148,7 +155,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                   />
                 </div>
               </TxData>
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           </div>
         </div>
 
@@ -170,7 +177,15 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
-          <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+          {safenetInfo && (
+            <safenet.SafenetDetailsCard
+              safeTxHash={safenetInfo.safeTxHash}
+              chainId={safe.chainId}
+              timestampMs={safenetInfo.submittedAt}
+              isQueued={isQueue}
+            />
+          )}
+          <ParsingErrorBoundary>
             <Summary
               txDetails={txDetails}
               txData={txDetails.txData}
@@ -179,7 +194,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               showDecodedData={!isDecodedDataVisible}
               showAuditLogFields={!showAuditLog}
             />
-          </ObservabilityErrorBoundary>
+          </ParsingErrorBoundary>
         </div>
 
         {(isMultiSendTxInfo(txDetails.txInfo) ||
@@ -187,9 +202,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           isBridgeOrderTxInfo(txDetails.txInfo) ||
           isLifiSwapTxInfo(txDetails.txInfo)) && (
           <div className={css.multiSend}>
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <Multisend txData={txDetails.txData} isExecuted={!!txDetails.executedAt} />
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           </div>
         )}
       </div>

@@ -12,6 +12,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Code } from 'lucide-react'
 import css from './styles.module.css'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import { cn } from '@safe-global/views/utils/cn'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
@@ -117,7 +118,9 @@ const SingleTxDecoded = ({
 
       <AccordionContent className={cn('p-4', isGrouped && 'border-t border-border bg-card')}>
         <div className="flex flex-col gap-2">
-          <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} isTxExecuted={isExecuted} />
+          <ParsingErrorBoundary>
+            <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} isTxExecuted={isExecuted} />
+          </ParsingErrorBoundary>
         </div>
       </AccordionContent>
     </>

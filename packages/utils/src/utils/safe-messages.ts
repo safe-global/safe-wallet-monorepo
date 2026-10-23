@@ -22,6 +22,17 @@ const EIP1271_SUPPORTED_SAFE_VERSION = '1.0.0'
 
 const EIP1271_OFFCHAIN_SUPPORTED_SAFE_APPS_SDK_VERSION = '7.11.0'
 
+/*
+ * From v1.5.0, a Safe checks the signature of an owner that is a contract with the message hash
+ * (isValidSignature(bytes32)). Below it, the owner gets the message preimage, which a Safe signer never signs.
+ */
+const SAFE_SIGNER_MESSAGES_SUPPORTED_SAFE_VERSION = '1.5.0'
+
+/** Whether a Safe of `safeVersion` accepts a message signature from an owner that is itself a Safe */
+export const isSafeSignerMessageSupported = (safeVersion: string | null | undefined): boolean =>
+  // An unknown version is not blocked: the rule cannot tell, and the backend still checks the signature
+  !safeVersion || gte(safeVersion, SAFE_SIGNER_MESSAGES_SUPPORTED_SAFE_VERSION)
+
 const isHash = (payload: string) => /^0x[a-f0-9]+$/i.test(payload)
 
 /*

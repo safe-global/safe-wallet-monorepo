@@ -38,8 +38,11 @@ import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
 import { ManageSigners } from './ManageSigners'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import BridgeTransaction from './BridgeTransaction'
 import { LifiSwapTransaction } from './LifiSwapTransaction'
+import { SpendingLimitBatchSummary } from '@/components/transactions/TxDetails/TxData/SpendingLimits/SpendingLimitBatchSummary'
+import { getSpendingLimitBatch } from '@/components/transactions/TxDetails/TxData/SpendingLimits/spendingLimitBatch'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -52,7 +55,12 @@ type ConfirmationViewProps = {
   withDecodedData?: boolean
 }
 
-const getConfirmationViewComponent = ({ txInfo, txData, txFlow }: TransactionPreview & { txFlow?: ReactElement }) => {
+const getConfirmationViewComponent = ({
+  txInfo,
+  txData,
+  txFlow,
+  chainId,
+}: TransactionPreview & { txFlow?: ReactElement; chainId: string }) => {
   if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
 
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
@@ -87,6 +95,9 @@ const getConfirmationViewComponent = ({ txInfo, txData, txFlow }: TransactionPre
     return <NestedSafeCreation txData={txData} />
   }
 
+  const spendingLimitBatch = getSpendingLimitBatch(txData, chainId)
+  if (txData && spendingLimitBatch) return <SpendingLimitBatchSummary txData={txData} batch={spendingLimitBatch} />
+
   return null
 }
 
@@ -117,9 +128,10 @@ const ConfirmationView = ({
           txInfo: details.txInfo,
           txData: details.txData,
           txFlow,
+          chainId,
         })
       : undefined
-  }, [details, txFlow])
+  }, [details, txFlow, chainId])
 
   const showTxDetails =
     details !== undefined &&
@@ -128,28 +140,32 @@ const ConfirmationView = ({
 
   return (
     <>
-      {withDecodedData &&
-        (ConfirmationViewComponent ||
-          (details && showTxDetails && (
-            <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
-              <div ref={decodedDataRef}>
-                <DecodedData
-                  txData={details.txData}
-                  toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
-                />
-              </div>
-            </TxData>
-          )))}
+      <ParsingErrorBoundary>
+        {withDecodedData &&
+          (ConfirmationViewComponent ||
+            (details && showTxDetails && (
+              <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
+                <div ref={decodedDataRef}>
+                  <DecodedData
+                    txData={details.txData}
+                    toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
+                  />
+                </div>
+              </TxData>
+            )))}
+      </ParsingErrorBoundary>
 
       {props.children}
 
-      <Summary
-        safeTxData={safeTx?.data}
-        txDetails={txDetails}
-        txData={details?.txData}
-        txInfo={details?.txInfo}
-        showDecodedData={!isDecodedDataVisible}
-      />
+      <ParsingErrorBoundary>
+        <Summary
+          safeTxData={safeTx?.data}
+          txDetails={txDetails}
+          txData={details?.txData}
+          txInfo={details?.txInfo}
+          showDecodedData={!isDecodedDataVisible}
+        />
+      </ParsingErrorBoundary>
     </>
   )
 }

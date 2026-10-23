@@ -16,7 +16,7 @@ import {
   useSpaceSafeLimit,
 } from '@/features/spaces'
 import SeatLimitBanner from '../SafeAccounts/SeatLimitBanner'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 type EntryPoint = 'dashboard' | 'safe_accounts'
@@ -53,10 +53,6 @@ const AddAccountsChooser = ({
 
   const handleAdd = () => {
     if (!isAdmin) return
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
-      { workspace_id: spaceId, entry_point: entryPoint },
-    )
     setChooserOpen(false)
     setShowAddPicker(true)
   }
@@ -95,17 +91,23 @@ const AddAccountsChooser = ({
           </DialogHeader>
           <div className="flex flex-col gap-2">
             {showsLimit && <SeatLimitBanner variant="alert" />}
-            <ChooserRow
-              icon={showsLimit ? <Settings className="size-4" /> : <Plus className="size-4" />}
-              title={showsLimit ? 'Manage accounts' : 'Select from my accounts'}
-              subtitle={
-                showsLimit ? `Swap one out to add another · ${safeCount ?? safeLimit} of ${safeLimit}` : undefined
-              }
-              onClick={handleAdd}
-              disabled={!isAdmin}
-              disabledTooltip="You need to be an Admin to add accounts"
-              testId="add-safe-accounts-to-workspace-button"
-            />
+            <Track
+              {...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED}
+              label={spaceId}
+              mixpanelParams={{ workspace_id: spaceId, entry_point: entryPoint }}
+            >
+              <ChooserRow
+                icon={showsLimit ? <Settings className="size-4" /> : <Plus className="size-4" />}
+                title={showsLimit ? 'Manage accounts' : 'Select from my accounts'}
+                subtitle={
+                  showsLimit ? `Swap one out to add another · ${safeCount ?? safeLimit} of ${safeLimit}` : undefined
+                }
+                onClick={handleAdd}
+                disabled={!isAdmin}
+                disabledTooltip="You need to be an Admin to add accounts"
+                testId="add-safe-accounts-to-workspace-button"
+              />
+            </Track>
             <ChooserRow
               icon={<CirclePlus className="size-4" />}
               title={showsLimit ? 'Create new' : 'Create new Safe'}

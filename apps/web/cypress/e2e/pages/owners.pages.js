@@ -5,7 +5,7 @@ import * as navigation from '../pages/navigation.page'
 import * as addressBook from '../pages/address_book.page'
 
 const tooltipLabel = (label) => `span[aria-label="${label}"]`
-export const removeOwnerBtn = 'span[data-track="settings: Remove owner"] > span > button'
+const removeOwnerBtn = 'span[data-track="settings: Remove owner"] > span > button'
 const replaceOwnerBtn = 'span[data-track="settings: Replace owner"] > span > button'
 const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > button'
 const tooltip = 'div[role="tooltip"]'
@@ -26,9 +26,6 @@ const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
-const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
-const addressRegex = /0x[0-9a-fA-F]{40}/
-const txModalDialog = '[role="dialog"]:visible'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
 const signerList = '[data-testid="signer-list"]'
 
@@ -37,13 +34,10 @@ const notConnectedStatus = 'Connect'
 const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
-const removedOwnerSectionStr = 'Remove owner'
-const selectedOwnerStr = 'Signers'
 const changeThresholdStr = 'Change threshold'
 
 export const safeAccountNonceStr = 'Safe account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe account'
-export const disconnectedUserErrorMsg = 'Please connect your wallet'
 
 export function checkExistingSignerCount(count) {
   cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
@@ -84,12 +78,6 @@ export function typeExistingOwnerName(name) {
   main.verifyInputValue(singleOwnerNameInput, name)
 }
 
-export function verifyOwnerDeletionWindowDisplayed() {
-  cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
-  cy.get('button').contains(backbtnStr).should('exist')
-  cy.get('p').contains(selectedOwnerStr)
-}
-
 export function clickOnThresholdDropdown() {
   cy.get(thresholdDropdown).eq(0).click()
 }
@@ -111,32 +99,11 @@ export function verifyThresholdLimit(startValue, endValue) {
   selectThresholdOption(0)
 }
 
-export function verifyRemoveBtnIsEnabled() {
-  return cy.get(removeOwnerBtn).should('exist')
-}
-
-export function verifyRemoveBtnIsDisabled() {
-  return cy.get(removeOwnerBtn).should('exist').and('be.disabled')
-}
-
 export function openRemoveOwnerWindow(btn) {
   const minimumCount = btn === 0 ? 1 : btn
   main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
   cy.get(removeOwnerBtn).eq(btn).should('be.enabled').click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
-}
-
-export function getAddressToBeRemoved() {
-  cy.get(txModalDialog)
-    .contains('p', removedOwnerSectionStr)
-    .parent()
-    .find(addressToBeRemoved)
-    .first()
-    .invoke('text')
-    .then((address) => {
-      expect(address, 'removed owner address').to.match(addressRegex)
-      cy.wrap(address).as('removedAddress')
-    })
 }
 
 export function openReplaceOwnerWindow(index) {
@@ -149,21 +116,6 @@ export function openReplaceOwnerWindow(index) {
 export function verifyTooltipLabel(label) {
   cy.get(tooltipLabel(label)).should('be.visible')
 }
-export function verifyReplaceBtnIsEnabled() {
-  cy.get(replaceOwnerBtn).should('exist')
-  main.verifyBtnIsEnabled(replaceOwnerBtn)
-}
-
-export function verifyReplaceBtnIsDisabled() {
-  cy.get(replaceOwnerBtn).should('exist')
-  main.verifyBtnIsDisabled(replaceOwnerBtn)
-}
-
-export function verifyManageSignersBtnIsEnabled() {
-  cy.get(manageSignersBtn).should('exist')
-  main.verifyBtnIsEnabled(manageSignersBtn)
-}
-
 export function verifyManageSignersBtnIsDisabled() {
   cy.get(manageSignersBtn).should('exist')
   main.verifyBtnIsDisabled(manageSignersBtn)
@@ -234,14 +186,6 @@ export function typeOwnerName(name) {
 }
 
 //Type the signer name into the "Signer Name" field for manage signers
-export function typeOwnerNameManage(index, name) {
-  cy.get(existingOwnerNameInput(index)).clear().type(name, main.nameTypingOptions)
-  main.verifyInputValue(existingOwnerNameInput(index), name)
-}
-
-export function verifyNewOwnerName(name) {
-  cy.get(addressBook.addressBookRecipient).should('include.text', name)
-}
 //next button on Manage signers
 export function clickOnNextBtnManage() {
   main.clickOnNextBtn(submitNextBt)

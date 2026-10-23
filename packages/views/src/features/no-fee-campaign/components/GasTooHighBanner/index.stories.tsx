@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import GasTooHighBanner from './index'
 
 // Informational banner shown in the transaction flow when gas prices exceed

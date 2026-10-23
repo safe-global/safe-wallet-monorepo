@@ -5,8 +5,6 @@ import { addressBookRecipient } from '../pages/address_book.page'
 
 const addExistingAccountBtnStr = 'Add existing one'
 const contactStr = 'Choose address, network and a name'
-export const invalidAddressFormatErrorMsg = 'Invalid address format'
-const invalidAddressNameLengthErrorMsg = 'Maximum 50 symbols'
 
 const safeDataForm = '[data-testid=load-safe-form]'
 const removeOwnerBtn = '[data-testid="remove-owner-btn"]'
@@ -17,6 +15,7 @@ const sideBarIcon = '[data-testid="ChevronRightIcon"]'
 const sidebarCheckIcon = '[data-testid="CheckIcon"]'
 const addressStepNextBtn = '[data-testid="load-safe-next-btn"]'
 const ownerName = '[data-testid="owner-name"]'
+const ownerNameInput = `input${ownerName}, ${ownerName} input`
 const networkSelectorItem = '[data-testid="network-selector-item"]'
 const selectContent = '[data-slot="select-content"]'
 const addressSection = '[data-testid="address-section"]'
@@ -25,7 +24,6 @@ const settingsBtnStr = 'Settings'
 const ownersConfirmationsStr = 'Owners and confirmations'
 const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
-const safeAddressError = 'Address given is not a valid Safe account address'
 const ownerNameLabel = 'Signer name'
 export const addSafeStr = 'Add existing Safe account'
 
@@ -40,10 +38,7 @@ export function verifyAddresFormatIsValid() {
 }
 
 function getOwnerNameInput(index) {
-  return cy
-    .get(ownerName)
-    .eq(index)
-    .then(($el) => ($el.is('input') ? cy.wrap($el) : cy.wrap($el.find('input'))))
+  return cy.get(ownerNameInput).eq(index)
 }
 
 export function clickOnAddNewOwnerBtn() {
@@ -137,10 +132,6 @@ export function verifyOnwerNameENS(index, ens) {
   getOwnerNameInput(index).invoke('attr', 'placeholder').should('contain', ens)
 }
 
-export function verifyAddressError() {
-  cy.get(addressSection).closest('[data-slot="field"]').find('label').contains(safeAddressError)
-}
-
 export function verifyOnwerInputIsNotEmpty(index) {
   getOwnerNameInput(index).invoke('attr', 'placeholder').should('not.be.empty')
 }
@@ -195,19 +186,6 @@ export function selectPolygon() {
 export function inputNameAndAddress(name, address) {
   inputName(name)
   inputAddress(address)
-}
-
-export function inputName(name) {
-  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
-}
-
-export function verifyIncorrectAddressErrorMessage() {
-  inputAddress('Random text')
-  cy.get(main.addressInput).parent().prev('label').contains(invalidAddressFormatErrorMsg)
-}
-
-export function verifyNameLengthErrorMessage() {
-  cy.get(main.nameInput).closest('[data-slot="field"]').find('label').contains(invalidAddressNameLengthErrorMsg)
 }
 
 export function inputAddress(address) {

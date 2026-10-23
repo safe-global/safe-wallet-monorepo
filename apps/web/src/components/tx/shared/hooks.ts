@@ -15,7 +15,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
-import { isSmartContractWallet } from '@/utils/wallets'
+import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
 import {
   dispatchProposerTxSigning,
   dispatchNestedTxCreation,
@@ -40,8 +40,6 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import type { SignerWallet } from '@/components/common/WalletProvider'
 import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
-
-const isSafeSigner = (signer: SignerWallet): boolean => Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
 
 // The in-app nested signer only ever proposes in its parent
 const executesImmediately = (signer: SignerWallet): boolean =>

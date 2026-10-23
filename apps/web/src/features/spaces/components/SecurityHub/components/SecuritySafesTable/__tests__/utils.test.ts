@@ -1,6 +1,12 @@
 import type { ScanResult, SecurityGrade } from '@/features/security/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
-import { buildSafeSecurityHref, formatBalance, getAggregateNonPassingCount, getNonPassingCount } from '../utils'
+import {
+  buildSafeSecurityHref,
+  buildSafeUpdateHref,
+  formatBalance,
+  getAggregateNonPassingCount,
+  getNonPassingCount,
+} from '../utils'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { AppRoutes } from '@/config/routes'
 
@@ -164,5 +170,21 @@ describe('buildSafeSecurityHref', () => {
   it('returns undefined when the chain has no known short name (renders as plain text)', () => {
     expect(buildSafeSecurityHref(chainShortNames, address, '999', null)).toBeUndefined()
     expect(buildSafeSecurityHref({}, address, '1', null)).toBeUndefined()
+  })
+})
+
+describe('buildSafeUpdateHref', () => {
+  const address = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12'
+
+  it("links to the Safe's Settings → Setup in the given Workspace", () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    expect(buildSafeUpdateHref({ '1': 'eth' }, address, '1', spaceId)).toEqual({
+      pathname: AppRoutes.settings.setup,
+      query: { safe: `eth:${address}`, spaceId },
+    })
+  })
+
+  it('returns undefined when the chain has no known short name', () => {
+    expect(buildSafeUpdateHref({}, address, '1', null)).toBeUndefined()
   })
 })

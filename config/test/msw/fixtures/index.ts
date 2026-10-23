@@ -18,6 +18,7 @@ import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positio
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain, ChainPage } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { TransactionDetails, TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Portfolio fixtures
 import portfolioEfSafe from './portfolio/ef-safe.json'
@@ -52,6 +53,17 @@ import chainMainnet from './chains/mainnet.json'
 
 // Safe Apps fixtures
 import safeAppsMainnet from './safe-apps/mainnet.json'
+
+// Transaction history fixtures
+import txHistory from './transactions/history.json'
+import txOnChainRejection from './transactions/details/on-chain-rejection.json'
+import txBatch from './transactions/details/batch.json'
+import txAddOwner from './transactions/details/add-owner.json'
+import txSwapOwner from './transactions/details/swap-owner.json'
+import txRemoveOwner from './transactions/details/remove-owner.json'
+import txDisableModule from './transactions/details/disable-module.json'
+import txChangeThreshold from './transactions/details/change-threshold.json'
+import txReceiveQtrust from './transactions/details/receive-qtrust.json'
 
 /**
  * Portfolio fixtures by scenario
@@ -133,6 +145,34 @@ export const safeAppsFixtures = {
   mainnet: safeAppsMainnet as SafeApp[],
   /** Empty Safe Apps list */
   empty: [] as SafeApp[],
+}
+
+/**
+ * SEP_STATIC_SAFE_7 on Sepolia, the Safe whose history the transaction fixtures record
+ */
+export const TX_HISTORY_SAFE = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+  shortName: 'sep',
+  version: '1.3.0',
+} as const
+
+/**
+ * Transaction history of SEP_STATIC_SAFE_7 on Sepolia, with the details of selected rows
+ */
+export const transactionFixtures = {
+  history: txHistory as TransactionItemPage,
+  details: {
+    onChainRejection: txOnChainRejection as TransactionDetails,
+    // CGW sends `dataDecoded: null` for undecoded multiSend actions; the generated type only allows undefined
+    batch: txBatch as unknown as TransactionDetails,
+    addOwner: txAddOwner as TransactionDetails,
+    swapOwner: txSwapOwner as TransactionDetails,
+    removeOwner: txRemoveOwner as TransactionDetails,
+    disableModule: txDisableModule as TransactionDetails,
+    changeThreshold: txChangeThreshold as TransactionDetails,
+    receiveQtrust: txReceiveQtrust as TransactionDetails,
+  },
 }
 
 /**

@@ -160,6 +160,50 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.getByText('Proposed')).toBeInTheDocument()
   })
 
+  describe('the name of the proposer', () => {
+    const mockUseAddressBook = jest.requireMock('@/hooks/useAddressBook') as jest.Mock
+    const proposerAddr = checksumAddress(faker.finance.ethereumAddress())
+
+    afterEach(() => {
+      mockUseAddressBook.mockReturnValue({})
+    })
+
+    const renderProposedTx = (proposedByDelegateName: string | null) => {
+      const { confirmations } = buildConfirmations(0, 2)
+      const txDetails = transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: multisigExecutionDetailsBuilder()
+            .with({
+              confirmations,
+              confirmationsRequired: 2,
+              proposer: { value: proposerAddr, name: null, logoUri: null },
+              proposedByDelegate: { value: proposerAddr, name: proposedByDelegateName, logoUri: null },
+            })
+            .build(),
+          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        })
+        .build()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />)
+    }
+
+    it('shows the name that the local address book gives the proposer', () => {
+      mockUseAddressBook.mockReturnValue({ [proposerAddr]: 'Treasury proposer' })
+
+      renderProposedTx('Name from the API')
+
+      expect(screen.getByText('By Treasury proposer')).toBeInTheDocument()
+      expect(screen.queryByText('By Name from the API')).not.toBeInTheDocument()
+    })
+
+    it('falls back to the name that the gateway gives the delegate proposer', () => {
+      renderProposedTx('Name from the API')
+
+      expect(screen.getByText('By Name from the API')).toBeInTheDocument()
+    })
+  })
+
   it('renders "Signed (N/M)" labels for each confirmation', () => {
     const { confirmations } = buildConfirmations(2, 3)
     const txDetails = transactionDetailsBuilder()
@@ -518,7 +562,7 @@ describe('TxSigners (Audit Log)', () => {
 
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
-    const copyButtons = screen.getAllByRole('button', { name: /^By / })
+    const copyButtons = screen.getAllByRole('button', { name: /^Copy address / })
     fireEvent.click(copyButtons[0])
 
     await waitFor(() => {
@@ -649,7 +693,10 @@ describe('TxSigners (Audit Log)', () => {
   })
 
   describe('Safenet audit step', () => {
-    const { useHasFeature } = jest.requireMock('@/hooks/useChains') as { useHasFeature: jest.Mock }
+    const { useHasFeature, useChain } = jest.requireMock('@/hooks/useChains') as {
+      useHasFeature: jest.Mock
+      useChain: jest.Mock
+    }
     const { useSafenetCheck } = jest.requireMock('@safe-global/utils/features/safenet-checks/hooks') as {
       useSafenetCheck: jest.Mock
     }
@@ -705,6 +752,14 @@ describe('TxSigners (Audit Log)', () => {
         isStale: false,
         refetch: jest.fn(),
       })
+      // The Safenet chain's explorer builds the attestation link.
+      useChain.mockReturnValue({
+        blockExplorerUriTemplate: {
+          txHash: 'https://gnosisscan.io/tx/{{txHash}}',
+          address: 'https://gnosisscan.io/address/{{address}}',
+          api: '',
+        },
+      })
       const { txDetails, txSummary } = buildSafenetTx()
 
       render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
@@ -723,7 +778,7 @@ describe('TxSigners (Audit Log)', () => {
       )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
-        expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`),
+        `https://gnosisscan.io/tx/${attested.transactionHash}`,
       )
     }, 15_000)
 

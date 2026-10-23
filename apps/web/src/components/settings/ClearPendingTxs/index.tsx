@@ -1,5 +1,6 @@
 import { usePendingTxIds } from '@/hooks/usePendingTxs'
-import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { useAppDispatch } from '@/store'
 import { clearPendingTx } from '@/store/pendingTxsSlice'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
@@ -17,8 +18,7 @@ export const ClearPendingTxs = () => {
     pendingTxIds.forEach((txId) => {
       dispatch(clearPendingTx({ txId }))
     })
-    trackEvent({ ...SETTINGS_EVENTS.DATA.CLEAR_PENDING_TXS, label: pendingTxCount })
-  }, [dispatch, pendingTxCount, pendingTxIds])
+  }, [dispatch, pendingTxIds])
   return (
     <div className="flex flex-col gap-4">
       <Typography>Clear this Safe account&apos;s pending transactions.</Typography>
@@ -31,9 +31,11 @@ export const ClearPendingTxs = () => {
       </Alert>
       <div>
         {pendingTxCount > 0 ? (
-          <Button variant="destructive" onClick={clearPendingTxs}>
-            Clear {pendingTxCount} transaction{maybePlural(pendingTxCount)}
-          </Button>
+          <Track {...SETTINGS_EVENTS.DATA.CLEAR_PENDING_TXS} label={pendingTxCount}>
+            <Button variant="destructive" onClick={clearPendingTxs}>
+              Clear {pendingTxCount} transaction{maybePlural(pendingTxCount)}
+            </Button>
+          </Track>
         ) : (
           <Typography variant="paragraph-small">No pending transactions</Typography>
         )}

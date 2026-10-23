@@ -13,7 +13,8 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@safe-global/views/components/ui/overlay`](../../packages/views/src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
-- **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`. Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
+- **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`; an event that mirrors an API result is sent by a store listener on the endpoint's `matchFulfilled`, with props from the request args, the response or the RTK cache (see `features/spaces/store/workspaceTrackingListener.ts`). Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
+- **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<img>` instead of `next/image`, `<a>` instead of `next/link` for external links, React `lazy` + `Suspense` instead of `next/dynamic` (except with `{ ssr: false }`: a module that must not load during the static export keeps `next/dynamic` for now), and a plain function component instead of the `NextPage` type. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/app`, `next/document`) have no replacement yet, so keep using them.
 
 ## Component variants over custom styling
 
@@ -163,7 +164,7 @@ Run: `yarn workspace @safe-global/web storybook` (port 6006). Every new componen
 Choosing a setup:
 
 1. **No store/API needs** → plain `Meta`/`StoryObj`.
-2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/preview`.
+2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
 3. **Pages/widgets needing API mocks** → `createMockStory` from `@/stories/mocks` — do NOT hand-roll `StoreDecorator`/provider stacks/MSW handlers.
 
 ```typescript
@@ -175,7 +176,7 @@ export const Default: Story = { parameters: { ...setup.parameters }, decorators:
 
 Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't override feature flags unless testing a disabled state.
 
-**Visual regression (Argos) does NOT auto-run on PRs** — the workflow is currently `workflow_dispatch`-only. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
+**Visual regression (Argos) does NOT run on PRs** — the workflow runs weekly on `dev` and by hand before a release. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
 
 ## Web-specific common pitfalls
 
@@ -204,6 +205,13 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
    the primitive, don't wrap it.
 6. **`packages/views/src/components/ui/` primitives are managed via the shadcn CLI** – read
    [packages/views/src/components/ui/README.md](../../packages/views/src/components/ui/README.md) before hand-editing them.
+7. **`next dev` and `next build` need `--webpack`** – Next 16 uses Turbopack by default, and
+   Turbopack ignores the `webpack()` config in `next.config.mjs` (SVGR, SRI, the dev page stub).
+   The `dev`, `dev:full`, `start` and `build` scripts pass the flag; keep it when adding a script.
+8. **The dev server renders every page as empty** – in `next dev`, `next.config.mjs` replaces
+   each page with `scripts/dev-server-page-stub.js` for the server compile, and `_app.tsx`
+   renders nothing until the client mounts (`RenderAfterMount`). Page code never runs on the
+   server in dev. Production builds and the static export do not use the stub.
 
 ## Code complexity
 

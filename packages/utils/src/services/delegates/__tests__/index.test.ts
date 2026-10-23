@@ -6,6 +6,7 @@ import {
   getDelegateTypedData,
   hashDelegateTypedData,
   isQueueServiceDelegateTypedData,
+  isQueueServiceDelegateMessage,
   normalizeDelegateTypedData,
   signDelegateTypedDataWithKey,
 } from '..'
@@ -85,6 +86,45 @@ describe('delegates', () => {
 
       expect(typedData.domain).toHaveProperty('safe', ZeroAddress)
       expect(typedData.message).toHaveProperty('action', 'add')
+    })
+  })
+
+  describe('isQueueServiceDelegateMessage', () => {
+    const queueServiceMessage = () =>
+      normalizeDelegateTypedData(
+        getDelegateTypedData(queueServiceChain(), faker.finance.ethereumAddress(), faker.finance.ethereumAddress()),
+      )
+
+    it('accepts queue service delegate typed data as returned by the API', () => {
+      expect(isQueueServiceDelegateMessage(queueServiceMessage())).toBe(true)
+    })
+
+    it('rejects transaction service delegate typed data', () => {
+      const message = normalizeDelegateTypedData(
+        getDelegateTypedData(transactionServiceChain(), faker.finance.ethereumAddress()),
+      )
+
+      expect(isQueueServiceDelegateMessage(message)).toBe(false)
+    })
+
+    it.each([
+      ['a different primary type', { primaryType: 'Mail' }],
+      [
+        'extra Delegate fields',
+        {
+          types: {
+            ...queueServiceMessage().types,
+            Delegate: [...queueServiceMessage().types.Delegate, { name: 'extra', type: 'uint256' }],
+          },
+        },
+      ],
+      [
+        'reordered Delegate fields',
+        { types: { ...queueServiceMessage().types, Delegate: [...queueServiceMessage().types.Delegate].reverse() } },
+      ],
+      ['no declared EIP712Domain', { types: { Delegate: queueServiceMessage().types.Delegate } }],
+    ])('rejects typed data named Safe Queue Service with %s', (_, override) => {
+      expect(isQueueServiceDelegateMessage({ ...queueServiceMessage(), ...override })).toBe(false)
     })
   })
 

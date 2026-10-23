@@ -1,4 +1,5 @@
 import { type ReactElement } from 'react'
+import { cn } from '@safe-global/views/utils/cn'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -15,12 +16,14 @@ interface PolicyCatalogueProps {
   onSelect?: (id: PolicyCatalogueId) => void
   /** Set when the workspace's plan does not include some policies: their tiles then lead to the upgrade. */
   locked?: Pick<PolicyLock, 'lockedPolicies' | 'accountCounts' | 'onUpgrade'>
+  /** Without it the recipient allowlist tile is left out: no chain has the allowlist enabled. */
+  isAllowlistAvailable?: boolean
 }
 
 const isPolicyEntry = (entry: PolicyCatalogueEntry): entry is PolicyCatalogueEntry & { id: PolicyId } =>
   entry.id !== 'suggestion'
 
-const PolicyCatalogue = ({ onSelect, locked }: PolicyCatalogueProps): ReactElement => {
+const PolicyCatalogue = ({ onSelect, locked, isAllowlistAvailable = false }: PolicyCatalogueProps): ReactElement => {
   const isLocked = (id: PolicyCatalogueId) => locked?.lockedPolicies.some((lockedId) => lockedId === id) ?? false
 
   const handleClick = ({ id }: PolicyCatalogueEntry) => {
@@ -34,10 +37,15 @@ const PolicyCatalogue = ({ onSelect, locked }: PolicyCatalogueProps): ReactEleme
     onSelect?.(id)
   }
 
-  const entries = locked ? POLICY_CATALOGUE.filter(isPolicyEntry) : POLICY_CATALOGUE
+  const entries = POLICY_CATALOGUE.filter(
+    (entry) => (isAllowlistAvailable || entry.id !== 'recipient-allowlist') && (!locked || isPolicyEntry(entry)),
+  )
 
   return (
-    <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-3">
+    <div
+      data-testid="policy-catalogue"
+      className={cn('grid gap-4', entries.length === 4 ? 'md:grid-cols-2' : 'md:grid-cols-3')}
+    >
       {entries.map((entry) => (
         <PolicyCatalogueTile
           key={entry.id}

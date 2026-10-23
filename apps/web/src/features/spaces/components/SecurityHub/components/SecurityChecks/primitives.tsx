@@ -134,7 +134,7 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
  * each render site.
  *
  * The returned CTA builder returns null when:
- *  - the row is passing (no action needed),
+ *  - the row is passing (no action needed) and has no upgrade available,
  *  - we don't yet have a `safeQueryParam` (chain metadata still loading), or
  *  - there's no checkDefs entry for this check id.
  * Label precedence: `ScanResult.ctaLabelOverride` → `checkDefs[id].ctaLabel`.
@@ -145,7 +145,7 @@ export const makeBuildCta =
     if (!safeQueryParam) return null
     const def = checkDefs[checkId]
     if (!def) return null
-    if (result && isPassingStatus(result.status)) return null
+    if (result && isPassingStatus(result.status) && !result.upgradeAvailable) return null
     const label = result?.ctaLabelOverride || def.ctaLabel
     return {
       label,
@@ -165,7 +165,7 @@ const CtaBody = ({ label }: { label: string }): ReactElement => (
   </>
 )
 
-const CtaLink = ({ cta }: { cta: Cta }): ReactElement =>
+export const CtaLink = ({ cta }: { cta: Cta }): ReactElement =>
   'href' in cta ? (
     <Link href={cta.href} onClick={(e) => e.stopPropagation()} className={ctaClassName}>
       <CtaBody label={cta.label} />

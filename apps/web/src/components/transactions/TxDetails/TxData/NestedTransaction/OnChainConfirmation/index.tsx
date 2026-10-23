@@ -104,7 +104,7 @@ export const OnChainConfirmation = ({
           trusted
           imitation={false}
         />
-      ) : txDetailsError ? (
+      ) : txDetailsError || !signedHash ? (
         <ErrorMessage>Could not load details on hash to approve.</ErrorMessage>
       ) : (
         <Skeleton className="h-5 w-full" />

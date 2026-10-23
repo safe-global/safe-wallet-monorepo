@@ -13,7 +13,6 @@
   --grid-date: minmax(76px, 2fr);
   --grid-confirmations: minmax(56px, 1fr);
   --grid-assessment: 0;
-  --grid-safenet: 0;
   /* A fixed minimum, not `auto`: each row is its own grid, so a content-sized track would shift every
      column by the width of that row's label. Queue rows have no status track (see .actions). */
   --grid-status: minmax(84px, 1fr);
@@ -30,18 +29,13 @@
   white-space: nowrap;
   grid-template-columns:
     var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
-    var(--grid-assessment) var(--grid-safenet) var(--grid-actions);
-  grid-template-areas: 'nonce type info date confirmations assessment safenet actions';
+    var(--grid-assessment) var(--grid-actions);
+  grid-template-areas: 'nonce type info date confirmations assessment actions';
 }
 
 .gridContainer.withAssessment {
   --grid-confirmations: minmax(90px, 1fr);
   --grid-assessment: minmax(80px, 1.5fr);
-}
-
-.gridContainer.withSafenet {
-  --grid-confirmations: minmax(90px, 1fr);
-  --grid-safenet: minmax(80px, 1.5fr);
 }
 
 /* min-width: 0 lets a cell shrink below its content so the row can hold one line; without it a long
@@ -75,16 +69,15 @@
   grid-template-areas: 'nonce type info date status';
 }
 
-.gridContainer.history .assessment,
-.gridContainer.history .safenet {
+.gridContainer.history .assessment {
   display: none;
 }
 
 .gridContainer.conflictGroup {
   grid-template-columns:
     var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations) var(--grid-assessment)
-    var(--grid-safenet) var(--grid-actions);
-  grid-template-areas: 'type info date confirmations assessment safenet actions';
+    var(--grid-actions);
+  grid-template-areas: 'type info date confirmations assessment actions';
 }
 
 .gridContainer.bulkGroup {
@@ -92,8 +85,7 @@
   grid-template-areas: 'nonce type info date status';
 }
 
-.gridContainer.bulkGroup .assessment,
-.gridContainer.bulkGroup .safenet {
+.gridContainer.bulkGroup .assessment {
   display: none;
 }
 
@@ -176,11 +168,6 @@
       'nonce type info info info'
       'nonce date . confirmations actions';
     align-items: center;
-  }
-
-  /* The two-row template has no safenet area; the check state lives in the expanded panel anyway. */
-  .gridContainer.queue .safenet {
-    display: none;
   }
 }
 
