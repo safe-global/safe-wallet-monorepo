@@ -1,5 +1,4 @@
 export const sideNavSettingsIcon = '[data-testid="settings-nav-icon"]'
-export const setupSection = '[data-testid="setup-section"]'
 export const modalBackBtn = '[data-testid="modal-back-btn"]'
 export const newTxBtn = '[data-testid="new-tx-btn"]'
 // The dialog close control kept its aria-label in the shadcn migration, but the icon
