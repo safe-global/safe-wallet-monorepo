@@ -7,7 +7,7 @@ run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('
 #              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
 #              create_tx_2, portfolio      -> both, inside <suite>
 #            with suite=full-regression a name matches every full-regression directory it exists in
-#            (21 names exist in more than one; happypath/ and visual/ are never included).
+#            (21 names exist in more than one; visual/ is never included).
 # Partial runs skip the TestRail upload and use one container per named spec (max 8; whole
 # directories keep 8).
 # A spec name that matches no file fails the small "plan" job in seconds; no e2e container is started.
@@ -63,7 +63,7 @@ jobs:
           SPEC: ${{ inputs.spec || '' }}
         run: |
           set -euo pipefail
-          # The full regression covers these; happypath/ and visual/ have their own workflows.
+          # The full regression covers these; visual/ has its own workflow.
           FULL_DIRS=(happypath_2 regression safe-apps smoke)
           suite="${SUITE:-full-regression}"
           if [ "$suite" = 'full-regression' ]; then dirs=("${FULL_DIRS[@]}"); else dirs=("$suite"); fi
