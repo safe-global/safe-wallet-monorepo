@@ -2,6 +2,7 @@ import { GA_TO_MIXPANEL_MAPPING, GA_LABEL_TO_MIXPANEL_PROPERTY } from '../ga-mix
 import { MixpanelEvent } from '../mixpanel-events'
 import { SWAP_EVENTS } from '../events/swaps'
 import { SPACE_EVENTS } from '../events/spaces'
+import { WALLETCONNECT_EVENTS } from '../events/walletconnect'
 
 describe('GA to Mixpanel Mapping', () => {
   describe('GA_TO_MIXPANEL_MAPPING', () => {
@@ -51,6 +52,16 @@ describe('GA to Mixpanel Mapping', () => {
       Object.values(GA_TO_MIXPANEL_MAPPING).forEach((mixpanelEvent) => {
         expect(knownEvents).toContain(mixpanelEvent)
       })
+    })
+
+    // Without these rows trackEvent silently drops the events
+    it('should map the WalletConnect Safe App suggestion events', () => {
+      expect(GA_TO_MIXPANEL_MAPPING[WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action]).toBe(
+        MixpanelEvent.WC_SAFE_APP_SUGGESTED,
+      )
+      expect(GA_TO_MIXPANEL_MAPPING[WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT.action]).toBe(
+        MixpanelEvent.WC_SAFE_APP_SUGGESTION_RESULT,
+      )
     })
   })
 
