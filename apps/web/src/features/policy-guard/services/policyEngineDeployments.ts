@@ -1,7 +1,8 @@
 import semverSatisfies from 'semver/functions/satisfies'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 
-export type PolicyEngineContract = 'SafePolicyGuard' | 'ERC20ApprovePolicy' | 'ERC20TransferPolicy'
+export type PolicyEngineContract =
+  'SafePolicyGuard' | 'ERC20ApprovePolicy' | 'ERC20TransferPolicy' | 'NativeTransferPolicy'
 
 type Deployment = { networkAddresses: Record<string, string> }
 
@@ -23,11 +24,21 @@ const onIndexedChains = (address: string): Deployment => ({
   networkAddresses: Object.fromEntries(INDEXED_CHAIN_IDS.map((chainId) => [chainId, address])),
 })
 
+const NATIVE_POLICY_CHAIN_IDS = ['100', '11155111', '84532']
+
+// TODO: read from CGW once a policies catalogue endpoint exists
+const NATIVE_TRANSFER_POLICY: Deployment = {
+  networkAddresses: Object.fromEntries(
+    NATIVE_POLICY_CHAIN_IDS.map((chainId) => [chainId, '0x77d29DEaE811D5E42fbe292d3f2729403e11cA3A']),
+  ),
+}
+
 // The policy indexer's addresses: configurations against any other deployment are invisible to CGW
 const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
   SafePolicyGuard: onIndexedChains(SAFE_POLICY_GUARD),
   ERC20ApprovePolicy: onIndexedChains('0xfF86DD4caf79672E55e0C3e3A5410746600d60F4'),
   ERC20TransferPolicy: onIndexedChains('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187'),
+  NativeTransferPolicy: NATIVE_TRANSFER_POLICY,
 }
 
 export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineContract): string | undefined =>

@@ -10,6 +10,14 @@ describe('policyEngineDeployments', () => {
     expect(getPolicyEngineAddress(chainId, 'ERC20TransferPolicy')).toBe('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187')
   })
 
+  it.each(['100', '11155111', '84532'])('returns the native transfer policy on chain %s', (chainId) => {
+    expect(getPolicyEngineAddress(chainId, 'NativeTransferPolicy')).toBe('0x77d29DEaE811D5E42fbe292d3f2729403e11cA3A')
+  })
+
+  it('has no native transfer policy on mainnet', () => {
+    expect(getPolicyEngineAddress('1', 'NativeTransferPolicy')).toBeUndefined()
+  })
+
   it('returns undefined for a chain without a deployment', () => {
     expect(getPolicyGuardAddress('999999')).toBeUndefined()
     expect(getPolicyEngineAddress('999999', 'ERC20TransferPolicy')).toBeUndefined()
