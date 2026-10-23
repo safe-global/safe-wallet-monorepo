@@ -1,4 +1,4 @@
-export type AllowlistRecipient = {
+export type AllowlistFormRecipient = {
   address: string
   name?: string
   fromAddressBook?: boolean
@@ -10,7 +10,7 @@ export type RecipientAllowlistFormValues = {
   excludedTokens: string[]
   /** Token addresses added via "Add a token". */
   addedTokens: string[]
-  recipients: AllowlistRecipient[]
+  recipients: AllowlistFormRecipient[]
 }
 
 export const createDefaultAllowlistValues = (): RecipientAllowlistFormValues => ({

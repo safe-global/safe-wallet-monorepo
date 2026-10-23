@@ -1,7 +1,11 @@
 import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
-import { RECIPIENT_DUPLICATE_ERROR, RECIPIENT_IS_SAFE_ERROR, RECIPIENT_RESERVED_ERROR } from '../constants'
-import type { AllowlistRecipient, AllowlistRule, RecipientAllowlistFormValues } from '../types'
+import {
+  RECIPIENT_DUPLICATE_ERROR,
+  RECIPIENT_IS_SAFE_ERROR,
+  RECIPIENT_RESERVED_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { AllowlistFormRecipient, AllowlistRule, RecipientAllowlistFormValues } from '../types'
 
 const uniqueAddresses = (addresses: readonly string[]): string[] =>
   addresses.reduce<string[]>(
@@ -20,7 +24,7 @@ export const getAllowedTokenAddresses = (
     (token) => !values.excludedTokens.some((excluded) => sameAddress(excluded, token)),
   )
 
-export const getSelectedRecipients = (values: RecipientAllowlistFormValues): AllowlistRecipient[] =>
+export const getSelectedRecipients = (values: RecipientAllowlistFormValues): AllowlistFormRecipient[] =>
   values.recipients.filter((recipient) => recipient.selected)
 
 export const isAllowlistComplete = (heldTokens: readonly string[], values: RecipientAllowlistFormValues): boolean =>
@@ -41,9 +45,9 @@ export const buildAllowlistRules = (
 
 /** Adding a recipient that is listed but deselected selects it again instead of listing it twice. */
 export const addAllowlistRecipients = (
-  recipients: readonly AllowlistRecipient[],
-  added: readonly AllowlistRecipient[],
-): AllowlistRecipient[] => {
+  recipients: readonly AllowlistFormRecipient[],
+  added: readonly AllowlistFormRecipient[],
+): AllowlistFormRecipient[] => {
   const reselected = recipients.map((recipient) => {
     const match = added.find(({ address }) => sameAddress(address, recipient.address))
     return match ? { ...recipient, name: recipient.name ?? match.name, selected: true } : recipient
@@ -55,7 +59,7 @@ export const addAllowlistRecipients = (
 
 export const validateAllowlistRecipient = (
   address: string,
-  { safeAddress, existing }: { safeAddress: string; existing: readonly AllowlistRecipient[] },
+  { safeAddress, existing }: { safeAddress: string; existing: readonly AllowlistFormRecipient[] },
 ): string | undefined =>
   addressIsNotReserved(RECIPIENT_RESERVED_ERROR)(address) ??
   addressIsNotCurrentSafe(safeAddress, RECIPIENT_IS_SAFE_ERROR)(address) ??

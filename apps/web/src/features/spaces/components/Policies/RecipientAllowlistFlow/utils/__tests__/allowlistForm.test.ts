@@ -1,8 +1,16 @@
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { RECIPIENT_DUPLICATE_ERROR, RECIPIENT_IS_SAFE_ERROR, RECIPIENT_RESERVED_ERROR } from '../../constants'
-import { createDefaultAllowlistValues, type AllowlistRecipient, type RecipientAllowlistFormValues } from '../../types'
+import {
+  RECIPIENT_DUPLICATE_ERROR,
+  RECIPIENT_IS_SAFE_ERROR,
+  RECIPIENT_RESERVED_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import {
+  createDefaultAllowlistValues,
+  type AllowlistFormRecipient,
+  type RecipientAllowlistFormValues,
+} from '../../types'
 import {
   addAllowlistRecipients,
   buildAllowlistRules,
@@ -14,7 +22,7 @@ import {
 } from '../allowlistForm'
 
 const address = () => getAddress(faker.finance.ethereumAddress())
-const recipient = (overrides: Partial<AllowlistRecipient> = {}): AllowlistRecipient => ({
+const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFormRecipient => ({
   address: address(),
   selected: true,
   ...overrides,
