@@ -23,9 +23,9 @@ export class TxQueuePage {
     this.bulkExecuteButton = page.getByRole('button', { name: /^Bulk execute/ })
   }
 
-  /** Open the queue of the Safe (`sep:0x…`) */
-  async goto(safe: string): Promise<void> {
-    await this.page.goto(`${ROUTES.transactionsQueue}?safe=${safe}`)
+  /** Open the queue of the Safe (`sep:0x…`), in a Workspace when `spaceId` is given */
+  async goto(safe: string, spaceId?: string): Promise<void> {
+    await this.page.goto(`${ROUTES.transactionsQueue}?safe=${safe}${spaceId ? `&spaceId=${spaceId}` : ''}`)
   }
 
   /** Open the page of one transaction by its CGW ID */

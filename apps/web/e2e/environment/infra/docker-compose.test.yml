@@ -188,8 +188,10 @@ services:
       - |
         set -e
         cd /keys
-        [ -f tls-cert.pem ] || openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj /CN=safe-e2e-mocks \
-          -addext subjectAltName=DNS:api.cow.fi,DNS:auth.safe-e2e.test -keyout tls-key.pem -out tls-cert.pem
+        # Renews a certificate from an older stack that lacks one of the names.
+        openssl x509 -in tls-cert.pem -noout -text 2>/dev/null | grep -q DNS:li.quest || \
+          openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj /CN=safe-e2e-mocks \
+          -addext subjectAltName=DNS:api.cow.fi,DNS:auth.safe-e2e.test,DNS:li.quest -keyout tls-key.pem -out tls-cert.pem
         [ -f auth0-signing-key.pem ] || openssl genrsa -out auth0-signing-key.pem 2048
         chmod 644 tls-key.pem auth0-signing-key.pem
     volumes:
@@ -220,6 +222,34 @@ services:
         - /mocks/healthcheck.ts
         - '443'
         - api.cow.fi
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # The gateway's LiFi API; it lists mocks/lifi-constants.ts as the LiFi Diamond of every fork.
+  lifi-api:
+    <<: *mock
+    command:
+      - /mocks/lifi-api.ts
+    # Binds port 443 without root: the gateway only calls https://li.quest.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
+    volumes:
+      - ./mocks:/mocks:ro
+      - mock-keys:/keys:ro
+    depends_on:
+      mock-keys:
+        condition: service_completed_successfully
+    networks:
+      default:
+        aliases:
+          - li.quest
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '443'
+        - li.quest
       interval: 5s
       timeout: 5s
       retries: 5
@@ -603,6 +633,7 @@ services:
       FF_AUTH: 'true'
       FF_USERS: 'true'
       FF_TRUSTED_DELEGATE_CALL: 'true'
+      FF_LIFITRANSACTIONS_MAPPING: 'true'
       # Scenarios change chain and backend state within seconds; production lifetimes (60 s, 404s for 30 s) only delay
       # what the tests see. Event-driven cache invalidation still runs as in production.
       EXPIRATION_TIME_DEFAULT_SECONDS: '5'
@@ -656,6 +687,8 @@ services:
       price-fixtures:
         condition: service_healthy
       cow-api:
+        condition: service_healthy
+      lifi-api:
         condition: service_healthy
       auth0-mock:
         condition: service_healthy

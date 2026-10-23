@@ -1,8 +1,10 @@
-import { parseEther } from 'ethers'
+import { hexlify, parseEther, randomBytes } from 'ethers'
 import { waitForQueued, waitUntil } from '../../environment/scenarios/indexing.mjs'
 import {
+  createSafe,
   createSafeAddress,
   executeTransaction,
+  onChain,
   openSafe,
   proposeTransaction,
 } from '../../environment/scenarios/safe.mjs'
@@ -49,19 +51,50 @@ export async function seedSafe(journey: Journey, { owners, threshold, safeVersio
   return safe
 }
 
+/**
+ * Deploys a 1/1 Safe of OWNER_4 at one address on Sepolia and on `chainId`, then adds OWNER_1 on `chainId` only, so
+ * the Safe's setup differs there. Needs the fork of `chainId` (`chains` in playwright-specs.mjs).
+ */
+export async function seedSafeWithOtherSetupOn(journey: Journey, chainId: number): Promise<SeededSafe> {
+  const { env, owners } = journey
+  const saltNonce = BigInt(hexlify(randomBytes(16))).toString()
+  const options = { ownerAddresses: [owners.owner4.address], threshold: 1, saltNonce }
+  const address = await createSafeAddress(env, owners, options)
+  const target = await createSafe(onChain(env, chainId), owners, options)
+  try {
+    if (target.safeAddress !== address) throw new Error(`The Safe got another address on chain ${chainId}`)
+    const addOwner = await target.safe.createAddOwnerTx({ ownerAddress: owners.owner1.address, threshold: 1 })
+    await executeTransaction(target, addOwner)
+  } finally {
+    target.provider.destroy()
+  }
+  const safe = {
+    address,
+    prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}`,
+    context: await openSafe(env, owners.owner4, address),
+  }
+  journey.recordSafe(safe)
+  return safe
+}
+
+/** Proposes a call signed by the Safe's context signer, and waits until it is in the CGW queue. */
+export async function seedQueuedCall(
+  safe: SeededSafe,
+  { nonce, to, value = '0', data }: { nonce: number; to: string; value?: string; data: string },
+): Promise<QueuedTransaction> {
+  const { context } = safe
+  const call = await context.safe.createTransaction({ transactions: [{ to, value, data }], options: { nonce } })
+  const { hash } = await proposeTransaction(context, call)
+  await waitForQueued(context.env, context, [hash])
+  return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
+}
+
 /** Proposes an ETH transfer signed by the Safe's context signer, and waits until it is in the CGW queue. */
-export async function seedQueuedTransfer(
+export function seedQueuedTransfer(
   safe: SeededSafe,
   { nonce, recipient, amount }: { nonce: number; recipient: string; amount: string },
 ): Promise<QueuedTransaction> {
-  const { context } = safe
-  const transfer = await context.safe.createTransaction({
-    transactions: [{ to: recipient, value: parseEther(amount).toString(), data: '0x' }],
-    options: { nonce },
-  })
-  const { hash } = await proposeTransaction(context, transfer)
-  await waitForQueued(context.env, context, [hash])
-  return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
+  return seedQueuedCall(safe, { nonce, to: recipient, value: parseEther(amount).toString(), data: '0x' })
 }
 
 /** Executes an ETH transfer signed by the Safe's context signer, and waits until the CGW history lists it. */
