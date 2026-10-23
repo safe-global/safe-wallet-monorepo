@@ -19,6 +19,8 @@ export class TxReviewPage {
   readonly relayMethod: Locator
   /** "<n> free transactions left today" next to the relay option */
   readonly remainingRelays: Locator
+  /** The sponsored transactions left: the free daily ones, or "<left>/<quota>" of a Workspace plan */
+  readonly sponsoredTxsCounter: Locator
   readonly executeButton: Locator
   /** The spending-limit review has no signing step, only this button */
   readonly spendingLimitExecuteButton: Locator
@@ -46,6 +48,7 @@ export class TxReviewPage {
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
     this.relayMethod = page.getByTestId('relay-execution-method').first()
     this.remainingRelays = page.getByText(/free transactions? left today/)
+    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter')
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
@@ -60,9 +63,12 @@ export class TxReviewPage {
     this.hashComparisonDialog = page.getByRole('dialog', { name: 'Compare transaction hash' })
   }
 
-  /** Confirm the risk, continue from the review and sign with the connected wallet */
-  async sign(): Promise<void> {
-    await this.confirmRisk()
+  /**
+   * Confirm the risk, continue from the review and sign with the connected wallet. Pass `confirmRisk: false` for a
+   * Safe that Safe Shield trusts, such as one in the user's Workspace: it reports no critical risk to confirm.
+   */
+  async sign({ confirmRisk = true }: { confirmRisk?: boolean } = {}): Promise<void> {
+    if (confirmRisk) await this.confirmRisk()
     await this.continueButton.click()
     await this.signButton.click()
   }
