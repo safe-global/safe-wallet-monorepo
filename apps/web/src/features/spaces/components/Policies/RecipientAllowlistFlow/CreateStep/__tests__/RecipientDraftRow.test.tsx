@@ -7,7 +7,7 @@ import {
   RECIPIENT_DUPLICATE_ERROR,
   RECIPIENT_IS_SAFE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { AllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { AllowlistFormRecipient } from '../../types'
 import RecipientDraftRow from '../RecipientDraftRow'
 
 // AddressInput has its own suite; a registered input keeps this row's validity about its own rules.
@@ -44,7 +44,7 @@ jest.mock('@/components/common/AddressInput', () => {
 
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
 
-const renderRow = (existing: AllowlistRecipient[] = [], autoFocus?: boolean) => {
+const renderRow = (existing: AllowlistFormRecipient[] = [], autoFocus?: boolean) => {
   const onAdd = jest.fn()
   const onCancel = jest.fn()
   const view = renderWithUserEvent(

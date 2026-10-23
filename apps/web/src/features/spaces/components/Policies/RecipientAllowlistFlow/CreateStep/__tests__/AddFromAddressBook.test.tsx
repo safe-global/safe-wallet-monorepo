@@ -4,7 +4,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
-import type { AllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { AllowlistFormRecipient } from '../../types'
 import AddFromAddressBook from '../AddFromAddressBook'
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -30,7 +30,7 @@ const contact = (name: string, source: ContactSource, chainIds = [CHAIN_ID]): Ex
   updatedAt: '',
 })
 
-const setup = (contacts: ExtendedContact[], existing: AllowlistRecipient[] = []) => {
+const setup = (contacts: ExtendedContact[], existing: AllowlistFormRecipient[] = []) => {
   const onAdd = jest.fn()
   const rendered = renderWithUserEvent(
     <AddFromAddressBook

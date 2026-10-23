@@ -21,7 +21,7 @@ import {
   LOCAL_CONTACTS_TOOLTIP,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import ShortAddress from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ShortAddress'
-import type { AllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { AllowlistFormRecipient } from '../types'
 import Identicon from '@/components/common/Identicon'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
 import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
@@ -31,8 +31,8 @@ type AddFromAddressBookProps = {
   chainId: string
   safeAddress: string
   contacts: readonly ExtendedContact[]
-  existing: readonly AllowlistRecipient[]
-  onAdd: (recipients: AllowlistRecipient[]) => void
+  existing: readonly AllowlistFormRecipient[]
+  onAdd: (recipients: AllowlistFormRecipient[]) => void
 }
 
 const CONTACT_LIST_CLASSES = [
