@@ -22,4 +22,13 @@ describe('FileListCard', () => {
     )
     expect(screen.getByText('Settings')).toBeInTheDocument()
   })
+
+  it('lists the bookmarked Safe Apps only when a chain has pinned apps', () => {
+    const { unmount } = render(<FileListCard safeApps={{ '11155111': { pinned: [24], opened: [] } }} />)
+    expect(screen.getByText('Safe Apps').closest('li')).toHaveTextContent('Bookmarked Safe Apps')
+    unmount()
+
+    render(<FileListCard safeApps={{ '11155111': { pinned: [], opened: [24] } }} />)
+    expect(screen.queryByText('Safe Apps')).not.toBeInTheDocument()
+  })
 })
