@@ -9,6 +9,7 @@ import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type {
   QueuedItemPage,
   Transaction,
@@ -84,6 +85,12 @@ export class SafeApiClient {
   ): Promise<BalancesResponse> {
     const query = trusted === undefined ? '' : `?trusted=${trusted}`
     return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}${query}`)
+  }
+
+  /** Get the portfolio (Zerion) of an address on this client's chain, as the wallet asks for its default token list */
+  async getPortfolio(address: string, fiatCode = 'USD'): Promise<Portfolio> {
+    const query = new URLSearchParams({ chainIds: this.chainId, fiatCode, trusted: 'true' })
+    return this.get<Portfolio>(`/v1/portfolio/${address}?${query}`)
   }
 
   /** Get queued transactions */

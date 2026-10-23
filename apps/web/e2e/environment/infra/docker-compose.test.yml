@@ -305,6 +305,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  # Zerion for the gateway: the positions a scenario registers for a wallet; a 503 for any other wallet.
+  zerion-api:
+    <<: *mock
+    command:
+      - /mocks/zerion-api.ts
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8095'
+      interval: 5s
+      timeout: 5s
+      retries: 5
   # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
   ledger-emulator:
     image: ${SPECULOS_IMAGE:?Load test-images.env}
@@ -637,6 +651,12 @@ services:
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
       POLICY_INDEXER_BASE_URI: http://policy-indexer:8094
+      # The portfolio, the positions and the Safe overviews come from Zerion, as on staging. Testnets keep the
+      # Transaction Service. Without a rate limit, a fast run does not push the overviews onto their fallback.
+      FF_ZERION_ENABLED: 'true'
+      ZERION_BASE_URI: http://zerion-api:8095
+      ZERION_API_KEY: local-test-only-zerion-key
+      ZERION_RATE_LIMIT_CALLS_BY_PERIOD: '0'
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       BILLING_WEBHOOK_JWT_PUBLIC_KEY: |
         -----BEGIN PUBLIC KEY-----
@@ -660,6 +680,8 @@ services:
       billing-api:
         condition: service_healthy
       policy-indexer:
+        condition: service_healthy
+      zerion-api:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -800,8 +822,9 @@ services:
       TEST_CHAIN_EXPLORER: https://etherscan.io
       TEST_CHAIN_EXPLORER_API: https://api.etherscan.io/api
       TEST_CHAIN_IS_TESTNET: 'false'
-      # As on staging: default tokens come from the portfolio, falling back to trusted Transaction Service tokens.
-      TEST_CHAIN_EXTRA_FEATURES: PORTFOLIO_ENDPOINT
+      # As on staging: default tokens and positions come from the portfolio (Zerion); without registered positions
+      # the wallet falls back to trusted Transaction Service tokens.
+      TEST_CHAIN_EXTRA_FEATURES: PORTFOLIO_ENDPOINT,POSITIONS
     depends_on:
       cfg-init:
         condition: service_completed_successfully
