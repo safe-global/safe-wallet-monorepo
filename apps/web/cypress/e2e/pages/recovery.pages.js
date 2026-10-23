@@ -24,6 +24,7 @@ const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
+const dialog = '[role="dialog"]'
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',
@@ -150,4 +151,9 @@ export function verifyRecoveryProposalDialog(option) {
 
 export function verifyRecoveryProposalCard() {
   cy.get(recoveryProposalCard).should('be.visible')
+}
+
+export function verifySetupRecoveryFlowClosed() {
+  cy.get(dialog).should('not.exist')
+  cy.get(setupRecoveryBtn).should('be.visible')
 }
