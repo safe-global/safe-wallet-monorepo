@@ -18,6 +18,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useWallet from '@/hooks/wallets/useWallet'
+import useSafeSignerAddress from '@/hooks/wallets/useSafeSignerAddress'
 import useSafeMessage from '@/hooks/messages/useSafeMessage'
 import useOnboard, { switchWallet } from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '@/components/tx-flow'
@@ -35,9 +36,13 @@ import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { SafeTxContext } from '../../SafeTxProvider'
 import RiskConfirmationError from '@/components/tx/shared/errors/RiskConfirmationError'
-import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
+import {
+  isBlindSigningPayload,
+  isEIP712TypedData,
+  isSafeSignerMessageSupported,
+} from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import { isWalletRejection } from '@/utils/wallets'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
@@ -241,6 +246,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   const { safe } = useSafeInfo()
   const isOwner = useIsSafeOwner()
   const wallet = useWallet()
+  const safeSignerAddress = useSafeSignerAddress()
   useHighlightHiddenTab()
 
   const { decodedMessage, safeMessageMessage, safeMessageHash } = useDecodedSafeMessage(message, safe)
@@ -260,8 +266,10 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   const isEip712 = isEIP712TypedData(decodedMessage)
   const isBlindSigningRequest = isBlindSigningPayload(decodedMessage)
   const isBlindSigningEnabled = useAppSelector(selectBlindSigning)
+  const needsNewerSafeForSafeSigner = !!safeSignerAddress && !isSafeSignerMessageSupported(safe.version)
   const isDisabled =
     !isOwner ||
+    needsNewerSafeForSafeSigner ||
     signedByCurrentSafe ||
     !safe.deployed ||
     (!isBlindSigningEnabled && isBlindSigningRequest) ||
@@ -313,9 +321,9 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           <DialogHeader threshold={safe.threshold} />
 
           {isEip712 && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <ApprovalEditor safeMessage={decodedMessage} />
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           )}
 
           <BlindSigningWarning
@@ -385,6 +393,13 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
             )}
 
             <NetworkWarning />
+
+            {needsNewerSafeForSafeSigner && (
+              <ErrorMessage>
+                Signing messages with a Safe signer needs Safe version 1.5.0 or newer. Update this Safe account in
+                Settings first.
+              </ErrorMessage>
+            )}
 
             <MessageDialogError isOwner={isOwner} submitError={submitError} />
 

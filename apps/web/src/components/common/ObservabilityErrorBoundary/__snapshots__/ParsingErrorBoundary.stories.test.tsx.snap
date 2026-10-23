@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./ParsingErrorBoundary.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div>
+      Decoded data
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./ParsingErrorBoundary.stories RenderError 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div>
+      Error parsing data
+    </div>
+  </div>
+</div>
+`;

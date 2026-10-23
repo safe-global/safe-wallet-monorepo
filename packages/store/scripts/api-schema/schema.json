@@ -3959,6 +3959,81 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/policies/requests": {
+      "post": {
+        "description": "Stores the `Configuration[]` behind a `requestConfiguration(root)`, which publishes only the hash on-chain, so that the configurations a later `applyConfiguration` needs survive the delay. Call it before requesting the configuration on-chain: the root is recomputed from the configurations and has to match, but it is not required to exist on-chain yet. Idempotent: storing the same root again is a no-op.",
+        "operationId": "policiesCreateConfigurationRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID the Safe belongs to",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "11155111",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePolicyConfigurationRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePolicyConfigurationRequestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, or the Safe holds the maximum number of stored requests in this space"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - user is not a member of this space, or the Safe is not in it"
+          },
+          "422": {
+            "description": "Invalid chain ID, Safe address or body, or the configurations do not hash to the given root"
+          }
+        },
+        "summary": "Store the configurations of a delayed configuration request",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/policies/active": {
       "get": {
         "description": "Returns the policies of every Safe in the Space. A Safe whose enabled modules and guards could not be read is omitted from the spending-limit and guard-enforced policies; a Safe whose delegates could not be read is omitted from the proposer policies.",
@@ -4385,7 +4460,7 @@
     },
     "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/safenet/checks": {
       "post": {
-        "description": "Queues a Safenet check of a pending Safe transaction that an owner has signed. Safe Labs pays the fee and counts the check against the workspace in the path. The caller must be an active member of that workspace, the workspace must hold the Safe and have a plan that includes Safenet checks, and the chain must list SAFENET_CHECKS.",
+        "description": "Queues a Safenet check of a pending Safe transaction that an owner has signed. Safe Labs pays the fee and counts the check against the workspace in the path. The caller must be an active member of that workspace, the workspace must hold the Safe and its plan must grant policies (Business and Enterprise), and the chain must list SAFENET_CHECKS.",
         "operationId": "safenetChecksRequestCheckV1",
         "parameters": [
           {
@@ -4438,8 +4513,11 @@
           "401": {
             "description": "Authentication required"
           },
+          "402": {
+            "description": "The workspace plan does not grant policies, which Safenet checks share. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
           "403": {
-            "description": "Not a member of the workspace, or the workspace does not hold the Safe or its plan does not include checks"
+            "description": "Not a member of the workspace, or the workspace does not hold the Safe"
           },
           "404": {
             "description": "Workspace not found, or no such transaction for this Safe"
@@ -7398,7 +7476,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-a0de2d2",
+    "version": "main-d9280df",
     "contact": {}
   },
   "tags": [],
@@ -12339,6 +12417,76 @@
           "recipient",
           "contract",
           "deadlock"
+        ]
+      },
+      "PolicyConfigurationDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Contract the guarded call targets"
+          },
+          "selector": {
+            "type": "string",
+            "description": "4-byte function selector",
+            "example": "0xa9059cbb"
+          },
+          "operation": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "0 = CALL, 1 = DELEGATECALL"
+          },
+          "policy": {
+            "type": "string",
+            "description": "Policy contract to bind. The zero address removes the policy of this access."
+          },
+          "data": {
+            "type": "string",
+            "description": "Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes)."
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation",
+          "policy",
+          "data"
+        ]
+      },
+      "CreatePolicyConfigurationRequestDto": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[])), as requested on-chain"
+          },
+          "configurations": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          }
+        },
+        "required": [
+          "root",
+          "configurations"
+        ]
+      },
+      "CreatePolicyConfigurationRequestResponse": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "The stored configuration root"
+          }
+        },
+        "required": [
+          "root"
         ]
       },
       "ModuleEnforcementDto": {

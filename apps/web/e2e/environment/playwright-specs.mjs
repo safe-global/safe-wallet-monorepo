@@ -15,16 +15,20 @@ export const playwrightSpecs = {
   },
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
+  'e2e/connected-non-owner.spec.ts': {},
   'e2e/delete.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
+  'e2e/proposer.spec.ts': {},
   'e2e/recovery.spec.ts': {},
   'e2e/reject.spec.ts': {},
   'e2e/replace.spec.ts': {},
+  'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
+  'regression/contract-signature-execute.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
@@ -65,5 +69,12 @@ export const playwrightSpecs = {
   },
   'smoke/dashboard.spec.ts': { scenarios: ['prepareBasicScenario'], safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' } },
   'smoke/landing.spec.ts': {},
+  // The basic Safe's history holds its creation, a "Success" row
+  'smoke/tx-history.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_HISTORY_SAFE: 'SEP_STATIC_SAFE_7' },
+  },
   'e2e/walletconnect.spec.ts': {},
+  'e2e/walletconnect-nested-signer.spec.ts': {},
+  'e2e/nested-signer.spec.ts': {},
 }

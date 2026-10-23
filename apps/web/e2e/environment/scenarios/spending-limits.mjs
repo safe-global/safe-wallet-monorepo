@@ -6,7 +6,3 @@ export async function prepareSpendingLimitsScenario(env, owners) {
   if (env.SAFE_E2E_CHAINS?.[137]) names.push('MATIC_STATIC_SAFE_34')
   return { safes: { static: await rebuildStagingSafes(env, owners, names) } }
 }
-
-export async function prepareMassPayoutsScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_6', 'SEP_STATIC_SAFE_8']) } }
-}

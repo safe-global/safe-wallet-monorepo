@@ -17,17 +17,15 @@ import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils
 
 function Disclaimer({ isMalicious }: { isMalicious: boolean }): ReactElement {
   return (
-    <div className={css.disclaimerContainer}>
-      <Typography>
-        <span className="font-semibold">Cancelling {isMalicious ? 'malicious transaction' : 'Account recovery'}.</span>{' '}
-        You will need to execute the cancellation.{' '}
-        <Track {...RECOVERY_EVENTS.LEARN_MORE} label="tx-queue">
-          <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-            Learn more
-          </ExternalLink>
-        </Track>
-      </Typography>
-    </div>
+    <Typography>
+      <span className="font-semibold">Cancelling {isMalicious ? 'malicious transaction' : 'Account recovery'}.</span>{' '}
+      You will need to execute the cancellation.{' '}
+      <Track {...RECOVERY_EVENTS.LEARN_MORE} label="tx-queue">
+        <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+          Learn more
+        </ExternalLink>
+      </Track>
+    </Typography>
   )
 }
 
@@ -57,12 +55,14 @@ export default function GroupedRecoveryListItems({
       <div style={{ gridArea: 'items' }} className={css.txItems}>
         {cancellations.map((tx) => (
           <div key={tx.transaction.id}>
-            <ExpandableTransactionItem item={tx} />
+            <ExpandableTransactionItem item={tx} isNested />
           </div>
         ))}
 
         {recoveries.map((recovery) => (
-          <RecoveryListItem key={recovery.transactionHash} item={recovery} />
+          <div key={recovery.transactionHash}>
+            <RecoveryListItem item={recovery} isNested />
+          </div>
         ))}
       </div>
     </div>

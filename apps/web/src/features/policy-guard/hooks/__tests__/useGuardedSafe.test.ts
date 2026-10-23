@@ -52,6 +52,7 @@ describe('useGuardedSafe', () => {
         safeLoaded: true,
         safeLoading: false,
         error: undefined,
+        refetch: expect.any(Function),
       })
       expect(query).toHaveBeenCalledWith(skipToken, expect.anything())
     })
@@ -86,6 +87,7 @@ describe('useGuardedSafe', () => {
         safeLoaded: true,
         safeLoading: false,
         error: undefined,
+        refetch: expect.any(Function),
       })
     })
 
@@ -106,7 +108,35 @@ describe('useGuardedSafe', () => {
         safeLoaded: false,
         safeLoading: true,
         error: undefined,
+        refetch: expect.any(Function),
       })
+    })
+
+    it('is loading while a newly picked target loads after another one had loaded', () => {
+      mockOpenSafe()
+      mockTargetQuery({ data: buildSafe(), currentData: undefined, isLoading: false, isFetching: true })
+      const { result } = renderHook(() => useGuardedSafe(TARGET))
+      expect(result.current).toMatchObject({ safeLoaded: false, safeLoading: true, error: undefined })
+    })
+
+    it('is not loading while a loaded target is polled', () => {
+      mockOpenSafe()
+      const target = buildSafe()
+      mockTargetQuery({ data: target, currentData: target, isLoading: false, isFetching: true })
+      const { result } = renderHook(() => useGuardedSafe(TARGET))
+      expect(result.current).toMatchObject({ safeLoaded: true, safeLoading: false })
+    })
+
+    it('is not loading while a target CGW does not know is polled after another one had loaded', () => {
+      mockOpenSafe()
+      mockTargetQuery({
+        data: buildSafe(),
+        currentData: undefined,
+        isFetching: true,
+        error: { status: 404, data: 'Not found' },
+      })
+      const { result } = renderHook(() => useGuardedSafe(TARGET))
+      expect(result.current.safeLoading).toBe(false)
     })
 
     it('ignores an error of the open Safe', () => {
