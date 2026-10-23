@@ -410,6 +410,13 @@ export const mockOwnedSafes = {
 }
 
 /**
+ * Space safes endpoint returning the owned Safes, for Spaces stories that need a populated Space
+ */
+export const spaceWithSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
+  HttpResponse.json({ safes: mockOwnedSafes }),
+)
+
+/**
  * Mock safe overviews for owned safes
  */
 export const mockSafeOverviews = [
@@ -517,6 +524,9 @@ export function spacesHandlers(): RequestHandler[] {
     http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} })),
     // A 403 on a Workspace route starts a session check that remounts the page and refetches it, in a loop
     http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () => HttpResponse.json({ spaceUuid: MOCK_SPACE_ID, data: [] })),
+    http.get(/\/v1\/spaces\/[^/]+\/address-book\/requests$/, () =>
+      HttpResponse.json({ spaceUuid: MOCK_SPACE_ID, data: [] }),
+    ),
     // Get all safes owned by address (used by useOwnedSafesGrouped)
     http.get(/\/v2\/owners\/0x[a-fA-F0-9]+\/safes$/, () => HttpResponse.json(mockOwnedSafes)),
     // Safe overviews v1 (batch endpoint for safe card data)
@@ -894,6 +904,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
     policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,
+    myAccounts: features.myAccounts ?? false,
   }
 
   // Build handlers array
