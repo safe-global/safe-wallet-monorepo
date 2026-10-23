@@ -2,7 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 import { plugin as shadcn } from '@shadcn/lint'
-import { designSystemSyntaxRules } from './eslint-design-system.mjs'
+import { designSystemContracts } from './eslint-design-system-contracts.mjs'
 
 export default tseslint.config(
   { ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx', '**/__tests__/**', '**/__mocks__/**'] },
@@ -15,7 +15,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'error',
       'shadcn/no-raw-colors': 'error',
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+      'shadcn/no-restyle': ['error', { deny: [], contracts: designSystemContracts }],
       'no-restricted-imports': [
         'error',
         {
