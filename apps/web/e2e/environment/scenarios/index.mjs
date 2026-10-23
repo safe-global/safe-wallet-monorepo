@@ -2,7 +2,6 @@ import * as accounts from './accounts.mjs'
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
 import * as batch from './batch.mjs'
-import * as bulk from './bulk.mjs'
 import * as chains from './chains.mjs'
 import * as counterfactual from './counterfactual.mjs'
 import * as cow from './cow.mjs'
@@ -29,7 +28,6 @@ const modules = [
   assets,
   basic,
   batch,
-  bulk,
   chains,
   counterfactual,
   cow,
