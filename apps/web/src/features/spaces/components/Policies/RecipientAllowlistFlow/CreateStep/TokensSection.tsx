@@ -16,8 +16,8 @@ import {
   POPULAR_LOAD_ERROR_TEXT,
   TOKEN_ICON_SIZE,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
-import { getFormTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
-import type { RecipientAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { getFormTokenAddresses } from '../utils/allowlistForm'
+import type { RecipientAllowlistFormValues } from '../types'
 import {
   ADD_TOKEN_LABEL,
   DESELECT_ALL_LABEL,
