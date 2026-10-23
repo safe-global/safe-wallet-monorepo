@@ -47,11 +47,6 @@ export function selectConnectedWalletIfOffered() {
     })
 }
 
-function selectRelayAndWaitUntilChecked() {
-  cy.get(relayExecutionMethod, { timeout: 30000 }).click()
-  verifyRelayExecutionMethodChecked()
-}
-
 function continueToSubmitStep() {
   cy.get(continueSignBtn, { timeout: 30000 }).should('be.enabled')
   clickOnContinueSignTransactionBtn()
@@ -92,13 +87,6 @@ export function signAndExecuteWithConnectedWallet() {
   continueToSubmitStep()
   signAndOpenExecuteStep()
   selectConnectedWalletIfOffered()
-  executeAndFinish()
-}
-
-export function signAndExecuteWithRelay() {
-  continueToSubmitStep()
-  signAndOpenExecuteStep()
-  selectRelayAndWaitUntilChecked()
   executeAndFinish()
 }
 

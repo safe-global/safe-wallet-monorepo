@@ -31,7 +31,6 @@ const hiddenTokenIcon = 'svg[data-testid="hidden-token-icon"]'
 const hiddenTokenCounter = '[data-testid="hidden-token-count"]'
 const currencySelector = '[data-testid="currency-selector"]'
 const currencyItem = '[data-testid="currency-item"]'
-const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenItem = '[data-testid="token-item"]'
 const sendBtn = '[data-testid="send-button"]'
 
@@ -144,14 +143,6 @@ export function checkNftCopyIconAndLink() {
       cy.get(createTx.explorerBtn, { timeout: 5000 }).should('exist')
     })
   })
-}
-
-export function enterAmount(amount) {
-  cy.get(tokenAmountFld).find('input').clear().type(amount)
-}
-
-export function checkSelectedToken(token) {
-  cy.get(tokenSelector).contains(token)
 }
 
 function clickOnTokenSelector(index) {
