@@ -64,6 +64,19 @@ const darkPalette: ColorPalette = {
     main: '#D6A100',
     background: '#2F2A18',
   },
+  // Tag colours (Figma Mint Refresh, dark mode, node 5-274).
+  tag: {
+    default: { background: '#303033', text: '#DCDEE0' },
+    slate: { background: '#292E34', text: '#CDD5DE' },
+    clay: { background: '#392A21', text: '#E7CFBF' },
+    rose: { background: '#422232', text: '#F9C2DB' },
+    orchid: { background: '#3D233C', text: '#EEC5EC' },
+    lilac: { background: '#352644', text: '#DFC9F9' },
+    iris: { background: '#262950', text: '#CAD1FF' },
+    cobalt: { background: '#1A2D4E', text: '#BDD6FE' },
+    sky: { background: '#0F3243', text: '#AEDCF6' },
+    lagoon: { background: '#0D3530', text: '#A8E2D9' },
+  },
   background: {
     default: '#121312',
     main: '#121312',
