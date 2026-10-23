@@ -19,11 +19,16 @@ const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
 
 export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
   ...PENDING_OUTCOME_TITLE,
-  expired: 'The transaction expired and can no longer be signed.',
+  expired: 'Transaction expired',
 }
 
-export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string =>
-  outcome === 'executed' ? EXECUTED_LINE[operation] : 'Close this panel to see the current policies.'
+const EXPIRED_LINE = 'It can no longer be signed. Set up the allowlist again to retry.'
+
+export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string => {
+  if (outcome === 'executed') return EXECUTED_LINE[operation]
+
+  return outcome === 'expired' ? EXPIRED_LINE : 'Close this panel to see the current policies.'
+}
 
 export const SCHEDULED_BANNER_TITLE = 'Change pending'
 

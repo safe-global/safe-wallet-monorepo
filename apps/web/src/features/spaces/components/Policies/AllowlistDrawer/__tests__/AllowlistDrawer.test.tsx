@@ -220,7 +220,8 @@ describe('AllowlistDrawer', () => {
   it('closes an expired transaction with no chip and no action', () => {
     setup(mockExpiredPendingAllowlist())
 
-    expect(screen.getByText('The transaction expired and can no longer be signed.')).toBeInTheDocument()
+    expect(screen.getByText('Transaction expired')).toBeInTheDocument()
+    expect(screen.getByText('It can no longer be signed. Set up the allowlist again to retry.')).toBeInTheDocument()
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
     expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()

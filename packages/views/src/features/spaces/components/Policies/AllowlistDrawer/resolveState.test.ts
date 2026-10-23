@@ -85,11 +85,7 @@ describe('resolveAllowlistDrawerState', () => {
       'Another transaction used this nonce, so this one can no longer be executed.',
       'Close this panel to see the current policies.',
     ],
-    [
-      'expired',
-      'The transaction expired and can no longer be signed.',
-      'Close this panel to see the current policies.',
-    ],
+    ['expired', 'Transaction expired', 'It can no longer be signed. Set up the allowlist again to retry.'],
   ] as const)('should, once the transaction was %s, report it with no action', (outcome, bannerTitle, bannerLine2) => {
     expect(resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll', outcome)).toEqual({
       kind: 'closed',
@@ -135,7 +131,7 @@ describe('resolveAllowlistDrawerState', () => {
     expect(resolveAllowlistDrawerState(mockExpiredPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
       kind: 'closed',
       action: 'none',
-      bannerTitle: 'The transaction expired and can no longer be signed.',
+      bannerTitle: 'Transaction expired',
     })
   })
 })
