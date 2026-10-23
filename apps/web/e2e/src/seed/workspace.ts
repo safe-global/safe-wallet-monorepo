@@ -22,6 +22,6 @@ export async function seedBusinessWorkspace(page: Page, safes: Record<string, Se
     safes: entries.map(([, { address }]) => ({ chainId: CHAIN_IDS.sepolia, address })),
     addressBookItems: entries.map(([name, { address }]) => ({ name, address, chainIds: [CHAIN_IDS.sepolia] })),
   })
-  await storeSubscription(uuid)
+  await storeSubscription(session, uuid)
   return uuid
 }
