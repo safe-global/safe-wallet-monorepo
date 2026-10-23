@@ -315,4 +315,21 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
   })
+
+  it('confirms a just activated allowlist with a green banner naming the Safe and counting the recipients', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} justActivated />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Your allowlist is now active')
+    expect(
+      screen.getByText(
+        'Treasury can only send the allowed tokens to the 3 allowed recipients. Further changes will take 24 hours to apply.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('shows no activation banner unless the allowlist was just activated', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+
+    expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+  })
 })

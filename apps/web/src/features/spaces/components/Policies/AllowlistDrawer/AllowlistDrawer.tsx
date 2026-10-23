@@ -26,12 +26,17 @@ import {
   type ActiveAllowlistPolicy,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+import {
+  ACTIVATED_BANNER_TITLE,
+  activatedBannerLine,
+} from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
 import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'
 import AllowlistTokens from './components/AllowlistTokens'
+import ActivatedBanner from './components/ActivatedBanner'
 import FailedBanner from './components/FailedBanner'
 import ScheduledBanner from './components/ScheduledBanner'
 
@@ -52,6 +57,8 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   onEdit?: () => void
   onRemove?: () => void
   onCancelChange?: () => void
+  /** The first setup just became active: confirms it once at the top of the panel. */
+  justActivated?: boolean
 }
 
 type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
@@ -92,6 +99,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const Icon = getPolicyIcon(policy.type)
   const status = outcome ? OUTCOME_STATUS[outcome] : getPolicyStatus(policy)
   const isRemoved = state.kind !== 'active' && state.operation === 'remove'
+  const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
     : { onEdit: props.onEdit, onRemove: props.onRemove, onCancelChange: props.onCancelChange }
@@ -115,6 +123,12 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               />
             </>
           )}
+          {state.kind === 'active' && !isPendingDrawer(props) && props.justActivated && (
+            <ActivatedBanner
+              title={ACTIVATED_BANNER_TITLE}
+              line2={activatedBannerLine(safe.name ?? 'This Safe account', recipients.length)}
+            />
+          )}
           {state.kind === 'scheduled' && policy.status === 'active' && policy.scheduledChange && (
             <ScheduledBanner
               title={state.bannerTitle}
@@ -128,7 +142,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ) : (
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ))}
-          <AllowlistRecipients recipients={getAllowlistRecipients(policy.data)} names={names} isRemoved={isRemoved} />
+          <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
           <PolicyOverview
             {...overview}

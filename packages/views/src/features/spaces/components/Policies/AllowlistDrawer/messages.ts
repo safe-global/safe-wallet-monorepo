@@ -30,6 +30,11 @@ export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolic
   return outcome === 'expired' ? EXPIRED_LINE : 'Close this panel to see the current policies.'
 }
 
+export const ACTIVATED_BANNER_TITLE = 'Your allowlist is now active'
+
+export const activatedBannerLine = (safeName: string, recipientCount: number): string =>
+  `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take 24 hours to apply.`
+
 export const SCHEDULED_BANNER_TITLE = 'Change pending'
 
 export const SCHEDULED_BANNER_LINE: Record<'create' | 'update', string> = {
