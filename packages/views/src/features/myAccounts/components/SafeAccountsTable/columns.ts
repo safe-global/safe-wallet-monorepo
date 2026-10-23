@@ -1,7 +1,14 @@
 import type { SafeSortColumn } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 
 export type SafeAccountColumnId =
-  'select' | 'name' | 'threshold' | 'networks' | 'workspaces' | 'pending' | 'balance' | 'actions'
+  | 'select'
+  | 'name'
+  | 'threshold'
+  | 'networks'
+  | 'workspaces'
+  | 'pending'
+  | 'balance'
+  | 'actions'
 
 export type SafeAccountColumn = {
   id: SafeAccountColumnId

@@ -77,7 +77,8 @@ const getTransactionServiceDelegateTypedData = (chainId: string, delegateAddress
 type QueueServiceDelegateTypedData = ReturnType<typeof getQueueServiceDelegateTypedData>
 
 export type DelegateTypedData =
-  QueueServiceDelegateTypedData | ReturnType<typeof getTransactionServiceDelegateTypedData>
+  | QueueServiceDelegateTypedData
+  | ReturnType<typeof getTransactionServiceDelegateTypedData>
 
 export const isQueueServiceDelegateTypedData = (
   typedData: DelegateTypedData,
