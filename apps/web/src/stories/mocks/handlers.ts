@@ -410,6 +410,13 @@ export const mockOwnedSafes = {
 }
 
 /**
+ * Space safes endpoint returning the owned Safes, for Spaces stories that need a populated Space
+ */
+export const spaceWithSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
+  HttpResponse.json({ safes: mockOwnedSafes }),
+)
+
+/**
  * Mock safe overviews for owned safes
  */
 export const mockSafeOverviews = [
