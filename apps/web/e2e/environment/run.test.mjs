@@ -90,6 +90,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
   assert.equal(env.ELECTRON_RUN_AS_NODE, undefined)
   assert.equal(env.NEXT_PUBLIC_CONFIG_SERVICE_KEY, 'WALLET_WEB')
   assert.equal(env.NEXT_PUBLIC_IS_PRODUCTION, 'false')
+  assert.equal(env.NEXT_PUBLIC_POLLING_INTERVAL, '2000')
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_STAGING, manifest.gatewayUrl)
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION, manifest.gatewayUrl)
   assert.equal(env.VITE_GATEWAY_URL, manifest.gatewayUrl)
