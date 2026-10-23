@@ -20,11 +20,8 @@ import {
   RECIPIENTS_EMPTY_TEXT,
   RECIPIENTS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import { addAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
-import type {
-  AllowlistRecipient,
-  RecipientAllowlistFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { addAllowlistRecipients } from '../utils/allowlistForm'
+import type { AllowlistFormRecipient, RecipientAllowlistFormValues } from '../types'
 import Identicon from '@/components/common/Identicon'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
@@ -70,10 +67,10 @@ const RecipientsSection = ({
       ),
     })
 
-  const append = (added: AllowlistRecipient[]) =>
+  const append = (added: AllowlistFormRecipient[]) =>
     onChange({ ...values, recipients: addAllowlistRecipients(recipients, added) })
 
-  const isInAddressBook = ({ address, fromAddressBook }: AllowlistRecipient) =>
+  const isInAddressBook = ({ address, fromAddressBook }: AllowlistFormRecipient) =>
     Boolean(fromAddressBook || (account && addressBook.has(address, account.chainId)))
 
   return (

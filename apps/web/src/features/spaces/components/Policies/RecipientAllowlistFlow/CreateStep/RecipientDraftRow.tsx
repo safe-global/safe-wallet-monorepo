@@ -5,8 +5,8 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { validateAllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
-import type { AllowlistRecipient } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { validateAllowlistRecipient } from '../utils/allowlistForm'
+import type { AllowlistFormRecipient } from '../types'
 import {
   IDENTICON_SIZE,
   RECIPIENT_ADD_CONFIRM_LABEL,
@@ -36,8 +36,8 @@ const INLINE_ADDRESS_INPUT = [
 
 type RecipientDraftRowProps = {
   safeAddress: string
-  existing: readonly AllowlistRecipient[]
-  onAdd: (recipient: AllowlistRecipient) => void
+  existing: readonly AllowlistFormRecipient[]
+  onAdd: (recipient: AllowlistFormRecipient) => void
   onCancel: () => void
   autoFocus?: boolean
 }
