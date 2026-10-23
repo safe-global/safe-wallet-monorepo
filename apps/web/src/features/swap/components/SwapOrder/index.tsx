@@ -34,7 +34,7 @@ import { EmptyRow } from '@safe-global/views/components/common/Table/EmptyRow'
 import { PartDuration } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartDuration'
 import { PartSellAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartSellAmount'
 import { PartBuyAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartBuyAmount'
-import { SurplusFee } from './rows/SurplusFee'
+import { SurplusFee } from '@safe-global/views/features/swap/components/SwapOrder/rows/SurplusFee'
 
 type SwapOrderProps = {
   txData?: TransactionData | null

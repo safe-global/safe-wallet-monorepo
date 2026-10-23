@@ -1,4 +1,4 @@
-import { _formatNumber } from '.'
+import { _formatNumber } from '@safe-global/views/components/common/NumberField'
 
 describe('NumberField', () => {
   it('should trim the value', () => {

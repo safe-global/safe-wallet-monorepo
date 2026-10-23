@@ -22,7 +22,7 @@ import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
 import css from './styles.module.css'
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/views/components/common/NumberField'
 import {
   getDelay,
   isCustomDelaySelected,

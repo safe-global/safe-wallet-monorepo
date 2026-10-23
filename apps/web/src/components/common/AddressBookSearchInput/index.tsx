@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactElement } from 'react'
 
-import SearchField from '@/components/common/SearchField'
+import SearchField from '@safe-global/views/components/common/SearchField'
 import { cn } from '@safe-global/views/utils/cn'
 
 interface AddressBookSearchInputProps {

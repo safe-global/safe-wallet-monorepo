@@ -4,13 +4,13 @@ import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 import { cn } from '@safe-global/views/utils/cn'
 import { ProgressTrack, ProgressIndicator } from '@safe-global/views/components/ui/progress'
 import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
-import Slider from './Slider'
+import Slider from '@safe-global/views/components/safe-apps/SafeAppsInfoModal/Slider'
 import AllowedFeaturesList from './AllowedFeaturesList'
 import type { AllowedFeatures, AllowedFeatureSelection } from '@safe-global/views/components/safe-apps/types'
 import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 import UnknownAppWarning from '@safe-global/views/components/safe-apps/SafeAppsInfoModal/UnknownAppWarning'
 import { getOrigin } from '../utils'
-import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
+import LegalDisclaimerContent from '@safe-global/views/components/common/LegalDisclaimerContent'
 
 type SafeAppsInfoModalProps = {
   onCancel: () => void

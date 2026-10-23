@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { AuditLog, AuditLogHeader, AuditRow } from './index'
+import { AuditLog, AuditLogHeader, AuditRow } from '@safe-global/views/components/common/AuditLog'
 
 /**
  * Rows reflow on a 300px container query against the AuditLog element, not the viewport, so the

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import Disclaimer from './index'
-import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
+import LegalDisclaimerContent from '@safe-global/views/components/common/LegalDisclaimerContent'
 
 const meta = {
   title: 'Components/Common/Disclaimer',
