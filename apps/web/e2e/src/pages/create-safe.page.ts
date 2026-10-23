@@ -8,6 +8,8 @@ import { type Page, type Locator } from '@playwright/test'
 
 // The success modal opens only once the deployment is mined and indexed
 const DEPLOYMENT_TIMEOUT_MS = 120_000
+// The relay option waits for the owners' relays, which a fork under load can take long to read
+const RELAYS_LOAD_TIMEOUT_MS = 60_000
 
 export class CreateSafePage {
   readonly nextButton: Locator
@@ -89,7 +91,7 @@ export class CreateSafePage {
         .filter({ hasText: switchWalletTo })
         .click()
     }
-    await this.relayMethod.click()
+    await this.relayMethod.click({ timeout: RELAYS_LOAD_TIMEOUT_MS })
     await this.confirmActivationButton.click()
     await this.letsGoButton.click({ timeout: DEPLOYMENT_TIMEOUT_MS })
   }
