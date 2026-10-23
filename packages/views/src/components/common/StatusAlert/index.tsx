@@ -16,6 +16,8 @@ const TONE_SEVERITIES = {
   info: 'info',
 } as const satisfies Record<Exclude<StatusAlertTone, 'loading'>, string>
 
+const TONE_VARIANTS = { ...TONE_SEVERITIES, loading: 'subtle' } as const satisfies Record<StatusAlertTone, string>
+
 const TONE_ICON_COLORS: Record<StatusAlertTone, string> = {
   error: 'text-destructive',
   warning: 'text-warning-accent',
@@ -24,12 +26,12 @@ const TONE_ICON_COLORS: Record<StatusAlertTone, string> = {
   loading: 'text-muted-foreground',
 }
 
-const TONE_SURFACES: Record<StatusAlertTone, string> = {
-  error: 'bg-alert-error-surface border-alert-error-border',
-  warning: 'bg-alert-warning-surface border-alert-warning-border',
-  success: 'bg-alert-success-surface border-alert-success-border',
-  info: 'bg-alert-info-surface border-alert-info-border',
-  loading: 'bg-muted border-border',
+const TONE_BORDERS: Record<StatusAlertTone, string> = {
+  error: 'border-destructive/30',
+  warning: 'border-warning-accent/30',
+  success: 'border-success-strong/30',
+  info: 'border-info-strong/30',
+  loading: 'border-border',
 }
 
 export type StatusAlertProps = {
@@ -44,7 +46,7 @@ export type StatusAlertProps = {
   'data-testid'?: string
 }
 
-/** An outlined banner: a tone icon, the text, and an optional dismiss or action. */
+/** A tinted banner: a tone icon, the text, and an optional dismiss or action. */
 const StatusAlert = ({
   tone,
   title,
@@ -59,7 +61,9 @@ const StatusAlert = ({
 
   return (
     <Alert
-      className={cn('flex items-center gap-4 rounded-lg px-4 py-3', TONE_SURFACES[tone], className)}
+      variant={TONE_VARIANTS[tone]}
+      outlined={false}
+      className={cn('flex items-center gap-4', TONE_BORDERS[tone], className)}
       role={tone === 'error' ? 'alert' : 'status'}
       aria-live={ariaLive}
       data-testid={testId}

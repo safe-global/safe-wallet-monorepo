@@ -13,7 +13,7 @@ describe('DismissibleCallout', () => {
       />,
     )
 
-    expect(screen.getByTestId('callout')).toHaveClass('bg-alert-warning-surface')
+    expect(screen.getByTestId('callout')).toHaveClass('bg-warning-subtle')
     expect(screen.getByText('Read this first.')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
@@ -29,6 +29,6 @@ describe('DismissibleCallout', () => {
   it('uses the tone it is given', () => {
     render(<DismissibleCallout tone="info" title="Tip" onDismiss={jest.fn()} data-testid="callout" />)
 
-    expect(screen.getByTestId('callout')).toHaveClass('bg-alert-info-surface')
+    expect(screen.getByTestId('callout')).toHaveClass('bg-[var(--color-info-background)]')
   })
 })

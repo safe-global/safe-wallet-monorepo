@@ -86,15 +86,6 @@
   --badge-dot-warning: #eab308; /* yellow-500 */
   --icon-brand: oklch(79.2% 0.209 151.711); /* green-400, both themes */
   --icon-hover: oklch(72.3% 0.219 149.579); /* green-500, both themes */
-  /* Obra "Alert / Light" banner (node 273:27982): Tailwind 50 surfaces with 200 borders. */
-  --alert-error-surface: #fef2f2;
-  --alert-error-border: #fecaca;
-  --alert-warning-surface: var(--warning-subtle);
-  --alert-warning-border: #fef08a;
-  --alert-success-surface: #f0fdf4;
-  --alert-success-border: #bbf7d0;
-  --alert-info-surface: #f0f9ff;
-  --alert-info-border: #bae6fd;
   --z-sidebar: 1300;
   --z-overlay: 1400;
   /* A dialog opened from inside another overlay (e.g. Rename from a modal or an open dropdown). Both
@@ -162,15 +153,6 @@
   --badge-warning-subtle: #301d02;
   --badge-warning-strong: #eab308; /* yellow-500 */
   --badge-dot-warning: #facc15; /* yellow-400 */
-  /* No dark spec for the Alert / Light banner: faint brand tints instead. */
-  --alert-error-surface: color-mix(in srgb, var(--color-error-main) 10%, transparent);
-  --alert-error-border: color-mix(in srgb, var(--color-error-main) 30%, transparent);
-  --alert-warning-surface: color-mix(in srgb, var(--color-warning-main) 10%, transparent);
-  --alert-warning-border: color-mix(in srgb, var(--color-warning-main) 30%, transparent);
-  --alert-success-surface: color-mix(in srgb, var(--color-success-main) 10%, transparent);
-  --alert-success-border: color-mix(in srgb, var(--color-success-main) 30%, transparent);
-  --alert-info-surface: color-mix(in srgb, var(--color-info-main) 10%, transparent);
-  --alert-info-border: color-mix(in srgb, var(--color-info-main) 30%, transparent);
 }
 
 @theme inline {
@@ -238,14 +220,6 @@
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);
-  --color-alert-error-surface: var(--alert-error-surface);
-  --color-alert-error-border: var(--alert-error-border);
-  --color-alert-warning-surface: var(--alert-warning-surface);
-  --color-alert-warning-border: var(--alert-warning-border);
-  --color-alert-success-surface: var(--alert-success-surface);
-  --color-alert-success-border: var(--alert-success-border);
-  --color-alert-info-surface: var(--alert-info-surface);
-  --color-alert-info-border: var(--alert-info-border);
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
