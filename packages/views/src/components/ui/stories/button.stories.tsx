@@ -17,7 +17,7 @@ const meta = {
     },
     size: {
       control: 'select',
-      options: ['default', 'xs', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
+      options: ['default', 'xs', '2xs', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
     },
     disabled: {
       control: 'boolean',
@@ -339,6 +339,14 @@ export const Guidelines: Story = {
                     "sm's box with a 12px label, for controls sitting beside body text",
                     <Button key="s-xs" size="xs">
                       Extra small
+                    </Button>,
+                  ],
+                  [
+                    '2xs',
+                    'h-6',
+                    'Persistent per-row action in a dense table; pair with a fixed w-* so a column of them aligns',
+                    <Button key="s-2xs" size="2xs" variant="outline">
+                      Execute
                     </Button>,
                   ],
                   [
