@@ -68,12 +68,12 @@ export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlist
 const isPendingDrawer = (props: AllowlistDrawerProps): props is PendingAllowlistDrawerProps =>
   props.policy.status !== 'active'
 
-/** Executed reads Pending rather than Activating: the change still waits out the guard's delay. */
+/** Executed reads Pending while it waits out the delay; replaced and deleted can never execute, so they read Failed. */
 const OUTCOME_STATUS: Record<AllowlistTxOutcome, PolicyStatus | null> = {
   executed: 'pending',
   failed: 'failed',
-  replaced: null,
-  deleted: null,
+  replaced: 'failed',
+  deleted: 'failed',
   expired: null,
 }
 
@@ -123,7 +123,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             />
           )}
           {state.kind === 'closed' &&
-            (outcome === 'failed' ? (
+            (status === 'failed' ? (
               <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ) : (
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />

@@ -206,14 +206,17 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
   })
 
-  it.each(['replaced', 'deleted'] as const)('reports a %s transaction with no failure alert or chip', (outcome) => {
+  it.each([
+    ['replaced', 'Another transaction used this nonce, so this one can no longer be executed.'],
+    ['deleted', 'The transaction was deleted.'],
+  ] as const)('reports a %s transaction in red and marks the policy as failed', (outcome, title) => {
     render(
       <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome={outcome} />,
     )
 
+    expect(screen.getByRole('alert')).toHaveTextContent(title)
     expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
-    expect(screen.queryByText('Failed')).not.toBeInTheDocument()
-    expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
     expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
