@@ -20,7 +20,6 @@ const creationModalLetsGoBtn = '[data-testid="cf-creation-lets-go-btn"]'
 const nextBtn = '[data-testid="next-btn"]'
 const backBtn = '[data-testid="back-btn"]'
 const cancelBtn = '[data-testid="cancel-btn"]'
-const safeActivationSection = '[data-testid="activation-section"]'
 export const addressAutocompleteOptions = '[data-testid="address-item"]'
 export const qrCode = '[data-testid="qr-code"]'
 export const addressInfo = '[data-testid="address-info"]'
@@ -145,10 +144,6 @@ export function checkAllTxTypesOrder(expectedOrder) {
 
 export function clickOnTxType(tx) {
   cy.get(choiceBtn).contains(tx).click()
-}
-
-export function verifyCFSafeCreated() {
-  main.verifyElementsIsVisible([sidebar.pendingActivationIcon, safeActivationSection])
 }
 
 export function selectRelayOption() {
@@ -445,17 +440,6 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
       checkNetworkLogo(network)
     })
   })
-}
-
-export function visitWelcomeAccountPage(chain = 'sep') {
-  cy.visit(`${constants.welcomeAccountUrl}?chain=${chain}`)
-  cy.wait(2000)
-}
-
-export function connectWalletAndCreateSafe(signer) {
-  wallet.connectSignerViaStorage(signer)
-  owner.waitForConnectionStatus()
-  clickOnCreateNewSafeBtn()
 }
 
 /** Opens the create-Safe form with the wallet connected first, so the form preselects the wallet's network. */

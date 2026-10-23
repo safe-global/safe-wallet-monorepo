@@ -898,16 +898,6 @@ export const addedSafes = {
       },
     },
   }),
-  /** Nested safes: parent safe SEP_STATIC_SAFE_39 on Sepolia */
-  nestedParentSafe39: aliasedStorage({
-    11155111: {
-      '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
   /** Nested safes: parent safe SEP_STATIC_SAFE_45 on Sepolia */
   nestedParentSafe45: aliasedStorage({
     11155111: {

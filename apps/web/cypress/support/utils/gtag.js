@@ -24,14 +24,6 @@ export const checkDataLayerEvents = (expectedEvents) => {
 }
 
 export const events = {
-  safeCreatedCF: {
-    category: 'create-safe',
-    action: 'Created Safe',
-    eventName: 'safe_created',
-    eventLabel: 'counterfactual',
-    eventType: 'safe_created',
-  },
-
   txCreatedSwapOwner: {
     category: 'transactions',
     action: 'Create transaction',

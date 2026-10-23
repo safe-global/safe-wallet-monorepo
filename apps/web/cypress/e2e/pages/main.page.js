@@ -458,19 +458,6 @@ export function verifyAppLocalStorageItemEquals(key, expectedValue) {
     })
 }
 
-const addedSafesOnChain = (win, chainId) =>
-  Object.keys(JSON.parse(win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes))?.[chainId] ?? {})
-
-/** Yields the address of the added Safe at `index` on the chain, after the app stores it. */
-export function getAddedSafeAddressFromLocalStorage(chainId, index) {
-  return cy
-    .window()
-    .should((win) => {
-      expect(addedSafesOnChain(win, chainId), `added Safes on chain ${chainId}`).to.have.length.above(index)
-    })
-    .then((win) => addedSafesOnChain(win, chainId)[index])
-}
-
 export function changeSafeChainName(originalChain, newChain) {
   return originalChain.replace(/^[^:]+:/, newChain + ':')
 }

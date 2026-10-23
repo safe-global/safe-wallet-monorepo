@@ -12,6 +12,7 @@ export const playwrightSpecs = {
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
+  'e2e/create-safe.spec.ts': {},
   'e2e/delete.spec.ts': {},
   'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
@@ -82,4 +83,5 @@ export const playwrightSpecs = {
   'e2e/walletconnect.spec.ts': {},
   'e2e/walletconnect-nested-signer.spec.ts': {},
   'e2e/nested-signer.spec.ts': {},
+  'e2e/nested-safe-create.spec.ts': {},
 }
