@@ -36,13 +36,17 @@ jest.mock('@/services/tx/tx-sender', () => ({
   createMultiSendCallOnlyTx: jest.fn(),
 }))
 
+type DetailsQueryArgs = { chainId: string; txIds: string[] }
+type DetailsQueryResult = { data: TransactionDetails[]; error: undefined; isLoading: boolean }
 let mockTxDetails: TransactionDetails[] = []
+const mockGetMultipleTransactionDetails = jest.fn<DetailsQueryResult, [DetailsQueryArgs]>(() => ({
+  data: mockTxDetails,
+  error: undefined,
+  isLoading: false,
+}))
 jest.mock('@safe-global/store/gateway/transactions', () => ({
-  useTransactionsGetMultipleTransactionDetailsQuery: () => ({
-    data: mockTxDetails,
-    error: undefined,
-    isLoading: false,
-  }),
+  useTransactionsGetMultipleTransactionDetailsQuery: (args: DetailsQueryArgs) =>
+    mockGetMultipleTransactionDetails(args),
 }))
 
 const MULTI_SEND = { multiSendContract: {}, multiSendContractAddress: '0x0000000000000000000000000000000000000003' }
@@ -148,18 +152,25 @@ const submit = async () => {
 
 const ONE_ETH = '1000000000000000000'
 
-const nativeTransfer = (): TransactionDetails =>
+const queuedTx = (txId: string, nonce: number) => {
+  const tx = getMockTx({ nonce })
+  return { ...tx, transaction: { ...tx.transaction, id: txId } }
+}
+
+const nativeTransfer = (txId: string): TransactionDetails =>
   transactionDetailsBuilder()
     .with({
+      txId,
       txData: transactionDataBuilder()
         .with({ to: { value: checksumAddress(faker.finance.ethereumAddress()) }, value: ONE_ETH })
         .build(),
     })
     .build()
 
-const removeOwnerTx = (): TransactionDetails =>
+const removeOwnerTx = (txId: string): TransactionDetails =>
   transactionDetailsBuilder()
     .with({
+      txId,
       txInfo: {
         type: TransactionInfoType.CUSTOM,
         to: { value: checksumAddress(faker.finance.ethereumAddress()) },
@@ -197,14 +208,30 @@ describe('ReviewBatch', () => {
   })
 
   describe('batched transactions', () => {
+    const transferId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const removeOwnerId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+
+    const renderQueuedBatch = () =>
+      render(<ReviewBatch params={{ txs: [queuedTx(transferId, 1), queuedTx(removeOwnerId, 2)] }} />)
+
     beforeEach(() => {
       const { default: RealDecodedTxs } = jest.requireActual<{ default: typeof DecodedTxs }>('../DecodedTxs')
       mockDecodedTxs.mockImplementation((props) => <RealDecodedTxs {...props} />)
-      mockTxDetails = [nativeTransfer(), removeOwnerTx()]
+      mockTxDetails = [nativeTransfer(transferId), removeOwnerTx(removeOwnerId)]
+    })
+
+    it('requests the details of the queued transactions in queue order', async () => {
+      renderQueuedBatch()
+
+      await screen.findAllByTestId('action-item')
+
+      expect(mockGetMultipleTransactionDetails).toHaveBeenLastCalledWith(
+        expect.objectContaining({ txIds: [transferId, removeOwnerId] }),
+      )
     })
 
     it('tells the user how many queued transactions the batch executes', async () => {
-      renderReviewBatch()
+      renderQueuedBatch()
 
       expect(
         await screen.findByText(/This transaction batches a total of 2 transactions from your queue/),
@@ -212,7 +239,7 @@ describe('ReviewBatch', () => {
     })
 
     it('lists one numbered action for each queued transaction', async () => {
-      renderReviewBatch()
+      renderQueuedBatch()
 
       const rows = await screen.findAllByTestId('action-item')
 
