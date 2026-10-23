@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/decorators'
 import MultiAccountContextMenu from './MultiAccountContextMenu'
 
 const MOCK_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
@@ -18,6 +19,7 @@ const meta = {
         </div>
       </div>
     ),
+    withMockProvider(),
   ],
   tags: ['autodocs'],
   argTypes: {
