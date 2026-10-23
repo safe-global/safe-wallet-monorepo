@@ -5,6 +5,7 @@ import {
   mockActivatingAllowlist,
   mockAllowlistChangePending,
   mockCgwAllowlist,
+  mockCgwUncoveredAllowlist,
   mockCgwUnenforcedAllowlist,
   mockExpiredPendingAllowlist,
   mockFailedAllowlist,
@@ -53,9 +54,13 @@ export const ActiveSigner: Story = {}
 
 export const ActiveJustActivated: Story = { args: { justActivated: true } }
 
-export const ActiveSpendingLimitsNotCovered: Story = { args: { uncoveredSpendingLimitCount: 2 } }
+export const ActiveSpendingLimitsNotCovered: Story = {
+  args: { policy: mockCgwUncoveredAllowlist(), uncoveredSpendingLimitCount: 2 },
+}
 
-export const ActiveOneSpendingLimitNotCovered: Story = { args: { uncoveredSpendingLimitCount: 1 } }
+export const ActiveOneSpendingLimitNotCovered: Story = {
+  args: { policy: mockCgwUncoveredAllowlist(), uncoveredSpendingLimitCount: 1 },
+}
 
 export const ActiveNoWallet: Story = { args: { viewer: MOCK_VIEWERS.disconnected } }
 
