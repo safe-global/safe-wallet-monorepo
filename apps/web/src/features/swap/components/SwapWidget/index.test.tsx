@@ -124,16 +124,28 @@ describe('SwapWidget', () => {
       expect(screen.queryByTestId('cow-swap-widget')).not.toBeInTheDocument()
     })
 
-    it('blocks swaps once the user picks a sanctioned recipient in the widget', () => {
-      const recipient = faker.finance.ethereumAddress()
-      sanction(recipient)
+    it.each([UiOrderType.SWAP, UiOrderType.LIMIT, UiOrderType.TWAP])(
+      'blocks swaps once the user picks a sanctioned recipient for a %s order',
+      (orderType) => {
+        const recipient = faker.finance.ethereumAddress()
+        sanction(recipient)
+        renderAcceptedWidget()
+
+        emit(CowWidgetEvents.ON_CHANGE_TRADE_PARAMS, tradeParams({ orderType, recipient }))
+
+        expect(screen.getByText('Blocked address')).toBeInTheDocument()
+        expect(screen.getByText(recipient)).toBeInTheDocument()
+        expect(screen.queryByTestId('cow-swap-widget')).not.toBeInTheDocument()
+      },
+    )
+
+    it('keeps the widget for a recipient that is not sanctioned', () => {
       renderAcceptedWidget()
 
-      emit(CowWidgetEvents.ON_CHANGE_TRADE_PARAMS, tradeParams({ recipient }))
+      emit(CowWidgetEvents.ON_CHANGE_TRADE_PARAMS, tradeParams({ recipient: faker.finance.ethereumAddress() }))
 
-      expect(screen.getByText('Blocked address')).toBeInTheDocument()
-      expect(screen.getByText(recipient)).toBeInTheDocument()
-      expect(screen.queryByTestId('cow-swap-widget')).not.toBeInTheDocument()
+      expect(screen.queryByText('Blocked address')).not.toBeInTheDocument()
+      expect(screen.getByTestId('cow-swap-widget')).toBeInTheDocument()
     })
   })
 
