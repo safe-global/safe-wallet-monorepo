@@ -2,9 +2,14 @@ import { renderHook } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSpendingLimitTokenOptions from '../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import useHeldTokenAddresses from '../useHeldTokenAddresses'
 
 jest.mock('../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions')
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
+  useSafeScope: jest.fn(),
+}))
 
 const mockOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 
@@ -36,6 +41,10 @@ const read = (overrides: Partial<ReturnType<typeof useSpendingLimitTokenOptions>
 }
 
 describe('useHeldTokenAddresses', () => {
+  beforeEach(() => {
+    ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: '11155111' })
+  })
+
   it('returns only the held tokens as addresses and keeps every option', () => {
     const options = [option(ZERO_ADDRESS, 'held'), option(USDC, 'held'), option(DAI, 'popular')]
     read({ options })
@@ -44,6 +53,26 @@ describe('useHeldTokenAddresses', () => {
 
     expect(result.current.addresses).toEqual([ZERO_ADDRESS, USDC])
     expect(result.current.options).toEqual(options)
+  })
+
+  it('drops the native token on a chain without a native transfer policy', () => {
+    ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: '1' })
+    read({ options: [option(ZERO_ADDRESS, 'held'), option(USDC, 'held')] })
+
+    const { result } = renderHook(() => useHeldTokenAddresses())
+
+    expect(result.current.addresses).toEqual([USDC])
+    expect(result.current.options.map(({ address }) => address)).toEqual([USDC])
+  })
+
+  it('keeps the native token on a chain with a native transfer policy', () => {
+    ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: '11155111' })
+    read({ options: [option(ZERO_ADDRESS, 'held'), option(USDC, 'held')] })
+
+    const { result } = renderHook(() => useHeldTokenAddresses())
+
+    expect(result.current.addresses).toEqual([ZERO_ADDRESS, USDC])
+    expect(result.current.options.map(({ address }) => address)).toEqual([ZERO_ADDRESS, USDC])
   })
 
   it('passes loading, error and retry through', () => {
