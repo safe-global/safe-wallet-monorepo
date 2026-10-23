@@ -4,9 +4,13 @@ import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { isAddress, isHexString, toQuantity } from 'ethers'
 import { localUrl } from './local-stack.mjs'
+import { configuration, readManifest } from './run.mjs'
+
+// The Transaction Builder, the wallet served locally (e2e:env default port) and the wallet served in CI.
+const allowedOrigins = new Set(['http://localhost:4000', 'http://localhost:3080', 'http://localhost:8080'])
 
 const isSafeExecution = (payload) =>
-  payload.network_id === '11155111' &&
+  typeof payload.network_id === 'string' &&
   isAddress(payload.from) &&
   isAddress(payload.to) &&
   isHexString(payload.input) &&
@@ -30,7 +34,7 @@ function stateOverride(address, { storage = {}, balance, code }) {
 /** Turns a Tenderly simulation request for execTransaction into eth_call params with state overrides. */
 export function simulationParams(payload) {
   if (!isSafeExecution(payload)) {
-    throw new Error('Simulation requires a Sepolia transaction with valid addresses, calldata and gas')
+    throw new Error('Simulation requires a Safe transaction with valid addresses, calldata and gas')
   }
   const overrides = Object.fromEntries(
     Object.entries(payload.state_objects || {}).map(([address, state]) => [address, stateOverride(address, state)]),
@@ -72,39 +76,58 @@ async function ethCall(rpc, params) {
   return { reverted, result }
 }
 
-// The shape of a Tenderly simulation that the Transaction Builder reads.
-function simulationResponse({ reverted, result }, to) {
+// The shape of a Tenderly simulation that the Transaction Builder and the wallet read.
+function simulationResponse({ reverted, result }, { to, input }) {
+  const id = `anvil-${randomUUID()}`
   const status = !reverted && result.result !== `0x${'0'.repeat(64)}`
-  const failure = {
-    error_message: result.error?.message || 'Safe execution returned false',
-    error_info: { address: to },
-  }
+  if (status) return { simulation: { id, status }, transaction: { status, call_trace: [] } }
+  const error = result.error?.message || 'Safe execution returned false'
   return {
-    simulation: { id: `anvil-${randomUUID()}`, status },
-    transaction: { status, ...(status ? {} : failure) },
+    simulation: { id, status },
+    transaction: { status, error_message: error, error_info: { address: to }, call_trace: [{ error, input }] },
   }
 }
 
-export function createSimulationServer(rpcUrl) {
-  const rpc = localUrl(rpcUrl, 'Simulation RPC')
+/** The RPC URL of every fork in a stack manifest, keyed by chain ID as Tenderly's `network_id`. */
+export function forkRpcUrls(manifest) {
+  const forks = [manifest, ...Object.values(manifest.chains ?? {})]
+  return Object.fromEntries(forks.map(({ chainId, rpcUrl }) => [String(chainId), rpcUrl]))
+}
+
+function allowOrigin(request, response) {
+  const { origin } = request.headers
+  if (!origin) return true
+  if (!allowedOrigins.has(origin)) return false
+  response.setHeader('Access-Control-Allow-Origin', origin)
+  response.setHeader('Vary', 'Origin')
+  return true
+}
+
+export function createSimulationServer(rpcUrls) {
+  const rpcs = Object.fromEntries(
+    Object.entries(rpcUrls).map(([chainId, url]) => [chainId, localUrl(url, `Chain ${chainId} simulation RPC`)]),
+  )
   return createServer(async (request, response) => {
-    response.setHeader('Access-Control-Allow-Origin', 'http://localhost:4000')
+    response.setHeader('Content-Type', 'application/json')
+    if (!allowOrigin(request, response)) return response.writeHead(403).end()
     response.setHeader('Access-Control-Allow-Headers', 'content-type')
     response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    response.setHeader('Content-Type', 'application/json')
     if (request.method === 'OPTIONS') return response.writeHead(204).end()
     if (request.method !== 'POST' || request.url !== '/simulate') return response.writeHead(404).end()
     let payload
     let params
+    let rpc
     try {
       payload = await readJsonBody(request)
       params = simulationParams(payload)
+      rpc = rpcs[payload.network_id]
+      if (!rpc) throw new Error(`No fork runs chain ${payload.network_id}`)
     } catch (error) {
       console.error(`Rejected simulation request: ${error.message}`)
       return response.writeHead(400).end(JSON.stringify({ error: 'Invalid simulation request' }))
     }
     try {
-      response.end(JSON.stringify(simulationResponse(await ethCall(rpc, params), payload.to)))
+      response.end(JSON.stringify(simulationResponse(await ethCall(rpc, params), payload)))
     } catch (error) {
       console.error(`Local simulation failed: ${error.message}`)
       response.writeHead(502).end(JSON.stringify({ error: 'Local Anvil simulation failed' }))
@@ -113,7 +136,8 @@ export function createSimulationServer(rpcUrl) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const server = createSimulationServer(process.env.SAFE_RPC_URL)
+  const { infrastructure, project } = configuration([])
+  const server = createSimulationServer(forkRpcUrls(await readManifest(infrastructure, project)))
   server.listen(4003, '127.0.0.1', () => console.log('Local simulation adapter: http://localhost:4003/simulate'))
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close())
 }

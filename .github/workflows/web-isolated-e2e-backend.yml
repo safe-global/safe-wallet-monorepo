@@ -81,6 +81,9 @@ jobs:
           NEXT_PUBLIC_GATEWAY_URL_STAGING: http://localhost:8000/cgw
           NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: http://localhost:8000/cgw
           NEXT_PUBLIC_LEDGER_EMULATOR_URL: http://localhost:9555
+          NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: http://localhost:4003/simulate
+          NEXT_PUBLIC_TENDERLY_ORG_NAME: safe
+          NEXT_PUBLIC_TENDERLY_PROJECT_NAME: safe-apps
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
 
       - name: Build Transaction Builder for local CGW
@@ -186,9 +189,10 @@ jobs:
           nohup yarn workspace @safe-global/tx-builder exec \
             vite preview --config vite.config.ts --host localhost --strictPort \
             > "$RUNNER_TEMP/tx-builder.log" 2>&1 &
-          SAFE_RPC_URL=http://localhost:8545 nohup node apps/web/e2e/environment/simulation.mjs \
+          nohup node apps/web/e2e/environment/simulation.mjs \
             > "$RUNNER_TEMP/simulation.log" 2>&1 &
           timeout 60 bash -c 'until curl -sf http://localhost:4000 > /dev/null; do sleep 2; done'
+          timeout 30 bash -c 'until curl -sf -X OPTIONS http://localhost:4003/simulate > /dev/null; do sleep 1; done'
 
       - name: Run isolated Cypress shard
         if: matrix.runner == 'cypress'
