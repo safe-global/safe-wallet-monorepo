@@ -132,6 +132,8 @@ export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPoli
 export type AllowlistPolicy = PolicyBase & {
   type: 'allowlist'
   data: AllowlistPolicyData
+  /** Whether the guard also checks module transactions, such as spending limits. */
+  spendingLimitsCovered: boolean
   scheduledChange?: AllowlistScheduledChange
 }
 
