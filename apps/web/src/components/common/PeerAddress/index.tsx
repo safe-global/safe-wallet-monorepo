@@ -7,10 +7,7 @@ import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 
 const iconButtonClassName = 'inline-flex shrink-0 cursor-pointer rounded p-0.5 transition-colors hover:bg-background/15'
 
-/**
- * Full address with inline copy (and an optional explorer link) for dark look-alike tooltips. Bare controls,
- * not CopyAddressButton/ExplorerButton — their hover tint and nested Tooltip are both wrong inside a dark tooltip.
- */
+// Bare controls: CopyAddressButton/ExplorerButton's hover tint and nested Tooltip break inside a dark tooltip.
 const PeerAddress = ({
   address,
   prefixLen = 0,
@@ -18,9 +15,8 @@ const PeerAddress = ({
   explorerLink,
 }: {
   address: string
-  /** Leading hex chars (after `0x`) to bold — the part a look-alike shares. */
+  /** Hex chars after `0x` to bold. */
   prefixLen?: number
-  /** Trailing hex chars to bold. */
   suffixLen?: number
   explorerLink?: { href: string; title: string }
 }): ReactElement => {
@@ -32,7 +28,7 @@ const PeerAddress = ({
         <HighlightedAddress address={address} prefixLen={prefixLen} suffixLen={suffixLen} />
       </span>
       <button type="button" aria-label="Copy address" className={iconButtonClassName} onClick={() => copy(address)}>
-        {copied ? <Check className="size-3 text-green-500" /> : <Copy className="size-3" />}
+        {copied ? <Check className="size-3 text-success-strong" /> : <Copy className="size-3" />}
       </button>
       {explorerLink && (
         <a

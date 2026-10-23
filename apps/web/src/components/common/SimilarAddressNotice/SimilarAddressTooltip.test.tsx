@@ -1,6 +1,6 @@
 import userEvent from '@testing-library/user-event'
 import { faker } from '@faker-js/faker'
-import { render, screen, fakerChecksummedAddress } from '@/tests/test-utils'
+import { render, screen, fakerChecksummedAddress, fakerLookalikeAddress } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
@@ -8,14 +8,12 @@ import { SimilarAddressTooltip } from '.'
 
 jest.mock('@/hooks/useChains')
 const mockUseCurrentChain = jest.requireMock('@/hooks/useChains').useCurrentChain as jest.Mock
-
-const lookalikeOf = (address: string) =>
-  `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '', casing: 'lower' })}${address.slice(-4)}`
+const mockUseChain = jest.requireMock('@/hooks/useChains').useChain as jest.Mock
 
 describe('SimilarAddressTooltip', () => {
   const name = faker.company.name()
   const savedAddress = fakerChecksummedAddress()
-  const enteredAddress = lookalikeOf(savedAddress)
+  const enteredAddress = fakerLookalikeAddress(savedAddress)
   const chain = chainBuilder().build()
 
   beforeEach(() => {
@@ -23,8 +21,15 @@ describe('SimilarAddressTooltip', () => {
     mockUseCurrentChain.mockReturnValue(chain)
   })
 
-  const hoverName = async () => {
-    render(<SimilarAddressTooltip name={name} savedAddress={savedAddress} enteredAddress={enteredAddress} />)
+  const hoverName = async (chainId?: string) => {
+    render(
+      <SimilarAddressTooltip
+        name={name}
+        savedAddress={savedAddress}
+        enteredAddress={enteredAddress}
+        chainId={chainId}
+      />,
+    )
     await userEvent.hover(screen.getByText(name))
     return screen.findByText('Address entered:')
   }
@@ -57,5 +62,28 @@ describe('SimilarAddressTooltip', () => {
       getBlockExplorerLink(chain, enteredAddress)?.href,
       getBlockExplorerLink(chain, savedAddress)?.href,
     ])
+  })
+
+  it('links to the block explorer of the given chain', async () => {
+    const otherChain = chainBuilder().build()
+    mockUseChain.mockReturnValue(otherChain)
+
+    await hoverName(otherChain.chainId)
+
+    expect(mockUseChain).toHaveBeenCalledWith(otherChain.chainId)
+    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'))
+    expect(hrefs).toEqual([
+      getBlockExplorerLink(otherChain, enteredAddress)?.href,
+      getBlockExplorerLink(otherChain, savedAddress)?.href,
+    ])
+  })
+
+  it('opens on keyboard focus', async () => {
+    render(<SimilarAddressTooltip name={name} savedAddress={savedAddress} enteredAddress={enteredAddress} />)
+
+    await userEvent.tab()
+
+    expect(screen.getByRole('button', { name })).toHaveFocus()
+    expect(await screen.findByText('Address entered:')).toBeInTheDocument()
   })
 })

@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 
 export { SimilarAddressTooltip } from './SimilarAddressTooltip'
 
-/** Red one-liner under an address field or file summary, e.g. "This address is similar to <name> in …". */
 export const SimilarAddressNotice = ({ children }: { children: ReactNode }): ReactElement => (
   <Alert variant="destructive" outlined={false}>
     <AlertSeverityIcon variant="destructive" />
