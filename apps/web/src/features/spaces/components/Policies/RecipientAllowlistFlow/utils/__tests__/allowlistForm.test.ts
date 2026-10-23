@@ -201,6 +201,18 @@ describe('allowlistForm', () => {
       ).toEqual([{ ...listed, name: 'Alice', selected: true }])
     })
 
+    it('adds a recipient repeated in the batch only once', () => {
+      const added = recipient({ name: 'Alice' })
+
+      expect(addAllowlistRecipients([], [added, { ...added, address: added.address.toLowerCase() }])).toEqual([added])
+    })
+
+    it('selects every new recipient', () => {
+      const added = recipient({ selected: false })
+
+      expect(addAllowlistRecipients([], [added])).toEqual([{ ...added, selected: true }])
+    })
+
     it('keeps the name a listed recipient already has', () => {
       const listed = recipient({ name: 'Alice', selected: false })
 
