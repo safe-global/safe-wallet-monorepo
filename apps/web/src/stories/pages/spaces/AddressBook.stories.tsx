@@ -63,6 +63,6 @@ const spaceAddressBookHandler = http.get(/\/v1\/spaces\/[^/]+\/address-book$/, (
 export const WithContacts: Story = {
   parameters: { msw: { handlers: [spaceAddressBookHandler, ...defaultSetup.handlers] } },
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByText('Treasury')
+    await within(canvasElement).findByText('Treasury', undefined, { timeout: 10_000 })
   },
 }

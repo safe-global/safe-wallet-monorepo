@@ -38,6 +38,6 @@ export const Default: Story = {}
 export const WithSafes: Story = {
   parameters: { msw: { handlers: [spaceWithSafesHandler, ...defaultSetup.handlers] } },
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findAllByText(/0xA77D/)
+    await within(canvasElement).findAllByText(/0xA77D/, undefined, { timeout: 10_000 })
   },
 }

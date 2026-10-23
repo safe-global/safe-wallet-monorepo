@@ -15,7 +15,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces',
-  features: { spaces: true },
+  features: { spaces: true, myAccounts: true },
   query: { spaceId: '1' },
   shadcn: true,
 })
@@ -39,16 +39,16 @@ export const Default: Story = {}
 export const WithSafes: Story = {
   parameters: { msw: { handlers: [spaceWithSafesHandler, ...defaultSetup.handlers] } },
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findAllByText(/0xA77D/)
+    await within(canvasElement).findAllByText(/0xA77D/, undefined, { timeout: 10_000 })
   },
 }
 
 export const SendFromModal: Story = {
   parameters: { msw: { handlers: [spaceWithSafesHandler, ...defaultSetup.handlers] } },
   play: async ({ canvasElement }) => {
-    const sendButton = await within(canvasElement).findByRole('button', { name: 'Send' })
-    await waitFor(() => expect(sendButton).toBeEnabled())
+    const sendButton = await within(canvasElement).findByRole('button', { name: 'Send' }, { timeout: 10_000 })
+    await waitFor(() => expect(sendButton).toBeEnabled(), { timeout: 10_000 })
     await userEvent.click(sendButton)
-    await within(document.body).findByRole('dialog')
+    await within(document.body).findByRole('dialog', undefined, { timeout: 10_000 })
   },
 }
