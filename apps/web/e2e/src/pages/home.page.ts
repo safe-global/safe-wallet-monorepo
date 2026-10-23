@@ -19,6 +19,8 @@ export class HomePage {
   readonly pendingTxRows: Locator
   readonly viewAllLink: Locator
   readonly swapBtn: Locator
+  /** "Top positions"; hidden while the Safe has no positions */
+  readonly positionsWidget: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -29,6 +31,7 @@ export class HomePage {
     this.pendingTxRows = this.pendingTxWidget.getByTestId('tx-pending-item')
     this.viewAllLink = page.getByRole('link', { name: /view all/i })
     this.swapBtn = page.getByRole('button', { name: /swap/i })
+    this.positionsWidget = page.getByTestId('positions-widget')
   }
 
   /** Navigate to dashboard for a given Safe address */
