@@ -1,7 +1,14 @@
 import type { ReactElement } from 'react'
 import { faker } from '@faker-js/faker'
-import { getAddress } from 'ethers'
-import { fakerChecksummedAddress, fireEvent, render, screen, waitFor, within } from '@/tests/test-utils'
+import {
+  fakerChecksummedAddress,
+  fakerLookalikeAddress,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
 import * as analytics from '@/services/analytics'
 import * as addressBookSlice from '@/store/addressBookSlice'
@@ -33,15 +40,12 @@ jest.mock('react-papaparse', () => {
   return { ...jest.requireActual('react-papaparse'), useCSVReader: () => ({ CSVReader: MockCSVReader }) }
 })
 
-const lookalikeOf = (address: string) =>
-  getAddress(
-    `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '' })}${address.slice(-4)}`.toLowerCase(),
-  )
-
 describe('ImportDialog look-alike check', () => {
   const contact = fakerChecksummedAddress()
-  const lookalike = lookalikeOf(contact)
+  const lookalike = fakerLookalikeAddress(contact)
   const clean = fakerChecksummedAddress()
+  const lookalikeName = faker.company.name()
+  const cleanName = faker.company.name()
   const initialReduxState = { addressBook: { '1': { [contact]: faker.person.fullName() } } } as Partial<RootState>
 
   beforeEach(() => {
@@ -51,8 +55,8 @@ describe('ImportDialog look-alike check', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     mockCsvRows = [
       ['address', 'name', 'chainId'],
-      [lookalike, 'Vendor A', '1'],
-      [clean, 'Payroll', '1'],
+      [lookalike, lookalikeName, '1'],
+      [clean, cleanName, '1'],
     ]
   })
 
@@ -91,7 +95,7 @@ describe('ImportDialog look-alike check', () => {
   it('imports straight away when no address looks like another', async () => {
     mockCsvRows = [
       ['address', 'name', 'chainId'],
-      [clean, 'Payroll', '1'],
+      [clean, cleanName, '1'],
     ]
     const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
     renderDialog()
@@ -99,6 +103,36 @@ describe('ImportDialog look-alike check', () => {
     fireEvent.click(await screen.findByTestId('import-btn'))
 
     await waitFor(() => expect(importedAddresses(spy)).toEqual([clean]))
+    expect(screen.queryByRole('dialog', { name: 'Similar addresses detected' })).not.toBeInTheDocument()
+  })
+
+  it('keeps a saved address in the file when skipping the look-alike that imitates it', async () => {
+    mockCsvRows = [
+      ['address', 'name', 'chainId'],
+      [contact, faker.company.name(), '1'],
+      [lookalike, lookalikeName, '1'],
+    ]
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog()
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '1 address in this file looks similar to other addresses.',
+    )
+    fireEvent.click(await screen.findByTestId('import-btn'))
+    fireEvent.click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() => expect(importedAddresses(spy)).toEqual([contact]))
+  })
+
+  it('imports straight away when the ADDRESS_POISONING_PROTECTION flag is off', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog()
+
+    fireEvent.click(await screen.findByTestId('import-btn'))
+
+    await waitFor(() => expect(importedAddresses(spy)).toEqual([lookalike, clean]))
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog', { name: 'Similar addresses detected' })).not.toBeInTheDocument()
   })
 

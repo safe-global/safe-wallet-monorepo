@@ -1,6 +1,13 @@
 import { faker } from '@faker-js/faker'
-import { getAddress } from 'ethers'
-import { fakerChecksummedAddress, fireEvent, render, screen, waitFor, within } from '@/tests/test-utils'
+import {
+  fakerChecksummedAddress,
+  fakerLookalikeAddress,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
 import * as analytics from '@/services/analytics'
 import { ADDRESS_POISONING_EVENTS, MixpanelEventParams } from '@/services/analytics'
@@ -139,9 +146,7 @@ describe('EntryDialog scope', () => {
 describe('EntryDialog look-alike warning', () => {
   const contact = fakerChecksummedAddress()
   const contactName = faker.person.fullName()
-  const lookalike = getAddress(
-    `0x${contact.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '' })}${contact.slice(-4)}`.toLowerCase(),
-  )
+  const lookalike = fakerLookalikeAddress(contact)
   const initialReduxState = { addressBook: { '1': { [contact]: contactName } } } as Partial<RootState>
 
   beforeEach(() => {
@@ -159,7 +164,7 @@ describe('EntryDialog look-alike warning', () => {
   const save = async () => {
     const field = screen.getByTestId('name-input')
     const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
-    fireEvent.change(input, { target: { value: 'Treasury ops' } })
+    fireEvent.change(input, { target: { value: faker.company.name() } })
     await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
     fireEvent.click(screen.getByTestId('save-btn'))
   }
@@ -208,6 +213,23 @@ describe('EntryDialog look-alike warning', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     await save()
     await waitFor(() => expect(spy).toHaveBeenCalled())
+  })
+
+  it('does not warn when renaming a Workspace Safe', () => {
+    ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(jest.fn().mockResolvedValue({}))
+
+    render(
+      <EntryDialog
+        handleClose={jest.fn()}
+        chainIds={['1']}
+        defaultValues={{ name: faker.company.name(), address: lookalike }}
+        scope="workspace"
+        disableAddressInput
+      />,
+      { initialReduxState },
+    )
+
+    expect(screen.queryByText(/is similar to/)).not.toBeInTheDocument()
   })
 
   it('does not warn when the ADDRESS_POISONING_PROTECTION flag is off', () => {

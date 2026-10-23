@@ -1,10 +1,17 @@
 import { faker } from '@faker-js/faker'
-import { getAddress } from 'ethers'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { fakerChecksummedAddress, fireEvent, render, screen, waitFor, within } from '@/tests/test-utils'
+import {
+  fakerChecksummedAddress,
+  fakerLookalikeAddress,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
 import * as analytics from '@/services/analytics'
 import { ADDRESS_POISONING_EVENTS, MixpanelEventParams } from '@/services/analytics'
@@ -12,15 +19,10 @@ import type { RootState } from '@/store'
 import { loadSafeDefaultData } from '@/components/new-safe/load'
 import SetAddressStep from '..'
 
-const lookalikeOf = (address: string) =>
-  getAddress(
-    `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '' })}${address.slice(-4)}`.toLowerCase(),
-  )
-
 describe('SetAddressStep look-alike check', () => {
   const safe = fakerChecksummedAddress()
   const safeName = faker.company.name()
-  const lookalike = lookalikeOf(safe)
+  const lookalike = fakerLookalikeAddress(safe)
   const initialReduxState = {
     addressBook: { '1': { [safe]: safeName } },
     addedSafes: { '1': { [safe]: { owners: [], threshold: 1 } } },
@@ -40,7 +42,7 @@ describe('SetAddressStep look-alike check', () => {
   const renderStep = (address: string) =>
     render(
       <SetAddressStep
-        data={{ ...loadSafeDefaultData, address, name: 'Treasury Safe 2' }}
+        data={{ ...loadSafeDefaultData, address, name: faker.company.name() }}
         onSubmit={onSubmit}
         onBack={jest.fn()}
         setStep={jest.fn()}
@@ -69,6 +71,7 @@ describe('SetAddressStep look-alike check', () => {
 
     await clickNext()
     const dialog = await confirmDialog()
+    expect(within(dialog).getByText('Safe account')).toBeInTheDocument()
     expect(onSubmit).not.toHaveBeenCalled()
 
     fireEvent.click(within(dialog).getByText(/I understand, continue anyway/))
@@ -94,6 +97,16 @@ describe('SetAddressStep look-alike check', () => {
     await clickNext()
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('goes straight to the next step when the ADDRESS_POISONING_PROTECTION flag is off', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+    renderStep(lookalike)
+
+    await clickNext()
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ address: lookalike })))
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
