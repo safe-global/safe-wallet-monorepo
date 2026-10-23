@@ -105,7 +105,13 @@ const HypernativeOAuthCallback: NextPage = () => {
         }
 
         // Step 6: Store token in cookie
-        setToken(tokenResponse.access_token, tokenResponse.token_type, tokenResponse.expires_in)
+        setToken(
+          tokenResponse.access_token,
+          tokenResponse.token_type,
+          tokenResponse.expires_in,
+          tokenResponse.refresh_token,
+          tokenResponse.refresh_expires_in,
+        )
 
         // Step 7: Clean up sessionStorage
         clearPkce()
