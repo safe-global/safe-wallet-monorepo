@@ -27,6 +27,11 @@ export const getAllowedTokenAddresses = (
 export const getSelectedRecipients = (values: RecipientAllowlistFormValues): AllowlistRecipient[] =>
   values.recipients.filter((recipient) => recipient.selected)
 
+export const getUniqueSelectedRecipients = (values: RecipientAllowlistFormValues): AllowlistRecipient[] => {
+  const unique = new Map(getSelectedRecipients(values).map((recipient) => [recipient.address.toLowerCase(), recipient]))
+  return [...unique.values()]
+}
+
 export const isAllowlistComplete = (heldTokens: readonly string[], values: RecipientAllowlistFormValues): boolean =>
   getAllowedTokenAddresses(heldTokens, values).length > 0 && getSelectedRecipients(values).length > 0
 

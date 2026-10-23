@@ -4,6 +4,7 @@ import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowType } from '@/services/analytics'
 import CreateRecipientAllowlistPolicy from './CreateStep'
+import ReviewRecipientAllowlist from './ReviewStep'
 import type { CalloutSection } from './CreateStep/RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
@@ -30,6 +31,7 @@ const RecipientAllowlistFlow = (): ReactElement => {
       <TxFlow<RecipientAllowlistFlowData>
         icon={RecipientAllowlistIcon}
         subtitle={FLOW_SUBTITLE}
+        ReviewTransactionComponent={ReviewRecipientAllowlist}
         eventCategory={TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST}
         initialData={{ ...createDefaultAllowlistValues(), rules: [] }}
       >
