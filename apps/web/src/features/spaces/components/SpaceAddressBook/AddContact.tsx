@@ -2,13 +2,21 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
 import AddContactDialog from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
 
-const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
+type AddContactProps = {
+  label?: string
+  /** Shows the Tags field; the v2 address book passes them. */
+  workspaceTags?: WorkspaceTag[]
+  onTagLimitReached?: () => void
+}
+
+const AddContact = ({ label = 'Add contact', workspaceTags, onTagLimitReached }: AddContactProps) => {
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -20,6 +28,8 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
       successMessage={getContactAddedMessage(workspaceAddressBookLabel)}
       successGroupKey="add-contact-success"
       validateCharset
+      workspaceTags={workspaceTags}
+      onTagLimitReached={onTagLimitReached}
       submit={(item, sid) =>
         upsertAddressBook({
           spaceId: sid,
