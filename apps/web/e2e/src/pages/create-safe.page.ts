@@ -8,6 +8,8 @@ import { type Page, type Locator } from '@playwright/test'
 
 // The success modal opens only once the deployment is mined and indexed
 const DEPLOYMENT_TIMEOUT_MS = 120_000
+// The relay option waits for the owners' relays, which a fork under load can take long to read
+const RELAYS_LOAD_TIMEOUT_MS = 60_000
 
 export class CreateSafePage {
   readonly nextButton: Locator
@@ -17,6 +19,7 @@ export class CreateSafePage {
   /** "Activate" on the dashboard of a Safe that is not deployed yet */
   readonly activateButton: Locator
   readonly confirmActivationButton: Locator
+  readonly relayMethod: Locator
   readonly activationSection: Locator
   readonly removeNetworkIcon: Locator
   readonly networkInput: Locator
@@ -28,6 +31,7 @@ export class CreateSafePage {
     this.letsGoButton = page.getByTestId('cf-creation-lets-go-btn')
     this.activateButton = page.getByTestId('activate-account-btn-cf').first()
     this.confirmActivationButton = page.getByTestId('activate-account-flow-btn')
+    this.relayMethod = page.getByTestId('relay-execution-method').first()
     this.activationSection = page.getByTestId('activation-section')
     this.removeNetworkIcon = page.getByTestId('CancelIcon')
     this.networkInput = page.getByRole('combobox').first()
@@ -74,9 +78,20 @@ export class CreateSafePage {
     return this.finishPayLaterCreation()
   }
 
-  /** Deploy the pay-later Safe whose dashboard is open, and wait until the app reports it as deployed */
-  async activate(): Promise<void> {
+  /**
+   * Deploy the pay-later Safe whose dashboard is open with the relay, and wait until the app reports it as deployed.
+   * The relay option shows once the owners' relays have loaded; before that, the app deploys with the wallet.
+   * `switchWalletTo` names the Safe's network when the wallet is connected to another one.
+   */
+  async activate({ switchWalletTo }: { switchWalletTo?: string } = {}): Promise<void> {
     await this.activateButton.click()
+    if (switchWalletTo) {
+      await this.page
+        .getByRole('button', { name: /^Switch to/ })
+        .filter({ hasText: switchWalletTo })
+        .click()
+    }
+    await this.relayMethod.click({ timeout: RELAYS_LOAD_TIMEOUT_MS })
     await this.confirmActivationButton.click()
     await this.letsGoButton.click({ timeout: DEPLOYMENT_TIMEOUT_MS })
   }
