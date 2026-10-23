@@ -967,5 +967,16 @@ describe('Policies', () => {
 
       expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
     })
+
+    it('hides the allowlist panel while a flow is open', () => {
+      render(
+        <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies policies={[mockActiveAllowlist()]} />
+        </TxModalContext.Provider>,
+      )
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
+    })
   })
 })

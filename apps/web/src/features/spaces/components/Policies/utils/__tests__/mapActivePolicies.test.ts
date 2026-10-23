@@ -251,6 +251,21 @@ describe('mapActivePolicies', () => {
       ])
     })
 
+    it('lists an ETH recipient once when several policies name it, whatever the casing', () => {
+      const [policy] = toAllowlists([
+        mockNativeTransferDto(MOCK_ADDRESSES.alice),
+        mockNativeTransferDto(MOCK_ADDRESSES.alice.toLowerCase()),
+      ])
+
+      expect(policy.data.entries[0].recipients).toEqual([{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }])
+    })
+
+    it('leaves out an erc20-transfer policy whose data has another shape', () => {
+      const mismatched = mockErc20TransferDto({ data: { module: '0x1', spenders: [] } })
+
+      expect(toAllowlists([mismatched])).toEqual([])
+    })
+
     it('leaves out the ETH entry when the chain config is not loaded', () => {
       const [policy] = toAllowlists([mockErc20TransferDto(), mockNativeTransferDto()], () => undefined)
 

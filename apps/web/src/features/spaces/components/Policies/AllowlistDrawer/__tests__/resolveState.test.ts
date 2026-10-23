@@ -65,6 +65,15 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
+  it('should send a signer to review the transaction while it is not known whether they have signed', () => {
+    const signer = { ...MOCK_VIEWERS.signer, hasSigned: undefined }
+
+    expect(resolveAllowlistDrawerState(mockPendingAllowlist(), signer, 'Payroll')).toMatchObject({
+      kind: 'pending',
+      action: 'review',
+    })
+  })
+
   it('should offer the transaction link to a signer who has already signed', () => {
     expect(resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signerWhoSigned, 'Payroll')).toMatchObject({
       action: 'copy-link',
