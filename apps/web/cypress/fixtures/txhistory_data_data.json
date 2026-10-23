@@ -132,18 +132,6 @@
       "transactionHashCopied": "0x54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c",
       "altImage": "Received",
       "altToken": ""
-    },
-    "bulkTransaction": {
-      "send": "Sent",
-      "receive": "Received",
-      "twoTx": "2 transactions",
-      "threeTx": "3 transactions",
-      "wrappedEther": "Wrapped Ether",
-      "addOwnerWithThreshold": "addOwnerWithThreshold",
-      "1transfer": "1transfer",
-      "2removeOwner": "2removeOwner",
-      "COW": "-10 COW",
-      "DAI": "363.19846 DAI"
     }
   }
 }
