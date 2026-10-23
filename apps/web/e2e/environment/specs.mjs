@@ -10,7 +10,6 @@ const fourthChain = 'the list only appears when a chain is left to add, which ne
  * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/happypath_2/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
   'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/address_book.cy.js': { scenario: 'prepareBasicScenario' },

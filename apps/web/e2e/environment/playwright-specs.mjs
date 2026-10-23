@@ -32,6 +32,7 @@ export const playwrightSpecs = {
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'e2e/tx-history-filter.spec.ts': {},
+  'e2e/tx-builder.spec.ts': {},
   'regression/auth0/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
