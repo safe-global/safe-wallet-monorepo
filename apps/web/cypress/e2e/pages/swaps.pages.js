@@ -16,12 +16,10 @@ const currencySelectBtn = '.open-currency-select-button'
 export const swapBtn = '[id="swap-button"]'
 const exceedFeesChkbox = 'input[id="fees-exceed-checkbox"]'
 const settingsBtn = 'button[id="open-settings-dialog-button"]'
-const settingsBtnTwap = 'button[id^="menu-button--menu"]'
 const assetsSwapBtn = '[data-testid="swap-btn"]'
 export const dashboardSwapBtn = '[data-testid="overview-swap-btn"]'
 export const customRecipient = 'div[id="recipient"]'
 const recipientToggle = 'span[id="toggle-recipient-mode-button"]'
-const twapsCustomRecipientStr = 'Custom Recipient'
 const explorerBtn = '[data-testid="explorer-btn"]'
 const limitPriceFld = '[data-testid="limit-price"]'
 const expiryFld = '[data-testid="expiry"]'
@@ -132,8 +130,6 @@ export const swapTxs = fixtureGetters('swaps', {
     '&id=multisig_0x03042B890b99552b60A073F808100517fb148F60_0x5f08e05edb210a8990791e9df2f287a5311a8137815ec85856a2477a36552f1e',
   wrapSwap:
     '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
-  swapQueue:
-    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
 })
 
 export const tokenBlockLabels = {
@@ -181,10 +177,6 @@ export function clickOnAssetSwapBtn(index) {
 
 export function clickOnSettingsBtn() {
   cy.get(settingsBtn).click()
-}
-
-export function clickOnSettingsBtnTwaps() {
-  cy.get(settingsBtnTwap).eq(0).click()
 }
 
 export function setExpiry(value) {
@@ -447,11 +439,6 @@ export function setNumberOfParts(parts) {
 
 export function outputInputIsNotEmpty() {
   cy.get(outputCurrencyInput).find('input').invoke('val').should('not.be.empty')
-}
-
-export function enableTwapCustomRecipient(option) {
-  cy.contains(twapsCustomRecipientStr).should('be.visible')
-  if (!option) cy.contains(twapsCustomRecipientStr).click()
 }
 
 export function enableCustomRecipient(option) {

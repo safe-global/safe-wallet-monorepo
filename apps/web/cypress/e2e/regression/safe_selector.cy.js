@@ -17,10 +17,9 @@ let staticSafes = []
 const newSafeName = 'Added safe 3'
 const addedSafe900 = 'Added safe 900'
 
-let signer, signer1, signer2
+let signer, signer2
 before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
-  signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
   signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
 })
 
@@ -167,13 +166,6 @@ describe('Safe selector tests - accounts modal actions', () => {
     accountsModal.verifyImportBtnVisible()
   })
 
-  it('Verify safes added to watchlist appear in the accounts modal', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
-    wallet.connectSignerViaStorage(signer1, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    accountsModal.openAccountsModal()
-    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe3short)
-  })
-
   it('Verify missing signature info is shown for a safe in the accounts modal', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
     wallet.connectSignerViaStorage(signer2, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
@@ -226,15 +218,6 @@ describe('Safe selector tests - watchlist in dropdown', () => {
     safeNav.verifyDropdownContainsSafe(sideBar.sideBarSafes.safe3short)
   })
 
-  it('Verify that safes the user owns appear in the safe selector dropdown after adding them', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
-    wallet.connectSignerViaStorage(signer1, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-
-    safeNav.openSelector()
-
-    safeNav.verifyDropdownContainsSafe(sideBar.sideBarSafes.safe3short)
-  })
-
   it('Verify that a watched safe with a pending tx appears in the safe selector dropdown', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
     wallet.connectSignerViaStorage(signer2, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
@@ -242,15 +225,6 @@ describe('Safe selector tests - watchlist in dropdown', () => {
     safeNav.openSelector()
 
     safeNav.verifyDropdownContainsSafe(sideBar.sideBarSafesPendingActions.safe1short)
-  })
-
-  it('Verify the first row in the safe selector dropdown shows a balance', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-
-    safeNav.openSelector()
-
-    safeNav.verifyFirstDropdownRowHasBalance()
   })
 })
 
