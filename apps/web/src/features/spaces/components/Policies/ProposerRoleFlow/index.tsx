@@ -16,7 +16,7 @@ import {
 import { useGrantProposer } from './hooks/useGrantProposer'
 import { useProposerValidation } from './hooks/useProposerValidation'
 import ProposerRoleForm, { type ProposerRoleFormValues } from './ProposerRoleForm'
-import ProposerRoleHeader from './ProposerRoleHeader'
+import ProposerRoleHeader from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/ProposerRoleHeader'
 
 const ProposerRoleFlowContent = (): ReactElement => {
   const [safeAccount, setSafeAccount] = useState<string>()
