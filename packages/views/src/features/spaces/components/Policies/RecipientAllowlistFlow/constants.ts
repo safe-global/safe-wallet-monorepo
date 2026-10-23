@@ -61,4 +61,23 @@ export const getAllowlistAccountLabel = (name: string, chainName: string): strin
 
 export const NATIVE_POLICY_UNAVAILABLE_ERROR = 'Native token allowlists are not available on this chain'
 export const TOO_MANY_CONFIGURATIONS_ERROR = 'This allowlist is too large. Remove some tokens or recipients.'
+export const GUARD_READ_ERROR = "Couldn't check the Safe's policy guard. Try again."
+export const GUARD_UNAVAILABLE_ERROR = 'Allowlists are not available on this chain.'
 export const GUARD_NOT_SUPPORTED_ERROR = "This Safe account's guard setup doesn't support allowlists."
+
+export const REVIEW_SUMMARY_DESCRIPTION = 'Check the details below before you sign.'
+export const REVIEW_ACCOUNT_LABEL = 'Applies to'
+export const REVIEW_TOKENS_LABEL = 'Allowed tokens'
+export const getReviewRecipientsLabel = (count: number): string => `Allowed recipients (${count})`
+export const getNextSignersText = (names: string): string =>
+  `${names} will be asked to sign next. Nothing changes until it's executed.`
+export const POLICY_GUARD_NAME = 'SafePolicyGuard'
+export const getRuleTitle = (index: number, count: number): string => `Rule ${index + 1} of ${count}`
+export const RULE_POLICY_LABEL = 'Policy'
+export const RULE_TARGET_LABEL = 'Applies to'
+export const RULE_RECIPIENTS_LABEL = 'Allowed recipients'
+export const POLICY_LABELS = {
+  erc20: 'Token withdraw allowlist',
+  native: 'Native transfers',
+} as const
+export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."
