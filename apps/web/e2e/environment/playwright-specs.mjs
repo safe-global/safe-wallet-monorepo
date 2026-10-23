@@ -23,6 +23,7 @@ export const playwrightSpecs = {
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
+  'e2e/policies.spec.ts': {},
   'e2e/proposer.spec.ts': {},
   'e2e/proposer-settings.spec.ts': {},
   'e2e/recovery.spec.ts': {},

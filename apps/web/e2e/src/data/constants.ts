@@ -117,6 +117,7 @@ export const TEST_ADDRESSES = {
 export const ROUTES = {
   home: '/home',
   welcomeSpaces: '/welcome/spaces',
+  spacesPolicies: '/spaces/policies',
   welcomeAccounts: '/welcome/accounts',
   balances: '/balances',
   balancesNfts: '/balances/nfts',
