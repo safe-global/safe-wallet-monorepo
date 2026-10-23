@@ -18,6 +18,7 @@ export const playwrightSpecs = {
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
   'e2e/delete.spec.ts': {},
+  'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/multisig-confirm.spec.ts': {},
