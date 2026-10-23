@@ -1,6 +1,6 @@
 import { useContext, type ReactElement } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
-import type { ActiveAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+import type { ActiveAllowlistPolicy } from '@/features/spaces/components/Policies/AllowlistDrawer/resolveState'
 import { AllowlistDrawer } from '../AllowlistDrawer'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
 

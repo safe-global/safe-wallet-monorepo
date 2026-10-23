@@ -12,7 +12,7 @@ import {
   mockUnenforcedAllowlist,
 } from '../../mocks/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
-import type { AllowlistDrawerPolicy } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+import type { AllowlistDrawerPolicy } from '../resolveState'
 import AllowlistDrawer from '../AllowlistDrawer'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -191,7 +191,7 @@ describe('AllowlistDrawer', () => {
     )
 
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
-    expect(screen.getByText('The allowlist applies after the 24-hour delay.')).toBeInTheDocument()
+    expect(screen.getByText('The allowlist becomes active after the 24-hour delay.')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
@@ -207,21 +207,25 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
   })
 
-  it.each(['replaced', 'deleted'] as const)('reports a %s transaction with no failure alert or chip', (outcome) => {
+  it.each([
+    ['replaced', 'Another transaction used this nonce, so this one can no longer be executed.'],
+    ['deleted', 'The transaction was deleted.'],
+  ] as const)('reports a %s transaction in red and marks the policy as failed', (outcome, title) => {
     render(
       <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome={outcome} />,
     )
 
+    expect(screen.getByRole('alert')).toHaveTextContent(title)
     expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
-    expect(screen.queryByText('Failed')).not.toBeInTheDocument()
-    expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
     expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('closes an expired transaction with no chip and no action', () => {
     setup(mockExpiredPendingAllowlist())
 
-    expect(screen.getByText('The transaction expired and can no longer be signed.')).toBeInTheDocument()
+    expect(screen.getByText('Transaction expired')).toBeInTheDocument()
+    expect(screen.getByText('It can no longer be signed. Set up the allowlist again to retry.')).toBeInTheDocument()
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
     expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
@@ -322,5 +326,22 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByText('Enforced by')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
+  })
+
+  it('confirms a just activated allowlist with a green banner naming the Safe and counting the recipients', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} justActivated />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Your allowlist is now active')
+    expect(
+      screen.getByText(
+        'Treasury can only send the allowed tokens to the 3 allowed recipients. Further changes will take 24 hours to apply.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('shows no activation banner unless the allowlist was just activated', () => {
+    render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+
+    expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
   })
 })

@@ -12,7 +12,7 @@ import PolicyRule from '@safe-global/views/features/spaces/components/Policies/P
 import PolicyTokens from './components/PolicyTokens'
 import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
-import { getPendingStatusDetail } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
+import { getPendingStatusDetail } from '../utils/policyStatusDetail'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'

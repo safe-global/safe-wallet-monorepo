@@ -21,8 +21,15 @@ const _TrustedToggleButton = ({
   return (
     <Track {...TX_LIST_EVENTS.TOGGLE_UNTRUSTED} label={onlyTrusted ? 'show' : 'hide'}>
       <Field orientation="horizontal" className="h-10 w-fit items-center gap-2" data-testid="toggle-untrusted">
-        <Switch id="toggle-untrusted" checked={onlyTrusted} onCheckedChange={setOnlyTrusted} />
-        <Label htmlFor="toggle-untrusted">Hide suspicious</Label>
+        <Switch
+          id="toggle-untrusted"
+          aria-labelledby="toggle-untrusted-label"
+          checked={onlyTrusted}
+          onCheckedChange={setOnlyTrusted}
+        />
+        <Label id="toggle-untrusted-label" htmlFor="toggle-untrusted">
+          Hide suspicious
+        </Label>
       </Field>
     </Track>
   )

@@ -8,7 +8,7 @@ import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
-import { getPolicyTokens } from '@safe-global/views/features/spaces/components/Policies/utils/policyTokens'
+import { getPolicyTokens } from '../utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
 import { formatTimeToSign } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
@@ -21,17 +21,18 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
-  inferAllowlistOutcome,
-  resolveAllowlistDrawerState,
-  type ActiveAllowlistPolicy,
+  ACTIVATED_BANNER_TITLE,
+  activatedBannerLine,
   type AllowlistTxOutcome,
-} from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+} from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
 import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
+import { inferAllowlistOutcome, resolveAllowlistDrawerState, type ActiveAllowlistPolicy } from './resolveState'
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'
 import AllowlistTokens from './components/AllowlistTokens'
+import ActivatedBanner from './components/ActivatedBanner'
 import FailedBanner from './components/FailedBanner'
 import ScheduledBanner from './components/ScheduledBanner'
 
@@ -52,6 +53,8 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   onEdit?: () => void
   onRemove?: () => void
   onCancelChange?: () => void
+  /** The first setup just became active: confirms it once at the top of the panel. */
+  justActivated?: boolean
 }
 
 type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
@@ -68,12 +71,12 @@ export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlist
 const isPendingDrawer = (props: AllowlistDrawerProps): props is PendingAllowlistDrawerProps =>
   props.policy.status !== 'active'
 
-/** Executed reads Pending rather than Activating: the change still waits out the guard's delay. */
+/** Executed reads Pending while it waits out the delay; replaced and deleted can never execute, so they read Failed. */
 const OUTCOME_STATUS: Record<AllowlistTxOutcome, PolicyStatus | null> = {
   executed: 'pending',
   failed: 'failed',
-  replaced: null,
-  deleted: null,
+  replaced: 'failed',
+  deleted: 'failed',
   expired: null,
 }
 
@@ -92,6 +95,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const Icon = getPolicyIcon(policy.type)
   const status = outcome ? OUTCOME_STATUS[outcome] : getPolicyStatus(policy)
   const isRemoved = 'operation' in state && state.operation === 'remove'
+  const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
     : { onEdit: props.onEdit, onRemove: props.onRemove, onCancelChange: props.onCancelChange }
@@ -116,6 +120,12 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             </>
           )}
           {state.kind === 'unenforced' && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
+          {state.kind === 'active' && !isPendingDrawer(props) && props.justActivated && (
+            <ActivatedBanner
+              title={ACTIVATED_BANNER_TITLE}
+              line2={activatedBannerLine(safe.name ?? 'This Safe account', recipients.length)}
+            />
+          )}
           {state.kind === 'scheduled' && policy.status === 'active' && policy.scheduledChange && (
             <ScheduledBanner
               title={state.bannerTitle}
@@ -124,12 +134,12 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             />
           )}
           {state.kind === 'closed' &&
-            (outcome === 'failed' ? (
+            (status === 'failed' ? (
               <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ) : (
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ))}
-          <AllowlistRecipients recipients={getAllowlistRecipients(policy.data)} names={names} isRemoved={isRemoved} />
+          <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
           <PolicyOverview
             {...overview}

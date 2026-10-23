@@ -51,6 +51,8 @@ type Story = StoryObj<typeof meta>
 
 export const ActiveSigner: Story = {}
 
+export const ActiveJustActivated: Story = { args: { justActivated: true } }
+
 export const ActiveNoWallet: Story = { args: { viewer: MOCK_VIEWERS.disconnected } }
 
 export const ActiveNotASigner: Story = { args: { viewer: MOCK_VIEWERS.nonSigner } }

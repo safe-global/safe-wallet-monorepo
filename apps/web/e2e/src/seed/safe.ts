@@ -1,19 +1,17 @@
 import { parseEther } from 'ethers'
-import { waitForQueued } from '../../environment/scenarios/indexing.mjs'
+import { waitForQueued, waitUntil } from '../../environment/scenarios/indexing.mjs'
 import { createSafeAddress, openSafe, proposeTransaction } from '../../environment/scenarios/safe.mjs'
+import type { OwnedSafes } from '@safe-global/store/gateway/types'
 import { NETWORK_PREFIXES } from '../data/constants'
-import type { Journey } from '../fixtures/journey.fixture'
+import type { Journey, OwnerName } from '../fixtures/journey.fixture'
 
 export type SeededSafe = {
   address: string
   /** The `sep:0x…` form that wallet URLs take */
   prefixedAddress: string
-  /** Signs and proposes as the journey's OWNER_4 */
+  /** Signs and proposes as the Safe's first owner that is a journey owner, or as OWNER_4 when it has none */
   context: Awaited<ReturnType<typeof openSafe>>
 }
-
-/** A Safe that the journey's owners cannot sign for */
-export type SafeAddress = Pick<SeededSafe, 'address' | 'prefixedAddress'>
 
 export type QueuedTransaction = {
   safeTxHash: string
@@ -21,24 +19,31 @@ export type QueuedTransaction = {
   txId: string
 }
 
-/** Deploys a Safe of OWNER_4 and OWNER_1 (and OWNER_2 for 3 owners) with 1 ETH, and waits until CGW serves it. */
-export async function seedSafe(
-  journey: Journey,
-  { threshold, ownerCount = 2 }: { threshold: 1 | 2; ownerCount?: 2 | 3 },
-): Promise<SeededSafe> {
-  const { env, owners } = journey
-  const ownerAddresses = [owners.owner4, owners.owner1, owners.owner2]
-    .slice(0, ownerCount)
-    .map((owner) => owner.address)
-  const address = await createSafeAddress(env, owners, { threshold, ownerAddresses })
-  return {
-    address,
-    prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}`,
-    context: await openSafe(env, owners.owner4, address),
-  }
+export type SafeSetup = {
+  /** A journey owner, or a seeded Safe that owns this one */
+  owners: Array<OwnerName | SeededSafe>
+  threshold: number
+  safeVersion?: '1.4.1' | '1.5.0'
 }
 
-/** Proposes an ETH transfer signed by OWNER_4, and waits until it is in the CGW queue. */
+/** Deploys a Safe with 1 ETH, waits until CGW serves it, and names it in the test report. */
+export async function seedSafe(journey: Journey, { owners, threshold, safeVersion }: SafeSetup): Promise<SeededSafe> {
+  const { env } = journey
+  const ownerAddresses = owners.map((owner) =>
+    typeof owner === 'string' ? journey.owners[owner].address : owner.address,
+  )
+  const address = await createSafeAddress(env, journey.owners, { threshold, ownerAddresses, safeVersion })
+  const signer = owners.find((owner): owner is OwnerName => typeof owner === 'string') ?? 'owner4'
+  const safe = {
+    address,
+    prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}`,
+    context: await openSafe(env, journey.owners[signer], address),
+  }
+  journey.recordSafe(safe)
+  return safe
+}
+
+/** Proposes an ETH transfer signed by the Safe's context signer, and waits until it is in the CGW queue. */
 export async function seedQueuedTransfer(
   safe: SeededSafe,
   { nonce, recipient, amount }: { nonce: number; recipient: string; amount: string },
@@ -53,12 +58,30 @@ export async function seedQueuedTransfer(
   return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
 }
 
-/** A 1/1 Safe of OWNER_4 (the parent) and a 1/1 Safe whose only owner is the parent (the child). */
-export async function seedNestedSafe(journey: Journey): Promise<{ parent: SeededSafe; child: SafeAddress }> {
-  const parent = await seedSafe(journey, { threshold: 1 })
-  const address = await createSafeAddress(journey.env, journey.owners, {
-    threshold: 1,
-    ownerAddresses: [parent.address],
+type NestedSafeSetup = {
+  parent: { owners: OwnerName[]; threshold: number }
+  /** `'parent'` stands for the parent Safe */
+  child: { owners: Array<OwnerName | 'parent'>; threshold: number; safeVersion?: '1.4.1' | '1.5.0' }
+}
+
+/**
+ * Deploys a parent Safe and a child Safe that the parent owns. Waits until CGW lists the parent among OWNER_4's
+ * Safes, which makes an OWNER_4 of the parent a nested owner of the child.
+ */
+export async function seedNestedSafe(
+  journey: Journey,
+  { parent: parentSetup, child: childSetup }: NestedSafeSetup,
+): Promise<{ parent: SeededSafe; child: SeededSafe }> {
+  const parent = await seedSafe(journey, parentSetup)
+  const child = await seedSafe(journey, {
+    ...childSetup,
+    owners: childSetup.owners.map((owner) => (owner === 'parent' ? parent : owner)),
   })
-  return { parent, child: { address, prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}` } }
+  const { env, chainId } = parent.context
+  await waitUntil(
+    env,
+    `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/owners/${journey.owners.owner4.address}/safes`,
+    (result: OwnedSafes) => result.safes.includes(parent.address),
+  )
+  return { parent, child }
 }

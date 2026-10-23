@@ -4,14 +4,13 @@ import type {
   FailedAllowlistPolicy,
   PendingAllowlistPolicy,
   QueuedAllowlistPolicy,
-} from '../types'
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import type {
   ActiveDrawerState,
   ClosedDrawerState,
   PendingDrawerState,
-  PendingTxOutcome,
   Viewer,
-} from '../SpendingLimitDrawer/resolveState'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
   ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
@@ -19,7 +18,7 @@ import {
   executeLine,
   signedAndWaitingLine,
   signAndExecuteLine,
-} from '../SpendingLimitDrawer/messages'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import {
   CANCEL_CONNECT_HELPER,
   CANCEL_NOT_A_SIGNER_HELPER,
@@ -31,7 +30,8 @@ import {
   UNENFORCED_BANNER_LINE,
   UNENFORCED_BANNER_TITLE,
   outcomeLine,
-} from './messages'
+  type AllowlistTxOutcome,
+} from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 
 /** Executed, waiting out the guard's delay. Only a change to a live allowlist can be cancelled. */
 export type ScheduledDrawerState = {
@@ -59,9 +59,6 @@ export type AllowlistDrawerState =
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
 
 export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | QueuedAllowlistPolicy | FailedAllowlistPolicy
-
-/** `expired`: the signing window closed before the transaction executed. */
-export type AllowlistTxOutcome = PendingTxOutcome | 'expired'
 
 /** The outcome a row carries on its own: a failed status, or a pending one whose signing window has closed. */
 export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: number): AllowlistTxOutcome | undefined => {

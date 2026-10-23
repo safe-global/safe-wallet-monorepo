@@ -11,7 +11,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   MULTIPLE_RULES_TITLE,
@@ -21,7 +21,7 @@ import {
   STALE_NOTE,
   type ResolvedPresentation,
 } from '../statusPresentation'
-import { formatFlaggedCount, summariseRejection, type RejectionSummary } from '../summariseRejection'
+import { formatFlaggedCount, rejectionSeverity, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
 import {
   SAFENET_ATTESTATION_LINK_LABEL,
@@ -139,19 +139,23 @@ const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
   </div>
 )
 
-const RejectionReasons = ({ summary }: { summary: RejectionSummary | null }): ReactElement | null => {
-  if (!summary || summary.rules.length === 0) return null
+/** One card for a risk: each cited rule's label and description, then the sentinel tally. */
+const RuleBlock = ({ summary, severity }: { summary: RejectionSummary; severity: Severity }): ReactElement => {
+  const flaggedCount = formatFlaggedCount(summary)
 
   return (
-    <div className="flex flex-col gap-2" data-testid="safenet-rejection-rules">
-      {summary.rules.map((rule) => (
-        <SafenetBlock key={rule.id} severity={Severity.CRITICAL}>
-          <span className="font-bold">{rule.label}</span>
-          <br />
-          {rule.description}
-        </SafenetBlock>
-      ))}
-    </div>
+    <SafenetBlock severity={severity}>
+      <span className="flex flex-col gap-2" data-testid="safenet-rejection-rules">
+        {summary.rules.map((rule) => (
+          <span key={rule.id}>
+            <span className="font-bold">{rule.label}</span>
+            <br />
+            {rule.description}
+          </span>
+        ))}
+        {flaggedCount && <span data-testid="safenet-flagged-count">{flaggedCount}</span>}
+      </span>
+    </SafenetBlock>
   )
 }
 
@@ -170,9 +174,12 @@ type ProofLink = { href: string; testId: string; label: string }
 
 const EXPLORER_UNAVAILABLE_REASONS: ReadonlyArray<UnavailableReason | undefined> = ['READ_FAILED', 'WINDOW_UNCERTAIN']
 
-/** A risk, or a check that could not be read, points at the explorer once there is a transaction to look up. */
+/** A risk, an open dispute or an unreadable check points at the explorer once there is a transaction to look up. */
 const hasExplorerPage = ({ publicStatus, unavailableReason }: SectionCheck, safeTxHash: string | undefined): boolean =>
-  !!safeTxHash && (publicStatus === CheckStatus.MALICIOUS || EXPLORER_UNAVAILABLE_REASONS.includes(unavailableReason))
+  !!safeTxHash &&
+  (publicStatus === CheckStatus.MALICIOUS ||
+    publicStatus === CheckStatus.DISPUTED ||
+    EXPLORER_UNAVAILABLE_REASONS.includes(unavailableReason))
 
 /** A verified BENIGN links its attestation; the explorer page is the fallback where it applies. */
 const proofLinkFor = (check: SectionCheck, safeTxHash: string | undefined, links: SafenetLinks): ProofLink | null => {
@@ -204,7 +211,7 @@ const InFlightCopy = ({ copy, isStale }: { copy: string; isStale: boolean }): Re
   </>
 )
 
-/** The headline, then the sentinel tally alone when rules follow in their own blocks, else the state copy and the tally. */
+/** The headline, the state copy, then the sentinel tally when sentinels voted. */
 const VerdictCopy = ({
   title,
   copy,
@@ -220,17 +227,11 @@ const VerdictCopy = ({
     <>
       <span className="font-bold">{title}</span>
       <br />
-      {flaggedCount && summary && summary.rules.length > 0 ? (
-        <span data-testid="safenet-flagged-count">{flaggedCount}</span>
-      ) : (
+      {copy}
+      {flaggedCount && (
         <>
-          {copy}
-          {flaggedCount && (
-            <>
-              {' '}
-              <span data-testid="safenet-flagged-count">{flaggedCount}</span>
-            </>
-          )}
+          {' '}
+          <span data-testid="safenet-flagged-count">{flaggedCount}</span>
         </>
       )}
     </>
@@ -259,6 +260,21 @@ const CheckBlock = ({
   </SafenetBlock>
 )
 
+type RiskView = { summary: RejectionSummary | null; content: ResolvedPresentation; title: string }
+
+/** A risk takes its title and severity from the rules sentinels cited; other states keep their own. */
+const resolveRisk = (check: SectionCheck, content: ResolvedPresentation): RiskView => {
+  const summary =
+    check.publicStatus === CheckStatus.MALICIOUS && check.snapshot ? summariseRejection(check.snapshot.events) : null
+  if (!summary) return { summary, content, title: content.label }
+
+  return {
+    summary,
+    content: { ...content, severity: rejectionSeverity(summary) },
+    title: maliciousTitle(summary, content.label),
+  }
+}
+
 /** The row once a check has something to show: a running state, a verdict, or a non-verdict "unavailable". */
 const CheckRow = ({
   check,
@@ -275,26 +291,33 @@ const CheckRow = ({
 
   const isInFlight = isCheckInFlight(publicStatus)
   const isRisk = publicStatus === CheckStatus.MALICIOUS
-  const summary = isRisk && snapshot ? summariseRejection(snapshot.events) : null
-  const title = summary ? maliciousTitle(summary, content.label) : content.label
+  const risk = resolveRisk(check, content)
   const proofLink = proofLinkFor(check, safeTxHash, links)
 
   return (
     <SectionRow
       // Remounts when a risk lands so the row opens even if it was already on screen.
       key={isRisk ? 'risk' : 'other'}
-      icon={<RowIcon content={content} isInFlight={isInFlight} />}
-      announcement={`Safenet: ${title}`}
+      icon={<RowIcon content={risk.content} isInFlight={isInFlight} />}
+      announcement={`Safenet: ${risk.title}`}
       status={publicStatus}
       reason={unavailableReason}
       defaultOpen={isRisk}
     >
-      <CheckBlock content={content} title={title} summary={summary} isInFlight={isInFlight} isStale={isStale} />
-
-      <RejectionReasons summary={summary} />
+      {risk.summary && risk.summary.rules.length > 0 ? (
+        <RuleBlock summary={risk.summary} severity={risk.content.severity} />
+      ) : (
+        <CheckBlock
+          content={risk.content}
+          title={risk.title}
+          summary={risk.summary}
+          isInFlight={isInFlight}
+          isStale={isStale}
+        />
+      )}
 
       {proofLink && (
-        <SafenetOutboundLink href={proofLink.href} testId={proofLink.testId}>
+        <SafenetOutboundLink href={proofLink.href} testId={proofLink.testId} className="text-sm">
           {proofLink.label}
         </SafenetOutboundLink>
       )}

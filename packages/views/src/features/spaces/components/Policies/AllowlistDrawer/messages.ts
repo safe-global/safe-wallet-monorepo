@@ -1,6 +1,9 @@
 import type { PendingPolicyOperation } from '../types'
-import type { AllowlistTxOutcome } from './resolveState'
+import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
+
+/** `expired`: the signing window closed before the transaction executed. */
+export type AllowlistTxOutcome = PendingTxOutcome | 'expired'
 
 export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   create: 'The allowlist is not active as the transaction is not yet executed.',
@@ -12,18 +15,28 @@ export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit t
 
 // Every change to the allowlist waits out the guard's 24-hour delay after execution.
 const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
-  create: 'The allowlist applies after the 24-hour delay.',
-  update: 'The new recipients apply after the 24-hour delay.',
+  create: 'The allowlist becomes active after the 24-hour delay.',
+  update: 'The new rules apply after the 24-hour delay.',
   remove: 'The allowlist is removed after the 24-hour delay.',
 }
 
 export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
   ...PENDING_OUTCOME_TITLE,
-  expired: 'The transaction expired and can no longer be signed.',
+  expired: 'Transaction expired',
 }
 
-export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string =>
-  outcome === 'executed' ? EXECUTED_LINE[operation] : 'Close this panel to see the current policies.'
+const EXPIRED_LINE = 'It can no longer be signed. Set up the allowlist again to retry.'
+
+export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string => {
+  if (outcome === 'executed') return EXECUTED_LINE[operation]
+
+  return outcome === 'expired' ? EXPIRED_LINE : 'Close this panel to see the current policies.'
+}
+
+export const ACTIVATED_BANNER_TITLE = 'Your allowlist is now active'
+
+export const activatedBannerLine = (safeName: string, recipientCount: number): string =>
+  `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take 24 hours to apply.`
 
 export const SCHEDULED_BANNER_TITLE = 'Change pending'
 

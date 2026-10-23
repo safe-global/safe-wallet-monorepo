@@ -34,7 +34,7 @@ describe('PendingSignatures', () => {
   it('counts the signatures collected against the threshold', () => {
     render(<PendingSignatures safe={SAFE} signed={1} required={3} />)
 
-    expect(screen.getByText('1 of 3 signed')).toBeInTheDocument()
+    expect(screen.getByText('1 of 3 signatures')).toBeInTheDocument()
     expect(screen.getByText('Safe account')).toBeInTheDocument()
     expect(screen.getByText('Ops')).toBeInTheDocument()
   })

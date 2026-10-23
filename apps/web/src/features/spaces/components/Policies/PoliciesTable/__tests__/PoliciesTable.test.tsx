@@ -146,7 +146,7 @@ describe('PoliciesTable', () => {
     await user.hover(screen.getByTestId('policy-status-pending'))
     act(() => jest.runOnlyPendingTimers())
 
-    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signed')
+    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signatures')
   })
 
   it('should, when an allowlist change waits out the delay, show it as pending', () => {

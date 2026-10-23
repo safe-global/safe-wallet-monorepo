@@ -11,15 +11,9 @@ function applyScenario(scenario) {
 
 if (Cypress.expose('SAFE_E2E_ISOLATED')) {
   const spec = isolatedSpecs[Cypress.spec.relative] ?? {}
-  const prepareScenario = () =>
-    cy.task('prepareSafeScenario', Cypress.spec.relative, { log: false }).then(applyScenario)
+  before(() => cy.task('prepareSafeScenario', Cypress.spec.relative, { log: false }).then(applyScenario))
 
-  before(prepareScenario)
-
-  let firstTest = true
   beforeEach(function () {
     if (spec.skips && Object.hasOwn(spec.skips, this.currentTest.title)) this.skip()
-    if (spec.perTest && !firstTest) return prepareScenario()
-    firstTest = false
   })
 }

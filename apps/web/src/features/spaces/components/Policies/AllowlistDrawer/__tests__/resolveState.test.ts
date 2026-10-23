@@ -1,4 +1,4 @@
-import { MOCK_VIEWERS } from '@/features/spaces/components/Policies/mocks/policies'
+import { MOCK_VIEWERS } from '../../mocks/policies'
 import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
@@ -8,8 +8,8 @@ import {
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockUnenforcedAllowlist,
-} from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
-import { inferAllowlistOutcome, resolveAllowlistDrawerState } from './resolveState'
+} from '../../mocks/allowlistPolicies'
+import { inferAllowlistOutcome, resolveAllowlistDrawerState } from '../resolveState'
 
 describe('resolveAllowlistDrawerState', () => {
   it('should let a signer manage an active allowlist', () => {
@@ -92,7 +92,7 @@ describe('resolveAllowlistDrawerState', () => {
   })
 
   it.each([
-    ['executed', 'The transaction was executed.', 'The allowlist applies after the 24-hour delay.'],
+    ['executed', 'The transaction was executed.', 'The allowlist becomes active after the 24-hour delay.'],
     [
       'failed',
       'The transaction failed and can no longer be executed.',
@@ -104,11 +104,7 @@ describe('resolveAllowlistDrawerState', () => {
       'Another transaction used this nonce, so this one can no longer be executed.',
       'Close this panel to see the current policies.',
     ],
-    [
-      'expired',
-      'The transaction expired and can no longer be signed.',
-      'Close this panel to see the current policies.',
-    ],
+    ['expired', 'Transaction expired', 'It can no longer be signed. Set up the allowlist again to retry.'],
   ] as const)('should, once the transaction was %s, report it with no action', (outcome, bannerTitle, bannerLine2) => {
     expect(resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll', outcome)).toEqual({
       kind: 'closed',
@@ -154,7 +150,7 @@ describe('resolveAllowlistDrawerState', () => {
     expect(resolveAllowlistDrawerState(mockExpiredPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
       kind: 'closed',
       action: 'none',
-      bannerTitle: 'The transaction expired and can no longer be signed.',
+      bannerTitle: 'Transaction expired',
     })
   })
 })
