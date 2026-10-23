@@ -1,5 +1,7 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import TxLayoutBase from '.'
+import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 // The Safe Shield widget and the status rail pull in network/analytics-heavy hooks; stub them so
 // this test focuses on the shared layout logic (what renders, when) rather than their internals.
@@ -11,6 +13,15 @@ jest.mock('@/features/safe-shield', () => ({
 jest.mock('@/components/tx-flow/common/TxStatusWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="tx-status-widget">StatusRail</div>,
+}))
+
+jest.mock('../TxNonce', () => ({
+  __esModule: true,
+  default: () => <div data-testid="nonce-fld">Nonce</div>,
+}))
+jest.mock('../QueuedNonceHint', () => ({
+  __esModule: true,
+  default: () => <div data-testid="queued-nonce-hint">Hint</div>,
 }))
 
 const Step = () => <div data-testid="step-content">Step content</div>
@@ -192,5 +203,53 @@ describe('TxLayoutBase', () => {
     } finally {
       window.matchMedia = originalMatchMedia
     }
+  })
+
+  const safeTxContext: SafeTxContextParams = {
+    setSafeTx: jest.fn(),
+    setSafeMessage: jest.fn(),
+    setSafeMessageHash: jest.fn(),
+    setSafeTxError: jest.fn(),
+    nonce: 15,
+    setNonce: jest.fn(),
+    nonceNeeded: true,
+    setNonceNeeded: jest.fn(),
+    setSafeTxGas: jest.fn(),
+    recommendedNonce: 15,
+    setTxOrigin: jest.fn(),
+    isReadOnly: false,
+    gtfPaymentMode: 'safe',
+    setGtfPaymentMode: jest.fn(),
+    setGtfSelectedGasToken: jest.fn(),
+  }
+
+  const renderWithNonce = (fixedNonce?: boolean) => {
+    const safe = extendedSafeInfoBuilder().with({ deployed: true }).build()
+    return render(
+      <SafeTxContext.Provider value={safeTxContext}>
+        <TxLayoutBase title="Send tokens" step={0} stepCount={2} progress={50} fixedNonce={fixedNonce}>
+          <Step />
+        </TxLayoutBase>
+      </SafeTxContext.Provider>,
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: safe } } },
+    )
+  }
+
+  it('renders the queued-nonce hint after the header row', () => {
+    renderWithNonce()
+
+    const hint = screen.getByTestId('queued-nonce-hint')
+    const headerRow = screen.getByTestId('nonce-fld').parentElement
+
+    expect(screen.getByTestId('modal-header')).toContainElement(hint)
+    expect(headerRow).not.toContainElement(hint)
+    expect(headerRow?.nextElementSibling).toBe(hint)
+  })
+
+  it('does not render the queued-nonce hint when the nonce is fixed', () => {
+    renderWithNonce(true)
+
+    expect(screen.getByTestId('nonce-fld')).toBeInTheDocument()
+    expect(screen.queryByTestId('queued-nonce-hint')).not.toBeInTheDocument()
   })
 })
