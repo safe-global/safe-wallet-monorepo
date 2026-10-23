@@ -2,7 +2,6 @@ import { type Page } from '@playwright/test'
 import { Wallet, parseEther, parseUnits } from 'ethers'
 import { allowanceOf } from '../../src/chain/allowance'
 import { balanceOf, tokenBalanceOf } from '../../src/chain/balances'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedAllowance } from '../../src/seed/allowance'
 import { seedSafe } from '../../src/seed/safe'
@@ -33,18 +32,15 @@ async function sendFromAllowance(
 }
 
 test.describe('Send with a spending limit', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safe on the isolated stack')
-
   test('should pay the recipient from the allowance without a Safe transaction when the beneficiary sends', async ({
     safePage,
     journey,
-  }, testInfo) => {
+  }) => {
     const recipient = Wallet.createRandom().address
     const beneficiary = journey.owners.owner4.address
-    const safe = await seedSafe(journey, { threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
     await seedAllowance(safe, { delegate: beneficiary, amount: parseEther(ALLOWANCE) })
     const nonceBefore = await safe.context.safe.getNonce()
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
 
     await sendFromAllowance(safePage, { safe: safe.prefixedAddress, recipient, amount: AMOUNT })
 
@@ -60,15 +56,14 @@ test.describe('Send with a spending limit', { tag: '@e2e' }, () => {
   test('should pay the recipient from a USDC allowance without a Safe transaction when the beneficiary sends', async ({
     safePage,
     journey,
-  }, testInfo) => {
+  }) => {
     const { address: usdc, decimals, symbol } = SEPOLIA_USDC
     const recipient = Wallet.createRandom().address
     const beneficiary = journey.owners.owner4.address
-    const safe = await seedSafe(journey, { threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
     await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: parseUnits(USDC_BALANCE, decimals) })
     await seedAllowance(safe, { delegate: beneficiary, amount: parseUnits(USDC_ALLOWANCE, decimals), token: usdc })
     const nonceBefore = await safe.context.safe.getNonce()
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
 
     await sendFromAllowance(safePage, { safe: safe.prefixedAddress, recipient, amount: USDC_AMOUNT, symbol })
 

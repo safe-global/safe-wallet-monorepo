@@ -2,7 +2,6 @@ import { Wallet, parseEther } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe } from '../../src/seed/safe'
 import { BatchSidebarPage } from '../../src/pages/batch-sidebar.page'
@@ -20,16 +19,13 @@ function multiSendActionCounts(history: TransactionItemPage): number[] {
 }
 
 test.describe('Execute a batch', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safe on the isolated stack')
-
   test('should pay every batched recipient in one multisend when an owner executes the batch', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const [firstRecipient, secondRecipient] = [Wallet.createRandom().address, Wallet.createRandom().address]
-    const safe = await seedSafe(journey, { threshold: 1 })
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
 
     const batch = new BatchSidebarPage(safePage)
     const sendTokens = new SendTokensPage(safePage)

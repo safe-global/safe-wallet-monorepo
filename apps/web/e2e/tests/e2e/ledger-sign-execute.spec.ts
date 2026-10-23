@@ -7,7 +7,6 @@
  */
 import type { TestInfo } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { LedgerEmulator } from '../../src/api/ledger-emulator'
 import { TransactionQueuePage } from '../../src/pages/transaction-queue.page'
 import { ledgerOwner } from '../../environment/scenarios/ledger.mjs'
@@ -29,8 +28,6 @@ async function attachReview(testInfo: TestInfo, name: string, review: string[]):
 }
 
 test.describe('Ledger signing', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Needs the emulated Ledger of the isolated stack')
-
   let device: LedgerEmulator
 
   test.beforeAll(async () => {

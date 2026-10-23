@@ -2,7 +2,6 @@ import { Wallet } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
@@ -16,17 +15,14 @@ function rejectionNonces(history: TransactionItemPage): Array<number | undefined
 }
 
 test.describe('Reject a queued transaction', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safe on the isolated stack')
-
   test('should execute an on-chain rejection at the nonce of the transfer when an owner rejects it', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
     const transfer = await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: '0.001' })
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
 
     const queue = new TxQueuePage(safePage)
     const review = new TxReviewPage(safePage)

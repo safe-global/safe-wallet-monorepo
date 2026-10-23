@@ -7,7 +7,6 @@ import { Interface, Wallet, parseEther } from 'ethers'
 import type { Page } from '@playwright/test'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { transactionsIn } from '../../src/api/transaction-items'
@@ -45,16 +44,16 @@ async function reviewTransfer(page: Page, child: SeededSafe, recipient: string):
 }
 
 test.describe('In-app nested signer', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safes on the isolated stack')
-
   test('should execute a transfer of the child Safe once the parent Safe executes its approval', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const recipient = Wallet.createRandom().address
-    const { parent, child } = await seedNestedSafe(journey)
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['parent'], threshold: 1 },
+    })
     const review = new TxReviewPage(safePage)
     const success = new NestedTxSuccessPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -107,9 +106,11 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
-    const { parent, child } = await seedNestedSafe(journey)
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+  }) => {
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['parent'], threshold: 1 },
+    })
     const review = new TxReviewPage(safePage)
 
     await reviewTransfer(safePage, child, Wallet.createRandom().address)
@@ -126,11 +127,13 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const recipient = Wallet.createRandom().address
     const { owner4 } = journey.owners
-    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['owner4', 'parent'], threshold: 2 },
+    })
     const seeded = await seedQueuedTransfer(child, { nonce: 0, recipient, amount: AMOUNT })
     const review = new TxReviewPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -174,9 +177,11 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
-    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+  }) => {
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['owner4', 'parent'], threshold: 2 },
+    })
     const review = new TxReviewPage(safePage)
 
     await reviewTransfer(safePage, child, Wallet.createRandom().address)

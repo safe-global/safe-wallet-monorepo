@@ -4,11 +4,10 @@ import { SigningMethod } from '@safe-global/types-kit'
 import { parseEther } from 'ethers'
 import { confirmInQueue } from '../../environment/scenarios/gateway.mjs'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
-import { createSafeAddress, openSafe } from '../../environment/scenarios/safe.mjs'
+import { openSafe } from '../../environment/scenarios/safe.mjs'
 import { transactionsIn } from '../api/transaction-items'
-import { NETWORK_PREFIXES } from '../data/constants'
 import type { Journey } from '../fixtures/journey.fixture'
-import { seedQueuedTransfer, type QueuedTransaction, type SeededSafe } from './safe'
+import { seedQueuedTransfer, seedSafe, type QueuedTransaction, type SeededSafe } from './safe'
 
 function confirmationsOf(queue: QueuedItemPage, txId: string): number | undefined {
   const transaction = transactionsIn(queue).find((tx) => tx.id === txId)
@@ -42,32 +41,26 @@ export async function seedSignedTransfer(
 export async function seedTransferWithContractSignature(
   journey: Journey,
   transfer: { recipient: string; amount: string },
-): Promise<{ safe: SeededSafe; parentAddress: string; queued: QueuedTransaction }> {
-  const { env, owners } = journey
-  const parentAddress = await createSafeAddress(env, owners, { threshold: 1, ownerAddresses: [owners.owner1.address] })
-  const address = await createSafeAddress(env, owners, {
-    threshold: 2,
-    ownerAddresses: [owners.owner4.address, parentAddress],
-  })
-  const safe: SeededSafe = {
-    address,
-    prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}`,
-    context: await openSafe(env, owners.owner4, address),
-  }
+): Promise<SeededSafe> {
+  const parent = await seedSafe(journey, { owners: ['owner1'], threshold: 1 })
+  const safe = await seedSafe(journey, { owners: ['owner4', parent], threshold: 2 })
   const queued = await seedQueuedTransfer(safe, { nonce: 0, ...transfer })
 
-  const parent = await openSafe(env, owners.owner1, parentAddress)
   const transaction = await safe.context.safe.createTransaction({
     transactions: [{ to: transfer.recipient, value: parseEther(transfer.amount).toString(), data: '0x' }],
     options: { nonce: 0 },
   })
-  const signedByParentOwner = await parent.safe.signTransaction(transaction, SigningMethod.SAFE_SIGNATURE, address)
-  const contractSignature = await buildContractSignature([...signedByParentOwner.signatures.values()], parentAddress)
+  const signedByParentOwner = await parent.context.safe.signTransaction(
+    transaction,
+    SigningMethod.SAFE_SIGNATURE,
+    safe.address,
+  )
+  const contractSignature = await buildContractSignature([...signedByParentOwner.signatures.values()], parent.address)
   await confirmInQueue(safe.context, queued.safeTxHash, buildSignatureBytes([contractSignature]))
   await waitUntil(
-    env,
+    journey.env,
     `${safe.context.path}/transactions/queued`,
     (queue: QueuedItemPage) => confirmationsOf(queue, queued.txId) === 2,
   )
-  return { safe, parentAddress, queued }
+  return safe
 }

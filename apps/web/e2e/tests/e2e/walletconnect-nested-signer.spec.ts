@@ -10,7 +10,6 @@ import { Interface, Wallet, hashMessage, parseEther } from 'ethers'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { short } from '../../environment/scenarios/chain.mjs'
@@ -54,7 +53,10 @@ type NestedSignerFixtures = {
 }
 
 const test = base.extend<NestedSignerFixtures>({
-  nestedSafes: [{}, { option: true }],
+  nestedSafes: [
+    { parent: { owners: ['owner4'], threshold: 1 }, child: { owners: ['parent'], threshold: 1 } },
+    { option: true },
+  ],
   childPage: async ({ browser }, provide, testInfo) => {
     const context = await browser.newContext({
       baseURL: testInfo.project.use.baseURL,
@@ -108,7 +110,6 @@ const test = base.extend<NestedSignerFixtures>({
 })
 
 test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safes on the isolated stack')
   // The hosted relay can drop a message; a second pairing tells that apart from a defect.
   test.describe.configure({ retries: 1 })
 
@@ -177,7 +178,12 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
   })
 
   test.describe('with a 2/2 child Safe that OWNER_4 and the parent own', () => {
-    test.use({ nestedSafes: { child: { withOwner4: true, threshold: 2 } } })
+    test.use({
+      nestedSafes: {
+        parent: { owners: ['owner4'], threshold: 1 },
+        child: { owners: ['owner4', 'parent'], threshold: 2 },
+      },
+    })
 
     test('should add the on-chain confirmation of the parent to a queued transfer of the child Safe', async ({
       safePage,
@@ -213,7 +219,12 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
   })
 
   test.describe('with a 2/2 parent Safe', () => {
-    test.use({ nestedSafes: { parent: { ownerCount: 2, threshold: 2 } } })
+    test.use({
+      nestedSafes: {
+        parent: { owners: ['owner4', 'owner1'], threshold: 2 },
+        child: { owners: ['parent'], threshold: 1 },
+      },
+    })
 
     test('should queue the approval in the parent Safe with the child transaction next to it', async ({
       safePage,
@@ -242,7 +253,12 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
 
   test.describe('with a child Safe 1.5.0', () => {
     // Below 1.5.0 a Safe asks a contract owner about the message preimage, so only 1.5.0 children can work
-    test.use({ nestedSafes: { child: { withOwner4: false, threshold: 1, safeVersion: '1.5.0' } } })
+    test.use({
+      nestedSafes: {
+        parent: { owners: ['owner4'], threshold: 1 },
+        child: { owners: ['parent'], threshold: 1, safeVersion: '1.5.0' },
+      },
+    })
 
     test('should give a dApp of the child Safe a signature that the child accepts when the parent signs the message', async ({
       safePage,
@@ -267,7 +283,12 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     })
 
     test.describe('and a 2/2 child of OWNER_4 and the parent', () => {
-      test.use({ nestedSafes: { child: { withOwner4: true, threshold: 2, safeVersion: '1.5.0' } } })
+      test.use({
+        nestedSafes: {
+          parent: { owners: ['owner4'], threshold: 1 },
+          child: { owners: ['owner4', 'parent'], threshold: 2, safeVersion: '1.5.0' },
+        },
+      })
 
       test('should combine the contract signature of the parent with the signature of OWNER_4', async ({
         safePage,
@@ -297,8 +318,8 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     test.describe('and a 2/2 parent of OWNER_4 and OWNER_1', () => {
       test.use({
         nestedSafes: {
-          parent: { ownerCount: 2, threshold: 2 },
-          child: { withOwner4: false, threshold: 1, safeVersion: '1.5.0' },
+          parent: { owners: ['owner4', 'owner1'], threshold: 2 },
+          child: { owners: ['parent'], threshold: 1, safeVersion: '1.5.0' },
         },
       })
 

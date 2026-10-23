@@ -1,6 +1,5 @@
 import { Wallet } from 'ethers'
 import { readSafeSetup } from '../../src/chain/recovery'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe } from '../../src/seed/safe'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
@@ -17,17 +16,14 @@ async function ownerSetupInCgw(safeApiClient: SafeApiClient, safeAddress: string
 }
 
 test.describe('Owner management', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safe on the isolated stack')
-
   test('should add the signer and require two confirmations when an owner adds a signer with threshold 2', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const { owner4 } = journey.owners
     const newSigner = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { threshold: 1, ownerCount: 1 })
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
+    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -51,11 +47,10 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const { owner4, owner1 } = journey.owners
     const newSigner = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { threshold: 1, ownerCount: 2 })
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -80,10 +75,9 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const { owner4, owner1 } = journey.owners
-    const safe = await seedSafe(journey, { threshold: 1, ownerCount: 2 })
-    testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
