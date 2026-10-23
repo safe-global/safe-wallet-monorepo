@@ -129,7 +129,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                     >
                       {Object.values(TxFilterType).map((value) => (
                         <div key={value} className={css.radioOption}>
-                          <RadioGroupItem value={value} id={`filter-type-${value}`} />
+                          <RadioGroupItem value={value} id={`filter-type-${value}`} aria-label={value} />
                           <Label htmlFor={`filter-type-${value}`} className="font-normal">
                             {value}
                           </Label>

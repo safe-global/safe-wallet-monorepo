@@ -4,7 +4,6 @@ const recipientInput = 'input[name="recipient"]'
 export const nftsRow = '[data-testid^="nfts-table-row"]'
 const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"]`
 const selectAllNFTsCheckbox = '[data-slot="checkbox"][title="Select all"]'
-const activeSendNFTBtn = '[data-testid="nft-send-btn-false"]'
 export const accordionActionItem = '[data-testid="action-item"]'
 
 export function verifyDataInTable(name, address, tokenID) {
@@ -33,14 +32,6 @@ export function checkSelectedNFTsNumberIs(numberOfNFTs) {
   cy.contains('button', `Send ${numberOfNFTs} NFT${numberOfNFTs > 1 ? 's' : ''}`)
 }
 
-export function sendNFT() {
-  cy.get(activeSendNFTBtn).click()
-}
-
 export function typeRecipientAddress(address) {
   cy.get(recipientInput).type(address)
-}
-
-export function clikOnNextBtn() {
-  cy.contains('button', main.nextBtnStr).click()
 }

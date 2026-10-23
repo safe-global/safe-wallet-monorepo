@@ -1,6 +1,12 @@
 import { parseEther } from 'ethers'
 import { waitForQueued, waitUntil } from '../../environment/scenarios/indexing.mjs'
-import { createSafeAddress, openSafe, proposeTransaction } from '../../environment/scenarios/safe.mjs'
+import {
+  createSafeAddress,
+  executeTransaction,
+  openSafe,
+  proposeTransaction,
+} from '../../environment/scenarios/safe.mjs'
+import { readChain } from '../chain/local-provider'
 import type { OwnedSafes } from '@safe-global/store/gateway/types'
 import { NETWORK_PREFIXES } from '../data/constants'
 import type { Journey, OwnerName } from '../fixtures/journey.fixture'
@@ -56,6 +62,18 @@ export async function seedQueuedTransfer(
   const { hash } = await proposeTransaction(context, transfer)
   await waitForQueued(context.env, context, [hash])
   return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
+}
+
+/** Executes an ETH transfer signed by the Safe's context signer, and waits until the CGW history lists it. */
+export async function seedExecutedTransfer(
+  safe: SeededSafe,
+  { recipient, amount }: { recipient: string; amount: string },
+): Promise<void> {
+  const { context } = safe
+  const transfer = await context.safe.createTransaction({
+    transactions: [{ to: recipient, value: parseEther(amount).toString(), data: '0x' }],
+  })
+  await readChain(context.env, (provider) => executeTransaction({ ...context, provider }, transfer))
 }
 
 type NestedSafeSetup = {

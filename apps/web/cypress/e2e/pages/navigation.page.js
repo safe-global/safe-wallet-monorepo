@@ -1,5 +1,4 @@
 export const sideNavSettingsIcon = '[data-testid="settings-nav-icon"]'
-export const setupSection = '[data-testid="setup-section"]'
 export const modalBackBtn = '[data-testid="modal-back-btn"]'
 export const newTxBtn = '[data-testid="new-tx-btn"]'
 // The dialog close control kept its aria-label in the shadcn migration, but the icon
@@ -32,10 +31,6 @@ export function clickOnDiscardTxBtn() {
 
 export function clickOnNewTxBtn() {
   cy.get(newTxBtn).click()
-}
-
-export function clickOnNewTxBtnS() {
-  cy.get('button').contains('Next').click()
 }
 
 export function clickOnWalletExpandMoreIcon() {

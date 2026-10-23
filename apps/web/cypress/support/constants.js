@@ -22,7 +22,6 @@ export { defaultOwnerAddress } from './credentials.js'
 export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
 export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
 export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
-export const SEPOLIA_OWNER_2_SHORT = '0x96D4...5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
 export const SIDEBAR_ADDRESS = '0x04f8...1a91'
 //ENS_TEST_SEPOLIA resolves to 0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F
@@ -106,13 +105,9 @@ export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl =
   (Cypress.expose('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
-export const stagingCGWUrlv2 = `${stagingCGWUrl}v2`
 export const stagingCGWChains = '/chains/'
 export const stagingCGWSafes = '/safes/'
-export const stagingCGWNone = '/nonces/'
-export const stagingCGWCollectibles = '/collectibles/'
 export const stagingCGWDelegatesUrl = '/delegates?safe='
-export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'

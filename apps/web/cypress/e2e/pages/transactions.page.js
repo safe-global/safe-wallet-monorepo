@@ -8,7 +8,6 @@ const relayExecutionMethod = '[data-testid="relay-execution-method"]'
 const txStatus = '[data-testid="transaction-status"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const executeBtn = '[data-testid="combo-submit-execute"]'
-const signedNotice = '[data-testid="signed-notice"]'
 const radioItem = '[data-slot="radio-group-item"]'
 const signBtn = '[data-testid="sign-btn"]'
 const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handler-warning"]'
@@ -46,11 +45,6 @@ export function selectConnectedWalletIfOffered() {
       cy.get(connectedWalletExecutionMethod).click()
       cy.get(connectedWalletExecutionMethod).find(radioItem).should('have.attr', 'aria-checked', 'true')
     })
-}
-
-function selectRelayAndWaitUntilChecked() {
-  cy.get(relayExecutionMethod, { timeout: 30000 }).click()
-  verifyRelayExecutionMethodChecked()
 }
 
 function continueToSubmitStep() {
@@ -92,20 +86,6 @@ function executeAndFinish() {
 export function signAndExecuteWithConnectedWallet() {
   continueToSubmitStep()
   signAndOpenExecuteStep()
-  selectConnectedWalletIfOffered()
-  executeAndFinish()
-}
-
-export function signAndExecuteWithRelay() {
-  continueToSubmitStep()
-  signAndOpenExecuteStep()
-  selectRelayAndWaitUntilChecked()
-  executeAndFinish()
-}
-
-export function executeSignedTxWithConnectedWallet() {
-  continueToSubmitStep()
-  cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
   selectConnectedWalletIfOffered()
   executeAndFinish()
 }

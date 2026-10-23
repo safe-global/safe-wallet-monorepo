@@ -34,7 +34,6 @@ const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const expandSafesList = '[data-testid="expand-safes-list"]'
 export const importBtn = '[data-testid="import-btn"]'
-export const pendingActivationIcon = '[data-testid="safe-selector-not-activated-icon"]'
 const safeItemMenuIcon = '[data-testid="MoreVertIcon"]'
 const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const addChainDialog = "[data-testid='add-chain-dialog']"
@@ -80,10 +79,6 @@ export function clickOnOpenNestedSafeListBtn() {
 
 export function checkSafesInPopverList(safes) {
   main.verifyValuesExist(nestedSafeListPopover, safes)
-}
-
-export function checkSafesCountInPopverList(number) {
-  main.verifyElementsCount(nestedSafeListPopover, number)
 }
 
 export function clickOnSafeInPopover(safe) {
