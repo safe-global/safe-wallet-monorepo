@@ -5,9 +5,9 @@ import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import {
   createDefaultAllowlistValues,
-  type AllowlistRecipient,
+  type AllowlistFormRecipient,
   type RecipientAllowlistFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+} from '../../types'
 import RecipientsSection from '../RecipientsSection'
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -16,7 +16,7 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
 }))
 jest.mock('../AddFromAddressBook', () => ({
   __esModule: true,
-  default: ({ onAdd }: { onAdd: (recipients: AllowlistRecipient[]) => void }) => (
+  default: ({ onAdd }: { onAdd: (recipients: AllowlistFormRecipient[]) => void }) => (
     <button onClick={() => onAdd([{ address: BOOK_ADDRESS, name: 'Carol', fromAddressBook: true, selected: true }])}>
       Add from address book
     </button>
@@ -30,7 +30,7 @@ jest.mock('../RecipientDraftRow', () => ({
     onCancel,
     autoFocus,
   }: {
-    onAdd: (recipient: AllowlistRecipient) => void
+    onAdd: (recipient: AllowlistFormRecipient) => void
     onCancel: () => void
     autoFocus?: boolean
   }) => (
@@ -50,14 +50,14 @@ const DRAFT_ADDRESS = checksumAddress(faker.finance.ethereumAddress())
 const SAFE_ADDRESS = checksumAddress(faker.finance.ethereumAddress())
 const CHAIN_ID = '1'
 
-const recipient = (overrides: Partial<AllowlistRecipient> = {}): AllowlistRecipient => ({
+const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFormRecipient => ({
   address: checksumAddress(faker.finance.ethereumAddress()),
   selected: true,
   ...overrides,
 })
 
 const setup = (
-  recipients: AllowlistRecipient[] = [],
+  recipients: AllowlistFormRecipient[] = [],
   props: {
     hasAccount?: boolean
     isCalloutDismissed?: boolean
