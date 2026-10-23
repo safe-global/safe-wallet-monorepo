@@ -9,7 +9,7 @@ import {
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { mapActivePolicies } from '../utils/mapActivePolicies'
-import { TRANSACTION_GUARD_ONLY, mockTreasuryAllowlistDtos } from './activePolicies'
+import { MODULE_GUARD_ONLY, TRANSACTION_GUARD_ONLY, mockTreasuryAllowlistDtos } from './activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, asActivePolicy } from './policies'
 
 const POLICY_GUARD = '0x1a4F7b8C9d0E1f2A3b4C5d6E7f8091A2b3C4c802'
@@ -30,6 +30,7 @@ export const mockAllowlistPolicy = (overrides: Partial<AllowlistPolicy> = {}): A
   safe: MOCK_SAFES.treasury,
   enforcement: { via: 'guard', guardAddress: POLICY_GUARD },
   enabled: true,
+  spendingLimitsCovered: true,
   data: {
     entries: [
       { token: MOCK_TOKENS.usdc, recipients: RECIPIENTS },
@@ -59,9 +60,12 @@ export const mockCgwAllowlist = (
 }
 
 export const mockCgwUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  mockCgwAllowlist(mockTreasuryAllowlistDtos(MODULE_GUARD_ONLY))
+
+export const mockCgwUncoveredAllowlist = (): AllowlistPolicy & { status: 'active' } =>
   mockCgwAllowlist(mockTreasuryAllowlistDtos(TRANSACTION_GUARD_ONLY))
 
-/** The guard is not in both slots, so the row reads "Not enforced". */
+/** The transaction slot is empty, so the row reads "Not enforced". */
 export const mockUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>
   asActivePolicy(mockAllowlistPolicy({ id: '0xallowlist-unenforced', enabled: false }))
 

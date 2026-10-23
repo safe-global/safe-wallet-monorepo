@@ -181,6 +181,7 @@ describe('mapActivePolicies', () => {
         safe: MOCK_SAFES.treasury,
         enforcement: { via: 'guard', guardAddress: GUARD },
         enabled: true,
+        spendingLimitsCovered: true,
       })
       expect(policy.data.entries.map((entry) => entry.token.address)).toEqual([
         ZERO_ADDRESS,
@@ -268,22 +269,40 @@ describe('mapActivePolicies', () => {
 
     it.each<[string, GuardSlotsDto, boolean]>([
       ['both slots', { transactionGuard: CONTRACTS, moduleGuard: CONTRACTS }, true],
-      ['only the transaction slot', { transactionGuard: CONTRACTS }, false],
+      ['only the transaction slot', { transactionGuard: CONTRACTS }, true],
       ['only the module slot', { moduleGuard: CONTRACTS }, false],
       ['no slot', {}, false],
-    ])('marks the allowlist enabled only when the guard is in both slots: %s', (_, guards, enabled) => {
+    ])('marks the allowlist enabled only when the guard is in the transaction slot: %s', (_, guards, enabled) => {
       const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), guards)])
 
       expect(policy.enabled).toBe(enabled)
     })
 
+    it.each<[string, GuardSlotsDto, boolean]>([
+      ['both slots', { transactionGuard: CONTRACTS, moduleGuard: CONTRACTS }, true],
+      ['only the transaction slot', { transactionGuard: CONTRACTS }, false],
+    ])('covers spending limits only when the guard is in the module slot: %s', (_, guards, covered) => {
+      const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), guards)])
+
+      expect(policy).toMatchObject({ spendingLimitsCovered: covered })
+    })
+
     it('marks the whole row not enabled when one of its policies is not enforced', () => {
+      const [policy] = toAllowlists([
+        mockErc20TransferDto(),
+        withGuards(mockNativeTransferDto(), { moduleGuard: CONTRACTS }),
+      ])
+
+      expect(policy.enabled).toBe(false)
+    })
+
+    it('marks the whole row not covering spending limits when one of its policies lacks the module slot', () => {
       const [policy] = toAllowlists([
         mockErc20TransferDto(),
         withGuards(mockNativeTransferDto(), { transactionGuard: CONTRACTS }),
       ])
 
-      expect(policy.enabled).toBe(false)
+      expect(policy).toMatchObject({ enabled: true, spendingLimitsCovered: false })
     })
   })
 })

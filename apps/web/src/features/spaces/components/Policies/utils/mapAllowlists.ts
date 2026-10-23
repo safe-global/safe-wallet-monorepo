@@ -25,6 +25,7 @@ type AllowlistDto = ActivePolicyDto & { enforcement: Extract<ActivePolicyDto['en
 type AllowlistGroup = {
   safe: PolicySafe
   enabled: boolean
+  spendingLimitsCovered: boolean
   guardAddress?: string
   tokens: Map<string, AllowlistEntry>
   nativeRecipients: AllowlistRecipient[]
@@ -35,9 +36,8 @@ const isAllowlistDto = (dto: ActivePolicyDto): dto is AllowlistDto =>
 
 const isAllowlistData = (data: ActivePolicyDto['data']): data is Erc20TransferPolicyDataDto => 'tokenAddress' in data
 
-/** CGW calls a policy enabled when either slot holds the guard, but an empty slot leaves one path unchecked. */
-// TODO(WA-3964): tell a partly enforced guard (one slot) apart from a missing one, and show it in the UI.
-const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard && !!guards.moduleGuard
+/** CGW calls a policy enabled when either slot holds the guard, but owner transactions go through the transaction slot. */
+const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard
 
 const toNativeRecipient = ({ target, selector, operation }: PolicyAccessDto): string | null => {
   if (operation !== 'CALL' || selector.toLowerCase() !== NATIVE_TRANSFER_SELECTOR) return null
@@ -91,6 +91,7 @@ const toAllowlist = (
         guardAddress: group.guardAddress ?? getPolicyGuardAddress(group.safe.chainId) ?? '',
       },
       enabled: group.enabled,
+      spendingLimitsCovered: group.spendingLimitsCovered,
       data: { entries },
     },
   ]
@@ -108,11 +109,13 @@ export const toAllowlists = (dtos: ActivePolicyDto[], resolveNativeToken: Native
     const group: AllowlistGroup = bySafe.get(key) ?? {
       safe: dto.safe,
       enabled: true,
+      spendingLimitsCovered: true,
       tokens: new Map(),
       nativeRecipients: [],
     }
 
     group.enabled = group.enabled && isEnforced(guards)
+    group.spendingLimitsCovered = group.spendingLimitsCovered && !!guards.moduleGuard
     group.guardAddress ??= (guards.transactionGuard ?? guards.moduleGuard)?.safePolicyGuard
     addToGroup(group, dto)
     bySafe.set(key, group)

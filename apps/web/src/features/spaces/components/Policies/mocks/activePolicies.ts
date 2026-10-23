@@ -96,8 +96,11 @@ export const mockNativeTransferDto = (
   ...overrides,
 })
 
-/** The guard in the transaction slot only, so the allowlist reads "Not enforced". */
+/** The allowlist is active, but spending limits are not covered. */
 export const TRANSACTION_GUARD_ONLY: GuardSlotsDto = { transactionGuard: POLICY_CONTRACTS }
+
+/** The transaction slot is empty, so the allowlist reads "Not enforced" despite the module slot. */
+export const MODULE_GUARD_ONLY: GuardSlotsDto = { moduleGuard: POLICY_CONTRACTS }
 
 const withGuards = (dto: ActivePolicyDto, guards: GuardSlotsDto): ActivePolicyDto =>
   dto.enforcement.via === 'guard' ? { ...dto, enforcement: { ...dto.enforcement, guards } } : dto
