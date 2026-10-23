@@ -8,7 +8,6 @@ const relayExecutionMethod = '[data-testid="relay-execution-method"]'
 const txStatus = '[data-testid="transaction-status"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const executeBtn = '[data-testid="combo-submit-execute"]'
-const signedNotice = '[data-testid="signed-notice"]'
 const radioItem = '[data-slot="radio-group-item"]'
 const signBtn = '[data-testid="sign-btn"]'
 const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handler-warning"]'
@@ -100,13 +99,6 @@ export function signAndExecuteWithRelay() {
   continueToSubmitStep()
   signAndOpenExecuteStep()
   selectRelayAndWaitUntilChecked()
-  executeAndFinish()
-}
-
-export function executeSignedTxWithConnectedWallet() {
-  continueToSubmitStep()
-  cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
-  selectConnectedWalletIfOffered()
   executeAndFinish()
 }
 

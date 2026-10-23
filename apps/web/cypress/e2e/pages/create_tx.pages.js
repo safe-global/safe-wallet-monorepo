@@ -801,19 +801,6 @@ export function verifyConfirmTransactionBtnIsVisible() {
   cy.get('button').contains(confirmBtnStr).should('be.visible')
 }
 
-export function clickOnConfirmBtn(index) {
-  cy.wait(2000)
-  cy.get(transactionItem)
-    .eq(index)
-    .within(() => {
-      cy.get('button')
-        .contains(confirmBtnStr)
-        .then((elements) => {
-          cy.wrap(elements[0]).click()
-        })
-    })
-}
-
 export function clickOnExecuteBtn(index) {
   cy.get(transactionItem, { timeout: 30000 }).eq(index).find(executeTxBtn).should('be.enabled').click()
 }

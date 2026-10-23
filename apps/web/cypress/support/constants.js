@@ -106,11 +106,9 @@ export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl =
   (Cypress.expose('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
-export const stagingCGWUrlv2 = `${stagingCGWUrl}v2`
 export const stagingCGWChains = '/chains/'
 export const stagingCGWSafes = '/safes/'
 export const stagingCGWNone = '/nonces/'
-export const stagingCGWCollectibles = '/collectibles/'
 export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
