@@ -14,7 +14,7 @@ test.describe('Workspace policies', { tag: '@e2e' }, () => {
   }) => {
     const { owner3, owner4 } = journey.owners
     const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
-    const workspaceId = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
 
     const policies = new PoliciesPage(safePage)
     await policies.goto(workspaceId)
@@ -40,7 +40,7 @@ test.describe('Workspace policies', { tag: '@e2e' }, () => {
       parent: { owners: ['owner4'], threshold: 1 },
       child: { owners: ['parent'], threshold: 1 },
     })
-    const workspaceId = await seedBusinessWorkspace(safePage, { 'Parent Safe': parent, 'Nested Safe': child })
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { 'Parent Safe': parent, 'Nested Safe': child })
 
     const policies = new PoliciesPage(safePage)
     await policies.goto(workspaceId)
