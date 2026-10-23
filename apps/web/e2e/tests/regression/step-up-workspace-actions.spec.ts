@@ -46,7 +46,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     setup = await createEmailSession(email)
     workspaceId = (await createWorkspace(setup, 'Step-up actions')).uuid
     // The default trial reaches the gateway late; a stored plan gives the Workspace its Safe seats now.
-    await storeSubscription(workspaceId)
+    await storeSubscription(setup, workspaceId)
   })
 
   test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
@@ -208,7 +208,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
   test('should delete the Workspace from the Workspace list when the step-up succeeds', async ({ safePage }) => {
     // Only a Workspace without a subscription that could still bill can be deleted.
-    await storeSubscription(workspaceId, { status: 'canceled' })
+    await storeSubscription(setup, workspaceId, { status: 'canceled' })
     await safePage.goto('/welcome/spaces')
 
     const card = safePage.getByRole('link').filter({ hasText: 'Step-up actions' })

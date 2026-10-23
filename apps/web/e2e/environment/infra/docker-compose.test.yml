@@ -280,6 +280,8 @@ services:
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       # Throwaway P-256 test key; its public half is BILLING_WEBHOOK_JWT_PUBLIC_KEY of cgw-web.
       BILLING_WEBHOOK_SIGNING_KEY: 9df1216f154fc36b2e5df222b08470df3cac20b9f5679328781f959373e2b23d
+      # Where a browser reaches the mock's checkout page, through nginx.
+      BILLING_PUBLIC_URL: http://localhost:${REVERSE_PROXY_PORT:-8000}/billing
     healthcheck:
       test:
         - CMD
@@ -616,7 +618,8 @@ services:
       FF_MFA_STEP_UP: 'true'
       AUTH0_REDIRECT_URI: http://localhost:${REVERSE_PROXY_PORT:-8000}/cgw/v1/auth/oidc/callback
       AUTH0_API_AUDIENCE: safe-e2e-local
-      AUTH_ALLOWED_REDIRECT_DOMAIN: safe-e2e.test
+      # On localhost the wallet names the staging app as the checkout return URL (returnUrl.ts); loopback is allowed anyway.
+      AUTH_ALLOWED_REDIRECT_DOMAIN: safe-wallet-web.dev.5afe.dev
       # Specs sign in and create Workspaces many times within minutes; the production limits answer them with 429.
       AUTH_RATE_LIMIT_MAX: '1000'
       SPACES_RATE_LIMIT_MAX: '1000'
