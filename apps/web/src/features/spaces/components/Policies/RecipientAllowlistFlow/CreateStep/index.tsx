@@ -15,11 +15,8 @@ import {
   createDefaultAllowlistValues,
   type RecipientAllowlistFlowData,
   type RecipientAllowlistFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
-import {
-  buildAllowlistRules,
-  isAllowlistComplete,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
+} from '../types'
+import { buildAllowlistRules, isAllowlistComplete } from '../utils/allowlistForm'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'

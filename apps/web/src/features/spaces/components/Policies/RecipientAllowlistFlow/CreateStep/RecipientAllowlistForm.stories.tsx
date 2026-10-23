@@ -6,11 +6,7 @@ import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERAT
 import { createMockStory } from '@/stories/mocks'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
-import {
-  createDefaultAllowlistValues,
-  type AllowlistRecipient,
-  type RecipientAllowlistFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { createDefaultAllowlistValues, type AllowlistFormRecipient, type RecipientAllowlistFormValues } from '../types'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -63,7 +59,7 @@ const filledValues: RecipientAllowlistFormValues = {
 }
 
 faker.seed(3079)
-const manyRecipients: AllowlistRecipient[] = Array.from({ length: 20 }, (_, index) => ({
+const manyRecipients: AllowlistFormRecipient[] = Array.from({ length: 20 }, (_, index) => ({
   address: faker.finance.ethereumAddress(),
   name: index % 2 === 0 ? faker.person.firstName() : undefined,
   selected: index % 3 !== 0,

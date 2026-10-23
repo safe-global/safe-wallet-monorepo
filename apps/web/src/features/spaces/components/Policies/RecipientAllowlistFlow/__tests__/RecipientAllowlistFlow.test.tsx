@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics'
-import { createDefaultAllowlistValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { createDefaultAllowlistValues } from '../types'
 import RecipientAllowlistFlow from '..'
 
 jest.mock('@/components/tx-flow/TxFlow', () => ({

@@ -5,10 +5,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import {
-  createDefaultAllowlistValues,
-  type RecipientAllowlistFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { createDefaultAllowlistValues, type RecipientAllowlistFormValues } from '../../types'
 import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import RecipientAllowlistForm from '../RecipientAllowlistForm'
 

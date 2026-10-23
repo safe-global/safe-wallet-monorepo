@@ -5,10 +5,7 @@ import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowType } from '@/services/analytics'
 import CreateRecipientAllowlistPolicy from './CreateStep'
 import type { CalloutSection } from './CreateStep/RecipientAllowlistForm'
-import {
-  createDefaultAllowlistValues,
-  type RecipientAllowlistFlowData,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import { createDefaultAllowlistValues, type RecipientAllowlistFlowData } from './types'
 import { CREATE_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { FLOW_SUBTITLE } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import RecipientAllowlistIcon from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/RecipientAllowlistIcon'

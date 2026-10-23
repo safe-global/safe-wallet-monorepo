@@ -1,11 +1,8 @@
 import { useMemo, type ReactElement, type ReactNode } from 'react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
-import type { RecipientAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
-import {
-  getAllowedTokenAddresses,
-  getSelectedRecipients,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
+import type { RecipientAllowlistFormValues } from '../types'
+import { getAllowedTokenAddresses, getSelectedRecipients } from '../utils/allowlistForm'
 import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokensSection from './TokensSection'
