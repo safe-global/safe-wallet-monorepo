@@ -28,7 +28,8 @@ import {
 } from '@/services/analytics'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
-import { SimilarSavedAddressNotice, useAddressPoisoningCheck } from '@/features/address-poisoning'
+import { useAddressPoisoningCheck } from '@/features/address-poisoning'
+import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 
@@ -44,13 +45,10 @@ type FormData = {
 
 const networkSelectTriggerClassName = `${largeFormFieldSurfaceClassName} w-full`
 
-const LOOKALIKE_TRACKING = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADD_SAFE }
-
 const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormData>) => {
   const currentChainId = useChainId()
   const addedSafes = useAppSelector((state) => selectAddedSafes(state, currentChainId))
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
-  // A look-alike Safe waiting for the user to confirm it in the similarity dialog.
   const [pendingData, setPendingData] = useState<FormData>()
   const formMethods = useForm<FormData>({
     mode: 'all',
@@ -71,7 +69,8 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
   const randomName = useMnemonicSafeName()
   const { ens, name, resolving } = useAddressResolver(safeAddress)
   const similar = useAddressPoisoningCheck(safeAddress)
-  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, LOOKALIKE_TRACKING, !!similar)
+  const lookalikeTracking = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADD_SAFE }
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, lookalikeTracking, !!similar)
 
   // Address book, ENS, mnemonic
   const fallbackName = name || ens || randomName
@@ -109,7 +108,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
   const onConfirmLookalike = () => {
     if (!pendingData) return
-    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, LOOKALIKE_TRACKING)
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     setPendingData(undefined)
     goToNextStep(pendingData)
   }
@@ -205,6 +204,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
       <SimilarityConfirmDialog
         open={!!pendingData}
         safe={{ address: pendingData?.[Field.address] ?? safeAddress, name: pendingData?.[Field.name] || undefined }}
+        addressLabel="Safe account"
         description={`This Safe account is similar to ${similar?.source === 'accounts' ? 'a Safe in your accounts' : 'an address in your address book'}. This could indicate an address poisoning attack.`}
         onConfirm={onConfirmLookalike}
         onCancel={() => setPendingData(undefined)}

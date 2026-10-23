@@ -1,19 +1,23 @@
 import { useMemo } from 'react'
 import { useHasFeature } from '@/hooks/useChains'
+import { useAppSelector } from '@/store'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { selectAnchorIndex } from '../store'
 import useSimilarityClusters from './useSimilarityClusters'
 
-/**
- * The addresses in a batch (e.g. a CSV import) that look like a saved address or like another
- * address in the same batch, lowercased. Unlike {@link useSimilarityClusters}, the in-batch check
- * is flag-gated too: nothing is flagged when ADDRESS_POISONING_PROTECTION is off.
- * Pass a referentially-stable `addresses`.
- */
+const NO_ADDRESSES: string[] = []
+
+/** Lowercased batch addresses that look like a saved address or another one in the batch; saved ones are skipped. */
 const useAddressPoisoningBatchCheck = (addresses: string[]): Set<string> => {
   const isEnabled = useHasFeature(FEATURES.ADDRESS_POISONING_PROTECTION)
-  const { flagged } = useSimilarityClusters(addresses)
+  const anchorIndex = useAppSelector(selectAnchorIndex)
 
-  return useMemo(() => (isEnabled ? flagged : new Set<string>()), [isEnabled, flagged])
+  const candidates = useMemo(
+    () => (isEnabled ? addresses.filter((address) => !anchorIndex.isAnchor(address)) : NO_ADDRESSES),
+    [isEnabled, addresses, anchorIndex],
+  )
+
+  return useSimilarityClusters(candidates).flagged
 }
 
 export default useAddressPoisoningBatchCheck

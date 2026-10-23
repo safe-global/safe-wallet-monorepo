@@ -26,11 +26,7 @@ const findSavedName = (addressBooks: AddressBookState, chainId: string, address:
     .map((addressBook) => findName(addressBook, address))
     .find(Boolean)
 
-/**
- * The saved address — an address book contact or a Safe in the user's accounts — that `address`
- * looks like. Undefined when it looks like none, is one of them, or is not a full address (yet).
- * Flag-gated by ADDRESS_POISONING_PROTECTION.
- */
+/** The saved contact or account Safe that `address` looks like; undefined if none, itself saved, or partial. */
 const useAddressPoisoningCheck = (address: string | undefined): SimilarSavedAddress | undefined => {
   const isEnabled = useHasFeature(FEATURES.ADDRESS_POISONING_PROTECTION)
   const chainId = useChainId()

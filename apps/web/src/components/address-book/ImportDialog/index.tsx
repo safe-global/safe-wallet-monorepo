@@ -43,8 +43,6 @@ const hasEntry = (entry: string[]) => {
   return entry.length === 3 && entry[0] && entry[1] && entry[2]
 }
 
-const LOOKALIKE_TRACKING = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_IMPORT }
-
 const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural)
 
 const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElement => {
@@ -62,7 +60,6 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
     return [entryLen, chainLen]
   }, [csvData])
 
-  // Rows below the header; addresses that look like a saved one or like another row get flagged.
   const entries = useMemo(() => csvData?.data.slice(1) ?? [], [csvData])
   const addresses = useMemo(() => entries.map(([address]) => address.trim()), [entries])
   const flagged = useAddressPoisoningBatchCheck(addresses)
@@ -78,7 +75,8 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
     return Array.from(byAddress.values())
   }, [entries, flagged])
 
-  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, LOOKALIKE_TRACKING, flaggedEntries.length > 0)
+  const lookalikeTracking = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_IMPORT }
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, lookalikeTracking, flaggedEntries.length > 0)
 
   const dispatch = useAppDispatch()
   const { CSVReader } = useCSVReader()
@@ -111,7 +109,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
   }
 
   const onImportLookalikes = () => {
-    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, LOOKALIKE_TRACKING)
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     importEntries(entries)
   }
 

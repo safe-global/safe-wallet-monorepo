@@ -13,7 +13,8 @@ import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { useUpsertWorkspaceSafeName, useWorkspaceAddressBookLabel, type AddressBookWriteScope } from '@/features/spaces'
-import { SimilarSavedAddressNotice, useAddressPoisoningCheck } from '@/features/address-poisoning'
+import { useAddressPoisoningCheck } from '@/features/address-poisoning'
+import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice'
 import {
   ADDRESS_POISONING_EVENTS,
   LookalikeWarningLocation,
@@ -26,8 +27,6 @@ export type AddressEntry = {
   name: string
   address: string
 }
-
-const LOOKALIKE_TRACKING = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_ENTRY }
 
 function EntryDialog({
   handleClose,
@@ -60,7 +59,6 @@ function EntryDialog({
   const workspaceLabel = useWorkspaceAddressBookLabel()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // A look-alike entry waiting for the user to confirm it in the similarity dialog.
   const [pendingEntry, setPendingEntry] = useState<AddressEntry>()
 
   const methods = useForm<AddressEntry>({
@@ -71,8 +69,10 @@ function EntryDialog({
   const { handleSubmit, formState, watch } = methods
 
   const address = watch('address')
-  const similar = useAddressPoisoningCheck(address)
-  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, LOOKALIKE_TRACKING, !!similar)
+  // A Workspace rename never makes the address a local anchor, so it would warn on every rename.
+  const similar = useAddressPoisoningCheck(scope === 'workspace' ? undefined : address)
+  const lookalikeTracking = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_ENTRY }
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, lookalikeTracking, !!similar)
 
   const save = async (data: AddressEntry) => {
     const targetChainIds = chainIds ?? [actualChainId]
@@ -110,7 +110,7 @@ function EntryDialog({
 
   const onConfirmLookalike = () => {
     if (!pendingEntry) return
-    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, LOOKALIKE_TRACKING)
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     setPendingEntry(undefined)
     save(pendingEntry).catch(onSaveError)
   }
@@ -157,7 +157,12 @@ function EntryDialog({
 
             {similar && (
               <div className="mt-4">
-                <SimilarSavedAddressNotice subject="This address" enteredAddress={address} similar={similar} />
+                <SimilarSavedAddressNotice
+                  subject="This address"
+                  enteredAddress={address}
+                  similar={similar}
+                  chainId={actualChainId}
+                />
               </div>
             )}
 

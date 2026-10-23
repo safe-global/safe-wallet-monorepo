@@ -7,16 +7,9 @@ import { selectAllCuratedNestedSafes } from '@/store/settingsSlice'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import type { RootState } from '@/store'
 
-// `selectAllAddressBooks` (addressBookSlice) and `selectAllCuratedNestedSafes` (settingsSlice) can
-// still be mid-evaluation when this module is first pulled in via the store barrel (slices.ts).
-// Reading the binding eagerly in a createSelector input yields `undefined` and crashes it, so the
-// selectors below wrap them to resolve the live binding at call-time instead.
+// Wrapped selectors resolve at call time: their slices can still be mid-evaluation via the store barrel.
 
-/**
- * The anchors that are Safes in the user's accounts — added / pinned, curated nested and
- * undeployed (counterfactual) Safes — flattened across chains and lowercased. Lets a warning say
- * an address looks like a Safe in "your accounts" rather than a contact in "your address book".
- */
+/** Anchors that are Safes in the user's accounts (added, curated nested, undeployed), lowercased. */
 export const selectAccountAnchorAddresses = createSelector(
   [selectAllAddedSafes, (state: RootState) => selectAllCuratedNestedSafes(state), selectUndeployedSafes],
   (addedSafes, curatedNested, undeployedSafes): Set<string> => {

@@ -1,20 +1,19 @@
 import type { ReactElement } from 'react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { SimilarAddressNotice, SimilarAddressTooltip } from '@/components/common/SimilarAddressNotice'
-import type { SimilarSavedAddress } from '../hooks/useAddressPoisoningCheck'
+import type { SimilarSavedAddress } from '@/features/address-poisoning'
+import { SimilarAddressNotice } from './SimilarAddressNotice'
+import { SimilarAddressTooltip } from './SimilarAddressTooltip'
 
-/**
- * "<subject> is similar to <saved name> in your address book / accounts." Hovering the name compares
- * the two addresses. An unnamed saved address is shown shortened.
- */
-const SimilarSavedAddressNotice = ({
+export const SimilarSavedAddressNotice = ({
   subject,
   enteredAddress,
   similar,
+  chainId,
 }: {
   subject: string
   enteredAddress: string
   similar: SimilarSavedAddress
+  chainId?: string
 }): ReactElement => (
   <SimilarAddressNotice>
     {subject} is similar to{' '}
@@ -22,9 +21,8 @@ const SimilarSavedAddressNotice = ({
       name={similar.name ?? shortenAddress(similar.address)}
       savedAddress={similar.address}
       enteredAddress={enteredAddress}
+      chainId={chainId}
     />{' '}
     in {similar.source === 'accounts' ? 'your accounts' : 'your address book'}.
   </SimilarAddressNotice>
 )
-
-export default SimilarSavedAddressNotice
