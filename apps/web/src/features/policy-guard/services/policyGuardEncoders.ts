@@ -1,6 +1,6 @@
 import { AbiCoder, Interface, keccak256 } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import type { PolicyConfiguration } from '../types'
+import type { PolicyConfiguration, SetupCallDescription } from '../types'
 
 // Hand-written from SafePolicyGuard.sol until the WA-3034 artifact package is published
 const CONFIGURATION_TUPLE = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -15,6 +15,32 @@ const safeGuardManagerInterface = new Interface([
   'function setGuard(address guard)',
   'function setModuleGuard(address moduleGuard)',
 ])
+
+export const describeSetupCall = ({ data }: Pick<MetaTransactionData, 'data'>): SetupCallDescription | undefined => {
+  const selector = data.slice(0, 10)
+  const guardFunction = policyGuardInterface.getFunction(selector)
+  if (guardFunction) return { method: guardFunction.name, target: 'guard' }
+
+  const safeCall = safeGuardManagerInterface.parseTransaction({ data })
+  if (!safeCall) return undefined
+  return {
+    method: safeCall.name,
+    target: 'safe',
+    param: { name: safeCall.fragment.inputs[0].name, value: String(safeCall.args[0]) },
+  }
+}
+
+export const createSetGuardTx = (safeAddress: string, guardAddress: string): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: safeGuardManagerInterface.encodeFunctionData('setGuard', [guardAddress]),
+})
+
+export const createSetModuleGuardTx = (safeAddress: string, guardAddress: string): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: safeGuardManagerInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
+})
 
 // configureImmediately reverts once our guard is in either slot, so it must run before both setters
 export const createFirstSetupTxs = ({
@@ -31,16 +57,8 @@ export const createFirstSetupTxs = ({
     value: '0',
     data: policyGuardInterface.encodeFunctionData('configureImmediately', [configurations]),
   },
-  {
-    to: safeAddress,
-    value: '0',
-    data: safeGuardManagerInterface.encodeFunctionData('setGuard', [guardAddress]),
-  },
-  {
-    to: safeAddress,
-    value: '0',
-    data: safeGuardManagerInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
-  },
+  createSetGuardTx(safeAddress, guardAddress),
+  createSetModuleGuardTx(safeAddress, guardAddress),
 ]
 
 export const createRequestConfigurationTx = (guardAddress: string, configureRoot: string): MetaTransactionData => ({

@@ -24,3 +24,10 @@ export type AllowlistIneligibilityReason = 'chain-not-enabled' | 'safe-not-deplo
 export type AllowlistEligibility = { eligible: true } | { eligible: false; reason: AllowlistIneligibilityReason }
 
 export type PolicyGuardTarget = { chainId: string; safeAddress: string }
+
+export type SetupCallDescription = {
+  method: string
+  target: 'guard' | 'safe'
+  /** The address a Safe setter points at, e.g. `{ name: 'guard', value: '0x…' }`. */
+  param?: { name: string; value: string }
+}
