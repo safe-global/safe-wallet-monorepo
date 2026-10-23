@@ -32,6 +32,11 @@ export const getSignerIdentity = (id: string) => ({
   address: getAddress((id.startsWith('0x') ? id : (SIGNER_ADDRESSES[id] ?? fixtureAddress(id))).toLowerCase()),
 })
 export const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`
+// Fixtures keep short addresses. Hovers show a full one with the same start and end.
+export const fullAddress = (address: string) => {
+  const [start, end] = address.split('…')
+  return end === undefined ? address : `${start}${fixtureAddress(address).slice(start.length, 42 - end.length)}${end}`
+}
 export const getSignerName = (id: string) => {
   const { name, address } = getSignerIdentity(id)
   return name ?? shortAddress(address)
@@ -138,10 +143,11 @@ export const protocolAccounts: Account[] = PROTOCOL_TEAMS.flatMap(([team, name, 
     .slice(0, count)
     .map(([network, chainId]) => {
       const id = `${team}-${network.toLowerCase().replace(/ /g, '-')}`
-      const address = fixtureAddress(id)
+      const address = fixtureAddress(`protocol-${team}`)
       return {
         id,
         name: `${name} ${network}`,
+        safeName: name,
         network,
         chainId,
         address: shortAddress(address),
@@ -189,11 +195,14 @@ const FLEET_SAFES: [name: string, network: string, owners: string[], threshold: 
   ['DAO reserve', 'Ethereum', ['Dev', 'Ana', 'Max', 'Jonas', 'Omar'], 3],
 ]
 export const fleetAccounts: Account[] = FLEET_SAFES.map(([name, network, owners, threshold]) => {
-  const id = `fleet-${name.toLowerCase().replace(/ /g, '-')}-${network.toLowerCase()}`
-  const address = fixtureAddress(id)
+  const safe = `fleet-${name.toLowerCase().replace(/ /g, '-')}`
+  const id = `${safe}-${network.toLowerCase()}`
+  // A Safe deployed on several networks keeps one address.
+  const address = fixtureAddress(safe)
   return {
     id,
     name: `${name} ${network}`,
+    safeName: name,
     network,
     chainId: CHAIN_IDS[network],
     address: shortAddress(address),
@@ -1055,7 +1064,31 @@ const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => 
   return all
 }
 
-export const getScenario = (scenario: Scenario): Proposal[] => {
+// Payroll on Base queues a month of contractor payouts, more than one page of the queue.
+const PAYEES = ['Northwind', 'Contoso Ltd', 'Fabrikam', 'Tailspin Labs', 'Litware Markets', 'Adventure Works']
+export const DEEP_QUEUE_SIZE = 40
+const withDeepQueue = (items: Proposal[], accountId: string): Proposal[] => {
+  const nonces = items.filter((tx) => tx.account === accountId).map((tx) => tx.nonce)
+  const start = Math.max(...nonces) + 1
+  const payouts = Array.from({ length: DEEP_QUEUE_SIZE }, (_, index): Proposal => {
+    const payee = PAYEES[index % PAYEES.length]
+    return {
+      id: `${accountId}-payout-${index}`,
+      account: accountId,
+      nonce: start + index,
+      recipient: `${payee} · ${shortAddress(fixtureAddress(`${payee}-${index % 3}`))}`,
+      amount: `${((4 + ((index * 7) % 18)) * 500).toLocaleString('en-US')} EURe`,
+      kind: { type: 'transfer' },
+      age: `${1 + (index % 6)}d ago`,
+      signers: index % 4 === 0 ? ['Ana'] : [],
+      eligible: true,
+    }
+  })
+  return [...items, ...payouts]
+}
+
+// Option A only: Stat cards rank signers and Safes by queue size, and a month of payouts would skew them.
+export const getScenario = (scenario: Scenario, { deepQueue = false } = {}): Proposal[] => {
   const items = proposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))
   const realistic = () => [...items, ...realisticProposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))]
   const withSafes = (ids: string[]) => manySafesProposals().filter((tx) => ids.includes(tx.account))
@@ -1065,8 +1098,14 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
       .map((tx) => (tx.id === 'grants-12' ? { ...tx, id: 'treasury-49', account: 'treasury', nonce: 49 } : tx))
   if (scenario === '5-safes') return [...realistic(), ...withSafes(FIVE_SAFES)]
   if (scenario === '10-safes') return [...realistic(), ...withSafes(TEN_SAFES)]
-  if (scenario === '20-safes') return withMix(fleetProposals(), fleetAccounts)
-  if (scenario === '50-safes') return withMix(protocolProposals(), protocolAccounts)
+  if (scenario === '20-safes') {
+    const items = withMix(fleetProposals(), fleetAccounts)
+    return deepQueue ? withDeepQueue(items, 'fleet-payroll-base') : items
+  }
+  if (scenario === '50-safes') {
+    const items = withMix(protocolProposals(), protocolAccounts)
+    return deepQueue ? withDeepQueue(items, 'payroll-base') : items
+  }
   if (scenario === 'conflict')
     items.push({
       id: 'treasury-42-swap',

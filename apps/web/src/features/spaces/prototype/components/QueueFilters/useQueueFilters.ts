@@ -121,6 +121,7 @@ export function useQueueFilters(
     items,
     matches: (tx: Proposal, status: Filter) => matchesFilter(tx, status, persona, exclusive),
     toggleAccount: (id: string) => setAccountFilter(toggled(accountFilter, id)),
+    setAccounts: setAccountFilter,
     toggleNetwork: (network: string) => setNetworkFilter(toggled(networkFilter, network)),
     toggleType: (type: string) => setTypeFilter(toggled(typeFilter, type)),
     toggleStatus: (status: Filter) => setStateFilter(toggled(stateFilter, status)),

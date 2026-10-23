@@ -9,6 +9,8 @@ export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
 export type Account = {
   id: string
   name: string
+  // The Safe's name without its network, when the same Safe is on several networks.
+  safeName?: string
   network: string
   chainId: string
   address: string

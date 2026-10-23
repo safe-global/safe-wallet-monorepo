@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ChevronDown, ChevronsDownUp, ChevronsUpDown, Info } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/components/ui/table'
 import type { BulkBatch, PreviewAction } from '../../services/queue'
-import type { MenuAction } from '../../services/actions'
+import type { MenuAction, SignLabel } from '../../services/actions'
 import type { Account, Filter, Persona, Proposal } from '../../types'
 import type { Executions } from '../../services/execution'
 import { SafeIdentity, STATUS_ORDER, chainLogoUrl } from '../shared'
@@ -66,6 +66,11 @@ export type QueueSectionProps = {
   executions?: Executions
   now?: number
   onSpeedUp?: (id: string) => void
+  // Option A: network sub-headers, pages of rows and the Safenet mark.
+  safeTable?: boolean
+  pageSize?: number
+  signLabel?: SignLabel
+  onSeeMore?: (accountIds: string[]) => void
 }
 
 const SUMMARY_LABELS = {
@@ -92,14 +97,17 @@ export const getSummary = (section: QueueSectionData, persona: Persona) => {
 }
 
 // One pill per status, in the tones of the row status chips.
-function SafeSummary({
+export function SafeSummary({
   section,
   persona,
   recoveryCount,
+  more = false,
 }: {
   section: QueueSectionData
   persona: Persona
   recoveryCount: number
+  // Only the first pages are loaded, so the counts are a minimum.
+  more?: boolean
 }) {
   const summary = getSummary(section, persona)
   if (!summary.length && !recoveryCount)
@@ -113,6 +121,7 @@ function SafeSummary({
         </span>
       )}
       {summary.map(({ status, count }) => `${count} ${SUMMARY_LABELS[status]}`).join(' · ')}
+      {more && ' · more not loaded'}
     </span>
   )
 }
@@ -123,12 +132,14 @@ export function SafeTitle({
   persona,
   size,
   showNetwork = true,
+  name = account.name,
 }: {
   account: Account
   persona: Persona
   size: number
   // Queue bands leave the network to the Chain column.
   showNetwork?: boolean
+  name?: string
 }) {
   const wallet = isSignerOf(account, persona) ? getOwnerWallet(account) : undefined
   return (
@@ -144,7 +155,7 @@ export function SafeTitle({
         ...(wallet ? [{ label: 'You sign with', value: wallet.name }] : []),
       ]}
     >
-      <span className="truncate font-medium text-foreground">{account.name}</span>
+      <span className="truncate font-medium text-foreground">{name}</span>
       {showNetwork && (
         <Badge variant="outline" className="shrink-0 gap-1 font-normal text-muted-foreground">
           <img src={chainLogoUrl(account.chainId)} alt="" className="size-3.5 rounded-full" />
@@ -161,17 +172,34 @@ type SectionHeaderProps = Pick<
 > & {
   items?: Proposal[]
   recoveryCount?: number
+  // Option A has no Chain column, so the band names the Safe and shows its network.
+  label?: string
+  // Option A: the network logos after the name, which open and close each network.
+  chains?: ReactNode
+  // Option A: See all, when only the Safe's first page is loaded.
+  actions?: ReactNode
+  more?: boolean
 }
 
 // The chevron button. It sits in the Nonce column, so the Safe lines up with the type icons.
-export function SectionToggle({ section, collapsed }: Pick<QueueSectionProps, 'section' | 'collapsed'>) {
+export function SectionToggle({
+  section,
+  collapsed,
+  controls = `section-${section.id}`,
+  size = 'icon-sm',
+}: {
+  section: Pick<QueueSectionData, 'id' | 'label'>
+  collapsed: boolean
+  controls?: string
+  size?: 'icon-sm' | 'icon-xs'
+}) {
   return (
     <Button
-      size="icon-sm"
+      size={size}
       variant="ghost-muted"
       aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${section.label}`}
       aria-expanded={!collapsed}
-      aria-controls={`section-${section.id}`}
+      aria-controls={controls}
     >
       <ChevronDown className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
     </Button>
@@ -190,6 +218,10 @@ export function SectionHeader({
   onOpenSafe,
   simple,
   items = section.items,
+  label,
+  chains,
+  actions,
+  more,
 }: SectionHeaderProps) {
   if (simple) return <SimpleSectionHeader section={section} onToggle={onToggle} persona={persona} items={items} />
   return (
@@ -198,7 +230,8 @@ export function SectionHeader({
       className="group/section flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium transition-colors"
       onClick={onToggle}
     >
-      <SafeTitle account={section.account} persona={persona} size={24} showNetwork={false} />
+      <SafeTitle account={section.account} persona={persona} size={24} showNetwork={false} name={label} />
+      {chains}
       {onOpenSafe && (
         <Button
           size="2xs"
@@ -214,7 +247,8 @@ export function SectionHeader({
       )}
       <div className="ml-auto flex items-center gap-2">
         {/* Open Safes show each status in their rows. */}
-        {collapsed && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} />}
+        {collapsed && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} more={more} />}
+        {actions}
         {safeBatch && safeBatch.proposals.length > 1 && (
           <Button
             size="2xs"
@@ -376,6 +410,8 @@ export function QueueSectionRows({
   now,
   onSpeedUp,
   labelLastSignature,
+  safeTable,
+  signLabel,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
   return (
@@ -415,6 +451,8 @@ export function QueueSectionRows({
           onStartFlow={onStartFlow}
           onMenuAction={onMenuAction}
           labelLastSignature={labelLastSignature}
+          safeTable={safeTable}
+          signLabel={signLabel}
         />
       ))}
       {!section.items.length && !safeRecoveries.length && (

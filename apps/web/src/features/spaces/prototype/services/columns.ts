@@ -1,5 +1,6 @@
 import type { BatchAction, Proposal } from '../types'
 import {
+  fullAddress,
   getAccount,
   getRecipientAddress,
   getRecipientName,
@@ -62,9 +63,15 @@ export const getSummaryHint = (tx: Proposal) => {
   const { threshold, owners } = getAccount(tx)
   switch (kind.type) {
     case 'transfer':
-      return tx.fiat ? `Worth about ${tx.fiat}` : undefined
+      return getFiat(tx)
     case 'swap':
-      return `${kind.order === 'market' ? 'Market' : kind.order === 'limit' ? 'Limit' : 'TWAP'} order · ${kind.expiry}`
+      return [
+        `${kind.order === 'market' ? 'Market' : kind.order === 'limit' ? 'Limit' : 'TWAP'} order`,
+        getFiat(tx),
+        kind.expiry,
+      ]
+        .filter(Boolean)
+        .join(' · ')
     case 'bridge':
       return `${kind.destination ? `To ${kind.destination}` : 'To an unknown network'} · Fees ${kind.fees}`
     case 'batch':
@@ -89,6 +96,30 @@ export const getSummaryHint = (tx: Proposal) => {
           return 'Changes who controls funds'
       }
   }
+}
+
+// Preview prices, in line with the fixtures' own dollar values (1 ETH ≈ $3,200).
+const PRICES: Record<string, number> = {
+  USDC: 1,
+  USDT: 1,
+  DAI: 1,
+  EURe: 1.08,
+  ETH: 3200,
+  ARB: 0.6,
+  OP: 1.5,
+  POL: 0.4,
+  LINK: 15,
+  SAFE: 0.45,
+}
+const USD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+
+// The amount sent or sold, in dollars. Settings and calls without a value have none.
+export const getFiat = (tx: Proposal) => {
+  if (tx.fiat) return tx.fiat
+  const amount = tx.kind.type === 'swap' || tx.kind.type === 'bridge' ? tx.kind.sell : tx.amount
+  const [value, token] = amount.split(' ')
+  const price = PRICES[token]
+  return price ? USD.format(Number(value.replace(/,/g, '')) * price) : undefined
 }
 
 // Between the summary and the other party, so the line reads as a sentence.
@@ -119,7 +150,7 @@ export const getCounterpartyCell = (tx: Proposal): Counterparty => {
     name,
     avatar: getSignerIdentity(name).address,
     detail,
-    address: recipientAddress?.startsWith('0x') ? recipientAddress : undefined,
+    address: recipientAddress?.startsWith('0x') ? fullAddress(recipientAddress) : undefined,
   })
   switch (kind.type) {
     case 'settings':

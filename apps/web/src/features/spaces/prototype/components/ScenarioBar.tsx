@@ -4,6 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import type { Direction, Persona, QueueState, Scenario } from '../types'
+import type { SignLabel } from '../services/actions'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
@@ -119,6 +120,9 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
   )
 }
 
+const PAGE_SIZES = { '10': '10 per Safe', '20': '20 per Safe', '5': '5 per Safe' }
+const SIGN_LABELS: Record<SignLabel, string> = { Sign: 'Button · Sign', Review: 'Button · Review' }
+
 export function ScenarioBar({
   direction,
   scenario,
@@ -126,9 +130,13 @@ export function ScenarioBar({
   hypernative,
   persona,
   milestone1,
+  pageSize,
+  signLabel,
   onChange,
 }: {
   milestone1: boolean
+  pageSize: number
+  signLabel: SignLabel
   state: QueueState
   direction: Direction
   scenario: Scenario
@@ -174,6 +182,43 @@ export function ScenarioBar({
             Milestone 1
           </FieldLabel>
         </Field>
+        {/* Oct 22 review: the first 10 rows per Safe before See all, and "Sign" or "Review" on the row button. */}
+        {direction === 'table' && (
+          <>
+            <Select
+              value={String(pageSize)}
+              items={PAGE_SIZES}
+              onValueChange={(value) => value && onChange({ page: value })}
+            >
+              <SelectTrigger size="sm" variant="ghost" aria-label="Rows per Safe">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-auto min-w-(--anchor-width)">
+                {Object.entries(PAGE_SIZES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={signLabel}
+              items={SIGN_LABELS}
+              onValueChange={(value) => value && onChange({ cta: value === 'Review' ? 'review' : 'sign' })}
+            >
+              <SelectTrigger size="sm" variant="ghost" aria-label="Sign button label">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-auto min-w-(--anchor-width)">
+                {Object.entries(SIGN_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <label className="sr-only" htmlFor="scenario">
             Scenario

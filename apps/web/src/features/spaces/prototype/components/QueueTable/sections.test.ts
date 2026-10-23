@@ -1,6 +1,6 @@
-import { accounts } from '../../services/model'
+import { accounts, fleetAccounts } from '../../services/model'
 import type { Proposal } from '../../types'
-import { buildSections, rankAccounts } from './sections'
+import { buildSections, groupBySafe, rankAccounts, shareLimit, type QueueSectionData } from './sections'
 
 // Dev ("owner") signs on Treasury (3 of 5, next #42) and Ops Payroll (2 of 4, next #17), not on Grants.
 const [treasury, payroll, grants] = accounts
@@ -44,5 +44,66 @@ describe('Safe order', () => {
       order: ['grants', 'payroll', 'treasury'],
     })
     expect(sections.map((section) => section.account?.id)).toEqual(['grants', 'payroll', 'treasury'])
+  })
+})
+
+describe('Safes on several networks', () => {
+  const fleet = (id: string) => fleetAccounts.find((account) => account.id === `fleet-${id}`)!
+
+  it('shares one address across a Safe’s networks', () => {
+    expect(fleet('treasury-ethereum').iconAddress).toBe(fleet('treasury-base').iconAddress)
+    expect(fleet('treasury-ethereum').iconAddress).not.toBe(fleet('liquidity-ethereum').iconAddress)
+  })
+
+  it('groups networks under their Safe, where its first network ranks', () => {
+    const sections = buildSections({
+      visible: [],
+      accounts: [fleet('treasury-ethereum'), fleet('vesting-ethereum'), fleet('treasury-base')],
+      accountFilter: [],
+      persona: 'owner',
+      order: ['fleet-treasury-ethereum', 'fleet-vesting-ethereum', 'fleet-treasury-base'],
+    })
+    const groups = groupBySafe(sections)
+    expect(groups.map((group) => group.label)).toEqual(['Treasury', 'Vesting'])
+    expect(groups[0].sections.map((section) => section.account.network)).toEqual(['Ethereum', 'Base'])
+  })
+
+  it('keeps nonces per network', () => {
+    const sections = buildSections({
+      visible: [tx('fleet-treasury-ethereum', 1, [], '1h ago'), tx('fleet-treasury-base', 1, [], '1h ago')],
+      accounts: [fleet('treasury-ethereum'), fleet('treasury-base')],
+      accountFilter: [],
+      persona: 'owner',
+    })
+    expect(groupBySafe(sections)[0].sections.map((section) => section.items.length)).toEqual([1, 1])
+  })
+})
+
+describe('First page of a Safe', () => {
+  const section = (account: string, nonces: number[]): QueueSectionData => ({
+    id: `safe-${account}`,
+    label: account,
+    account: treasury,
+    items: nonces.map((nonce, index) => ({ ...tx(account, nonce, [], '1h ago'), id: `${account}-${index}` })),
+  })
+  const counts = (sections: QueueSectionData[]) => sections.map((item) => item.items.length)
+
+  it('shares the limit across networks, a nonce at a time', () => {
+    const ethereum = section('ethereum', [1, 2, 3, 4, 5, 6, 7, 8])
+    const base = section('base', [1, 2, 3, 4, 5, 6, 7, 8])
+    expect(counts(shareLimit([ethereum, base], 10))).toEqual([5, 5])
+  })
+
+  it('gives a short network all its rows and the rest to the others', () => {
+    expect(counts(shareLimit([section('ethereum', [1, 2, 3, 4, 5, 6, 7, 8]), section('base', [1])], 4))).toEqual([3, 1])
+  })
+
+  it('keeps conflict options together and never goes over the limit', () => {
+    const shared = shareLimit([section('ethereum', [1, 2, 2, 2, 3]), section('base', [1, 2])], 4)
+    expect(counts(shared)).toEqual([1, 2])
+  })
+
+  it('shows everything when it fits', () => {
+    expect(counts(shareLimit([section('ethereum', [1, 2]), section('base', [1])], 10))).toEqual([2, 1])
   })
 })

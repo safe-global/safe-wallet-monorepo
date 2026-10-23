@@ -47,6 +47,42 @@ export function buildSections({
   return ranked.sort((a, b) => compareUrgency(a.urgency, b.urgency))
 }
 
+// A Safe's first page, shared across its networks a nonce at a time, so each network shows the start of its queue.
+// Options at one nonce stay together, so a network stops once its next nonce doesn't fit.
+export const shareLimit = (sections: QueueSectionData[], limit: number): QueueSectionData[] => {
+  const shown = sections.map(() => 0)
+  let left = limit
+  let added = true
+  while (added) {
+    added = false
+    sections.forEach(({ items }, index) => {
+      const start = shown[index]
+      if (start >= items.length) return
+      const next = items.findIndex((tx, position) => position > start && tx.nonce !== items[start].nonce)
+      const size = (next < 0 ? items.length : next) - start
+      if (size > left) return
+      shown[index] += size
+      left -= size
+      added = true
+    })
+  }
+  return sections.map((section, index) => ({ ...section, items: section.items.slice(0, shown[index]) }))
+}
+
+export type SafeGroup = { id: string; label: string; sections: QueueSectionData[] }
+
+// One group per Safe address, with a section per network. A Safe sits where its most urgent network ranks.
+export const groupBySafe = (sections: QueueSectionData[]): SafeGroup[] => {
+  const groups = new Map<string, SafeGroup>()
+  sections.forEach((section) => {
+    const { iconAddress, safeName, name } = section.account
+    const group = groups.get(iconAddress) ?? { id: `group-${iconAddress}`, label: safeName ?? name, sections: [] }
+    group.sections.push(section)
+    groups.set(iconAddress, group)
+  })
+  return [...groups.values()]
+}
+
 // Safes you can act on come first: most urgent step, then the one waiting longest. Other Safes keep their order.
 export const rankAccounts = (accounts: Account[], items: Proposal[], persona: Persona) =>
   accounts

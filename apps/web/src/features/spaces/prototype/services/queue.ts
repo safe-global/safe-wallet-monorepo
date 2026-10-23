@@ -40,8 +40,12 @@ export const applyQueueState = (items: Proposal[], scenario: Scenario, state: Qu
   ]
 }
 
-export const createPreviewQueue = (scenario: Scenario, state: QueueState = 'normal'): PreviewQueue => ({
-  items: applyQueueState(getScenario(scenario), scenario, state),
+export const createPreviewQueue = (
+  scenario: Scenario,
+  state: QueueState = 'normal',
+  options: { deepQueue?: boolean } = {},
+): PreviewQueue => ({
+  items: applyQueueState(getScenario(scenario, options), scenario, state),
   completed: [],
   nextProposalId: 1,
   nextNonces: Object.fromEntries(getScenarioAccounts(scenario).map((account) => [account.id, account.nextNonce])),

@@ -47,7 +47,7 @@ import {
   proposePreviewAlternative,
   type PreviewAction,
 } from '../services/queue'
-import { getOutsiders, getRemindable, type MenuAction } from '../services/actions'
+import { getOutsiders, getRemindable, type MenuAction, type SignLabel } from '../services/actions'
 import {
   advanceExecution,
   getLockingTx,
@@ -109,8 +109,11 @@ function PendingQueueView() {
   const { scenario, state } = parseScenario(router.query)
   const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
+  // Option A: rows per Safe before See all (`?page=20` or `5`), and the Sign button's label (`?cta=review`).
+  const pageSize = router.query.page === '5' ? 5 : router.query.page === '20' ? 20 : 10
+  const signLabel: SignLabel = router.query.cta === 'review' ? 'Review' : 'Sign'
 
-  const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state))
+  const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state, { deepQueue: direction === 'table' }))
   // Execute runs through Processing and Indexing before the queue updates.
   const [executions, setExecutions] = useState<Executions>(() =>
     simple ? {} : getInitialExecutions(queue.items, state, Date.now()),
@@ -601,6 +604,15 @@ function PendingQueueView() {
     now,
     onSpeedUp: speedUp,
     alignTo: direction !== 'fleet',
+    safeTable: direction === 'table',
+    pageSize,
+    signLabel,
+    // Narrows the table to one Safe, on all its networks, and opens it from the top, under its filter tag.
+    onSeeMore: (ids: string[]) => {
+      filters.setAccounts(ids)
+      setCollapsedSections((collapsed) => collapsed.filter((id) => !ids.some((account) => id === `safe-${account}`)))
+      mainRef.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' })
+    },
     simple,
   }
   const needsYouCount = items.filter((tx) => getStepKind(tx, persona)).length
@@ -891,6 +903,8 @@ function PendingQueueView() {
           hypernative={hypernative}
           persona={persona}
           milestone1={milestone1}
+          pageSize={pageSize}
+          signLabel={signLabel}
           onChange={setOption}
         />
         <ReviewDrawer

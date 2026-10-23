@@ -1,6 +1,12 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { CopyableParty } from '../CopyableParty'
-import { getCounterpartyCell, getCounterpartyJoin, getSummary, getSummaryHint } from '../../services/columns'
+import {
+  getCounterpartyCell,
+  getCounterpartyJoin,
+  getSummary,
+  getSummaryHint,
+  isNewRecipient,
+} from '../../services/columns'
 import { getTypeLabel, shortAddress } from '../../services/model'
 import type { Proposal } from '../../types'
 import { Tag } from '@safe-global/views/components/ui/tag'
@@ -41,12 +47,17 @@ export function TransactionHead({
   )
 }
 
+// Settings, rejections and transfers to the Safe itself have no other party.
+export const hasCounterparty = (tx: Proposal) =>
+  tx.kind.type !== 'settings' && tx.kind.type !== 'rejection' && getCounterpartyCell(tx).name !== 'This Safe'
+
 // The other party. Its tooltip copies the address. In its own column, "to" or "via" becomes a tag like the type.
 export function Counterparty({ tx, inColumn = false }: { tx: Proposal; inColumn?: boolean }) {
   const counterparty = getCounterpartyCell(tx)
-  if (tx.kind.type === 'settings' || tx.kind.type === 'rejection' || counterparty.name === 'This Safe') return null
+  if (!hasCounterparty(tx)) return null
   const address = counterparty.address ?? counterparty.avatar
-  const named = hasName(counterparty.name)
+  // A recipient missing from the address book shows its address, even when the proposer named it.
+  const named = hasName(counterparty.name) && !isNewRecipient(tx)
   // Inline, the other party stops at 14rem so the action stays readable. Its tooltip has the full name.
   return (
     <span className={`flex min-w-0 items-center gap-2 ${inColumn ? '' : 'max-w-56'}`}>

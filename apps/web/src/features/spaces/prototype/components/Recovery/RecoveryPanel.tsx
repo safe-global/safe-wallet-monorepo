@@ -81,8 +81,9 @@ export function RecoveryRow({
         </Hint>
       </TableCell>
     ),
+    // The recoverer sits in the line, so the action runs into the empty To column.
     Transaction: (
-      <TableCell className="py-2">
+      <TableCell className="py-2" colSpan={columns.includes('To') ? 2 : undefined}>
         <span className="flex min-h-10 min-w-0 items-center gap-2 text-sm">
           <span className={`flex shrink-0 ${ROW_TAG_FILL}`}>
             <Tag>
@@ -131,7 +132,7 @@ export function RecoveryRow({
       </TableCell>
     ),
     Note: <TableCell />,
-    To: <TableCell />,
+    To: null,
     Chain: (
       <TableCell>
         <ChainIcon chainId={account.chainId} network={account.network} />

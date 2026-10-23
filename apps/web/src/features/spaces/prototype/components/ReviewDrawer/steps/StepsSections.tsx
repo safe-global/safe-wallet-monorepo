@@ -9,6 +9,7 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
+import { SAFENET_ICONS, SAFENET_TONES } from '../../SafenetMark'
 import { DrawerList } from '@/components/common/Drawer'
 import { PanelAlert } from '../../Panel/PanelAlert'
 import { TOOLTIP_TIMING } from '../../Panel/SharedDrawerHeader'
@@ -328,14 +329,6 @@ export function ConflictsSection({ tx, items, persona, onReview }: QueueProps) {
 }
 
 type Simulation = 'idle' | 'running' | 'success' | 'failed'
-
-const SAFENET_ICONS = { notStarted: ShieldEllipsis, checking: ShieldEllipsis, passed: ShieldCheck, risk: ShieldAlert }
-const SAFENET_TONES = {
-  notStarted: 'text-muted-foreground',
-  checking: 'text-muted-foreground',
-  passed: 'text-success-strong',
-  risk: 'text-warning-strong',
-}
 
 type CheckResult = 'notRun' | 'running' | 'passed' | 'issue'
 

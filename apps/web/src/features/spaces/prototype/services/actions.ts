@@ -19,6 +19,8 @@ export type PrimaryAction =
   | { kind: 'remind'; label: string; target: Proposal; hint?: string }
   | { kind: 'review'; label: string; hint?: string }
 
+// Oct 22 review: "Review" may fit better than "Sign", since the table doesn't show everything you sign.
+export type SignLabel = 'Sign' | 'Review'
 export type MenuAction = 'remind' | 'invite' | 'replace' | 'reject' | 'delete' | 'copyLink'
 export const MENU_LABELS: Record<MenuAction, string> = {
   remind: 'Remind signers',

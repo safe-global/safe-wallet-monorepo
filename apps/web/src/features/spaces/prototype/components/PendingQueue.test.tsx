@@ -74,7 +74,6 @@ describe('queue design exploration', () => {
       'Nonce',
       'Transaction',
       'To',
-      'Chain',
       'Proposed',
       'Note',
       'Signatures',
@@ -450,15 +449,78 @@ describe('queue design exploration', () => {
     expect(within(nonce).getByRole('button', { name: /^Nonce 44\. / })).toBeInTheDocument()
     expect(transaction).toContainElement(within(row).getByRole('img', { name: /^Send\./ }))
   })
-  it('names the chain in its own column and leaves the Safe to its band', () => {
+  it('names the Safe and its chain in the band, not in the row', () => {
     render(<PendingQueue />)
     const row = rowFor('Add signer Priya')
     expect(within(row).getByRole('img', { name: /^Settings\./ })).toBeVisible()
     expect(within(row).getByRole('button', { name: /^Nonce 43\. / })).toBeVisible()
     expect(row).not.toHaveTextContent('Treasury Main')
-    expect(within(within(row).getAllByRole('cell')[3]).getByRole('img', { name: 'Ethereum' })).toBeVisible()
+    expect(within(row).queryByRole('img', { name: 'Ethereum' })).toBeNull()
     expect(row).toHaveTextContent('Blocked by #42')
-    expect(within(safeBand('Treasury Main')).queryByText('Ethereum')).toBeNull()
+    expect(within(safeBand('Treasury Main')).getByRole('button', { name: 'Show Ethereum' })).toBeVisible()
+  })
+  it('groups a Safe on several networks in one band, with a sub-header per network', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: '20-safes' } } })
+    const marketMaking = await screen.findByRole('button', { name: /^(Collapse|Expand) Market making$/ })
+    const subHeaders = marketMaking
+      .getAttribute('aria-controls')!
+      .split(' ')
+      .map((id) => document.getElementById(id)!)
+    expect(subHeaders.map((subHeader) => subHeader.textContent)).toEqual([
+      expect.stringMatching(/^Ethereum/),
+      expect.stringMatching(/^Arbitrum/),
+    ])
+    expect(screen.getByRole('button', { name: 'Collapse all' })).toHaveTextContent('Collapse 10 Safes')
+    // A network logo shows that network only. Clicked again, it shows them all.
+    const band = within(marketMaking.closest('tr')!)
+    const arbitrum = band.getByRole('button', { name: 'Show Arbitrum' })
+    await user.click(arbitrum)
+    expect(band.getByRole('button', { name: 'Show Ethereum' })).toHaveAttribute('aria-expanded', 'false')
+    expect(arbitrum).toHaveAttribute('aria-expanded', 'true')
+    expect(arbitrum).toHaveAccessibleName('Show all 2 networks')
+    await user.click(arbitrum)
+    expect(band.getByRole('button', { name: 'Show Ethereum' })).toHaveAttribute('aria-expanded', 'true')
+    await user.click(screen.getByRole('button', { name: 'Collapse Market making' }))
+    subHeaders.forEach((subHeader) => expect(subHeader).not.toBeVisible())
+    await user.click(band.getByRole('button', { name: 'Show Ethereum' }))
+    expect(subHeaders[0]).toBeVisible()
+    expect(band.getByRole('button', { name: 'Show Arbitrum' })).toHaveAttribute('aria-expanded', 'false')
+  })
+  it('shows 10 rows per Safe across its networks, then See all in its header narrows the table to the Safe and loads all of it', () => {
+    render(<PendingQueue />, { routerProps: { query: { scenario: '20-safes' } } })
+    const payrollRows = () =>
+      ['fleet-payroll-base', 'fleet-payroll-gnosis'].flatMap((id) =>
+        within(document.getElementById(`section-safe-${id}`)!).queryAllByRole('button', { name: /^Open / }),
+      )
+    expect(payrollRows()).toHaveLength(10)
+    const seeAll = within(safeBand('Payroll')).getByRole('button', { name: 'See all in Payroll' })
+    const scrollIntoView = jest.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+    jest.useFakeTimers()
+    fireEvent.click(seeAll)
+    expect(seeAll).toHaveTextContent('Loading…')
+    // The click doesn't collapse the Safe.
+    expect(safeToggle('Payroll')).toHaveAttribute('aria-expanded', 'true')
+    act(() => jest.advanceTimersByTime(600))
+    jest.useRealTimers()
+    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Payroll Base')
+    expect(screen.queryByRole('button', { name: /^(Collapse|Expand) Treasury$/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^See all/ })).not.toBeInTheDocument()
+    // Back to the top, so the filter tag and the start of the Safe's queue are in view.
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' })
+    expect(allPending().getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(40)
+  })
+  it('swaps Sign for Review from the scenario bar, opening the transaction instead', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { cta: 'review' } } })
+    expect(allPending().queryByRole('button', { name: 'Sign Send to Globex Payroll' })).not.toBeInTheDocument()
+    await user.click(allPending().getByRole('button', { name: 'Review Send to Globex Payroll' }))
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Globex Payroll')
+  })
+  it('marks the Safenet result once a transaction has a signature', () => {
+    render(<PendingQueue />)
+    expect(
+      within(rowFor('Send to Globex Payroll')).getByRole('button', { name: 'No issues found (Safenet)' }),
+    ).toBeVisible()
   })
   it('opens mobile details full screen with the actions in the footer', async () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
@@ -506,9 +568,9 @@ describe('queue design exploration', () => {
         .getAllByRole('columnheader')
         .slice(0, -1)
         .map((header) => header.textContent),
-    ).toEqual(['Nonce', 'Transaction', 'To', 'Chain', 'Proposed', 'Signatures', 'Status'])
+    ).toEqual(['Nonce', 'Transaction', 'To', 'Proposed', 'Signatures', 'Status'])
     const row = rowFor('Send to Globex Payroll')
-    const [nonce, , , , proposed, , status] = within(row).getAllByRole('cell')
+    const [nonce, , , proposed, , status] = within(row).getAllByRole('cell')
     expect(nonce).toHaveTextContent(/^42$/)
     expect(proposed).toHaveTextContent(/^3d ago$/)
     expect(status).toHaveTextContent(/^Sign$/)
@@ -523,12 +585,12 @@ describe('queue design exploration', () => {
     render(<PendingQueue />)
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     const headers = table.getAllByRole('columnheader')
-    expect(headers).toHaveLength(8)
+    expect(headers).toHaveLength(7)
     expect(headers[0]).toHaveClass('max-md:sticky', 'max-md:left-0')
     expect(headers.at(-1)).toHaveClass('sticky', 'right-0')
     const row = rowFor('Send to Globex Payroll')
     const cells = within(row).getAllByRole('cell')
-    expect(cells).toHaveLength(8)
+    expect(cells).toHaveLength(7)
     expect(cells[0]).toHaveClass('max-md:sticky', 'max-md:left-0', 'max-md:bg-card')
     expect(cells.at(-1)).toHaveClass('sticky', 'right-0')
     fireEvent.click(row)

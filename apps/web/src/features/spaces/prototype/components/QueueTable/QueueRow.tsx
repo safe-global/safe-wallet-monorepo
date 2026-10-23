@@ -38,9 +38,11 @@ import {
   MENU_LABELS,
   RARE_MENU_ACTIONS,
   type MenuAction,
+  type SignLabel,
 } from '../../services/actions'
 import type { PreviewAction } from '../../services/queue'
-import { Counterparty, TransactionHead } from './TransactionLine'
+import { Counterparty, hasCounterparty, TransactionHead } from './TransactionLine'
+import { SafenetMark } from '../SafenetMark'
 import { ExecutionChip, LockedChip } from './ExecutionStatus'
 import { canSpeedUp, getLockingTx, type Executions } from '../../services/execution'
 import { ChainIcon, HINT_CLASS, StatusChip, StepsStatusChip } from '../shared'
@@ -76,6 +78,9 @@ export type QueueRowProps = {
   onSpeedUp?: (id: string) => void
   // Option C, Needs you: the last signature reads "Sign & execute", so it doesn't look like a plain Sign above Execute.
   labelLastSignature?: boolean
+  // Option A: the Safenet mark.
+  safeTable?: boolean
+  signLabel?: SignLabel
 }
 
 export function QueueRow({
@@ -103,6 +108,8 @@ export function QueueRow({
   now = Date.now(),
   onSpeedUp,
   labelLastSignature = false,
+  safeTable = false,
+  signLabel = 'Sign',
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
@@ -136,13 +143,17 @@ export function QueueRow({
     else onReview(tx)
   }
   const lastSignature = labelLastSignature && primaryAction.kind === 'flow' && primaryAction.flow === 'signAndExecute'
+  // "Review" opens the transaction instead of signing from the row.
+  const reviewToSign = signLabel === 'Review' && primaryAction.kind === 'flow' && primaryAction.flow !== 'execute'
   const primary = {
-    label: lastSignature ? 'Sign & execute' : primaryAction.label,
+    label: lastSignature ? 'Sign & execute' : reviewToSign ? 'Review' : primaryAction.label,
     hint: 'hint' in primaryAction ? primaryAction.hint : undefined,
-    onClick: stop(runPrimary),
+    onClick: reviewToSign ? stop(() => onReview(tx)) : stop(runPrimary),
   }
   const primaryLabel = primary.label
   const columnCount = columns.length
+  // Option A: with no other party, the action runs into the To column instead of truncating.
+  const spanTo = safeTable && columns.includes('To') && !hasCounterparty(tx)
   const review = (event: { stopPropagation: () => void }) => {
     event.stopPropagation()
     onReview(tx)
@@ -216,7 +227,7 @@ export function QueueRow({
       </TableCell>
     ),
     Transaction: (
-      <TableCell className="py-2">
+      <TableCell className="py-2" colSpan={spanTo ? 2 : undefined}>
         {/* min-h-10 matches the Policies table, so rows are the same height across Spaces. */}
         <div className="flex min-h-10 min-w-0 items-center gap-1.5">
           <button
@@ -255,21 +266,24 @@ export function QueueRow({
     ),
     Signatures: (
       <TableCell className="py-1">
-        <Tooltip delay={150}>
-          <TooltipTrigger
-            aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
-            className="flex text-sm tabular-nums"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <span className="flex items-center gap-1.5">
-              <SignatureGauge count={signatureCount} threshold={account.threshold} />
-              {signatureCount}/{account.threshold}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent className={HINT_CLASS}>
-            <SignerList tx={tx} persona={persona} />
-          </TooltipContent>
-        </Tooltip>
+        <span className="flex items-center gap-2">
+          <Tooltip delay={150}>
+            <TooltipTrigger
+              aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
+              className="flex text-sm tabular-nums"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <span className="flex items-center gap-1.5">
+                <SignatureGauge count={signatureCount} threshold={account.threshold} />
+                {signatureCount}/{account.threshold}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className={HINT_CLASS}>
+              <SignerList tx={tx} persona={persona} />
+            </TooltipContent>
+          </Tooltip>
+          {safeTable && <SafenetMark tx={tx} />}
+        </span>
       </TableCell>
     ),
     Note:
@@ -501,9 +515,11 @@ export function QueueRow({
         data-executing={execution ? true : undefined}
         className={`group/transaction relative h-14 cursor-pointer data-[executing]:[&>td]:bg-info-subtle/40 data-[state=selected]:bg-transparent [&:has(:focus-visible)>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted || cursor ? '[&>td]:bg-muted' : ''}`}
       >
-        {columns.map((label) => (
-          <Fragment key={label}>{cells[label]}</Fragment>
-        ))}
+        {columns
+          .filter((label) => !(spanTo && label === 'To'))
+          .map((label) => (
+            <Fragment key={label}>{cells[label]}</Fragment>
+          ))}
       </TableRow>
     </Fragment>
   )
