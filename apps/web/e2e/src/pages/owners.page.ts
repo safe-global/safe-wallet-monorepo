@@ -13,6 +13,8 @@ export class OwnersPage {
   readonly addSignerButton: Locator
   readonly thresholdSelector: Locator
   readonly nextButton: Locator
+  /** The name field of the signer row that "Add new signer" adds; its placeholder is the address's ENS name */
+  readonly newSignerName: Locator
 
   constructor(private readonly page: Page) {
     this.signerList = page.getByTestId('signer-list')
@@ -21,6 +23,7 @@ export class OwnersPage {
     this.addSignerButton = page.getByTestId('add-new-signer')
     this.thresholdSelector = page.getByTestId('threshold-selector')
     this.nextButton = page.getByRole('button', { name: 'Next' })
+    this.newSignerName = page.getByRole('textbox', { name: 'Signer name' }).last()
   }
 
   /** Open Settings → Setup of the Safe (`sep:0x…`) */
@@ -28,11 +31,16 @@ export class OwnersPage {
     await this.page.goto(`${ROUTES.settingsSetup}?safe=${safe}`)
   }
 
-  /** "Manage signers": add `newSigner`, require `threshold` confirmations and continue to the review */
-  async addSigner({ newSigner, threshold }: { newSigner: string; threshold: number }): Promise<void> {
+  /** "Manage signers": add a signer row and type `newSigner` as its address */
+  async enterNewSigner(newSigner: string): Promise<void> {
     await this.manageSignersButton.click()
     await this.addSignerButton.click()
     await this.page.getByTestId('address-book-input').last().getByRole('combobox').fill(newSigner)
+  }
+
+  /** "Manage signers": add `newSigner`, require `threshold` confirmations and continue to the review */
+  async addSigner({ newSigner, threshold }: { newSigner: string; threshold: number }): Promise<void> {
+    await this.enterNewSigner(newSigner)
     await this.thresholdSelector.click()
     await this.page.getByRole('option', { name: String(threshold), exact: true }).click()
     await this.nextButton.click()

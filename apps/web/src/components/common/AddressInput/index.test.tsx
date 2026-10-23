@@ -194,6 +194,17 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText(`Invalid address format`, { exact: false })).toBeDefined())
   })
 
+  it('flags an address with a wrong checksum', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: '0X6D0B6F96F665BB4490F9DDB2E450DA2F7E546DC1' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() => expect(utils.getByLabelText('Invalid address checksum', { exact: false })).toBeDefined())
+  })
+
   it('should accept a custom validate function', async () => {
     const { input, utils } = setup('', (val) => `${val} is wrong`)
 

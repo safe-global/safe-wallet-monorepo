@@ -10,12 +10,6 @@ const fourthChain = 'the list only appears when a chain is left to add, which ne
  * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/happypath_2/create_safe_cf.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/happypath_2/mass_payouts.cy.js': { scenario: 'preparePayoutProposerScenario' },
-  'cypress/e2e/happypath_2/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [1, 137] },
-  'cypress/e2e/happypath_2/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
-  'cypress/e2e/happypath_2/proposers.cy.js': { scenario: 'prepareProposersScenario' },
-  'cypress/e2e/happypath_2/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
   'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/address_book.cy.js': { scenario: 'prepareBasicScenario' },
@@ -99,7 +93,6 @@ export const isolatedSpecs = {
         positionsProvider,
     },
   },
-  'cypress/e2e/regression/proposers_2.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/recovery_2.cy.js': { scenario: 'prepareRecoveryScenario' },
   'cypress/e2e/regression/recovery.cy.js': {
@@ -138,8 +131,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history_5.cy.js': { scenario: 'prepareHistorySummaryScenario' },
-  'cypress/e2e/regression/tx_history_filter_2.cy.js': { scenario: 'prepareHistoryFiltersScenario' },
-  'cypress/e2e/regression/tx_history_filter.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_notes.cy.js': { scenario: 'prepareNotesScenario' },
   'cypress/e2e/regression/tx_queue_reject_btn.cy.js': { scenario: 'prepareRejectionScenario' },
@@ -155,16 +146,9 @@ export const isolatedSpecs = {
   'cypress/e2e/safe-apps/safe_permissions.cy.js': { scenario: 'prepareSafeAppsHostScenario' },
   'cypress/e2e/safe-apps/tx-builder_3.cy.js': { scenario: 'prepareCowFallbackScenario' },
   'cypress/e2e/safe-apps/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
-  'cypress/e2e/smoke/address_book.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/smoke/balances_endpoints.cy.js': { scenario: 'prepareBalancesEndpointsScenario', chains: [1] },
   'cypress/e2e/smoke/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/smoke/create_tx.cy.js': { scenario: 'prepareTransferFormScenario' },
   'cypress/e2e/smoke/dashboard.cy.js': { scenario: 'prepareDashboardScenario' },
-  'cypress/e2e/smoke/import_export_data_2.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/smoke/import_export_data.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/smoke/landing.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/smoke/load_safe.cy.js': { scenario: 'prepareEnsFixtureScenario' },
-  'cypress/e2e/smoke/safe_selector.cy.js': { scenario: 'prepareBasicScenario', chains: [1] },
-  'cypress/e2e/smoke/spending_limits.cy.js': { scenario: 'prepareEnsFixtureScenario' },
 }

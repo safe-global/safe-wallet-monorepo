@@ -7,6 +7,7 @@
 import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type {
   QueuedItemPage,
@@ -70,6 +71,11 @@ export class SafeApiClient {
     return (await this.getSafeInfo(safeAddress)).nonce
   }
 
+  /** Get the addresses of the Safes that `owner` (an account or a Safe) owns */
+  async getOwnedSafes(owner: string): Promise<string[]> {
+    return (await this.get<{ safes: string[] }>(`/v1/chains/${this.chainId}/owners/${owner}/safes`)).safes
+  }
+
   /** Get token balances for a Safe */
   async getBalances(safeAddress: string, currency = 'usd'): Promise<BalancesResponse> {
     return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}`)
@@ -83,6 +89,11 @@ export class SafeApiClient {
   /** Get the queued transactions, without the labels and conflict headers of the queue page */
   async getQueued(safeAddress: string): Promise<Transaction[]> {
     return transactionsIn(await this.getQueuedTransactions(safeAddress))
+  }
+
+  /** Get the proposers (delegates) of a Safe from the Queue Service */
+  async getDelegates(safeAddress: string): Promise<DelegatesGetDelegatesV3ApiResponse> {
+    return this.get(`/v3/chains/${this.chainId}/delegates?safe=${safeAddress}`)
   }
 
   /** Get transaction history */
@@ -111,15 +122,5 @@ export class SafeApiClient {
   /** Get supported chains */
   async getChains(): Promise<unknown> {
     return this.get('/v1/chains')
-  }
-
-  /** Health check — is the CGW reachable? */
-  async isHealthy(): Promise<boolean> {
-    try {
-      await this.get('/health/ready', 0) // No retry on health check
-      return true
-    } catch {
-      return false
-    }
   }
 }

@@ -5,8 +5,6 @@ import { addressBookRecipient } from '../pages/address_book.page'
 
 const addExistingAccountBtnStr = 'Add existing one'
 const contactStr = 'Choose address, network and a name'
-export const invalidAddressFormatErrorMsg = 'Invalid address format'
-const invalidAddressNameLengthErrorMsg = 'Maximum 50 symbols'
 
 const safeDataForm = '[data-testid=load-safe-form]'
 const removeOwnerBtn = '[data-testid="remove-owner-btn"]'
@@ -26,7 +24,6 @@ const settingsBtnStr = 'Settings'
 const ownersConfirmationsStr = 'Owners and confirmations'
 const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
-const safeAddressError = 'Address given is not a valid Safe account address'
 const ownerNameLabel = 'Signer name'
 export const addSafeStr = 'Add existing Safe account'
 
@@ -135,10 +132,6 @@ export function verifyOnwerNameENS(index, ens) {
   getOwnerNameInput(index).invoke('attr', 'placeholder').should('contain', ens)
 }
 
-export function verifyAddressError() {
-  cy.get(addressSection).closest('[data-slot="field"]').find('label').contains(safeAddressError)
-}
-
 export function verifyOnwerInputIsNotEmpty(index) {
   getOwnerNameInput(index).invoke('attr', 'placeholder').should('not.be.empty')
 }
@@ -193,19 +186,6 @@ export function selectPolygon() {
 export function inputNameAndAddress(name, address) {
   inputName(name)
   inputAddress(address)
-}
-
-export function inputName(name) {
-  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
-}
-
-export function verifyIncorrectAddressErrorMessage() {
-  inputAddress('Random text')
-  cy.get(main.addressInput).parent().prev('label').contains(invalidAddressFormatErrorMsg)
-}
-
-export function verifyNameLengthErrorMessage() {
-  cy.get(main.nameInput).closest('[data-slot="field"]').find('label').contains(invalidAddressNameLengthErrorMsg)
 }
 
 export function inputAddress(address) {

@@ -3,9 +3,7 @@
  */
 import { expect, type Page } from '@playwright/test'
 import { Auth0Page } from '../pages/auth0.page'
-
-// The return from Auth0 is a page load: the app boots again behind its launch screen.
-export const launchScreen = (page: Page) => page.getByTestId('launch-screen')
+import { launchScreen } from './email-session'
 
 // Next.js renders its route announcer with role="alert" too.
 export const toast = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })

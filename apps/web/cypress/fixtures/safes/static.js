@@ -76,7 +76,7 @@ export default {
   ZKSYNC_STATIC_SAFE_22: 'zksync:0x49136c0270c5682FFbb38Cb29Ecf0563b2E1F9f6',
 
   // More Sepolia Safes
-  /** Transaction history, messages, and spending limits testing - Used in: visual/tx_history.cy.js, msg_details.cy.js, spending_limits.cy.js */
+  /** Transaction history, messages, and spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
   /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
@@ -95,20 +95,14 @@ export default {
   // More Sepolia Safes
   /** Available for general testing */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
-  /** Proposers testing - Used in: proposers.cy.js, proposers_2.cy.js, tx_share_block.cy.js */
+  /** Proposers testing - Used in: proposers.cy.js, tx_share_block.cy.js */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-  /** Proposers testing - Used in: proposers.cy.js (happypath_2) */
-  SEP_STATIC_SAFE_32: 'sep:0x698C8D95D7B6b0B50338c2885d9583737546768f',
-  /** Proposers testing - Used in: proposers_2.cy.js */
-  SEP_STATIC_SAFE_33: 'sep:0x597D644b1F2b66B84F2C56f0D40D0314E8D5895b',
   /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js, swaps_queue.cy.js, limit_order_queue.cy.js, twaps_queue.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
   /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
   /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
   SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
-  /** Transaction history filter testing - Used in: tx_history_filter_2.cy.js */
-  SEP_STATIC_SAFE_38: 'sep:0x30aeC11779d29dB096C434D4e72E77276EB01BdE',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */
   SEP_STATIC_SAFE_39: 'sep:0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD',
   /** Nested safes testing - Used in: nested_safes.cy.js */

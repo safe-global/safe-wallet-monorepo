@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as addressBook from '../pages/address_book.page'
-import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
 import { LS_NAMESPACE } from '../../../src/config/constants'
@@ -14,7 +13,6 @@ const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
 const modalTitle = '[data-testid="modal-title"]'
 const timePeriodSection = '[data-testid="time-period-section"]'
-const timePeriodItem = '[data-testid="time-period-item"]'
 const nextBtn = '[data-testid="next-btn"]'
 const deleteBtn = '[data-testid="delete-btn"]'
 const resetTimeInfo = '[data-testid="reset-time"]'
@@ -55,7 +53,6 @@ const expectedResetOptions = new Array(3).fill('One-time')
 
 const newTransactionStr = 'New transaction'
 const confirmTxStr = 'Confirm transaction'
-const invalidNumberErrorStr = 'The value must be greater than 0'
 const invalidCharErrorStr = 'The value must be a number'
 
 export function selectRecipient(recipient) {
@@ -107,19 +104,6 @@ export function clickOnTimePeriodDropdown() {
   cy.get(timePeriodSection).click()
 }
 
-export function checkTimeDropdownOptions() {
-  cy.get(timePeriodItem).then(($lis) => {
-    const displayedOptions = Array.from($lis, (li) => li.textContent.trim())
-
-    const expectedOptions = Object.values(timePeriodOptions).every((option) => displayedOptions.includes(option))
-    expect(expectedOptions).to.be.true
-  })
-}
-
-export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).scrollIntoView().contains(timePeriodOptions.oneTime).should('be.visible')
-}
-
 export function visitSpendingLimitsPage(safe) {
   cy.visit(constants.setupUrl + safe, {
     onBeforeLoad(win) {
@@ -146,29 +130,8 @@ export function checkBeneficiaryInputValue(value) {
   getBeneficiaryInput().invoke('val').should('contain', value)
 }
 
-export function checkBeneficiaryENS(ens) {
-  getBeneficiaryInput().invoke('val').should('contain', ens.substring(4))
-}
-
-export function verifyValidAddressShowsNoErrors() {
-  // The label is a sibling of the input inside the Field wrapper, not a descendant of it.
-  cy.get(beneficiarySection)
-    .closest('[data-slot="field"]')
-    .find('label')
-    .should('not.contain', invalidAddressFormatErrorMsg)
-    .and('not.contain', invalidCharErrorStr)
-}
-
-export function verifyNumberErrorValidation() {
-  cy.get(tokenAmountSection).find('label').should('contain', invalidNumberErrorStr)
-}
-
 export function verifyCharErrorValidation() {
   cy.get(tokenAmountSection).find('label').should('contain', invalidCharErrorStr)
-}
-
-export function verifyNumberAmountEntered(amount) {
-  cy.get(tokenAmountFld).should('have.value', amount)
 }
 
 export function verifyActionCount(count) {

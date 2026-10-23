@@ -1,35 +1,39 @@
 /**
  * Every Playwright spec that runs against the isolated backend, by path under e2e/tests. `scenarios` names the
  * functions in scenarios/index.mjs that prepare the spec's data, once per spec file; `safes` maps each key of SAFES
- * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return.
+ * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return. `chains` lists the forks
+ * besides Sepolia that the spec needs; the stack of the Playwright job starts them.
  */
 export const playwrightSpecs = {
-  'api/credentials.spec.ts': {},
   'e2e/ledger-sign-execute.spec.ts': {
     scenarios: ['prepareLedgerScenario'],
     safes: { SEP_LEDGER_SIGN_SAFE: 'SEP_STATIC_SAFE_48', SEP_LEDGER_EXECUTE_SAFE: 'SEP_STATIC_SAFE_49' },
-  },
-  'api/safe-info.api.spec.ts': {
-    scenarios: ['prepareBasicScenario'],
-    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
+  'e2e/create-safe.spec.ts': {},
   'e2e/delete.spec.ts': {},
+  'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
+  'e2e/multichain-create-safe.spec.ts': { chains: [1, 137] },
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
+  'e2e/policies.spec.ts': {},
   'e2e/proposer.spec.ts': {},
+  'e2e/proposer-settings.spec.ts': {},
   'e2e/recovery.spec.ts': {},
   'e2e/reject.spec.ts': {},
+  'e2e/relay.spec.ts': {},
   'e2e/replace.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
-  'regression/email-sign-in.spec.ts': {},
+  'e2e/tx-history-filter.spec.ts': {},
+  'e2e/tx-builder.spec.ts': {},
+  'regression/auth0/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
@@ -54,15 +58,19 @@ export const playwrightSpecs = {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
   },
-  'regression/step-up-outside-workspace.spec.ts': {
+  'regression/auth0/step-up-billing.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
-  'regression/step-up-workspace-actions.spec.ts': {
+  'regression/auth0/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
-  'regression/step-up-workspace-rename.spec.ts': {},
+  'regression/auth0/step-up-workspace-actions.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
+  },
+  'regression/auth0/step-up-workspace-rename.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
@@ -78,4 +86,5 @@ export const playwrightSpecs = {
   'e2e/walletconnect.spec.ts': {},
   'e2e/walletconnect-nested-signer.spec.ts': {},
   'e2e/nested-signer.spec.ts': {},
+  'e2e/nested-safe-create.spec.ts': {},
 }
