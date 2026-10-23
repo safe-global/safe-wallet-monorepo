@@ -9,6 +9,7 @@ import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { SafeShieldAnalyzeRecipientV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import type {
   QueuedItemPage,
   Transaction,
@@ -117,6 +118,11 @@ export class SafeApiClient {
   /** Get collectibles (NFTs) */
   async getCollectibles(safeAddress: string): Promise<CollectiblePage> {
     return this.get(`/v2/chains/${this.chainId}/safes/${safeAddress}/collectibles`)
+  }
+
+  /** Get the Safe Shield checks of a recipient: whether and how often the Safe has sent to it */
+  async getRecipientAnalysis(safeAddress: string, recipient: string): Promise<SafeShieldAnalyzeRecipientV1ApiResponse> {
+    return this.get(`/v1/chains/${this.chainId}/security/${safeAddress}/recipient/${recipient}`)
   }
 
   /** Get supported chains */
