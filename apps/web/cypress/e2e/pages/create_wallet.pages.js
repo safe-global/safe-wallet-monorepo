@@ -28,7 +28,6 @@ const addFundsBtn = '[data-testid="add-funds-btn"]'
 const createTxBtn = '[data-testid="create-tx-btn"]'
 const qrCodeSwitch = '[data-testid="qr-code-switch"]'
 export const activateAccountBtn = '[data-testid="activate-account-btn-cf"]'
-export const activateFlowAccountBtn = '[data-testid="activate-account-flow-btn"]'
 const notificationsSwitch = '[data-testid="notifications-switch"]'
 export const addFundsSection = '[data-testid="add-funds-section"]'
 export const noTokensAlert = '[data-testid="no-tokens-alert"]'
@@ -71,45 +70,6 @@ export function checkNotificationsSwitchIs(status) {
 export function clickOnActivateAccountBtn(index) {
   // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
   cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
-}
-
-const submitErrorMsg = 'Could not submit the transaction. Try again.'
-const errorMessage = '[data-testid="error-message"]'
-
-export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
-  cy.get(activateFlowAccountBtn).should('be.enabled').click()
-  // Wait for the submission to resolve: on success the tx-flow modal closes; on a
-  // retryable RPC error the app shows a submission error and re-enables the button.
-  cy.get('body', { timeout: 180000 }).should(($body) => {
-    const flowStillOpen = $body.find(activateFlowAccountBtn).length > 0
-    const hasSubmitError = $body.text().includes(submitErrorMsg)
-    expect(!flowStillOpen || hasSubmitError, 'deployment submitted or retryable error shown').to.be.true
-  })
-  cy.get('body').then(($body) => {
-    const needsRetry = $body.find(activateFlowAccountBtn).length > 0 && $body.text().includes(submitErrorMsg)
-    if (!needsRetry) return
-    if (retriesLeft === 0) {
-      // Expand the error's Details section (when present) and include its text in the failure.
-      cy.get(errorMessage)
-        .last()
-        .then(($err) => {
-          if ($err.find('button:contains("Details")').length) {
-            cy.wrap($err).contains('button', 'Details').click()
-          }
-        })
-      cy.get(errorMessage)
-        .last()
-        .invoke('text')
-        .then((details) => {
-          throw new Error(
-            `Safe activation kept failing to submit after 3 attempts. Error shown: ${details || submitErrorMsg}`,
-          )
-        })
-      return
-    }
-    cy.wait(10000)
-    clickOnFinalActivateAccountBtn(retriesLeft - 1)
-  })
 }
 
 export function clickOnQRCodeSwitch() {
@@ -290,10 +250,6 @@ export function clickOnMultiNetworkInput(index) {
 
 export function clearNetworkInput(index) {
   cy.get('input').eq(index).click()
-  cy.get(cancelIcon).click()
-}
-
-export function clickOnNetwrokRemoveIcon() {
   cy.get(cancelIcon).click()
 }
 
