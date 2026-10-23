@@ -17,6 +17,7 @@ import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import AddIcon from '@/public/images/common/add.svg'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { SETTINGS_EVENTS, UpgradeFeature } from '@/services/analytics'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -45,7 +46,15 @@ const headCells = [
 ]
 const SafeNotActivated = 'You need to activate the Safe before transacting'
 
-const AddProposerButton = ({ onAdd, isUndeployedSafe }: { onAdd: () => void; isUndeployedSafe: boolean }) => (
+const AddProposerButton = ({
+  onAdd,
+  isUndeployedSafe,
+  showProTag,
+}: {
+  onAdd: () => void
+  isUndeployedSafe: boolean
+  showProTag: boolean
+}) => (
   <div className="mb-4">
     <CheckWallet allowProposer={false}>
       {(isOk) => (
@@ -56,13 +65,18 @@ const AddProposerButton = ({ onAdd, isUndeployedSafe }: { onAdd: () => void; isU
                 <span>
                   <Button
                     data-testid="add-proposer-btn"
-                    variant="ghost"
+                    variant="outline"
                     size="lg"
                     onClick={onAdd}
                     disabled={!isOk || isUndeployedSafe}
                   >
                     <AddIcon className="size-4" />
                     Add proposer
+                    {showProTag && (
+                      <span className="block h-5 w-8" role="img" aria-label="Safe Pro" data-testid="pro-tag">
+                        <ProChip className="size-full" />
+                      </span>
+                    )}
                   </Button>
                 </span>
               }
@@ -79,7 +93,12 @@ const ProposersList = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>()
   const proposers = useProposers()
   const isEnabled = useHasFeature(FEATURES.PROPOSERS)
-  const { mustUpgradeToSafePro, isLoading: isPlanLoading, upgradeHref } = usePlanGate(FEATURES.PROPOSER_GATING)
+  const {
+    mustUpgradeToSafePro,
+    isLoading: isPlanLoading,
+    upgradeHref,
+    showProTag,
+  } = usePlanGate(FEATURES.PROPOSER_GATING)
   useMigrateProposerLabels()
   const { safe } = useSafeInfo()
   const isUndeployedSafe = !safe.deployed
@@ -148,7 +167,9 @@ const ProposersList = () => {
             />
           </div>
         ) : (
-          !isPlanLoading && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />
+          !isPlanLoading && (
+            <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} showProTag={showProTag} />
+          )
         ))}
 
       {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}

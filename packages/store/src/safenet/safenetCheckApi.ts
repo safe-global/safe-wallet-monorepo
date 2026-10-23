@@ -66,6 +66,16 @@ const selectAttestation = async (
   return best
 }
 
+/** Dates a check past its deadline from the deadline block — one header read per poll until polling stops. */
+const timedOutAtMs = async (
+  reader: SafenetReader,
+  status: CheckStatus,
+  { deadlineBlock, headBlock }: Pick<SafenetCheckSnapshot, 'deadlineBlock' | 'headBlock'>,
+): Promise<number | null> => {
+  const pastDeadline = deadlineBlock !== null && headBlock !== null && BigInt(headBlock) > BigInt(deadlineBlock)
+  return status === CheckStatus.TIMED_OUT && pastDeadline ? reader.blockTimeMs(Number(deadlineBlock)) : null
+}
+
 const configuredRpcUrl = (rpcUri: RpcUri | undefined): string => {
   if (!rpcUri?.value) throw new Error('Safenet chain RPC configuration unavailable')
   if (rpcUri.authentication === 'API_KEY_PATH' && !INFURA_TOKEN) {
@@ -146,6 +156,7 @@ export const safenetCheckApi = createApi({
             headBlock: read.headBlock,
             attestation,
             attestedAtMs,
+            timedOutAtMs: await timedOutAtMs(reader, status, read),
             aimedAtMs,
             windowCoverage: read.windowCoverage,
             events,

@@ -1,10 +1,8 @@
 import * as main from './main.page'
 import * as safe from '../pages/load_safe.pages'
-import * as tx from '../pages/transactions.page'
 import { tableContainer } from '../pages/address_book.page'
 import { txDate } from '../pages/create_tx.pages'
 import { modalHeader } from '../pages/modals.page'
-import { moduleRemoveIcon } from '../pages/modules.page'
 
 export const setupRecoveryBtn = '[data-testid="setup-recovery-btn"]'
 const recoveryNextBtn = '[data-testid="next-btn"]'
@@ -14,8 +12,7 @@ const termsCheckbox = '[data-slot="checkbox"]'
 // Once opened, Base UI select popups stay mounted after closing — scope to the open one.
 const openSelectContent = '[data-slot="select-content"][data-open]'
 const selectItem = '[data-slot="select-item"]'
-export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
-export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
+const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
 const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
 const startRecoveryBtn = '[data-testid="start-recovery"]'
 const recoveryDelaySelect = '[data-testid="recovery-delay-select"]'
@@ -25,10 +22,8 @@ const goToQueueBtn = '[data-testid="queue-btn"]'
 const executeBtn = '[data-testid="execute-btn"]'
 const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
-const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const recoveryModalTitle = 'How does recovery work'
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',
@@ -57,9 +52,6 @@ export function verifyRecovererConfirmationData(data) {
 
 export function verifyRecoveryTableDisplayed() {
   cy.get(tableContainer).should('be.visible')
-}
-export function clickOnExecuteRecoveryCancelBtn() {
-  cy.get(executeFormBtn).click()
 }
 export function cancelRecoveryTx() {
   cy.get(txDate).click()
@@ -135,22 +127,6 @@ export function agreeToTerms() {
   })
 }
 
-export function verifyRecovererAdded(address) {
-  main.verifyValuesExist(tableContainer, address)
-}
-
-export function clearRecoverers() {
-  cy.get('body').then(($body) => {
-    if ($body.find(removeRecovererBtn).length) {
-      cy.get(removeRecovererBtn).each(($btn) => {
-        cy.wrap($btn).click()
-        clickOnNextBtn()
-        tx.executeFlow_1()
-      })
-    }
-  })
-}
-
 export function clickOnStartRecoveryBtn() {
   cy.get(recoveryProposalCard)
     .should('be.visible')
@@ -161,19 +137,6 @@ export function clickOnStartRecoveryBtn() {
 
 export function enterOwnerAddress(address) {
   safe.inputOwnerAddress(0, address)
-}
-
-const RECOVERY_PROPOSAL_TIMEOUT_MS = 7000
-
-// The proposal modal shows once the recovery state loads, and only for a guardian who did not dismiss it.
-export function postponeRecovery() {
-  main
-    .pollUntil(() => Cypress.$(postponeRecoveryBtn).length > 0, RECOVERY_PROPOSAL_TIMEOUT_MS)
-    .then((shown) => {
-      if (!shown) return
-      cy.get(postponeRecoveryBtn).click()
-      cy.get(postponeRecoveryBtn).should('not.exist')
-    })
 }
 
 export function clickOnRecoverLaterBtn() {
@@ -187,15 +150,4 @@ export function verifyRecoveryProposalDialog(option) {
 
 export function verifyRecoveryProposalCard() {
   cy.get(recoveryProposalCard).should('be.visible')
-}
-
-export function verifyRecoveryModalDisplayed() {
-  cy.contains(recoveryModalTitle).should('be.visible')
-}
-
-export function deleteRecoveryModule() {
-  cy.get(moduleRemoveIcon).click()
-  main.acceptCookies()
-  clickOnNextBtn()
-  tx.executeFlow_1()
 }

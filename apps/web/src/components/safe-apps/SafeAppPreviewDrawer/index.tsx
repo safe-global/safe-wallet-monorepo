@@ -15,6 +15,7 @@ import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCar
 import CloseIcon from '@/public/images/common/close.svg'
 import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import css from './styles.module.css'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
 
@@ -29,7 +30,8 @@ type SafeAppPreviewDrawerProps = {
 const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookmark }: SafeAppPreviewDrawerProps) => {
   const { markSafeAppOpened } = useOpenedSafeApps()
   const router = useRouter()
-  const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '')
+  const safeLinkQuery = useSafeLinkQuery()
+  const safeAppUrl = getSafeAppUrl(router, safeLinkQuery, safeApp?.url || '')
   const { configs } = useChains()
   const knownChainIds = safeApp?.chainIds.filter((chainId) => configs.some((chain) => chain.chainId === chainId)) ?? []
 

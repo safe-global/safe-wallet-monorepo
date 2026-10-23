@@ -2,19 +2,15 @@ name: Web Argos Storybook
 
 # Visual regression for the web Storybook: builds it statically, screenshots every
 # story in light + dark via scripts/storybook/render-sweep.ts, and uploads the
-# screenshots to Argos (same service the Cypress visual E2E suite uses).
+# screenshots to Argos.
 #
-# Requires the ARGOS_TOKEN_STORYBOOK repo secret (a dedicated Argos project for
-# Storybook, separate from the E2E project's ARGOS_TOKEN_E2E).
+# Uploads to the Argos project of web-argos-e2e.yml; the build name keeps the
+# Storybook baseline apart from the Cypress one.
 
 on:
-  # ! Temporarily disabled — re-enable when Storybook Argos should run on every web PR again. !
-  # Runs automatically on web PRs so visual regressions surface in review instead of
-  # being discovered by hand. Fork PRs without ARGOS_TOKEN_STORYBOOK skip the upload step.
-  # pull_request:
-  #   paths:
-  #     - 'apps/web/**'
-  #     - 'packages/**'
+  # Weekly baseline on dev. Release checks are started by hand.
+  schedule:
+    - cron: '0 5 * * 1'
   workflow_dispatch:
     inputs:
       reference_branch:
@@ -45,11 +41,11 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
@@ -84,13 +80,10 @@ jobs:
             ${{ inputs.filter && format('--filter={0}', inputs.filter) || '' }}
 
       - name: Upload to Argos
-        # Fork PRs have no access to ARGOS_TOKEN_STORYBOOK — skip the upload (the sweep's
-        # broken-story check below still runs and fails the job on render errors).
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         working-directory: apps/web
-        run: npx --yes @argos-ci/cli upload argos-screenshots
+        run: npx --yes @argos-ci/cli upload argos-screenshots --build-name storybook
         env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_STORYBOOK }}
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
           ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
           ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
 

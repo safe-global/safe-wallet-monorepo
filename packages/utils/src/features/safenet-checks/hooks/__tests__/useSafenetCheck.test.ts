@@ -7,6 +7,7 @@ import { useSafenetCheck } from '../useSafenetCheck'
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  DISPUTED_POLL_MS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
   UNAVAILABLE_GRACE_MS,
@@ -243,6 +244,19 @@ describe('useSafenetCheck', () => {
       renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(0)
+    })
+
+    it('polls an open dispute every 5 minutes, not at the fast rate its far-off deadline would give', () => {
+      mockQuery.mockReturnValue(
+        queryResult({
+          data: buildSnapshot({ status: CheckStatus.DISPUTED, headBlock: '48838950', deadlineBlock: '49322741' }),
+        }),
+      )
+
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+      expect(result.current.publicStatus).toBe(CheckStatus.DISPUTED)
+      expect(lastOptions().pollingInterval).toBe(DISPUTED_POLL_MS)
     })
 
     it('polls fast when the proposal has no on-chain deadline', () => {

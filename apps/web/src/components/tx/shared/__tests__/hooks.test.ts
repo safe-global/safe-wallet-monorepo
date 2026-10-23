@@ -1,6 +1,7 @@
 import { extendedSafeInfoBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { render, renderHook, waitFor } from '@/tests/test-utils'
 import { zeroPadValue } from 'ethers'
+import { faker } from '@faker-js/faker'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -353,6 +354,55 @@ describe('SignOrExecute hooks', () => {
       const id = await signTx(createSafeTx(), '456')
       expect(signSpy).toHaveBeenCalled()
       expect(id.txId).toBe('456')
+    })
+
+    it('should sign a proposer tx and propose it with the proposer as sender', async () => {
+      const proposerWallet = {
+        label: 'MetaMask',
+        chainId: '1',
+        address: zeroPadValue('0x0789', 20),
+        provider: MockEip1193Provider,
+      } as ConnectedWallet
+      jest.spyOn(wallet, 'default').mockReturnValue(proposerWallet)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const signedTx = createSafeTx()
+      const signSpy = jest.spyOn(txSender, 'dispatchProposerTxSigning').mockResolvedValue(signedTx)
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+      const { result } = renderHook(() => useTxActions())
+      const safeTx = createSafeTx()
+
+      const txId = await result.current.signProposerTx(safeTx, 'origin')
+
+      expect(signSpy).toHaveBeenCalledWith(safeTx, proposerWallet, undefined)
+      expect(proposeSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: '1',
+          safeAddress: zeroPadValue('0x0000', 20),
+          sender: proposerWallet.address,
+          safeTx: signedTx,
+          origin: 'origin',
+        }),
+      )
+      expect(txId).toBe('123')
     })
 
     it('should propose before signing on-chain when a non-Safe smart account is the first signer', async () => {
@@ -1019,9 +1069,7 @@ describe('SignOrExecute hooks', () => {
       expect(id.txId).toEqual('123')
     })
 
-    it('should sign a not fully signed tx when relaying', async () => {
-      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
-
+    it('should throw when relaying a tx that is not fully signed', async () => {
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
         safe: {
           ...extendedSafeInfo,
@@ -1051,82 +1099,14 @@ describe('SignOrExecute hooks', () => {
       const proposeSpy = jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
-      const confirmSpy = jest
-        .spyOn(txSender, 'dispatchTxConfirmation')
-        .mockImplementation((() =>
-          Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxConfirmation)
-      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
-        tx.addSignature({
-          signer: '0x12345',
-          data: '0x0001',
-          staticPart: () => '',
-          dynamicPart: () => '',
-          isContractSignature: false,
-        })
-        return Promise.resolve(tx)
-      })
-      const relaySpy = jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
-
-      const { result } = renderHook(() => useTxActions())
-      const { executeTx } = result.current
-
-      const id = await executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
-      expect(signSpy).toHaveBeenCalled()
-      expect(proposeSpy).not.toHaveBeenCalled()
-      expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: '123', safeTx: tx }))
-      expect(relaySpy).toHaveBeenCalled()
-      expect(id.txId).toEqual('123')
-    })
-
-    it('should throw when relaying an unsigned tx as a smart contract wallet', async () => {
-      jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(true)
-
-      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
-        safe: {
-          ...extendedSafeInfo,
-          ...extendedSafeInfoBuilder().build(),
-          version: '1.3.0',
-          address: { value: zeroPadValue('0x0000', 20) },
-          nonce: 100,
-          threshold: 2,
-          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
-          chainId: '1',
-        },
-        safeAddress: '0x123',
-        safeError: undefined,
-        safeLoading: false,
-        safeLoaded: true,
-      }))
-
-      const tx = createSafeTx()
-      tx.addSignature({
-        signer: '0x123',
-        data: '0x0001',
-        staticPart: () => '',
-        dynamicPart: () => '',
-        isContractSignature: false,
-      })
-
-      const proposeSpy = jest
-        .spyOn(txSender, 'dispatchTxProposal')
-        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
-      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
-        tx.addSignature({
-          signer: '0x12345',
-          data: '0x0001',
-          staticPart: () => '',
-          dynamicPart: () => '',
-          isContractSignature: false,
-        })
-        return Promise.resolve(tx)
-      })
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
       const relaySpy = jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
 
       const { result } = renderHook(() => useTxActions())
       const { executeTx } = result.current
 
       await expect(executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)).rejects.toThrow(
-        'Cannot relay an unsigned transaction from a smart contract wallet',
+        'Cannot relay a transaction that is not fully signed',
       )
 
       expect(proposeSpy).not.toHaveBeenCalled()
@@ -1134,7 +1114,7 @@ describe('SignOrExecute hooks', () => {
       expect(relaySpy).not.toHaveBeenCalled()
     })
 
-    describe('sign-then-execute flow', () => {
+    describe('wallet execution', () => {
       const setupThreshold1Safe = () => {
         jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
           safe: {
@@ -1153,81 +1133,7 @@ describe('SignOrExecute hooks', () => {
         }))
       }
 
-      it('signs before executing a new unsigned tx for an EOA wallet', async () => {
-        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
-        setupThreshold1Safe()
-
-        const tx = createSafeTx()
-        const signedTx = createSafeTx()
-        signedTx.addSignature({
-          signer: '0x1234567890000000000000000000000000000000',
-          data: '0x0001',
-          staticPart: () => '',
-          dynamicPart: () => '',
-          isContractSignature: false,
-        })
-
-        const callOrder: string[] = []
-        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
-          callOrder.push('sign')
-          return Promise.resolve(signedTx)
-        })
-        jest.spyOn(txSender, 'dispatchTxProposal').mockImplementation((() => {
-          callOrder.push('propose')
-          return Promise.resolve({ txId: '123' })
-        }) as unknown as typeof txSender.dispatchTxProposal)
-        const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation(((
-          _chainId: string,
-          _safeTx: unknown,
-          _txOptions: unknown,
-          txId: string,
-        ) => {
-          callOrder.push('execute')
-          return Promise.resolve(txId)
-        }) as unknown as typeof txSender.dispatchTxExecution)
-
-        const { result } = renderHook(() => useTxActions())
-        const id = await result.current.executeTx({ gasPrice: 1 }, tx)
-
-        expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider, undefined)
-        expect(callOrder).toEqual(['sign', 'propose', 'execute'])
-        expect(id).toEqual({ txId: '123', isExecuted: true })
-        expect(executeSpy.mock.calls[0][1]).toBe(signedTx)
-      })
-
-      it('clears the pre-validated-sig gas estimate before executing after EIP-712 signing', async () => {
-        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
-        setupThreshold1Safe()
-
-        const tx = createSafeTx()
-        const signedTx = createSafeTx()
-        signedTx.addSignature({
-          signer: '0x1234567890000000000000000000000000000000',
-          data: '0x0001',
-          staticPart: () => '',
-          dynamicPart: () => '',
-          isContractSignature: false,
-        })
-
-        jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(signedTx)
-        jest
-          .spyOn(txSender, 'dispatchTxProposal')
-          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
-        const executeSpy = jest
-          .spyOn(txSender, 'dispatchTxExecution')
-          .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
-
-        const { result } = renderHook(() => useTxActions())
-        // Pass a gasLimit that was estimated with a pre-validated signature
-        await result.current.executeTx({ gasPrice: 1, gasLimit: 50000 }, tx)
-
-        // gasLimit must be cleared so the SDK re-estimates with the actual EIP-712 signature
-        const [, , calledTxOptions] = executeSpy.mock.calls[0]
-        expect(calledTxOptions).not.toHaveProperty('gasLimit', 50000)
-        expect(calledTxOptions?.gasLimit).toBeUndefined()
-      })
-
-      it('skips signing when the tx is already fully signed', async () => {
+      it('executes a fully signed tx with the estimated gas limit and without signing again', async () => {
         jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
         setupThreshold1Safe()
 
@@ -1241,17 +1147,22 @@ describe('SignOrExecute hooks', () => {
         })
 
         const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
-        jest
+        const executeSpy = jest
           .spyOn(txSender, 'dispatchTxExecution')
           .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
 
-        const { result } = renderHook(() => useTxActions())
-        await result.current.executeTx({ gasPrice: 1 }, tx, '123')
+        const txOptions = { gasPrice: 1, gasLimit: faker.number.int({ min: 21_000 }) }
 
+        const { result } = renderHook(() => useTxActions())
+        await result.current.executeTx(txOptions, tx, '123')
+
+        const [, executedTx, executedTxOptions] = executeSpy.mock.calls[0]
         expect(signSpy).not.toHaveBeenCalled()
+        expect(executedTx).toBe(tx)
+        expect(executedTxOptions).toEqual(txOptions)
       })
 
-      it('skips signing for SC wallets and uses implicit executor approval', async () => {
+      it('leaves a missing signature to the implicit executor approval', async () => {
         jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(true)
         setupThreshold1Safe()
 
@@ -1261,14 +1172,16 @@ describe('SignOrExecute hooks', () => {
         jest
           .spyOn(txSender, 'dispatchTxProposal')
           .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
-        jest
+        const executeSpy = jest
           .spyOn(txSender, 'dispatchTxExecution')
           .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
 
         const { result } = renderHook(() => useTxActions())
         await result.current.executeTx({ gasPrice: 1 }, tx)
 
+        const [, executedTx] = executeSpy.mock.calls[0]
         expect(signSpy).not.toHaveBeenCalled()
+        expect(executedTx).toBe(tx)
       })
     })
   })

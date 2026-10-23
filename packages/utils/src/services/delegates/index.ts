@@ -1,6 +1,7 @@
 import { TypedDataEncoder, ZeroAddress, concat, keccak256 } from 'ethers'
 import type { SigningKey } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { TypedData, TypedDataParameter } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 const DELEGATE_DOMAIN_TYPES = [
@@ -76,12 +77,24 @@ const getTransactionServiceDelegateTypedData = (chainId: string, delegateAddress
 type QueueServiceDelegateTypedData = ReturnType<typeof getQueueServiceDelegateTypedData>
 
 export type DelegateTypedData =
-  | QueueServiceDelegateTypedData
-  | ReturnType<typeof getTransactionServiceDelegateTypedData>
+  QueueServiceDelegateTypedData | ReturnType<typeof getTransactionServiceDelegateTypedData>
 
 export const isQueueServiceDelegateTypedData = (
   typedData: DelegateTypedData,
 ): typedData is QueueServiceDelegateTypedData => typedData.domain.name === QUEUE_SERVICE_DOMAIN_NAME
+
+const hasFields = (fields: TypedDataParameter[] | undefined, expected: TypedDataParameter[]): boolean =>
+  fields?.length === expected.length &&
+  fields.every((field, index) => field.name === expected[index].name && field.type === expected[index].type)
+
+/** Checks typed data received from the API (e.g. an off-chain message) against the queue service delegate structure. */
+export const isQueueServiceDelegateMessage = (
+  typedData: TypedData,
+): typedData is TypedData & QueueServiceDelegateTypedData =>
+  typedData.domain.name === QUEUE_SERVICE_DOMAIN_NAME &&
+  typedData.primaryType === 'Delegate' &&
+  hasFields(typedData.types.EIP712Domain, DELEGATE_DOMAIN_TYPES) &&
+  hasFields(typedData.types.Delegate, DELEGATE_MESSAGE_TYPES.Delegate)
 
 /**
  * Generates the EIP-712 typed data for delegate registration, used by both web and mobile.

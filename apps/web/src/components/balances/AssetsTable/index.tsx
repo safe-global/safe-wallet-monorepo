@@ -177,7 +177,7 @@ const AssetsTable = ({
               rawValue: rawPriceValue,
               content: (
                 <Typography className="text-right">
-                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} />
+                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} precise />
                 </Typography>
               ),
             },

@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
-import staticSafes from '../../fixtures/safes/static.js'
 
 // Re-export common selectors from main.page.js for backward compatibility
 export const tableContainer = main.tableContainer
@@ -17,7 +16,6 @@ const importBtn = '[data-testid="import-btn"]'
 const uploadErrorMsg = '[data-testid="error-message"]'
 const modalSummaryMessage = '[data-testid="summary-message"]'
 const saveBtn = '[data-testid="save-btn"]'
-const divInput = '[data-testid="name-input"]'
 const exportSummary = '[data-testid="export-summary"]'
 const sendBtn = '[data-testid="send-btn"]'
 export const entryDialog = '[data-testid="entry-dialog"]'
@@ -112,11 +110,11 @@ export function verifyEntriesOrder(option = 'ascending') {
   cy.get(tableRow).eq(0).contains(name)
 }
 
-export function addEntryByENS(name, ens) {
+export function addEntryByENS(name, ens, resolvedAddress) {
   typeInName(name)
   typeInAddress(ens)
   clickOnSaveEntryBtn()
-  verifyNewEntryAdded(name, staticSafes.SEP_STATIC_SAFE_6)
+  verifyNewEntryAdded(name, resolvedAddress)
 }
 
 export function verifyModalSummaryMessage(entryCount, chainCount) {
@@ -234,10 +232,4 @@ export function verifyBeamerIsChecked() {
 export function verifyBeameriFrameExists() {
   cy.wait(1000)
   cy.get(beameriFrameContainer).should('exist')
-}
-
-export function verifyEmptyOwnerNameNotAllowed() {
-  cy.get(main.nameInput).clear()
-  main.verifyElementsStatus([saveBtn], constants.enabledStates.disabled)
-  cy.get(divInput).should('have.attr', 'aria-invalid', 'true')
 }

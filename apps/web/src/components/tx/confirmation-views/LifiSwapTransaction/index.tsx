@@ -6,6 +6,7 @@ import { useLoadFeature } from '@/features/__core__'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/getTotalBridgeFee'
 import TokenAmount from '@/components/common/TokenAmount'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
@@ -57,10 +58,7 @@ const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
 )
 
 export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransactionInfo; isPreview: boolean }) => {
-  const totalFee = formatUnits(
-    BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n),
-    txInfo.fromToken.decimals,
-  )
+  const totalFee = getTotalBridgeFee(txInfo.fees)
 
   const fromAmountDecimals = formatUnits(txInfo.fromAmount, txInfo.fromToken.decimals)
   const toAmountDecimals = formatUnits(txInfo.toAmount, txInfo.toToken.decimals)
@@ -82,7 +80,13 @@ export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransac
       />
     </DataRow>,
     <DataRow datatestid="total-fee" key="fees" title="Fees">
-      {formatAmount(totalFee)} {txInfo.fromToken.symbol}
+      {totalFee === null ? (
+        'Unknown'
+      ) : (
+        <>
+          {formatAmount(formatUnits(totalFee, txInfo.fromToken.decimals))} {txInfo.fromToken.symbol}
+        </>
+      )}
     </DataRow>,
   ]
 

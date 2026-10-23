@@ -5,7 +5,7 @@ import * as createwallet from '../pages/create_wallet.pages'
 import * as ls from '../../support/localstorage_data.js'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { getMockAddress } from '../../support/utils/ethers.js'
+import { getMockAddress, mockEnsName } from '../../support/utils/ethers.js'
 
 let staticSafes,
   fundSafes = []
@@ -51,6 +51,7 @@ describe('Load Safe tests 2', () => {
     })
 
     it('Verify names with primary ENS name are filled by default', () => {
+      mockEnsName(constants.ENS_TEST_SEPOLIA_VALID, constants.defaultOwnerAddress())
       safe.inputAddress(staticSafes.SEP_STATIC_SAFE_13)
       safe.clickOnNextBtn()
       safe.verifyOnwerNameENS(1, constants.ENS_TEST_SEPOLIA_VALID)

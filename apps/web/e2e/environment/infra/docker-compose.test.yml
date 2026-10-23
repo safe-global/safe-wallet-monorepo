@@ -1,20 +1,32 @@
+# The TypeScript mocks and fork helpers in mocks/. A mock answers only localhost unless MOCK_HOST says otherwise,
+# so the entrypoint sets it: services may replace `environment` without losing it.
+x-mock: &mock
+  image: ${NODE_IMAGE:?Load test-images.env}
+  entrypoint:
+    - env
+    - MOCK_HOST=0.0.0.0
+    - node
+  user: node
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  volumes:
+    - ./mocks:/mocks:ro
 x-fork-proxy-healthcheck: &fork-proxy-healthcheck
   test:
     - CMD
-    - python
-    - -c
-    - import urllib.request;
-      urllib.request.urlopen('http://localhost:8546/health')
+    - node
+    - /mocks/healthcheck.ts
+    - '8546'
   interval: 5s
   timeout: 5s
   retries: 5
 x-fork-upstream: &fork-upstream
-  image: ${TXS_IMAGE:?Load test-images.env}
-  entrypoint:
-    - python
-    - /fork_upstream.py
-  volumes:
-    - ./scripts/fork_upstream.py:/fork_upstream.py:ro
+  <<: *mock
+  command:
+    - /mocks/fork-upstream.ts
   healthcheck: *fork-proxy-healthcheck
 x-anvil: &anvil
   image: ${ANVIL_IMAGE:?Load test-images.env}
@@ -44,19 +56,13 @@ x-anvil-healthcheck-timing: &anvil-healthcheck-timing
   retries: 12
   start_period: 20s
 x-anvil-init: &anvil-init
-  image: ${TXS_IMAGE:?Load test-images.env}
-  entrypoint:
-    - python
-    - /align_fork_clock.py
-  volumes:
-    - ./scripts/align_fork_clock.py:/align_fork_clock.py:ro
+  <<: *mock
+  command:
+    - /mocks/align-fork-clock.ts
 x-fork-rpc: &fork-rpc
-  image: ${TXS_IMAGE:?Load test-images.env}
-  entrypoint:
-    - python
-    - /fork_rpc.py
-  volumes:
-    - ./scripts/fork_rpc.py:/fork_rpc.py:ro
+  <<: *mock
+  command:
+    - /mocks/fork-rpc.ts
   healthcheck: *fork-proxy-healthcheck
 x-txs-init: &txs-init
   image: ${TXS_IMAGE:?Load test-images.env}
@@ -138,42 +144,70 @@ x-decoder-chain: &decoder-chain
     decoder-init:
       condition: service_completed_successfully
   command: python setup_decoder.py
+x-auth0-client: &auth0-client
+  AUTH0_DOMAIN: auth.safe-e2e.test
+  AUTH0_CLIENT_ID: safe-e2e-local
+  AUTH0_CLIENT_SECRET: local-test-only-auth0-secret
+x-queue: &queue
+  image: ${QUEUE_IMAGE:?Load test-images.env}
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/queue
+    RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
+    CONFIG_SERVICE_URL: http://nginx:8000/cfg
+    # Queued data is written only to the Queue Service; the worker still applies executions from the TXS events.
+    ENABLE_MIGRATION_EVENT_PROCESSING: 'false'
 volumes:
+  ledger-apps:
   nginx-shared-txs:
   nginx-shared-cfg:
   postgres-data:
-  cow-api-tls:
+  mock-keys:
 services:
   price-fixtures:
-    image: ${TXS_IMAGE:?Load test-images.env}
-    entrypoint:
-      - python
-      - /price_fixtures.py
-    volumes:
-      - ./scripts/price_fixtures.py:/price_fixtures.py:ro
+    <<: *mock
+    command:
+      - /mocks/price-fixtures.ts
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import urllib.request;
-          urllib.request.urlopen('http://localhost:8091/health')
+        - node
+        - /mocks/healthcheck.ts
+        - '8091'
       interval: 5s
       timeout: 5s
       retries: 5
-  cow-api:
+  # One self-signed certificate for the mocks that answer as HTTPS hosts, which the gateway trusts, and the
+  # local Auth0's token signing key.
+  mock-keys:
     image: ${TXS_IMAGE:?Load test-images.env}
-    # Writes the self-signed certificate into the shared volume that the gateway trusts.
     user: root
     entrypoint:
-      - python
-      - /cow_api.py
+      - sh
+      - -c
+      - |
+        set -e
+        cd /keys
+        [ -f tls-cert.pem ] || openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj /CN=safe-e2e-mocks \
+          -addext subjectAltName=DNS:api.cow.fi,DNS:auth.safe-e2e.test -keyout tls-key.pem -out tls-cert.pem
+        [ -f auth0-signing-key.pem ] || openssl genrsa -out auth0-signing-key.pem 2048
+        chmod 644 tls-key.pem auth0-signing-key.pem
+    volumes:
+      - mock-keys:/keys
+  cow-api:
+    <<: *mock
+    command:
+      - /mocks/cow-api.ts
+    # Binds port 443 without root.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
     environment:
       COW_API_OFFLINE: 'true'
     volumes:
-      - ./scripts/cow_api.py:/cow_api.py:ro
-      - ./scripts/cow_api_orders.json:/cow_api_orders.json:ro
-      - cow-api-tls:/tls
+      - ./mocks:/mocks:ro
+      - mock-keys:/keys:ro
+    depends_on:
+      mock-keys:
+        condition: service_completed_successfully
     networks:
       default:
         aliases:
@@ -181,58 +215,135 @@ services:
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import ssl, urllib.request;
-          urllib.request.urlopen('https://localhost/health',
-          context=ssl._create_unverified_context())
+        - node
+        - /mocks/healthcheck.ts
+        - '443'
+        - api.cow.fi
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  auth0-mock:
+    <<: *mock
+    command:
+      - /mocks/auth0-api.ts
+    # Binds port 443 without root: the gateway only calls https://AUTH0_DOMAIN, without a port.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
+    environment:
+      <<: *auth0-client
+    volumes:
+      - ./mocks:/mocks:ro
+      - mock-keys:/keys:ro
+    ports:
+      - 127.0.0.1:${AUTH0_MOCK_PORT:-8443}:443
+    depends_on:
+      mock-keys:
+        condition: service_completed_successfully
+    networks:
+      default:
+        aliases:
+          - auth.safe-e2e.test
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '443'
+        - auth.safe-e2e.test
       interval: 5s
       timeout: 5s
       retries: 5
   relay-api:
-    image: ${TXS_IMAGE:?Load test-images.env}
-    entrypoint:
-      - python
-      - /relay_api.py
+    <<: *mock
+    command:
+      - /mocks/relay-api.ts
     environment:
       RELAY_RPC_URLS: 11155111=http://anvil:${RPC_PORT:-8545},1=http://anvil-mainnet:8547,137=http://anvil-polygon:8548
-    volumes:
-      - ./scripts/relay_api.py:/relay_api.py:ro
     depends_on:
       anvil:
         condition: service_healthy
     healthcheck:
       test:
         - CMD
-        - python
-        - -c
-        - import urllib.request;
-          urllib.request.urlopen('http://localhost:8092/health')
+        - node
+        - /mocks/healthcheck.ts
+        - '8092'
       interval: 5s
       timeout: 5s
       retries: 5
   billing-api:
-    image: ${TXS_IMAGE:?Load test-images.env}
-    entrypoint:
-      - python
-      - /billing_api.py
+    <<: *mock
+    command:
+      - /mocks/billing-api.ts
     environment:
       BILLING_WEBHOOK_URL: http://cgw-web:3000/v1/billing/webhooks
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       # Throwaway P-256 test key; its public half is BILLING_WEBHOOK_JWT_PUBLIC_KEY of cgw-web.
       BILLING_WEBHOOK_SIGNING_KEY: 9df1216f154fc36b2e5df222b08470df3cac20b9f5679328781f959373e2b23d
+      # Where a browser reaches the mock's checkout page, through nginx.
+      BILLING_PUBLIC_URL: http://localhost:${REVERSE_PROXY_PORT:-8000}/billing
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8093'
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # The gateway reads Workspace spending limits from a policy indexer; this one has no indexed state.
+  policy-indexer:
+    <<: *mock
+    command:
+      - /mocks/policy-indexer.ts
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8094'
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
+  ledger-emulator:
+    image: ${SPECULOS_IMAGE:?Load test-images.env}
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        python -c "
+        import hashlib, os, urllib.request
+        path = '/apps/ethereum.elf'
+        if not os.path.exists(path):
+            urllib.request.urlretrieve(os.environ['LEDGER_APP_URL'], path)
+        digest = hashlib.sha256(open(path, 'rb').read()).hexdigest()
+        if digest != os.environ['LEDGER_APP_SHA256']:
+            os.remove(path)
+            raise SystemExit(f'The Ledger app download has digest {digest}, not LEDGER_APP_SHA256')
+        "
+        exec python ./speculos.py /apps/ethereum.elf --model nanosp --display headless --api-port 5000 \
+          --apdu-port 9999 --seed "$$LEDGER_SEED"
+    environment:
+      LEDGER_APP_URL: ${LEDGER_APP_URL:?Load test-images.env}
+      LEDGER_APP_SHA256: ${LEDGER_APP_SHA256:?Load test-images.env}
+      # Public test mnemonic: every address it derives is test-only. Its first address owns the Ledger Safes.
+      LEDGER_SEED: solution enroll ozone error hazard glory reunion pear shoe rapid nephew kitchen
     volumes:
-      - ./scripts/billing_api.py:/billing_api.py:ro
+      - ledger-apps:/apps
+    ports:
+      - 127.0.0.1:${LEDGER_EMULATOR_PORT:-9555}:5000
     healthcheck:
       test:
         - CMD
         - python
         - -c
         - import urllib.request;
-          urllib.request.urlopen('http://localhost:8093/health')
+          urllib.request.urlopen('http://localhost:5000/events')
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 12
   fork-upstream:
     <<: *fork-upstream
     environment:
@@ -449,6 +560,32 @@ services:
       interval: 5s
       timeout: 10s
       retries: 30
+  # Runs the migrations, so the worker starts after it.
+  queue-web:
+    <<: *queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/run_web.sh
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:8888/health/ready',
+          timeout=5)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+  queue-worker:
+    <<: *queue
+    depends_on:
+      queue-web:
+        condition: service_healthy
+    command: docker/workers/run_tx_service_sync.sh
   cgw-web:
     image: ${CGW_IMAGE:?Load test-images.env}
     env_file:
@@ -457,7 +594,8 @@ services:
       AMQP_URL: amqp://general-rabbitmq:5672
       USE_TX_SERVICE_VPC_URL: 'true'
       FF_FILTER_VALUE_PARSING: 'true'
-      FF_SAFE_QUEUE_SERVICE: 'false'
+      FF_SAFE_QUEUE_SERVICE: 'true'
+      SAFE_QUEUE_SERVICE_BASE_URI: http://queue-web:8888
       FF_AUTH: 'true'
       FF_USERS: 'true'
       FF_TRUSTED_DELEGATE_CALL: 'true'
@@ -471,8 +609,20 @@ services:
       PRICES_PROVIDER_API_BASE_URI: http://price-fixtures:8091
       PRICES_PROVIDER_API_KEY: ''
       SAFE_DATA_DECODER_BASE_URI: http://decoder-web:8888
-      NODE_EXTRA_CA_CERTS: /cow-api-tls/cert.pem
+      NODE_EXTRA_CA_CERTS: /mock-keys/tls-cert.pem
       AUTH_POST_LOGIN_REDIRECT_URI: http://localhost:${SAFE_E2E_WEB_PORT:-3080}
+      # Email sign-in and step-up against auth0-mock. A non-production gateway with an allowed redirect domain also
+      # accepts loopback redirects on any port, so every local wallet port works.
+      <<: *auth0-client
+      FF_OIDC_AUTH: 'true'
+      FF_MFA_STEP_UP: 'true'
+      AUTH0_REDIRECT_URI: http://localhost:${REVERSE_PROXY_PORT:-8000}/cgw/v1/auth/oidc/callback
+      AUTH0_API_AUDIENCE: safe-e2e-local
+      # On localhost the wallet names the staging app as the checkout return URL (returnUrl.ts); loopback is allowed anyway.
+      AUTH_ALLOWED_REDIRECT_DOMAIN: safe-wallet-web.dev.5afe.dev
+      # Specs sign in and create Workspaces many times within minutes; the production limits answer them with 429.
+      AUTH_RATE_LIMIT_MAX: '1000'
+      SPACES_RATE_LIMIT_MAX: '1000'
       JWT_ISSUER: safe-e2e-local
       JWT_SECRET: ${SAFE_E2E_JWT_SECRET:-local-test-only-signing-secret}
       BLOCKLIST_ENABLED: 'false'
@@ -486,6 +636,7 @@ services:
       FF_BILLING_SERVICE: 'true'
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
+      POLICY_INDEXER_BASE_URI: http://policy-indexer:8094
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       BILLING_WEBHOOK_JWT_PUBLIC_KEY: |
         -----BEGIN PUBLIC KEY-----
@@ -496,19 +647,25 @@ services:
       POSTGRES_DB: cgw
       REDIS_HOST: redis
     volumes:
-      - cow-api-tls:/cow-api-tls:ro
+      - mock-keys:/mock-keys:ro
     depends_on:
       price-fixtures:
         condition: service_healthy
       cow-api:
         condition: service_healthy
+      auth0-mock:
+        condition: service_healthy
       relay-api:
         condition: service_healthy
       billing-api:
         condition: service_healthy
+      policy-indexer:
+        condition: service_healthy
       redis:
         condition: service_healthy
       decoder-web:
+        condition: service_healthy
+      queue-web:
         condition: service_healthy
       postgres:
         condition: service_healthy

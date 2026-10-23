@@ -28,14 +28,6 @@ export function openSelector() {
   cy.get(openSafesIcon).click()
 }
 
-export function verifyItemExistsInSelector(name) {
-  cy.contains(name).should('be.visible')
-}
-
-export function clickOnSafe(name) {
-  cy.contains(name).click()
-}
-
 export function verifyDropdownContainsSafe(address) {
   cy.get(dropdownContent).should('be.visible').and('contain', address)
 }

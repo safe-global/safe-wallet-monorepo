@@ -6,6 +6,12 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
+import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
+
+const mockWalletAddress = faker.finance.ethereumAddress()
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useIsSafeOwner', () => ({ __esModule: true, default: jest.fn(() => true) }))
@@ -16,13 +22,23 @@ jest.mock('@/hooks/useProposers', () => ({
 }))
 jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,
-  default: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009', chainId: '1' })),
-  useSigner: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009', chainId: '1' })),
+  default: jest.fn(() => ({ address: mockWalletAddress, chainId: '1' })),
+  useSigner: jest.fn(() => ({ address: mockWalletAddress, chainId: '1' })),
 }))
 jest.mock('@/components/tx/shared/hooks', () => ({
   __esModule: true,
   useAlreadySigned: jest.fn(() => false),
 }))
+
+const createTxSummary = (confirmationsSubmitted: number, confirmationsRequired: number) =>
+  safeTxSummaryBuilder()
+    .with({
+      txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      executionInfo: executionInfoBuilder()
+        .with({ confirmationsSubmitted, confirmationsRequired, missingSigners: [{ value: mockWalletAddress }] })
+        .build(),
+    })
+    .build()
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const mockUseAlreadySigned = useAlreadySigned as jest.MockedFunction<typeof useAlreadySigned>
@@ -53,6 +69,8 @@ describe('TxStatusWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseAlreadySigned.mockReturnValue(false)
+    jest.mocked(useIsSafeOwner).mockReturnValue(true)
+    jest.mocked(useIsWalletProposer).mockReturnValue(false)
   })
 
   it('shows a Sign step before Execute on a 1/n Safe', () => {
@@ -77,7 +95,21 @@ describe('TxStatusWidget', () => {
     expect(screen.getByText('Sign').closest('li')).not.toHaveClass('incomplete')
   })
 
-  it('shows no Sign step on an m/n Safe', () => {
+  it('shows a Sign step before Execute when the signature completes the threshold of an m/n Safe', () => {
+    renderWidget(3, { txSummary: createTxSummary(2, 3) })
+
+    const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
+
+    expect(labels).toEqual(['Create', 'Confirmed (2 of 3)+1', 'Sign', 'Execute'])
+  })
+
+  it('shows no Sign step on an m/n Safe while other signatures are still missing', () => {
+    renderWidget(3, { txSummary: createTxSummary(1, 3) })
+
+    expect(screen.queryByText('Sign')).not.toBeInTheDocument()
+  })
+
+  it('shows no Sign step when creating a transaction on an m/n Safe', () => {
     renderWidget(2)
 
     expect(screen.queryByText('Sign')).not.toBeInTheDocument()
@@ -89,5 +121,28 @@ describe('TxStatusWidget', () => {
 
     renderWidget(1, { isMessage: true })
     expect(screen.queryByText('Sign')).not.toBeInTheDocument()
+  })
+
+  describe('for a proposer', () => {
+    beforeEach(() => {
+      jest.mocked(useIsWalletProposer).mockReturnValue(true)
+    })
+
+    it('shows no Sign step and leaves the confirmation open when a proposer who is not an owner creates a tx', () => {
+      jest.mocked(useIsSafeOwner).mockReturnValue(false)
+
+      renderWidget(1)
+
+      const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
+      expect(labels).toEqual(['Create', 'Confirmed (0 of 1)', 'Execute'])
+      expect(screen.getByText('Confirmed (0 of 1)').closest('li')).toHaveClass('incomplete')
+    })
+
+    it('shows the owner steps to a proposer who is also an owner', () => {
+      renderWidget(1)
+
+      const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
+      expect(labels).toEqual(['Create', 'Confirmed (0 of 1)+1', 'Sign', 'Execute'])
+    })
   })
 })

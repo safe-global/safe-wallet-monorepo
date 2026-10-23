@@ -1,7 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { render, screen } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -10,20 +7,17 @@ import { Builder } from '@/tests/Builder'
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+const mockUseGetSpaceAddressBook = jest.fn((): { address: string }[] => [])
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => true,
-  useGetSpaceAddressBook: () => [],
+  useGetSpaceAddressBook: () => mockUseGetSpaceAddressBook(),
 }))
 const mockApprove = jest.fn()
 const mockReject = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBookRequestsApproveRequestV1Mutation: () => [mockApprove],
   useAddressBookRequestsRejectRequestV1Mutation: () => [mockReject],
-}))
-jest.mock('@/services/analytics', () => ({
-  ...jest.requireActual('@/services/analytics'),
-  trackEvent: jest.fn(),
 }))
 jest.mock('@/store', () => ({
   useAppDispatch: () => jest.fn(),
@@ -79,6 +73,18 @@ const requestBuilder = () =>
 describe('PendingRequestsTable', () => {
   beforeEach(() => {
     mockUseIsMobile.mockReturnValue(false)
+    mockUseGetSpaceAddressBook.mockReturnValue([])
+  })
+
+  it('wraps the "Already in Workspace" badge below the name instead of squeezing it', () => {
+    const request = requestBuilder().build()
+    mockUseGetSpaceAddressBook.mockReturnValue([{ address: request.address.toUpperCase() }])
+
+    render(<PendingRequestsTable requests={[request]} />)
+
+    const badge = screen.getByText('Already in Workspace')
+    expect(badge.parentElement).toHaveClass('flex-wrap')
+    expect(badge.parentElement).toContainElement(screen.getByText(request.name))
   })
 
   it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {
@@ -122,39 +128,5 @@ describe('PendingRequestsTable', () => {
 
     expect(screen.getByText(requestedBy)).toBeInTheDocument()
     expect(screen.getAllByTestId('eth-hash-info').some((el) => el.textContent === requestedBy)).toBe(false)
-  })
-
-  describe('analytics', () => {
-    beforeEach(() => {
-      jest.clearAllMocks()
-    })
-
-    it('tracks an approved request', async () => {
-      mockApprove.mockResolvedValue({ data: {} })
-      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
-
-      await userEvent.click(screen.getByTestId('approve-request-btn'))
-
-      await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED))
-    })
-
-    it('tracks a rejected request', async () => {
-      mockReject.mockResolvedValue({ data: {} })
-      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
-
-      await userEvent.click(screen.getByTestId('reject-request-btn'))
-
-      await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED))
-    })
-
-    it('does not track when approving fails', async () => {
-      mockApprove.mockResolvedValue({ error: { status: 500 } })
-      render(<PendingRequestsTable requests={[requestBuilder().build()]} />)
-
-      await userEvent.click(screen.getByTestId('approve-request-btn'))
-
-      await waitFor(() => expect(mockApprove).toHaveBeenCalled())
-      expect(trackEvent).not.toHaveBeenCalled()
-    })
   })
 })

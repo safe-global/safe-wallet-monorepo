@@ -1,4 +1,6 @@
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { render, screen } from '@/tests/test-utils'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { SafeShieldContent } from '../SafeShieldContent'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -32,7 +34,7 @@ describe('SafeShieldContent Safenet section integration', () => {
     hasFeatureSpy.mockRestore()
   })
 
-  it('renders the check section through the lazy feature for a flow with a txId', async () => {
+  const renderContent = (props: { hasProFeatures?: boolean; isSafePro?: boolean } = {}) => {
     const mocked = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
     mocked.mockReturnValue(
       buildCheckView({
@@ -48,18 +50,37 @@ describe('SafeShieldContent Safenet section integration', () => {
     render(
       <TxFlowContext.Provider value={{ txId: TX_ID, txDetails } as TxFlowContextType}>
         <SafeShieldContent
-          recipient={emptyAnalysis}
+          recipient={RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build()}
           contract={emptyAnalysis}
           threat={emptyAnalysis}
           deadlock={emptyAnalysis}
+          {...props}
         />
       </TxFlowContext.Provider>,
     )
+  }
 
-    // The testid alone distinguishes the real mount from the null stub. Cold
-    // CI runners can take seconds to transform the chunk's module graph.
-    await waitFor(() => expect(screen.getByTestId('safenet-checks-section')).toBeInTheDocument(), {
-      timeout: 10_000,
-    })
+  // Cold CI runners can take seconds to transform the lazy chunk's module graph.
+  const timeout = { timeout: 10_000 }
+
+  it('shows the check in the Pro block with a plan', async () => {
+    renderContent()
+
+    const section = await screen.findByTestId('safenet-checks-section', {}, timeout)
+    expect(screen.getByTestId('pro-checks-section')).toContainElement(section)
+  }, 15_000)
+
+  it('shows the check locked in the Pro block without a plan', async () => {
+    renderContent({ hasProFeatures: false })
+
+    const locked = await screen.findByTestId('safenet-checks-locked', {}, timeout)
+    expect(screen.getByTestId('pro-checks-section')).toContainElement(locked)
+  }, 15_000)
+
+  it('lists the check among the open checks when Safe Pro is off', async () => {
+    renderContent({ isSafePro: false })
+
+    const section = await screen.findByTestId('safenet-checks-section', {}, timeout)
+    expect(screen.getByTestId('open-checks-list')).toContainElement(section)
   }, 15_000)
 })

@@ -1,6 +1,7 @@
 import { isRejectedWithValue, type UnknownAction } from '@reduxjs/toolkit'
 import { cgwClient, isCredentialRoute } from '@safe-global/store/gateway/cgwClient'
 import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import type { cgwApi as safenetApi } from '@safe-global/store/gateway/AUTO_GENERATED/safenet'
 import type { listenerMiddlewareInstance, RootState } from '@/store'
 import { isAuthenticated, setSessionCheckPending } from '@/store/authSlice'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
@@ -8,6 +9,9 @@ import { expireSession, isForbidden } from './expireSession'
 
 const CGW_ACTION_PREFIX = `${cgwClient.reducerPath}/`
 const AUTH_ME_ENDPOINT: keyof typeof authApi.endpoints = 'authGetMeV1'
+const SAFENET_CHECK_REQUEST_ENDPOINT: keyof typeof safenetApi.endpoints = 'safenetChecksRequestCheckV1'
+// Their 403 is no sign of a lost session: /me is the probe, and the Safenet route answers it for a refused Workspace
+const NON_SESSION_FORBIDDEN: Record<string, true> = { [AUTH_ME_ENDPOINT]: true, [SAFENET_CHECK_REQUEST_ENDPOINT]: true }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
@@ -25,7 +29,8 @@ export const isSessionForbiddenRejection = (action: UnknownAction, state: RootSt
   if (!action.type.startsWith(CGW_ACTION_PREFIX)) return false
   if (!isAuthenticated(state)) return false
   if (!isForbidden(action.payload) || isElevationRequiredError(action.payload)) return false
-  if (getEndpointName(action) === AUTH_ME_ENDPOINT) return false
+  const endpoint = getEndpointName(action)
+  if (endpoint && NON_SESSION_FORBIDDEN[endpoint]) return false
   const url = getRequestUrl(action)
   return url !== undefined && isCredentialRoute(url)
 }
