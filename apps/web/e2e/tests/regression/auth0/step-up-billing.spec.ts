@@ -1,26 +1,33 @@
 // The billing actions that need a step-up; the local billing service opens a local page in place of Stripe's checkout.
 import type { Page } from '@playwright/test'
-import { test, expect } from '../../src/fixtures/test.fixture'
-import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
-import { isIsolated } from '../../src/fixtures/isolated-data'
+import { test, expect } from '../../../src/fixtures/test.fixture'
+import { TEST_ADDRESSES, safeAddress } from '../../../src/data/constants'
 import {
+  addWorkspaceSafes,
   createEmailSession,
   createWorkspace,
-  gatewayRequest,
   planName,
   removeSubscription,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  workspaceUrl,
   type EmailSession,
-} from '../../src/fixtures/email-session'
-import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
+} from '../../../src/fixtures/email-session'
+import { completeStepUp, expectActionCompleted } from '../../../src/fixtures/step-up'
 
 const WORKSPACE_NAME = 'Step-up billing'
 
 // The plan card at the top of the Plans page names the plan in force.
 const currentPlan = (page: Page) => page.getByRole('main').getByRole('heading', { level: 4 }).first()
+
+/** The Plans page confirms a switch made during the free access, which the local billing service always gives. */
+async function expectPlanSwitched(page: Page, plan: string): Promise<void> {
+  await expect(page.getByRole('dialog', { name: new RegExp(`^You're on ${plan}`) })).toBeVisible()
+  await page.getByRole('button', { name: 'Get started' }).click()
+  await expect(currentPlan(page)).toHaveText(plan)
+}
 
 /** The local checkout page, opened for the Workspace (as the billing service names it, without dashes). */
 async function expectLocalCheckout(page: Page, workspaceId: string, plan: string): Promise<void> {
@@ -31,8 +38,6 @@ async function expectLocalCheckout(page: Page, workspaceId: string, plan: string
 }
 
 test.describe('Step-up for the billing actions of a Workspace', { tag: '@regression' }, () => {
-  test.skip(!isIsolated, 'Needs the local Auth0 and billing service of the isolated stack')
-
   let user: EmailSession
   let email: string
 
@@ -60,11 +65,9 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
     const offer = safePage.getByRole('dialog', { name: 'Workspaces run on Safe Pro' })
     await offer.getByRole('radio', { name: /^Starter/ }).click()
     await offer.getByRole('button', { name: 'Claim free access' }).click()
-    const returned = safePage.waitForURL(new RegExp(`/welcome/select-safes\\?spaceId=${workspaceId}`))
     await completeStepUp(safePage)
 
-    // The step-up returns to the next step of the wizard, whose replay then opens the checkout.
-    await returned
+    // The checkout returns to the next step of the wizard.
     await expectLocalCheckout(safePage, workspaceId, 'Starter')
     await expect(safePage.getByText('30 days free')).toBeVisible()
     await expect(safePage.getByText(`/welcome/select-safes?spaceId=${workspaceId}`)).toBeVisible()
@@ -79,17 +82,15 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       workspaceId = (await createWorkspace(setup, WORKSPACE_NAME)).uuid
     })
 
-    const plansUrl = () => new RegExp(`/spaces/plans\\?spaceId=${workspaceId}$`)
+    const plansUrl = () => workspaceUrl('/spaces/plans', workspaceId)
 
     test('should open the checkout of a lapsed Workspace when the step-up succeeds', async ({ safePage }) => {
       await storeSubscription(setup, workspaceId, { status: 'canceled' })
       await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
       await safePage.getByRole('button', { name: 'Continue with Business' }).click()
-      const returned = safePage.waitForURL(new RegExp(`/spaces/safe-accounts\\?spaceId=${workspaceId}`))
       await completeStepUp(safePage)
 
-      await returned
       await expectLocalCheckout(safePage, workspaceId, 'Business')
       await expect(safePage.getByText('days free')).toBeHidden()
     })
@@ -102,8 +103,8 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await safePage.getByRole('button', { name: 'Confirm change' }).click()
       await completeStepUp(safePage)
 
-      await expectActionReplayed(safePage, plansUrl(), 'Plan updated')
-      await expect(currentPlan(safePage)).toHaveText('Starter')
+      await expectActionCompleted(safePage, plansUrl())
+      await expectPlanSwitched(safePage, 'Starter')
       await expect.poll(() => planName(user, workspaceId)).toBe('Starter')
     })
 
@@ -115,21 +116,18 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await safePage.getByRole('button', { name: 'Confirm change' }).click()
       await completeStepUp(safePage)
 
-      await expectActionReplayed(safePage, plansUrl(), 'Plan updated')
-      await expect(currentPlan(safePage)).toHaveText('Business')
+      await expectActionCompleted(safePage, plansUrl())
+      await expectPlanSwitched(safePage, 'Business')
       await expect.poll(() => planName(user, workspaceId)).toBe('Business')
     })
 
     test('should remove the deselected Safe and downgrade when the step-up succeeds', async ({ safePage, safes }) => {
       await storeSubscription(setup, workspaceId)
-      const addresses = [
-        safes.SEP_STATIC_SAFE_1.split(':')[1],
+      await addWorkspaceSafes(setup, workspaceId, [
+        safeAddress(safes.SEP_STATIC_SAFE_1),
         TEST_ADDRESSES.PLACEHOLDER_A,
         TEST_ADDRESSES.PLACEHOLDER_B,
-      ]
-      await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
-        safes: addresses.map((address) => ({ chainId: CHAIN_IDS.sepolia, address })),
-      })
+      ])
       await safePage.goto(`/spaces/plans?spaceId=${workspaceId}`)
 
       await safePage.getByRole('button', { name: 'Switch to Starter' }).click()
@@ -139,8 +137,8 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await safePage.getByRole('button', { name: 'Confirm change' }).click()
       await completeStepUp(safePage)
 
-      await expectActionReplayed(safePage, plansUrl(), 'Plan updated')
-      await expect(currentPlan(safePage)).toHaveText('Starter')
+      await expectActionCompleted(safePage, plansUrl())
+      await expectPlanSwitched(safePage, 'Starter')
       await expect.poll(() => planName(user, workspaceId)).toBe('Starter')
       const workspaceSafes = await workspaceResource(user, workspaceId, 'safes')
       expect(workspaceSafes.toLowerCase()).not.toContain(TEST_ADDRESSES.PLACEHOLDER_B)

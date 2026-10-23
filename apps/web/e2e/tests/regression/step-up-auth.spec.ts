@@ -18,15 +18,13 @@ import type {
 import type { UsersGetWithWalletsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { toast } from '../../src/fixtures/step-up'
+import { clickVerify, expectActionCompleted, stepUpDialog } from '../../src/fixtures/step-up'
 import { LS_NAMESPACE } from '../../src/data/constants'
 
 /**
- * When a sensitive action needs a fresh second factor, the user is sent to Auth0,
- * and the state of the action they were trying to perform has to be preserved
- * until they come back. That state is kept in sessionStorage. There are many ways
- * for it to become corrupted during this interaction, so this file tests the
- * unhappy paths.
+ * The browser side of a step-up, with the gateway and Auth0 mocked: the popup ends on the static completion page,
+ * which reports to the wallet tab over a BroadcastChannel; and a browser that blocks the popup gets a same-tab
+ * verification. The isolated specs cover the real Auth0 round-trip.
  */
 
 const SIGNER = '0x1234567890123456789012345678901234567890'
@@ -34,7 +32,6 @@ const CHAIN_ID = '1'
 const SPACE_ID = '00000000-0000-0000-0000-0000000000bb'
 const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
 const SAFE_ACCOUNTS_URL = `/spaces/safe-accounts?spaceId=${SPACE_ID}`
-const STEP_UP_KEY = 'oidc_step_up'
 const AUTHORIZE_PATTERN = /\/v1\/auth\/oidc\/authorize/
 const SPACE_SAFES_PATTERN = /\/v1\/spaces\/[^/]+\/safes$/
 const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
@@ -150,11 +147,26 @@ async function seedWorkspaceSession(page: Page): Promise<void> {
   )
 }
 
-async function gateSafeRemoval(page: Page): Promise<void> {
+/** Rejects the first removals with `elevation_required` and accepts the rest; returns the number of removals sent. */
+async function gateSafeRemoval(page: Page, rejections = 1): Promise<() => number> {
+  let removals = 0
   await page.route(SPACE_SAFES_PATTERN, async (route) => {
     if (route.request().method() !== 'DELETE') return route.fallback()
 
-    return route.fulfill(ELEVATION_REQUIRED_RESPONSE)
+    removals += 1
+    return removals <= rejections
+      ? route.fulfill(ELEVATION_REQUIRED_RESPONSE)
+      : route.fulfill({ status: 200, body: '' })
+  })
+  return () => removals
+}
+
+/** The gateway sends a completed challenge to its `redirect_url`; the popup is a new page, so the route is the context's. */
+async function stubCompletedChallenge(page: Page): Promise<void> {
+  await page.context().route(AUTHORIZE_PATTERN, (route) => {
+    const returnUrl = new URL(route.request().url()).searchParams.get('redirect_url')
+
+    return route.fulfill({ status: 302, headers: { location: returnUrl ?? '/' } })
   })
 }
 
@@ -168,58 +180,51 @@ async function stubProviderChallengePage(page: Page): Promise<void> {
   )
 }
 
-async function stubCompletedChallenge(page: Page): Promise<void> {
-  await page.route(AUTHORIZE_PATTERN, (route) => {
-    const returnUrl = new URL(route.request().url()).searchParams.get('redirect_url')
-
-    return route.fulfill({ status: 302, headers: { location: returnUrl ?? '/' } })
-  })
-}
-
-async function openRemoveDialog(page: Page): Promise<void> {
+async function removeSafe(page: Page): Promise<void> {
   await page.goto(SAFE_ACCOUNTS_URL)
   await page.getByRole('button', { name: 'Safe Account actions' }).first().click()
   await page.getByRole('menuitem', { name: 'Remove from Workspace' }).click()
+  await page.getByRole('button', { name: 'Remove' }).click()
 }
 
-const readStepUpRecord = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STEP_UP_KEY)
-
-test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
+test.describe('Step-up auth in a popup', { tag: '@regression' }, () => {
   test.beforeEach(async ({ safePage }) => {
     await seedWorkspaceSession(safePage)
-    await gateSafeRemoval(safePage)
-    await stubProviderChallengePage(safePage)
   })
 
-  test('that it replays an abandoned challenge once, silently, without starting a new one', async ({ safePage }) => {
-    await openRemoveDialog(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-    await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
-
-    await safePage.goto(SAFE_ACCOUNTS_URL)
-
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
-    await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
-    await expect(safePage.getByText(ELEVATION_REQUIRED_ERROR)).toBeHidden()
-  })
-
-  test('that it reports an error when the replayed action fails', async ({ safePage }) => {
+  test('that the request is sent again once the popup reports the verification', async ({ safePage }) => {
+    const removals = await gateSafeRemoval(safePage)
     await stubCompletedChallenge(safePage)
 
-    let removalCalls = 0
-    await safePage.route(SPACE_SAFES_PATTERN, async (route) => {
-      if (route.request().method() !== 'DELETE') return route.fallback()
+    await removeSafe(safePage)
+    const popup = await clickVerify(safePage)
+    // The mocked challenge ends at once, so the popup can close before a 'close' listener exists.
+    await expect.poll(() => popup.isClosed()).toBe(true)
 
-      removalCalls += 1
-      return removalCalls === 1
-        ? route.fulfill(ELEVATION_REQUIRED_RESPONSE)
-        : route.fulfill({ status: 500, json: { message: 'Internal error', statusCode: 500 } })
-    })
+    await expectActionCompleted(safePage, new RegExp(`/spaces/safe-accounts\\?spaceId=${SPACE_ID}$`))
+    await expect(safePage.getByRole('alert').filter({ hasText: 'Removed safe account from space' })).toBeVisible()
+    expect(removals()).toBe(2)
+  })
 
-    await openRemoveDialog(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
+  test('that a blocked popup offers the verification in the same tab', async ({ safePage }) => {
+    const removals = await gateSafeRemoval(safePage)
+    await stubProviderChallengePage(safePage)
+    // Chromium under test opens every popup, so the page sees what a blocking browser returns.
+    await safePage.addInitScript(() => Object.assign(window, { open: () => null }))
 
-    await expect(toast(safePage, 'Internal error')).toBeVisible()
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
+    await removeSafe(safePage)
+    await safePage.getByTestId('step-up-verify-button').click()
+    await expect(stepUpDialog(safePage)).toContainText('Your browser blocked the verification window')
+
+    const challenge = safePage.waitForRequest(AUTHORIZE_PATTERN)
+    await safePage.getByRole('button', { name: /Verify in this tab instead/ }).click()
+    const authorize = new URL((await challenge).url())
+
+    await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
+    expect(authorize.searchParams.get('elevate')).toBe('true')
+    expect(authorize.searchParams.get('redirect_url')).toMatch(
+      new RegExp(`/spaces/safe-accounts\\?spaceId=${SPACE_ID}$`),
+    )
+    expect(removals()).toBe(1)
   })
 })

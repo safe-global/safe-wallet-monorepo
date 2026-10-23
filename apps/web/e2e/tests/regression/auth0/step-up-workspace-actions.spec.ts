@@ -1,9 +1,9 @@
 // The user signs in without a second factor; the test data comes from a second session that has one.
 import type { Page } from '@playwright/test'
-import { test, expect } from '../../src/fixtures/test.fixture'
-import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
-import { isIsolated } from '../../src/fixtures/isolated-data'
+import { test, expect } from '../../../src/fixtures/test.fixture'
+import { CHAIN_IDS, TEST_ADDRESSES, safeAddress } from '../../../src/data/constants'
 import {
+  addWorkspaceSafes,
   createWorkspace,
   createEmailSession,
   gatewayRequest,
@@ -11,23 +11,20 @@ import {
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  workspaceUrl,
   type EmailSession,
-} from '../../src/fixtures/email-session'
-import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
+} from '../../../src/fixtures/email-session'
+import { completeStepUp, expectActionCompleted } from '../../../src/fixtures/step-up'
 
 const SEPOLIA = CHAIN_IDS.sepolia
 const CONTACT = { name: 'Treasury contact', address: TEST_ADDRESSES.NON_OWNER }
 
-const prefixless = (prefixedAddress: string): string => prefixedAddress.split(':')[1]
-
 test.describe('Step-up for the actions inside a Workspace', { tag: '@regression' }, () => {
-  test.skip(!isIsolated, 'Needs the local Auth0 of the isolated stack')
-
   let workspaceId: string
   /** The same user, signed in with a second factor, for test data. */
   let setup: EmailSession
 
-  const pageUrl = (path: string) => new RegExp(`${path}\\?spaceId=${workspaceId}$`)
+  const pageUrl = (path: string) => workspaceUrl(path, workspaceId)
 
   /** Invites a new user, who accepts; returns that member's session. */
   async function joinAsMember(name: string): Promise<EmailSession> {
@@ -50,7 +47,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = prefixless(safes.SEP_STATIC_SAFE_1)
+    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Add accounts' }).click()
@@ -66,16 +63,14 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await safePage.getByRole('button', { name: 'Save' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/safe-accounts'), 'Safe account added')
+    await expectActionCompleted(safePage, pageUrl('/spaces/safe-accounts'), 'Added 1 safe account')
     await expect(safePage.getByRole('row').filter({ hasText: 'Treasury Safe' })).toBeVisible()
     expect(await workspaceResource(setup, workspaceId, 'safes')).toContain(address)
   })
 
   test('should rename the Workspace Safe when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = prefixless(safes.SEP_STATIC_SAFE_1)
-    await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
-      safes: [{ chainId: SEPOLIA, address }],
-    })
+    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    await addWorkspaceSafes(setup, workspaceId, [address])
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Safe Account actions' }).click()
@@ -84,16 +79,14 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await safePage.getByRole('dialog').getByRole('button', { name: 'Save' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/safe-accounts'), 'Address book updated')
+    await expectActionCompleted(safePage, pageUrl('/spaces/safe-accounts'), 'Contact updated in')
     await expect(safePage.getByRole('row').filter({ hasText: 'Treasury Safe' })).toBeVisible()
     expect(await workspaceResource(setup, workspaceId, 'address-book')).toContain('Treasury Safe')
   })
 
   test('should remove the Safe from the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = prefixless(safes.SEP_STATIC_SAFE_1)
-    await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
-      safes: [{ chainId: SEPOLIA, address }],
-    })
+    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    await addWorkspaceSafes(setup, workspaceId, [address])
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Safe Account actions' }).click()
@@ -101,7 +94,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await safePage.getByRole('dialog').getByRole('button', { name: 'Remove' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/safe-accounts'), 'Safe account removed')
+    await expectActionCompleted(safePage, pageUrl('/spaces/safe-accounts'), 'Removed safe account from space')
     await expect(safePage.getByRole('button', { name: 'Safe Account actions' })).toBeHidden()
     expect(await workspaceResource(setup, workspaceId, 'safes')).not.toContain(address)
   })
@@ -117,7 +110,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await dialog.getByRole('button', { name: 'Add member' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/members'), 'Invitation sent')
+    await expectActionCompleted(safePage, pageUrl('/spaces/members'), 'Invited Invitee to space')
     await expect(safePage.getByRole('tab', { name: 'Pending (1)' })).toBeVisible()
     expect(await workspaceResource(setup, workspaceId, 'members')).toContain(invitee)
   })
@@ -140,7 +133,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
       await safePage.getByRole('button', { name: 'Update' }).click()
       await completeStepUp(safePage)
 
-      await expectActionReplayed(safePage, pageUrl('/spaces/members'), 'Role updated')
+      await expectActionCompleted(safePage, pageUrl('/spaces/members'), `Updated role of ${MEMBER_NAME} to Admin`)
       await expect(memberRow(safePage)).toContainText('Admin')
     })
 
@@ -151,7 +144,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
       await safePage.getByRole('dialog').getByRole('button', { name: 'Remove' }).click()
       await completeStepUp(safePage)
 
-      await expectActionReplayed(safePage, pageUrl('/spaces/members'), 'Member removed')
+      await expectActionCompleted(safePage, pageUrl('/spaces/members'), `Removed ${MEMBER_NAME} from space`)
       await expect(memberRow(safePage)).toBeHidden()
       expect(await workspaceResource(setup, workspaceId, 'members')).not.toContain(MEMBER_NAME)
     })
@@ -167,7 +160,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await dialog.getByRole('button', { name: 'Add contact' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/address-book'), 'Address book updated')
+    await expectActionCompleted(safePage, pageUrl('/spaces/address-book'), 'Contact added to')
     await expect(safePage.getByRole('row').filter({ hasText: CONTACT.name })).toBeVisible()
   })
 
@@ -185,7 +178,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await safePage.getByRole('dialog').getByRole('button', { name: 'Remove' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/address-book'), 'Address removed from the address book')
+    await expectActionCompleted(safePage, pageUrl('/spaces/address-book'), 'Contact removed from')
     await expect(safePage.getByRole('row').filter({ hasText: CONTACT.name })).toBeHidden()
   })
 
@@ -201,7 +194,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await safePage.getByTestId('approve-request-btn').click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, pageUrl('/spaces/address-book'), 'Address book request approved')
+    await expectActionCompleted(safePage, pageUrl('/spaces/address-book'), 'Contact added to Workspace address book')
     await expect(safePage.getByRole('tab', { name: 'Workspace contacts (1)' })).toBeVisible()
     expect(await workspaceResource(setup, workspaceId, 'address-book')).toContain(CONTACT.name)
   })
@@ -220,7 +213,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await dialog.getByRole('button', { name: 'Delete Workspace' }).click()
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, /\/welcome\/spaces$/, 'Workspace deleted')
+    await expectActionCompleted(safePage, /\/welcome\/spaces$/, 'Deleted Workspace Step-up actions.')
     await expect(card).toBeHidden()
   })
 })

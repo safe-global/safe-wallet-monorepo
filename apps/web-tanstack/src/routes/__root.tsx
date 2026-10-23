@@ -31,8 +31,7 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
-import LaunchScreen from '@/components/common/LaunchScreen'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { StepUpDialog, useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { initObservability } from '@/services/observability'
@@ -77,12 +76,6 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 
-const StepUpSplash = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
-}
-
 const InitApp = (): ReactElement => {
   useHydrateStore(reduxStore)
   useInitChains()
@@ -96,7 +89,7 @@ const InitApp = (): ReactElement => {
   useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
   useUnlockBodyScroll()
@@ -117,6 +110,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <CookieAndTermBanner />
       <TargetedOutreachPopupLoader />
       <Notifications />
+      <StepUpDialog />
       <RecoveryLoader />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
@@ -145,7 +139,6 @@ function RootShell() {
             {/* Before InitApp and the page, so GA exists before their mount effects send events */}
             <Analytics />
             <InitApp />
-            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

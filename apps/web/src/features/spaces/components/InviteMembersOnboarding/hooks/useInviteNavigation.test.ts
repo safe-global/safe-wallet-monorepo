@@ -77,17 +77,4 @@ describe('useInviteNavigation', () => {
 
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/create-space' })
   })
-
-  it('points the step-up return URL at the survey step', () => {
-    const { result } = renderHook(() => useInviteNavigation())
-
-    expect(result.current.nextStepUrl).toBe('/welcome/survey?spaceId=7')
-  })
-
-  it('points the step-up return URL at the sanitised next URL when present', () => {
-    mockRouterQuery = { spaceId: '7', next: '/balances?token=eth' }
-    const { result } = renderHook(() => useInviteNavigation())
-
-    expect(result.current.nextStepUrl).toBe('/balances?token=eth')
-  })
 })

@@ -5,6 +5,7 @@ import IdentitySection from '../IdentitySection'
 import { spaceBuilder } from '@/tests/builders/space'
 import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -116,6 +117,25 @@ describe('IdentitySection', () => {
         updateSpaceDto: { name: 'New Name' },
       })
     })
+  })
+
+  it('lets the user save again after they cancel the verification', async () => {
+    mockUnwrap.mockRejectedValueOnce({ status: 403, data: { message: ELEVATION_REQUIRED_ERROR } })
+    mockUnwrap.mockResolvedValueOnce({})
+    setup(true)
+
+    fireEvent.change(getInput(), { target: { value: 'New Name' } })
+    fireEvent.click(getSaveButton())
+    await waitFor(() => expect(mockUpdateSpace).toHaveBeenCalledTimes(1))
+
+    fireEvent.change(getInput(), { target: { value: 'Other Name' } })
+    await waitFor(() => expect(getSaveButton()).not.toBeDisabled())
+    fireEvent.click(getSaveButton())
+
+    await waitFor(() => {
+      expect(mockUpdateSpace).toHaveBeenLastCalledWith({ id: MOCK_SPACE_UUID, updateSpaceDto: { name: 'Other Name' } })
+    })
+    expect(screen.queryByText(ELEVATION_REQUIRED_MESSAGE)).not.toBeInTheDocument()
   })
 
   it('does not show a validation error for the pristine saved name', () => {

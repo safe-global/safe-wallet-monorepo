@@ -47,14 +47,7 @@ export {
   toggleGlobalSearch,
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
-export {
-  elevationListener,
-  stepUpSlice,
-  stepUpLeaving,
-  stepUpReturning,
-  stepUpSettled,
-  selectStepUpPhase,
-} from '@/features/oidc-auth/store'
+export { stepUpSlice } from '@/features/oidc-auth/store'
 export {
   spaceSafesEntitlementsListener,
   planChangeSyncListener,

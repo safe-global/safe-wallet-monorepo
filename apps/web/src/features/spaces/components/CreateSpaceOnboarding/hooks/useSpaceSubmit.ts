@@ -40,10 +40,6 @@ const useSpaceSubmit = (
     [router, getSelectSafesQuery],
   )
 
-  const selectSafesUrl = createdSpaceId
-    ? `${AppRoutes.welcome.selectSafes}?${new URLSearchParams(getSelectSafesQuery(createdSpaceId))}`
-    : undefined
-
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
@@ -104,7 +100,6 @@ const useSpaceSubmit = (
     onSubmit,
     createdSpaceId,
     goToSelectSafes,
-    selectSafesUrl,
   }
 }
 
