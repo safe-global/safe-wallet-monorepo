@@ -16,6 +16,7 @@ export type {
   AllowlistEligibility,
   AllowlistIneligibilityReason,
   PolicyGuardTarget,
+  SetupCallDescription,
 } from './types'
 export { usePolicyGuard } from './hooks/usePolicyGuard'
 export type { UsePolicyGuardResult } from './hooks/usePolicyGuard'

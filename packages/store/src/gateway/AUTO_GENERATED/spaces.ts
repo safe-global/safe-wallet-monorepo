@@ -203,6 +203,17 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
         providesTags: ['spaces'],
       }),
+      policiesCreateConfigurationRequestV1: build.mutation<
+        PoliciesCreateConfigurationRequestV1ApiResponse,
+        PoliciesCreateConfigurationRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/policies/requests`,
+          method: 'POST',
+          body: queryArg.createPolicyConfigurationRequestDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacePoliciesGetActivePoliciesV1: build.query<
         SpacePoliciesGetActivePoliciesV1ApiResponse,
         SpacePoliciesGetActivePoliciesV1ApiArg
@@ -419,6 +430,17 @@ export type SpaceCounterfactualSafesGetV1ApiResponse =
 export type SpaceCounterfactualSafesGetV1ApiArg = {
   /** Space UUID */
   spaceId: string
+}
+export type PoliciesCreateConfigurationRequestV1ApiResponse =
+  /** status 201  */ CreatePolicyConfigurationRequestResponse
+export type PoliciesCreateConfigurationRequestV1ApiArg = {
+  /** Space UUID the Safe belongs to */
+  spaceId: string
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address, must be registered to the Space */
+  safeAddress: string
+  createPolicyConfigurationRequestDto: CreatePolicyConfigurationRequestDto
 }
 export type SpacePoliciesGetActivePoliciesV1ApiResponse = /** status 200  */ ActivePolicyDto[]
 export type SpacePoliciesGetActivePoliciesV1ApiArg = {
@@ -678,6 +700,27 @@ export type GetCounterfactualSafesResponse = {
   safes: {
     [key: string]: GetCounterfactualSafeItem[]
   }
+}
+export type CreatePolicyConfigurationRequestResponse = {
+  /** The stored configuration root */
+  root: string
+}
+export type PolicyConfigurationDto = {
+  /** Contract the guarded call targets */
+  target: string
+  /** 4-byte function selector */
+  selector: string
+  /** 0 = CALL, 1 = DELEGATECALL */
+  operation: 0 | 1
+  /** Policy contract to bind. The zero address removes the policy of this access. */
+  policy: string
+  /** Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes). */
+  data: string
+}
+export type CreatePolicyConfigurationRequestDto = {
+  /** keccak256(abi.encode(Configuration[])), as requested on-chain */
+  root: string
+  configurations: PolicyConfigurationDto[]
 }
 export type ModuleEnforcementDto = {
   via: 'module'
@@ -992,6 +1035,7 @@ export const {
   useMembersRemoveUserV1Mutation,
   useSpaceCounterfactualSafesGetV1Query,
   useLazySpaceCounterfactualSafesGetV1Query,
+  usePoliciesCreateConfigurationRequestV1Mutation,
   useSpacePoliciesGetActivePoliciesV1Query,
   useLazySpacePoliciesGetActivePoliciesV1Query,
   useSpacePoliciesGetPendingPoliciesV1Query,
