@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
 
 const SIMILAR_ADDRESSES = [
@@ -39,7 +39,7 @@ export const ManyAddresses: Story = {
 export const AddressBookImport: Story = {
   args: {
     similarAddresses: SIMILAR_ADDRESSES,
-    description: `${SIMILAR_ADDRESSES.length} addresses in this file closely resemble addresses in your address book. Review them carefully before continuing.`,
+    description: `${SIMILAR_ADDRESSES.length} addresses in this file closely resemble other addresses. Review them carefully before continuing.`,
     question: 'Do you want to import these addresses?',
     confirmLabel: 'Yes, import them anyway',
   },

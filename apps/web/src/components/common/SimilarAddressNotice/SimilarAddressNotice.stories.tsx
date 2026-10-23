@@ -44,6 +44,6 @@ export const SafeAccount: Story = {
 
 export const CsvImport: Story = {
   args: {
-    children: '3 addresses in this file are similar to addresses in your address book.',
+    children: '3 addresses in this file look similar to other addresses.',
   },
 }
