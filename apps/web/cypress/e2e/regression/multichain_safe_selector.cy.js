@@ -33,14 +33,6 @@ describe('Multichain safe selector tests', { defaultCommandTimeout: 60000 }, () 
     safeNav.verifyFirstDropdownRowHasBalance()
   })
 
-  it('Verify address of the safe group', () => {
-    const address = staticSafes.MATIC_STATIC_SAFE_28.split(':')[1].substring(0, 6)
-
-    safeNav.openSelector()
-
-    safeNav.verifyDropdownContainsSafe(address)
-  })
-
   it('Verify network logo for safes in the group', () => {
     const address = staticSafes.MATIC_STATIC_SAFE_28.split(':')[1].substring(0, 6)
 

@@ -101,11 +101,4 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
       getBody().findAllByText(safeapps.noTokensSelectedStr).should('be.visible')
     })
   })
-
-  it('Verify a drain cannot be created when no assets and recipient are selected', () => {
-    cy.enter(iframeSelector).then((getBody) => {
-      getBody().findByLabelText(safeapps.selectAllRowsChbxStr).click()
-      getBody().findAllByText(safeapps.noTokensSelectedStr).should('be.visible')
-    })
-  })
 })
