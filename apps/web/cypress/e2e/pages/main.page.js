@@ -182,21 +182,6 @@ export const getSafeBalance = (safeAddress, chain) => {
     })
 }
 
-export const getSafeNFTs = (safeAddress, chain) => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${constants.stagingCGWUrlv2}${constants.stagingCGWChains}${chain}${constants.stagingCGWSafes}${safeAddress}${constants.stagingCGWCollectibles}`,
-      headers: {
-        accept: 'application/json',
-      },
-    })
-    .then((response) => {
-      expect(response.status).to.eq(200)
-      return response
-    })
-}
-
 export const getSafeNonce = (safeAddress, chain) => {
   return cy
     .request({
@@ -249,28 +234,6 @@ export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {
     console.log(targetToken)
     expect(targetToken.balance).to.include(expectedBalance)
   })
-}
-
-export function checkTokenBalanceIsNull(safeAddress, tokenSymbol) {
-  let pollCount = 0
-
-  function poll() {
-    getSafeNFTs(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
-      const targetToken = response.body.results.find((token) => token.tokenSymbol === tokenSymbol)
-      if (targetToken === undefined) {
-        console.log('Token is undefined as expected. Stopping polling.')
-        return true
-      } else if (pollCount < 10) {
-        pollCount++
-        console.log('Token is not undefined, retrying...')
-        cy.wait(5000)
-        poll()
-      } else {
-        throw new Error('Failed to validate token status within the allowed polling attempts.')
-      }
-    })
-  }
-  cy.wrap(null).then(poll).should('be.true')
 }
 
 // The global beforeEach stores the current cookie consent, so the banner shows only when that storage is gone.
