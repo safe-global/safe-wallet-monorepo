@@ -1,9 +1,9 @@
 /**
  * "Default tokens" lists only the tokens that the Transaction Service trusts; "All tokens" lists every token.
  *
- * Runs only on the isolated stack. There mainnet has no portfolio endpoint, so both lists come from the
- * Transaction Service, and the scenario trusts a known set of the Safe's tokens. On staging the default list
- * comes from the portfolio provider instead.
+ * Runs only on the isolated stack. There CGW runs without Zerion, so the portfolio request of "Default tokens" fails
+ * and the wallet falls back to the tokens that the Transaction Service trusts; the scenario trusts a known set of the
+ * Safe's tokens. On staging the default list comes from Zerion instead.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { SafeApiClient } from '../../src/api/safe-api-client'
