@@ -25,6 +25,7 @@ import { useElementWidth } from '../hooks/useElementWidth'
 import {
   getConflicts,
   getOutstandingSigners,
+  getPrimaryStatus,
   getScenarioAccounts,
   getSignerName,
   getState,
@@ -57,7 +58,7 @@ import {
 } from '../services/execution'
 import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
-import type { Account, Direction, Persona, Proposal } from '../types'
+import type { Account, Direction, Filter, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
@@ -80,6 +81,8 @@ import { formatUpdated, getNeedsYou } from '../services/simple'
 import { getStepKind } from '../services/nextSteps'
 
 const LIST_LABELS = { safes: 'Safes', signers: 'Signers' }
+// Option C: enough open Safes to show blocked and waiting rows without a click.
+const OPEN_WAITING_SAFES = 3
 
 export default function PendingQueue() {
   const router = useRouter()
@@ -139,11 +142,20 @@ function PendingQueueView() {
     nextNonce: queue.nextNonces[account.id],
   }))
   const unavailable = state === 'loading' || state === 'error' || simpleLoading
+  // The first Safe with a blocked row and the first with a waiting one, then the next by rank.
+  const openWaitingSafes = () => {
+    const needsYouIds = new Set(getNeedsYou(items, persona).map((tx) => tx.id))
+    const rest = (account: Account) => items.filter((tx) => tx.account === account.id && !needsYouIds.has(tx.id))
+    const ranked = rankAccounts(accounts, items, persona).filter((account) => rest(account).length > 0)
+    const first = (status: Filter) =>
+      ranked.filter((account) => rest(account).some((tx) => getPrimaryStatus(tx, persona) === status)).slice(0, 1)
+    return [...new Set([...first('waiting'), ...first('awaiting'), ...ranked])].slice(0, OPEN_WAITING_SAFES)
+  }
   // Safes with nothing for you start collapsed. Fleet admin keeps conflicting Safes open for everyone.
-  // In C what needs you is listed above, so every Safe starts collapsed.
+  // In C what needs you is listed above, so only the first Safes waiting on others start open.
   const idleSafeIds = () =>
     simple
-      ? accounts.map((account) => `safe-${account.id}`)
+      ? accounts.filter((account) => !openWaitingSafes().includes(account)).map((account) => `safe-${account.id}`)
       : buildSections({ visible: items, accounts, accountFilter: [], persona })
           .filter((section) => section.urgency === undefined && !(fleet && hasConflicts(section.account.id, items)))
           .map((section) => section.id)

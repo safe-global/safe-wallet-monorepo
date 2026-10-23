@@ -1164,7 +1164,8 @@ describe('queue design exploration', () => {
       expect(within(lastSignature.closest('tr')!).getAllByText('Sign & execute')).toHaveLength(2)
       expect(within(needsYou).getAllByRole('button', { name: /^Sign / }).length).toBeGreaterThan(0)
       const bySafe = screen.getByRole('table', { name: 'Pending transactions' })
-      expect(within(bySafe).getAllByRole('button', { name: /^Expand / }).length).toBeGreaterThan(0)
+      // The first Safes waiting on others start open, so blocked and waiting rows show without a click.
+      expect(within(bySafe).getAllByRole('button', { name: /^Collapse / }).length).toBeGreaterThan(0)
       expect(screen.getByText(/^Updated just now/)).toBeInTheDocument()
       // Safe and Status only.
       expect(screen.queryByRole('button', { name: /^Filter/ })).not.toBeInTheDocument()

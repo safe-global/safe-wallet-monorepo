@@ -900,7 +900,8 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
 }
 // 20 and 50 Safes: one of each type the others lack, plus a conflict between three transactions.
 // They go at the end of a few queues, so they also show waiting on earlier nonces.
-type MixTemplate = Pick<Proposal, 'recipient' | 'amount' | 'kind' | 'age'> & Pick<Partial<Proposal>, 'app' | 'fiat'>
+type MixTemplate = Pick<Proposal, 'recipient' | 'amount' | 'kind' | 'age'> &
+  Pick<Partial<Proposal>, 'app' | 'fiat' | 'note' | 'origin' | 'signers'>
 const MIX: MixTemplate[] = [
   {
     recipient: 'GPv2Settlement · 0x9008…ab41',
@@ -946,6 +947,75 @@ const MIX: MixTemplate[] = [
     age: '30m ago',
   },
 ]
+// Variations the mix above doesn't cover. They go after queues you sign on, so they also show signing ahead.
+const VARIATIONS: MixTemplate[] = [
+  {
+    recipient: 'CoW Swap · TWAP order',
+    amount: '600,000 USDC',
+    kind: { type: 'swap', sell: '600,000 USDC', buy: '186 ETH', order: 'twap', expiry: '12 parts over 24h' },
+    app: { name: 'CoW Swap', logo: `${TOKEN_LOGOS}/0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB.png` },
+    age: '40m ago',
+    signers: ['Ana'],
+    note: { text: 'Spread the buy over a day to limit slippage.', author: 'Ana', date: '22 Oct, 09:10', onchain: true },
+  },
+  {
+    recipient: 'CoW Swap · Limit order',
+    amount: '120 ETH',
+    kind: {
+      type: 'swap',
+      sell: '120 ETH',
+      buy: '400,000 USDC',
+      order: 'limit',
+      expiry: 'Expired 2h ago',
+      expired: true,
+    },
+    age: '2d ago',
+    signers: ['Ana', 'Max'],
+  },
+  {
+    recipient: 'MultiSendCallOnly · 0x9641…3a6f',
+    amount: '',
+    kind: {
+      type: 'batch',
+      delegateCall: 'untrusted',
+      actions: [
+        { method: 'approve', to: 'USDC' },
+        { method: 'deposit', to: 'Unknown vault · 0x7d1e…40b2' },
+      ],
+    },
+    app: { name: 'Transaction Builder' },
+    age: '15m ago',
+    signers: [],
+  },
+  {
+    recipient: 'Compatibility fallback handler',
+    amount: '',
+    kind: { type: 'settings', change: { kind: 'setFallbackHandler', handler: 'Compatibility fallback handler' } },
+    age: '6h ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Safe 1.4.1',
+    amount: '',
+    kind: { type: 'settings', change: { kind: 'updateVersion', from: '1.3.0', to: '1.4.1' } },
+    age: '1d ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Treasury reserve · 0x3f0a…b7c4',
+    amount: '1,000,000 USDC',
+    kind: { type: 'transfer', toSelf: true },
+    age: '3h ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Max · 0x91c4…d2e8',
+    amount: '',
+    kind: { type: 'settings', change: { kind: 'removeOwner', owner: 'Max' } },
+    age: '4h ago',
+    signers: [],
+  },
+]
 const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => {
   const all = [...items]
   const nextFree = (account: Account) =>
@@ -956,7 +1026,7 @@ const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => 
       id: `${account.id}-mix-${suffix}`,
       account: account.id,
       nonce,
-      signers: [account.owners[0]],
+      signers: template.signers ?? [account.owners[0]],
       eligible: true,
     })
   MIX.forEach((template, index) => {
@@ -973,8 +1043,15 @@ const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => 
     age: '3h ago',
   })
   add(account, send('50,000 USDC'), nonce, 'a')
-  add(account, send('45,000 USDC'), nonce, 'b')
+  add(account, { ...send('45,000 USDC'), origin: 'replacement' }, nonce, 'b')
   add(account, { recipient: account.name, amount: '', kind: { type: 'rejection' }, age: '20m ago' }, nonce, 'c')
+  const yours = scenarioAccounts.filter(
+    (candidate) => candidate.owners.includes('Dev') && all.some((tx) => tx.account === candidate.id),
+  )
+  VARIATIONS.forEach((template, index) => {
+    const target = yours[(index * 2) % yours.length]
+    add(target, template, nextFree(target), `v${index}`)
+  })
   return all
 }
 

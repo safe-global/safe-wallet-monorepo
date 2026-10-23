@@ -1,4 +1,5 @@
-import { getScenario, getScenarioAccounts, getState } from './model'
+import { getConflicts, getPrimaryStatus, getScenario, getScenarioAccounts, getState } from './model'
+import { getStepKind } from './nextSteps'
 import {
   applyPreviewAction,
   BULK_EXECUTE_LIMIT,
@@ -124,6 +125,35 @@ describe('scenarios and states', () => {
       (tx) => tx.id.includes('-mix-') && tx.nonce === items.find((t) => t.id.endsWith('-mix-a'))?.nonce,
     )
     expect(threeWay.filter((tx) => tx.account === threeWay[0].account)).toHaveLength(3)
+  })
+
+  it.each(['20-safes', '50-safes'] as const)('shows every row variation in %s', (scenario) => {
+    const items = getScenario(scenario)
+    const has = (match: (tx: Proposal) => boolean) => items.some(match)
+    for (const step of ['signAndExecute', 'execute', 'sign', 'signAhead'])
+      expect(has((tx) => getStepKind(tx, 'owner') === step)).toBe(true)
+    for (const status of ['waiting', 'awaiting'] as const)
+      expect(has((tx) => getPrimaryStatus(tx, 'owner') === status)).toBe(true)
+    expect(items.filter((tx) => tx.app).length).toBeGreaterThanOrEqual(3)
+    expect(has((tx) => getConflicts(tx, items).length > 0)).toBe(true)
+    expect(has((tx) => tx.origin === 'replacement')).toBe(true)
+    expect(has((tx) => !!tx.note?.onchain)).toBe(true)
+    expect(has((tx) => tx.kind.type === 'transfer' && !!tx.kind.toSelf)).toBe(true)
+    expect(has((tx) => tx.kind.type === 'batch' && tx.kind.delegateCall === 'untrusted')).toBe(true)
+    const orders = items.flatMap((tx) => (tx.kind.type === 'swap' ? [tx.kind.order] : []))
+    expect(new Set(orders)).toEqual(new Set(['market', 'limit', 'twap']))
+    expect(has((tx) => tx.kind.type === 'swap' && !!tx.kind.expired)).toBe(true)
+    const changes = new Set(items.flatMap((tx) => (tx.kind.type === 'settings' ? [tx.kind.change.kind] : [])))
+    for (const change of [
+      'addOwner',
+      'removeOwner',
+      'changeThreshold',
+      'enableModule',
+      'setGuard',
+      'setFallbackHandler',
+      'updateVersion',
+    ])
+      expect(changes).toContain(change)
   })
 
   it('has as many Safes as its name says', () => {
