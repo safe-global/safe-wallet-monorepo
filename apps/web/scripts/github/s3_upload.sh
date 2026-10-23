@@ -12,10 +12,16 @@ cd out
 aws s3 sync . $BUCKET --delete --exclude "storybook/*"
 
 # Storybook's entry files are not content-hashed; a cached index points at bundles --delete already removed.
-# Paths excluded from a sync are also excluded from its --delete, so this pass owns storybook/.
+# Paths excluded from a sync are also excluded from its --delete, so these passes own storybook/.
 # The release workflow builds no Storybook, so the directory may not exist.
+# JS/CSS/JSON are uploaded pre-gzipped: the review host otherwise gzips the multi-MB bundles on every request, slowly.
+# HTML stays plain because the extensionless-HTML loop below re-uploads it without a Content-Encoding.
 if [[ -d storybook ]]; then
-  aws s3 sync storybook "$BUCKET/storybook" --delete --cache-control "no-cache"
+  find storybook -type f \( -name '*.js' -o -name '*.css' -o -name '*.json' \) -exec gzip -9 -n {} \; -exec mv {}.gz {} \;
+  aws s3 sync storybook "$BUCKET/storybook" --delete --cache-control "no-cache" --content-encoding gzip \
+    --exclude "*" --include "*.js" --include "*.css" --include "*.json"
+  aws s3 sync storybook "$BUCKET/storybook" --delete --cache-control "no-cache" \
+    --exclude "*.js" --exclude "*.css" --exclude "*.json"
 fi
 
 function parallel_limit {

@@ -276,7 +276,7 @@ const TxFlowProvider = <T extends unknown>({
       // Track tx event
       trackTxEvents(
         details,
-        !!isCreation,
+        isCreation && !signedTxId,
         isExecuted,
         isRoleExecution,
         isProposerCreation,
@@ -288,7 +288,18 @@ const TxFlowProvider = <T extends unknown>({
         isExecuted ? gasPaymentOption : undefined,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, isGtfChain, gasPaymentOption],
+    [
+      chainId,
+      isCreation,
+      signedTxId,
+      trigger,
+      signer?.isSafe,
+      txOrigin,
+      data,
+      safe.threshold,
+      isGtfChain,
+      gasPaymentOption,
+    ],
   )
 
   const value = {

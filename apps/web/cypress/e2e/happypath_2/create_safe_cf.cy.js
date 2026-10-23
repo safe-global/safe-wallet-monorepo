@@ -15,9 +15,6 @@ before(() => {
 describe('CF Safe creation happy path tests', () => {
   beforeEach(() => {
     createwallet.visitWelcomeAccountPage()
-    // Required for data layer
-    cy.clearLocalStorage()
-    main.acceptCookies()
   })
 
   it('CF creation happy path. GA safe_created', () => {

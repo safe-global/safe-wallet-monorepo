@@ -37,7 +37,7 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
   /** Creating a Workspace needs no step-up, so the user's own session prepares it, with a plan. */
   async function prepareWorkspace(): Promise<string> {
     const workspaceId = (await createWorkspace(user, WORKSPACE_NAME)).uuid
-    await storeSubscription(workspaceId)
+    await storeSubscription(user, workspaceId)
     return workspaceId
   }
 

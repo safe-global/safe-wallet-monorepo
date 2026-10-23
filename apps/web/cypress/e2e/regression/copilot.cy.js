@@ -194,19 +194,11 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // 5. Tenderly Simulation
   // ========================================
 
-  it('[Tenderly Simulation] Verify that tenderly section is presented in the safe shield', () => {
-    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.tenderlySimulation, signer)
-
-    copilot.verifyTenderlySimulation()
-    cy.get(copilot.tenderlySimulation).should('contain.text', 'Transaction simulation')
-    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('be.visible')
-    cy.contains('Run').should('be.visible')
-  })
-
   it('[Tenderly Simulation] Verify success simulation state', () => {
     copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.tenderlySimulation, signer)
 
     copilot.verifyTenderlySimulation()
+    cy.get(copilot.tenderlySimulation).should('contain.text', 'Transaction simulation')
     cy.get(copilot.tenderlySimulation, { timeout: 15000 }).find(copilot.runSimulationBtn).click()
     cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('contain.text', 'Running...')
     cy.contains('Simulation successful', { timeout: 10000 }).should('be.visible')

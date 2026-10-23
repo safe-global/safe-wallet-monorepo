@@ -37,6 +37,7 @@ import type SecurityHubPage from './components/SecurityHub/Page'
 import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 import type SpacePlansPage from './components/Plans/Page'
 import type SpacePoliciesPage from './components/Policies/Page'
+import type SpaceTransactionsPage from './components/SpaceTransactions/Page'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -70,6 +71,7 @@ export interface SpacesContract {
   SpaceActivityLogPage: typeof SpaceActivityLogPage
   SpacePlansPage: typeof SpacePlansPage
   SpacePoliciesPage: typeof SpacePoliciesPage
+  SpaceTransactionsPage: typeof SpaceTransactionsPage
 
   // Modal components (PascalCase) - stub renders null
   SelectSafeModal: typeof SelectSafeModal

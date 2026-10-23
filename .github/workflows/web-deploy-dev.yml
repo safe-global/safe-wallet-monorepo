@@ -28,7 +28,7 @@ jobs:
       # Post a PR comment before deploying
       - name: Post a comment while building
         if: github.event.number
-        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
+        uses: mshick/add-pr-comment@v3.12.0
         with:
           message-id: praul
           message: |
@@ -37,13 +37,13 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
 
-      - uses: ./.github/actions/build
+      - uses: $/.github/actions/build
         env:
           DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
           NEXT_PUBLIC_BEAMER_ID: ${{ secrets.NEXT_PUBLIC_BEAMER_ID }}
@@ -99,7 +99,7 @@ jobs:
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
 
       - name: Upload app build
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: web-out
           path: apps/web/out
@@ -112,18 +112,18 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
-      - uses: ./.github/actions/yarn
+      - uses: $/.github/actions/yarn
 
-      - uses: ./.github/actions/build-storybook
+      - uses: $/.github/actions/build-storybook
         env:
           NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
 
       - name: Upload Storybook build
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: web-storybook
           path: apps/web/out/storybook
@@ -147,22 +147,22 @@ jobs:
         if: needs.build.result != 'success' || needs.storybook.result != 'success'
         run: exit 1
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: web-out
           path: apps/web/out
 
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: web-storybook
           path: apps/web/out/storybook
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -188,7 +188,7 @@ jobs:
       # Extract branch name
       - name: Extract branch name
         id: extract_branch
-        uses: ./.github/actions/branch-slug
+        uses: $/.github/actions/branch-slug
 
       # Deploy to S3
       - name: Deploy PR branch
@@ -201,7 +201,7 @@ jobs:
       # Comment
       - name: Post a deployment link in the PR
         if: always() && github.event.number
-        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
+        uses: mshick/add-pr-comment@v3.12.0
         with:
           message-id: praul
           message: |

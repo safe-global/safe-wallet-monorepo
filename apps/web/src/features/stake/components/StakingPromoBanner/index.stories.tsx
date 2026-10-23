@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import StakingPromoBanner from './index'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import { RouterDecorator } from '@/stories/routerDecorator'
 
 const meta = {

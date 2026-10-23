@@ -32,13 +32,9 @@ test('checks creation and owner lists against TXS with the scenario condition', 
   })
 })
 
-test('waits until TXS knows a multisig transaction before asking CGW for its details', () => {
+test('asks CGW directly for multisig transactions, which the Queue Service holds until execution', () => {
   const hash = `0x${'ab'.repeat(32)}`
-  assert.deepEqual(transactionServiceCheck(env, `${CGW}/11155111/transactions/multisig_${SAFE}_${hash}`), {
-    url: `${TXS}/v1/multisig-transactions/${hash}/`,
-    samePredicate: false,
-  })
-  assert.equal(transactionServiceCheck(env, `${CGW}/11155111/transactions/multisig_${SAFE}_0x12`), undefined)
+  assert.equal(transactionServiceCheck(env, `${CGW}/11155111/transactions/multisig_${SAFE}_${hash}`), undefined)
 })
 
 test('leaves contracts to CGW, which reads them from the decoder service', () => {

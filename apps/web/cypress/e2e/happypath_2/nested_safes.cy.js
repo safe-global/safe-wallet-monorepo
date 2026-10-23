@@ -36,7 +36,6 @@ describe('Nested safes happy path tests', () => {
     nsafes.completeIntroScreenSelectValid()
     nsafes.clickOnAddNestedSafeBtn()
     createTx.hasNonce()
-    createTx.changeNonce(3)
     nsafes.nameInputHasPlaceholder()
     nsafes.typeName(main.generateRandomString(51))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)

@@ -29,6 +29,8 @@ import { safeItemBuilder } from '@/tests/builders/safeItem'
 import EditSpendingLimitFlow from '../SpendingLimitFlow/EditFlow'
 import Policies from '../index'
 import SpendingLimitFlow from '../SpendingLimitFlow'
+import RecipientAllowlistFlow from '../RecipientAllowlistFlow'
+import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 
 jest.mock('@/hooks/wallets/useWallet')
 
@@ -41,16 +43,29 @@ const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
 let mockHasSeenProposerIntro: boolean | undefined = false
+let mockHasSeenAllowlistIntro: boolean | undefined = false
 const mockSetHasSeenSpendingLimitIntro = jest.fn()
 const mockSetHasSeenProposerIntro = jest.fn()
+const mockSetHasSeenAllowlistIntro = jest.fn()
 
 jest.mock('@/services/local-storage/useLocalStorage', () => ({
   __esModule: true,
-  default: jest.fn((key: string) =>
-    key === 'proposerIntroSeen'
-      ? [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
-      : [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro],
-  ),
+  default: jest.fn((key: string) => {
+    if (key === 'proposerIntroSeen') return [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
+    if (key === 'recipientAllowlistIntroSeen') return [mockHasSeenAllowlistIntro, mockSetHasSeenAllowlistIntro]
+    return [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro]
+  }),
+}))
+
+let mockIsAllowlistAvailable = false
+
+jest.mock('@/features/policy-guard', () => ({
+  useIsAllowlistAvailableInSpace: () => mockIsAllowlistAvailable,
+}))
+
+jest.mock('../RecipientAllowlistFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="recipient-allowlist-flow" />,
 }))
 
 // The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
@@ -103,6 +118,8 @@ describe('Policies', () => {
   beforeEach(() => {
     mockHasSeenSpendingLimitIntro = false
     mockHasSeenProposerIntro = false
+    mockHasSeenAllowlistIntro = false
+    mockIsAllowlistAvailable = false
     jest.clearAllMocks()
     mockUseSpaceSafes.mockReturnValue({
       allSafes: [],
@@ -290,6 +307,92 @@ describe('Policies', () => {
     })
   })
 
+  describe('the recipient allowlist', () => {
+    const openAddPolicyDialog = async () => {
+      const setTxFlow = jest.fn()
+      const utils = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={mockPolicies()} />
+        </TxModalContext.Provider>,
+      )
+      await utils.user.click(screen.getByTestId('add-policy-button'))
+      return { ...utils, setTxFlow }
+    }
+
+    it('is not offered when no chain has it enabled', async () => {
+      await openAddPolicyDialog()
+
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
+    })
+
+    it('is offered first, in one column, when a chain has it enabled', async () => {
+      mockIsAllowlistAvailable = true
+
+      await openAddPolicyDialog()
+
+      const options = within(screen.getByTestId('add-policy-options')).getAllByRole('button')
+      expect(options[0]).toHaveAttribute('data-testid', 'add-policy-option-recipient-allowlist')
+      expect(screen.getByTestId('add-policy-options')).not.toHaveClass('sm:grid-cols-2')
+    })
+
+    it('explains the allowlist before the flow starts', async () => {
+      mockIsAllowlistAvailable = true
+      const { user, setTxFlow } = await openAddPolicyDialog()
+
+      await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
+
+      expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
+    })
+
+    it('starts the flow from the intro and records that the intro was shown', async () => {
+      mockIsAllowlistAvailable = true
+      const { user, setTxFlow } = await openAddPolicyDialog()
+
+      await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
+      await user.click(await screen.findByRole('button', { name: 'Set up recipient allowlist' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: RecipientAllowlistFlow })
+      expect(mockSetHasSeenAllowlistIntro).toHaveBeenCalledWith(true)
+      expect(mockSetHasSeenSpendingLimitIntro).not.toHaveBeenCalled()
+    })
+
+    it('starts nothing when the intro is dismissed', async () => {
+      mockIsAllowlistAvailable = true
+      const { user, setTxFlow } = await openAddPolicyDialog()
+
+      await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
+      await user.click(await screen.findByRole('button', { name: 'Close' }))
+
+      await waitFor(() => expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument())
+      expect(setTxFlow).not.toHaveBeenCalled()
+      expect(mockSetHasSeenAllowlistIntro).toHaveBeenCalledWith(true)
+    })
+
+    it('can be set up from the catalogue when the Space has no policies yet', async () => {
+      mockIsAllowlistAvailable = true
+      const { user } = renderWithUserEvent(<Policies policies={[]} />)
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Recipient allowlist' }))
+
+      expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
+    })
+
+    it('opens the flow directly once the intro has been seen', async () => {
+      mockIsAllowlistAvailable = true
+      mockHasSeenAllowlistIntro = true
+      const { user, setTxFlow } = await openAddPolicyDialog()
+
+      await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: RecipientAllowlistFlow })
+      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
+    })
+  })
+
   describe('the intro storage keys', () => {
     it('remembers each intro under its own key', () => {
       render(<Policies />)
@@ -298,7 +401,10 @@ describe('Policies', () => {
 
       expect(keys).toContain(SPENDING_LIMIT_INTRO_SEEN_KEY)
       expect(keys).toContain(PROPOSER_INTRO_SEEN_KEY)
-      expect(SPENDING_LIMIT_INTRO_SEEN_KEY).not.toBe(PROPOSER_INTRO_SEEN_KEY)
+      expect(keys).toContain(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY)
+      expect(
+        new Set([SPENDING_LIMIT_INTRO_SEEN_KEY, PROPOSER_INTRO_SEEN_KEY, RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY]).size,
+      ).toBe(3)
     })
 
     it('scopes the keys to the browser, not to a Safe or a chain', () => {
@@ -693,6 +799,31 @@ describe('Policies', () => {
       expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
       expect(onUpgrade).not.toHaveBeenCalled()
+    })
+
+    it('should, when the plan does not include the recipient allowlist, disable it in the add policy dialog', async () => {
+      mockIsAllowlistAvailable = true
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
+
+      expect(screen.getByTestId('add-policy-option-recipient-allowlist')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when the plan does not include the recipient allowlist, lead its catalogue tile to the upgrade', async () => {
+      mockIsAllowlistAvailable = true
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-recipient-allowlist')).getByRole('button'))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
     })
 
     it('should, when a policy the plan includes is picked in the add policy dialog, open its intro dialog', async () => {

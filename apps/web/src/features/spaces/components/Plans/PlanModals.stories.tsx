@@ -2,30 +2,21 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import type { PaymentLink, Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import ChangePlanDialog from './ChangePlanDialog'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal from './PlanChooserModal'
 import SelectAccountsStep from './SelectAccountsStep'
 import TrialEndingModal from './TrialEndingModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import {
-  DAY,
-  PAID_LINKS,
-  PAID_PLANS,
-  SPACE_ID,
-  TRIAL_LINKS,
-  billingHandlers,
-  now,
-  subscription,
-} from './plans.fixtures'
+import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.fixtures'
 
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   features: { spaces: true, safePro: true },
   pathname: '/spaces',
-  query: { spaceId: SPACE_ID },
+  query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
 })
 
@@ -66,7 +57,7 @@ type Story = StoryObj<typeof meta>
 /** Last week of free access without a payment method; shown once per login on every Workspace page. */
 export const TrialEnding: Story = {
   parameters: withBilling([trial]),
-  render: () => <TrialEndingModal spaceId={SPACE_ID} />,
+  render: () => <TrialEndingModal spaceId={MOCK_SPACE_ID} />,
 }
 
 /** Free access ended without a plan: the Workspace is locked until an admin picks one. */
@@ -75,20 +66,26 @@ export const LockedTrialEnded: Story = {
     subscription({ status: 'canceled', currentPeriodEnd: now() - 2 * DAY, cancelledAt: now() - 2 * DAY }),
   ]),
   render: () => (
-    <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={(now() - 2 * DAY) * 1000} onBack={() => {}} />
+    <PlanChooserModal spaceId={MOCK_SPACE_ID} reason="lapsed" endedAt={(now() - 2 * DAY) * 1000} onBack={() => {}} />
   ),
+}
+
+/** A Workspace that never had a plan: locked until an admin picks one. */
+export const LockedNoPlan: Story = {
+  parameters: withBilling([]),
+  render: () => <PlanChooserModal spaceId={MOCK_SPACE_ID} reason="lapsed" endedAt={null} onBack={() => {}} />,
 }
 
 /** The last payment failed: the Workspace is locked until billing is fixed or another plan is picked. */
 export const LockedPaymentFailed: Story = {
   parameters: withBilling([subscription({ status: 'past_due', hasPaymentMethod: true })]),
-  render: () => <PlanChooserModal spaceId={SPACE_ID} reason="payment-failed" endedAt={null} onBack={() => {}} />,
+  render: () => <PlanChooserModal spaceId={MOCK_SPACE_ID} reason="payment-failed" endedAt={null} onBack={() => {}} />,
 }
 
 /** Right after creating a Workspace, or opening a locked one that can still start free access. */
 export const ClaimFreeAccess: Story = {
   parameters: withBilling([], TRIAL_LINKS),
-  render: () => <ClaimTrialModal spaceId={SPACE_ID} onBack={() => {}} />,
+  render: () => <ClaimTrialModal spaceId={MOCK_SPACE_ID} onBack={() => {}} />,
 }
 
 /** Switching plan during free access: no proration preview, the switch is explained instead. */
@@ -96,7 +93,7 @@ export const ChangePlanDuringTrial: Story = {
   parameters: withBilling([trial]),
   render: () => (
     <ChangePlanDialog
-      spaceId={SPACE_ID}
+      spaceId={MOCK_SPACE_ID}
       pick={{ tier: starterTier, option: starterTier.options[0] }}
       currentPlan={trialPlan}
       entry={{ 'Entry Point': 'sidebar' }}

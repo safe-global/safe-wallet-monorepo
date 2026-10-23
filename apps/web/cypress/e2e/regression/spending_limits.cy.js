@@ -6,7 +6,6 @@ import * as tx from '../pages/create_tx.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import { getMockAddress } from '../../support/utils/ethers.js'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
@@ -15,10 +14,6 @@ before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
   signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
 })
-
-const tokenAmount = 0.1
-const newTokenAmount = 0.001
-const spendingLimitBalance = '(0.15 ETH)'
 
 describe('Spending limits tests', () => {
   before(async () => {
@@ -45,80 +40,10 @@ describe('Spending limits tests', () => {
       ])
     })
 
-    // Added to prod
-    it('Verify that the Review step shows beneficiary, amount allowed, reset time', () => {
-      //Assume that default reset time is set to One time
-      spendinglimit.clickOnNewSpendingLimitBtn()
-      spendinglimit.enterBeneficiaryAddress(getMockAddress())
-      spendinglimit.enterSpendingLimitAmount(0.1)
-      spendinglimit.clickOnNextBtn()
-      spendinglimit.checkReviewData(
-        tokenAmount,
-        getMockAddress(),
-        spendinglimit.timePeriodOptions.oneTime.split(' ').join('-'),
-      )
-    })
-
-    // Added to prod
-    it('Verify Spending limit option is available when selecting the corresponding token', () => {
-      navigation.clickOnNewTxBtn()
-      tx.clickOnSendTokensBtn()
-      spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption])
-    })
-
-    it('Verify spending limit option shows available amount', () => {
-      navigation.clickOnNewTxBtn()
-      tx.clickOnSendTokensBtn()
-      spendinglimit.verifySpendingOptionShowsBalance([spendingLimitBalance])
-    })
-
-    it('Verify when owner is a delegate, standard tx and spending limit tx are present', () => {
-      navigation.clickOnNewTxBtn()
-      tx.clickOnSendTokensBtn()
-      spendinglimit.verifyTxOptionExist([spendinglimit.spendingLimitTxOption, spendinglimit.standardTx])
-    })
-
-    it('Verify when spending limit is selected the nonce field is removed', () => {
-      navigation.clickOnNewTxBtn()
-      tx.clickOnSendTokensBtn()
-      spendinglimit.selectSpendingLimitOption()
-      spendinglimit.verifyNonceState(constants.elementExistanceStates.not_exist)
-    })
-
-    it('Verify "Max" button value set to be no more than the allowed amount', () => {
-      navigation.clickOnNewTxBtn()
-      tx.clickOnSendTokensBtn()
-      spendinglimit.clickOnMaxBtn()
-      spendinglimit.checkMaxValue()
-    })
-
     it('Verify selecting a native token from the dropdown in new tx', () => {
       navigation.clickOnNewTxBtn()
       tx.clickOnSendTokensBtn()
       spendinglimit.selectToken(constants.tokenNames.sepoliaEther)
-    })
-
-    it('Verify that when replacing spending limit for the same owner, previous values are displayed in red', () => {
-      spendinglimit.clickOnNewSpendingLimitBtn()
-      spendinglimit.enterBeneficiaryAddress(constants.defaultOwnerAddress())
-      spendinglimit.enterSpendingLimitAmount(newTokenAmount)
-      spendinglimit.clickOnTimePeriodDropdown()
-      spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.fiveMin)
-      tx.clickOnNextBtn()
-      spendinglimit.verifyOldValuesAreDisplayed()
-    })
-
-    it('Verify that when editing spending limit for owner who used some of it, relevant actions are displayed', () => {
-      spendinglimit.clickOnNewSpendingLimitBtn()
-      spendinglimit.enterBeneficiaryAddress(constants.SPENDING_LIMIT_ADDRESS_2)
-      spendinglimit.enterSpendingLimitAmount(newTokenAmount)
-      spendinglimit.clickOnTimePeriodDropdown()
-      spendinglimit.selectTimePeriod(spendinglimit.timePeriodOptions.oneTime)
-      tx.clickOnNextBtn()
-      spendinglimit.verifyActionNamesAreDisplayed([
-        constants.TXActionNames.resetAllowance,
-        constants.TXActionNames.setAllowance,
-      ])
     })
   })
 

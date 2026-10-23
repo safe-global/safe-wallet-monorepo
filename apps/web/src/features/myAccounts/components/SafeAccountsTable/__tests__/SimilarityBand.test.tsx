@@ -1,6 +1,5 @@
-import { render, screen, fakerChecksummedAddress } from '@/tests/test-utils'
+import { render, screen, fakerChecksummedAddress, fakerLookalikeAddress } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
@@ -9,9 +8,6 @@ import type { SimilarWarning } from '@/features/address-poisoning'
 
 jest.mock('@/hooks/useChains')
 const mockUseChain = jest.requireMock('@/hooks/useChains').useChain as jest.Mock
-
-const lookalikeOf = (address: string) =>
-  `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '', casing: 'lower' })}${address.slice(-4)}`
 
 describe('bandHeaderAt', () => {
   const clusters =
@@ -47,6 +43,10 @@ describe('SimilarityWarningIcon', () => {
   const tooltipOf = async (label: string) =>
     (await screen.findByText(label)).closest('[data-slot="tooltip-content"]') as HTMLElement
 
+  beforeEach(() => {
+    mockUseChain.mockReset()
+  })
+
   it('lists only the non-empty peer section', async () => {
     render(<SimilarityWarningIcon address={rowAddress} warning={warning({ owned: ['0xdead'] })} />)
 
@@ -77,7 +77,7 @@ describe('SimilarityWarningIcon', () => {
   })
 
   it('bolds the ends each peer shares with the row address', async () => {
-    const peer = lookalikeOf(rowAddress)
+    const peer = fakerLookalikeAddress(rowAddress)
     render(<SimilarityWarningIcon address={rowAddress} warning={warning({ trusted: [peer] })} />)
 
     await userEvent.hover(icon())
@@ -93,7 +93,7 @@ describe('SimilarityWarningIcon', () => {
   it('links each peer to the block explorer of the row chain', async () => {
     const chain = chainBuilder().build()
     mockUseChain.mockReturnValue(chain)
-    const peer = lookalikeOf(rowAddress)
+    const peer = fakerLookalikeAddress(rowAddress)
     render(
       <SimilarityWarningIcon
         address={rowAddress}

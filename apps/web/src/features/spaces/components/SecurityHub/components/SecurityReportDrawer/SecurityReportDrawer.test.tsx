@@ -12,7 +12,7 @@ describe('SecurityReportDrawer surface', () => {
 
     const content = screen.getByLabelText('Security report')
 
-    expect(content).toHaveClass('bg-zinc-50')
+    expect(content).toHaveClass('bg-muted-secondary')
     expect(content).toHaveClass('dark:bg-[var(--color-background-main)]')
     expect(content).not.toHaveClass('bg-card')
   })

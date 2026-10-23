@@ -120,7 +120,6 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <RecoveryLoader />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
-      <Analytics />
       <PkModulePopup />
     </>
   )
@@ -143,6 +142,8 @@ function RootShell() {
         <MetaTags prefetchUrl={GATEWAY_URL} />
         <AppProviders>
           <CaptchaProvider>
+            {/* Before InitApp and the page, so GA exists before their mount effects send events */}
+            <Analytics />
             <InitApp />
             <StepUpSplash />
             <PwaReloadPrompt />

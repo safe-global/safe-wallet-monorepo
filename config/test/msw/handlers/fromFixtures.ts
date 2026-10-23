@@ -5,6 +5,7 @@ import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positio
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain, ChainPage } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { TransactionDetails, TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   portfolioFixtures,
@@ -13,6 +14,7 @@ import {
   safeFixtures,
   chainFixtures,
   safeAppsFixtures,
+  transactionFixtures,
   type FixtureScenario,
 } from '../fixtures'
 
@@ -172,6 +174,34 @@ export const createSafeAppsHandlersFromFixture = (GATEWAY_URL: string, empty = f
     http.get<{ chainId: string }, never, SafeApp[]>(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, () => {
       return HttpResponse.json(safeAppsData)
     }),
+  ]
+}
+
+/**
+ * Create transaction history and details handlers from the SEP_STATIC_SAFE_7 fixtures.
+ * Details of a transaction without a fixture return 404.
+ */
+export const createTransactionHandlersFromFixture = (GATEWAY_URL: string) => {
+  const detailsById = new Map(Object.values(transactionFixtures.details).map((details) => [details.txId, details]))
+
+  return [
+    http.get<{ chainId: string; safeAddress: string }, never, TransactionItemPage>(
+      `${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`,
+      () => {
+        return HttpResponse.json(transactionFixtures.history)
+      },
+    ),
+
+    http.get<{ chainId: string; id: string }, never, TransactionDetails | { message: string }>(
+      `${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`,
+      ({ params }) => {
+        const details = detailsById.get(params.id)
+        if (!details) {
+          return HttpResponse.json({ message: `No transaction fixture for ${params.id}` }, { status: 404 })
+        }
+        return HttpResponse.json(details)
+      },
+    ),
   ]
 }
 
