@@ -26,6 +26,13 @@ describe('StatusAlert', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Tip')
   })
 
+  it('draws a tone border instead of the borderless Alert surface', () => {
+    render(<StatusAlert tone="info" title="Tip" data-testid="status" />)
+
+    expect(screen.getByTestId('status')).toHaveClass('border-info-strong/30')
+    expect(screen.getByTestId('status')).not.toHaveClass('border-transparent')
+  })
+
   it('shows a dismiss button only when onDismiss is passed', () => {
     const onDismiss = jest.fn()
     const { rerender } = render(<StatusAlert tone="info" title="Heads up" />)
