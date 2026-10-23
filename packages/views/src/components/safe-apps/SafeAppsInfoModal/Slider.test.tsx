@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import Slider from './Slider'
+import Slider from '@safe-global/views/components/safe-apps/SafeAppsInfoModal/Slider'
 
 describe('Slider', () => {
   it('calls onSlideChange when Continue is clicked', async () => {
