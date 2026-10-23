@@ -533,7 +533,7 @@ export type SpaceAddressBookDto = {
   /** All tags defined in the workspace address book */
   tags: SpaceAddressBookTagDto[]
 }
-export type AddressBookItem = {
+export type UpsertAddressBookItem = {
   name: string
   address: string
   chainIds: string[]
@@ -541,7 +541,7 @@ export type AddressBookItem = {
   tags?: string[]
 }
 export type UpsertAddressBookItemsDto = {
-  items: AddressBookItem[]
+  items: UpsertAddressBookItem[]
 }
 export type SetContactTagsItem = {
   address: string
@@ -681,6 +681,11 @@ export type SpaceAuditLogActorDto = {
 export type SpaceSafeDto = {
   chainId: string
   address: string
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
 }
 export type CreateSpaceSafesDto = {
   safes: SpaceSafeDto[]
