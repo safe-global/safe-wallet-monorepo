@@ -12,7 +12,6 @@ export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
 const amountInput = 'input[name="recipients.0.amount"]'
-const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
 const walletNonceInput = '[name="userNonce"]'
 const gasLimitInput = '[name="gasLimit"]'
@@ -639,31 +638,6 @@ export function clickOnNewtransactionBtn() {
 
 export function typeRecipientAddress(address) {
   cy.get(recepientInput).clear().type(address).should('have.value', address)
-}
-
-export function verifyENSResolves(fullAddress) {
-  let split = fullAddress.split(':')
-  let noPrefixAddress = split[1]
-  cy.get(recepientInput).should('have.value', noPrefixAddress)
-}
-
-export function verifyRandomStringAddress(randomAddressString) {
-  typeRecipientAddress(randomAddressString)
-  cy.contains(constants.addressBookErrrMsg.invalidFormat).should('be.visible')
-}
-
-export function verifyWrongChecksum(wronglyChecksummedAddress) {
-  typeRecipientAddress(wronglyChecksummedAddress)
-  cy.contains(constants.addressBookErrrMsg.invalidChecksum).should('be.visible')
-}
-
-export function verifyAmountLargerThanCurrentBalance() {
-  setSendValue(9999)
-  cy.contains(constants.amountErrorMsg.largerThanCurrentBalance).should('be.visible')
-}
-
-export function verifyTooltipMessage(message) {
-  cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
 }
 
 export function verifyRelayerAttemptsAvailable() {
