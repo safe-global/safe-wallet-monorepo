@@ -8,6 +8,7 @@ const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
+const mockUseSpaceQueuePolling = jest.fn()
 let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
@@ -74,6 +75,10 @@ jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
+jest.mock('../../hooks/useSpaceQueuePolling', () => ({
+  useSpaceQueuePolling: () => mockUseSpaceQueuePolling(),
+}))
+
 jest.mock('../Plans/TrialEndingModal', () => ({
   __esModule: true,
   default: ({ spaceId }: { spaceId: string }) => <div data-testid="trial-ending-modal" data-space={spaceId} />,
@@ -99,6 +104,16 @@ describe('AuthState', () => {
       isFetching: false,
     })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 'u1' } })
+  })
+
+  it('polls the Space queue', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockUseSpaceQueuePolling).toHaveBeenCalled()
   })
 
   it('skips the space query when the user is not authenticated', () => {

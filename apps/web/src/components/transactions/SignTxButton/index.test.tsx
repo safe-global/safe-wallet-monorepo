@@ -1,10 +1,12 @@
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import SignTxButton from '.'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { faker } from '@faker-js/faker'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
+import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
+import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
@@ -67,11 +69,58 @@ describe('SignTxButton', () => {
     expect(getConfirmButton()).toBeEnabled()
   })
 
+  it('keeps its usual size unless the dense row size is asked for', () => {
+    const wallet = mockRole('owner')
+    const tx = txAwaitingSignatureFrom(wallet?.address ?? '')
+
+    const { rerender } = render(<SignTxButton txSummary={tx} compact />)
+
+    expect(getConfirmButton()).not.toHaveClass('h-6')
+
+    rerender(<SignTxButton txSummary={tx} compact dense />)
+
+    expect(getConfirmButton()).toHaveClass('h-6', 'w-20')
+  })
+
   it('should be disabled for a proposer who is not a missing signer', () => {
     mockRole('proposer')
 
     render(<SignTxButton txSummary={txAwaitingAnotherSigner} />)
 
     expect(getConfirmButton()).toBeDisabled()
+  })
+
+  describe('opening the confirm flow', () => {
+    const clickConfirm = (scope?: ReturnType<typeof safeScopeContextFor>) => {
+      const wallet = mockRole('owner')
+      const setTxFlow = mockSetTxFlow()
+      render(
+        <TxModalWithScope setTxFlow={setTxFlow} scope={scope}>
+          <SignTxButton txSummary={txAwaitingSignatureFrom(wallet?.address ?? '')} />
+        </TxModalWithScope>,
+      )
+      fireEvent.click(getConfirmButton())
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      return setTxFlow.mock.calls[0]
+    }
+
+    it('opens it unwrapped on a Safe-level page', () => {
+      const [txFlow, onClose, shouldWarn] = clickConfirm()
+
+      expect(txFlow?.type).toBe(ConfirmTxFlow)
+      expect(onClose).toBeUndefined()
+      expect(shouldWarn).toBe(false)
+    })
+
+    it("opens it inside the row's SafeScope", () => {
+      const target = { chainId: faker.string.numeric(5), safeAddress: faker.finance.ethereumAddress() }
+
+      const [txFlow, , shouldWarn] = clickConfirm(safeScopeContextFor(target))
+
+      const { flow, target: flowTarget } = unwrapScopedFlow(txFlow)
+      expect(flow?.type).toBe(ConfirmTxFlow)
+      expect(flowTarget).toEqual(target)
+      expect(shouldWarn).toBe(false)
+    })
   })
 })
