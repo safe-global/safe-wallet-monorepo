@@ -1,6 +1,4 @@
 import { createSafe } from './safe.mjs'
-import { ensFixtureFiles } from './ens.mjs'
-import { addressOf } from './chain.mjs'
 
 export async function prepareBasicScenario(env, owners) {
   const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
@@ -25,9 +23,4 @@ export async function prepareBasicScenario(env, owners) {
   } finally {
     context.provider.destroy()
   }
-}
-
-export async function prepareEnsFixtureScenario(env, owners) {
-  const scenario = await prepareBasicScenario(env, owners)
-  return { ...scenario, files: await ensFixtureFiles(addressOf(scenario.safes.static.SEP_STATIC_SAFE_6)) }
 }

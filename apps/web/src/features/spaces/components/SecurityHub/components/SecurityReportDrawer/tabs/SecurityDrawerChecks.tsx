@@ -6,7 +6,9 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { usePanelHeader } from '../../SecurityChecks/hooks/usePanelHeader'
+import { CtaLink, makeBuildCta } from '../../SecurityChecks/primitives'
 import SecurityChecksSection from '../../SecurityChecks/SecurityChecksSection'
 import { ScoreGauge } from '@safe-global/views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
 
@@ -34,6 +36,7 @@ const SecurityDrawerChecks = ({
 }: SecurityDrawerChecksProps): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
   const header = usePanelHeader(results, isComplete)
+  const spaceId = useUrlSpaceId()
   const hasResults = Object.keys(results).length > 0
 
   if (!scanContext || !security.$isReady || header.status === 'loading' || (!hasResults && !isComplete)) {
@@ -48,6 +51,10 @@ const SecurityDrawerChecks = ({
   const summary = security.computeSummary(results)
   const issueCount = summary ? summary.applicableCount - summary.passing : 0
   const title = issueCount === 0 ? 'Healthy' : `${issueCount} issue${maybePlural(issueCount)} found`
+  const versionResult = results['contract_version']
+  const updateCta = versionResult?.upgradeAvailable
+    ? makeBuildCta(security.checkDefs, spaceId)('contract_version', versionResult, safeQueryParam)
+    : null
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,6 +69,12 @@ const SecurityDrawerChecks = ({
               Scanned {security.formatTimestamp(lastScannedAt ?? undefined)}
             </Typography>
           </div>
+
+          {updateCta && (
+            <div className="ml-auto shrink-0">
+              <CtaLink cta={updateCta} />
+            </div>
+          )}
         </Card>
       )}
 

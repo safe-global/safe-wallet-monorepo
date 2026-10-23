@@ -6,7 +6,6 @@ import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 const mockDispatch = jest.fn()
 const mockUpdateAlias = jest.fn()
 const mockUpdateRole = jest.fn()
-const mockTrackEvent = jest.fn()
 const mockAdminCount = jest.fn(() => 2)
 const mockIsAdmin = jest.fn(() => true)
 const mockCurrentUser = jest.fn<{ id: number } | undefined, []>(() => ({ id: 1 }))
@@ -36,17 +35,6 @@ jest.mock('@/features/spaces', () => ({
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
   sanitizeMemberAlias: (value: string) => value.trim(),
   MEMBER_ALIAS_MAX_LENGTH: 30,
-}))
-
-jest.mock('@/services/analytics', () => ({
-  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
-}))
-
-jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: {
-    WORKSPACE_MEMBER_ROLE_CHANGED: { action: 'Member role changed', category: 'spaces' },
-    WORKSPACE_MEMBER_NAME_CHANGED: { action: 'Member name changed', category: 'spaces' },
-  },
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({

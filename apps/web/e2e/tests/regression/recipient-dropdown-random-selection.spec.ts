@@ -29,7 +29,6 @@ import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import type { Page } from '@playwright/test'
 import {
-  SAFES,
   CHAIN_IDS,
   LS_NAMESPACE,
   DROPDOWN_TEST_SPACE,
@@ -71,7 +70,7 @@ const WORKSPACE_ADDRESS_BOOK = {
  * contacts by mocking the auth/users/spaces GET endpoints. Everything else
  * (chains, safe info) hits the real CGW. Mirrors Cypress `setupSpacesAuth`.
  */
-async function mockSpacesSession(page: Page): Promise<void> {
+async function mockSpacesSession(page: Page, safe: string): Promise<void> {
   await page.addInitScript(
     ({ ns, spaceId }) => {
       window.localStorage.setItem(
@@ -101,7 +100,7 @@ async function mockSpacesSession(page: Page): Promise<void> {
   )
   await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: SPACE.members }))
   await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
-    route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [SAFES.SEP_OWNER_4_SAFE.split(':')[1]] } } }),
+    route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [safe.split(':')[1]] } } }),
   )
   await page.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
   await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
@@ -112,14 +111,15 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
     safePage,
     walletPage,
     credentials,
+    safes,
   }) => {
-    await mockSpacesSession(safePage)
+    await mockSpacesSession(safePage, safes.SEP_OWNER_4_SAFE)
 
     const home = new HomePage(safePage)
     const sendTokens = new SendTokensPage(safePage)
 
     // Open the Safe and connect the owner wallet (enables "New transaction").
-    await home.goto(SAFES.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
+    await home.goto(safes.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()

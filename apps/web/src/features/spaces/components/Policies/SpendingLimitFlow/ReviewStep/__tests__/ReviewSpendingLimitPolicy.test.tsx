@@ -354,7 +354,10 @@ describe('ReviewSpendingLimitPolicy', () => {
 
     const review = screen.getByTestId('review-transaction')
     expect(review).toHaveAttribute('data-title', REVIEW_STEP_TITLE)
-    expect(mockReviewTransaction).toHaveBeenCalledWith(expect.objectContaining({ title: REVIEW_STEP_TITLE }), undefined)
+    expect(mockReviewTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ title: REVIEW_STEP_TITLE, withDecodedData: false }),
+      undefined,
+    )
     const summary = screen.getByTestId('spending-limit-summary')
     expect(review.firstElementChild).toBe(summary)
     expect(screen.getByTestId('spending-limit-summary-applies-to')).toHaveTextContent(shortenAddress(SAFE_A))

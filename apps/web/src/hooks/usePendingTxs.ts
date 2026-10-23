@@ -2,7 +2,7 @@ import { LabelValue } from '@safe-global/store/gateway/types'
 import type { Transaction, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
-import { selectPendingTxIdsBySafe } from '@/store/pendingTxsSlice'
+import { selectPendingTxIdsBySafe, selectPendingTxs } from '@/store/pendingTxsSlice'
 import { selectQueuedTransactions } from '@/store/txQueueSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import {
@@ -22,8 +22,12 @@ export const usePendingTxIds = (): Array<Transaction['id']> => {
 }
 
 export const useHasPendingTxs = (): boolean => {
-  const pendingIds = usePendingTxIds()
-  return pendingIds.length > 0
+  const { safe, safeAddress } = useSafeInfo()
+  const { chainId, nonce } = safe
+  return useAppSelector((state) => {
+    const pendingTxs = selectPendingTxs(state)
+    return selectPendingTxIdsBySafe(state, chainId, safeAddress).some((id) => pendingTxs[id].nonce >= nonce)
+  })
 }
 
 /**

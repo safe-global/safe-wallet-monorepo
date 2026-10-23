@@ -5,6 +5,8 @@ import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/
 import { UpsertRecoveryFlowSettings, _validateRecoverer } from './UpsertRecoveryFlowSettings'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
+import { MAX_CUSTOM_DELAY_DAYS, MAX_CUSTOM_DELAY_DIGITS } from './utils'
+import { userEvent } from '@testing-library/user-event'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 
 jest.mock('@/hooks/useSafeInfo', () => ({
@@ -91,6 +93,34 @@ describe('UpsertRecoveryFlowSettings', () => {
     const trigger = getByTestId('recovery-delay-select')
     expect(trigger).toHaveTextContent('28 days')
     expect(trigger).not.toHaveTextContent(`${DAY_IN_SECONDS * 28}`)
+  })
+
+  describe('custom review window', () => {
+    it('limits the input to the digits of the maximum and shows the maximum as a hint', () => {
+      const { getByPlaceholderText, getByText } = renderSettings({})
+
+      expect(getByPlaceholderText('E.g. 100')).toHaveAttribute('maxLength', `${MAX_CUSTOM_DELAY_DIGITS}`)
+      expect(getByText(`Up to ${MAX_CUSTOM_DELAY_DAYS} days`)).toBeInTheDocument()
+    })
+
+    it('shows an error for a period above the maximum', async () => {
+      const { getByPlaceholderText, findByText, queryByText } = renderSettings({})
+
+      await userEvent.type(getByPlaceholderText('E.g. 100'), `${MAX_CUSTOM_DELAY_DAYS + 1}`)
+
+      expect(await findByText(`Maximum is ${MAX_CUSTOM_DELAY_DAYS} days`)).toBeInTheDocument()
+      expect(queryByText(`Up to ${MAX_CUSTOM_DELAY_DAYS} days`)).not.toBeInTheDocument()
+    })
+
+    it('asks for a value when the field is cleared', async () => {
+      const { getByPlaceholderText, findByText } = renderSettings({})
+      const input = getByPlaceholderText('E.g. 100')
+
+      await userEvent.type(input, '5')
+      await userEvent.clear(input)
+
+      expect(await findByText('Enter a number of days')).toBeInTheDocument()
+    })
   })
 
   it('shows the human-readable label in the proposal expiry trigger, not the raw seconds value', () => {

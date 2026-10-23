@@ -2,7 +2,8 @@ import type { DelegationOrigin } from '@/features/proposers/types'
 import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
+import { parseDelegation, parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
+import { PendingDelegationConflictError } from '@/features/proposers/utils/proposerErrors'
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
@@ -76,13 +77,13 @@ export async function createDelegationMessage(
       // Find the existing message for this delegate
       const existingMessage = messagesResult.results?.find((msg) => {
         if (msg.type !== 'MESSAGE') return false
-        const msgOrigin = parseDelegationOrigin(msg.origin)
+        const msgDelegation = parseDelegation(msg)
         const msgDelegate = (msg.message as { message?: { delegateAddress?: string } })?.message?.delegateAddress
-        return sameAddress(msgDelegate, typedDataDelegate) && msgOrigin !== null
+        return sameAddress(msgDelegate, typedDataDelegate) && msgDelegation !== null
       })
 
       if (existingMessage && existingMessage.type === 'MESSAGE') {
-        const existingAction = parseDelegationOrigin(existingMessage.origin)?.action
+        const existingAction = parseDelegation(existingMessage)?.action
 
         if (existingAction === requestedAction) {
           // Same action - confirm the existing message instead
@@ -90,7 +91,7 @@ export async function createDelegationMessage(
           return
         } else {
           // Different action - can't have add + remove in same TOTP window
-          throw new Error(
+          throw new PendingDelegationConflictError(
             `A pending "${existingAction}" delegation already exists for this proposer. ` +
               `Please wait for it to expire (~1 hour) before initiating a "${requestedAction}" action.`,
           )

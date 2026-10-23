@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": false,
     "types": ["node", "jest", "mdx"],
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
@@ -54,5 +54,5 @@
     "../../packages/views/src/**/*.ts",
     "../../packages/views/src/**/*.tsx"
   ],
-  "exclude": ["node_modules", "src/types/contracts"]
+  "exclude": ["node_modules", "src/types/contracts", "e2e/environment/infra/mocks"]
 }

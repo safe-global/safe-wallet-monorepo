@@ -8,6 +8,7 @@ import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { formatRecoveryTime } from '../../services/formatRecoveryTime'
 import useAddressBook from '@/hooks/useAddressBook'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
@@ -19,7 +20,8 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
   const executionLabel = isExpired ? 'Expired' : isExecutable ? 'Executable' : 'Waiting'
   const executionActionType = isExpired ? 'expired' : isExecutable ? 'executed' : 'pending'
 
-  const expiresAtFormatted = item.expiresAt !== null ? formatAuditDateTime(Number(item.expiresAt)) : null
+  const expiresAtFormatted =
+    item.expiresAt !== null ? formatRecoveryTime(item.expiresAt, item.timestamp, formatAuditDateTime) : null
 
   const desc = isExecutable
     ? expiresAtFormatted

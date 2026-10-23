@@ -19,6 +19,9 @@ export class AssetsPage {
   readonly saveHiddenTokensButton: Locator
   readonly cancelHiddenTokensButton: Locator
   readonly deselectAllButton: Locator
+  readonly firstTokenSendButton: Locator
+  /** CheckWallet wraps a disabled Send button in this trigger; hovering it shows why the button is disabled. */
+  readonly firstTokenWalletCheck: Locator
 
   constructor(readonly page: Page) {
     this.manageTokensButton = page.getByTestId('manage-tokens-button')
@@ -39,6 +42,11 @@ export class AssetsPage {
     this.saveHiddenTokensButton = page.getByRole('button', { name: 'Save', exact: true })
     this.cancelHiddenTokensButton = page.getByRole('button', { name: 'Cancel', exact: true })
     this.deselectAllButton = page.getByRole('button', { name: 'Deselect all' })
+    this.firstTokenSendButton = this.tokenRows.first().getByRole('button', { name: 'Send' })
+    this.firstTokenWalletCheck = this.tokenRows
+      .first()
+      .getByTestId('check-wallet-tooltip-trigger')
+      .filter({ has: page.getByRole('button', { name: 'Send' }) })
   }
 
   async goto(safe: string): Promise<void> {
@@ -79,10 +87,6 @@ export class AssetsPage {
   /** The icon Send button in the actions cell (the asset cell holds a mobile-only duplicate). */
   sendButton(row: Locator): Locator {
     return row.getByTestId('table-cell-actions').getByRole('button', { name: 'Send' })
-  }
-
-  swapButton(row: Locator): Locator {
-    return row.getByTestId('table-cell-actions').getByRole('button', { name: 'Swap' })
   }
 
   tokenSymbol(row: Locator): Locator {

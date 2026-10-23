@@ -5,12 +5,24 @@ import { faker } from '@faker-js/faker'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { createMockChain } from '@safe-global/test'
-import { SAFENET_ORACLE_ADDRESSES } from '@safe-global/utils/features/safenet-checks'
-import { buildOracleProposedLog } from '@safe-global/utils/features/safenet-checks/builders'
+import { CheckStatus, SAFENET_ORACLE_ADDRESSES } from '@safe-global/utils/features/safenet-checks'
+import type { SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
+import { buildCheckView, buildOracleProposedLog } from '@safe-global/utils/features/safenet-checks/builders'
 import type { RawLog } from '@safe-global/utils/features/safenet-checks/utils/decodeLogs'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SafenetChecksSection } from './SafenetChecksSection'
+import { SafenetChecksSection, SafenetChecksSectionView, type PreCheckKind } from './SafenetChecksSection'
+import {
+  SAFENET_EXAMPLE_VOTES,
+  STORY_CHAIN_ID,
+  STORY_SAFE_TX_HASH,
+  STORY_SUBMITTED_AT,
+  exampleSnapshot,
+  inProgressWithDeadline,
+  openDisputeSnapshot,
+  rejectedSnapshot,
+  timedOutDisputeSnapshot,
+} from './storyExamples'
 
 faker.seed(456)
 
@@ -150,3 +162,35 @@ export const Submitted: Story = {
     docs: { description: { story: 'A check was proposed onchain and is inside its deadline.' } },
   },
 }
+
+type ViewCheck = Parameters<typeof SafenetChecksSectionView>[0]['check']
+
+const verdict = (snapshot: SafenetCheckSnapshot): ViewCheck =>
+  buildCheckView({ snapshot, status: snapshot.status, publicStatus: snapshot.status as ViewCheck['publicStatus'] })
+
+const viewStory = (check: ViewCheck, preCheck?: PreCheckKind): Story => ({
+  render: () => (
+    <SafenetChecksSectionView
+      check={check}
+      safeTxHash={STORY_SAFE_TX_HASH}
+      chainId={STORY_CHAIN_ID}
+      submittedAt={STORY_SUBMITTED_AT}
+      preCheck={preCheck}
+    />
+  ),
+})
+
+export const PreCheck = viewStory(buildCheckView(), 'multisig')
+export const StatusUnknown = viewStory(
+  buildCheckView({
+    snapshot: exampleSnapshot(CheckStatus.SUBMITTED, { status: CheckStatus.UNAVAILABLE }),
+    unavailableReason: 'WINDOW_UNCERTAIN',
+  }),
+)
+export const Simulating = viewStory(verdict(inProgressWithDeadline()))
+export const NoIssuesFound = viewStory(verdict(exampleSnapshot(CheckStatus.BENIGN)))
+export const RiskDetected = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.approvalAndSpender)))
+export const RiskSettingsChange = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.settingsChange)))
+export const RiskMaliciousAddress = viewStory(verdict(rejectedSnapshot(SAFENET_EXAMPLE_VOTES.blocklisted)))
+export const UnderReview = viewStory(verdict(openDisputeSnapshot()))
+export const CheckFailed = viewStory(verdict(timedOutDisputeSnapshot()))

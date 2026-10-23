@@ -23,7 +23,14 @@ import type { RecoveryStateItem } from '@/features/recovery'
 
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
-import { getDelay, isCustomDelaySelected } from './utils'
+import {
+  getDelay,
+  isCustomDelaySelected,
+  MAX_CUSTOM_DELAY_DAYS,
+  MAX_CUSTOM_DELAY_DIGITS,
+  validateCustomDelay,
+} from './utils'
+import { cn } from '@safe-global/views/utils/cn'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
@@ -111,13 +118,6 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
       recoverer && delay && expiry
 
   const validateRecoverer = (recoverer: string) => _validateRecoverer(recoverer, safeAddress)
-
-  const validateCustomDelay = (delay: string) => {
-    if (!delay) return ''
-    if (delay === '0' || !Number.isInteger(Number(delay))) {
-      return 'Invalid number'
-    }
-  }
 
   const onShowAdvanced = () => {
     setShowAdvanced((prev) => !prev)
@@ -214,27 +214,33 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               )}
             />
 
-            <div className="flex max-w-[180px] min-w-[140px] flex-1 gap-4">
-              {isCustomDelaySelected(selectedDelay) && (
-                <>
-                  <Controller
-                    control={formMethods.control}
-                    name={UpsertRecoveryFlowFields.customDelay}
-                    rules={{ validate: validateCustomDelay }}
-                    render={({ field, fieldState }) => (
+            {isCustomDelaySelected(selectedDelay) && (
+              <Controller
+                control={formMethods.control}
+                name={UpsertRecoveryFlowFields.customDelay}
+                rules={{ validate: validateCustomDelay }}
+                render={({ field, fieldState }) => (
+                  <div className="mt-3">
+                    <div className="w-[180px]">
                       <NumberField
-                        label={fieldState.error?.message}
                         error={!!fieldState.error}
                         {...field}
                         required
                         placeholder="E.g. 100"
+                        maxLength={MAX_CUSTOM_DELAY_DIGITS}
+                        endAdornment="days"
                       />
-                    )}
-                  />
-                  <Typography className="my-auto">days.</Typography>
-                </>
-              )}
-            </div>
+                    </div>
+                    <Typography
+                      variant="paragraph-small"
+                      className={cn('mt-1', fieldState.error ? 'text-destructive' : 'text-muted-foreground')}
+                    >
+                      {fieldState.error?.message || `Up to ${MAX_CUSTOM_DELAY_DAYS} days`}
+                    </Typography>
+                  </div>
+                )}
+              />
+            )}
           </div>
 
           <div className="mb-6">

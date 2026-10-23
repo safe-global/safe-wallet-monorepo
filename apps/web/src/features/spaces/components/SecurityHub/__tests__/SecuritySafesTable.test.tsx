@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import SecuritySafesTable from '../components/SecuritySafesTable/SecuritySafesTable'
 import type { SpaceSafeEntry, SelectedSafe } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 import type { ScanResult } from '@/features/security/types'
+import { AppRoutes } from '@/config/routes'
 // Helper: mirrors security.scanKey exactly (address.toLowerCase() + chainId). Inlined to
 // avoid a feature-handle mock setup in tests that don't exercise the security feature directly.
 const scanKey = (address: string, chainId: string) => `${address.toLowerCase()}:${chainId}`
@@ -10,8 +11,9 @@ const scanKey = (address: string, chainId: string) => `${address.toLowerCase()}:
 // ─── mocks ────────────────────────────────────────────────────────────────────
 
 jest.mock('next/link', () => {
-  const MockLink = ({ children, href, ...rest }: { children: ReactNode; href: string } & Record<string, unknown>) => (
-    <a href={typeof href === 'string' ? href : ''} {...rest}>
+  type Href = string | { pathname: string; query: Record<string, string> }
+  const MockLink = ({ children, href, ...rest }: { children: ReactNode; href: Href } & Record<string, unknown>) => (
+    <a href={typeof href === 'string' ? href : `${href.pathname}?${new URLSearchParams(href.query)}`} {...rest}>
       {children}
     </a>
   )
@@ -231,6 +233,100 @@ describe('SecuritySafesTable', () => {
     renderTable()
     expect(screen.getByText('Healthy')).toBeInTheDocument()
     expect(screen.queryByText(/0 issues found/i)).not.toBeInTheDocument()
+  })
+
+  describe('contract update available', () => {
+    const upgradeAvailable: Partial<ScanResult> = { ...mkResult(), upgradeAvailable: true }
+
+    it('shows an Update link to Settings → Setup next to the Healthy chip', () => {
+      renderTable({
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: upgradeAvailable,
+        }),
+      })
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
+      const link = screen.getByRole('link', { name: 'Update contracts' })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
+      expect(link).toHaveAttribute('href', expect.stringContaining(encodeURIComponent(`eth:${singleSafe.address}`)))
+    })
+
+    it('puts the Update link in its own column, not in the Status cell', () => {
+      const { container } = renderTable({
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: upgradeAvailable,
+        }),
+      })
+      const link = screen.getByRole('link', { name: 'Update contracts' })
+      expect(screen.getByLabelText('Healthy').parentElement).not.toContainElement(link)
+
+      const row = screen.getByText('My Vault').closest('[data-testid="security-safe-row"]')!
+      const header = container.querySelector('.min-w-\\[960px\\]')!.firstElementChild!
+      expect(row.children).toHaveLength(header.children.length)
+    })
+
+    it('does not open the side card when the Update link is clicked', () => {
+      const onViewReport = jest.fn()
+      renderTable({
+        onViewReport,
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: upgradeAvailable,
+        }),
+      })
+      fireEvent.click(screen.getByRole('link', { name: 'Update contracts' }))
+      expect(onViewReport).not.toHaveBeenCalled()
+    })
+
+    it('shows the Update link next to a non-passing chip too', () => {
+      renderTable({
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: { ...mkResult('partial'), severity: 'Medium', upgradeAvailable: true },
+        }),
+      })
+      expect(screen.getByText('Needs review · 1 issue found')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Update contracts' })).toBeInTheDocument()
+    })
+
+    it('shows no Update link when the contract version is current', () => {
+      renderTable()
+      expect(screen.queryByRole('link', { name: 'Update contracts' })).not.toBeInTheDocument()
+    })
+
+    it('links each network that needs an update, not the collapsed multichain row', () => {
+      const chains = [
+        { address: multiSafe.address, chainId: '1' },
+        { address: multiSafe.address, chainId: '137' },
+      ]
+      renderTable({
+        safes: [multiSafe],
+        scanResults: buildScanResults(chains, { contract_version: upgradeAvailable }),
+      })
+
+      expect(screen.queryByRole('link', { name: 'Update contracts' })).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getAllByText('Multi Safe')[0].closest('[data-testid="security-safe-row"]')!)
+      const links = screen.getAllByRole('link', { name: 'Update contracts' })
+      expect(links).toHaveLength(2)
+      expect(screen.getByTestId('chain-1').closest('[data-testid="security-safe-row"]')).toContainElement(links[0])
+      expect(links[0]).toHaveAttribute('href', expect.stringContaining(encodeURIComponent(`eth:${multiSafe.address}`)))
+      expect(screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')).toContainElement(links[1])
+      expect(links[1]).toHaveAttribute(
+        'href',
+        expect.stringContaining(encodeURIComponent(`matic:${multiSafe.address}`)),
+      )
+    })
+
+    it('shows no link on a network row whose contract version is current', () => {
+      const scanResults = {
+        ...buildScanResults([{ address: multiSafe.address, chainId: '1' }]),
+        ...buildScanResults([{ address: multiSafe.address, chainId: '137' }], { contract_version: upgradeAvailable }),
+      }
+      renderTable({ safes: [multiSafe], scanResults })
+
+      fireEvent.click(screen.getAllByText('Multi Safe')[0].closest('[data-testid="security-safe-row"]')!)
+      const links = screen.getAllByRole('link', { name: 'Update contracts' })
+      expect(links).toHaveLength(1)
+      expect(screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')).toContainElement(links[0])
+    })
   })
 
   describe('multichain safes', () => {
