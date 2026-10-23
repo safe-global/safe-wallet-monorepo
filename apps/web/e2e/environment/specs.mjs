@@ -7,17 +7,15 @@ const fourthChain = 'the list only appears when a chain is left to add, which ne
 
 /**
  * Every spec that runs against the isolated backend: `scenario` names a function from scenarios/index.mjs,
- * `chains` the forks besides Sepolia, `perTest` prepares data before each test, `skips` maps titles to reasons.
+ * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/happypath_2/add_owner.cy.js': { scenario: 'prepareOwnerLifecycleScenario', perTest: true },
   'cypress/e2e/happypath_2/create_safe_cf.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/happypath_2/mass_payouts.cy.js': { scenario: 'preparePayoutProposerScenario' },
   'cypress/e2e/happypath_2/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [1, 137] },
   'cypress/e2e/happypath_2/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
   'cypress/e2e/happypath_2/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/happypath_2/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
-  'cypress/e2e/regression/add_owner.cy.js': { scenario: 'prepareAddOwnerScenario' },
   'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/address_book.cy.js': { scenario: 'prepareBasicScenario' },
@@ -112,8 +110,6 @@ export const isolatedSpecs = {
         productionApp,
     },
   },
-  'cypress/e2e/regression/remove_owner.cy.js': { scenario: 'prepareRemoveOwnerScenario', perTest: true },
-  'cypress/e2e/regression/replace_owner.cy.js': { scenario: 'prepareReplaceOwnerScenario', perTest: true },
   'cypress/e2e/regression/safe_selector.cy.js': { scenario: 'prepareSafeSelectorScenario', chains: [1] },
   'cypress/e2e/regression/sidebar_new.cy.js': { scenario: 'prepareSafeSelectorScenario' },
   'cypress/e2e/regression/spaces_basicflow.cy.js': { scenario: 'prepareBasicScenario' },
@@ -159,7 +155,6 @@ export const isolatedSpecs = {
   'cypress/e2e/safe-apps/safe_permissions.cy.js': { scenario: 'prepareSafeAppsHostScenario' },
   'cypress/e2e/safe-apps/tx-builder_3.cy.js': { scenario: 'prepareCowFallbackScenario' },
   'cypress/e2e/safe-apps/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
-  'cypress/e2e/smoke/add_owner.cy.js': { scenario: 'prepareAddOwnerScenario' },
   'cypress/e2e/smoke/address_book.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/smoke/balances_endpoints.cy.js': { scenario: 'prepareBalancesEndpointsScenario', chains: [1] },
@@ -170,7 +165,6 @@ export const isolatedSpecs = {
   'cypress/e2e/smoke/import_export_data.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/smoke/landing.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/load_safe.cy.js': { scenario: 'prepareEnsFixtureScenario' },
-  'cypress/e2e/smoke/replace_owner.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/safe_selector.cy.js': { scenario: 'prepareBasicScenario', chains: [1] },
   'cypress/e2e/smoke/spending_limits.cy.js': { scenario: 'prepareEnsFixtureScenario' },
 }

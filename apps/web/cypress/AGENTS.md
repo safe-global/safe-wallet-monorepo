@@ -155,7 +155,7 @@ The isolated CI workflow runs registered specs against local Anvil, CGW, TXS and
 
 Use `yarn workspace @safe-global/web e2e:env cypress` after starting the backend and wallet. `SAFE_E2E_SPECS` selects registered specs, `SAFE_E2E_WEB_URL` overrides the wallet URL, and `SAFE_E2E_BROWSER` selects a Chromium executable (default: Chrome). The runner clears `e2e/environment/artifacts/cypress` once per invocation and retains per-spec videos, screenshots and JUnit reports. Backend cleanup belongs to the calling CI workflow and must run after failures. See [local setup](../e2e/docs/ISOLATED_ENVIRONMENT.md).
 
-Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `getSafes()` only reads prepared fixtures. Mutable scenarios reset before each test when their entry in `e2e/environment/specs.mjs` sets `perTest`. Specs must not branch on `SAFE_E2E_ISOLATED`: seed their expected data and expose generated identifiers through fixture getters. Preserve existing mocks and assertions.
+Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `getSafes()` only reads prepared fixtures. Specs must not branch on `SAFE_E2E_ISOLATED`: seed their expected data and expose generated identifiers through fixture getters. Preserve existing mocks and assertions.
 
 Per-spec scenario `files` replace JSON data at existing fixture paths in a temporary fixtures directory. Preserve the original fixture shape and expected values, supplying generated IDs for seeded backend records. Source fixture files remain unchanged; the temporary directory is removed after each spec.
 
