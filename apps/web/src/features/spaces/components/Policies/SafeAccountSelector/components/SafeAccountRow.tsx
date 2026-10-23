@@ -12,6 +12,7 @@ import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSele
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
 import type { SafeItemDataChain } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 import SafeIdentity from './SafeIdentity'
+import { chainLabel } from '../utils'
 import type {
   SafeAccountIneligibility,
   SafeAccountOption,
@@ -139,7 +140,7 @@ export const SafeAccountChainRow = ({ account }: { account: SafeAccountOption })
   const summary = (
     <div className="flex w-full min-w-0 items-center gap-3 pl-11">
       <Typography variant="paragraph-small-medium" className="min-w-0 flex-1 truncate">
-        {account.chain?.chainName ?? account.chainId}
+        {chainLabel(account)}
       </Typography>
       <SafeRowStats
         threshold={account.threshold ?? 0}

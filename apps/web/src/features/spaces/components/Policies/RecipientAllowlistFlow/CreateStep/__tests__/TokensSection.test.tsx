@@ -4,10 +4,9 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { createDefaultAllowlistValues, type RecipientAllowlistFormValues } from '../../types'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
-import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
+import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import TokensSection from '../TokensSection'
 
-jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../TokenDraftRow', () => ({
   __esModule: true,
   default: ({
@@ -30,8 +29,6 @@ jest.mock('../TokenDraftRow', () => ({
   ),
 }))
 
-const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
-
 const USDC = '0x00000000000000000000000000000000000000a1'
 const DAI = '0x00000000000000000000000000000000000000b2'
 const NO_SYMBOL = '0x00000000000000000000000000000000000000c3'
@@ -48,8 +45,10 @@ const ETH = option(ZERO_ADDRESS, 'ETH')
 const USDC_OPTION = option(USDC, 'USDC')
 const DAI_OPTION = option(DAI, 'DAI', 'popular')
 
-const hold = (options: TokenOption[], overrides: Partial<ReturnType<typeof useHeldTokenAddresses>> = {}) =>
-  mockHeld.mockReturnValue({
+let heldTokens: HeldTokenAddresses
+
+const hold = (options: TokenOption[], overrides: Partial<HeldTokenAddresses> = {}) => {
+  heldTokens = {
     addresses: options.filter((o) => o.group === 'held').map((o) => o.address),
     options,
     isLoading: false,
@@ -60,7 +59,8 @@ const hold = (options: TokenOption[], overrides: Partial<ReturnType<typeof useHe
     refetchPopular: jest.fn(),
     identityKey: '1:0x1',
     ...overrides,
-  })
+  }
+}
 
 const setup = (
   values: RecipientAllowlistFormValues = createDefaultAllowlistValues(),
@@ -72,6 +72,7 @@ const setup = (
     <TokensSection
       values={values}
       onChange={onChange}
+      heldTokens={heldTokens}
       hasAccount={props.hasAccount ?? true}
       isCalloutDismissed={props.isCalloutDismissed ?? false}
       onDismissCallout={onDismissCallout}
@@ -200,13 +201,21 @@ describe('TokensSection', () => {
     expect(screen.getAllByText('Which tokens can be sent')).toHaveLength(1)
   })
 
-  it('keeps loaded chips and "Deselect all" when a refetch fails', () => {
-    hold([ETH, USDC_OPTION], { isError: true })
+  it('keeps loaded chips and "Deselect all" when a refetch fails and offers a retry below them', async () => {
+    const refetch = jest.fn()
+    hold([ETH, USDC_OPTION], { isError: true, refetch })
     setup()
 
     expect(screen.queryByTestId('allowlist-tokens-error')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Allow ETH' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Deselect all' })).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-tokens-refetch-error')).toHaveTextContent(
+      'Could not load the tokens in this account.',
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(refetch).toHaveBeenCalled()
   })
 
   it.each([
