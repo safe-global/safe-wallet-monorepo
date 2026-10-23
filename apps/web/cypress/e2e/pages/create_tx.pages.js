@@ -11,7 +11,6 @@ export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
-const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
 const amountInput = 'input[name="recipients.0.amount"]'
 const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
@@ -38,7 +37,6 @@ const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
 export const txDate = '[data-testid="tx-date"]'
 export const txType = '[data-testid="tx-type"]'
-export const proposalStatus = '[data-testid="proposal-status"]'
 const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
 const sendTokensBtn = '[data-testid="send-tokens-btn"]'
 export const replacementNewSigner = '[data-testid="new-owner"]'
@@ -83,7 +81,6 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
 const addrecipientBtn = '[data-testid="add-recipient-btn"]'
-const proposeTransactionBtn = '[data-testid="sign-btn"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
@@ -644,10 +641,6 @@ export function typeRecipientAddress(address) {
   cy.get(recepientInput).clear().type(address).should('have.value', address)
 }
 
-export function typeRecipientAddress_(index, address) {
-  cy.get(recepientInput_(index)).clear().type(address).should('have.value', address)
-}
-
 export function verifyENSResolves(fullAddress) {
   let split = fullAddress.split(':')
   let noPrefixAddress = split[1]
@@ -707,10 +700,6 @@ export function verifyMaxAmount(token, tokenAbbreviation) {
 
 export function setSendValue(value) {
   cy.get(amountInput).clear().type(value)
-}
-
-export function setSendValue_(index, value) {
-  cy.get(amountInput_(index)).clear().type(value)
 }
 
 export function clickOnNextBtn() {
@@ -824,10 +813,6 @@ export function signAndOpenExecuteStep() {
 export function clickOnExecuteLaterBtn() {
   cy.get(executeLaterBtn).click()
   cy.get(transactionItem, { timeout: 30000 }).should('be.visible')
-}
-
-export function clickOnProposeTransactionBtn() {
-  cy.get(proposeTransactionBtn).click()
 }
 
 export function clickOnContinueSignTransactionBtn() {

@@ -7,6 +7,7 @@
 import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type {
   QueuedItemPage,
@@ -83,6 +84,11 @@ export class SafeApiClient {
   /** Get the queued transactions, without the labels and conflict headers of the queue page */
   async getQueued(safeAddress: string): Promise<Transaction[]> {
     return transactionsIn(await this.getQueuedTransactions(safeAddress))
+  }
+
+  /** Get the proposers (delegates) of a Safe from the Queue Service */
+  async getDelegates(safeAddress: string): Promise<DelegatesGetDelegatesV3ApiResponse> {
+    return this.get(`/v3/chains/${this.chainId}/delegates?safe=${safeAddress}`)
   }
 
   /** Get transaction history */

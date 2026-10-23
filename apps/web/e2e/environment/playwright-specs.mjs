@@ -23,7 +23,9 @@ export const playwrightSpecs = {
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
+  'e2e/policies.spec.ts': {},
   'e2e/proposer.spec.ts': {},
+  'e2e/proposer-settings.spec.ts': {},
   'e2e/recovery.spec.ts': {},
   'e2e/reject.spec.ts': {},
   'e2e/replace.spec.ts': {},
@@ -53,6 +55,10 @@ export const playwrightSpecs = {
   'regression/send-form-keyboard-navigation.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
+  },
+  'regression/step-up-billing.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'regression/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
