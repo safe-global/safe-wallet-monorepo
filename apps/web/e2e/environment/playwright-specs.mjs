@@ -29,6 +29,8 @@ export const playwrightSpecs = {
   'e2e/reject.spec.ts': {},
   'e2e/relay.spec.ts': {},
   'e2e/replace.spec.ts': {},
+  // The bridge checks compare the Safe with its Polygon twin
+  'e2e/safe-shield-bridge.spec.ts': { chains: [137] },
   'e2e/safe-shield-recipient.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
