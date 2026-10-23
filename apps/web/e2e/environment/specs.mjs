@@ -11,10 +11,8 @@ const fourthChain = 'the list only appears when a chain is left to add, which ne
  */
 export const isolatedSpecs = {
   'cypress/e2e/happypath_2/create_safe_cf.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/happypath_2/mass_payouts.cy.js': { scenario: 'preparePayoutProposerScenario' },
   'cypress/e2e/happypath_2/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [1, 137] },
   'cypress/e2e/happypath_2/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
-  'cypress/e2e/happypath_2/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/happypath_2/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
   'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
@@ -99,7 +97,6 @@ export const isolatedSpecs = {
         positionsProvider,
     },
   },
-  'cypress/e2e/regression/proposers_2.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/recovery_2.cy.js': { scenario: 'prepareRecoveryScenario' },
   'cypress/e2e/regression/recovery.cy.js': {
