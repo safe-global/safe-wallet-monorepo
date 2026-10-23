@@ -116,7 +116,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     recovery.clickOnNextBtn()
     navigation.clickOnModalCloseBtn(0)
     navigation.clickOnDiscardTxBtn()
-    recovery.getSetupRecoveryBtn()
+    recovery.verifySetupRecoveryFlowClosed()
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
