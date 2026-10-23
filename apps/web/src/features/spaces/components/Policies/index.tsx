@@ -4,6 +4,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { usePolicyIntro } from './hooks/usePolicyIntro'
+import { useNewAllowlistIds } from './hooks/useNewAllowlistIds'
 import AddPolicyDialog from './AddPolicyDialog'
 import {
   ADD_POLICY_OPTIONS,
@@ -91,6 +92,7 @@ const Policies = ({
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
   const isSettled = !isLoading && !isError
+  const { newIds: newAllowlistIds, dismiss: dismissNewAllowlist } = useNewAllowlistIds(policies, isSettled)
 
   const selectPolicy = useCallback((policy: Policy) => {
     // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
@@ -103,7 +105,10 @@ const Policies = ({
     }
   }, [])
 
-  const closeDetails = useCallback(() => setOpenPolicy(null), [])
+  const closeDetails = useCallback(() => {
+    if (openPolicy) dismissNewAllowlist(openPolicy.id)
+    setOpenPolicy(null)
+  }, [openPolicy, dismissNewAllowlist])
 
   // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
   // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
@@ -270,7 +275,11 @@ const Policies = ({
       )}
 
       {openedPolicy && isAllowlistPolicy(openedPolicy) && openedPolicy.status === 'active' && (
-        <AllowlistDetails policy={openedPolicy} onClose={closeDetails} />
+        <AllowlistDetails
+          policy={openedPolicy}
+          onClose={closeDetails}
+          justActivated={newAllowlistIds.has(openedPolicy.id)}
+        />
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (

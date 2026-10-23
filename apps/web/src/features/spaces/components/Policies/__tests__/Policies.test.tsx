@@ -624,6 +624,25 @@ describe('Policies', () => {
       expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
     })
 
+    it('should confirm an allowlist that turns up while the page is open, the first time its panel opens', async () => {
+      const { rerender, user } = renderWithUserEvent(<Policies policies={[]} />)
+      rerender(<Policies policies={[mockActiveAllowlist()]} />)
+
+      await user.click(screen.getByTestId('policy-open-button'))
+      expect(screen.getByText('Your allowlist is now active')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+      await user.click(screen.getByTestId('policy-open-button'))
+      expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+    })
+
+    it('should not confirm an allowlist that was there when the page loaded', () => {
+      render(<Policies policies={[mockActiveAllowlist()]} />)
+      fireEvent.click(screen.getByTestId('policy-open-button'))
+
+      expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+    })
+
     it('should, when a pending allowlist row is clicked, open no panel yet', () => {
       render(<Policies policies={[mockPendingAllowlist()]} />)
       fireEvent.click(screen.getAllByTestId('policy-open-button')[0])

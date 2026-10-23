@@ -6,7 +6,7 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
-import type { ActiveAllowlistPolicy } from '@/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+import type { ActiveAllowlistPolicy } from '../../AllowlistDrawer/resolveState'
 
 const ENFORCED_BY = 'Safe policy contract'
 
