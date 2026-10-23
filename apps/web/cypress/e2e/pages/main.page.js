@@ -458,8 +458,6 @@ export function verifyAppLocalStorageItemEquals(key, expectedValue) {
     })
 }
 
-Object.keys(JSON.parse(win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes))?.[chainId] ?? {})
-
 export function changeSafeChainName(originalChain, newChain) {
   return originalChain.replace(/^[^:]+:/, newChain + ':')
 }
