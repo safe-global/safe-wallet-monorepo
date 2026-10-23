@@ -189,7 +189,7 @@ yarn workspace @safe-global/web test --testPathPatterns=spending
 
 ### E2E Tests
 
-- `cypress/e2e/smoke/spending_limits.cy.js`
+- `e2e/tests/e2e/spending-limit.spec.ts` (Playwright, isolated stack)
 - `cypress/e2e/regression/spending_limits.cy.js`
 - `cypress/e2e/regression/spending_limits_nonowner.cy.js`
 
