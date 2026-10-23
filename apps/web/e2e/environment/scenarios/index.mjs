@@ -16,7 +16,6 @@ import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
 import * as nested from './nested.mjs'
 import * as notes from './notes.mjs'
-import * as owners from './owners.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
 import * as rejection from './rejection.mjs'
@@ -46,7 +45,6 @@ const modules = [
   ledger,
   nested,
   notes,
-  owners,
   proposers,
   recovery,
   rejection,
