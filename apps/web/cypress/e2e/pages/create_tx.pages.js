@@ -139,12 +139,6 @@ export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
 export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', constants.safeProxyFactoryLabel]
 
-export const tx_status = {
-  execution_needed: 'Execution needed',
-  execute: 'Execute',
-  proposal: 'Proposal',
-}
-
 export const txActions = {
   setFallbackHandler: 'setFallbackHandler',
 }
@@ -551,9 +545,6 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
     }
   })
 }
-export function clickOnTransactionItem(item) {
-  cy.get(transactionItem).eq(item).scrollIntoView().click({ force: true })
-}
 
 export function verifyTransactionActionsVisibility(option) {
   cy.get(transactionSideList).should(option)
@@ -637,10 +628,6 @@ export function verifyNativeTokenTransfer() {
 
 export function changeNonce(value) {
   cy.get(nonceInput).clear().type(value, { force: true })
-}
-
-export function hasNonce() {
-  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
 }
 
 export function displayAdvancedDetails() {

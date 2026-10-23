@@ -71,6 +71,11 @@ export class SafeApiClient {
     return (await this.getSafeInfo(safeAddress)).nonce
   }
 
+  /** Get the addresses of the Safes that `owner` (an account or a Safe) owns */
+  async getOwnedSafes(owner: string): Promise<string[]> {
+    return (await this.get<{ safes: string[] }>(`/v1/chains/${this.chainId}/owners/${owner}/safes`)).safes
+  }
+
   /** Get token balances for a Safe */
   async getBalances(safeAddress: string, currency = 'usd'): Promise<BalancesResponse> {
     return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}`)
