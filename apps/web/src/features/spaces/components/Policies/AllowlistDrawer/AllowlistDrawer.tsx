@@ -35,6 +35,7 @@ import AllowlistTokens from './components/AllowlistTokens'
 import ActivatedBanner from './components/ActivatedBanner'
 import FailedBanner from './components/FailedBanner'
 import ScheduledBanner from './components/ScheduledBanner'
+import UncoveredSpendingLimits from './components/UncoveredSpendingLimits'
 
 type AllowlistDrawerBaseProps = {
   open: boolean
@@ -55,6 +56,8 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   onCancelChange?: () => void
   /** The first setup just became active: confirms it once at the top of the panel. */
   justActivated?: boolean
+  /** The Safe's spending limits that bypass the allowlist because the guard is not in the module slot. */
+  uncoveredSpendingLimitCount?: number
 }
 
 type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
@@ -141,6 +144,9 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ))}
           <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
+          {!isPendingDrawer(props) && state.kind !== 'unenforced' && !!props.uncoveredSpendingLimitCount && (
+            <UncoveredSpendingLimits count={props.uncoveredSpendingLimitCount} />
+          )}
           <PolicyOverview
             {...overview}
             appliesTo={{

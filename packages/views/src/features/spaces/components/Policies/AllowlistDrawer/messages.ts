@@ -52,3 +52,7 @@ export const CANCEL_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can
 export const UNENFORCED_BANNER_TITLE = 'Safe policy guard removed'
 
 export const UNENFORCED_BANNER_LINE = 'Allowlist not applied as the guard is removed.'
+
+export const NOT_COVERED_BADGE = 'Not covered'
+
+export const NOT_COVERED_LINE = 'They can still send any token to any address. Edit the allowlist to include them.'

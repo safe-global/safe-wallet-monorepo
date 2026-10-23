@@ -344,4 +344,58 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
   })
+
+  it('lists the spending limits the allowlist does not cover, keeping the allowlist active', () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockActiveAllowlist()}
+        viewer={MOCK_VIEWERS.signer}
+        uncoveredSpendingLimitCount={2}
+      />,
+    )
+
+    expect(screen.getByText('2 spending limits')).toBeInTheDocument()
+    expect(screen.getByText('Not covered')).toBeInTheDocument()
+    expect(screen.getByText('Active')).toBeInTheDocument()
+  })
+
+  it('says "1 spending limit" for a single uncovered spending limit', () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockActiveAllowlist()}
+        viewer={MOCK_VIEWERS.signer}
+        uncoveredSpendingLimitCount={1}
+      />,
+    )
+
+    expect(screen.getByText('1 spending limit')).toBeInTheDocument()
+  })
+
+  it('shows no existing policies section when no spending limit is uncovered', () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockActiveAllowlist()}
+        viewer={MOCK_VIEWERS.signer}
+        uncoveredSpendingLimitCount={0}
+      />,
+    )
+
+    expect(screen.queryByTestId('allowlist-uncovered-spending-limits')).not.toBeInTheDocument()
+  })
+
+  it('shows no existing policies section on an unenforced allowlist', () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockUnenforcedAllowlist()}
+        viewer={MOCK_VIEWERS.signer}
+        uncoveredSpendingLimitCount={2}
+      />,
+    )
+
+    expect(screen.queryByTestId('allowlist-uncovered-spending-limits')).not.toBeInTheDocument()
+  })
 })
