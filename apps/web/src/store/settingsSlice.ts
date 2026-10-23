@@ -3,7 +3,6 @@ import { createSelector, createSlice } from '@reduxjs/toolkit'
 import merge from 'lodash/merge'
 
 import type { RootState } from '@/store'
-import isEqual from 'lodash/isEqual'
 import type { EnvState } from '@safe-global/store/settingsSlice'
 
 export enum TOKEN_LISTS {
@@ -207,7 +206,8 @@ export const selectHasOwnTenderly = createSelector(selectTenderly, (tenderly) =>
 )
 
 export const isEnvInitialState = createSelector([selectSettings, (_, chainId) => chainId], (settings, chainId) => {
-  return isEqual(settings.env.tenderly, initialState.env.tenderly) && !settings.env.rpc[chainId]
+  const { url, accessToken, publicSharing } = settings.env.tenderly
+  return !url && !accessToken && !publicSharing && !settings.env.rpc[chainId]
 })
 
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)
