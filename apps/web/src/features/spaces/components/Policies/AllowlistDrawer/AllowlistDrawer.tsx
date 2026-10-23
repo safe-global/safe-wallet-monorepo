@@ -8,7 +8,7 @@ import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
-import { getPolicyTokens } from '@safe-global/views/features/spaces/components/Policies/utils/policyTokens'
+import { getPolicyTokens } from '../utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
 import { formatTimeToSign } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
@@ -21,18 +21,14 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
-  inferAllowlistOutcome,
-  resolveAllowlistDrawerState,
-  type ActiveAllowlistPolicy,
-  type AllowlistTxOutcome,
-} from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
-import {
   ACTIVATED_BANNER_TITLE,
   activatedBannerLine,
+  type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
 import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
+import { inferAllowlistOutcome, resolveAllowlistDrawerState, type ActiveAllowlistPolicy } from './resolveState'
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'
 import AllowlistTokens from './components/AllowlistTokens'

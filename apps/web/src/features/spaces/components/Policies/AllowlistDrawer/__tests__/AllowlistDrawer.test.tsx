@@ -11,7 +11,7 @@ import {
   mockPendingAllowlistUpdate,
 } from '../../mocks/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
-import type { AllowlistDrawerPolicy } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+import type { AllowlistDrawerPolicy } from '../resolveState'
 import AllowlistDrawer from '../AllowlistDrawer'
 
 jest.mock('@/components/common/ChainIndicator', () => {

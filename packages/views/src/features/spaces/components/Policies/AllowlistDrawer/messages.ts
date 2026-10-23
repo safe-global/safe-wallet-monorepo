@@ -1,6 +1,9 @@
 import type { PendingPolicyOperation } from '../types'
-import type { AllowlistTxOutcome } from './resolveState'
+import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
+
+/** `expired`: the signing window closed before the transaction executed. */
+export type AllowlistTxOutcome = PendingTxOutcome | 'expired'
 
 export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   create: 'The allowlist is not active as the transaction is not yet executed.',

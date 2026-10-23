@@ -1,4 +1,4 @@
-import { MOCK_VIEWERS } from '@/features/spaces/components/Policies/mocks/policies'
+import { MOCK_VIEWERS } from '../../mocks/policies'
 import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
@@ -7,8 +7,8 @@ import {
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
-} from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
-import { inferAllowlistOutcome, resolveAllowlistDrawerState } from './resolveState'
+} from '../../mocks/allowlistPolicies'
+import { inferAllowlistOutcome, resolveAllowlistDrawerState } from '../resolveState'
 
 describe('resolveAllowlistDrawerState', () => {
   it('should let a signer manage an active allowlist', () => {

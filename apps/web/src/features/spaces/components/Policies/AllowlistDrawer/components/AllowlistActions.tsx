@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@safe-global/views/components/ui/button'
-import type { AllowlistDrawerState } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/resolveState'
+import type { AllowlistDrawerState } from '../resolveState'
 import { PolicyDrawerActions } from '../../components/PolicyDrawerActions'
 import { CopyTransactionLink } from '../../SpendingLimitDrawer/components/CopyTransactionLink'
 
