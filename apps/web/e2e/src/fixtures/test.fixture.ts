@@ -37,7 +37,7 @@ const COOKIE_STATE = JSON.stringify({
  * Prevents popups and modals from blocking test flows.
  * Mirrors: cypress/support/e2e.js beforeEach()
  */
-async function seedLocalStorage(page: Page): Promise<void> {
+export async function seedLocalStorage(page: Page): Promise<void> {
   await page.addInitScript(
     ({ cookiesKey, safeLabsKey, outreachKey, cookieState }) => {
       // Cookie + terms consent
@@ -160,11 +160,11 @@ async function attachFailureEvidence(
     contentType: 'text/plain',
   })
 
-  // Test data identifiers — extract Safe address from test URL if present
-  const safeAnnotation = testInfo.annotations.find((a) => a.type === 'safe-address')?.description
-  if (safeAnnotation) {
+  // Test data identifiers: the Safes the test recorded
+  const safeAddresses = testInfo.annotations.filter((a) => a.type === 'safe-address').map((a) => a.description)
+  if (safeAddresses.length > 0) {
     await testInfo.attach('test-data', {
-      body: `Safe address: ${safeAnnotation}`,
+      body: safeAddresses.map((address) => `Safe address: ${address}`).join('\n'),
       contentType: 'text/plain',
     })
   }
@@ -193,7 +193,8 @@ const ISOLATED_DATA_TIMEOUT_MS = 600_000
 // Extended test with Safe-specific fixtures
 // ---------------------------------------------------------------------------
 export const test = base.extend<SafeFixtures>({
-  safePage: async ({ page }, use, testInfo) => {
+  // Not `use`: the React hooks lint rule takes that name for a hook.
+  safePage: async ({ page }, provide, testInfo) => {
     // Start collecting failure evidence before the test runs
     const consoleErrors = collectConsoleErrors(page)
     const consoleWarnings = collectConsoleWarnings(page)
@@ -201,31 +202,31 @@ export const test = base.extend<SafeFixtures>({
 
     // Seed localStorage via addInitScript — runs before page scripts, no extra navigation
     await seedLocalStorage(page)
-    await use(page)
+    await provide(page)
 
     // After test: attach evidence if it failed
     await attachFailureEvidence(testInfo, page, consoleErrors, consoleWarnings, failedRequests)
   },
 
-  safeApiClient: async ({}, use) => {
+  safeApiClient: async ({}, provide) => {
     const client = new SafeApiClient()
-    await use(client)
+    await provide(client)
   },
 
-  walletPage: async ({ safePage }, use) => {
-    await use(new WalletPage(safePage))
+  walletPage: async ({ safePage }, provide) => {
+    await provide(new WalletPage(safePage))
   },
 
   credentials: [
-    async ({}, use, testInfo) => {
-      await use(isIsolated ? (await isolatedSpecData(testInfo)).credentials : getWalletCredentials())
+    async ({}, provide, testInfo) => {
+      await provide(isIsolated ? (await isolatedSpecData(testInfo)).credentials : getWalletCredentials())
     },
     { timeout: ISOLATED_DATA_TIMEOUT_MS },
   ],
 
   safes: [
-    async ({}, use, testInfo) => {
-      await use(isIsolated ? (await isolatedSpecData(testInfo)).safes : SAFES)
+    async ({}, provide, testInfo) => {
+      await provide(isIsolated ? (await isolatedSpecData(testInfo)).safes : SAFES)
     },
     { timeout: ISOLATED_DATA_TIMEOUT_MS },
   ],

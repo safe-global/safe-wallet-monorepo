@@ -4,7 +4,8 @@ import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { PAID_LINKS, SPACE_ID } from '../../components/Plans/plans.fixtures'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { PAID_LINKS } from '../../components/Plans/plans.fixtures'
 import { checkoutTrackingListener } from '../checkoutTrackingListener'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
@@ -13,7 +14,11 @@ const checkout = (requestStatus: 'fulfilled' | 'rejected', paymentLinkId: string
   type: `${billingApi.reducerPath}/executeQuery/${requestStatus}`,
   meta: {
     requestStatus,
-    arg: { type: 'query', endpointName: 'billingGetCheckoutUrlV1', originalArgs: { spaceId: SPACE_ID, paymentLinkId } },
+    arg: {
+      type: 'query',
+      endpointName: 'billingGetCheckoutUrlV1',
+      originalArgs: { spaceId: MOCK_SPACE_ID, paymentLinkId },
+    },
   },
 })
 

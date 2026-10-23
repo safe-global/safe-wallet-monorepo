@@ -1,8 +1,8 @@
 import Safe from '@safe-global/protocol-kit'
-import SafeApiKit from '@safe-global/api-kit'
 import { NonceManager, Wallet, parseEther, randomBytes, hexlify } from 'ethers'
 import { chainProfiles } from '../local-stack.mjs'
 import { FUNDED_BALANCE, SEPOLIA } from './chain.mjs'
+import { proposeToQueue } from './gateway.mjs'
 import { waitUntil } from './indexing.mjs'
 import { localProvider, sendAndConfirm } from './provider.mjs'
 
@@ -50,15 +50,15 @@ async function assertForkChain(provider, env) {
 
 const randomSaltNonce = () => BigInt(hexlify(randomBytes(16))).toString()
 
-/** Deploys a Safe 1.4.1 L2 with `owners` and `threshold` and gives it 1 ETH; returns its address. */
-async function deploySafe(env, signer, { owners, threshold, saltNonce = randomSaltNonce() }) {
+/** Deploys a Safe L2 (1.4.1 by default) with `owners` and `threshold` and gives it 1 ETH; returns its address. */
+async function deploySafe(env, signer, { owners, threshold, saltNonce = randomSaltNonce(), safeVersion = '1.4.1' }) {
   const predicted = await Safe.init({
     provider: env.SAFE_RPC_URL,
     signer: signer.privateKey,
     isL1SafeSingleton: false,
     predictedSafe: {
       safeAccountConfig: { owners, threshold },
-      safeDeploymentConfig: { safeVersion: '1.4.1', saltNonce },
+      safeDeploymentConfig: { safeVersion, saltNonce },
     },
   })
   const safeAddress = await predicted.getAddress()
@@ -73,7 +73,7 @@ async function deploySafe(env, signer, { owners, threshold, saltNonce = randomSa
  * Safe belongs to OWNER_4 and OWNER_1; `waitForIndexing` waits until CGW serves it.
  */
 export async function createSafe(env, owners, options = {}) {
-  const { ownerAddresses, threshold = 2, saltNonce, waitForIndexing = true } = options
+  const { ownerAddresses, threshold = 2, saltNonce, waitForIndexing = true, safeVersion } = options
   const provider = localProvider(env.SAFE_RPC_URL)
   try {
     const chainId = await assertForkChain(provider, env)
@@ -82,12 +82,11 @@ export async function createSafe(env, owners, options = {}) {
     }
     const signer = owners.owner4.connect(provider)
     const safeOwners = ownerAddresses ?? [signer.address, owners.owner1.address]
-    const safeAddress = await deploySafe(env, signer, { owners: safeOwners, threshold, saltNonce })
+    const safeAddress = await deploySafe(env, signer, { owners: safeOwners, threshold, saltNonce, safeVersion })
     const path = `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/safes/${safeAddress}`
     if (waitForIndexing) await waitUntil(env, path, (safe) => safe.threshold === threshold && safe.nonce === 0)
     const safe = await Safe.init({ provider: env.SAFE_RPC_URL, signer: signer.privateKey, safeAddress })
-    const api = new SafeApiKit({ chainId, txServiceUrl: env.SAFE_TXS_BASE_URL })
-    return { env, provider, safe, api, path, safeAddress, signer, chainId }
+    return { env, provider, safe, path, safeAddress, signer, chainId }
   } catch (error) {
     provider.destroy()
     throw error
@@ -101,16 +100,10 @@ export async function createSafeAddress(env, owners, options) {
   return context.safeAddress
 }
 
-/** The Transaction Service client and CGW path of an existing Safe, for flows that need no signer. */
+/** The chain and CGW path of an existing Safe, for flows that need no signer. */
 export function safeService(env, safeAddress) {
   const chainId = BigInt(env.SAFE_CHAIN_ID ?? SEPOLIA)
-  return {
-    env,
-    safeAddress,
-    chainId,
-    path: `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/safes/${safeAddress}`,
-    api: new SafeApiKit({ chainId, txServiceUrl: env.SAFE_TXS_BASE_URL }),
-  }
+  return { env, safeAddress, chainId, path: `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/safes/${safeAddress}` }
 }
 
 /** A context like createSafe's for an existing Safe, signing as `owner`; it opens no provider to destroy. */
@@ -121,17 +114,16 @@ export async function openSafe(env, owner, safeAddress) {
 
 /**
  * Signs `transaction` as `proposer` (the context's owner by default, or `{ safe, signer }` of another owner) and
- * proposes it to the Transaction Service, with an optional `origin` such as a transaction note.
+ * proposes it to the Queue Service, with an optional `origin` such as a transaction note.
  */
 export async function proposeTransaction(context, transaction, { proposer = context, origin } = {}) {
   const signed = await proposer.safe.signTransaction(transaction)
   const hash = await context.safe.getTransactionHash(signed)
-  await context.api.proposeTransaction({
-    safeAddress: context.safeAddress,
-    safeTransactionData: signed.data,
-    safeTxHash: hash,
-    senderAddress: proposer.signer.address,
-    senderSignature: signed.encodedSignatures(),
+  await proposeToQueue(context, {
+    data: signed.data,
+    hash,
+    sender: proposer.signer.address,
+    signature: signed.encodedSignatures(),
     origin,
   })
   return { signed, hash, id: `&id=multisig_${context.safeAddress}_${hash}` }

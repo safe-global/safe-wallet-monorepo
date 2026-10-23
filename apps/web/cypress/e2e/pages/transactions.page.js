@@ -11,7 +11,6 @@ const executeBtn = '[data-testid="combo-submit-execute"]'
 const signedNotice = '[data-testid="signed-notice"]'
 const radioItem = '[data-slot="radio-group-item"]'
 const signBtn = '[data-testid="sign-btn"]'
-const txConfirmBtn = '[data-track="tx-list: Confirm transaction"] > button'
 const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 
 const txCompletedStr = 'Transaction was successful'
@@ -27,28 +26,12 @@ export const fallbackhandlerTx = fixtureGetters('fallbackHandlers', {
     '&id=multisig_0xc36A530ccD728d36a654ccedEB7994473474C018_0xceccff6539d75da107014e1a4ae9ccb864a6a4bf10b4e0dd38431ac80148f2f5',
 })
 
-export function visitTxHistoryInSinglePage(safe) {
-  cy.intercept('GET', '**/v1/chains/*/safes/*/transactions/history**', (req) => {
-    const url = new URL(req.url)
-    if (!url.searchParams.has('cursor')) {
-      url.searchParams.set('cursor', 'limit=100&offset=0')
-      req.url = url.toString()
-    }
-  }).as('txHistory')
-  cy.visit(constants.transactionsHistoryUrl + safe)
-  cy.wait('@txHistory')
-}
-
 export function verifyUntrustedHandllerWarningVisible() {
   cy.get(untrustedFallbackHandlerWarning).should('be.visible')
 }
 
 export function verifyUntrustedHandllerWarningDoesNotExist() {
   cy.get(untrustedFallbackHandlerWarning).should('not.exist')
-}
-
-export function verifyTxConfirmBtnDisabled() {
-  cy.get(txConfirmBtn).should('be.disabled')
 }
 
 export function verifySignBtnEnabled() {

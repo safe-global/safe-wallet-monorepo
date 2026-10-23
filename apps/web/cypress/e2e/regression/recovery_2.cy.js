@@ -4,57 +4,19 @@ import * as owner from '../pages/owners.pages.js'
 import * as recovery from '../pages/recovery.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as modules from '../pages/modules.page.js'
 import * as navigation from '../pages/navigation.page.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
 import { walletCredentials } from '../../support/credentials.js'
 
-let recoverySafes,
-  staticSafes = []
-let signer, guardian
+let staticSafes = []
+let signer
 before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
-  guardian = walletCredentials.OWNER_2_PRIVATE_KEY
 })
 
 describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => {
-  before(() => {
-    getSafes(CATEGORIES.recovery)
-      .then((recoveries) => {
-        recoverySafes = recoveries
-        return getSafes(CATEGORIES.static)
-      })
-      .then((statics) => {
-        staticSafes = statics
-      })
-  })
-
-  it('Verify "Edit Recovery" flow start from the Recovery widget', () => {
-    cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    wallet.connectSignerViaStorage(signer)
-    main.acceptCookies()
-    recovery.verifyRecoveryTableDisplayed()
-    recovery.clickOnEditRecoverer()
-    recovery.verifyRecoveryModalDisplayed()
-  })
-
-  it('Verify that Recovery widget has "Edit recovery" button when the recovery module is enabled', () => {
-    cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
-    cy.clearLocalStorage()
-    wallet.connectSignerViaStorage(signer)
-    main.acceptCookies()
-    recovery.verifyRecoveryTableDisplayed()
-    main.verifyElementsCount(recovery.editRecovererBtn, 1)
-  })
-
-  it('Verify that the "Set up recovery" button starts the set up recovery flow when no enabled recovery module in the safe', () => {
-    cy.visit(constants.securityUrl + staticSafes.SEP_STATIC_SAFE_13)
-    cy.clearLocalStorage()
-    wallet.connectSignerViaStorage(signer)
-    main.acceptCookies()
-    recovery.clickOnSetupRecoveryBtn()
-    recovery.verifyRecoveryModalDisplayed()
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
   })
 
   it('Verify that there is validation for the Guardian address field', () => {

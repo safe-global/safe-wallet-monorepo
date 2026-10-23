@@ -4,6 +4,7 @@ import Topbar, {
   SEARCH_CONTEXT_HEIGHT,
   SEARCH_CONTEXT_WRAP,
 } from './index'
+import type { ReactNode } from 'react'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -12,6 +13,9 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import walletConnectFeature from '@/features/walletconnect/feature'
+import { wcPopupStore } from '@/features/walletconnect/store'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -46,8 +50,17 @@ jest.mock('@/features/walletconnect', () => ({
   WalletConnectFeature: { name: 'walletconnect' },
 }))
 
+jest.mock('@walletconnect/core', () => ({ Core: jest.fn() }))
+jest.mock('@reown/walletkit', () => ({
+  WalletKit: {
+    init: () => Promise.resolve({ getActiveSessions: () => ({}), on: jest.fn(), off: jest.fn() }),
+  },
+}))
+
+const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
 jest.mock('@/features/batching', () => ({
-  useDraftBatch: () => [],
+  useDraftBatch: () => mockUseDraftBatch(),
+  BatchTooltip: ({ children }: { children: ReactNode }) => children,
 }))
 
 const mockUseSafeAddress = jest.fn<string, []>(() => '')
@@ -61,13 +74,15 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
+const mockUseIsSafeOwner = jest.fn(() => false)
 jest.mock('@/hooks/useIsSafeOwner', () => ({
   __esModule: true,
-  default: () => false,
+  default: () => mockUseIsSafeOwner(),
 }))
 
+const mockUseIsWalletProposer = jest.fn(() => false)
 jest.mock('@/hooks/useProposers', () => ({
-  useIsWalletProposer: () => false,
+  useIsWalletProposer: () => mockUseIsWalletProposer(),
 }))
 
 const mockIsSpaceRoute = jest.fn(() => true)
@@ -141,12 +156,15 @@ const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseDraftBatch.mockReturnValue([])
     mockUseIsMobile.mockReturnValue(false)
     mockUseIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockUsePathname.mockReturnValue('/home')
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseSafeAddress.mockReturnValue('')
+    mockUseIsSafeOwner.mockReturnValue(false)
+    mockUseIsWalletProposer.mockReturnValue(false)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -158,6 +176,71 @@ describe('Topbar', () => {
   it('renders the wallet address in HeaderNavigation', () => {
     render(<Topbar />)
     expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
+  })
+
+  describe('on a Safe page', () => {
+    const safeInfo = extendedSafeInfoBuilder().build()
+    const PAIRING_PROMPT = /paste the pairing code/i
+
+    const renderOnSafePage = () =>
+      render(<Topbar />, {
+        initialReduxState: { safeInfo: { data: safeInfo, loading: false, loaded: true } },
+      })
+
+    beforeEach(() => {
+      wcPopupStore.setStore(false)
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUseSafeAddress.mockReturnValue(safeInfo.address.value)
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: () => null,
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => null,
+        WalletConnectWidget: walletConnectFeature.WalletConnectWidget,
+      })
+    })
+
+    it('opens the notifications popover when the notifications button is clicked', async () => {
+      const user = userEvent.setup()
+      renderOnSafePage()
+      expect(screen.queryByTestId('notifications-title')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Notifications' }))
+
+      expect(screen.getByTestId('notifications-title')).toBeInTheDocument()
+    })
+
+    it('shows the Batch button', () => {
+      renderOnSafePage()
+
+      expect(screen.getByLabelText('Batch transactions')).toBeInTheDocument()
+    })
+
+    it('counts the transactions in the draft batch on the Batch button', () => {
+      mockUseDraftBatch.mockReturnValue([{}])
+
+      renderOnSafePage()
+
+      expect(screen.getByLabelText('1 batched transactions')).toBeInTheDocument()
+    })
+
+    it('opens the WalletConnect pairing popup when the WalletConnect button is clicked', async () => {
+      const user = userEvent.setup()
+      renderOnSafePage()
+      expect(screen.queryByText(PAIRING_PROMPT)).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'WalletConnect' }))
+
+      expect(await screen.findByText(PAIRING_PROMPT)).toBeInTheDocument()
+    })
+  })
+
+  it('hides the Batch button on a page without a Safe', () => {
+    mockIsSpaceRoute.mockReturnValue(false)
+    mockUseSafeAddress.mockReturnValue('')
+
+    render(<Topbar />)
+
+    expect(screen.queryByLabelText('Batch transactions')).not.toBeInTheDocument()
   })
 
   it('renders notification badge when there are unread notifications', () => {
@@ -499,6 +582,46 @@ describe('Topbar', () => {
       mockUsePathname.mockReturnValue('/welcome')
       render(<Topbar />)
       expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('batch button role gating', () => {
+    const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
+    const BATCH_BUTTON_LABEL = 'Batch transactions'
+
+    beforeEach(() => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUseSafeAddress.mockReturnValue(SAFE_ADDRESS)
+    })
+
+    it.each([
+      { role: 'an owner', isSafeOwner: true, isProposer: false },
+      { role: 'a proposer who is also an owner', isSafeOwner: true, isProposer: true },
+      { role: 'a connected non-owner who is not a proposer', isSafeOwner: false, isProposer: false },
+    ])('shows the batch button to $role', ({ isSafeOwner, isProposer }) => {
+      mockUseIsSafeOwner.mockReturnValue(isSafeOwner)
+      mockUseIsWalletProposer.mockReturnValue(isProposer)
+
+      render(<Topbar />)
+
+      expect(screen.getByLabelText(BATCH_BUTTON_LABEL)).toBeInTheDocument()
+    })
+
+    it('hides the batch button from a proposer who is not an owner', () => {
+      mockUseIsWalletProposer.mockReturnValue(true)
+
+      render(<Topbar />)
+
+      expect(screen.queryByLabelText(BATCH_BUTTON_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the batch button from an owner when there is no Safe address', () => {
+      mockUseSafeAddress.mockReturnValue('')
+      mockUseIsSafeOwner.mockReturnValue(true)
+
+      render(<Topbar />)
+
+      expect(screen.queryByLabelText(BATCH_BUTTON_LABEL)).not.toBeInTheDocument()
     })
   })
 

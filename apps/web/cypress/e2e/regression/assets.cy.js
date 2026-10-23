@@ -2,7 +2,6 @@ import * as constants from '../../support/constants'
 import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as main from '../pages/main.page'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
@@ -27,30 +26,6 @@ describe('Assets tests', () => {
       assets.toggleHideDust(false)
       assets.openHiddenTokensFromManageMenu()
       assets.verifyEachRowHasCheckbox()
-    })
-
-    it('Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
-      let spamTokens = [
-        assets.currencyAave,
-        assets.currencyTestTokenA,
-        assets.currencyTestTokenB,
-        assets.currencyUSDC,
-        assets.currencyLink,
-        assets.currencyDaiCap,
-      ]
-
-      assets.toggleHideDust(false)
-
-      // On chains without portfolio support (Sepolia), trusted filtering is disabled, so
-      // "Default tokens" behaves like "All tokens". Asserting the two modes show different
-      // lists requires a portfolio-supported chain (e.g. mainnet).
-      // Mirrors the same assertions in smoke/assets.cy.js.
-      assets.toggleShowAllTokens(false)
-      main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther, ...spamTokens])
-
-      assets.toggleShowAllTokens(true)
-      spamTokens.push(constants.tokenNames.sepoliaEther)
-      main.verifyValuesExist(assets.tokenListTable, spamTokens)
     })
   })
 

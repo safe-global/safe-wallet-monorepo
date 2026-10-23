@@ -1,46 +1,55 @@
-import { screen } from '@testing-library/react'
+import type { UserEvent } from '@testing-library/user-event'
+import { screen } from '../test-utils'
+import { buildBatchFile, renderApp, uploadJson } from '../test/app'
+import { BatchFile } from '../typings/models'
 
-import { render } from '../test-utils'
-import TransactionLibrary from './TransactionLibrary'
-import { Batch } from '../typings/models'
+jest.mock('@safe-global/safe-apps-react-sdk', () => jest.requireActual('../test/sdk').safeAppsReactSdkFake)
 
-const mockUseTransactionLibrary = jest.fn()
+const BATCH_NAME = 'Monthly payroll'
 
-jest.mock('../store', () => ({
-  __esModule: true,
-  ...jest.requireActual('../store'),
-  useTransactionLibrary: () => mockUseTransactionLibrary(),
-}))
+const saveToLibrary = async (user: UserEvent) => {
+  await uploadJson(user, buildBatchFile())
+  await user.click(await screen.findByRole('button', { name: 'Save to Library' }))
+  await user.type(screen.getByLabelText(/^Batch name/), BATCH_NAME)
+  await user.click(screen.getByRole('button', { name: 'Create' }))
+  await user.click(await screen.findByRole('link', { name: '(1) Your transaction library' }))
+}
 
-jest.mock('../assets/empty-library-dark.svg', () => ({ ReactComponent: () => null }))
-jest.mock('../assets/empty-library-light.svg', () => ({ ReactComponent: () => null }))
-
-const batch: Batch = { id: 'batch-1', name: 'My batch', transactions: [] }
-
-const setBatches = (batches: Batch[]) =>
-  mockUseTransactionLibrary.mockReturnValue({
-    batches,
-    removeBatch: jest.fn(),
-    executeBatch: jest.fn(),
-    downloadBatch: jest.fn(),
-    renameBatch: jest.fn(),
-  })
+const downloadedBatch = async (createObjectURL: jest.Mock): Promise<BatchFile> => {
+  const blob: Blob = createObjectURL.mock.lastCall?.[0]
+  return JSON.parse(await blob.text())
+}
 
 describe('<TransactionLibrary>', () => {
-  it('shows the title and saved batches when the library is not empty', () => {
-    setBatches([batch])
-    render(<TransactionLibrary />)
+  const createObjectURL = jest.fn(() => 'blob:batch')
 
-    expect(screen.getByText('Your transaction library')).toBeInTheDocument()
-    expect(screen.getByText('My batch')).toBeInTheDocument()
-    expect(screen.queryByText("You don't have any saved batches.")).not.toBeInTheDocument()
+  beforeEach(() => {
+    localStorage.clear()
+    URL.createObjectURL = createObjectURL
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
   })
 
-  it('shows only the empty state when there are no saved batches', () => {
-    setBatches([])
-    render(<TransactionLibrary />)
+  it('lists a saved batch and downloads it as a batch file', async () => {
+    const user = renderApp()
+    await saveToLibrary(user)
 
-    expect(screen.queryByText('Your transaction library')).not.toBeInTheDocument()
-    expect(screen.getByText("You don't have any saved batches.")).toBeInTheDocument()
+    await user.click(await screen.findByRole('button', { name: 'Download batch' }))
+
+    expect(screen.getByText(BATCH_NAME)).toBeInTheDocument()
+    expect(await downloadedBatch(createObjectURL)).toMatchObject({
+      meta: { name: BATCH_NAME },
+      transactions: buildBatchFile().transactions,
+    })
+  })
+
+  it('shows the empty library after the last batch is deleted', async () => {
+    const user = renderApp()
+    await saveToLibrary(user)
+
+    await user.click(await screen.findByRole('button', { name: 'Delete Batch' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, delete' }))
+
+    expect(await screen.findByText("You don't have any saved batches.")).toBeInTheDocument()
+    expect(screen.queryByText(BATCH_NAME)).not.toBeInTheDocument()
   })
 })

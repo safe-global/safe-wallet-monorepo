@@ -21,6 +21,7 @@ def create_placeholder_image(color: str = "#B8AAF8") -> ContentFile:
 
 # Staging Sepolia features for WALLET_WEB, which the existing Cypress specs expect.
 # Left out: SECURITY_HUB stalls transaction signing in the local stack.
+# Added: QUEUE_SERVICE, because CGW runs with FF_SAFE_QUEUE_SERVICE and the wallet must sign for it.
 DEFAULT_FEATURES = [
     "ADDRESS_POISONING_PROTECTION",
     "BATCHING",
@@ -54,6 +55,7 @@ DEFAULT_FEATURES = [
     "PROPOSERS",
     "PROPOSER_GATING",
     "PUSH_NOTIFICATIONS",
+    "QUEUE_SERVICE",
     "RECOVERY",
     "RELAYING",
     "RISK_MITIGATION",

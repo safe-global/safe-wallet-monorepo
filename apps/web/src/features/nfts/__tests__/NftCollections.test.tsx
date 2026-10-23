@@ -7,6 +7,8 @@ import useCollectibles from '@/hooks/useCollectibles'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { TxModalContext } from '@/components/tx-flow'
+import { NftTransferFlow } from '@/components/tx-flow/flows'
 
 jest.mock('@/services/observability', () => ({
   logger: {
@@ -94,6 +96,39 @@ describe('NftCollections', () => {
     await user.click(firstCheckbox)
 
     expect(await screen.findByRole('button', { name: 'Send 1 NFT' })).toBeInTheDocument()
+  })
+
+  it('opens the NFT transfer with only the NFTs that stay selected', async () => {
+    const nftItems = [
+      getCollectible({ id: '1', tokenName: 'Cat #1' }),
+      getCollectible({ id: '2', tokenName: 'Cat #2' }),
+      getCollectible({ id: '3', tokenName: 'Cat #3' }),
+    ]
+    mockUseCollectibles.mockReturnValue({
+      nfts: nftItems,
+      error: undefined,
+      isInitialLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      loadMore: jest.fn(),
+    })
+    const setTxFlow = jest.fn()
+
+    const { user } = renderWithUserEvent(
+      <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+        <NftCollections />
+      </TxModalContext.Provider>,
+    )
+
+    await user.click(await screen.findByTestId('nft-checkbox-1'))
+    await user.click(screen.getByTestId('nft-checkbox-2'))
+    await user.click(screen.getByTestId('nft-checkbox-3'))
+    await user.click(screen.getByTestId('nft-checkbox-2'))
+    await user.click(screen.getByRole('button', { name: 'Send 2 NFTs' }))
+
+    expect(setTxFlow).toHaveBeenCalledWith(
+      expect.objectContaining({ type: NftTransferFlow, props: { tokens: [nftItems[0], nftItems[2]] } }),
+    )
   })
 
   it('selects every listed NFT with the header "Select all" checkbox', async () => {

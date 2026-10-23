@@ -14,8 +14,8 @@ const termsCheckbox = '[data-slot="checkbox"]'
 // Once opened, Base UI select popups stay mounted after closing — scope to the open one.
 const openSelectContent = '[data-slot="select-content"][data-open]'
 const selectItem = '[data-slot="select-item"]'
-export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
-export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
+const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
+const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
 const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
 const startRecoveryBtn = '[data-testid="start-recovery"]'
 const recoveryDelaySelect = '[data-testid="recovery-delay-select"]'
@@ -27,7 +27,6 @@ const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const recoveryModalTitle = 'How does recovery work'
 const RECOVERY_STATE_TIMEOUT_MS = 60000
 
 export const recoveryOptions = {
@@ -166,19 +165,6 @@ export function enterOwnerAddress(address) {
   safe.inputOwnerAddress(0, address)
 }
 
-const RECOVERY_PROPOSAL_TIMEOUT_MS = 7000
-
-// The proposal modal shows once the recovery state loads, and only for a guardian who did not dismiss it.
-export function postponeRecovery() {
-  main
-    .pollUntil(() => Cypress.$(postponeRecoveryBtn).length > 0, RECOVERY_PROPOSAL_TIMEOUT_MS)
-    .then((shown) => {
-      if (!shown) return
-      cy.get(postponeRecoveryBtn).click()
-      cy.get(postponeRecoveryBtn).should('not.exist')
-    })
-}
-
 export function clickOnRecoverLaterBtn() {
   cy.get(postponeRecoveryBtn).click()
   cy.get(postponeRecoveryBtn).should('not.exist')
@@ -190,10 +176,6 @@ export function verifyRecoveryProposalDialog(option) {
 
 export function verifyRecoveryProposalCard() {
   cy.get(recoveryProposalCard).should('be.visible')
-}
-
-export function verifyRecoveryModalDisplayed() {
-  cy.contains(recoveryModalTitle).should('be.visible')
 }
 
 export function deleteRecoveryModule() {

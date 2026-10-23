@@ -10,13 +10,22 @@ export const SAFENET_EXPLORER_LINK_LABEL = 'View on Safenet explorer'
 export const SafenetOutboundLink = ({
   href,
   testId,
+  className,
   children,
 }: {
   href: string
   testId?: string
+  className?: string
   children: ReactNode
 }): ReactElement => (
-  <Link variant="muted" href={href} target="_blank" rel="noreferrer noopener" data-testid={testId}>
+  <Link
+    variant="muted"
+    href={href}
+    target="_blank"
+    rel="noreferrer noopener"
+    data-testid={testId}
+    className={className}
+  >
     <span className="inline-flex items-center gap-0.5">
       {children}
       <ArrowUpRight className="size-3.5" aria-hidden />
