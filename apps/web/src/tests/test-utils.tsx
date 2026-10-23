@@ -99,6 +99,10 @@ function customRenderHook<Result, Props>(
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
 
+/** Keeps the first and last 4 hex characters of `address` and randomises the middle. */
+export const fakerLookalikeAddress = (address: string) =>
+  `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '', casing: 'lower' })}${address.slice(-4)}`
+
 /**
  * Stub `navigator.clipboard.writeText` and return the mock so tests can assert
  * what was copied. Keeps clipboard mocking consistent across test files.

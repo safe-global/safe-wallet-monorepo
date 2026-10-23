@@ -32,13 +32,17 @@ describe('PeerAddress', () => {
     const writeText = jest.fn(() => Promise.resolve())
     const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
-    const address = fakerChecksummedAddress()
-    render(<PeerAddress address={address} />)
+    try {
+      const address = fakerChecksummedAddress()
+      render(<PeerAddress address={address} />)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Copy address' }))
 
-    expect(writeText).toHaveBeenCalledWith(address)
-    if (originalClipboard) Object.defineProperty(navigator, 'clipboard', originalClipboard)
+      expect(writeText).toHaveBeenCalledWith(address)
+    } finally {
+      if (originalClipboard) Object.defineProperty(navigator, 'clipboard', originalClipboard)
+      else Reflect.deleteProperty(navigator, 'clipboard')
+    }
   })
 
   it('links to the block explorer when an explorer link is given', () => {
