@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
-import { Check, ChevronDown, Info, LifeBuoy, ListFilter, Plus } from 'lucide-react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { Check, ChevronDown, Info, LifeBuoy, ListFilter, Plus, Search, X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@safe-global/views/components/ui/avatar'
@@ -17,6 +17,13 @@ import {
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { Chip } from '@safe-global/views/components/ui/chip'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Kbd } from '@safe-global/views/components/ui/kbd'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/views/components/ui/input-group'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@/components/common/Identicon'
 import { getAccount, getTypeLabel, TYPE_LABELS } from '../../services/model'
@@ -217,7 +224,7 @@ function SafeDropdown({ filters, accounts }: Pick<QueueFiltersProps, 'filters' |
     <ToolbarDropdown
       label="Safe"
       tooltip="Filter by Safe"
-      selected={accounts.filter((account) => filters.accountFilter.includes(account.id)).map((account) => account.name)}
+      selected={filters.accountNames}
       onClear={() => filters.applied.find((filter) => filter.section === 'accounts')?.clear()}
       footer={
         <Tooltip delay={150}>
@@ -247,10 +254,11 @@ const SAFE_SEARCH_FROM = 6
 function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filters' | 'accounts'>) {
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
-  const shown = query ? accounts.filter((account) => account.name.toLowerCase().includes(query)) : accounts
+  const { safes } = filters
+  const shown = query ? safes.filter((safe) => safe.name.toLowerCase().includes(query)) : safes
   return (
     <>
-      {accounts.length >= SAFE_SEARCH_FROM && (
+      {safes.length >= SAFE_SEARCH_FROM && (
         <SearchInput
           variant="surface"
           className="m-1 w-[calc(100%-0.5rem)]"
@@ -264,18 +272,74 @@ function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filt
           autoComplete="off"
         />
       )}
-      {shown.map((account) => (
+      {shown.map((safe) => (
         <FilterOption
-          key={account.id}
-          label={account.name}
-          checked={filters.accountFilter.includes(account.id)}
-          count={filters.optionCount('accounts', (tx) => tx.account === account.id)}
-          icon={<Identicon address={account.iconAddress} size={16} />}
-          onToggle={() => filters.toggleAccount(account.id)}
+          key={safe.ids[0]}
+          label={safe.name}
+          checked={safe.ids.every((id) => filters.accountFilter.includes(id))}
+          count={filters.optionCount('accounts', (tx) => safe.ids.includes(tx.account))}
+          icon={<Identicon address={accounts.find((account) => account.id === safe.ids[0])!.iconAddress} size={16} />}
+          onToggle={() => filters.toggleSafe(safe.ids)}
         />
       ))}
       {query && !shown.length && <p className="px-2 py-1.5 text-sm text-muted-foreground">No Safes match</p>}
     </>
+  )
+}
+
+// SearchInput's field, with Apply filter beside the clear button when the text names a filter. Enter does the same.
+function QueueSearch({ filters }: Pick<QueueFiltersProps, 'filters'>) {
+  const match = filters.searchMatch
+  return (
+    <InputGroup variant="search" className="min-w-48 flex-1 @max-[640px]:basis-full">
+      <InputGroupAddon align="inline-start">
+        <Search className="size-4" />
+      </InputGroupAddon>
+      <InputGroupInput
+        type="search"
+        aria-label="Find a proposal"
+        placeholder="Search Safes, networks, status, and signers…"
+        className="[&::-webkit-search-cancel-button]:hidden"
+        value={filters.search}
+        onChange={(event) => filters.setSearch(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' || !match) return
+          event.preventDefault()
+          match.apply()
+        }}
+      />
+      {filters.search && (
+        <InputGroupAddon align="inline-end">
+          {match && (
+            <Tooltip delay={150}>
+              <TooltipTrigger
+                render={
+                  <InputGroupButton
+                    variant="ghost"
+                    aria-label={`Apply filter, ${match.title}: ${match.labels.join(', ')}`}
+                    onClick={match.apply}
+                  />
+                }
+              >
+                <span className="text-xs">Apply filter</span>
+                <Kbd className="h-6 min-w-6 px-1.5 text-sm">Enter</Kbd>
+              </TooltipTrigger>
+              <TooltipContent>
+                {match.title}: {match.labels.join(', ')}
+              </TooltipContent>
+            </Tooltip>
+          )}
+          <InputGroupButton
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Clear search"
+            onClick={() => filters.setSearch('')}
+          >
+            <X className="pointer-events-none size-4" strokeWidth={ICON_STROKE} />
+          </InputGroupButton>
+        </InputGroupAddon>
+      )}
+    </InputGroup>
   )
 }
 
@@ -284,14 +348,7 @@ export function QueueToolbar({ filters, accounts, hasItems, extraMenu, simple, s
     // Under 640px of content, search takes its own row and the buttons go below.
     <div className="@container mb-5">
       <div className="flex flex-wrap items-center gap-3">
-        <SearchInput
-          className="min-w-48 flex-1 @max-[640px]:basis-full"
-          aria-label="Find a proposal"
-          placeholder="Search Safes and transactions…"
-          value={filters.search}
-          onChange={(event) => filters.setSearch(event.target.value)}
-          onClear={() => filters.setSearch('')}
-        />
+        <QueueSearch filters={filters} />
         {hasItems && <StatusDropdown filters={filters} simple={simple} />}
         {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}
         {!simple && (
@@ -418,6 +475,23 @@ export function AppliedFilters({
       .map((pill) => ({ ...pill, values: pill.values.filter((value) => !hidden.includes(value)) }))
       .filter((pill) => pill.values.length > 0),
   ]
+  const clearAll = () => {
+    extra.forEach((pill) => pill.clear())
+    filters.reset()
+  }
+  // Esc clears the filters, unless it's closing a drawer, menu or dialog, or editing a field.
+  useEffect(() => {
+    if (!pills.length) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"]'))
+        return
+      if (document.querySelector('[role="dialog"], [role="menu"], [role="listbox"]')) return
+      clearAll()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  })
   if (!pills.length) return null
   return (
     <div role="group" aria-label="Applied filters" className="-mt-2 mb-5 flex flex-wrap items-center gap-2">
@@ -430,16 +504,14 @@ export function AppliedFilters({
         </Chip>
       ))}
       {actions}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {
-          extra.forEach((pill) => pill.clear())
-          filters.reset()
-        }}
-      >
-        Clear
-      </Button>
+      <Tooltip delay={300}>
+        <TooltipTrigger render={<Button variant="ghost" size="2xs" className="-ml-1" onClick={clearAll} />}>
+          Clear
+        </TooltipTrigger>
+        <TooltipContent className="flex items-center gap-1.5">
+          Clear all filters <Kbd>Esc</Kbd>
+        </TooltipContent>
+      </Tooltip>
     </div>
   )
 }

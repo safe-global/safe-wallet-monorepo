@@ -180,9 +180,16 @@ function PendingQueueView() {
     persona,
     onFeedback: setFeedback,
   })
-  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, true)
   // A signer narrows the queue on top of the toolbar filters. Fleet admin adds Proposal date.
   const [signerFocus, setSignerFocus] = useState<string | null>(null)
+  const signerOptions = [...new Set(accounts.flatMap((account) => account.owners))].map((id) => ({
+    title: 'Signer',
+    label: getSignerName(id),
+    names: [getSignerName(id)],
+    apply: () => setSignerFocus(id),
+    test: (tx: Proposal) => getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(id),
+  }))
+  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, true, signerOptions)
   // Fleet admin: the Safes and Signers cards swap the queue for a list.
   const [list, setList] = useState<'safes' | 'signers' | null>(null)
   const [safeId, setSafeId] = useState<string | null>(null)
@@ -194,8 +201,14 @@ function PendingQueueView() {
       (!signerFocus || (getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(signerFocus))) &&
       (!proposed || proposedWithin(tx, proposed)),
   )
-  // A new status filter opens every Safe. Clearing it leaves them as they are.
-  const statusKey = [filters.stateFilter.join(','), filters.flags.join(','), signerFocus, proposed].join('|')
+  // A new status filter, or text that previews one, opens every Safe. Clearing it leaves them as they are.
+  const statusKey = [
+    filters.stateFilter.join(','),
+    filters.flags.join(','),
+    signerFocus,
+    proposed,
+    filters.searchMatch?.labels.join(','),
+  ].join('|')
   const [seededStatus, setSeededStatus] = useState(statusKey)
   if (seededStatus !== statusKey) {
     setSeededStatus(statusKey)

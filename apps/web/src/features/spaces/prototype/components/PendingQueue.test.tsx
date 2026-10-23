@@ -503,7 +503,7 @@ describe('queue design exploration', () => {
     expect(safeToggle('Payroll')).toHaveAttribute('aria-expanded', 'true')
     act(() => jest.advanceTimersByTime(600))
     jest.useRealTimers()
-    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Payroll Base')
+    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent(/^Safe:PayrollClear$/)
     expect(screen.queryByRole('button', { name: /^(Collapse|Expand) Treasury$/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^See all/ })).not.toBeInTheDocument()
     // Back to the top, so the filter tag and the start of the Safe's queue are in view.
@@ -534,6 +534,74 @@ describe('queue design exploration', () => {
     expect(dialog.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
     await user.click(dialog.getByRole('button', { name: 'Execute' }))
     expect(dialog.getByRole('button', { name: 'Execute in preview' })).toBeVisible()
+  })
+  describe('search names a filter', () => {
+    const search = () => screen.getByRole('searchbox', { name: 'Find a proposal' })
+    const applied = () => screen.getByRole('group', { name: 'Applied filters' })
+
+    it('turns a network into a filter on Enter and clears the search', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      await user.type(search(), 'ethereum')
+      expect(screen.getByRole('button', { name: 'Apply filter, Network: Ethereum' })).toHaveTextContent(
+        'Apply filterEnter',
+      )
+      await user.keyboard('{Enter}')
+      expect(applied()).toHaveTextContent('Network:Ethereum')
+      expect(search()).toHaveValue('')
+    })
+
+    it('adds a status from the start of its name, with the Apply filter button', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      await user.type(search(), 'Waiting')
+      await user.click(screen.getByRole('button', { name: 'Apply filter, Status: Waiting on others' }))
+      expect(applied()).toHaveTextContent('Status:Waiting on others')
+    })
+
+    it('adds every network of a Safe from its name', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: '20-safes' } } })
+      await user.type(search(), 'Treasury{Enter}')
+      expect(applied()).toHaveTextContent(/^Safe:TreasuryClear$/)
+    })
+
+    it.each(['Waiting', 'Blocked', 'Sign', 'Execute'])('previews the %s status while typing', async (word) => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      const all = openRows().length
+      await user.type(search(), word)
+      const preview = openRows().length
+      expect(preview).toBeGreaterThan(0)
+      expect(preview).toBeLessThan(all)
+      await user.keyboard('{Enter}')
+      expect(openRows()).toHaveLength(preview)
+    })
+
+    it('finds a signer by name and offers the Signer filter', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      await user.type(search(), 'Jonas')
+      expect(openRows().length).toBeGreaterThan(0)
+      await user.keyboard('{Enter}')
+      expect(applied()).toHaveTextContent('Signer:Jonas')
+      expect(search()).toHaveValue('')
+      expect(openRows().length).toBeGreaterThan(0)
+    })
+
+    it('clears every filter with Esc, as the Clear tooltip says', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      await user.type(search(), 'ethereum{Enter}')
+      await user.hover(within(applied()).getByRole('button', { name: 'Clear' }))
+      expect(await screen.findByText('Clear all filters')).toBeVisible()
+      await user.click(document.body)
+      await user.keyboard('{Escape}')
+      expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+    })
+
+    it('keeps plain text as a search', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      await user.type(search(), 'Globex')
+      expect(screen.queryByRole('button', { name: /^Apply filter/ })).not.toBeInTheDocument()
+      await user.keyboard('{Enter}')
+      expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+      expect(search()).toHaveValue('Globex')
+    })
   })
   it('filters by network and clears all filters back to the default table', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
