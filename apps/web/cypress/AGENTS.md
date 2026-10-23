@@ -13,7 +13,6 @@ cypress/
 │   ├── smoke/          # Functional smoke tests (CI on every PR)
 │   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
-│   ├── happypath_2/    # User journey tests (run by the full on-demand CI suite)
 │   └── safe-apps/      # Safe Apps tests
 ├── fixtures/           # Static test data (JSON, safes/)
 ├── support/            # Shared config, commands, constants, localstorage_data
@@ -22,20 +21,19 @@ cypress/
 
 ## Test categories
 
-| Category     | Folder             | CI trigger                           | Naming                    |
-| ------------ | ------------------ | ------------------------------------ | ------------------------- |
-| Smoke        | `e2e/smoke/`       | Every PR                             | `[SMOKE] Verify ...`      |
-| Visual       | `e2e/visual/`      | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
-| Regression   | `e2e/regression/`  | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
-| Happy path 2 | `e2e/happypath_2/` | Runs with the full on-demand suite   | `Verify ...`              |
+| Category   | Folder            | CI trigger                           | Naming                    |
+| ---------- | ----------------- | ------------------------------------ | ------------------------- |
+| Smoke      | `e2e/smoke/`      | Every PR                             | `[SMOKE] Verify ...`      |
+| Visual     | `e2e/visual/`     | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
+| Regression | `e2e/regression/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + happypath_2 + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
 
 CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
 ## Visual regression tests (Argos E2E)
 
-All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
+All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`. Only states that no Storybook story renders yet stay here (`COVERAGE.md`); new visual coverage is a story — see [../docs/storybook-guide.md](../docs/storybook-guide.md). When a story renders a test's state, delete the test.
 
 ### Structure
 
@@ -79,7 +77,7 @@ Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds s
 
 ### API mocking for visual tests
 
-Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data — except the `spaces_*.cy.js` specs, which sign in via `signInToSpaces()` and run unmocked against the live spaces backend. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
+Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions

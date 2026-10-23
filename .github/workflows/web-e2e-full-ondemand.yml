@@ -2,7 +2,7 @@ name: Web Full Regression on demand tests
 run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('E2E regression — **/{0}', inputs.spec) || inputs.spec != '' && format('E2E regression — {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('E2E regression — {0}/*', inputs.suite) || 'Web Full Regression on demand tests' }}
 
 # Manual runs can be narrowed down; leave both inputs untouched for the full regression.
-#   suite  = full-regression (default) | smoke | regression | happypath_2 | safe-apps
+#   suite  = full-regression (default) | smoke | regression | safe-apps
 #   spec   = spec file name(s) without path or .cy.js, comma-separated, e.g.
 #              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
 #              create_tx_2, portfolio      -> both, inside <suite>
@@ -17,14 +17,13 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Directory to run. Default = the full regression (all four directories).'
+        description: 'Directory to run. Default = the full regression (all three directories).'
         type: choice
         default: full-regression
         options:
           - full-regression
           - smoke
           - regression
-          - happypath_2
           - safe-apps
       spec:
         description: 'Spec names (optional), comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js).'
@@ -64,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           # The full regression covers these; visual/ has its own workflow.
-          FULL_DIRS=(happypath_2 regression safe-apps smoke)
+          FULL_DIRS=(regression safe-apps smoke)
           suite="${SUITE:-full-regression}"
           if [ "$suite" = 'full-regression' ]; then dirs=("${FULL_DIRS[@]}"); else dirs=("$suite"); fi
 

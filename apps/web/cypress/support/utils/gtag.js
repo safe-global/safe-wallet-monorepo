@@ -52,22 +52,6 @@ export const events = {
     eventType: 'tx_confirmed',
   },
 
-  txCreatedTxBuilder: {
-    category: 'transactions',
-    action: 'Confirm transaction',
-    eventLabel: TX_Builder_url,
-    eventType: 'tx_created',
-    event: 'tx_created',
-  },
-
-  txConfirmedTxBuilder: {
-    category: 'transactions',
-    action: 'Confirm transaction',
-    eventLabel: TX_Builder_url,
-    eventType: 'tx_confirmed',
-    event: 'tx_confirmed',
-  },
-
   txCopyShareBlockLink: {
     action: 'Copy deeplink',
     event: 'customClick',

@@ -50,7 +50,6 @@ const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
 const signedNotice = '[data-testid="signed-notice"]'
-const executeLaterBtn = '[data-testid="execute-later-btn"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -90,7 +89,6 @@ const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 const noTxFoundStr = (type) => `0 ${type} transactions found`
-const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
 const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
 
@@ -250,24 +248,6 @@ export function deleteTx() {
   // so wait for it to become enabled — a click on the disabled button is silently ignored.
   cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).closest(wallet.choiceBtn).should('be.enabled').click()
   cy.get(deleteTxModalBtn).click()
-}
-
-/** Deletes every queued transaction; call it on the queue page. */
-export function deleteAllTx() {
-  cy.get('body', { timeout: 30000 }).should(($body) => {
-    const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
-    expect(loaded, 'transaction queue loaded').to.be.true
-  })
-  cy.get('body').then(($body) => {
-    if ($body.find(transactionItem).length > 0) {
-      cy.get(transactionItem).then(($items) => {
-        for (let i = $items.length - 1; i >= 0; i--) {
-          cy.wrap($items[i]).click({ force: true })
-          deleteTx()
-        }
-      })
-    }
-  })
 }
 
 export function verifyNoTxDisplayed(type) {
@@ -705,11 +685,6 @@ export function clickOnSignTransactionBtn() {
 export function signAndOpenExecuteStep() {
   cy.get(signBtn).click()
   cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
-}
-
-export function clickOnExecuteLaterBtn() {
-  cy.get(executeLaterBtn).click()
-  cy.get(transactionItem, { timeout: 30000 }).should('be.visible')
 }
 
 export function clickOnContinueSignTransactionBtn() {

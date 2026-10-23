@@ -76,7 +76,7 @@ export default {
   ZKSYNC_STATIC_SAFE_22: 'zksync:0x49136c0270c5682FFbb38Cb29Ecf0563b2E1F9f6',
 
   // More Sepolia Safes
-  /** Transaction history, messages, and spending limits testing - Used in: visual/tx_history.cy.js, msg_details.cy.js, spending_limits.cy.js */
+  /** Transaction history, messages, and spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
   /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',

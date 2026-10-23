@@ -225,6 +225,13 @@ export async function planName(session: EmailSession, uuid: string): Promise<str
   return metadata?.planName ?? null
 }
 
+/** Sponsored transactions the Workspace spent in the current cycle, as the gateway counts them; null without the meter. */
+export async function sponsoredTransactionsUsed(session: EmailSession, uuid: string): Promise<number | null> {
+  const response = await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}/entitlements`)
+  const entitlements = (response as { entitlements?: Array<{ feature?: string; used?: number }> })?.entitlements
+  return entitlements?.find(({ feature }) => feature === 'sponsored_transactions')?.used ?? null
+}
+
 /** The gateway's answer for a resource of the Workspace (`safes`, `members`, `address-book`), as text. */
 export async function workspaceResource(session: EmailSession, uuid: string, resource: string): Promise<string> {
   return JSON.stringify(await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}/${resource}`))

@@ -55,10 +55,6 @@ export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)
 }
 
-export function acceptWidgetDisclaimer() {
-  cy.get('button').contains('Continue').click()
-}
-
 /**
  * Intercepts the chains list endpoint to inject and/or remove a feature flag for a specific chain,
  * and optionally aliases the feature's data endpoint for use with cy.wait().
