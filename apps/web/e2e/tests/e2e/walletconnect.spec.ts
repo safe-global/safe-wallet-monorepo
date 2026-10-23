@@ -6,7 +6,6 @@
  */
 import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedSafe, type SeededSafe } from '../../src/seed/safe'
 import { balanceOf } from '../../src/chain/balances'
 import { isValidSafeSignature } from '../../src/chain/signatures'
@@ -25,7 +24,7 @@ type WalletConnectFixtures = {
 
 const test = base.extend<WalletConnectFixtures>({
   safe: async ({ journey }, provide) => {
-    await provide(await seedSafe(journey, { threshold: 1 }))
+    await provide(await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }))
   },
 
   dapp: async ({ safePage, safe }, provide, testInfo) => {
@@ -61,7 +60,6 @@ async function receiptOf(dapp: WalletConnectDapp, hash: string): Promise<Transac
 }
 
 test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safe on the isolated stack')
   // The hosted relay can drop a message; a second pairing tells that apart from a defect.
   test.describe.configure({ retries: 1 })
 

@@ -160,11 +160,11 @@ async function attachFailureEvidence(
     contentType: 'text/plain',
   })
 
-  // Test data identifiers — extract Safe address from test URL if present
-  const safeAnnotation = testInfo.annotations.find((a) => a.type === 'safe-address')?.description
-  if (safeAnnotation) {
+  // Test data identifiers: the Safes the test recorded
+  const safeAddresses = testInfo.annotations.filter((a) => a.type === 'safe-address').map((a) => a.description)
+  if (safeAddresses.length > 0) {
     await testInfo.attach('test-data', {
-      body: `Safe address: ${safeAnnotation}`,
+      body: safeAddresses.map((address) => `Safe address: ${address}`).join('\n'),
       contentType: 'text/plain',
     })
   }

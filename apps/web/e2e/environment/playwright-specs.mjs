@@ -16,6 +16,7 @@ export const playwrightSpecs = {
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
+  'e2e/contract-signature-execute.spec.ts': {},
   'e2e/delete.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
@@ -29,7 +30,6 @@ export const playwrightSpecs = {
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'regression/email-sign-in.spec.ts': {},
-  'regression/contract-signature-execute.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },

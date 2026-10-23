@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { multiSendActionCounts } from '../../src/api/transaction-items'
 import { ownerOf } from '../../src/chain/nfts'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedNfts } from '../../src/seed/nfts'
 import { seedSafe, type SeededSafe } from '../../src/seed/safe'
@@ -29,17 +28,17 @@ async function sendNfts(
 }
 
 test.describe('Send NFTs', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safes on the isolated stack')
-
   test('should transfer the NFT to the recipient when an owner sends one NFT', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
-    const [sender, recipient] = [await seedSafe(journey, { threshold: 1 }), await seedSafe(journey, { threshold: 1 })]
+  }) => {
+    const [sender, recipient] = [
+      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
+      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
+    ]
     const { contract, tokenIds } = await seedNfts(sender, { count: 2 })
     const [sent, kept] = tokenIds
-    testInfo.annotations.push({ type: 'safe-address', description: sender.prefixedAddress })
 
     await sendNfts(safePage, { sender, recipient, tokenIds: [sent] })
 
@@ -60,10 +59,12 @@ test.describe('Send NFTs', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
-    const [sender, recipient] = [await seedSafe(journey, { threshold: 1 }), await seedSafe(journey, { threshold: 1 })]
+  }) => {
+    const [sender, recipient] = [
+      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
+      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
+    ]
     const { contract, tokenIds } = await seedNfts(sender, { count: 2 })
-    testInfo.annotations.push({ type: 'safe-address', description: sender.prefixedAddress })
 
     await sendNfts(safePage, { sender, recipient, tokenIds })
 
