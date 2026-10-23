@@ -24,14 +24,13 @@ const showAllTokensSwitch = '[data-testid="show-all-tokens-switch"]'
 const hideSmallBalancesSwitch = '[data-testid="hide-small-balances-switch"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
 
-const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
-const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
-const hiddenTokenDeselectAllBtn = 'span[data-track="assets: Deselect all hide dialog"]'
+const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"] > button'
+const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"] > button'
+const hiddenTokenDeselectAllBtn = 'span[data-track="assets: Deselect all hide dialog"] > button'
 const hiddenTokenIcon = 'svg[data-testid="hidden-token-icon"]'
 const hiddenTokenCounter = '[data-testid="hidden-token-count"]'
 const currencySelector = '[data-testid="currency-selector"]'
 const currencyItem = '[data-testid="currency-item"]'
-const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenItem = '[data-testid="token-item"]'
 const sendBtn = '[data-testid="send-button"]'
 
@@ -144,14 +143,6 @@ export function checkNftCopyIconAndLink() {
       cy.get(createTx.explorerBtn, { timeout: 5000 }).should('exist')
     })
   })
-}
-
-export function enterAmount(amount) {
-  cy.get(tokenAmountFld).find('input').clear().type(amount)
-}
-
-export function checkSelectedToken(token) {
-  cy.get(tokenSelector).contains(token)
 }
 
 function clickOnTokenSelector(index) {

@@ -102,8 +102,17 @@ describe('CoW API mock', () => {
   it('rejects malformed settlements and fails ones that reference unrecorded orders', async () => {
     const settlements: Settlements = new Map()
     const options = { fixtures, settlements, offline: true }
-    const malformed = JSON.stringify({ txHash: TX_HASH, uids: ['not-a-uid'] })
-    assert.equal((await dispatch(request('POST', '/__test/settlements', malformed), options)).status, 400)
+    const malformed = [
+      JSON.stringify({ txHash: TX_HASH, uids: ['not-a-uid'] }),
+      JSON.stringify({ txHash: TX_HASH, uids: RECORDED_UID }),
+      JSON.stringify({ uids: [RECORDED_UID] }),
+      JSON.stringify([TX_HASH, RECORDED_UID]),
+      'not json',
+      '',
+    ]
+    for (const body of malformed) {
+      assert.equal((await dispatch(request('POST', '/__test/settlements', body), options)).status, 400, body)
+    }
     assert.throws(() => registerSettlement(settlements, 'not-a-hash', [RECORDED_UID]))
     registerSettlement(settlements, TX_HASH, [UNRECORDED_UID])
     assert.throws(() => get(`/transactions/${TX_HASH}/orders`, settlements), /unrecorded order/)

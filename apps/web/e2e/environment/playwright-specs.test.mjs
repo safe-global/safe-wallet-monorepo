@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { playwrightSpecs } from './playwright-specs.mjs'
+import { chainProfiles } from './local-stack.mjs'
 import { scenarios } from './scenarios/index.mjs'
 
 const testsDir = new URL('../tests/', import.meta.url)
@@ -11,6 +12,12 @@ test('every registered Playwright spec exists and names scenario functions', () 
   for (const [spec, { scenarios: names = [] }] of Object.entries(playwrightSpecs)) {
     assert.ok(existsSync(new URL(spec, testsDir)), `${spec} does not exist`)
     for (const name of names) assert.equal(typeof scenarios[name], 'function', `${spec} names unknown scenario ${name}`)
+  }
+})
+
+test('every fork that a Playwright spec names has a stack profile', () => {
+  for (const [spec, { chains = [] }] of Object.entries(playwrightSpecs)) {
+    for (const chainId of chains) assert.ok(chainProfiles[chainId], `${spec} names unknown fork ${chainId}`)
   }
 })
 

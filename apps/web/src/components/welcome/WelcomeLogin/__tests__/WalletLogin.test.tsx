@@ -80,11 +80,11 @@ describe('WalletLogin', () => {
     )
     const button = secondary.getByTestId('connect-wallet-btn')
     expect(button.querySelector('svg')).toBeInTheDocument()
-    expect(button).toHaveClass('[&_svg]:text-green-400')
+    expect(button).toHaveClass('[&_svg]:text-icon-brand')
     secondary.unmount()
 
     const primary = render(<WalletLogin onLogin={jest.fn()} onContinue={jest.fn()} />)
-    expect(primary.getByTestId('connect-wallet-btn')).not.toHaveClass('[&_svg]:text-green-400')
+    expect(primary.getByTestId('connect-wallet-btn')).not.toHaveClass('[&_svg]:text-icon-brand')
   })
 
   it('should invoke the callback if user actively connects', async () => {

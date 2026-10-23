@@ -11,7 +11,7 @@ import { useSpacePolicies } from './hooks/useSpacePolicies'
 import type { PolicyId } from '@safe-global/views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
 import Policies from './index'
 
-const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer']
+const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer', 'recipient-allowlist']
 
 const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
   const router = useRouter()

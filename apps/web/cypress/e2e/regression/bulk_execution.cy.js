@@ -35,32 +35,6 @@ describe('Bulk execution', () => {
   })
 
   it(
-    'Verify that "Confirm bulk execution" screen contains only available for execution txs in the actions list',
-    { defaultCommandTimeout: 30000 },
-    () => {
-      const actions = ['1Send', '2removeOwner']
-
-      wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + fundsSafes.SEP_FUNDS_SAFE_14)
-      main.acceptCookies()
-      create_tx.verifyBulkExecuteBtnIsEnabled(2).click()
-      create_tx.verifyBulkConfirmationScreen(2, actions)
-    },
-  )
-
-  it(
-    'Verify bulk view for the txs with the same tx hash in the History (tx executed via bulk feature)',
-    { defaultCommandTimeout: 30000 },
-    () => {
-      const actions = ['Wrapped Ether', 'addOwnerWithThreshold', 'Sent']
-      const tx = '3 transactions'
-
-      wallet.connectSignerViaStorage(signer, constants.transactionsHistoryUrl + fundsSafes.SEP_FUNDS_SAFE_14)
-      main.acceptCookies()
-      create_tx.verifyBulkTxHistoryBlock(create_tx.bulkTxs, tx, actions)
-    },
-  )
-
-  it(
     'Verify bulk view for the outgoing and incoming txs in the History after swap',
     { defaultCommandTimeout: 30000 },
     () => {

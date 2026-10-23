@@ -4,6 +4,7 @@ import extractTxInfo from '@/src/services/tx/extractTx'
 import { createConnectedWallet } from '../../web3'
 import { SafeInfo } from '@/src/types/address'
 import type { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
+import { toSafeSignature } from '@safe-global/utils/utils/safeTransaction'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -39,13 +40,7 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
  */
 export const addSignaturesToTx = (safeTx: SafeTransaction, signatures: Record<string, string>): void => {
   Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
+    safeTx.addSignature(toSafeSignature(signer, data))
   })
 }
 

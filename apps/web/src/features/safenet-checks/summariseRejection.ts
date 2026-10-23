@@ -1,3 +1,4 @@
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   AttestationVerificationStatus,
   CheckEventType,
@@ -67,18 +68,25 @@ export const summariseRejection = (events: ReadonlyArray<NormalizedCheckEvent>):
 export const formatFlaggedCount = ({ flagged, revealed }: RejectionSummary): string | null =>
   revealed > 0 ? `${flagged} of ${revealed} ${revealed === 1 ? 'sentinel' : 'sentinels'} flagged this.` : null
 
-/** Checked in order: the furthest step a failed check reached names what was missing. */
+/** A warning only when every reason is a known warning rule; an unknown or missing reason stays a threat. */
+export const rejectionSeverity = ({ rules, unrecognised }: RejectionSummary): Severity.WARN | Severity.CRITICAL =>
+  rules.length > 0 && !unrecognised && rules.every((rule) => rule.severity === Severity.WARN)
+    ? Severity.WARN
+    : Severity.CRITICAL
+
+/** Checked in order: the furthest step a check reached names what is missing. */
 const FAILURE_REASONS: ReadonlyArray<[ReadonlyArray<CheckEventType>, string]> = [
   [[CheckEventType.DISPUTE_OUT_OF_SCOPE], 'Safenet gave no ruling because this transaction is out of scope.'],
+  [[CheckEventType.ARBITRATION_TIMED_OUT], 'Sentinels disagreed, and the dispute got no final ruling.'],
   [
-    [CheckEventType.DISPUTE_TRIGGERED, CheckEventType.ARBITRATION_TIMED_OUT],
-    'Sentinels disagreed, and the dispute got no final ruling.',
+    [CheckEventType.DISPUTE_RESOLVED, CheckEventType.ORACLE_RESULT],
+    'Sentinels voted, but the validators did not sign the result in time.',
   ],
-  [[CheckEventType.ORACLE_RESULT], 'Sentinels voted, but the validators did not sign the result in time.'],
+  [[CheckEventType.DISPUTE_TRIGGERED], 'Sentinels disagreed. The dispute is open.'],
   [[CheckEventType.SENTINEL_REVEALED], 'Not enough sentinels voted before the deadline.'],
 ]
 
-/** Why a check failed, read from the lifecycle step it never got past. */
+/** Why a check has no verdict: the lifecycle step it never got past, or the dispute it still waits on. */
 export const explainFailure = ({
   events,
   attestation,

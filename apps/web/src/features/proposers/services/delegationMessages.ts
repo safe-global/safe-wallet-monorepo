@@ -3,6 +3,7 @@ import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { parseDelegation, parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
+import { PendingDelegationConflictError } from '@/features/proposers/utils/proposerErrors'
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
@@ -90,7 +91,7 @@ export async function createDelegationMessage(
           return
         } else {
           // Different action - can't have add + remove in same TOTP window
-          throw new Error(
+          throw new PendingDelegationConflictError(
             `A pending "${existingAction}" delegation already exists for this proposer. ` +
               `Please wait for it to expire (~1 hour) before initiating a "${requestedAction}" action.`,
           )

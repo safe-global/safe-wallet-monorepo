@@ -9,16 +9,11 @@ import * as cow from './cow.mjs'
 import * as creation from './creation.mjs'
 import * as dashboard from './dashboard.mjs'
 import * as fallbackHandlers from './fallback-handlers.mjs'
-import * as happypath from './happypath.mjs'
 import * as history from './history.mjs'
-import * as historyFilters from './history-filters.mjs'
-import * as historySmoke from './history-smoke.mjs'
 import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
-import * as messages from './messages.mjs'
 import * as nested from './nested.mjs'
 import * as notes from './notes.mjs'
-import * as owners from './owners.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
 import * as rejection from './rejection.mjs'
@@ -41,16 +36,11 @@ const modules = [
   creation,
   dashboard,
   fallbackHandlers,
-  happypath,
   history,
-  historyFilters,
-  historySmoke,
   historySummary,
   ledger,
-  messages,
   nested,
   notes,
-  owners,
   proposers,
   recovery,
   rejection,
