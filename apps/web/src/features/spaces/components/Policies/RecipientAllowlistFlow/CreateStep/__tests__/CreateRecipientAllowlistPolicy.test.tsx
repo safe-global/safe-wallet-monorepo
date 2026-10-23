@@ -6,9 +6,9 @@ import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvid
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import {
   createDefaultAllowlistValues,
-  type AllowlistRecipient,
+  type AllowlistFormRecipient,
   type RecipientAllowlistFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+} from '../../types'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { GuardStatus } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -36,7 +36,7 @@ jest.mock('../AddFromAddressBook', () => ({ __esModule: true, default: () => nul
 jest.mock('../TokenDraftRow', () => ({ __esModule: true, default: () => null }))
 jest.mock('../RecipientDraftRow', () => ({
   __esModule: true,
-  default: ({ onAdd }: { onAdd: (recipient: AllowlistRecipient) => void }) => (
+  default: ({ onAdd }: { onAdd: (recipient: AllowlistFormRecipient) => void }) => (
     <button type="button" onClick={() => onAdd({ address: RECIPIENT, name: 'Dave', selected: true })}>
       confirm draft
     </button>
