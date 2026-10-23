@@ -1,5 +1,6 @@
 import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import {
   isAllowlistPolicy,
   type AllowlistPolicy,
@@ -49,11 +50,14 @@ const MOCK_ETH: PolicyTokenInfo = {
   logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
 }
 
-/** The treasury's allowlist as CGW sends it: ERC20 tokens by address only, ETH named by the chain config. */
+const resolveMockToken = (_chainId: string, address: string): PolicyTokenInfo | undefined =>
+  Object.values(MOCK_TOKENS).find((token) => sameAddress(token.address, address))
+
+/** The treasury's allowlist as CGW sends it: ERC20 tokens named by the tokens endpoint, ETH by the chain config. */
 export const mockCgwAllowlist = (
   dtos: ActivePolicyDto[] = mockTreasuryAllowlistDtos(),
 ): AllowlistPolicy & { status: 'active' } => {
-  const policy = mapActivePolicies(dtos, () => MOCK_ETH).find(isAllowlistPolicy)
+  const policy = mapActivePolicies(dtos, () => MOCK_ETH, resolveMockToken).find(isAllowlistPolicy)
   if (policy?.status !== 'active') throw new Error('The DTOs map to no active allowlist')
 
   return policy
