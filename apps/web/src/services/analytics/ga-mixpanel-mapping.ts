@@ -17,6 +17,7 @@ import { TX_EVENTS } from './events/transactions'
 import { SPACE_EVENTS } from './events/spaces'
 import { POLICY_EVENTS } from './events/policies'
 import { SAFE_PRO_EVENTS } from './events/safe-pro'
+import { ADDRESS_POISONING_EVENTS } from './events/addressPoisoning'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -141,6 +142,8 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED.action]: MixpanelEvent.FREE_ACCESS_REMINDER_VIEWED,
   [SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED.action]: MixpanelEvent.WORKSPACE_LOCKED_VIEWED,
   [SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED.action]: MixpanelEvent.UPGRADE_PROMPT_VIEWED,
+  [ADDRESS_POISONING_EVENTS.WARNING_SHOWN.action]: MixpanelEvent.LOOKALIKE_ADDRESS_WARNING_SHOWN,
+  [ADDRESS_POISONING_EVENTS.WARNING_CONTINUED.action]: MixpanelEvent.LOOKALIKE_ADDRESS_WARNING_CONTINUED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

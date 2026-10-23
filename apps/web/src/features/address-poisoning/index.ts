@@ -4,6 +4,8 @@
  */
 export { selectAnchorIndex, selectAnchorAddresses } from './store'
 
+export { default as useAddressPoisoningCheck, type SimilarSavedAddress } from './hooks/useAddressPoisoningCheck'
+export { default as useAddressPoisoningBatchCheck } from './hooks/useAddressPoisoningBatchCheck'
 export { default as useAnchorListMatches } from './hooks/useAnchorListMatches'
 export { default as useSimilarityClusters } from './hooks/useSimilarityClusters'
 
