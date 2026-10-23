@@ -9,12 +9,12 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
-export const RiskConfirmation = () => {
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskConfirmed } = useSafeShield()
-  const { safeTx } = useContext(SafeTxContext)
+type RiskConfirmationProps = {
+  subject: 'transaction' | 'message'
+}
 
-  // We either scan a tx or a message if tx is undefined
-  const isTransaction = !!safeTx
+export const RiskConfirmation = ({ subject }: RiskConfirmationProps) => {
+  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskConfirmed } = useSafeShield()
 
   const toggleConfirmation = () => {
     setIsRiskConfirmed((prev) => !prev)
@@ -34,12 +34,18 @@ export const RiskConfirmation = () => {
         >
           <Checkbox id="risk-confirmation" checked={isRiskConfirmed} onCheckedChange={toggleConfirmation} />
           <Typography variant="paragraph-small" data-testid="risk-confirmation-text">
-            I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
+            I understand the risks and would like to proceed with this {subject}.
           </Typography>
         </Label>
       </Track>
     </Card>
   )
+}
+
+const TxFlowRiskConfirmation = () => {
+  const { safeTx } = useContext(SafeTxContext)
+  // A flow without a safeTx scans a message
+  return <RiskConfirmation subject={safeTx ? 'transaction' : 'message'} />
 }
 
 const useSlotCondition = () => {
@@ -48,7 +54,7 @@ const useSlotCondition = () => {
 }
 
 const RiskConfirmationSlot = withSlot({
-  Component: RiskConfirmation,
+  Component: TxFlowRiskConfirmation,
   slotName: SlotName.Footer,
   id: 'riskConfirmation',
   useSlotCondition,

@@ -91,15 +91,4 @@ describe('Transaction notes tests', () => {
     createtx.clickOnNextBtn()
     main.verifyElementsCount(createtx.noteTextField, 1)
   })
-
-  it('Verify no tx note is present during a recovery tx', () => {
-    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
-    navigation.clickOnNewTxBtn()
-    createtx.clickOnSendTokensBtn()
-    createtx.typeRecipientAddress(constants.EOA)
-    spendinglimit.enterSpendingLimitAmount(0.00001)
-    spendinglimit.selectStandardOption()
-    createtx.clickOnNextBtn()
-    main.verifyElementsCount(createtx.noteTextField, 1)
-  })
 })

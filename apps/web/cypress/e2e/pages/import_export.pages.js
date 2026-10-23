@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page.js'
-import { format } from 'date-fns'
 const path = require('path')
 
 const pinnedAppsStr = 'My pinned apps'
@@ -8,7 +7,6 @@ const addressBookBtnStr = 'Address book'
 const appsBtnStr = 'Apps'
 const bookmarkedAppsBtnStr = 'Bookmarked apps'
 const settingsBtnStr = 'Settings'
-const appearenceTabStr = 'Appearance'
 const showMoreTabsBtn = '[data-testid="KeyboardArrowRightIcon"]'
 const dataTabStr = 'Data'
 const tab = 'div[role="tablist"] a'
@@ -16,10 +14,6 @@ const importDialog = 'div[role="dialog"]'
 const dialogImportBtn = '[data-testid="dialog-import-btn"]'
 const dialogCancelBtn = '[data-testid="dialog-cancel-btn"]'
 const fileUploadSection = '[data-testid="file-upload-section"]'
-
-const exportFileSection = '[data-testid="export-file-section"]'
-
-export const darkModeStr = 'Dark mode'
 
 // Import messages for data_import.json
 const importMessages = [
@@ -30,9 +24,6 @@ const importMessages = [
   'Bookmarked Safe Apps',
 ]
 
-export function verifyExportFileSectionIsVisible() {
-  main.verifyElementsIsVisible([exportFileSection])
-}
 export const importErrorMessages = {
   noImportableData: 'This file contains no importable data.',
 }
@@ -70,10 +61,6 @@ export function verifyImportBtnStatus(status) {
   main.verifyElementsStatus([dialogImportBtn], status)
 }
 
-export function verifyImportSectionVisible() {
-  main.verifyElementsIsVisible([fileUploadSection])
-}
-
 export function clickOnImportBtn() {
   verifyImportBtnIsVisible()
   cy.get(dialogImportBtn).last().scrollIntoView().click()
@@ -86,14 +73,6 @@ export function clickOnCancelBtn() {
 
 export function clickOnImportBtnDataImportModal() {
   cy.contains('button', 'Import').click()
-}
-
-export function verifyImportModalData() {
-  //verifies that the modal says the amount of chains/addressbook values it uploaded for file ../fixtures/data_import.json
-  cy.contains('Added Safe accounts on 4 chains').should('be.visible')
-  cy.contains('Address book for 4 chains').should('be.visible')
-  cy.contains('Settings').should('be.visible')
-  cy.contains('Bookmarked Safe Apps').should('be.visible')
 }
 
 export function clickOnOpenSafeListSidebar() {
@@ -142,38 +121,10 @@ export function clickOnSettingsBtn() {
   cy.contains(settingsBtnStr).click()
 }
 
-export function clickOnAppearenceBtn() {
-  cy.contains(tab, appearenceTabStr).click()
-  // Wait for appearance page content to render after Next.js client-side navigation
-  cy.contains('Theme').should('be.visible')
-}
-
 export function clickOnShowMoreTabsBtn() {
   cy.get(showMoreTabsBtn).click()
 }
 
 export function verifDataTabBtnIsVisible() {
   cy.contains(tab, dataTabStr).should('be.visible')
-}
-export function clickOnDataTab() {
-  cy.contains(tab, dataTabStr).click()
-}
-
-export function verifyCheckboxes(checkboxes, checked = false) {
-  checkboxes.forEach((checkbox) => {
-    cy.get('main')
-      .contains('label', checkbox)
-      .closest('[data-slot="field"]')
-      .find('[role="switch"]')
-      .should('have.attr', 'aria-checked', String(checked))
-  })
-}
-
-export function verifyFileDownload() {
-  const date = format(new Date(), 'yyyy-MM-dd', { timeZone: 'UTC' })
-  const fileName = `safe-${date}.json`
-  cy.contains('div', fileName).next().click()
-  const downloadsFolder = Cypress.config('downloadsFolder')
-  //File reading is failing in the CI. Can be tested locally
-  cy.readFile(path.join(downloadsFolder, fileName)).should('exist')
 }

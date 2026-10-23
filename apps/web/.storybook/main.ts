@@ -71,6 +71,12 @@ const config: StorybookConfig = {
       'mocks/useBytecodeComparison.ts',
     )
 
+    // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
+    ;(config.resolve.alias as Record<string, string>)['@cowprotocol/widget-react$'] = path.resolve(
+      __dirname,
+      'mocks/cowSwapWidget.tsx',
+    )
+
     // Stories in packages/views would otherwise get the root react-hook-form, a different copy (and context) than the app's
     ;(config.resolve.alias as Record<string, string>)['react-hook-form'] = path.dirname(
       require.resolve('react-hook-form/package.json'),

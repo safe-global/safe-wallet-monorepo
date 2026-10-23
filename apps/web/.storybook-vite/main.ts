@@ -173,6 +173,8 @@ const config: StorybookConfig = {
       ...(config.resolve.alias || {}),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),
+      // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
+      '@cowprotocol/widget-react': path.resolve(__dirname, '../.storybook/mocks/cowSwapWidget.tsx'),
       // Polyfill Node.js querystring module for browser
       querystring: path.resolve(__dirname, '../.storybook/mocks/querystring.ts'),
     }

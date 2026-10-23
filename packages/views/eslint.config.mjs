@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
+import { plugin as shadcn } from '@shadcn/lint'
 import { designSystemSyntaxRules } from './eslint-design-system.mjs'
 
 export default tseslint.config(
@@ -9,10 +10,11 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ['src/**/*.{ts,tsx}'],
-    plugins: { 'react-hooks': reactHooks },
+    plugins: { 'react-hooks': reactHooks, shadcn },
     rules: {
       ...reactHooks.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'error',
+      'shadcn/no-raw-colors': 'error',
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
       'no-restricted-imports': [
         'error',

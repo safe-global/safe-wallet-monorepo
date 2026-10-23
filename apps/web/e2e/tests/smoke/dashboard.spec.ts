@@ -6,14 +6,13 @@
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { HomePage } from '../../src/pages/home.page'
-import { SAFES } from '../../src/data/constants'
 
 test.describe('Dashboard', { tag: '@smoke' }, () => {
   let homePage: HomePage
 
-  test.beforeEach(async ({ safePage }) => {
+  test.beforeEach(async ({ safePage, safes }) => {
     homePage = new HomePage(safePage)
-    await homePage.goto(SAFES.SEP_STATIC_SAFE_1)
+    await homePage.goto(safes.SEP_STATIC_SAFE_1)
   })
 
   test('should load the dashboard and show Safe header info', async ({ safePage }) => {

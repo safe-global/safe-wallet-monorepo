@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as modal from './modals.page.js'
-import * as navigation from './navigation.page.js'
 import * as file from './import_export.pages.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
@@ -10,8 +9,6 @@ import sidebar from '../../fixtures/sidebar.js'
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
-const sidebarTopBar = '[data-testid="sidebar-top-bar"]'
-const sidebarTrigger = '[data-testid="sidebar-trigger"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
 export const copyAddressBtn = '[data-testid="copy-address-btn"]'
@@ -35,7 +32,6 @@ const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const expandSafesList = '[data-testid="expand-safes-list"]'
 export const importBtn = '[data-testid="import-btn"]'
-export const pendingActivationIcon = '[data-testid="safe-selector-not-activated-icon"]'
 const safeItemMenuIcon = '[data-testid="MoreVertIcon"]'
 const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const addChainDialog = "[data-testid='add-chain-dialog']"
@@ -81,10 +77,6 @@ export function clickOnOpenNestedSafeListBtn() {
 
 export function checkSafesInPopverList(safes) {
   main.verifyValuesExist(nestedSafeListPopover, safes)
-}
-
-export function checkSafesCountInPopverList(number) {
-  main.verifyElementsCount(nestedSafeListPopover, number)
 }
 
 export function clickOnSafeInPopover(safe) {
@@ -334,10 +326,6 @@ export function verifyEtherscanLinkExists() {
     })
 }
 
-export function verifyNewTxBtnStatus(status) {
-  main.verifyElementsStatus([navigation.newTxBtn], status)
-}
-
 export function verifySideListItems() {
   main.verifyValuesExist(sideBarListItem, sideBarListItems)
   main.verifyElementsExist([sideBarListItemWhatsNew, sideBarListItemNeedHelp])
@@ -386,14 +374,6 @@ export function openSidebar() {
   cy.wait(500)
   showAllSafes()
   main.verifyElementsExist([sidebarSafeContainer])
-}
-
-export function collapseSidebar() {
-  cy.get(sidebarTrigger).click()
-}
-
-export function verifySidebarCollapsed() {
-  cy.get(sidebarTopBar).should('have.attr', 'data-sidebar-state', 'collapsed')
 }
 
 export function verifyAddedSafesExist(safes) {

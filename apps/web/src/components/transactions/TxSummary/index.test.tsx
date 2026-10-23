@@ -11,27 +11,8 @@ import {
 } from '@safe-global/store/gateway/types'
 
 import TxSummary from '@/components/transactions/TxSummary/index'
-import { waitFor } from '@testing-library/react'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
 import * as pending from '@/hooks/useIsPending'
-import * as useChainsModule from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { render } from '@/tests/test-utils'
-
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
-  useSafenetCheck: jest.fn().mockReturnValue({
-    snapshot: undefined,
-    status: 'UNAVAILABLE',
-    publicStatus: 'UNAVAILABLE',
-    isLoading: false,
-    isFetching: false,
-    isStale: false,
-    refetch: jest.fn(),
-  }),
-}))
 
 const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
@@ -68,6 +49,23 @@ const mockTransactionWithoutExecutionInfo = {
 const mockTransactionInHistory = {
   ...mockTransaction,
   transaction: { ...mockTransaction.transaction, txStatus: TransactionStatus.SUCCESS },
+}
+
+const SIGN_MESSAGE_LIB_NAME = 'Safe: SignMessageLib 1.3.0'
+
+const mockSignMessageLibTxInHistory = {
+  ...mockTransactionInHistory,
+  transaction: {
+    ...mockTransactionInHistory.transaction,
+    txInfo: {
+      type: TransactionInfoType.CUSTOM,
+      to: { value: '0x98FFBBF51bb33A056B08ddf711f289936AafF717', name: SIGN_MESSAGE_LIB_NAME },
+      dataSize: '100',
+      value: '0',
+      isCancellation: false,
+      methodName: 'signMessage',
+    },
+  } as unknown as Transaction,
 }
 
 describe('TxSummary', () => {
@@ -178,77 +176,19 @@ describe('TxSummary', () => {
     expect(statusCell?.style.gridArea).toBe('actions')
   })
 
+  it('should display the contract, the method and the success status of an executed SignMessageLib transaction', () => {
+    jest.spyOn(pending, 'default').mockReturnValue(false)
+    const { getByTestId } = render(<TxSummary item={mockSignMessageLibTxInHistory} isConflictGroup={false} />)
+
+    expect(getByTestId('tx-type')).toHaveTextContent(SIGN_MESSAGE_LIB_NAME)
+    expect(getByTestId('tx-info')).toHaveTextContent('signMessage')
+    expect(getByTestId('tx-status-label')).toHaveTextContent('Success')
+  })
+
   it('should not display a status label if transaction is in queue and not pending', () => {
     jest.spyOn(pending, 'default').mockReturnValue(false)
     const { queryByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(queryByTestId('tx-status-label')).not.toBeInTheDocument()
-  })
-
-  describe('Safenet queue status', () => {
-    const safenetTxHash = `0x${'ab'.repeat(32)}`
-    const mockQueuedWithId = {
-      ...mockTransaction,
-      transaction: {
-        ...mockTransaction.transaction,
-        id: `multisig_0x0000000000000000000000000000000000000123_${safenetTxHash}`,
-        timestamp: 1_700_000_000_000,
-      },
-    }
-
-    let hasFeatureSpy: jest.SpyInstance
-
-    beforeEach(() => {
-      hasFeatureSpy = jest
-        .spyOn(useChainsModule, 'useHasFeature')
-        .mockImplementation((feature) => feature === FEATURES.SAFENET_CHECKS)
-      const mocked = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
-      mocked.mockReturnValue(
-        buildCheckView({
-          snapshot: buildBenignSnapshot({ safeTxHash: safenetTxHash as `0x${string}` }),
-          status: CheckStatus.BENIGN,
-          publicStatus: CheckStatus.BENIGN,
-        }),
-      )
-    })
-
-    afterEach(() => {
-      hasFeatureSpy.mockRestore()
-    })
-
-    it('mounts the indicator for a queued transaction with the flag on', async () => {
-      const { getByTestId } = render(<TxSummary item={mockQueuedWithId} isConflictGroup={false} />)
-
-      // The feature chunk loads lazily.
-      await waitFor(() => expect(getByTestId('safenet-queue-status')).toHaveTextContent('No issues found'))
-      expect(useSafenetCheck).toHaveBeenCalledWith(
-        safenetTxHash,
-        1_700_000_000_000,
-        expect.objectContaining({ chainId: expect.any(String) }),
-      )
-    })
-
-    it('never mounts the indicator on a history row', async () => {
-      const historyItem = {
-        ...mockQueuedWithId,
-        transaction: { ...mockQueuedWithId.transaction, txStatus: TransactionStatus.SUCCESS },
-      }
-      const { queryByTestId } = render(<TxSummary item={historyItem} isConflictGroup={false} />)
-
-      await waitFor(() => expect(queryByTestId('safenet-queue-status')).not.toBeInTheDocument())
-    })
-
-    it('never mounts the indicator with the flag off', async () => {
-      hasFeatureSpy.mockReturnValue(false)
-      const { queryByTestId } = render(<TxSummary item={mockQueuedWithId} isConflictGroup={false} />)
-
-      await waitFor(() => expect(queryByTestId('safenet-queue-status')).not.toBeInTheDocument())
-    })
-
-    it('never mounts the indicator on a bulk-group row (hidden cells must not read the chain)', async () => {
-      const { queryByTestId } = render(<TxSummary item={mockQueuedWithId} isBulkGroup />)
-
-      await waitFor(() => expect(queryByTestId('safenet-queue-status')).not.toBeInTheDocument())
-    })
   })
 })

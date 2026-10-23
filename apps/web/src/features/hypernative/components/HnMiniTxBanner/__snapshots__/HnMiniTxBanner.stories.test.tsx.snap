@@ -8,6 +8,7 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
     class="shadcn-scope"
   >
     <span
+      class="contents"
       data-track="hypernative: Guardian Form Viewed"
     >
       <div

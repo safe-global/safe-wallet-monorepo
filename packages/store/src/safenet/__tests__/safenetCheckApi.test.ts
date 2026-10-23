@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { configureStore, type UnknownAction } from '@reduxjs/toolkit'
 import { createMockChain } from '@safe-global/test'
 import { apiSliceWithChainsConfig, chainsAdapter, initialState } from '../../gateway/chains'
@@ -208,6 +209,23 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
     expect(result.data?.status).toBe(CheckStatus.BENIGN)
     expect(result.data?.attestedAtMs).toBeNull()
+  })
+
+  it('dates a check past its deadline from the deadline block, and not before', async () => {
+    const deadlineAtMs = faker.date.recent().getTime()
+    fakeReader.blockTimeMs.mockResolvedValue(deadlineAtMs)
+    const read = (headBlock: string) =>
+      baseRead({ events: [requestCreatedEvent({ deadlineBlock: '150' })], deadlineBlock: '150', headBlock })
+
+    fakeReader.fetchCheckState.mockResolvedValueOnce(read('150'))
+    expect((await runQuery(makeTestStore())).data?.timedOutAtMs).toBeNull()
+
+    fakeReader.fetchCheckState.mockResolvedValueOnce(read('151'))
+    const result = await runQuery(makeTestStore())
+
+    expect(result.data?.status).toBe(CheckStatus.TIMED_OUT)
+    expect(fakeReader.blockTimeMs).toHaveBeenCalledWith(150)
+    expect(result.data?.timedOutAtMs).toBe(deadlineAtMs)
   })
 
   it('never walks a pinned verdict backwards — a later transient re-derivation keeps BENIGN', async () => {

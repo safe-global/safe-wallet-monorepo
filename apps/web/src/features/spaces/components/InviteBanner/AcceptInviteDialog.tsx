@@ -18,8 +18,6 @@ import { PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
 import { showNotification } from '@/store/notificationsSlice'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
@@ -58,11 +56,6 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
     } finally {
       setIsSubmitting(false)
     }
-
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
-      { workspace_id: space.uuid, user_id: currentUser?.id },
-    )
 
     if (router.pathname === AppRoutes.welcome.spaces) {
       router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })

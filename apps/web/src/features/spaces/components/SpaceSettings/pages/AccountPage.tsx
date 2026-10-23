@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
 import { SwitchAuthenticatorSection, WalletTwoFactorSection } from '@/features/oidc-auth'
 import useLogout from '@/hooks/useLogout'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -20,11 +20,6 @@ const AccountPage = () => {
   const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
   const [isEditOpen, setIsEditOpen] = useState(false)
-
-  const handleSignOut = () => {
-    trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT)
-    logout()
-  }
 
   if (isLoading && !membership) {
     return (
@@ -105,10 +100,12 @@ const AccountPage = () => {
               </Typography>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut} data-testid="settings-account-sign-out">
-            <LogOut className="h-3.5 w-3.5" />
-            Sign out
-          </Button>
+          <Track {...SPACE_EVENTS.AUTH_LOGGED_OUT}>
+            <Button variant="outline" size="sm" onClick={logout} data-testid="settings-account-sign-out">
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </Button>
+          </Track>
         </div>
 
         {isEditOpen && <EditMemberDialog member={membership} handleClose={() => setIsEditOpen(false)} />}

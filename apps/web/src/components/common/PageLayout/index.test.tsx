@@ -98,6 +98,7 @@ jest.mock('@/features/__core__', () => ({
     BatchSidebar: () => null,
     SelectSafeModal: () => null,
     SafeWorkspaceSignInDialog: () => null,
+    SafeWorkspaceChooserDialog: () => null,
   })),
 }))
 

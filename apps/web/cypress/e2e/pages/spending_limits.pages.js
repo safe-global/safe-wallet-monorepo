@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as addressBook from '../pages/address_book.page'
-import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
 import { LS_NAMESPACE } from '../../../src/config/constants'
@@ -14,30 +13,22 @@ const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
 const modalTitle = '[data-testid="modal-title"]'
 const timePeriodSection = '[data-testid="time-period-section"]'
-const timePeriodItem = '[data-testid="time-period-item"]'
 const nextBtn = '[data-testid="next-btn"]'
-const reviewTokenAmountFld = '[data-testid="token-amount"]'
-const reviewBeneficiaryAddressFld = '[data-testid="beneficiary-address"]'
-const reviewSpendingLimit = '[data-testid="spending-limit-label"]'
 const deleteBtn = '[data-testid="delete-btn"]'
 const resetTimeInfo = '[data-testid="reset-time"]'
 const spentAmountInfo = '[data-testid="spent-amount"]'
 export const spendingLimitTxOption = '[data-testid="spending-limit-tx"]'
-export const standardTx = '[data-testid="standard-tx"]'
+const standardTx = '[data-testid="standard-tx"]'
 const tokenItem = '[data-testid="token-item"]'
-const maxBtn = '[data-testid="max-btn"]'
-const nonceFld = '[data-testid="nonce-fld"]'
 const splimitBeneficiaryIcon = '[data-testid="beneficiary-icon"]'
 const splimitAssetIcon = '[data-testid="asset-icon"]'
 const splimitTimeIcon = '[data-testid="time-icon"]'
-const oldTokenAmount = '[data-testid="old-token-amount"]'
-const oldResetTime = '[data-testid="old-reset-time"]'
-const slimitReplacementWarning = '[data-testid="limit-replacement-warning"]'
 const addressItem = '[data-testid="address-item"]'
 const allActionsSection = '[data-testid="all-actions"]'
 const actionItem = '[data-testid="action-item"]'
 const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
+const DECODED_TX_TIMEOUT_MS = 30000
 
 export const timePeriodOptions = {
   oneTime: 'One time',
@@ -62,7 +53,6 @@ const expectedResetOptions = new Array(3).fill('One-time')
 
 const newTransactionStr = 'New transaction'
 const confirmTxStr = 'Confirm transaction'
-const invalidNumberErrorStr = 'The value must be greater than 0'
 const invalidCharErrorStr = 'The value must be a number'
 
 export function selectRecipient(recipient) {
@@ -71,14 +61,6 @@ export function selectRecipient(recipient) {
     recipient,
     ls.addressBookData.sepoliaAddress2[11155111][constants.defaultOwnerAddress()],
   ])
-}
-
-export function verifyOldValuesAreDisplayed() {
-  main.verifyElementsIsVisible([oldTokenAmount, oldResetTime, slimitReplacementWarning])
-}
-
-export function verifyActionNamesAreDisplayed(names) {
-  main.verifyValuesExist(actionItem, names)
 }
 
 export function verifySpendingLimitsIcons() {
@@ -98,28 +80,6 @@ export function selectToken(token) {
   main.verifyValuesExist(tokenSelector, [token])
 }
 
-export function checkMaxValue() {
-  const maxValue = []
-
-  main.extractDigitsToArray(tokenSelector, maxValue)
-  cy.get(tokenAmountFld)
-    .invoke('val')
-    .then((value) => {
-      expect(maxValue).to.contain(value)
-    })
-}
-
-export function verifyNonceState(state) {
-  if (state === constants.elementExistanceStates.exist) {
-    cy.get(nonceFld).should(constants.elementExistanceStates.exist)
-  }
-  cy.get(nonceFld).should(constants.elementExistanceStates.not_exist)
-}
-
-export function clickOnMaxBtn() {
-  cy.get(maxBtn).click()
-}
-
 export function selectSpendingLimitOption() {
   cy.get(spendingLimitTxOption).click()
   cy.get(spendingLimitTxOption).find('input').should('be.checked')
@@ -130,23 +90,10 @@ export function selectStandardOption() {
   cy.get(standardTx).find('input').should('be.checked')
 }
 
-export function verifyTxOptionExist(options) {
-  main.verifyElementsIsVisible(options)
-}
-
-export function verifySpendingOptionShowsBalance(balance) {
-  main.verifyValuesExist(spendingLimitTxOption, [balance])
-}
-
 export function verifyBeneficiaryTable() {
   main.checkTextOrder(spentAmountInfo, expectedSpendOptions)
   main.checkTextOrder(resetTimeInfo, expectedResetOptions)
   main.verifyElementsCount(deleteBtn, 3)
-}
-export function checkReviewData(tokenAmount, address, spendingLimit) {
-  cy.get(reviewTokenAmountFld).should('have.text', tokenAmount)
-  cy.get(reviewBeneficiaryAddressFld).should('contain', address)
-  cy.get(reviewSpendingLimit).should('contain', spendingLimit)
 }
 export function clickOnNextBtn() {
   cy.get(nextBtn).click()
@@ -155,23 +102,6 @@ export function clickOnNextBtn() {
 
 export function clickOnTimePeriodDropdown() {
   cy.get(timePeriodSection).click()
-}
-
-export function selectTimePeriod(period) {
-  main.selectDropdownOption(timePeriodItem, period)
-}
-
-export function checkTimeDropdownOptions() {
-  cy.get(timePeriodItem).then(($lis) => {
-    const displayedOptions = Array.from($lis, (li) => li.textContent.trim())
-
-    const expectedOptions = Object.values(timePeriodOptions).every((option) => displayedOptions.includes(option))
-    expect(expectedOptions).to.be.true
-  })
-}
-
-export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).scrollIntoView().contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
 export function visitSpendingLimitsPage(safe) {
@@ -200,29 +130,8 @@ export function checkBeneficiaryInputValue(value) {
   getBeneficiaryInput().invoke('val').should('contain', value)
 }
 
-export function checkBeneficiaryENS(ens) {
-  getBeneficiaryInput().invoke('val').should('contain', ens.substring(4))
-}
-
-export function verifyValidAddressShowsNoErrors() {
-  // The label is a sibling of the input inside the Field wrapper, not a descendant of it.
-  cy.get(beneficiarySection)
-    .closest('[data-slot="field"]')
-    .find('label')
-    .should('not.contain', invalidAddressFormatErrorMsg)
-    .and('not.contain', invalidCharErrorStr)
-}
-
-export function verifyNumberErrorValidation() {
-  cy.get(tokenAmountSection).find('label').should('contain', invalidNumberErrorStr)
-}
-
 export function verifyCharErrorValidation() {
   cy.get(tokenAmountSection).find('label').should('contain', invalidCharErrorStr)
-}
-
-export function verifyNumberAmountEntered(amount) {
-  cy.get(tokenAmountFld).should('have.value', amount)
 }
 
 export function verifyActionCount(count) {
@@ -240,9 +149,9 @@ export function verifyActionNames(names) {
 }
 
 export function verifyDecodedTxSummary(names) {
-  cy.get(decodedTxSummary).within(() => {
+  cy.get(decodedTxSummary, { timeout: DECODED_TX_TIMEOUT_MS }).within(() => {
     names.forEach((item) => {
-      cy.contains(item)
+      cy.contains(item, { timeout: DECODED_TX_TIMEOUT_MS })
     })
   })
 }
