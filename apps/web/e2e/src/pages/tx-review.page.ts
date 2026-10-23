@@ -16,6 +16,9 @@ export class TxReviewPage {
   /** A proposer who is not a signer gets this button in place of the sign step */
   readonly proposeButton: Locator
   readonly connectedWalletMethod: Locator
+  readonly relayMethod: Locator
+  /** "<n> free transactions left today" next to the relay option */
+  readonly remainingRelays: Locator
   readonly executeButton: Locator
   /** The spending-limit review has no signing step, only this button */
   readonly spendingLimitExecuteButton: Locator
@@ -41,6 +44,8 @@ export class TxReviewPage {
     this.signButton = page.getByTestId('combo-submit-sign')
     this.proposeButton = page.getByRole('button', { name: 'Propose transaction' })
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
+    this.relayMethod = page.getByTestId('relay-execution-method').first()
+    this.remainingRelays = page.getByText(/free transactions? left today/)
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
@@ -90,6 +95,12 @@ export class TxReviewPage {
     await this.sign()
     await this.execute()
     await this.waitForExecution()
+  }
+
+  /** Execute a fully signed transaction with the relay, which pays the gas */
+  async executeWithRelay(): Promise<void> {
+    await this.relayMethod.click()
+    await this.executeButton.click()
   }
 
   /** Execute a fully signed transaction with the connected wallet, not the relay */

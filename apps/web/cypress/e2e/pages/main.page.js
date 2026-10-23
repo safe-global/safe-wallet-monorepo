@@ -27,8 +27,6 @@ const connectedOwnerBlock = '[data-testid="open-account-center"]'
 export const modalDialogCloseBtn = '[data-testid="modal-dialog-close-btn"]'
 const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
-export const noRelayAttemptsError = 'Not enough relay attempts remaining'
-
 /**
  * Yields whether `isReady()` returns true within `timeout` ms. Unlike an assertion, it does not
  * fail the test, so the caller can recover, for example by clicking again.
@@ -180,52 +178,6 @@ export const getSafeBalance = (safeAddress, chain) => {
     .then((response) => {
       expect(response.status).to.eq(200)
     })
-}
-
-export const getSafeNonce = (safeAddress, chain) => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chain}${constants.stagingCGWSafes}${safeAddress}${constants.stagingCGWNone}`,
-      headers: {
-        accept: 'application/json',
-      },
-    })
-    .then((response) => {
-      expect(response.status).to.eq(200)
-    })
-}
-
-export function fetchCurrentNonce(safeAddress) {
-  return getSafeNonce(safeAddress.substring(4), constants.networkKeys.sepolia).then(
-    (response) => response.body.currentNonce,
-  )
-}
-
-export const getRelayRemainingAttempts = (safeAddress) => {
-  const chain = constants.networkKeys.sepolia
-
-  return cy
-    .request({
-      method: 'GET',
-      url: `${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chain}${constants.relayPath}${safeAddress}`,
-      headers: {
-        accept: 'application/json',
-      },
-      failOnStatusCode: false,
-    })
-    .then((response) => (response.status === 200 ? response.body.remaining : 0))
-}
-
-export function verifyNonceChange(safeAddress, expectedNonce, retries = 30, delay = 10000) {
-  fetchCurrentNonce(safeAddress).then((newNonce) => {
-    if (newNonce === expectedNonce || retries <= 1) {
-      expect(newNonce, 'Safe nonce').to.equal(expectedNonce)
-      return
-    }
-    cy.wait(delay)
-    verifyNonceChange(safeAddress, expectedNonce, retries - 1, delay)
-  })
 }
 
 export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {

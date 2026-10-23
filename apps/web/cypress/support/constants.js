@@ -108,9 +108,7 @@ export const stagingCGWUrl =
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
 export const stagingCGWChains = '/chains/'
 export const stagingCGWSafes = '/safes/'
-export const stagingCGWNone = '/nonces/'
 export const stagingCGWDelegatesUrl = '/delegates?safe='
-export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
