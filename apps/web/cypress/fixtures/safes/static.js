@@ -103,8 +103,6 @@ export default {
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
   /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
   SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
-  /** Transaction history filter testing - Used in: tx_history_filter_2.cy.js */
-  SEP_STATIC_SAFE_38: 'sep:0x30aeC11779d29dB096C434D4e72E77276EB01BdE',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */
   SEP_STATIC_SAFE_39: 'sep:0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD',
   /** Nested safes testing - Used in: nested_safes.cy.js */

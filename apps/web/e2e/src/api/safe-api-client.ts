@@ -118,14 +118,4 @@ export class SafeApiClient {
   async getChains(): Promise<unknown> {
     return this.get('/v1/chains')
   }
-
-  /** Health check — is the CGW reachable? */
-  async isHealthy(): Promise<boolean> {
-    try {
-      await this.get('/health/ready', 0) // No retry on health check
-      return true
-    } catch {
-      return false
-    }
-  }
 }

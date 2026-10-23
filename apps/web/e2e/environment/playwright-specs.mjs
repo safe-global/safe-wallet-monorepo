@@ -4,14 +4,9 @@
  * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return.
  */
 export const playwrightSpecs = {
-  'api/credentials.spec.ts': {},
   'e2e/ledger-sign-execute.spec.ts': {
     scenarios: ['prepareLedgerScenario'],
     safes: { SEP_LEDGER_SIGN_SAFE: 'SEP_STATIC_SAFE_48', SEP_LEDGER_EXECUTE_SAFE: 'SEP_STATIC_SAFE_49' },
-  },
-  'api/safe-info.api.spec.ts': {
-    scenarios: ['prepareBasicScenario'],
-    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
