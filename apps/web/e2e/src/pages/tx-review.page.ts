@@ -38,6 +38,8 @@ export class TxReviewPage {
   readonly signedMessageContinueButton: Locator
   /** The Ledger dialog, open while the device reviews a transaction */
   readonly hashComparisonDialog: Locator
+  /** The rows of a batch review, one per batched transaction, in batch order */
+  readonly batchedTransactions: Locator
 
   constructor(private readonly page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -61,6 +63,7 @@ export class TxReviewPage {
     this.signMessageButton = page.getByRole('button', { name: 'Sign', exact: true })
     this.signedMessageContinueButton = page.getByRole('button', { name: 'Continue', exact: true })
     this.hashComparisonDialog = page.getByRole('dialog', { name: 'Compare transaction hash' })
+    this.batchedTransactions = page.getByRole('listitem').getByTestId('action-item')
   }
 
   /**

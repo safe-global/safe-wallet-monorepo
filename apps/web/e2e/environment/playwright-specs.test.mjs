@@ -32,6 +32,7 @@ test('every Playwright spec is registered, so isolated runs include it', () => {
 test('mapped Safes are keys of SAFES and come from a scenario of the spec', () => {
   for (const [spec, { scenarios: names = [], safes = {} }] of Object.entries(playwrightSpecs)) {
     if (Object.keys(safes).length) assert.ok(names.length, `${spec} maps Safes but names no scenario`)
-    for (const key of Object.keys(safes)) assert.match(constants, new RegExp(`\\b${key}: 'sep:`), `${spec}: ${key}`)
+    for (const key of Object.keys(safes))
+      assert.match(constants, new RegExp(`\\b${key}: '[a-z]+:0x`), `${spec}: ${key}`)
   }
 })
