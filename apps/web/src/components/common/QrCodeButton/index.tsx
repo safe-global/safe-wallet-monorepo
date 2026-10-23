@@ -1,5 +1,5 @@
 import { type ReactElement, type ReactNode, useState, Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 
 const QrModal = dynamic(() => import('./QrModal'))
 
