@@ -10,9 +10,11 @@ import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type {
   QueuedItemPage,
+  Transaction,
   TransactionDetails,
   TransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { transactionsIn } from './transaction-items'
 
 const REQUEST_TIMEOUT_MS = 10_000
 const RETRY_DELAY_MS = 1_000
@@ -63,6 +65,11 @@ export class SafeApiClient {
     return this.get<SafeInfo>(`/v1/chains/${this.chainId}/safes/${safeAddress}`)
   }
 
+  /** Get the nonce of the next transaction of the Safe */
+  async getNonce(safeAddress: string): Promise<number> {
+    return (await this.getSafeInfo(safeAddress)).nonce
+  }
+
   /** Get token balances for a Safe */
   async getBalances(safeAddress: string, currency = 'usd'): Promise<BalancesResponse> {
     return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}`)
@@ -71,6 +78,11 @@ export class SafeApiClient {
   /** Get queued transactions */
   async getQueuedTransactions(safeAddress: string): Promise<QueuedItemPage> {
     return this.get(`/v1/chains/${this.chainId}/safes/${safeAddress}/transactions/queued`)
+  }
+
+  /** Get the queued transactions, without the labels and conflict headers of the queue page */
+  async getQueued(safeAddress: string): Promise<Transaction[]> {
+    return transactionsIn(await this.getQueuedTransactions(safeAddress))
   }
 
   /** Get transaction history */

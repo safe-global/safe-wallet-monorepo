@@ -2,6 +2,7 @@ import { type Page } from '@playwright/test'
 import { Wallet, parseEther, parseUnits } from 'ethers'
 import { allowanceOf } from '../../src/chain/allowance'
 import { balanceOf, tokenBalanceOf } from '../../src/chain/balances'
+import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedAllowance } from '../../src/seed/allowance'
 import { seedSafe } from '../../src/seed/safe'
@@ -22,7 +23,7 @@ async function sendFromAllowance(
   { safe, recipient, amount, symbol }: { safe: string; recipient: string; amount: string; symbol?: string },
 ): Promise<void> {
   const sendTokens = new SendTokensPage(page)
-  await page.goto(`${ROUTES.home}?safe=${safe}`)
+  await new HomePage(page).goto(safe)
   await sendTokens.open()
   if (symbol) await sendTokens.selectToken(symbol)
   await sendTokens.fillTransfer({ recipient, amount })

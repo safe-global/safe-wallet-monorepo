@@ -29,9 +29,7 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await owners.goto(safe.prefixedAddress)
     await owners.addSigner({ newSigner, threshold: 2 })
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     const expected = { owners: sorted([owner4.address, newSigner]), threshold: 2 }
     await expect.poll(() => ownerSetupInCgw(safeApiClient, safe.address)).toEqual(expected)
@@ -56,9 +54,7 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await owners.goto(safe.prefixedAddress)
     await owners.replaceSigner({ oldSigner: owner1.address, newSigner })
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     const expected = { owners: sorted([owner4.address, newSigner]), threshold: 1 }
     await expect.poll(() => ownerSetupInCgw(safeApiClient, safe.address)).toEqual(expected)
@@ -83,9 +79,7 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await owners.goto(safe.prefixedAddress)
     await owners.removeSigner(owner1.address)
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     const expected = { owners: [owner4.address], threshold: 1 }
     await expect.poll(() => ownerSetupInCgw(safeApiClient, safe.address)).toEqual(expected)

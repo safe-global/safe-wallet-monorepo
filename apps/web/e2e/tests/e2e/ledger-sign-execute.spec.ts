@@ -8,7 +8,8 @@
 import type { TestInfo } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { LedgerEmulator } from '../../src/api/ledger-emulator'
-import { TransactionQueuePage } from '../../src/pages/transaction-queue.page'
+import { TxQueuePage } from '../../src/pages/tx-queue.page'
+import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { ledgerOwner } from '../../environment/scenarios/ledger.mjs'
 
 // One emulated device serves the whole spec.
@@ -45,17 +46,19 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
     walletPage,
     safes,
   }, testInfo) => {
-    const queue = new TransactionQueuePage(safePage)
+    const queue = new TxQueuePage(safePage)
+    const transactionReview = new TxReviewPage(safePage)
     await queue.goto(safes.SEP_LEDGER_SIGN_SAFE)
-    await expect(queue.queuedTransaction).toContainText('1/3')
+    await expect(queue.transactionWithNonce(0)).toContainText('1/3')
     await walletPage.connectLedger(ledgerOwner.address)
 
-    await queue.startSigning()
+    await queue.confirm(0)
+    await transactionReview.sign()
     const review = await device.approve('Sign message')
     await attachReview(testInfo, 'ledger-review-sign', review)
 
     expect(review).toContain('Review typed message')
-    await expect(queue.queuedTransaction).toContainText('2/3')
+    await expect(queue.transactionWithNonce(0)).toContainText('2/3')
   })
 
   test('should execute a signed transaction when the owner approves it on the device', async ({
@@ -63,14 +66,16 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
     walletPage,
     safes,
   }, testInfo) => {
-    const queue = new TransactionQueuePage(safePage)
+    const queue = new TxQueuePage(safePage)
+    const transactionReview = new TxReviewPage(safePage)
     await queue.goto(safes.SEP_LEDGER_EXECUTE_SAFE)
     await walletPage.connectLedger(ledgerOwner.address)
 
-    await queue.startExecution()
-    await expect(queue.hashComparisonDialog).toBeVisible()
+    await queue.execute(0)
+    await transactionReview.continueAndExecute()
+    await expect(transactionReview.hashComparisonDialog).toBeVisible()
     // The dialog closes once the device signs, so its hash is read before the approval.
-    const appHash = (await queue.hashComparisonDialog.innerText()).toLowerCase()
+    const appHash = (await transactionReview.hashComparisonDialog.innerText()).toLowerCase()
     const review = await device.approve('Accept risk and sign transaction')
     await attachReview(testInfo, 'ledger-review-execute', review)
 
@@ -78,6 +83,6 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
     const deviceHash = deviceTransactionHash(review).toLowerCase()
     expect(deviceHash).toMatch(/^0x[0-9a-f]{64}$/)
     expect(appHash).toContain(deviceHash)
-    await expect(queue.transactionStatus).toHaveText('Transaction was successful', { timeout: 120_000 })
+    await expect(transactionReview.status).toHaveText('Transaction was successful', { timeout: 120_000 })
   })
 })

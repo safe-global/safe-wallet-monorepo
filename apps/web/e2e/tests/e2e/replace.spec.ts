@@ -34,14 +34,12 @@ test.describe('Replace a queued transaction', { tag: '@e2e' }, () => {
     await queue.replace()
     await sendTokens.fillTransfer({ recipient: newRecipient, amount: REPLACEMENT_AMOUNT })
     await sendTokens.nextButton.click()
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect
       .poll(async () => recipientsAtNonce(await safeApiClient.getTransactionHistory(safe.address), 0))
       .toEqual([newRecipient])
-    await expect.poll(async () => transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))).toEqual([])
+    await expect.poll(() => safeApiClient.getQueued(safe.address)).toEqual([])
     expect(await balanceOf(journey.env, newRecipient)).toBe(parseEther(REPLACEMENT_AMOUNT))
     expect(await balanceOf(journey.env, recipient)).toBe(0n)
 

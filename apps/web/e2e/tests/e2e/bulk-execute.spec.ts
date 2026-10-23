@@ -36,13 +36,11 @@ test.describe('Bulk execute queued transactions', { tag: '@e2e' }, () => {
     await queue.bulkExecuteButton.click()
     await review.executeBulk()
 
-    await expect.poll(async () => (await safeApiClient.getSafeInfo(safe.address)).nonce).toBe(2)
+    await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(2)
     await expect
       .poll(async () => executionSummary(await safeApiClient.getTransactionHistory(safe.address)))
       .toEqual({ executed: 2, ethereumTransactions: 1 })
-    await expect
-      .poll(async () => transactionsIn(await safeApiClient.getQueuedTransactions(safe.address)).map(nonceOf))
-      .toEqual([2])
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(nonceOf)).toEqual([2])
 
     await safePage.goto(`${ROUTES.transactionsHistory}?safe=${safe.prefixedAddress}`)
     const bulkGroup = safePage.getByTestId('grouped-items').filter({ hasText: 'Bulk transactions' })

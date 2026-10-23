@@ -20,9 +20,7 @@ test.describe('Delete a queued transaction', { tag: '@e2e' }, () => {
     await queue.deleteFromQueue()
 
     await expect.poll(() => safeApiClient.findTransaction(last.txId)).toBeNull()
-    await expect
-      .poll(async () => transactionsIn(await safeApiClient.getQueuedTransactions(safe.address)).map(nonceOf))
-      .toEqual([0])
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(nonceOf)).toEqual([0])
 
     await queue.goto(safe.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toBeVisible()
