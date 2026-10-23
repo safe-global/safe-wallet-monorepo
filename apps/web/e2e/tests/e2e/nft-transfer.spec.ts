@@ -22,9 +22,7 @@ async function sendNfts(
   const review = new TxReviewPage(page)
   await nfts.goto(sender.prefixedAddress)
   await nfts.send({ labels: tokenIds.map(labelOf), recipient: recipient.address })
-  await review.sign()
-  await review.execute()
-  await review.waitForExecution()
+  await review.signAndExecute()
 }
 
 test.describe('Send NFTs', { tag: '@e2e' }, () => {

@@ -1,13 +1,13 @@
 import { Wallet, parseUnits } from 'ethers'
 import { erc20TransfersIn } from '../../src/api/transaction-items'
 import { tokenBalanceOf } from '../../src/chain/balances'
+import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe } from '../../src/seed/safe'
 import { SEPOLIA_USDC, seedTokenBalance } from '../../src/seed/tokens'
 import { AssetsPage } from '../../src/pages/assets.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
-import { ROUTES } from '../../src/data/constants'
 
 const BALANCE = '10'
 const AMOUNT = '1.5'
@@ -26,14 +26,12 @@ test.describe('Send an ERC-20 token', { tag: '@e2e' }, () => {
 
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)
-    await safePage.goto(`${ROUTES.home}?safe=${safe.prefixedAddress}`)
+    await new HomePage(safePage).goto(safe.prefixedAddress)
     await sendTokens.open()
     await sendTokens.selectToken(symbol)
     await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
     await sendTokens.nextButton.click()
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect
       .poll(() => tokenBalanceOf(journey.env, { token: usdc, holder: recipient }))

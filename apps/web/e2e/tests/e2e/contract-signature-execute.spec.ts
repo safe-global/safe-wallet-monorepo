@@ -24,7 +24,7 @@ test.describe('Execute a transaction that an owner Safe confirmed', { tag: '@e2e
     await review.continueAndExecute()
     await review.waitForExecution()
 
-    await expect.poll(async () => (await safeApiClient.getSafeInfo(safe.address)).nonce).toBe(1)
+    await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
   })
 })

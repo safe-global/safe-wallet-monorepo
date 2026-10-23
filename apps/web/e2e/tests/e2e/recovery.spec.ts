@@ -1,6 +1,7 @@
 import { Wallet, ZeroHash } from 'ethers'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { readDelayModifier, readSafeSetup } from '../../src/chain/recovery'
+import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { DAY_IN_SECONDS, seedExecutableRecovery, seedProposedRecovery, seedRecovery } from '../../src/seed/recovery'
 import { seedSafe } from '../../src/seed/safe'
@@ -22,9 +23,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await recovery.gotoSettings(safe.prefixedAddress)
     await recovery.setUp({ recoverer, delay: '2 days' })
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect.poll(async () => (await readSafeSetup(journey.env, safe.address)).modules).toHaveLength(1)
     const [delayModifier] = (await readSafeSetup(journey.env, safe.address)).modules
@@ -51,9 +50,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await recovery.gotoSettings(safe.prefixedAddress)
     await recovery.remove()
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect.poll(async () => (await readSafeSetup(journey.env, safe.address)).modules).not.toContain(delayModifier)
 
@@ -76,9 +73,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await recovery.gotoSettings(safe.prefixedAddress)
     await recovery.changeDelay('7 days')
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect
       .poll(async () => (await readDelayModifier(journey.env, delayModifier)).cooldownSeconds)
@@ -100,7 +95,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     })
 
     const recovery = new RecoveryPage(safePage)
-    await safePage.goto(`${ROUTES.home}?safe=${safe.prefixedAddress}`)
+    await new HomePage(safePage).goto(safe.prefixedAddress)
     await recovery.proposeRecovery(newOwner)
 
     await expect
@@ -128,9 +123,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     await safePage.goto(`${ROUTES.transactionsQueue}?safe=${safe.prefixedAddress}`)
     await recovery.goToQueue()
     await recovery.cancel()
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect
       .poll(() => readDelayModifier(journey.env, seeded.delayModifier))

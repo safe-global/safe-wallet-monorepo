@@ -28,12 +28,10 @@ test.describe('Reject a queued transaction', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await queue.openTransaction(safe.prefixedAddress, transfer.txId)
     await queue.reject()
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
-    await expect.poll(async () => (await safeApiClient.getSafeInfo(safe.address)).nonce).toBe(1)
-    await expect.poll(async () => transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))).toEqual([])
+    await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
+    await expect.poll(() => safeApiClient.getQueued(safe.address)).toEqual([])
     await expect.poll(async () => rejectionNonces(await safeApiClient.getTransactionHistory(safe.address))).toEqual([0])
     expect(await balanceOf(journey.env, recipient)).toBe(0n)
 

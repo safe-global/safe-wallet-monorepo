@@ -5,14 +5,12 @@ import { parseEther } from 'ethers'
 import { confirmInQueue } from '../../environment/scenarios/gateway.mjs'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
 import { openSafe } from '../../environment/scenarios/safe.mjs'
-import { transactionsIn } from '../api/transaction-items'
+import { confirmationsOf, transactionsIn } from '../api/transaction-items'
 import type { Journey } from '../fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe, type QueuedTransaction, type SeededSafe } from './safe'
 
-function confirmationsOf(queue: QueuedItemPage, txId: string): number | undefined {
-  const transaction = transactionsIn(queue).find((tx) => tx.id === txId)
-  return transaction?.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.confirmationsSubmitted : undefined
-}
+const hasConfirmations = (queue: QueuedItemPage, txId: string, count: number): boolean =>
+  transactionsIn(queue).some((tx) => tx.id === txId && confirmationsOf(tx) === count)
 
 /** Proposes an ETH transfer signed by OWNER_4 and OWNER_1, and waits until the CGW queue shows both signatures. */
 export async function seedSignedTransfer(
@@ -25,10 +23,8 @@ export async function seedSignedTransfer(
   const owner1 = await openSafe(journey.env, journey.owners.owner1, safe.address)
   const signature = await owner1.safe.signHash(queued.safeTxHash)
   await confirmInQueue(context, queued.safeTxHash, signature.data)
-  await waitUntil(
-    context.env,
-    `${context.path}/transactions/queued`,
-    (queue: QueuedItemPage) => confirmationsOf(queue, queued.txId) === 2,
+  await waitUntil(context.env, `${context.path}/transactions/queued`, (queue: QueuedItemPage) =>
+    hasConfirmations(queue, queued.txId, 2),
   )
   return queued
 }
@@ -57,10 +53,8 @@ export async function seedTransferWithContractSignature(
   )
   const contractSignature = await buildContractSignature([...signedByParentOwner.signatures.values()], parent.address)
   await confirmInQueue(safe.context, queued.safeTxHash, buildSignatureBytes([contractSignature]))
-  await waitUntil(
-    journey.env,
-    `${safe.context.path}/transactions/queued`,
-    (queue: QueuedItemPage) => confirmationsOf(queue, queued.txId) === 2,
+  await waitUntil(journey.env, `${safe.context.path}/transactions/queued`, (queue: QueuedItemPage) =>
+    hasConfirmations(queue, queued.txId, 2),
   )
   return safe
 }

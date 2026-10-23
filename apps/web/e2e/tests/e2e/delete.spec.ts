@@ -1,5 +1,5 @@
 import { Wallet } from 'ethers'
-import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
+import { nonceOf } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
@@ -20,9 +20,7 @@ test.describe('Delete a queued transaction', { tag: '@e2e' }, () => {
     await queue.deleteFromQueue()
 
     await expect.poll(() => safeApiClient.findTransaction(last.txId)).toBeNull()
-    await expect
-      .poll(async () => transactionsIn(await safeApiClient.getQueuedTransactions(safe.address)).map(nonceOf))
-      .toEqual([0])
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(nonceOf)).toEqual([0])
 
     await queue.goto(safe.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toBeVisible()

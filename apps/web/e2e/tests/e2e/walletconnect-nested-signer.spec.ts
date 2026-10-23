@@ -6,14 +6,13 @@
  * connects no private key: it pairs through the onboard WalletConnect module.
  */
 import type { Page } from '@playwright/test'
-import { Interface, Wallet, hashMessage, parseEther } from 'ethers'
-import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Wallet, hashMessage, parseEther } from 'ethers'
+import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
 import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
-import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { short } from '../../environment/scenarios/chain.mjs'
-import { CHAIN_IDS, ROUTES } from '../../src/data/constants'
+import { CHAIN_IDS } from '../../src/data/constants'
 import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
 import { isApprovedHash, isValidSafeSignature } from '../../src/chain/signatures'
 import { confirmPendingMessage } from '../../src/seed/messages'
@@ -23,20 +22,11 @@ import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { balanceOf } from '../../src/chain/balances'
-import { transactionsIn } from '../../src/api/transaction-items'
+import { approveHashData, confirmationsOf, safeTxHashOf } from '../../src/api/transaction-items'
 
 const AMOUNT = '0.01'
 // Once the parent executes approveHash, the Transaction Service indexes the event before CGW counts it
 const ON_CHAIN_CONFIRMATION_TIMEOUT_MS = 60_000
-
-const safeInterface = new Interface(['function approveHash(bytes32 hashToApprove)'])
-
-const confirmationsOf = (transaction: Transaction): number | undefined =>
-  transaction.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.confirmationsSubmitted : undefined
-
-async function queuedIn(safeApiClient: SafeApiClient, safe: SeededSafe): Promise<Transaction[]> {
-  return transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))
-}
 
 // A wallet sees another owner's message signature on its next Safe info poll (POLLING_INTERVAL, 15 s)
 const OTHER_OWNER_SIGNATURE_TIMEOUT_MS = 60_000
@@ -77,9 +67,9 @@ const test = base.extend<NestedSignerFixtures>({
 
   pairing: async ({ safePage, childPage, journey, nestedSafes }, provide) => {
     const { parent, child } = await seedNestedSafe(journey, nestedSafes)
-    await safePage.goto(`${ROUTES.home}?safe=${parent.prefixedAddress}`)
+    await new HomePage(safePage).goto(parent.prefixedAddress)
     await new WalletPage(safePage).accountCenter.waitFor({ state: 'visible' })
-    await childPage.goto(`${ROUTES.home}?safe=${child.prefixedAddress}`)
+    await new HomePage(childPage).goto(child.prefixedAddress)
 
     const uri = await new WalletPage(childPage).startWalletConnectPairing()
     const parentWalletConnect = new WalletConnectPage(safePage)
@@ -152,11 +142,9 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     await expect(queue.transactionWithNonce(0)).toContainText('1/1')
     await queue.execute(0)
     await childReview.continueAndExecute()
-    await parentReview.sign()
-    await parentReview.execute()
-    await parentReview.waitForExecution()
+    await parentReview.signAndExecute()
 
-    await expect.poll(async () => (await safeApiClient.getSafeInfo(pairing.child.address)).nonce).toBe(1)
+    await expect.poll(() => safeApiClient.getNonce(pairing.child.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
   })
 
@@ -174,7 +162,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     await new TxReviewPage(safePage).discard()
 
     await expect(childPage.getByText('User rejected signing.')).toBeVisible()
-    expect(transactionsIn(await safeApiClient.getQueuedTransactions(pairing.child.address))).toEqual([])
+    expect(await safeApiClient.getQueued(pairing.child.address)).toEqual([])
   })
 
   test.describe('with a 2/2 child Safe that OWNER_4 and the parent own', () => {
@@ -204,14 +192,12 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       await expect(queue.transactionWithNonce(0)).toContainText('1/2')
       await queue.confirm(0)
       await new TxReviewPage(childPage).sign()
-      await parentReview.sign()
-      await parentReview.execute()
-      await parentReview.waitForExecution()
+      await parentReview.signAndExecute()
 
       const approval = { safeAddress: pairing.child.address, owner: pairing.parent.address, hash: queued.safeTxHash }
       expect(await isApprovedHash(journey.env, approval)).toBe(true)
       await expect
-        .poll(async () => (await queuedIn(safeApiClient, pairing.child)).map(confirmationsOf), {
+        .poll(async () => (await safeApiClient.getQueued(pairing.child.address)).map(confirmationsOf), {
           timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
         })
         .toEqual([2])
@@ -239,15 +225,17 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       await new TxReviewPage(childPage).sign()
       await new TxReviewPage(safePage).sign()
 
-      await expect.poll(async () => (await queuedIn(safeApiClient, pairing.parent)).map(confirmationsOf)).toEqual([1])
-      const [childTransaction] = await queuedIn(safeApiClient, pairing.child)
+      await expect
+        .poll(async () => (await safeApiClient.getQueued(pairing.parent.address)).map(confirmationsOf))
+        .toEqual([1])
+      const [childTransaction] = await safeApiClient.getQueued(pairing.child.address)
       expect(confirmationsOf(childTransaction)).toBe(0)
 
-      const [parentTransaction] = await queuedIn(safeApiClient, pairing.parent)
+      const [parentTransaction] = await safeApiClient.getQueued(pairing.parent.address)
       const details = await safeApiClient.findTransaction(parentTransaction.id)
-      const childSafeTxHash = childTransaction.id.split('_')[2]
+      const childSafeTxHash = safeTxHashOf(childTransaction)
       // Exactly approveHash: the envelope with the child transaction never reaches the parent
-      expect(details?.txData?.hexData).toBe(safeInterface.encodeFunctionData('approveHash', [childSafeTxHash]))
+      expect(details?.txData?.hexData).toBe(approveHashData(childSafeTxHash))
     })
   })
 

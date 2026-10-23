@@ -31,6 +31,8 @@ export class TxReviewPage {
   readonly signMessageButton: Locator
   /** Shown once a message has all its signatures; it hands the signature to the app that asked for it */
   readonly signedMessageContinueButton: Locator
+  /** The Ledger dialog, open while the device reviews a transaction */
+  readonly hashComparisonDialog: Locator
 
   constructor(private readonly page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -50,6 +52,7 @@ export class TxReviewPage {
     this.discardButton = page.getByRole('alertdialog').getByRole('button', { name: 'Discard' })
     this.signMessageButton = page.getByRole('button', { name: 'Sign', exact: true })
     this.signedMessageContinueButton = page.getByRole('button', { name: 'Continue', exact: true })
+    this.hashComparisonDialog = page.getByRole('dialog', { name: 'Compare transaction hash' })
   }
 
   /** Confirm the risk, continue from the review and sign with the connected wallet */
@@ -80,6 +83,13 @@ export class TxReviewPage {
     await this.confirmRisk()
     await this.continueButton.click()
     await this.proposeButton.click()
+  }
+
+  /** Sign as the only signer that the threshold needs, execute with the connected wallet and wait until it is mined */
+  async signAndExecute(): Promise<void> {
+    await this.sign()
+    await this.execute()
+    await this.waitForExecution()
   }
 
   /** Execute a fully signed transaction with the connected wallet, not the relay */

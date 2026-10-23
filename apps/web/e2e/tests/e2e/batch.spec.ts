@@ -2,12 +2,12 @@ import { Wallet, parseEther } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
+import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe } from '../../src/seed/safe'
 import { BatchSidebarPage } from '../../src/pages/batch-sidebar.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
-import { ROUTES } from '../../src/data/constants'
 
 const FIRST_AMOUNT = '0.001'
 const SECOND_AMOUNT = '0.002'
@@ -30,7 +30,7 @@ test.describe('Execute a batch', { tag: '@e2e' }, () => {
     const batch = new BatchSidebarPage(safePage)
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)
-    await safePage.goto(`${ROUTES.home}?safe=${safe.prefixedAddress}`)
+    await new HomePage(safePage).goto(safe.prefixedAddress)
     await batch.sendTokensFromEmptyBatch()
     await sendTokens.fillTransfer({ recipient: firstRecipient, amount: FIRST_AMOUNT })
     await sendTokens.nextButton.click()
@@ -40,9 +40,7 @@ test.describe('Execute a batch', { tag: '@e2e' }, () => {
     await sendTokens.nextButton.click()
     await review.addToBatch()
     await batch.confirmBatch()
-    await review.sign()
-    await review.execute()
-    await review.waitForExecution()
+    await review.signAndExecute()
 
     await expect
       .poll(async () => multiSendActionCounts(await safeApiClient.getTransactionHistory(safe.address)))
@@ -50,7 +48,7 @@ test.describe('Execute a batch', { tag: '@e2e' }, () => {
     expect(await balanceOf(journey.env, firstRecipient)).toBe(parseEther(FIRST_AMOUNT))
     expect(await balanceOf(journey.env, secondRecipient)).toBe(parseEther(SECOND_AMOUNT))
 
-    await safePage.goto(`${ROUTES.home}?safe=${safe.prefixedAddress}`)
+    await new HomePage(safePage).goto(safe.prefixedAddress)
     await batch.openButton.click()
     await expect(batch.emptyBatch).toBeVisible()
   })

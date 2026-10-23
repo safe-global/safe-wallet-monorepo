@@ -5,12 +5,12 @@
  * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of OWNER_4.
  */
 import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
+import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe, type SeededSafe } from '../../src/seed/safe'
 import { balanceOf } from '../../src/chain/balances'
 import { isValidSafeSignature } from '../../src/chain/signatures'
-import { transactionsIn } from '../../src/api/transaction-items'
-import { CHAIN_IDS, ROUTES } from '../../src/data/constants'
+import { CHAIN_IDS } from '../../src/data/constants'
 import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
@@ -30,7 +30,7 @@ const test = base.extend<WalletConnectFixtures>({
   dapp: async ({ safePage, safe }, provide, testInfo) => {
     const dapp = await WalletConnectDapp.start(CHAIN_IDS.sepolia)
     try {
-      await safePage.goto(`${ROUTES.home}?safe=${safe.prefixedAddress}`)
+      await new HomePage(safePage).goto(safe.prefixedAddress)
       await new WalletPage(safePage).accountCenter.waitFor({ state: 'visible' })
 
       const walletConnect = new WalletConnectPage(safePage)
@@ -131,7 +131,7 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     await new TxReviewPage(safePage).discard()
 
     expect(await response).toEqual({ error: { code: 4001, message: expect.any(String) } })
-    expect(transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))).toEqual([])
+    expect(await safeApiClient.getQueued(safe.address)).toEqual([])
   })
 
   test('should end the dApp session when the owner disconnects it', async ({ safePage, dapp }) => {
