@@ -6,6 +6,11 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
+import {
+  getPolicyStatus,
+  isSpendingLimitPolicy,
+  type Policy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import type { ActiveAllowlistPolicy } from '../../AllowlistDrawer/resolveState'
 
 const ENFORCED_BY = 'Safe policy contract'
@@ -17,10 +22,12 @@ export type AllowlistDetailsContent = {
   overview: { enforcedBy: string }
   names: Record<string, string>
   onConnectWallet: () => void
+  /** Counted per spender and token. */
+  uncoveredSpendingLimitCount?: number
 }
 
 /** Ownership comes from the Space's own safes, already loaded, so opening a panel costs no request. */
-export const useAllowlistDetails = (policy: ActiveAllowlistPolicy): AllowlistDetailsContent => {
+export const useAllowlistDetails = (policy: ActiveAllowlistPolicy, policies: Policy[]): AllowlistDetailsContent => {
   const { chainId, address: safeAddress } = policy.safe
   const addressBook = useMergedAddressBooks(chainId)
   const wallet = useWallet()
@@ -48,11 +55,24 @@ export const useAllowlistDetails = (policy: ActiveAllowlistPolicy): AllowlistDet
     return Object.fromEntries(named)
   }, [policy.data, addressBook, chainId])
 
+  const uncoveredSpendingLimitCount = useMemo(() => {
+    if (policy.spendingLimitsCovered) return undefined
+
+    let count = 0
+    for (const other of policies) {
+      if (!isSpendingLimitPolicy(other) || getPolicyStatus(other) !== 'active') continue
+      if (other.safe.chainId !== chainId || !sameAddress(other.safe.address, safeAddress)) continue
+      count += other.data.spenders.reduce((sum, { allowances }) => sum + allowances.length, 0)
+    }
+    return count
+  }, [policy.spendingLimitsCovered, policies, chainId, safeAddress])
+
   return {
     viewer: { address: wallet?.address, isSigner },
     safe: { address: safeAddress, name: addressBook.get(safeAddress, chainId)?.name },
     overview: { enforcedBy: ENFORCED_BY },
     names,
     onConnectWallet,
+    uncoveredSpendingLimitCount,
   }
 }

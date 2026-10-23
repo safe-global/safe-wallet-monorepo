@@ -3,8 +3,15 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { mockWallet } from '@/tests/mocks/hooks'
 import { useSpaceSafes } from '../../../../../hooks/useSpaceSafes'
-import { mockActiveAllowlist } from '../../../mocks/allowlistPolicies'
-import { MOCK_ADDRESSES } from '../../../mocks/policies'
+import { mockActiveAllowlist, mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
+import {
+  MOCK_ADDRESSES,
+  MOCK_SAFES,
+  asActivePolicy,
+  mockMultiSpenderPolicy,
+  mockPendingPolicy,
+  mockSpendingLimitPolicy,
+} from '../../../mocks/policies'
 import { useAllowlistDetails } from '../useAllowlistDetails'
 
 jest.mock('@/hooks/wallets/useWallet')
@@ -49,20 +56,20 @@ describe('useAllowlistDetails', () => {
   })
 
   it('names the recipients from the Space address book and the Safe from the merged one', () => {
-    const { result } = renderHook(() => useAllowlistDetails(policy))
+    const { result } = renderHook(() => useAllowlistDetails(policy, []))
 
     expect(result.current.names).toEqual({ [MOCK_ADDRESSES.alice]: 'Alice' })
     expect(result.current.safe).toEqual({ address: policy.safe.address, name: 'Treasury' })
   })
 
   it('says the Safe policy contract enforces it, with no last updated time', () => {
-    const { result } = renderHook(() => useAllowlistDetails(policy))
+    const { result } = renderHook(() => useAllowlistDetails(policy, []))
 
     expect(result.current.overview).toEqual({ enforcedBy: 'Safe policy contract' })
   })
 
   it('treats a viewer who owns the Safe in the Space as a signer', () => {
-    const { result } = renderHook(() => useAllowlistDetails(policy))
+    const { result } = renderHook(() => useAllowlistDetails(policy, []))
 
     expect(result.current.viewer.isSigner).toBe(true)
   })
@@ -70,8 +77,53 @@ describe('useAllowlistDetails', () => {
   it('does not treat a viewer who only watches the Safe as a signer', () => {
     mockSpaceSafes(true)
 
-    const { result } = renderHook(() => useAllowlistDetails(policy))
+    const { result } = renderHook(() => useAllowlistDetails(policy, []))
 
     expect(result.current.viewer.isSigner).toBe(false)
+  })
+
+  describe('uncovered spending limits', () => {
+    const uncovered = asActivePolicy(mockAllowlistPolicy({ spendingLimitsCovered: false }))
+    const treasuryLimit = asActivePolicy(mockSpendingLimitPolicy())
+
+    it("counts every allowance of the Safe's active spending limits", () => {
+      const { result } = renderHook(() =>
+        useAllowlistDetails(uncovered, [treasuryLimit, asActivePolicy(mockMultiSpenderPolicy())]),
+      )
+
+      expect(result.current.uncoveredSpendingLimitCount).toBe(6)
+    })
+
+    it('matches the Safe address case-insensitively', () => {
+      const lowercased = asActivePolicy(
+        mockSpendingLimitPolicy({
+          safe: { ...MOCK_SAFES.treasury, address: MOCK_SAFES.treasury.address.toLowerCase() },
+        }),
+      )
+
+      const { result } = renderHook(() => useAllowlistDetails(uncovered, [lowercased]))
+
+      expect(result.current.uncoveredSpendingLimitCount).toBe(2)
+    })
+
+    it.each([
+      ['on another Safe', asActivePolicy(mockSpendingLimitPolicy({ safe: MOCK_SAFES.payroll }))],
+      [
+        'on the same address on another chain',
+        asActivePolicy(mockSpendingLimitPolicy({ safe: { ...MOCK_SAFES.treasury, chainId: '137' } })),
+      ],
+      ['whose module is not enabled', asActivePolicy(mockSpendingLimitPolicy({ enabled: false }))],
+      ['that is still pending', mockPendingPolicy({ safe: MOCK_SAFES.treasury })],
+    ])('leaves out a spending limit %s', (_, other) => {
+      const { result } = renderHook(() => useAllowlistDetails(uncovered, [other]))
+
+      expect(result.current.uncoveredSpendingLimitCount).toBe(0)
+    })
+
+    it('counts nothing when the guard also covers module transactions', () => {
+      const { result } = renderHook(() => useAllowlistDetails(policy, [treasuryLimit]))
+
+      expect(result.current.uncoveredSpendingLimitCount).toBeUndefined()
+    })
   })
 })

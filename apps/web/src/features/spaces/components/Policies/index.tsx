@@ -277,6 +277,7 @@ const Policies = ({
       {openedPolicy && isAllowlistPolicy(openedPolicy) && openedPolicy.status === 'active' && (
         <AllowlistDetails
           policy={openedPolicy}
+          policies={policies}
           onClose={closeDetails}
           justActivated={newAllowlistIds.has(openedPolicy.id)}
         />
