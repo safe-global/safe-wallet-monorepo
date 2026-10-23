@@ -10,7 +10,3 @@ export async function preparePayoutProposerScenario(env, owners) {
   ])
   return { safes: { static: safes } }
 }
-
-export async function prepareOwnerLifecycleScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_24']) } }
-}
