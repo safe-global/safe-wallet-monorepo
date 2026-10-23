@@ -25,7 +25,7 @@
 - `migrated` — Playwright spec merged and past the 10-run gate (migration PR); **Cypress spec still present and still running in CI.**
 - `deleted` — Cypress spec removed in a separate deletion PR. Only valid after `migrated`, after the Playwright spec has run green in CI on `dev`, and after the Cypress suite was re-run green (loop step 8).
 - `won't-migrate` — classification said delete or push down the pyramid. Record why in Verdict.
-- `out-of-scope (Argos)` — the 31 `visual/` specs. Not part of this programme.
+- `out-of-scope (Argos)` — the 3 `visual/` specs. Not part of this programme.
 
 ## Progress
 
@@ -34,8 +34,8 @@
 | In scope                       | **117** |
 | Migrated                       | 3       |
 | Deleted                        | 24      |
-| Out of scope (Argos `visual/`) | 31      |
-| **Total Cypress specs**        | **148** |
+| Out of scope (Argos `visual/`) | 3       |
+| **Total Cypress specs**        | **120** |
 
 > ⚠️ **Only the Stage 1 pilot and two Stage 2 specs have a Playwright replacement, and their Cypress specs are still running.** Three Playwright specs overlap Cypress ones but none is a replacement — `tests/smoke/dashboard.spec.ts` asserts 3 things where `smoke/dashboard.cy.js` asserts 6. Treat the "Playwright equivalent" column as a starting point to _finish_, not credit already earned.
 
@@ -163,40 +163,12 @@
 
 ## Out of scope — Argos visual specs
 
-These stay on Cypress. Migrating them means swapping `@argos-ci/cypress` for `@argos-ci/playwright`, rewriting `support/visual-mocks.js` and `awaitVisualStability()`, and re-approving all 31 screenshot baselines in Argos. That is a separate project.
+These stay on Cypress until a Storybook story renders the same state; the other 28 visual specs were deleted because stories render their states. Migrating them means swapping `@argos-ci/cypress` for `@argos-ci/playwright`, rewriting `support/visual-mocks.js` and `awaitVisualStability()`, and re-approving their screenshot baselines in Argos. That is a separate project.
 
 **Consequence: Cypress cannot be deleted when this programme finishes.** These specs import `cypress/e2e/pages/main.page.js`, so the Cypress page-object tree survives with them.
 
-| Spec                                | Lines | Area         | Stage | Wallet | Mocks | Status               | Verdict                                             | Playwright equivalent |
-| ----------------------------------- | ----- | ------------ | ----- | ------ | ----- | -------------------- | --------------------------------------------------- | --------------------- |
-| `visual/address_book.cy.js`         | 36    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/apps_custom.cy.js`          | 25    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/balances.cy.js`             | 30    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/batch_tx.cy.js`             | 33    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/bridge.cy.js`               | 22    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/create_tx_flow.cy.js`       | 36    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/dashboard.cy.js`            | 26    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/earn.cy.js`                 | 22    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/error_pages.cy.js`          | 19    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/msg_details.cy.js`          | 31    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/new_safe.cy.js`             | 20    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/nfts.cy.js`                 | 27    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/owner_management.cy.js`     | 38    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/positions.cy.js`            | 21    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/safe_apps.cy.js`            | 27    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/settings.cy.js`             | 51    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/sidebar.cy.js`              | 27    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_activity.cy.js`      | 17    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_address_book.cy.js`  | 42    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_dashboard.cy.js`     | 28    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_members.cy.js`       | 23    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_safe_accounts.cy.js` | 21    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_security.cy.js`      | 17    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spaces_settings.cy.js`      | 27    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/spending_limits.cy.js`      | 40    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/stake.cy.js`                | 22    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/swap.cy.js`                 | 22    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/tx_details.cy.js`           | 29    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/tx_history.cy.js`           | 29    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/tx_queue.cy.js`             | 34    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
-| `visual/welcome.cy.js`              | 22    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
+| Spec                      | Lines | Area         | Stage | Wallet | Mocks | Status               | Verdict                                             | Playwright equivalent |
+| ------------------------- | ----- | ------------ | ----- | ------ | ----- | -------------------- | --------------------------------------------------- | --------------------- |
+| `visual/tx_details.cy.js` | 29    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
+| `visual/tx_queue.cy.js`   | 34    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |
+| `visual/welcome.cy.js`    | 22    | Argos visual | —     | —      | —     | out-of-scope (Argos) | Needs `@argos-ci/playwright` + baseline re-approval | —                     |

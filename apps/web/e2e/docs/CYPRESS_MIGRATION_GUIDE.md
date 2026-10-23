@@ -138,7 +138,7 @@ The same applies to `won't-migrate`: it is a legitimate and common outcome, but 
 
 Migration runs **one stage at a time**, easiest feature area first, and every stage lands as **two PRs**: a _migration PR_ that adds the Playwright specs, and a _deletion PR_ that removes the Cypress specs only after CI has run the new specs on `dev`. Do not open a PR that spans stages, and never delete Cypress specs in the PR that introduces their replacement.
 
-**Scope: 117 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
+**Scope: 117 specs.** The 3 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
 
 ### Why staged
 

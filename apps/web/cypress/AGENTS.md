@@ -33,7 +33,7 @@ CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs 
 
 ## Visual regression tests (Argos E2E)
 
-All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
+All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`. Only states that no Storybook story renders yet stay here (`COVERAGE.md`); new visual coverage is a story — see [../docs/storybook-guide.md](../docs/storybook-guide.md). When a story renders a test's state, delete the test.
 
 ### Structure
 
@@ -77,7 +77,7 @@ Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds s
 
 ### API mocking for visual tests
 
-Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data — except the `spaces_*.cy.js` specs, which sign in via `signInToSpaces()` and run unmocked against the live spaces backend. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
+Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions
