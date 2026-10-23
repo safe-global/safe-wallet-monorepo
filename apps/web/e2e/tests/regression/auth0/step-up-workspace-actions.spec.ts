@@ -1,9 +1,9 @@
 // The user signs in without a second factor; the test data comes from a second session that has one.
 import type { Page } from '@playwright/test'
-import { test, expect } from '../../src/fixtures/test.fixture'
-import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
-import { isIsolated } from '../../src/fixtures/isolated-data'
+import { test, expect } from '../../../src/fixtures/test.fixture'
+import { CHAIN_IDS, TEST_ADDRESSES, safeAddress } from '../../../src/data/constants'
 import {
+  addWorkspaceSafes,
   createWorkspace,
   createEmailSession,
   gatewayRequest,
@@ -11,23 +11,20 @@ import {
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  workspaceUrl,
   type EmailSession,
-} from '../../src/fixtures/email-session'
-import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
+} from '../../../src/fixtures/email-session'
+import { completeStepUp, expectActionReplayed } from '../../../src/fixtures/step-up'
 
 const SEPOLIA = CHAIN_IDS.sepolia
 const CONTACT = { name: 'Treasury contact', address: TEST_ADDRESSES.NON_OWNER }
 
-const prefixless = (prefixedAddress: string): string => prefixedAddress.split(':')[1]
-
 test.describe('Step-up for the actions inside a Workspace', { tag: '@regression' }, () => {
-  test.skip(!isIsolated, 'Needs the local Auth0 of the isolated stack')
-
   let workspaceId: string
   /** The same user, signed in with a second factor, for test data. */
   let setup: EmailSession
 
-  const pageUrl = (path: string) => new RegExp(`${path}\\?spaceId=${workspaceId}$`)
+  const pageUrl = (path: string) => workspaceUrl(path, workspaceId)
 
   /** Invites a new user, who accepts; returns that member's session. */
   async function joinAsMember(name: string): Promise<EmailSession> {
@@ -50,7 +47,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = prefixless(safes.SEP_STATIC_SAFE_1)
+    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Add accounts' }).click()
@@ -72,10 +69,8 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should rename the Workspace Safe when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = prefixless(safes.SEP_STATIC_SAFE_1)
-    await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
-      safes: [{ chainId: SEPOLIA, address }],
-    })
+    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    await addWorkspaceSafes(setup, workspaceId, [address])
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Safe Account actions' }).click()
@@ -90,10 +85,8 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should remove the Safe from the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = prefixless(safes.SEP_STATIC_SAFE_1)
-    await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
-      safes: [{ chainId: SEPOLIA, address }],
-    })
+    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    await addWorkspaceSafes(setup, workspaceId, [address])
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Safe Account actions' }).click()
