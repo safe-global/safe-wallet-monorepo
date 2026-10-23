@@ -57,7 +57,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
   'cypress/e2e/regression/import_export_data_2.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
-  'cypress/e2e/regression/limit_order_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/load_safe_2.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1] },
   'cypress/e2e/regression/load_safe_3.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1, 137] },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
@@ -111,7 +110,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/spending_limits.cy.js': { scenario: 'prepareSpendingLimitsScenario', chains: [137] },
   'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
-  'cypress/e2e/regression/swaps_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },
   // The swap widgets screen recipients against the Chainalysis sanctions oracle on Ethereum.
   'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
@@ -126,7 +124,6 @@ export const isolatedSpecs = {
       'Verify that the "Max" button sets the value as the max balance': swapWidgetBalances,
     },
   },
-  'cypress/e2e/regression/twaps_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
