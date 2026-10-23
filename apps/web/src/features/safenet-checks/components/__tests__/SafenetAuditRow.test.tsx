@@ -11,7 +11,7 @@ import {
   attestedEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
-import { formatAuditDateTime } from '@/components/common/AuditLog'
+import { formatAuditDateTime } from '@safe-global/views/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
 import { SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
 

@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 import { Button } from '@safe-global/views/components/ui/button'
 import { Copy as CopyIcon } from 'lucide-react'
 import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
-import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader } from '@safe-global/views/components/common/AuditLog'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'

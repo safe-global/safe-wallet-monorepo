@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
-import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@safe-global/views/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
