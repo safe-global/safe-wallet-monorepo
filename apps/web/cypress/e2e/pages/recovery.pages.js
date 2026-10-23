@@ -1,10 +1,8 @@
 import * as main from './main.page'
 import * as safe from '../pages/load_safe.pages'
-import * as tx from '../pages/transactions.page'
 import { tableContainer } from '../pages/address_book.page'
 import { txDate } from '../pages/create_tx.pages'
 import { modalHeader } from '../pages/modals.page'
-import { moduleRemoveIcon } from '../pages/modules.page'
 
 export const setupRecoveryBtn = '[data-testid="setup-recovery-btn"]'
 const recoveryNextBtn = '[data-testid="next-btn"]'
@@ -14,7 +12,6 @@ const termsCheckbox = '[data-slot="checkbox"]'
 // Once opened, Base UI select popups stay mounted after closing — scope to the open one.
 const openSelectContent = '[data-slot="select-content"][data-open]'
 const selectItem = '[data-slot="select-item"]'
-const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
 const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
 const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
 const startRecoveryBtn = '[data-testid="start-recovery"]'
@@ -27,7 +24,6 @@ const cancelRecoveryBtn = '[data-testid="cancel-recovery-btn"]'
 const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const RECOVERY_STATE_TIMEOUT_MS = 60000
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',
@@ -131,28 +127,6 @@ export function agreeToTerms() {
   })
 }
 
-export function verifyRecovererAdded(addresses) {
-  addresses.forEach((address) => {
-    cy.get(tableContainer, { timeout: RECOVERY_STATE_TIMEOUT_MS }).should('contain', address)
-  })
-}
-
-export function verifySetupRecoveryBtnVisible() {
-  cy.get(setupRecoveryBtn, { timeout: RECOVERY_STATE_TIMEOUT_MS }).should('be.visible')
-}
-
-export function clearRecoverers() {
-  cy.get('body').then(($body) => {
-    if ($body.find(removeRecovererBtn).length) {
-      cy.get(removeRecovererBtn).each(($btn) => {
-        cy.wrap($btn).click()
-        clickOnNextBtn()
-        tx.signAndExecuteWithConnectedWallet()
-      })
-    }
-  })
-}
-
 export function clickOnStartRecoveryBtn() {
   cy.get(recoveryProposalCard)
     .should('be.visible')
@@ -176,10 +150,4 @@ export function verifyRecoveryProposalDialog(option) {
 
 export function verifyRecoveryProposalCard() {
   cy.get(recoveryProposalCard).should('be.visible')
-}
-
-export function deleteRecoveryModule() {
-  cy.get(moduleRemoveIcon).click()
-  main.acceptCookies()
-  tx.signAndExecuteWithConnectedWallet()
 }
