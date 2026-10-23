@@ -15,7 +15,8 @@ export class HomePage {
   readonly safeHeaderInfo: Locator
   readonly connectWalletBtn: Locator
   readonly pendingTxWidget: Locator
-  readonly pendingTxItems: Locator
+  /** One row per nonce, each a link to the transaction */
+  readonly pendingTxRows: Locator
   readonly viewAllLink: Locator
   readonly swapBtn: Locator
 
@@ -25,7 +26,7 @@ export class HomePage {
     this.safeHeaderInfo = page.getByTestId('safe-header-info')
     this.connectWalletBtn = page.getByTestId('connect-wallet-btn')
     this.pendingTxWidget = page.getByTestId('pending-tx-widget')
-    this.pendingTxItems = page.getByTestId('pending-tx-widget').locator('[data-testid]')
+    this.pendingTxRows = this.pendingTxWidget.getByTestId('tx-pending-item')
     this.viewAllLink = page.getByRole('link', { name: /view all/i })
     this.swapBtn = page.getByRole('button', { name: /swap/i })
   }
@@ -44,10 +45,5 @@ export class HomePage {
   /** Click the connect wallet button */
   async clickConnectWallet(): Promise<void> {
     await this.connectWalletBtn.click()
-  }
-
-  /** Get the count of pending transactions shown in the widget */
-  async getPendingTxCount(): Promise<number> {
-    return this.pendingTxItems.count()
   }
 }

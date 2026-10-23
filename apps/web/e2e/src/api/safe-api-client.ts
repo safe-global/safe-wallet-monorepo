@@ -76,9 +76,14 @@ export class SafeApiClient {
     return (await this.get<{ safes: string[] }>(`/v1/chains/${this.chainId}/owners/${owner}/safes`)).safes
   }
 
-  /** Get token balances for a Safe */
-  async getBalances(safeAddress: string, currency = 'usd'): Promise<BalancesResponse> {
-    return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}`)
+  /** Get token balances for a Safe; `trusted` limits them to the tokens the Transaction Service trusts */
+  async getBalances(
+    safeAddress: string,
+    currency = 'usd',
+    { trusted }: { trusted?: boolean } = {},
+  ): Promise<BalancesResponse> {
+    const query = trusted === undefined ? '' : `?trusted=${trusted}`
+    return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}${query}`)
   }
 
   /** Get queued transactions */

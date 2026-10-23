@@ -4,8 +4,31 @@
  * These are read-only tests: they verify the dashboard loads correctly
  * for a known static Safe on Sepolia staging. No mutations, no wallet.
  */
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { HomePage } from '../../src/pages/home.page'
+import { nonceOf } from '../../src/api/transaction-items'
+import { safeAddress } from '../../src/data/constants'
+
+/** Rows the widget has room for — mirrors MAX_TXS in src/components/dashboard/PendingTxs/PendingTxsList.tsx */
+const WIDGET_ROWS = 4
+
+/** The first proposal of each nonce, in the order CGW lists the queue; CGW lists the newest proposal first. */
+function latestProposalPerNonce(queue: Transaction[]): Transaction[] {
+  const seen = new Set<number | undefined>()
+  return queue.filter((transaction) => {
+    const nonce = nonceOf(transaction)
+    if (seen.has(nonce)) return false
+    seen.add(nonce)
+    return true
+  })
+}
+
+function confirmationsLabel(transaction: Transaction): string {
+  const info = transaction.executionInfo
+  if (info?.type !== 'MULTISIG') throw new Error(`${transaction.id} is not a multisig transaction`)
+  return `${info.confirmationsSubmitted}/${info.confirmationsRequired}`
+}
 
 test.describe('Dashboard', { tag: '@smoke' }, () => {
   let homePage: HomePage
@@ -15,7 +38,7 @@ test.describe('Dashboard', { tag: '@smoke' }, () => {
     await homePage.goto(safes.SEP_STATIC_SAFE_1)
   })
 
-  test('should load the dashboard and show Safe header info', async ({ safePage }) => {
+  test('should load the dashboard and show Safe header info', async () => {
     await homePage.waitForDashboardLoaded()
     await expect(homePage.safeHeaderInfo).toBeVisible()
   })
@@ -26,5 +49,28 @@ test.describe('Dashboard', { tag: '@smoke' }, () => {
 
   test('should show connect wallet button when no wallet is connected', async () => {
     await expect(homePage.connectWalletBtn).toBeVisible()
+  })
+})
+
+test.describe('Dashboard pending transactions', { tag: '@smoke' }, () => {
+  test('should show the newest proposal of each queued nonce with its confirmations', async ({
+    safePage,
+    safeApiClient,
+    safes,
+  }) => {
+    const queue = await safeApiClient.getQueued(safeAddress(safes.SEP_QUEUE_SAFE))
+    // Precondition: the widget only has rows to check when the Safe has a queue.
+    expect(queue.length, `${safes.SEP_QUEUE_SAFE} has no queued transactions`).toBeGreaterThan(0)
+    const expected = latestProposalPerNonce(queue).slice(0, WIDGET_ROWS)
+
+    const home = new HomePage(safePage)
+    await home.goto(safes.SEP_QUEUE_SAFE)
+
+    await expect(home.pendingTxRows).toHaveCount(expected.length)
+    for (const [index, transaction] of expected.entries()) {
+      const row = home.pendingTxRows.nth(index)
+      await expect(row).toHaveAttribute('href', new RegExp(`[?&]id=${transaction.id}(&|$)`))
+      await expect(row).toContainText(confirmationsLabel(transaction))
+    }
   })
 })
