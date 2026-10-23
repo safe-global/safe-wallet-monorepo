@@ -6,31 +6,31 @@
  * page the user left. Without the step-up the name must not change.
  */
 import type { Page } from '@playwright/test'
-import { test, expect } from '../../src/fixtures/test.fixture'
-import { isIsolated } from '../../src/fixtures/isolated-data'
+import { test, expect } from '../../../src/fixtures/test.fixture'
 import {
   createWorkspace,
+  launchScreen,
   signInWithEmail,
   uniqueEmail,
   workspaceName,
+  workspaceUrl,
   type EmailSession,
-} from '../../src/fixtures/email-session'
-import { Auth0Page } from '../../src/pages/auth0.page'
-import { completeStepUp, expectActionReplayed, launchScreen, toast } from '../../src/fixtures/step-up'
+} from '../../../src/fixtures/email-session'
+import { Auth0Page } from '../../../src/pages/auth0.page'
+import { completeStepUp, expectActionReplayed, toast } from '../../../src/fixtures/step-up'
 
 const ORIGINAL_NAME = 'Step-up Workspace'
 const NEW_NAME = 'Renamed after step-up'
+const SETTINGS_PATH = '/spaces/settings/general'
 
 const nameInput = (page: Page) => page.getByTestId('space-name-input')
 
 async function rename(page: Page, name: string): Promise<void> {
-  await page.getByTestId('space-name-input').fill(name)
+  await nameInput(page).fill(name)
   await page.getByTestId('space-save-button').click()
 }
 
 test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
-  test.skip(!isIsolated, 'Needs the local Auth0 of the isolated stack')
-
   let session: EmailSession
   let workspaceId: string
   let settingsUrl: RegExp
@@ -38,9 +38,9 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
   test.beforeEach(async ({ safePage }) => {
     session = await signInWithEmail(safePage, uniqueEmail('step-up'), { secondFactor: false })
     workspaceId = (await createWorkspace(session, ORIGINAL_NAME)).uuid
-    settingsUrl = new RegExp(`/spaces/settings/general\\?spaceId=${workspaceId}$`)
-    await safePage.goto(`/spaces/settings/general?spaceId=${workspaceId}`)
-    await expect(safePage.getByTestId('space-name-input')).toHaveValue(ORIGINAL_NAME)
+    settingsUrl = workspaceUrl(SETTINGS_PATH, workspaceId)
+    await safePage.goto(`${SETTINGS_PATH}?spaceId=${workspaceId}`)
+    await expect(nameInput(safePage)).toHaveValue(ORIGINAL_NAME)
   })
 
   test('that the rename completes on the same page after the user enters the code', async ({ safePage }) => {
@@ -93,18 +93,16 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
 })
 
 test.describe('Workspace rename after a sign-in with a second factor', { tag: '@regression' }, () => {
-  test.skip(!isIsolated, 'Needs the local Auth0 of the isolated stack')
-
   test('that the rename needs no step-up while the sign-in second factor is recent', async ({ safePage }) => {
     const session = await signInWithEmail(safePage, uniqueEmail('fresh-mfa'))
     const { uuid } = await createWorkspace(session, ORIGINAL_NAME)
-    await safePage.goto(`/spaces/settings/general?spaceId=${uuid}`)
-    await expect(safePage.getByTestId('space-name-input')).toHaveValue(ORIGINAL_NAME)
+    await safePage.goto(`${SETTINGS_PATH}?spaceId=${uuid}`)
+    await expect(nameInput(safePage)).toHaveValue(ORIGINAL_NAME)
 
     await rename(safePage, NEW_NAME)
 
     await expect(toast(safePage, 'Workspace name updated')).toBeVisible()
-    await expect(safePage).toHaveURL(new RegExp(`/spaces/settings/general\\?spaceId=${uuid}$`))
+    await expect(safePage).toHaveURL(workspaceUrl(SETTINGS_PATH, uuid))
     await expect.poll(() => workspaceName(session, uuid)).toBe(NEW_NAME)
   })
 })

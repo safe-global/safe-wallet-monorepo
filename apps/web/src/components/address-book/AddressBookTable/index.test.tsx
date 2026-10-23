@@ -67,6 +67,13 @@ describe('AddressBookTable', () => {
     mockUseIsMobile.mockReturnValue(false)
   })
 
+  it('shows the name and the address of each entry in its row', () => {
+    render(<AddressBookTable />)
+
+    const firstRow = screen.getByText('Contact 1', { exact: true }).closest('tr') as HTMLElement
+    expect(within(firstRow).getByText(`0x${'1'.padStart(40, '0')}`)).toBeInTheDocument()
+  })
+
   it('stays on the current page when a row action opens the edit dialog', () => {
     render(<AddressBookTable />)
     goToSecondPage()

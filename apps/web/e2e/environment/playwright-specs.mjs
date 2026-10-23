@@ -4,20 +4,16 @@
  * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return.
  */
 export const playwrightSpecs = {
-  'api/credentials.spec.ts': {},
   'e2e/ledger-sign-execute.spec.ts': {
     scenarios: ['prepareLedgerScenario'],
     safes: { SEP_LEDGER_SIGN_SAFE: 'SEP_STATIC_SAFE_48', SEP_LEDGER_EXECUTE_SAFE: 'SEP_STATIC_SAFE_49' },
-  },
-  'api/safe-info.api.spec.ts': {
-    scenarios: ['prepareBasicScenario'],
-    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
   'e2e/delete.spec.ts': {},
+  'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/multisig-confirm.spec.ts': {},
@@ -31,7 +27,7 @@ export const playwrightSpecs = {
   'e2e/replace.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
-  'regression/email-sign-in.spec.ts': {},
+  'regression/auth0/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
@@ -56,19 +52,19 @@ export const playwrightSpecs = {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
   },
-  'regression/step-up-billing.spec.ts': {
+  'regression/auth0/step-up-billing.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
-  'regression/step-up-outside-workspace.spec.ts': {
+  'regression/auth0/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
-  'regression/step-up-workspace-actions.spec.ts': {
+  'regression/auth0/step-up-workspace-actions.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
-  'regression/step-up-workspace-rename.spec.ts': {},
+  'regression/auth0/step-up-workspace-rename.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

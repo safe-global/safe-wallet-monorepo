@@ -41,8 +41,15 @@ const Appearance: NextPage = () => {
 
             <div>
               <Field orientation="horizontal">
-                <Switch id={darkModeId} checked={isDarkMode} onCheckedChange={handleDarkModeToggle} />
-                <FieldLabel htmlFor={darkModeId}>Dark mode</FieldLabel>
+                <Switch
+                  id={darkModeId}
+                  aria-labelledby={`${darkModeId}-label`}
+                  checked={isDarkMode}
+                  onCheckedChange={handleDarkModeToggle}
+                />
+                <FieldLabel id={`${darkModeId}-label`} htmlFor={darkModeId}>
+                  Dark mode
+                </FieldLabel>
               </Field>
             </div>
           </div>
