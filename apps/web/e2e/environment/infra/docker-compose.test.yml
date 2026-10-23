@@ -306,6 +306,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  # The gateway's Safe Shield threat analysis and owners scan; the verdicts follow mocks/blockaid-addresses.ts.
+  blockaid-api:
+    <<: *mock
+    command:
+      - /mocks/blockaid-api.ts
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8095'
+      interval: 5s
+      timeout: 5s
+      retries: 5
   # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
   ledger-emulator:
     image: ${SPECULOS_IMAGE:?Load test-images.env}
@@ -641,6 +655,8 @@ services:
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
       POLICY_INDEXER_BASE_URI: http://policy-indexer:8094
+      BLOCKAID_BASE_URL: http://blockaid-api:8095
+      BLOCKAID_CLIENT_API_KEY: local-test-only-blockaid-key
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       BILLING_WEBHOOK_JWT_PUBLIC_KEY: |
         -----BEGIN PUBLIC KEY-----
@@ -664,6 +680,8 @@ services:
       billing-api:
         condition: service_healthy
       policy-indexer:
+        condition: service_healthy
+      blockaid-api:
         condition: service_healthy
       redis:
         condition: service_healthy
