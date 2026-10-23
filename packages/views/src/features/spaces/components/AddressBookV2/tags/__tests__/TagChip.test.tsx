@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
+import { buildSpaceAddressBookTags, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import { TagChip, TagChips } from '../TagChip'
 import { TAG_COLOR_CLASSES } from '../tagColor'
 
@@ -9,12 +9,6 @@ describe('TagChip', () => {
     render(<TagChip name={tag.name} color={tag.color} />)
 
     expect(screen.getByTestId('tag-chip')).toHaveClass(...TAG_COLOR_CLASSES.lagoon.chip.split(' '))
-  })
-
-  it('is neutral for a tag CGW has not coloured yet', () => {
-    render(<TagChip name="Brand new" />)
-
-    expect(screen.getByTestId('tag-chip')).toHaveClass('bg-muted')
   })
 })
 
@@ -26,8 +20,9 @@ describe('TagChips', () => {
   })
 
   it('shows every tag in order', () => {
-    render(<TagChips tags={[{ name: 'Vendor' }, { name: 'EU' }]} />)
+    const tags = buildSpaceAddressBookTags(2)
+    render(<TagChips tags={tags} />)
 
-    expect(screen.getAllByTestId('tag-chip').map((chip) => chip.textContent)).toEqual(['Vendor', 'EU'])
+    expect(screen.getAllByTestId('tag-chip').map((chip) => chip.textContent)).toEqual(tags.map((tag) => tag.name))
   })
 })

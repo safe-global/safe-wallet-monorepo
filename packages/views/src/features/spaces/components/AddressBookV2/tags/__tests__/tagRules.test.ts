@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { normalizeTagName, sameTagName, sameTagNames, validateTagName } from '../tagRules'
+import { normalizeTagName, sameTagName, validateTagName } from '../tagRules'
 
 describe('validateTagName', () => {
   it('accepts letters, numbers, spaces and - _ & /', () => {
@@ -42,15 +42,5 @@ describe('sameTagName', () => {
   it('ignores case and extra spaces', () => {
     const name = faker.word.noun()
     expect(sameTagName(name.toUpperCase(), `  ${name.toLowerCase()} `)).toBe(true)
-  })
-})
-
-describe('sameTagNames', () => {
-  it('ignores order and case', () => {
-    expect(sameTagNames(['Vendor', 'EU'], ['eu', 'VENDOR'])).toBe(true)
-  })
-
-  it('tells lists of different length apart', () => {
-    expect(sameTagNames(['Vendor'], ['Vendor', 'EU'])).toBe(false)
   })
 })

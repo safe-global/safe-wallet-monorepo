@@ -31,6 +31,3 @@ export const validateTagName = (raw: string): string | undefined => {
   if (!ALLOWED_TAG_NAME.test(name)) return 'Tags can only contain letters, numbers, spaces and the characters - _ & /'
   return undefined
 }
-
-export const sameTagNames = (a: readonly string[], b: readonly string[]): boolean =>
-  a.length === b.length && a.every((name) => b.some((other) => sameTagName(name, other)))

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -21,6 +22,16 @@ export type TagPickerProps = {
 const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }: TagPickerProps) => {
   const selected = existingTagIds(value, tags)
   const isFull = (count: number) => count > MAX_TAGS_PER_CONTACT
+  // A tick made while a create is in flight must survive it
+  const latestSelected = useRef(selected)
+  useEffect(() => {
+    latestSelected.current = selected
+  })
+
+  const tickCreated = (tagId: number) => {
+    const next = [...latestSelected.current, tagId]
+    if (!isFull(next.length)) onChange(next)
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -49,7 +60,7 @@ const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }:
         actions={actions}
         onLimitReached={onLimitReached}
         beforeCreate={() => (isFull(selected.length + 1) ? CONTACT_TAG_LIMIT_MESSAGE : undefined)}
-        onCreated={(tag) => onChange([...selected, tag.id])}
+        onCreated={(tag) => tickCreated(tag.id)}
       />
       <TagChips tags={selected.flatMap((id) => tags.find((tag) => tag.id === id) ?? [])} />
     </div>

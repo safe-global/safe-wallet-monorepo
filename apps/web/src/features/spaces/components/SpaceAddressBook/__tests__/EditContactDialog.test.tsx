@@ -177,6 +177,14 @@ describe('EditContactDialog', () => {
       expect(sentItem()).not.toHaveProperty('tags')
     })
 
+    it('opens outside the v2 address book when the backend sends no tagIds', () => {
+      const { tagIds: _tagIds, ...withoutTagIds } = entry
+
+      render(<EditContactDialog entry={withoutTagIds as SpaceAddressBookItemDto} onClose={jest.fn()} />)
+
+      expect(screen.getByLabelText('Name')).toHaveValue(entry.name)
+    })
+
     it('leaves the tags alone when only the name changes', async () => {
       mockUpsertAddressBook.mockResolvedValue({ data: {} })
       render(<EditContactDialog entry={entry} onClose={jest.fn()} workspaceTags={[vendor, internal]} />)

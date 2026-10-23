@@ -27,6 +27,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { existingTagIds } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
 import { tagNamesOf } from '../SpaceAddressBookV2/utils'
 import TagsField from './TagsField'
 
@@ -54,8 +55,8 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
     })
     .filter(Boolean)
 
-  const existingTagIds = (ids: number[]) => ids.filter((id) => workspaceTags?.some((tag) => tag.id === id))
-  const defaultTags = existingTagIds(entry.tagIds)
+  // Only the v2 book passes tags; v1 must not depend on the backend sending tagIds
+  const defaultTags = workspaceTags ? existingTagIds(entry.tagIds, workspaceTags) : []
 
   const defaultValues = {
     name: entry.name,
@@ -77,7 +78,7 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
   const watchedName = watch('name')
   const watchedNetworks = watch('networks')
   const watchedTags = watch('tags')
-  const currentTags = existingTagIds(watchedTags)
+  const currentTags = workspaceTags ? existingTagIds(watchedTags, workspaceTags) : []
   const tagsChanged = currentTags.length !== defaultTags.length || currentTags.some((id) => !defaultTags.includes(id))
 
   // Check if any changes were made

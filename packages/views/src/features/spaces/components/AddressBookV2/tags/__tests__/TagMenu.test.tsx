@@ -116,6 +116,16 @@ describe('TagMenu', () => {
       expect(onCreated).toHaveBeenCalledWith(created)
     })
 
+    it('offers no Create for a name the workspace has, spelled with other case or spacing', async () => {
+      const keyVendors = spaceAddressBookTagBuilder().with({ id: 3, name: 'Key vendors' }).build()
+      renderMenu({ tags: [...tags, keyVendors], actions: buildActions() })
+
+      await open()
+      await userEvent.type(screen.getByRole('searchbox'), 'key   VENDORS')
+
+      expect(screen.queryByRole('option', { name: /Create/ })).not.toBeInTheDocument()
+    })
+
     it('shows the error the create was refused with', async () => {
       const actions = buildActions({
         onCreate: jest.fn().mockResolvedValue({ error: 'A tag with this name already exists.' }),

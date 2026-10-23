@@ -30,6 +30,8 @@ export type FacetOptionListProps<V extends string = string> = {
    * "Create '<text>'" row appears; used by the tag picker.
    */
   onCreate?: (text: string) => void
+  /** Whether the search text names an existing option, so no "Create" row is offered. Defaults to ignoring case. */
+  isSameText?: (a: string, b: string) => boolean
   /**
    * Adds a rename action to each option. Resolves to an error message to keep the editor open, or
    * `undefined` once the rename is done.
@@ -58,6 +60,7 @@ export function FacetOptionList<V extends string = string>({
   searchPlaceholder = 'Search',
   emptyText = 'No options',
   onCreate,
+  isSameText = (a, b) => a.toLowerCase() === b.toLowerCase(),
   onRenameOption,
   onDeleteOption,
   deleteConfirmation,
@@ -110,7 +113,7 @@ export function FacetOptionList<V extends string = string>({
   const canCreate =
     Boolean(onCreate) &&
     trimmedQuery.length > 0 &&
-    !options.some((option) => optionText(option).toLowerCase() === trimmedQuery.toLowerCase())
+    !options.some((option) => isSameText(optionText(option), trimmedQuery))
 
   const handleCreate = () => {
     if (!canCreate || !onCreate) return

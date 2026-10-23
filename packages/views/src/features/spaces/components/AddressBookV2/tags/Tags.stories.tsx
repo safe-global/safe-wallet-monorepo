@@ -24,6 +24,3 @@ export const AllColours: Story = {
     />
   ),
 }
-
-/** Without a colour, e.g. while the tags load. */
-export const NoColour: Story = { args: { name: 'Vendor', color: undefined } }

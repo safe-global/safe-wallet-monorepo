@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { buildSpaceAddressBookTags, spaceAddressBookTagBuilder } from '@/tests/builders/space'
@@ -61,6 +62,31 @@ describe('TagPicker', () => {
 
     expect(actions.onCreate).toHaveBeenCalledWith('EU')
     expect(onChange).toHaveBeenCalledWith([1, 3])
+  })
+
+  it('keeps a tag ticked while a create was in flight', async () => {
+    const created = spaceAddressBookTagBuilder().with({ id: 3, name: 'EU' }).build()
+    let finishCreate: (result: { tag: typeof created }) => void = () => {}
+    const actions: TagActions = {
+      onCreate: jest.fn(() => new Promise((resolve) => (finishCreate = resolve))),
+      onRename: jest.fn(),
+      onDelete: jest.fn(),
+    }
+    let latest: number[] = []
+    const Controlled = () => {
+      const [value, setValue] = useState<number[]>([])
+      latest = value
+      return <TagPicker tags={[vendor, internal, created]} value={value} onChange={setValue} actions={actions} />
+    }
+    render(<Controlled />)
+
+    await open()
+    await userEvent.type(screen.getByRole('searchbox'), 'EU2')
+    await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+    await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+    finishCreate({ tag: created })
+
+    await waitFor(() => expect(latest).toEqual([1, 3]))
   })
 
   it('creates nothing for a contact that already has 3 tags', async () => {

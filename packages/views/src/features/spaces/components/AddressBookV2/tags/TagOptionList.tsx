@@ -1,6 +1,7 @@
 import { FacetOptionList, type FacetOption } from '@safe-global/views/components/common/FacetFilter'
 import { TagChip } from './TagChip'
 import type { TagColor } from './tagColor'
+import { sameTagName } from './tagRules'
 
 export type TagEditing<T> = {
   /** Resolves to an error message to keep the editor open, or `undefined` once renamed. */
@@ -11,7 +12,7 @@ export type TagEditing<T> = {
 export type TagOption<T> = {
   value: string
   name: string
-  color?: TagColor
+  color: TagColor
   /** Contacts that have the tag; a tag being created has none. */
   contactCount?: number
   tag: T
@@ -56,6 +57,7 @@ function TagOptionList<T>({ options, value, onChange, onCreate, tagEditing }: Ta
         value={value}
         onChange={onChange}
         onCreate={onCreate}
+        isSameText={sameTagName}
         searchable
         searchPlaceholder={onCreate ? 'Search or create a tag' : 'Search tags'}
         emptyText={onCreate ? 'No tags yet. Type to create one.' : 'No tags yet'}

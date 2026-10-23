@@ -206,11 +206,14 @@ export function getAuditEventDescription(
       )
     }
     case 'ADDRESS_BOOK_TAGS_UPDATED': {
-      const address = asString(payload.address)
+      const changes = Array.isArray(payload.changes) ? payload.changes.map((change) => asPayload(change)) : []
+      if (changes.length !== 1) return `changed the tags of ${pluralize(changes.length, 'contact')}`
+      const [change] = changes
+      const address = asString(change.address)
       return (
         <>
           changed the tags of {address ? <span className="break-all">{address}</span> : 'a contact'} from{' '}
-          <TagList tags={payload.oldTags} /> to <TagList tags={payload.newTags} />
+          <TagList tags={change.oldTags} /> to <TagList tags={change.newTags} />
         </>
       )
     }

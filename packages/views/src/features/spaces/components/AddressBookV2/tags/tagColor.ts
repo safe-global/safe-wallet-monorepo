@@ -35,4 +35,4 @@ export const TAG_COLOR_CLASSES: Record<TagColor, { chip: string; dot: string }> 
   },
 }
 
-export type TagLabel = { name: string; color?: TagColor }
+export type TagLabel = { name: string; color: TagColor }

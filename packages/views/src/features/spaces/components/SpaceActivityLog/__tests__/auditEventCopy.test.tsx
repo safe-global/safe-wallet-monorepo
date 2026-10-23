@@ -131,9 +131,9 @@ describe('getAuditEventDescription', () => {
       {
         eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const,
         payload: {
-          address: '0x1111111111111111111111111111111111111111',
-          oldTags: ['Vendor'],
-          newTags: ['Vendor', 'EU'],
+          changes: [
+            { address: '0x1111111111111111111111111111111111111111', oldTags: ['Vendor'], newTags: ['Vendor', 'EU'] },
+          ],
         },
       },
       'changed the tags of 0x1111111111111111111111111111111111111111 from Vendor to Vendor, EU',
@@ -142,9 +142,24 @@ describe('getAuditEventDescription', () => {
       'ADDRESS_BOOK_TAGS_UPDATED (first tags)',
       {
         eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const,
-        payload: { address: '0x1111111111111111111111111111111111111111', oldTags: [], newTags: ['Vendor'] },
+        payload: {
+          changes: [{ address: '0x1111111111111111111111111111111111111111', oldTags: [], newTags: ['Vendor'] }],
+        },
       },
       'changed the tags of 0x1111111111111111111111111111111111111111 from no tags to Vendor',
+    ],
+    [
+      'ADDRESS_BOOK_TAGS_UPDATED (several contacts)',
+      {
+        eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const,
+        payload: {
+          changes: [
+            { address: '0x1111111111111111111111111111111111111111', oldTags: [], newTags: ['Vendor'] },
+            { address: '0x2222222222222222222222222222222222222222', oldTags: ['EU'], newTags: [] },
+          ],
+        },
+      },
+      'changed the tags of 2 contacts',
     ],
     [
       'ADDRESS_BOOK_TAG_CREATED',
