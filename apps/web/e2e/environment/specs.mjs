@@ -41,7 +41,6 @@ export const isolatedSpecs = {
       '[Threat Analyse] Verify Malicious Native Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious wallet_sendCalls(Eth) detection - 9A': securityProviders,
       '[Threat Analyse] Verify that Safe Shield shows no threat detected-9C': securityProviders,
       '[Threat Analyse] Verify that Safe Shield shows warning details for reverted txs-9B': securityProviders,
       '[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue': securityProviders,

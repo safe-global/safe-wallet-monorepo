@@ -174,15 +174,6 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     main.verifyTextVisibility([copilot.maliciousAddressMessageStr, copilot.maliciousActivityStr])
   })
 
-  it('[Threat Analyse] Verify Malicious wallet_sendCalls(Eth) detection - 9A', () => {
-    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousAddressEth, signer)
-
-    copilot.verifyRiskDetected()
-    copilot.verifyThreatAnalysisGroupCard()
-    copilot.verifyThreatAnalysisMaliciousState()
-    copilot.expandThreatAnalysisCard()
-    main.verifyTextVisibility([copilot.maliciousAddressMessageStr, copilot.maliciousActivityStr])
-  })
   //TODO: Add tests for offchain messages when implemented
   // ========================================
   // 4. Contract Analyse

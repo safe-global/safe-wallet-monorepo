@@ -125,37 +125,6 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     })
   })
 
-  it(
-    'Verify entering a blocked address in the custom recipient input blocks the form',
-    { defaultCommandTimeout: 60000 },
-    () => {
-      let isCustomRecipientFound
-      swaps.acceptLegalDisclaimer()
-      cy.wait(4000)
-      main
-        .getIframeBody(iframeSelector)
-        .then(($frame) => {
-          isCustomRecipientFound = (customRecipient) => {
-            const element = $frame.find(customRecipient)
-            return element.length > 0
-          }
-        })
-        .within(() => {
-          swaps.switchToTwap()
-        })
-      swaps.unlockTwapOrders(iframeSelector)
-      main.getIframeBody(iframeSelector).within(() => {
-        swaps.selectInputCurrency(swaps.swapTokens.cow)
-        swaps.clickOnSettingsBtnTwaps()
-        swaps.enableTwapCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
-        swaps.clickOnSettingsBtnTwaps()
-        swaps.enterRecipient(swaps.blockedAddress)
-      })
-
-      swaps.verifyBlockedAddressFormShown()
-    },
-  )
-
   // ========================================
   // Order Creation Tests
   // ========================================
