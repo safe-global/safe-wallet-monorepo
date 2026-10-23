@@ -6,6 +6,8 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || (isCI ? 'http://localhost:808
 
 export default defineConfig({
   testDir: './tests',
+  // The journeys seed their own Safes, so they run only on the isolated stack (playwright.isolated.config.ts)
+  testIgnore: '**/tests/e2e/**',
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: isCI,

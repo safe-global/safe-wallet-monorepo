@@ -34,7 +34,6 @@
       "title": "Receive",
       "summaryTitle": "Received",
       "summaryTxInfoDAI": "25.50103 DAI",
-      "summaryTxInfoETH35": "ETH35.com",
       "summaryTxInfoETH_2": "1 ETH",
       "summaryTxInfoNFT": "1 FLOWER #6188",
       "summaryTxInfo": "1,000 QTRUST",
@@ -48,7 +47,6 @@
       "altImageDAI": "DAI",
       "altToken": "ETH",
       "altTokenNFT": "FLOWER #6188",
-      "altTokenETH35": "$ ETH35.com",
       "GPv2Settlement": "GPv2Settlement",
       "GPv2SettlementAddress": "0x9008D19f58AAbD9eD0D60971565",
       "Proxy": "Proxy",
@@ -66,31 +64,12 @@
     "send": {
       "title": "Sent",
       "summaryTxInfo": "-< 0.00001 ETH",
-      "summaryTxInfo2": "-0.0001 ETH",
       "summaryTime": "11:02 AM",
       "sentTo": "0.000000000001 ETH",
       "recipientAddress": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
       "transactionHash": "0x6a59...6a98",
       "altImage": "Sent",
       "altToken": "ETH"
-    },
-    "onchainRejection": {
-      "title": "On-chain rejection",
-      "summaryTime": "11:17 AM",
-      "altImage": "On-chain rejection",
-      "transactionHash": "0x4fbf...067d",
-      "transactionHash2": "0x636e...0524",
-      "safeTxHash": "0x1303...0fe2"
-    },
-    "batchNativeTransfer": {
-      "title": "Batch",
-      "summaryTxInfo": "2 actions",
-      "summaryTime": "11:24 AM",
-      "description": "Batch transaction with 2 actions",
-      "altImage": "Batch",
-      "contractAddress": "sep:0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
-      "transactionHash": "0xa5dd...b064",
-      "safeTxHash": "0x4dd0...b2b8"
     },
     "deleteSpendingLimit": {
       "title": "AllowanceModule",

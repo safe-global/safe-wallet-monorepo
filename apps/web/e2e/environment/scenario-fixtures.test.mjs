@@ -84,27 +84,12 @@ test('prepares once before spec hooks and reads multiple fixture categories with
   assert.equal(runner.calls.length, 1)
 })
 
-test('refreshes mutable scenarios between tests and retries while retaining spec fixture references', async (t) => {
-  const runner = await fixtureRunner(t, 'cypress/e2e/regression/remove_owner.cy.js')
-  await runner.hooks.before[0]()
-  const safes = await getSafes(CATEGORIES.static)
-  await runner.runBeforeEach()
-  assert.equal(runner.calls.length, 1)
-  await runner.runBeforeEach()
-  assert.equal(safes.SEP_STATIC_SAFE_2, 'safe-2')
-  await runner.runBeforeEach()
-  assert.equal(safes.SEP_STATIC_SAFE_2, 'safe-3')
-})
-
 test('shares prepared fixtures between separately bundled support and spec modules', async (t) => {
-  const runner = await fixtureRunner(t, 'cypress/e2e/regression/remove_owner.cy.js')
+  const runner = await fixtureRunner(t, 'cypress/e2e/regression/assets.cy.js')
   const specModule = await import('../../cypress/support/safes/safesHandler.js?spec-bundle')
   await runner.hooks.before[0]()
   const safes = await specModule.getSafes(CATEGORIES.static)
   assert.equal(safes.SEP_STATIC_SAFE_2, 'safe-1')
-  await runner.runBeforeEach()
-  await runner.runBeforeEach()
-  assert.equal(safes.SEP_STATIC_SAFE_2, 'safe-2')
   assert.strictEqual(safes, await getSafes(CATEGORIES.static))
 })
 

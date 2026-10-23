@@ -16,23 +16,15 @@ const modalTitle = '[data-testid="modal-title"]'
 const timePeriodSection = '[data-testid="time-period-section"]'
 const timePeriodItem = '[data-testid="time-period-item"]'
 const nextBtn = '[data-testid="next-btn"]'
-const reviewTokenAmountFld = '[data-testid="token-amount"]'
-const reviewBeneficiaryAddressFld = '[data-testid="beneficiary-address"]'
-const reviewSpendingLimit = '[data-testid="spending-limit-label"]'
 const deleteBtn = '[data-testid="delete-btn"]'
 const resetTimeInfo = '[data-testid="reset-time"]'
 const spentAmountInfo = '[data-testid="spent-amount"]'
 export const spendingLimitTxOption = '[data-testid="spending-limit-tx"]'
-export const standardTx = '[data-testid="standard-tx"]'
+const standardTx = '[data-testid="standard-tx"]'
 const tokenItem = '[data-testid="token-item"]'
-const maxBtn = '[data-testid="max-btn"]'
-const nonceFld = '[data-testid="nonce-fld"]'
 const splimitBeneficiaryIcon = '[data-testid="beneficiary-icon"]'
 const splimitAssetIcon = '[data-testid="asset-icon"]'
 const splimitTimeIcon = '[data-testid="time-icon"]'
-const oldTokenAmount = '[data-testid="old-token-amount"]'
-const oldResetTime = '[data-testid="old-reset-time"]'
-const slimitReplacementWarning = '[data-testid="limit-replacement-warning"]'
 const addressItem = '[data-testid="address-item"]'
 const allActionsSection = '[data-testid="all-actions"]'
 const actionItem = '[data-testid="action-item"]'
@@ -74,10 +66,6 @@ export function selectRecipient(recipient) {
   ])
 }
 
-export function verifyOldValuesAreDisplayed() {
-  main.verifyElementsIsVisible([oldTokenAmount, oldResetTime, slimitReplacementWarning])
-}
-
 export function verifySpendingLimitsIcons() {
   main.verifyElementsIsVisible([splimitBeneficiaryIcon, splimitAssetIcon, splimitTimeIcon])
 }
@@ -95,28 +83,6 @@ export function selectToken(token) {
   main.verifyValuesExist(tokenSelector, [token])
 }
 
-export function checkMaxValue() {
-  const maxValue = []
-
-  main.extractDigitsToArray(tokenSelector, maxValue)
-  cy.get(tokenAmountFld)
-    .invoke('val')
-    .then((value) => {
-      expect(maxValue).to.contain(value)
-    })
-}
-
-export function verifyNonceState(state) {
-  if (state === constants.elementExistanceStates.exist) {
-    cy.get(nonceFld).should(constants.elementExistanceStates.exist)
-  }
-  cy.get(nonceFld).should(constants.elementExistanceStates.not_exist)
-}
-
-export function clickOnMaxBtn() {
-  cy.get(maxBtn).click()
-}
-
 export function selectSpendingLimitOption() {
   cy.get(spendingLimitTxOption).click()
   cy.get(spendingLimitTxOption).find('input').should('be.checked')
@@ -127,23 +93,10 @@ export function selectStandardOption() {
   cy.get(standardTx).find('input').should('be.checked')
 }
 
-export function verifyTxOptionExist(options) {
-  main.verifyElementsIsVisible(options)
-}
-
-export function verifySpendingOptionShowsBalance(balance) {
-  main.verifyValuesExist(spendingLimitTxOption, [balance])
-}
-
 export function verifyBeneficiaryTable() {
   main.checkTextOrder(spentAmountInfo, expectedSpendOptions)
   main.checkTextOrder(resetTimeInfo, expectedResetOptions)
   main.verifyElementsCount(deleteBtn, 3)
-}
-export function checkReviewData(tokenAmount, address, spendingLimit) {
-  cy.get(reviewTokenAmountFld).should('have.text', tokenAmount)
-  cy.get(reviewBeneficiaryAddressFld).should('contain', address)
-  cy.get(reviewSpendingLimit).should('contain', spendingLimit)
 }
 export function clickOnNextBtn() {
   cy.get(nextBtn).click()
@@ -152,10 +105,6 @@ export function clickOnNextBtn() {
 
 export function clickOnTimePeriodDropdown() {
   cy.get(timePeriodSection).click()
-}
-
-export function selectTimePeriod(period) {
-  main.selectDropdownOption(timePeriodItem, period)
 }
 
 export function checkTimeDropdownOptions() {

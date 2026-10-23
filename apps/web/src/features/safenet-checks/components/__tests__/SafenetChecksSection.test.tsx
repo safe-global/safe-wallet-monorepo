@@ -153,6 +153,10 @@ describe('SafenetChecksSection', () => {
     [CheckStatus.IN_PROGRESS, 'Safenet is simulating this transaction.'],
     [CheckStatus.BENIGN, 'Safenet found no issues'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this address/transaction as malicious'],
+    [
+      CheckStatus.DISPUTED,
+      'A sentinel flagged this transaction, and the dispute is open. Safenet will publish a final ruling.',
+    ],
     [CheckStatus.TIMED_OUT, 'Safenet check is unavailable. You can still continue.'],
   ])('renders %s copy', (status, copy) => {
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status })
@@ -165,18 +169,46 @@ describe('SafenetChecksSection', () => {
     expect(section).toHaveTextContent(copy)
   })
 
-  it('lists the cited rules on a risk under one title, most-cited first', () => {
-    const events = ['R-4.4', 'R-4.5', 'R-4.5'].map((reason) => sentinelRevealedEvent({ approved: false, reason }))
+  const renderRisk = (reasons: string[]) => {
+    const events = reasons.map((reason) => sentinelRevealedEvent({ approved: false, reason }))
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.MALICIOUS, events })
     mockUseSafenetCheck.mockReturnValue(
       buildCheckView({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
     )
+    renderInFlow({ txId: TX_ID, txDetails })
+    return screen.getByTestId('safenet-rejection-rules')
+  }
+
+  it('shows the cited rules, most-cited first, and the sentinel tally below them in one card', () => {
+    const card = renderRisk(['R-4.4', 'R-4.5', 'R-4.5'])
+
+    expect(screen.getByRole('status')).toHaveTextContent('Risks detected')
+    const text = card.textContent ?? ''
+    expect(text.indexOf('Unlimited approval')).toBeLessThan(text.indexOf('Unknown spender'))
+    expect(text.indexOf('Unknown spender')).toBeLessThan(text.indexOf('3 of 3 sentinels flagged this.'))
+    expect(screen.getAllByTestId('safenet-flagged-count')).toHaveLength(1)
+  })
+
+  it.each([
+    ['R-4.1', 'var(--color-warning-main)'],
+    ['R-4.5', 'var(--color-warning-main)'],
+    ['R-4.6', 'var(--color-error-main)'],
+  ])('colors a risk citing %s with %s', (reason, color) => {
+    const card = renderRisk([reason])
+
+    expect((card.closest('[style]') as HTMLElement).style.borderLeftColor).toBe(color)
+  })
+
+  it('names an open dispute "Under review" and links the explorer', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.DISPUTED })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.DISPUTED, publicStatus: CheckStatus.DISPUTED }),
+    )
 
     renderInFlow({ txId: TX_ID, txDetails })
 
-    expect(screen.getByRole('status')).toHaveTextContent('Risks detected')
-    const rules = screen.getByTestId('safenet-rejection-rules').textContent ?? ''
-    expect(rules.indexOf('Unlimited approval')).toBeLessThan(rules.indexOf('Unknown spender'))
+    expect(screen.getByRole('status')).toHaveTextContent('Safenet: Under review')
+    expect(screen.getByTestId('safenet-explorer-link')).toBeInTheDocument()
   })
 
   it('pulses instead of showing a severity icon while the check runs', () => {

@@ -6,10 +6,12 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { AttestationVerificationStatus, CheckStatus, type Hex } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import {
+  arbitrationTimedOutEvent,
   attestedEvent,
   buildBenignSnapshot,
   buildCheckView,
   buildSnapshot,
+  disputeTriggeredEvent,
   oracleResultEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
@@ -97,6 +99,37 @@ describe('SafenetDetailsCardView', () => {
 
     expect(screen.getByTestId('safenet-failure-reason')).toHaveTextContent(
       'Sentinels voted, but the validators did not sign the result in time.',
+    )
+  })
+
+  it('shows an open dispute as under review, not as a failed check', () => {
+    renderView({
+      publicStatus: CheckStatus.DISPUTED,
+      snapshot: buildSnapshot({ safeTxHash, status: CheckStatus.DISPUTED, events: [disputeTriggeredEvent()] }),
+    })
+
+    const card = screen.getByTestId('safenet-details-card')
+    expect(card).toHaveAttribute('data-status', CheckStatus.DISPUTED)
+    expect(card).toHaveTextContent('Under review')
+    expect(card).not.toHaveTextContent('Check failed')
+    expect(card).not.toHaveTextContent('You can still continue')
+    expect(screen.getByText(/the dispute is open\. Safenet will publish a final ruling\./)).toBeInTheDocument()
+    expect(screen.getByTestId('safenet-failure-reason')).toHaveTextContent('Sentinels disagreed. The dispute is open.')
+    expect(screen.getByTestId('safenet-details-explorer')).toBeInTheDocument()
+  })
+
+  it('keeps "no final ruling" for an arbitration that timed out', () => {
+    renderView({
+      publicStatus: CheckStatus.TIMED_OUT,
+      snapshot: buildSnapshot({
+        safeTxHash,
+        status: CheckStatus.TIMED_OUT,
+        events: [disputeTriggeredEvent(), arbitrationTimedOutEvent()],
+      }),
+    })
+
+    expect(screen.getByTestId('safenet-failure-reason')).toHaveTextContent(
+      'Sentinels disagreed, and the dispute got no final ruling.',
     )
   })
 })
