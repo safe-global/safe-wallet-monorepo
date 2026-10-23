@@ -119,6 +119,7 @@ function DialogContent({
   children,
   showCloseButton = true,
   keepMounted,
+  forceBackdrop,
   size,
   padding,
   surface,
@@ -126,11 +127,13 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
   keepMounted?: boolean
+  /** Base UI skips the backdrop of a dialog opened inside another one; force it so the parent is dimmed. */
+  forceBackdrop?: boolean
   overlayClassName?: string
 } & VariantProps<typeof dialogContentVariants>) {
   return (
     <DialogPortal keepMounted={keepMounted}>
-      <DialogOverlay className={overlayClassName} />
+      <DialogOverlay className={overlayClassName} forceRender={forceBackdrop} />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(dialogContentVariants({ size, padding, surface }), className)}

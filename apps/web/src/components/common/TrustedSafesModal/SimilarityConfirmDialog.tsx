@@ -1,12 +1,5 @@
 import { TriangleAlert } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-} from '@safe-global/views/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import DialogActions from '@/components/common/DialogActions'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -38,11 +31,7 @@ const SimilarityConfirmDialog = ({
 }: SimilarityConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      {/* Opened from inside another dialog, where Base UI skips a nested backdrop — same approach as ModalDialog's forceBackdrop. */}
-      <DialogPortal>
-        <DialogOverlay forceRender />
-      </DialogPortal>
-      <DialogContent size="sm" overlayClassName="hidden">
+      <DialogContent size="sm" forceBackdrop>
         <DialogHeader>
           <DialogTitle>Similar address detected</DialogTitle>
         </DialogHeader>
