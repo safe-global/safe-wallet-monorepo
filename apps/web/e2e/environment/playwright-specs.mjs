@@ -18,6 +18,7 @@ export const playwrightSpecs = {
   'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
+  'e2e/multichain-add-network.spec.ts': { chains: [137] },
   'e2e/multichain-create-safe.spec.ts': { chains: [1, 137] },
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
