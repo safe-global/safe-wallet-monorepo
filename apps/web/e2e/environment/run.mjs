@@ -51,6 +51,9 @@ export function walletEnvironment(manifest, env = process.env) {
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
     NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
     NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: gatewayUrl,
+    NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: 'http://localhost:4003/simulate',
+    NEXT_PUBLIC_TENDERLY_ORG_NAME: 'safe',
+    NEXT_PUBLIC_TENDERLY_PROJECT_NAME: 'safe-apps',
     SAFE_CGW_BASE_URL: gatewayUrl,
     VITE_GATEWAY_URL: gatewayUrl,
   }
