@@ -1,5 +1,5 @@
 import { Wallet } from 'ethers'
-import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
+import { nonceOf } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
