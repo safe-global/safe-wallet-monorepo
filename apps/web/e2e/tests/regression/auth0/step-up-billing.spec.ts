@@ -1,21 +1,21 @@
 // The billing actions that need a step-up; the local billing service opens a local page in place of Stripe's checkout.
 import type { Page } from '@playwright/test'
-import { test, expect } from '../../src/fixtures/test.fixture'
-import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
-import { isIsolated } from '../../src/fixtures/isolated-data'
+import { test, expect } from '../../../src/fixtures/test.fixture'
+import { TEST_ADDRESSES, safeAddress } from '../../../src/data/constants'
 import {
+  addWorkspaceSafes,
   createEmailSession,
   createWorkspace,
-  gatewayRequest,
   planName,
   removeSubscription,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  workspaceUrl,
   type EmailSession,
-} from '../../src/fixtures/email-session'
-import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
+} from '../../../src/fixtures/email-session'
+import { completeStepUp, expectActionReplayed } from '../../../src/fixtures/step-up'
 
 const WORKSPACE_NAME = 'Step-up billing'
 
@@ -31,8 +31,6 @@ async function expectLocalCheckout(page: Page, workspaceId: string, plan: string
 }
 
 test.describe('Step-up for the billing actions of a Workspace', { tag: '@regression' }, () => {
-  test.skip(!isIsolated, 'Needs the local Auth0 and billing service of the isolated stack')
-
   let user: EmailSession
   let email: string
 
@@ -79,7 +77,7 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       workspaceId = (await createWorkspace(setup, WORKSPACE_NAME)).uuid
     })
 
-    const plansUrl = () => new RegExp(`/spaces/plans\\?spaceId=${workspaceId}$`)
+    const plansUrl = () => workspaceUrl('/spaces/plans', workspaceId)
 
     test('should open the checkout of a lapsed Workspace when the step-up succeeds', async ({ safePage }) => {
       await storeSubscription(setup, workspaceId, { status: 'canceled' })
@@ -122,14 +120,11 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
 
     test('should remove the deselected Safe and downgrade when the step-up succeeds', async ({ safePage, safes }) => {
       await storeSubscription(setup, workspaceId)
-      const addresses = [
-        safes.SEP_STATIC_SAFE_1.split(':')[1],
+      await addWorkspaceSafes(setup, workspaceId, [
+        safeAddress(safes.SEP_STATIC_SAFE_1),
         TEST_ADDRESSES.PLACEHOLDER_A,
         TEST_ADDRESSES.PLACEHOLDER_B,
-      ]
-      await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
-        safes: addresses.map((address) => ({ chainId: CHAIN_IDS.sepolia, address })),
-      })
+      ])
       await safePage.goto(`/spaces/plans?spaceId=${workspaceId}`)
 
       await safePage.getByRole('button', { name: 'Switch to Starter' }).click()

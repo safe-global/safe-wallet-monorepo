@@ -2,7 +2,7 @@
  * Email sessions of the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
  */
 import { expect, request, test, type APIResponse, type BrowserContext, type Page } from '@playwright/test'
-import { CGW_BASE_URL, LS_NAMESPACE } from '../data/constants'
+import { CGW_BASE_URL, CHAIN_IDS, LS_NAMESPACE } from '../data/constants'
 import { AUTH0_CODE, Auth0Page } from '../pages/auth0.page'
 
 /** The gateway sends browsers here; playwright.isolated.config.ts maps the name to the published port of the mock. */
@@ -20,6 +20,13 @@ export type EmailSession = { email: string; cookies: Cookie[] }
 
 export const uniqueEmail = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@safe-e2e.test`
+
+// The return from Auth0 is a page load: the app boots again behind its launch screen.
+export const launchScreen = (page: Page) => page.getByTestId('launch-screen')
+
+/** The URL of a Workspace page, with nothing after the Workspace. */
+export const workspaceUrl = (path: string, workspaceId: string): RegExp =>
+  new RegExp(`${path}\\?spaceId=${workspaceId}$`)
 
 /** Starts the email sign-in from the Workspace welcome page and stops on the local Auth0 page. */
 export async function openEmailSignIn(page: Page): Promise<Auth0Page> {
@@ -163,6 +170,17 @@ export async function createWorkspace(session: EmailSession, name: string): Prom
     .poll(async () => JSON.stringify(await gatewayRequest(session, 'GET', '/v1/spaces')), { timeout: 30_000 })
     .toContain(created.uuid)
   return created
+}
+
+/** Adds Sepolia Safes to the Workspace through the gateway. */
+export async function addWorkspaceSafes(
+  session: EmailSession,
+  workspaceId: string,
+  addresses: string[],
+): Promise<void> {
+  await gatewayRequest(session, 'POST', `/v1/spaces/${workspaceId}/safes`, {
+    safes: addresses.map((address) => ({ chainId: CHAIN_IDS.sepolia, address })),
+  })
 }
 
 const billingSubscriptionsUrl = (uuid: string): string =>
