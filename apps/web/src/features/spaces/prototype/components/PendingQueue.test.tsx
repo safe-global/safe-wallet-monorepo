@@ -1146,4 +1146,32 @@ describe('queue design exploration', () => {
       FLEET_TIMEOUT,
     )
   })
+
+  describe('option C, action first', () => {
+    const renderSimple = () => renderWithUserEvent(<PendingQueue />, { routerProps: { query: { option: 'simple' } } })
+
+    it('loads the workspace once, then lists what needs you above the Safes waiting on others', async () => {
+      const { user } = renderSimple()
+      expect(screen.getByLabelText('Loading transactions')).toBeInTheDocument()
+      const needsYou = await screen.findByRole('table', { name: 'Needs you' }, { timeout: 3000 })
+      expect(
+        within(needsYou)
+          .getAllByRole('columnheader')
+          .map((header) => header.textContent),
+      ).toEqual(['Nonce', 'Transaction', 'To', 'Safe', 'Proposed', 'Note', 'Signatures', 'Status', 'Action'])
+      const [lastSignature] = within(needsYou).getAllByRole('button', { name: /^Sign & execute / })
+      // The status pill says the same as the button.
+      expect(within(lastSignature.closest('tr')!).getAllByText('Sign & execute')).toHaveLength(2)
+      expect(within(needsYou).getAllByRole('button', { name: /^Sign / }).length).toBeGreaterThan(0)
+      const bySafe = screen.getByRole('table', { name: 'Pending transactions' })
+      expect(within(bySafe).getAllByRole('button', { name: /^Expand / }).length).toBeGreaterThan(0)
+      expect(screen.getByText(/^Updated just now/)).toBeInTheDocument()
+      // Safe and Status only.
+      expect(screen.queryByRole('button', { name: /^Filter/ })).not.toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: /^Status/ }))
+      expect(
+        (await screen.findAllByRole('menuitemcheckbox')).map((item) => item.textContent?.replace(/\d+$/, '')),
+      ).toEqual(['Needs your signature', 'Ready to execute', 'Blocked', 'Conflicting'])
+    })
+  })
 })

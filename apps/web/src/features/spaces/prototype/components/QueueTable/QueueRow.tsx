@@ -74,6 +74,8 @@ export type QueueRowProps = {
   executions?: Executions
   now?: number
   onSpeedUp?: (id: string) => void
+  // Option C, Needs you: the last signature reads "Sign & execute", so it doesn't look like a plain Sign above Execute.
+  labelLastSignature?: boolean
 }
 
 export function QueueRow({
@@ -100,6 +102,7 @@ export function QueueRow({
   executions = {},
   now = Date.now(),
   onSpeedUp,
+  labelLastSignature = false,
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
@@ -132,8 +135,9 @@ export function QueueRow({
     else if (primaryAction.kind === 'remind') onRemind?.(primaryAction.target)
     else onReview(tx)
   }
+  const lastSignature = labelLastSignature && primaryAction.kind === 'flow' && primaryAction.flow === 'signAndExecute'
   const primary = {
-    label: primaryAction.label,
+    label: lastSignature ? 'Sign & execute' : primaryAction.label,
     hint: 'hint' in primaryAction ? primaryAction.hint : undefined,
     onClick: stop(runPrimary),
   }
@@ -235,6 +239,15 @@ export function QueueRow({
         <ChainIcon chainId={account.chainId} network={account.network} />
       </TableCell>
     ),
+    // Option C: the Needs you list mixes Safes, so the chain cell also names the Safe.
+    Safe: (
+      <TableCell>
+        <span className="flex min-w-0 items-center gap-2 text-sm">
+          <ChainIcon chainId={account.chainId} network={account.network} />
+          <span className="truncate">{account.name}</span>
+        </span>
+      </TableCell>
+    ),
     To: (
       <TableCell className="py-2">
         <Counterparty tx={tx} inColumn />
@@ -296,13 +309,13 @@ export function QueueRow({
             <Tooltip delay={150}>
               <TooltipTrigger
                 render={<span />}
-                aria-label={`${getStepsStatus(tx, persona).label}. ${statusHint}`}
+                aria-label={`${lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`}
                 onClick={(event) => event.stopPropagation()}
               >
                 {willBeReplaced ? (
                   <StatusChip tone="secondary">Would be replaced</StatusChip>
                 ) : (
-                  <StepsStatusChip tx={tx} persona={persona} />
+                  <StepsStatusChip tx={tx} persona={persona} label={lastSignature ? 'Sign & execute' : undefined} />
                 )}
               </TooltipTrigger>
               <TooltipContent>
@@ -372,7 +385,7 @@ export function QueueRow({
                   <Button
                     size="2xs"
                     variant={hovered ? 'default' : 'outline'}
-                    className="w-20"
+                    className={lastSignature ? 'w-28' : 'w-20'}
                     aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
                     onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
                     onMouseLeave={() => onReplaceHover(null)}
@@ -390,7 +403,7 @@ export function QueueRow({
             <Button
               size="2xs"
               variant={hovered ? 'default' : 'outline'}
-              className="w-20"
+              className={lastSignature ? 'w-28' : 'w-20'}
               aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
               onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
               onMouseLeave={() => onReplaceHover(null)}

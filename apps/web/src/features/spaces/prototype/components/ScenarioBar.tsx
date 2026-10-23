@@ -146,14 +146,19 @@ export function ScenarioBar({
         </div>
         <Tabs
           value={direction}
-          // Stat cards (option B) open on the 20-Safe workspace.
+          // Stat cards (option B) open on the 20-Safe workspace, Action first (option C) on 50.
           onValueChange={(value) =>
-            onChange(value === 'fleet' ? { option: 'fleet', scenario: '20-safes' } : { option: String(value) })
+            onChange(
+              value === 'table'
+                ? { option: 'table' }
+                : { option: String(value), scenario: value === 'fleet' ? '20-safes' : '50-safes' },
+            )
           }
         >
           <TabsList aria-label="Design direction">
             <TabsTrigger value="table">A · Safe table</TabsTrigger>
             <TabsTrigger value="fleet">B · Stat cards</TabsTrigger>
+            <TabsTrigger value="simple">C · Action first</TabsTrigger>
           </TabsList>
         </Tabs>
         {/* Milestone 1 scope from the Oct 22 review: no side panel, no overview cards, no filter counts. */}
@@ -161,6 +166,8 @@ export function ScenarioBar({
           <Switch
             id="prototype-milestone-1"
             checked={milestone1}
+            // Option C is Milestone 1 by design.
+            disabled={direction === 'simple'}
             onCheckedChange={(checked) => onChange({ m1: checked ? '1' : '0' })}
           />
           <FieldLabel htmlFor="prototype-milestone-1" className="text-xs">

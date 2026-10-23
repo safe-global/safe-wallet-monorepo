@@ -14,6 +14,7 @@ import { getOwnerWallet } from '../../services/nextSteps'
 import { isSignerOf } from '../../services/personas'
 import { RecoveryNoticeRow, RecoveryRow, type RecoveryController } from '../Recovery/RecoveryPanel'
 import { getPrimaryStatus } from '../../services/model'
+import { getSafeBadges } from '../../services/simple'
 
 // Action has no width so it takes the slack and right-aligns its buttons.
 // Widths include 16px cell padding on each side.
@@ -59,6 +60,8 @@ export type QueueSectionProps = {
   onOpenSafe?: (account: Account) => void
   // Option C: the other party gets its own column.
   alignTo?: boolean
+  // Option C: a plain Safe header with the next nonce and a conflict or blocked badge.
+  simple?: boolean
   // Transactions executing now, and the clock that drives their elapsed time.
   executions?: Executions
   now?: number
@@ -154,8 +157,9 @@ export function SafeTitle({
 
 type SectionHeaderProps = Pick<
   QueueSectionProps,
-  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'persona' | 'onOpenSafe'
+  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'persona' | 'onOpenSafe' | 'simple'
 > & {
+  items?: Proposal[]
   recoveryCount?: number
 }
 
@@ -184,7 +188,10 @@ export function SectionHeader({
   persona,
   recoveryCount = 0,
   onOpenSafe,
+  simple,
+  items = section.items,
 }: SectionHeaderProps) {
+  if (simple) return <SimpleSectionHeader section={section} onToggle={onToggle} persona={persona} items={items} />
   return (
     <div
       data-slot="section-header"
@@ -219,6 +226,36 @@ export function SectionHeader({
           >
             Bulk execute {safeBatch.proposals.length}
           </Button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Option C: the Safe, its chain and next nonce, and a badge for a conflict or a blocked queue.
+function SimpleSectionHeader({
+  section,
+  onToggle,
+  persona,
+  items,
+}: Pick<QueueSectionProps, 'section' | 'onToggle' | 'persona' | 'items'>) {
+  const { account } = section
+  const { conflict, blocked } = getSafeBadges(account, items, persona)
+  return (
+    <div
+      data-slot="section-header"
+      className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium"
+      onClick={onToggle}
+    >
+      <SafeTitle account={account} persona={persona} size={24} />
+      <span className="shrink-0 font-mono text-xs font-normal text-muted-foreground">Next #{account.nextNonce}</span>
+      <div className="ml-auto flex items-center gap-2">
+        <span className="text-xs font-normal tabular-nums text-muted-foreground">{section.items.length} pending</span>
+        {conflict && <Badge variant="warning">Conflict</Badge>}
+        {blocked > 0 && (
+          <Badge variant="outline" className="font-normal text-muted-foreground">
+            {blocked} blocked behind #{account.nextNonce}
+          </Badge>
         )}
       </div>
     </div>
@@ -307,7 +344,12 @@ export function QueueTableHead({ columns, collapse }: { columns: string[]; colla
 export type QueueSectionRowsProps = Omit<
   QueueSectionProps,
   'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'recoveries'
-> & { columns: string[]; safeRecoveries: ReturnType<RecoveryController['forAccount']>; recoveries?: RecoveryController }
+> & {
+  columns: string[]
+  safeRecoveries: ReturnType<RecoveryController['forAccount']>
+  recoveries?: RecoveryController
+  labelLastSignature?: boolean
+}
 
 // The body rows of one section: its recoveries, then its proposals.
 export function QueueSectionRows({
@@ -333,6 +375,7 @@ export function QueueSectionRows({
   executions,
   now,
   onSpeedUp,
+  labelLastSignature,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
   return (
@@ -371,6 +414,7 @@ export function QueueSectionRows({
           onGoTo={onGoTo}
           onStartFlow={onStartFlow}
           onMenuAction={onMenuAction}
+          labelLastSignature={labelLastSignature}
         />
       ))}
       {!section.items.length && !safeRecoveries.length && (

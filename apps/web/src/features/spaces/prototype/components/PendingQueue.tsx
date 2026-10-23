@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Bell, Check, CircleHelp, LoaderCircle, ShieldAlert, ShieldCheck, UserPlus } from 'lucide-react'
+import { Bell, Check, CircleHelp, LoaderCircle, RefreshCw, ShieldAlert, ShieldCheck, UserPlus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
@@ -61,7 +61,7 @@ import type { Account, Direction, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
-import { QueueGroupedTable } from './QueueTable/QueueGroupedTable'
+import { QueueFlatTable, QueueGroupedTable } from './QueueTable/QueueGroupedTable'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
@@ -76,6 +76,8 @@ import { FleetFilterMenu } from './Fleet/FleetFilterMenu'
 import { SignerLoadTable } from './Fleet/SignerLoadTable'
 import { MemberDrawer } from './Fleet/MemberDrawer'
 import { getMemberProfile } from '../services/members'
+import { formatUpdated, getNeedsYou } from '../services/simple'
+import { getStepKind } from '../services/nextSteps'
 
 const LIST_LABELS = { safes: 'Safes', signers: 'Signers' }
 
@@ -92,19 +94,39 @@ function PendingQueueView() {
   const [mainRef, contentWidth] = useElementWidth<HTMLElement>()
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
-  // The preview opens on option A, the Safe table. `?option=fleet` shows Stat cards. Old `?option=aligned` links open A.
-  const direction: Direction = router.query.option === 'fleet' ? 'fleet' : 'table'
+  // The preview opens on option A, the Safe table. `?option=fleet` shows Stat cards, `?option=simple` Action first.
+  // Old `?option=aligned` links open A.
+  const direction: Direction =
+    router.query.option === 'fleet' ? 'fleet' : router.query.option === 'simple' ? 'simple' : 'table'
   const fleet = direction === 'fleet'
-  // Milestone 1 (`?m1=1`): rows open the transaction page, with no side panel, overview cards or filter counts.
-  const milestone1 = router.query.m1 === '1'
+  // Option C: one workspace load, a Needs you list across Safes, then the rest by Safe.
+  const simple = direction === 'simple'
+  // Milestone 1 (`?m1=1`, always in C): rows open the transaction page, with no side panel or overview cards.
+  const milestone1 = router.query.m1 === '1' || simple
   const { scenario, state } = parseScenario(router.query)
   const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
 
   const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state))
   // Execute runs through Processing and Indexing before the queue updates.
-  const [executions, setExecutions] = useState<Executions>(() => getInitialExecutions(queue.items, state, Date.now()))
+  const [executions, setExecutions] = useState<Executions>(() =>
+    simple ? {} : getInitialExecutions(queue.items, state, Date.now()),
+  )
   const [now, setNow] = useState(() => Date.now())
+  // Option C: the multi-Safe Queue Service call returns every row at once, after a short wait. Refresh reloads it.
+  const [loadedAt, setLoadedAt] = useState<number | null>(simple ? null : Date.now())
+  const simpleLoading = simple && loadedAt === null && state === 'normal'
+  useEffect(() => {
+    if (!simpleLoading) return
+    const timer = setTimeout(() => setLoadedAt(Date.now()), 800)
+    return () => clearTimeout(timer)
+  }, [simpleLoading])
+  const [clock, setClock] = useState(() => Date.now())
+  useEffect(() => {
+    if (!simple) return
+    const timer = setInterval(() => setClock(Date.now()), 10_000)
+    return () => clearInterval(timer)
+  }, [simple])
   const executing = Object.keys(executions).length > 0
   useEffect(() => {
     if (!executing) return
@@ -116,12 +138,15 @@ function PendingQueueView() {
     ...account,
     nextNonce: queue.nextNonces[account.id],
   }))
-  const unavailable = state === 'loading' || state === 'error'
+  const unavailable = state === 'loading' || state === 'error' || simpleLoading
   // Safes with nothing for you start collapsed. Fleet admin keeps conflicting Safes open for everyone.
+  // In C what needs you is listed above, so every Safe starts collapsed.
   const idleSafeIds = () =>
-    buildSections({ visible: items, accounts, accountFilter: [], persona })
-      .filter((section) => section.urgency === undefined && !(fleet && hasConflicts(section.account.id, items)))
-      .map((section) => section.id)
+    simple
+      ? accounts.map((account) => `safe-${account.id}`)
+      : buildSections({ visible: items, accounts, accountFilter: [], persona })
+          .filter((section) => section.urgency === undefined && !(fleet && hasConflicts(section.account.id, items)))
+          .map((section) => section.id)
   const [collapsedSections, setCollapsedSections] = useState<string[]>(idleSafeIds)
   // Re-seed when the persona changes. The page does not remount for it.
   const [seededPersona, setSeededPersona] = useState(persona)
@@ -132,7 +157,8 @@ function PendingQueueView() {
   const [feedback, setFeedback] = useState('')
   // Recoveries come with the 20 and 50 Safe mixes, on their first three Safes.
   const allRecoveries = useRecoveries({
-    enabled: (scenario === '20-safes' || scenario === '50-safes') && state === 'normal',
+    // Option C leaves them out.
+    enabled: (scenario === '20-safes' || scenario === '50-safes') && state === 'normal' && !simple,
     accountIds: getScenarioAccounts(scenario)
       .slice(0, 3)
       .map((account) => account.id),
@@ -307,6 +333,13 @@ function PendingQueueView() {
       setFeedback('Signature added in this preview. Execution may still need other signatures or earlier transactions.')
       return
     }
+    // Option C has no execution animation: the transaction leaves the queue at once.
+    if (simple) {
+      const signed = action === 'signAndExecute' ? applyPreviewAction(queue, target.id, persona, 'sign') : queue
+      setQueue(applyPreviewAction(signed, target.id, persona, 'execute'))
+      setFeedback(`${getTransactionLabel(target)} executed in this preview. Next nonce is #${target.nonce + 1}.`)
+      return
+    }
     // The transaction stays in the queue while it executes. Sign and execute adds your signature first.
     const signed = action === 'signAndExecute' ? applyPreviewAction(queue, target.id, persona, 'sign') : queue
     setQueue(signed)
@@ -372,14 +405,20 @@ function PendingQueueView() {
   }
 
   const filtering = filters.applied.length > 0 || filters.search.length > 0 || !!signerFocus || !!proposed
-  // While filtering, hide Safes with no matches.
+  // Option C: rows you can act on now, across Safes. The Safe groups below hold the rest.
+  const needsYou = simple ? getNeedsYou(visible, persona) : []
+  const needsYouIds = new Set(needsYou.map((tx) => tx.id))
+  // While filtering, hide Safes with no matches. C hides Safes with nothing left after Needs you.
   const sections = buildSections({
-    visible,
+    visible: visible.filter((tx) => !needsYouIds.has(tx.id)),
     accounts,
     accountFilter: filters.accountFilter,
     persona,
     order: safeOrder,
-  }).filter((section) => !filtering || section.items.length > 0 || recoveries.forAccount(section.account.id).length > 0)
+  }).filter(
+    (section) =>
+      (!filtering && !simple) || section.items.length > 0 || recoveries.forAccount(section.account.id).length > 0,
+  )
   const signerLoad = getSignerLoad(filters.visible, accounts, persona)
   const focusedLoad = signerLoad.find((signer) => signer.id === signerFocus)
   const fleetPills: AppliedPill[] = [
@@ -462,7 +501,10 @@ function PendingQueueView() {
     if (section && isCollapsed(section.id)) toggleSection(section.id)
     reviewTx(tx)
   }
-  const reviewOrder = sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items)
+  const reviewOrder = [
+    ...needsYou,
+    ...sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items),
+  ]
   const reviewIndex = review ? reviewOrder.findIndex((tx) => tx.id === review.id) : -1
   const stepReview = (offset: number) => {
     const next = reviewIndex >= 0 ? reviewOrder[reviewIndex + offset] : undefined
@@ -546,18 +588,29 @@ function PendingQueueView() {
     executions,
     now,
     onSpeedUp: speedUp,
-    alignTo: direction === 'table',
+    alignTo: direction !== 'fleet',
+    simple,
   }
+  const needsYouCount = items.filter((tx) => getStepKind(tx, persona)).length
+  const pendingSafes = new Set(items.map((tx) => tx.account)).size
 
   return (
     <div className="min-h-screen bg-secondary text-foreground">
       <PrototypeFrame>
-        <FilterCountsContext.Provider value={!milestone1}>
+        <FilterCountsContext.Provider value={!milestone1 || simple}>
           <main ref={mainRef} className="@container min-w-0 px-6 pb-8 pt-5">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <Typography as="h1" variant="h3">
-                Transactions
-              </Typography>
+              <div className="flex flex-col gap-1">
+                <Typography as="h1" variant="h3">
+                  Transactions
+                </Typography>
+                {simple && !unavailable && (
+                  <p className="text-sm tabular-nums text-muted-foreground">
+                    {needsYouCount} need you · {items.length} pending across {pendingSafes}{' '}
+                    {pendingSafes === 1 ? 'Safe' : 'Safes'}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-3">
                 {/* With many Safes the executing row can be off screen. This jumps to it. */}
                 {executing && (
@@ -575,7 +628,7 @@ function PendingQueueView() {
                     {Object.keys(executions).length} executing
                   </Button>
                 )}
-                {hypernative === 'in' && (
+                {hypernative === 'in' && !simple && (
                   // Under 600px of content, only the shield shows. Its tooltip names it.
                   <Tooltip delay={300}>
                     <TooltipTrigger
@@ -587,7 +640,7 @@ function PendingQueueView() {
                     <TooltipContent>Logged in to Hypernative</TooltipContent>
                   </Tooltip>
                 )}
-                {hypernative === 'out' && (
+                {hypernative === 'out' && !simple && (
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <ShieldAlert className="size-4 text-warning-strong" aria-hidden="true" />
                     <span className="@max-[600px]:sr-only">Hypernative not connected</span>
@@ -596,7 +649,7 @@ function PendingQueueView() {
                     </Button>
                   </span>
                 )}
-                {bulkIds.length > 1 && (
+                {bulkIds.length > 1 && !simple && (
                   <Tooltip delay={150}>
                     <TooltipTrigger
                       render={
@@ -646,6 +699,19 @@ function PendingQueueView() {
                 filters={filters}
                 accounts={orderedAccounts}
                 hasItems={items.length > 0}
+                simple={simple}
+                status={
+                  simple &&
+                  !unavailable && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
+                      <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
+                        <RefreshCw aria-hidden="true" />
+                        Refresh
+                      </Button>
+                    </span>
+                  )
+                }
                 extraMenu={
                   <FleetFilterMenu
                     items={filters.visible}
@@ -685,7 +751,7 @@ function PendingQueueView() {
                   )
                 }
               />
-              {state === 'loading' && <QueueSkeleton />}
+              {(state === 'loading' || simpleLoading) && <QueueSkeleton />}
               {state === 'error' && <QueueError onRetry={() => setOption({ state: 'normal' })} />}
               {!unavailable && !list && !visible.length && !recoveries.visible.length && (
                 <Empty className="rounded-2xl border border-border bg-card">
@@ -743,7 +809,45 @@ function PendingQueueView() {
                   }
                 />
               )}
-              {!unavailable && !list && (visible.length > 0 || recoveries.visible.length > 0) && (
+              {!unavailable && !list && simple && visible.length > 0 && (
+                <div className="flex flex-col gap-8">
+                  <section aria-labelledby="needs-you-title" className="flex flex-col gap-3">
+                    <h2 id="needs-you-title" className="text-sm font-medium">
+                      Needs you{' '}
+                      <span className="tabular-nums text-muted-foreground">
+                        {needsYou.filter((tx) => getStepKind(tx, persona)).length}
+                      </span>
+                    </h2>
+                    {needsYou.length > 0 ? (
+                      <QueueFlatTable rows={needsYou} label="Needs you" {...sectionProps} />
+                    ) : (
+                      <p className="rounded-xl border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
+                        Nothing needs your signature or execution right now.
+                      </p>
+                    )}
+                  </section>
+                  {sections.length > 0 && (
+                    <section aria-labelledby="by-safe-title" className="flex flex-col gap-3">
+                      <h2 id="by-safe-title" className="text-sm font-medium">
+                        Waiting on others{' '}
+                        <span className="tabular-nums text-muted-foreground">
+                          {visible.length - needsYou.length} across {sections.length}{' '}
+                          {sections.length === 1 ? 'Safe' : 'Safes'}
+                        </span>
+                      </h2>
+                      <QueueGroupedTable
+                        sections={sections}
+                        isCollapsed={isCollapsed}
+                        onToggle={toggleSection}
+                        getSafeBatch={safeBatchFor}
+                        collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
+                        {...sectionProps}
+                      />
+                    </section>
+                  )}
+                </div>
+              )}
+              {!unavailable && !list && !simple && (visible.length > 0 || recoveries.visible.length > 0) && (
                 <QueueGroupedTable
                   sections={sections}
                   isCollapsed={isCollapsed}

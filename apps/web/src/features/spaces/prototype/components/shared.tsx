@@ -163,11 +163,12 @@ export function StatusChip({ tone, children }: { tone: StatusTone; children: Rea
 }
 
 // The status chip. An info icon marks a row that executes after an earlier nonce. The chip tooltip explains it.
-export function StepsStatusChip({ tx, persona }: { tx: Proposal; persona: Persona }) {
-  const { label, tone, after } = getStepsStatus(tx, persona)
+// `label` replaces the status name, as Needs you does for the last signature.
+export function StepsStatusChip({ tx, persona, label }: { tx: Proposal; persona: Persona; label?: string }) {
+  const { label: statusLabel, tone, after } = getStepsStatus(tx, persona)
   return (
     <span className="flex min-w-0 items-center gap-1">
-      <StatusChip tone={tone}>{label}</StatusChip>
+      <StatusChip tone={tone}>{label ?? statusLabel}</StatusChip>
       {after !== undefined && (
         <Info
           className="size-3.5 shrink-0 text-muted-foreground"
