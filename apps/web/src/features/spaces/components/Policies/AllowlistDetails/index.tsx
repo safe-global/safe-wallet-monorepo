@@ -9,12 +9,22 @@ export type AllowlistDetailsProps = {
   onClose: () => void
 }
 
-/** Active allowlists only: pending ones are not wired to CGW yet. Edit and Remove stay disabled until their flows exist. */
+/** Active allowlists only: pending ones are not wired to CGW yet. */
 const AllowlistDetails = ({ policy, onClose }: AllowlistDetailsProps): ReactElement => {
   const content = useAllowlistDetails(policy)
   const { txFlow } = useContext(TxModalContext)
 
-  return <AllowlistDrawer open={!txFlow} onClose={onClose} policy={policy} {...content} />
+  return (
+    <AllowlistDrawer
+      open={!txFlow}
+      onClose={onClose}
+      policy={policy}
+      {...content}
+      // TODO: placeholder handlers so the buttons look live; replace with the edit and remove flows
+      onEdit={() => console.log('Edit allowlist', policy)}
+      onRemove={() => console.log('Remove allowlist', policy)}
+    />
+  )
 }
 
 export default AllowlistDetails
