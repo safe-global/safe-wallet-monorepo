@@ -13,7 +13,6 @@ cypress/
 │   ├── smoke/          # Functional smoke tests (CI on every PR)
 │   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
-│   ├── happypath/      # User journey tests
 │   ├── happypath_2/    # User journey tests (run by the full on-demand CI suite)
 │   └── safe-apps/      # Safe Apps tests
 ├── fixtures/           # Static test data (JSON, safes/)
@@ -28,7 +27,6 @@ cypress/
 | Smoke        | `e2e/smoke/`       | Every PR                             | `[SMOKE] Verify ...`      |
 | Visual       | `e2e/visual/`      | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
 | Regression   | `e2e/regression/`  | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
-| Happy path   | `e2e/happypath/`   | On-demand + Wed cron (04:00 UTC)     | `Verify ...`              |
 | Happy path 2 | `e2e/happypath_2/` | Runs with the full on-demand suite   | `Verify ...`              |
 
 The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + happypath_2 + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
