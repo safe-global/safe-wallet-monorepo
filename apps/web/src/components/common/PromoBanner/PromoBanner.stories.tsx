@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import PromoBanner from './PromoBanner'
-import SpacesIllustration from '@/public/images/common/spaces-illustration.png'
 
 const meta = {
   component: PromoBanner,
@@ -22,7 +21,7 @@ export const Default: Story = {
     href: '#',
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: SpacesIllustration,
+    imageSrc: '/images/common/spaces-illustration.png',
     imageAlt: 'Promo image',
   },
 }
@@ -46,7 +45,7 @@ export const WithCustomColors: Story = {
     href: '#',
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: SpacesIllustration,
+    imageSrc: '/images/common/spaces-illustration.png',
     imageAlt: 'Special offer',
     customFontColor: '#FFD700',
     customBackground: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -60,7 +59,7 @@ export const WithoutDismiss: Story = {
     ctaLabel: 'Get started',
     href: '#',
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
-    imageSrc: SpacesIllustration,
+    imageSrc: '/images/common/spaces-illustration.png',
     imageAlt: 'Welcome',
   },
 }
@@ -83,7 +82,7 @@ export const WithOnClick: Story = {
     onCtaClick: () => alert('Button clicked!'),
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: SpacesIllustration,
+    imageSrc: '/images/common/spaces-illustration.png',
     imageAlt: 'Action required',
   },
 }

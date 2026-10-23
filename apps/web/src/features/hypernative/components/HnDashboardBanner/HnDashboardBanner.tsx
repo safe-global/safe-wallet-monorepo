@@ -1,6 +1,5 @@
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import Image from 'next/image'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import { dashboardBannerConfig } from '@safe-global/views/features/hypernative/components/HnDashboardBanner/config'
@@ -29,7 +28,7 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
 
       <div className={css.content}>
         <div className={css.badgeContainer}>
-          <Image src={badgeSrc} alt={badgeAlt} width={54} height={54} className={css.badge} />
+          <img src={badgeSrc} alt={badgeAlt} width={54} height={54} className={css.badge} />
         </div>
 
         <div className={css.textContent}>
