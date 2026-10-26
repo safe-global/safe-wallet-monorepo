@@ -41,12 +41,6 @@ describe('Multichain safe selector tests', { defaultCommandTimeout: 60000 }, () 
     safeNav.verifyMultichainSafeChainLogos(address, 2)
   })
 
-  it('Verify Rename and Add network options are available for Group of safes', () => {
-    accountsModal.openAccountsModal()
-
-    accountsModal.clickSafeOptionsBtn(0)
-  })
-
   it('Verify Rename option in the group of safes opens a new edit entry modal', () => {
     const newName = 'Renamed multichain safe'
 

@@ -236,10 +236,6 @@ export function verifyOwnerConnected(prefix = 'sep:') {
   cy.get(connectedOwnerBlock).should('contain', prefix)
 }
 
-export function verifyHomeSafeUrl(safe) {
-  cy.location('href', { timeout: 10000 }).should('include', constants.homeUrl + safe)
-}
-
 export function verifyLinkContainsUrl(linkSelector, urlPattern) {
   if (typeof linkSelector === 'string') {
     cy.contains(linkSelector).closest('a').should('have.attr', 'href').and('include', urlPattern)
@@ -408,14 +404,6 @@ export function verifyElementsStatus(elements, status) {
   elements.forEach((element) => {
     cy.get(element).should(status)
   })
-}
-
-export function formatAddressInCaps(address) {
-  if (address.startsWith('sep:0x')) {
-    return '0x' + address.substring(6).toUpperCase()
-  } else {
-    return 'Invalid address format'
-  }
 }
 
 export function verifyTextVisibility(stringsArray) {

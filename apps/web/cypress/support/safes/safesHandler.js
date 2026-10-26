@@ -3,7 +3,6 @@ export const CATEGORIES = {
   nfts: 'nfts',
   static: 'static',
   safeapps: 'safeapps',
-  recovery: 'recovery',
 }
 
 export function setSafeScenario(scenario) {

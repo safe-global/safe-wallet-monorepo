@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { http, HttpResponse } from 'msw'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
-import { mockOwnedSafes } from '@/stories/mocks/handlers'
+import { spaceWithSafesHandler } from '@/stories/mocks/handlers'
 import SpaceDashboard from '@/pages/spaces'
 
 /**
@@ -16,7 +15,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces',
-  features: { spaces: true },
+  features: { spaces: true, myAccounts: true },
   query: { spaceId: '1' },
   shadcn: true,
 })
@@ -37,14 +36,19 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-const spaceWithSafes = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: mockOwnedSafes }))
+export const WithSafes: Story = {
+  parameters: { msw: { handlers: [spaceWithSafesHandler, ...defaultSetup.handlers] } },
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findAllByText(/0xA77D/, undefined, { timeout: 10_000 })
+  },
+}
 
 export const SendFromModal: Story = {
-  parameters: { msw: { handlers: [spaceWithSafes, ...defaultSetup.handlers] } },
+  parameters: { msw: { handlers: [spaceWithSafesHandler, ...defaultSetup.handlers] } },
   play: async ({ canvasElement }) => {
-    const sendButton = await within(canvasElement).findByRole('button', { name: 'Send' })
-    await waitFor(() => expect(sendButton).toBeEnabled())
+    const sendButton = await within(canvasElement).findByRole('button', { name: 'Send' }, { timeout: 10_000 })
+    await waitFor(() => expect(sendButton).toBeEnabled(), { timeout: 10_000 })
     await userEvent.click(sendButton)
-    await within(document.body).findByRole('dialog')
+    await within(document.body).findByRole('dialog', undefined, { timeout: 10_000 })
   },
 }

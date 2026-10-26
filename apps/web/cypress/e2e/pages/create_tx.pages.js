@@ -90,16 +90,8 @@ const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 const noTxFoundStr = (type) => `0 ${type} transactions found`
 const deleteFromQueueStr = 'Delete from the queue'
-const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
-
-const disabledBultExecuteBtnTooltip =
-  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce'
-const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be included in the batch execution'
-
-const bulkExecuteBtnStr = 'Bulk execute'
 
 const gasLimit21000 = 'Gas limit must be at least 21000'
-export const swapOrder = 'Swap order settlement'
 export const txStr = 'Transactions'
 export const txDetailsStr = 'Transaction details'
 export const settingsStr = 'Settings'
@@ -230,16 +222,6 @@ export function verifyCopiedURL() {
 
     cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
   })
-}
-
-export function verifyBulkExecuteBtnIsEnabled(txs) {
-  return cy.get('button').contains(bulkExecuteBtn(txs)).should('be.enabled')
-}
-
-export function verifyEnabledBulkExecuteBtnTooltip() {
-  // Base UI tooltips open on a native mouseenter on the trigger (mouseover/mousemove don't open them)
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseenter', { force: true })
-  cy.contains(enabledBulkExecuteBtnTooltip).should('exist')
 }
 
 export function deleteTx() {
@@ -772,29 +754,6 @@ export function verifyTxDestinationAddress(receivedAddress) {
 
 export function verifyReplacedSigner(newSignerName) {
   cy.get(replacementNewSigner).should('exist').contains(newSignerName)
-}
-
-function verifyBulkActions(actions) {
-  actions.forEach((action) => {
-    cy.contains(action).should('exist')
-  })
-}
-
-export function verifyBulkTxHistoryBlock(order, tx, actions) {
-  cy.contains(order)
-    .parent('div')
-    .parent()
-    .eq(0)
-    .within(() => {
-      cy.contains(tx)
-      verifyBulkActions(actions)
-    })
-}
-
-export function verifyBulkExecuteBtnIsDisabled() {
-  cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
-  cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 
 export function toggleUntrustedTxs() {

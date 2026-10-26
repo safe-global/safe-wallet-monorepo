@@ -43,8 +43,6 @@ export default [
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
-      // Outside tsconfig.json; `e2e:env:test` type-checks them with their own config
-      '**/e2e/environment/infra/mocks/',
     ],
   },
   ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),

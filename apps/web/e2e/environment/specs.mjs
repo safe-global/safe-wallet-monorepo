@@ -2,7 +2,6 @@
 const securityProviders = 'Blockaid, Hypernative and Tenderly are hosted providers'
 const positionsProvider = 'positions come from Zerion, a hosted provider'
 const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepolia, not the fork'
-const productionApp = 'the case opens the production app'
 const fourthChain = 'the list only appears when a chain is left to add, which needs a fourth fork'
 
 /**
@@ -17,23 +16,14 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/balances_pagination.cy.js': { scenario: 'preparePaginationScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/regression/bulk_execution.cy.js': { scenario: 'prepareBulkExecutionScenario' },
   'cypress/e2e/regression/copilot.cy.js': {
     scenario: 'prepareCopilotScenario',
     chains: [137],
     skips: {
       '[Recipient Analyse] Verify that Different setup warning is shown - 4D': securityProviders,
-      '[Recipient Analyse] Verify that Known recipient is shown when address is in address book - 1A':
-        securityProviders,
-      '[Recipient Analyse] Verify that Known recipient is shown when recipient is a Safe you own - 1A':
-        securityProviders,
-      '[Recipient Analyse] Verify that Low activity recipient warning is shown for address with few transactions - 2':
-        securityProviders,
       '[Recipient Analyse] Verify that Missing ownership warning is shown - 4B': securityProviders,
       '[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A': securityProviders,
       '[Recipient Analyse] Verify that Recurring recipient is shown with interaction count - 3B': securityProviders,
-      '[Recipient Analyse] Verify that Unknown recipient is shown when address is not in address book - 1B':
-        securityProviders,
       '[Recipient Analyse] Verify that Unsupported network warning is shown - 4C': securityProviders,
       '[Tenderly Simulation] Verify failed simulation state': securityProviders,
       '[Tenderly Simulation] Verify success simulation state': securityProviders,
@@ -41,8 +31,6 @@ export const isolatedSpecs = {
       '[Threat Analyse] Verify Malicious Native Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A': securityProviders,
-      '[Threat Analyse] Verify that Safe Shield shows no threat detected-9C': securityProviders,
-      '[Threat Analyse] Verify that Safe Shield shows warning details for reverted txs-9B': securityProviders,
       '[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue': securityProviders,
     },
   },
@@ -56,8 +44,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
   'cypress/e2e/regression/import_export_data_2.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
-  'cypress/e2e/regression/load_safe_2.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1] },
-  'cypress/e2e/regression/load_safe_3.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1, 137] },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/multichain_create_safe_flow.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
   'cypress/e2e/regression/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
@@ -92,15 +78,6 @@ export const isolatedSpecs = {
     },
   },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
-  'cypress/e2e/regression/recovery_2.cy.js': { scenario: 'prepareRecoveryScenario' },
-  'cypress/e2e/regression/recovery.cy.js': {
-    scenario: 'prepareRecoveryScenario',
-    skips: {
-      'Verify that the Security section contains Account recovery block on supported netwroks': productionApp,
-      'Verify that the Security and Login section does not contain Account recovery block on unsupported networks':
-        productionApp,
-    },
-  },
   'cypress/e2e/regression/safe_selector.cy.js': { scenario: 'prepareSafeSelectorScenario', chains: [1] },
   'cypress/e2e/regression/sidebar_new.cy.js': { scenario: 'prepareSafeSelectorScenario' },
   'cypress/e2e/regression/spaces_basicflow.cy.js': { scenario: 'prepareBasicScenario' },
@@ -142,9 +119,7 @@ export const isolatedSpecs = {
   'cypress/e2e/safe-apps/safe_permissions.cy.js': { scenario: 'prepareSafeAppsHostScenario' },
   'cypress/e2e/safe-apps/tx-builder_3.cy.js': { scenario: 'prepareCowFallbackScenario' },
   'cypress/e2e/safe-apps/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
-  'cypress/e2e/smoke/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/smoke/balances_endpoints.cy.js': { scenario: 'prepareBalancesEndpointsScenario', chains: [1] },
   'cypress/e2e/smoke/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
   'cypress/e2e/smoke/dashboard.cy.js': { scenario: 'prepareDashboardScenario' },
-  'cypress/e2e/smoke/landing.cy.js': { scenario: 'prepareBasicScenario' },
 }
