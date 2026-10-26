@@ -1,5 +1,4 @@
 import { LS_NAMESPACE } from '../../src/config/constants'
-import safes from '../fixtures/safes/static.js'
 
 // Visual regression (Argos) test settings
 export const VISUAL_VIEWPORT = { viewportWidth: 1920, viewportHeight: 1080 }
@@ -48,7 +47,6 @@ export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
-export const appsUrlGeneral = '/apps?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='
@@ -130,16 +128,6 @@ export const networkKeys = {
 export const mainSideMenuOptions = {
   home: 'Home',
 }
-export const SEPOLIA_CSV_ENTRY = {
-  name: 'test-sepolia-3',
-  address: safes.SEP_STATIC_SAFE_5,
-}
-
-export const GNO_CSV_ENTRY = {
-  name: 'gno user 1',
-  address: '0x61a0c717d18232711bC788F19C9Cd56a43cc8872',
-}
-
 export const networks = {
   ethereum: 'Ethereum',
   goerli: /^G(ö|oe)rli$/,

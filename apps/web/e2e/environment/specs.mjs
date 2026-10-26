@@ -9,8 +9,6 @@ const fourthChain = 'the list only appears when a chain is left to add, which ne
  * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/assets_2.cy.js': { scenario: 'prepareAssetsSecondScenario' },
   'cypress/e2e/regression/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/balances_pagination.cy.js': { scenario: 'preparePaginationScenario' },

@@ -303,33 +303,12 @@ export const addressBookData = {
       '0xE5577b9E75F94C4a900E74F63F79A7968e812208': 'Nested safe2',
     },
   }),
-  addedSafesImport: {
-    11155111: { '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': 'imported-safe' },
-  },
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },
   // Getters, because isolated runs set the default owner after this module loads.
   get sepoliaAddress2() {
     return { 11155111: { [defaultOwnerAddress()]: 'Automation owner' } }
-  },
-  dataSet: {
-    5: {
-      '0xD9cA710D531c20117dc74850C5CdebeDA86fbF76': 'qa-automate-tests-1@safe.global',
-      '0x50564D5f8954f94E8045C59f2c884D7CE203b661': 'Relaxed Goerli Safe',
-      '0x96D56627215c084649596eaC87bEA4157d6A9304': 'Prominent Goerli Safe',
-      '0x2FD9a2F6e70E94deB76c54062564C99abFd3237D': 'Peaceful Goerli Safe',
-      '0xdF9De87c2D4932645813B1d878e45f60a299f3Af': 'Kind Goerli Safe',
-      '0xc8981a24a4F17b0C92cAF55A2bE30D3D0C689b95': 'Delighted Goerli Safe',
-      '0x81CC5855C98cfe29a70EAbA3840D9A9B90cA2B60': 'Delightful Goerli Safe',
-      '0x7C51F1e3948f0B1e4008A913Ed047bC2ED1fe75D': 'Congenial Goerli Safe',
-    },
-    11155111: {
-      '0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7': 'test-sepolia-3',
-      '0xf405BC611F4a4c89CCB3E4d083099f9C36D966f8': 'sepolia-test-4',
-      '0x03042B890b99552b60A073F808100517fb148F60': 'sepolia-test-5',
-      '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415': 'assets-test-sepolia',
-    },
   },
   importedSafe: {
     5: {
@@ -391,11 +370,6 @@ export const addressBookData = {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': 'Undeployed Sepolia',
     },
   },
-  get sortingData() {
-    return {
-      11155111: { [defaultOwnerAddress()]: 'AA Safe', '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'BB Safe' },
-    }
-  },
   autofillData: {
     11155111: {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
@@ -412,37 +386,6 @@ export const addressBookData = {
       '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0': 'Test Recipient',
       '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D': 'Test Safe Address',
       '0x9445deb174C1eCbbfce8d31D33F438B8e7a0F1BA': 'Test Signer (Owner 4)',
-    },
-  },
-  pagination: {
-    11155111: {
-      '0xB8Bfd72663602dB33A454e3D899fb1ee95F54c26': 'Safe 1',
-      '0x368D6B0Aa605253D19AB7C1F006a61Aa46bbECEb': 'Safe 2',
-      '0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9': 'Safe 3',
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': 'Safe 4',
-      '0xC23e061252BFc7967203D054136d8fA7c7df2fc4': 'Safe 5',
-      '0x0Ec5EF749cce5185900819A3457C0f9129a9a9a1': 'Safe 6',
-      '0x0A0EEb6fBCc7c82259E548Fc4617175A357b3e71': 'Safe 7',
-      '0x10B45a24640E2170B6AA63ea3A289D723a0C9cba': 'Safe 8',
-      '0xF21445699e91aC6F2EeeAF1a19510AC4197e59aB': 'Safe 9',
-      '0x9E6DAfe829431e1892EcF8461FDAd02665170c31': 'Safe 10',
-      '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': 'Safe 11',
-      '0xB8Bfd72663602dB33A454e3D899fb1ee95F54c26': 'Safe 12',
-      '0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7': 'Safe 13',
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': 'Safe 14',
-      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': 'Safe 15',
-      '0xf8D6450d6ae36328cBAA97B1998C741be498c5D3': 'Safe 16',
-      '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415': 'Safe 17',
-      '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb': 'Safe 18',
-      '0x81034C61a318649F7aD43f9e8C1051427e326443': 'Safe 19',
-      '0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e': 'Safe 20',
-      '0x4DD4cB2299E491E1B469245DB589ccB2B16d7bde': 'Safe 21',
-      '0xD1571E8Cc4438aFef2836DD9a0E5D09fb63EDE9a': 'Safe 22',
-      '0x691B95d2531BFf662767839d668d3D7651524C21': 'Safe 23',
-      '0x39419cC835046D0c7beca69638eBBDD0F9FD85e4': 'Safe 24',
-      '0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F': 'Safe 25',
-      '0x8A89C14ed0900a95fc94075D0823f8c744789a40': 'Safe 26',
-      '0xc2F3645bfd395516d1a18CA6ad9298299d328C01': 'Safe 27',
     },
   },
   cookies: cookieState,
@@ -901,10 +844,6 @@ export const addedSafes = {
       },
     },
   }),
-}
-
-export const pinnedApps = {
-  transactionBuilder: storageFixture('pinnedApps.transactionBuilder', { 11155111: { pinned: [24], opened: [] } }),
 }
 
 export const customApps = (url) => ({
