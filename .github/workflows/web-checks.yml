@@ -45,7 +45,7 @@ jobs:
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Run ESLint with suggestions (PR only)
         if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@v4.1.36
+        uses: CatChen/eslint-suggestion-action@v4.1.37
         with:
           request-changes: true
           fail-check: true
