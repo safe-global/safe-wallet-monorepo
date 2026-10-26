@@ -80,43 +80,10 @@ const DAI = {
   name: 'Dai Stablecoin',
   decimals: 18,
 }
-const COMP = { address: '0xc00e94Cb662C3520282E6f5717214004A7f26888', symbol: 'COMP', name: 'Compound', decimals: 18 }
-const OSETH = {
-  address: '0xf1C9acDc66974dFB6dEcB12aA385b9cD01190E38',
-  symbol: 'osETH',
-  name: 'Staked ETH',
-  decimals: 18,
-}
-const WETH = {
-  address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  symbol: 'WETH',
-  name: 'Wrapped Ether',
-  decimals: 18,
-}
-const WBTC = { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', symbol: 'WBTC', name: 'Wrapped BTC', decimals: 8 }
-
-const SAFENET = { name: 'Safenet', url: 'https://safe.global/staking' }
-const COMPOUND = { name: 'Compound V2', url: 'https://app.compound.finance' }
-const STAKEWISE = { name: 'StakeWise', url: 'https://app.stakewise.io/' }
-const BALANCER = { name: 'Balancer', url: 'https://balancer.fi/' }
-
-/** A mainnet position of `app` in the group `groupId`, named `name` */
-const position = (app, name, groupId, type, token, quantity, value) => ({
-  chainId: '1',
-  type,
-  token,
-  quantity,
-  value,
-  price: value / Number(quantity),
-  app,
-  name,
-  groupId,
-})
 
 /**
- * A mainnet Safe with the kinds of DeFi positions that Zerion reports for real Safes (taken from a staging Safe): one
- * group with two position types, two groups with one name, a deposit with a loan against it, a two-token pool, and a
- * plain token, which is no position.
+ * A mainnet Safe with DeFi positions in two apps, as Zerion reports them for a staging Safe; its plain ETH is a token,
+ * not a position.
  */
 export async function prepareZerionPositionsScenario(env, owners) {
   const context = await createSafe(onChain(env, MAINNET), owners, {
@@ -126,16 +93,26 @@ export async function prepareZerionPositionsScenario(env, owners) {
   try {
     await registerZerionPositions(env, context.safeAddress, [
       { chainId: '1', type: 'wallet', token: ETH, quantity: '1', value: 2000, price: 2000 },
-      position(SAFENET, 'SAFE Staking', 'safenet-staking', 'staked', SAFE_TOKEN, '350.495', 35.07),
-      position(SAFENET, 'SAFE Staking', 'safenet-staking', 'locked', SAFE_TOKEN, '250.495', 25.06),
-      position(COMPOUND, 'Compound V2 Lending', 'compound-dai', 'deposit', DAI, '8.2291', 8.23),
-      position(COMPOUND, 'Compound V2 Lending', 'compound-dai', 'reward', COMP, '0.000191', 0.0039),
-      position(COMPOUND, 'Compound V2 Lending', 'compound-eth', 'deposit', ETH, '0.002009', 4.69),
-      position(COMPOUND, 'Compound V2 Lending', 'compound-eth', 'reward', COMP, '0.0001', 0.002),
-      position(STAKEWISE, 'StakeWise Lending', 'stakewise-eth', 'deposit', ETH, '0.0025755', 6.01),
-      position(STAKEWISE, 'StakeWise Lending', 'stakewise-eth', 'loan', OSETH, '0.0010024', 2.52),
-      position(BALANCER, 'Balancer WBTC/WETH Pool', 'balancer-wbtc-weth', 'deposit', WETH, '0.000617', 1.44),
-      position(BALANCER, 'Balancer WBTC/WETH Pool', 'balancer-wbtc-weth', 'deposit', WBTC, '0.00001792', 1.44),
+      {
+        chainId: '1',
+        type: 'staked',
+        token: SAFE_TOKEN,
+        quantity: '350.495',
+        value: 35.07,
+        price: 0.1,
+        app: { name: 'Safenet', url: 'https://safe.global/staking' },
+        name: 'SAFE Staking',
+      },
+      {
+        chainId: '1',
+        type: 'deposit',
+        token: DAI,
+        quantity: '8.2291',
+        value: 8.23,
+        price: 1,
+        app: { name: 'Compound V2', url: 'https://app.compound.finance' },
+        name: 'Compound V2 Lending',
+      },
     ])
     return { safes: { static: { ETH_ZERION_POSITIONS_SAFE: `eth:${context.safeAddress}` } } }
   } finally {

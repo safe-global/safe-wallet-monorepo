@@ -1,5 +1,5 @@
 /**
- * Assets › Positions: one section per app, with a table per position group.
+ * Assets › Positions: one section per app.
  *
  * Rule: Page Objects hold locators and actions only. Assertions belong in the test.
  */
@@ -21,19 +21,5 @@ export class PositionsPage {
     return this.appSections.filter({
       has: this.page.locator('[data-slot="accordion-trigger"]').getByText(appName, { exact: true }),
     })
-  }
-
-  /** The position groups of an app section, one table each, in page order */
-  groups(section: Locator): Locator {
-    return section.getByRole('table')
-  }
-
-  /** The title of a group: the first column header of its table */
-  groupTitle(group: Locator): Locator {
-    return group.getByRole('columnheader').first()
-  }
-
-  positionRows(group: Locator): Locator {
-    return group.getByTestId('table-row')
   }
 }
