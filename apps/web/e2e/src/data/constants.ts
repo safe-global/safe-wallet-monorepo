@@ -55,6 +55,8 @@ export const SAFES = {
   ETH_TOKEN_LIST_SAFE: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
   /** Isolated stack only (no staging Safe): mainnet Safe whose tokens and positions the local Zerion lists */
   ETH_ZERION_SAFE: 'eth:0x0000000000000000000000000000000000000000',
+  /** Isolated stack only (no staging Safe): mainnet Safe with the DeFi positions that the local Zerion lists */
+  ETH_ZERION_POSITIONS_SAFE: 'eth:0x0000000000000000000000000000000000000000',
   /** Isolated stack only (no staging Safe): 3/3 Safe of the emulated Ledger with a transfer that needs its signature */
   SEP_LEDGER_SIGN_SAFE: 'sep:0x0000000000000000000000000000000000000000',
   /** Isolated stack only (no staging Safe): 1/1 Safe of the emulated Ledger with a signed transfer to execute */

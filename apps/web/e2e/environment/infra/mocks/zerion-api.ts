@@ -34,6 +34,8 @@ export type Row = {
   price: number | null
   trash?: boolean
   app?: { name: string; url: string }
+  /** The position's name, which the gateway shows as its group title, such as "Compound V2 Lending"; the token name by default */
+  name?: string
   groupId?: string
 }
 
@@ -57,7 +59,8 @@ function isRow(value: unknown): value is Row {
     typeof token.name === 'string' &&
     Number.isInteger(token.decimals) &&
     typeof row.quantity === 'string' &&
-    /^\d+(\.\d+)?$/.test(row.quantity)
+    /^\d+(\.\d+)?$/.test(row.quantity) &&
+    (row.name === undefined || typeof row.name === 'string')
   )
 }
 
@@ -93,7 +96,7 @@ export function zerionPosition(row: Row, index: number): unknown {
     id: `${network}-${token.address ?? 'base'}-${row.type}-${index}`,
     attributes: {
       protocol: row.app?.name ?? null,
-      name: token.name,
+      name: row.name ?? token.name,
       position_type: row.type,
       application_metadata: row.app ? { name: row.app.name, icon: { url: null }, url: row.app.url } : null,
       quantity: {
