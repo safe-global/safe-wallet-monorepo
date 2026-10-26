@@ -2,7 +2,6 @@ import * as accounts from './accounts.mjs'
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
 import * as batch from './batch.mjs'
-import * as bulk from './bulk.mjs'
 import * as chains from './chains.mjs'
 import * as counterfactual from './counterfactual.mjs'
 import * as cow from './cow.mjs'
@@ -23,13 +22,13 @@ import * as sharing from './sharing.mjs'
 import * as spaces from './spaces.mjs'
 import * as spendingLimits from './spending-limits.mjs'
 import * as transferForm from './transfer-form.mjs'
+import * as zerion from './zerion.mjs'
 
 const modules = [
   accounts,
   assets,
   basic,
   batch,
-  bulk,
   chains,
   counterfactual,
   cow,
@@ -50,6 +49,7 @@ const modules = [
   spaces,
   spendingLimits,
   transferForm,
+  zerion,
 ]
 
 /** The scenario functions by name; specs.mjs refers to them by these names. */

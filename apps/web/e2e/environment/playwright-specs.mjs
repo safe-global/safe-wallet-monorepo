@@ -17,6 +17,7 @@ export const playwrightSpecs = {
   'e2e/delete.spec.ts': {},
   'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
+  'e2e/load-safe.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/multichain-add-network.spec.ts': { chains: [1] },
   'e2e/multichain-create-safe.spec.ts': { chains: [1] },
@@ -24,15 +25,31 @@ export const playwrightSpecs = {
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
   'e2e/policies.spec.ts': {},
+  'e2e/positions.spec.ts': {
+    scenarios: ['prepareZerionPositionsScenario'],
+    safes: { ETH_ZERION_POSITIONS_SAFE: 'ETH_ZERION_POSITIONS_SAFE' },
+    chains: [1],
+  },
   'e2e/proposer.spec.ts': {},
   'e2e/proposer-settings.spec.ts': {},
   'e2e/recovery.spec.ts': {},
   'e2e/reject.spec.ts': {},
   'e2e/relay.spec.ts': {},
   'e2e/replace.spec.ts': {},
+  'e2e/safe-shield-recipient.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'e2e/tx-history-filter.spec.ts': {},
+  'e2e/portfolio.spec.ts': {
+    scenarios: ['prepareZerionPortfolioScenario'],
+    safes: { ETH_ZERION_SAFE: 'ETH_ZERION_SAFE' },
+    chains: [1],
+  },
+  'e2e/token-lists.spec.ts': {
+    scenarios: ['prepareBalancesEndpointsScenario'],
+    safes: { ETH_TOKEN_LIST_SAFE: 'ETH_STATIC_SAFE_15' },
+    chains: [1],
+  },
   'e2e/tx-builder.spec.ts': {},
   'regression/auth0/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
@@ -77,7 +94,11 @@ export const playwrightSpecs = {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_3', SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
   },
-  'smoke/dashboard.spec.ts': { scenarios: ['prepareBasicScenario'], safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' } },
+  'smoke/dashboard.spec.ts': {
+    // Both scenarios return SEP_STATIC_SAFE_2; the last one wins, so the Safe with the queue comes last.
+    scenarios: ['prepareBasicScenario', 'prepareDashboardScenario'],
+    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0', SEP_QUEUE_SAFE: 'SEP_STATIC_SAFE_2' },
+  },
   'smoke/landing.spec.ts': {},
   // The basic Safe's history holds its creation, a "Success" row
   'smoke/tx-history.spec.ts': {
