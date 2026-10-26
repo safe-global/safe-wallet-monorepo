@@ -37,7 +37,7 @@ import {
   REQUEST_POLICY_FORM_WIDTH,
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
-  isAllowlistPolicy,
+  isActiveAllowlistPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -96,11 +96,7 @@ const Policies = ({
 
   const selectPolicy = useCallback((policy: Policy) => {
     // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
-    if (
-      isProposerPolicy(policy) ||
-      isSpendingLimitPolicy(policy) ||
-      (isAllowlistPolicy(policy) && policy.status === 'active')
-    ) {
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isActiveAllowlistPolicy(policy)) {
       setOpenPolicy(policy)
     }
   }, [])
@@ -274,7 +270,7 @@ const Policies = ({
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
       )}
 
-      {openedPolicy && isAllowlistPolicy(openedPolicy) && openedPolicy.status === 'active' && (
+      {openedPolicy && isActiveAllowlistPolicy(openedPolicy) && (
         <AllowlistDetails
           policy={openedPolicy}
           policies={policies}
