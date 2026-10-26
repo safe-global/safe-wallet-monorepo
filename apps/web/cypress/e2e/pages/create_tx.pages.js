@@ -76,7 +76,6 @@ const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 const transactionsPerHrStr = 'free transactions left today'
-const maxAmountBtnStr = 'Max'
 const nativeTokenTransferStr = 'ETH'
 const estimatedFeeStr = 'Estimated fee'
 // Re-export for backward compatibility
@@ -123,9 +122,6 @@ const advancedParametersInputNames = {
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-
-//Arrays for the Transaction Details on Tx creation for different type of txs
-export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
 
 export const txActions = {
   setFallbackHandler: 'setFallbackHandler',
@@ -341,11 +337,6 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-//Search in the element with the scroll
-export function verifytxAccordionDetailsScroll(data) {
-  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
-}
-
 export function switchView(view) {
   if (view === advancedDetailsViewOptions.table) {
     cy.get(tableViewBtn).click()
@@ -533,10 +524,6 @@ export function clickOnTokenselectorAndSelectSepoliaEth() {
 export function clickOnTokenselectorAndSelectToken(tokenName) {
   cy.get(tokenSelector).click()
   cy.get('[data-slot="select-content"]').contains(tokenName).click()
-}
-
-export function setMaxAmount() {
-  cy.contains(maxAmountBtnStr).click()
 }
 
 export function verifyMaxAmount(token, tokenAbbreviation) {

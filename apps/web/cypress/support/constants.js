@@ -248,4 +248,3 @@ export const sessionStorageKeys = {
 }
 
 // Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
-export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'
