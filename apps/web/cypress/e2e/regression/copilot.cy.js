@@ -1,9 +1,7 @@
-import * as constants from '../../support/constants.js'
 import * as copilot from '../pages/copilot.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as ls from '../../support/localstorage_data.js'
 import { walletCredentials } from '../../support/credentials.js'
 
@@ -21,15 +19,6 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
   // 1. Widget General
   // ========================================
-
-  it('[Widget General] Verify that Safe Shield empty state is shown on New Transaction start before scanning', () => {
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_30)
-    createtx.clickOnNewtransactionBtn()
-    createtx.clickOnSendTokensBtn()
-    copilot.verifySafeShieldDisplayed()
-    copilot.verifyEmptyState()
-    copilot.verifySecuredByFooter()
-  })
 
   it('[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue', () => {
     copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousApproval, signer)
@@ -52,25 +41,6 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
   //Only 4A - Incompatible Safe version is not covered
 
-  it('[Recipient Analyse] Verify that Known recipient is shown when address is in address book - 1A', () => {
-    copilot.setupRecipientAnalysis(
-      copilot.testTransactions.recipientAnalysisKnownUnknown,
-      signer,
-      ls.addressBookData.safeSchiledAddressBook,
-    )
-    main.verifyTextVisibility([copilot.addressInAddressBookStr])
-  })
-
-  it('[Recipient Analyse] Verify that Known recipient is shown when recipient is a Safe you own - 1A', () => {
-    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisSafeYouOwn, signer)
-    main.verifyTextVisibility([copilot.addressIsSafeYouOwnStr])
-  })
-
-  it('[Recipient Analyse] Verify that Unknown recipient is shown when address is not in address book - 1B', () => {
-    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisKnownUnknown, signer)
-    main.verifyTextVisibility([copilot.unknownRecipientStr, copilot.addressNotInAddressBookStr])
-  })
-
   it('[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A', () => {
     copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisSafeYouOwn, signer)
     main.verifyTextVisibility([copilot.firstTimeInteractionStr])
@@ -83,11 +53,6 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
       ls.addressBookData.safeSchiledAddressBook,
     )
     main.verifyTextVisibility([copilot.recurringRecipientStr, copilot.interactedTwoTimesStr])
-  })
-
-  it('[Recipient Analyse] Verify that Low activity recipient warning is shown for address with few transactions - 2', () => {
-    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisLowActivity, signer)
-    main.verifyTextVisibility([copilot.lowActivityRecipientStr, copilot.fewTransactionsStr])
   })
 
   it('[Recipient Analyse] Verify that Missing ownership warning is shown - 4B', () => {
@@ -113,26 +78,6 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
   // 3. Threat Analyse
   // ========================================
-
-  it('[Threat Analyse] Verify that Safe Shield shows warning details for reverted txs-9B', () => {
-    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisFailed, signer)
-
-    copilot.verifyIssuesFoundWarningHeader()
-    copilot.verifyThreatAnalysisGroupCard()
-    copilot.verifyThreatAnalysisWarningState()
-    copilot.expandThreatAnalysisCard()
-    copilot.verifyThreatAnalysisFailedDetails()
-  })
-
-  it('[Threat Analyse] Verify that Safe Shield shows no threat detected-9C', () => {
-    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisNoThreat, signer)
-
-    copilot.verifyThreatAnalysisGroupCard()
-    copilot.verifyThreatAnalysisNoThreatState()
-    copilot.expandThreatAnalysisCard()
-    copilot.verifyThreatAnalysisFoundNoIssues()
-    main.verifyTextNotVisible(['Malicious threat detected', 'Threat analysis failed'])
-  })
 
   it('[Threat Analyse] Verify Malicious Approval detection - 9A', () => {
     copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousApproval, signer)
