@@ -151,13 +151,6 @@ export const stagingSafes = {
     ether: parseEther('13.61'),
   },
   MATIC_STATIC_SAFE_34: { chainId: 137, owners: [sharedOwner, owner4], threshold: 1, ether: parseEther('0.11') },
-  // Funds category; its 575 executed transactions are not replayed.
-  ETH_FUNDS_SAFE_13: {
-    chainId: 1,
-    owners: ['0xd0ba955b8F34561907Abb588603a2400e06BD2d2', '0x4c3c38a459F0bAABB763290111B66ed01b5fEfA2', polygonOwner],
-    threshold: 2,
-    ether: 1137693581890135n,
-  },
 }
 
 // On-chain state of the staging Safe App Safes at the fork block.
