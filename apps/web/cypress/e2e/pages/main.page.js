@@ -63,7 +63,7 @@ export function awaitVisualStability() {
  *
  * @param {object} options
  * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
- * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.nativeSwaps)
  * @param {string} [options.removeFlag]  - Feature flag to remove (before adding `addFlag`, if any)
  * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
  * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)

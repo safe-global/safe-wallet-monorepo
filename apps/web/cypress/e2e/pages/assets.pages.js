@@ -1,8 +1,6 @@
 import * as main from './main.page'
 import * as addressbook from '../pages/address_book.page'
-import * as createTx from '../pages/create_tx.pages'
 import { tokenSelector } from '../pages/create_tx.pages'
-import { nftsRow } from '../pages/nfts.pages'
 
 // Re-export common selectors from main.page.js for backward compatibility
 export const tableContainer = main.tableContainer
@@ -22,7 +20,6 @@ const manageTokensMenu = '[data-testid="manage-tokens-menu"]'
 const hideTokensMenuItem = '[data-testid="hide-tokens-menu-item"]'
 const showAllTokensSwitch = '[data-testid="show-all-tokens-switch"]'
 const hideSmallBalancesSwitch = '[data-testid="hide-small-balances-switch"]'
-export const tablePaginationContainer = '[data-testid="table-pagination"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"] > button'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"] > button'
@@ -32,7 +29,6 @@ const hiddenTokenCounter = '[data-testid="hidden-token-count"]'
 const currencySelector = '[data-testid="currency-selector"]'
 const currencyItem = '[data-testid="currency-item"]'
 const tokenItem = '[data-testid="token-item"]'
-const sendBtn = '[data-testid="send-button"]'
 
 const assetNameSortBtnStr = 'Asset'
 const assetBalanceSortBtnStr = 'Balance'
@@ -54,8 +50,6 @@ export const assetsTableActionsCell = '[data-testid="table-cell-actions"]'
 const tokenName = '[data-testid="token-name"]'
 const tokenSymbol = '[data-testid="token-symbol"]'
 const tokenBalanceCell = '[data-testid="token-balance"]'
-
-export const shortAddressRegex = /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/
 
 // The switch is a Base UI control: the test id sits on the `role="switch"` element itself and the
 // state lives in `aria-checked`. It renders a native `input[type="checkbox"]` only when given a
@@ -127,23 +121,6 @@ export const currencyDaiCap = 'DAI'
 export const currencyDaiAlttext = 'DAI'
 export const currencyDaiBalance = '82'
 
-export function checkNftAddressFormat() {
-  cy.get(nftsRow).each(($el) => {
-    cy.wrap($el).invoke('text').should('match', shortAddressRegex)
-  })
-}
-
-export function checkNftCopyIconAndLink() {
-  cy.get(nftsRow).each(($el) => {
-    cy.wrap($el).within(() => {
-      cy.get(createTx.copyIcon, { timeout: 5000 }).should('exist')
-    })
-    cy.wrap($el).within(() => {
-      cy.get(createTx.explorerBtn, { timeout: 5000 }).should('exist')
-    })
-  })
-}
-
 function clickOnTokenSelector(index) {
   cy.get(tokenSelector).eq(index).click()
 }
@@ -172,15 +149,6 @@ export function clickOnSendBtn(index) {
         .then((elements) => {
           cy.wrap(elements[0]).invoke('css', 'opacity', 100).click()
         })
-    })
-}
-
-export function clickOnSendBtnAssetsTable(index) {
-  cy.get(balanceSingleRow)
-    .eq(index)
-    .find(assetsTableActionsCell)
-    .within(() => {
-      cy.get(sendBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click()
     })
 }
 

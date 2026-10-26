@@ -143,13 +143,6 @@ export const stagingSafes = {
       { address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', amount: 100n }, // USDT0
     ],
   },
-  MATIC_STATIC_SAFE_33: {
-    chainId: 137,
-    owners: [sharedOwner, '0x11B1D54B66e5e226D6f89069c21A569A22D98cfd', owner4],
-    threshold: 1,
-    nonce: 19,
-    ether: parseEther('13.61'),
-  },
   MATIC_STATIC_SAFE_34: { chainId: 137, owners: [sharedOwner, owner4], threshold: 1, ether: parseEther('0.11') },
 }
 
