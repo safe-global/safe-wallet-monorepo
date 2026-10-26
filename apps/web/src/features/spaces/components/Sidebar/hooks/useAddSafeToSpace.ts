@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import { stringify } from 'querystring'
+import { parse, stringify } from 'querystring'
 import { useSpaceSafesCreateV1Mutation, type SpaceSafeDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -80,7 +80,9 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     const toAdd = { chainId: chain.chainId, address: safe.address.value }
-    const { spaceId: _replaced, ...query } = router.query
+    // router.query stays empty until the router is ready, which can be after the user clicks
+    const currentQuery = router.isReady ? router.query : parse(window.location.search.slice(1))
+    const { spaceId: _replaced, ...query } = currentQuery
     const spaceQuery = withSpaceId(query, spaceId)
     // A step-up reloads the page, so it returns to this URL instead
     const stepUpReturnUrl = `${router.pathname}?${stringify(spaceQuery)}`

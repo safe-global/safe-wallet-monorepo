@@ -9,7 +9,12 @@ const mockDispatch = jest.fn()
 const mockUseSafeInfo = jest.fn()
 const mockUseCurrentChain = jest.fn()
 const mockLogError = jest.fn()
-const mockRouter = { pathname: '/home', query: {} as Record<string, string | string[]>, replace: jest.fn() }
+const mockRouter = {
+  pathname: '/home',
+  isReady: true,
+  query: {} as Record<string, string | string[]>,
+  replace: jest.fn(),
+}
 
 jest.mock('next/router', () => ({
   useRouter: () => mockRouter,
@@ -52,7 +57,9 @@ describe('useAddSafeToSpace', () => {
     mockUseCurrentChain.mockReturnValue({ chainId: '1' })
     mockAddSafeToSpace.mockResolvedValue({ data: {} })
     mockRouter.pathname = '/home'
+    mockRouter.isReady = true
     mockRouter.query = { safe: 'sep:0xSafe' }
+    window.history.replaceState(null, '', '/')
   })
 
   it('calls the mutation with correct args and returns true on success', async () => {
@@ -362,6 +369,20 @@ describe('useAddSafeToSpace', () => {
       expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(alphaReturnUrl))
     })
 
+    it('keeps the Safe of the page when the router is not ready yet', async () => {
+      mockRouter.isReady = false
+      mockRouter.query = {}
+      window.history.replaceState(null, '', '/home?safe=sep:0xSafe&spaceId=42')
+      mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } })
+      const { result } = renderHook(() => useAddSafeToSpace())
+
+      await act(async () => {
+        await result.current.addToSpace(alphaUuid)
+      })
+
+      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(alphaReturnUrl))
+    })
+
     it('clears the return URL when the Safe is added', async () => {
       const { result } = renderHook(() => useAddSafeToSpace())
 
@@ -431,6 +452,20 @@ describe('useAddSafeToSpace', () => {
 
     it('replaces a spaceId already in the URL', async () => {
       mockRouter.query = { safe: 'sep:0xSafe', spaceId: '42' }
+
+      await addToAlpha()
+
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        { pathname: '/home', query: { safe: 'sep:0xSafe', spaceId: alphaUuid } },
+        undefined,
+        { shallow: true },
+      )
+    })
+
+    it('opens the Safe of the page in the Workspace when the router is not ready yet', async () => {
+      mockRouter.isReady = false
+      mockRouter.query = {}
+      window.history.replaceState(null, '', '/home?safe=sep:0xSafe')
 
       await addToAlpha()
 
