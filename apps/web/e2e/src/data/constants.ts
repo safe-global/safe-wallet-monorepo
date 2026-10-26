@@ -135,6 +135,7 @@ export const ROUTES = {
   settingsSetup: '/settings/setup',
   addressBook: '/address-book',
   apps: '/apps',
+  loadSafe: '/new-safe/load',
 } as const
 
 // ---------------------------------------------------------------------------

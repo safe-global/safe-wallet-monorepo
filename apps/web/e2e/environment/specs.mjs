@@ -55,8 +55,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
   'cypress/e2e/regression/import_export_data_2.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
-  'cypress/e2e/regression/load_safe_2.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1] },
-  'cypress/e2e/regression/load_safe_3.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1, 137] },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/multichain_create_safe_flow.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
   'cypress/e2e/regression/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },

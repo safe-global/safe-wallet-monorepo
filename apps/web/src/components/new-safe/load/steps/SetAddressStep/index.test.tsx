@@ -100,6 +100,16 @@ describe('SetAddressStep', () => {
     await waitFor(() => expect(nextButton()).toBeEnabled())
   })
 
+  it('keeps Next disabled for an address with the prefix of another chain', async () => {
+    serveSafe(true)
+    const { addressInput } = renderStep()
+
+    fireEvent.change(addressInput, { target: { value: `eth:${fakerChecksummedAddress()}` } })
+
+    expect(await screen.findByLabelText(`"eth" doesn't match the current chain`, { exact: false })).toBeInTheDocument()
+    expect(nextButton()).toBeDisabled()
+  })
+
   it('rejects a Safe that is already in the account list of this chain', async () => {
     serveSafe(true)
     const address = fakerChecksummedAddress()
