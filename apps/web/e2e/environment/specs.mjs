@@ -66,9 +66,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/spending_limits.cy.js': { scenario: 'prepareSpendingLimitsScenario', chains: [137] },
   'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
-  'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },
-  // The swap widgets screen recipients against the Chainalysis sanctions oracle on Ethereum.
-  'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
   'cypress/e2e/regression/tokens.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
   'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },

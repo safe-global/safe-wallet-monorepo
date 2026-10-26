@@ -8,20 +8,8 @@ export function isRemoteBackendHost(host) {
   )
 }
 
-const RPC_HOST = /infura\.io|alchemy\.com/
-const HOSTED_WIDGET_ORIGINS = ['https://swap.cow.fi', 'https://staging.swap.cow.fi']
-
-/**
- * A hosted widget may read the chain through its own RPC; every other remote host stays blocked.
- * Cypress turns off web security, so cross-origin fetches carry only a Referer, not an Origin.
- */
-export function isRemoteBackendRequest(url, { origin, referer } = {}) {
-  const host = new URL(url).hostname
-  const initiator = origin ?? (referer ? new URL(referer).origin : undefined)
-  if (HOSTED_WIDGET_ORIGINS.includes(initiator) && RPC_HOST.test(host)) {
-    return false
-  }
-  return isRemoteBackendHost(host)
+export function isRemoteBackendRequest(url) {
+  return isRemoteBackendHost(new URL(url).hostname)
 }
 
 /** Resolves a comma-separated list of `name` or `suite/name` to registered spec paths; all specs when unset. */
