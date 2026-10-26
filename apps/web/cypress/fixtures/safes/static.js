@@ -97,7 +97,7 @@ export default {
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
   /** Proposers testing - Used in: proposers.cy.js, tx_share_block.cy.js */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js, swaps_queue.cy.js, limit_order_queue.cy.js, twaps_queue.cy.js */
+  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
   /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',

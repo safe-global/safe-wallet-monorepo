@@ -38,6 +38,10 @@ export function verifyValidImportInputExists() {
   cy.get(jsonInput).should('exist')
 }
 
+export function verifyImportDialogVisible() {
+  cy.get(importDialog).should('be.visible').find(jsonInput).should('exist')
+}
+
 export function verifyUploadErrorMessage(msg) {
   cy.contains(msg)
 }

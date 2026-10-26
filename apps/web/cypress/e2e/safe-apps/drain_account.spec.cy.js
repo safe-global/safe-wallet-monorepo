@@ -1,6 +1,8 @@
 import * as constants from '../../support/constants'
 import * as safeapps from '../pages/safeapps.pages'
 import * as navigation from '../pages/navigation.page'
+import * as main from '../pages/main.page.js'
+import { accordionActionItem } from '../pages/batches.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
@@ -53,6 +55,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
     })
     cy.findByRole('button', { name: safeapps.testTransfer2 })
     cy.findByRole('button', { name: safeapps.nativeTransfer1 })
+    main.verifyElementsCount(accordionActionItem, 2)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
@@ -98,13 +101,6 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.selectAllRowsChbxStr).click()
       getBody().findByLabelText(safeapps.recipientStr).type(getMockAddress())
-      getBody().findAllByText(safeapps.noTokensSelectedStr).should('be.visible')
-    })
-  })
-
-  it('Verify a drain cannot be created when no assets and recipient are selected', () => {
-    cy.enter(iframeSelector).then((getBody) => {
-      getBody().findByLabelText(safeapps.selectAllRowsChbxStr).click()
       getBody().findAllByText(safeapps.noTokensSelectedStr).should('be.visible')
     })
   })

@@ -23,6 +23,8 @@ describe('Import Export Data tests 2', { defaultCommandTimeout: 20000 }, () => {
 
   it('Verify that the Import button opens an import modal', () => {
     accountsModal.clickOnImportBtn()
+
+    file.verifyImportDialogVisible()
   })
 
   it('Verify that correctly formatted json file can be uploaded and shows data', () => {
