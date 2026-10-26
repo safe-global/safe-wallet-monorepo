@@ -104,9 +104,12 @@ function setupDefaults(
   } = {},
 ) {
   const allSafes = overrides.allSafes ?? [singleChainSafe]
-  ;(useSafeBarSafes as jest.Mock).mockReturnValue({ chainSelectorSafes: allSafes })
+  const safeAddress = overrides.safeAddress ?? '0xSafe1'
+  ;(useSafeBarSafes as jest.Mock).mockReturnValue({
+    chainSelectorSafe: allSafes.find((safe) => safe.address === safeAddress),
+  })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue('42')
-  ;(useSafeInfo as jest.Mock).mockReturnValue({ safeAddress: overrides.safeAddress ?? '0xSafe1' })
+  ;(useSafeInfo as jest.Mock).mockReturnValue({ safeAddress })
   ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('')
   ;(useChainId as jest.Mock).mockReturnValue(overrides.currentChainId ?? '1')
   ;(useChains as jest.Mock).mockReturnValue({ configs: chainConfigs })
@@ -200,28 +203,6 @@ describe('useSpaceChainSelector', () => {
     expect(mockPush).not.toHaveBeenCalled()
   })
 
-  it('matches current safe using case-insensitive address comparison', () => {
-    setupDefaults({ allSafes: [singleChainSafe], safeAddress: '0xsafe1' })
-
-    const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.deployedChains).toHaveLength(1)
-  })
-
-  it('prefers the URL safe address when Redux still points to the previous safe', () => {
-    setupDefaults({
-      allSafes: [singleChainSafe, multiChainSafe],
-      safeAddress: '0xSafe1',
-      currentChainId: '137',
-    })
-    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
-
-    const { result } = renderHook(() => useSpaceChainSelector())
-
-    expect(result.current.safeAddress).toBe('0xSafe2')
-    expect(result.current.deployedChainIds).toEqual(['1', '137'])
-    expect(result.current.safeName).toBe('Multi Safe')
-  })
-
   // Regression guard: when the user just navigated to a new safe, the URL updates synchronously
   // but Redux's safeAddress lags behind. handleChainChange must push the URL safe, not the
   // Redux one — otherwise the chain switcher rewrites the URL with the previous safe's address.
@@ -245,24 +226,6 @@ describe('useSpaceChainSelector', () => {
       pathname: '/home',
       query: { safe: 'eth:0xSafe2' },
     })
-  })
-
-  it('recomputes deployedChains/safeName when only urlSafeAddress changes between renders', () => {
-    setupDefaults({
-      allSafes: [singleChainSafe, multiChainSafe],
-      safeAddress: '0xSafe1',
-    })
-    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe1')
-
-    const { result, rerender } = renderHook(() => useSpaceChainSelector())
-
-    expect(result.current.safeName).toBe('My Safe')
-    expect(result.current.deployedChainIds).toEqual(['1'])
-    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
-    rerender()
-
-    expect(result.current.safeName).toBe('Multi Safe')
-    expect(result.current.deployedChainIds).toEqual(['1', '137'])
   })
 
   it('falls back to null for chainLogoUri when chain config exists but chainLogoUri is missing', () => {

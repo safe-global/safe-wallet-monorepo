@@ -10,13 +10,12 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ChainInfo } from '@/features/spaces/types'
 import { useSafeBarSafes } from './useSafeBarSafes'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export function useSpaceChainSelector() {
-  const { chainSelectorSafes: allSafes } = useSafeBarSafes()
+  const { chainSelectorSafe: currentSafe } = useSafeBarSafes()
   const { safeAddress: reduxSafeAddress } = useSafeInfo()
   const urlSafeAddress = useSafeAddressFromUrl()
   const safeAddress = urlSafeAddress || reduxSafeAddress
@@ -26,8 +25,6 @@ export function useSpaceChainSelector() {
   const spaceId = useCurrentSpaceId()
 
   const { deployedChains, deployedChainIds, safeName } = useMemo(() => {
-    const currentSafe = allSafes.find((s) => sameAddress(s.address, safeAddress))
-
     if (!currentSafe)
       return { deployedChains: [] as ChainInfo[], deployedChainIds: [] as string[], safeName: undefined }
 
@@ -44,7 +41,7 @@ export function useSpaceChainSelector() {
     })
 
     return { deployedChains: resolvedChains, deployedChainIds: chainIds, safeName: currentSafe.name }
-  }, [allSafes, safeAddress, chainConfigs])
+  }, [currentSafe, chainConfigs])
 
   const handleChainChange = useCallback(
     (chainId: string) => {

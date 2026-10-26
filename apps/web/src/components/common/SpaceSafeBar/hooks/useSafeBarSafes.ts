@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 import { useIsQualifiedSafe, useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
-import { useAllSafes, useAllSafesGrouped, useSafeOrderComparator, type AllSafeItems } from '@/hooks/safes'
+import {
+  _buildMultiChainSafeItem,
+  flattenSafeItems,
+  useAllSafes,
+  useAllSafesGrouped,
+  useSafeOrderComparator,
+  type AllSafeItems,
+} from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { getSpaceOrderScope, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import useChainId from '@/hooks/useChainId'
@@ -31,15 +38,25 @@ const orderDropdownSafes = (
   return sorted.map((safe, i) => (i === index ? current : safe))
 }
 
+/** Adds the chains of `extra` that `safe` doesn't list yet, keeping `safe`'s own chains first. */
+const withExtraChains = (
+  safe: SafeItem | MultiChainSafeItem,
+  extra: SafeItem | MultiChainSafeItem,
+): SafeItem | MultiChainSafeItem => {
+  const chains = flattenSafeItems([safe])
+  const extraChains = flattenSafeItems([extra]).filter((s) => !chains.some((c) => c.chainId === s.chainId))
+  return extraChains.length ? _buildMultiChainSafeItem(safe.address, [...chains, ...extraChains]) : safe
+}
+
 /**
  * Returns appropriate safe lists for the SafeBar based on context.
- * - Space context (qualified safe or on a space route): space safes for both
- *   dropdown and chain selector, so the user always sees the current space's
- *   accounts — including when a tx modal is opened from the space-level Actions Tray.
- * - Non-space: pinned safes for dropdown, all known safes for chain selector.
+ * - Space context (qualified safe or on a space route): space safes for the
+ *   dropdown, so the user always sees the current space's accounts — including
+ *   when a tx modal is opened from the space-level Actions Tray.
+ * - Non-space: pinned safes for the dropdown.
  *
- * The current safe is always injected into both lists so the selector
- * and chain switcher render even when the safe isn't pinned.
+ * The current safe is always injected into the dropdown so the selector renders
+ * even when the safe isn't pinned. The chain selector gets the current safe alone.
  */
 export function useSafeBarSafes() {
   const isQualifiedSafe = useIsQualifiedSafe()
@@ -122,18 +139,25 @@ export function useSafeBarSafes() {
     return orderDropdownSafes(spaceSafes, safeAddress, spaceComparator, current)
   }, [spaceSafes, safeAddress, fallbackCurrentSafe, spaceComparator])
 
-  // Same for chain selector.
-  const chainSelectorSafes = useMemo<AllSafeItems>(() => {
-    if (!safeAddress) return allKnownSafes
-    if (allKnownSafes.some((s) => sameAddress(s.address, safeAddress))) return allKnownSafes
-    const current = fallbackCurrentSafe
-    if (!current) return allKnownSafes
-    return [current, ...allKnownSafes]
-  }, [allKnownSafes, safeAddress, fallbackCurrentSafe])
+  const knownCurrentSafe = useMemo(
+    () => (safeAddress ? allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) : undefined),
+    [allKnownSafes, safeAddress],
+  )
+
+  // Current safe: trusted + counterfactual chains, or just the current chain
+  const chainSelectorSafe = knownCurrentSafe ?? fallbackCurrentSafe
+
+  // Current safe: space + trusted + counterfactual chains
+  const spaceChainSelectorSafe = useMemo(() => {
+    const spaceSafe = safeAddress ? spaceSafes.find((s) => sameAddress(s.address, safeAddress)) : undefined
+    if (!spaceSafe) return undefined
+    if (!knownCurrentSafe) return spaceSafe
+    return withExtraChains(spaceSafe, knownCurrentSafe)
+  }, [spaceSafes, safeAddress, knownCurrentSafe])
 
   return {
     dropdownSafes: isInSpaceContext ? spaceDropdownSafes : dropdownSafes,
-    chainSelectorSafes: isInSpaceContext ? spaceSafes : chainSelectorSafes,
+    chainSelectorSafe: isInSpaceContext ? spaceChainSelectorSafe : chainSelectorSafe,
     // Both lists are exposed so the dropdown can offer Workspace | Local tabs:
     // `workspaceSafes` are the current space's safes, `localSafes` the trusted (pinned) ones.
     workspaceSafes: spaceDropdownSafes,
