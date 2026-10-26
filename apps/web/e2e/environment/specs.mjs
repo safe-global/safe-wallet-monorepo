@@ -119,7 +119,4 @@ export const isolatedSpecs = {
   'cypress/e2e/safe-apps/safe_permissions.cy.js': { scenario: 'prepareSafeAppsHostScenario' },
   'cypress/e2e/safe-apps/tx-builder_3.cy.js': { scenario: 'prepareCowFallbackScenario' },
   'cypress/e2e/safe-apps/tx-builder.cy.js': { scenario: 'prepareSafeAppSafesScenario' },
-  'cypress/e2e/smoke/balances_endpoints.cy.js': { scenario: 'prepareBalancesEndpointsScenario', chains: [1] },
-  'cypress/e2e/smoke/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/smoke/dashboard.cy.js': { scenario: 'prepareDashboardScenario' },
 }
