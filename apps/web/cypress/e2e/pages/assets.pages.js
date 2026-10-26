@@ -55,7 +55,6 @@ const tokenName = '[data-testid="token-name"]'
 const tokenSymbol = '[data-testid="token-symbol"]'
 const tokenBalanceCell = '[data-testid="token-balance"]'
 
-export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 export const shortAddressRegex = /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/
 
 // The switch is a Base UI control: the test id sits on the `role="switch"` element itself and the
@@ -261,14 +260,6 @@ export function verifyEachRowHasCheckbox(state) {
       })
     })
   })
-}
-
-export function verifyTokensTabIsSelected(option) {
-  cy.get(`a[aria-selected="${option}"]`).contains('Tokens')
-}
-
-export function verifyTokenIsPresent(token) {
-  cy.get(tokenListTable).contains(token)
 }
 
 export function verifyTokenAltImageIsVisible(currency, alttext) {
