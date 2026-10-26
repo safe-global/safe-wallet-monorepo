@@ -43,6 +43,12 @@ test.describe('Dashboard', { tag: '@smoke' }, () => {
     await expect(homePage.safeHeaderInfo).toBeVisible()
   })
 
+  test('should show the total balance with Send disabled and Receive enabled when no wallet is connected', async () => {
+    await expect(homePage.overviewWidget.getByText('Total balance')).toBeVisible()
+    await expect(homePage.overviewSendBtn).toBeDisabled()
+    await expect(homePage.overviewReceiveBtn).toBeEnabled()
+  })
+
   test('should display the sidebar navigation', async () => {
     await expect(homePage.sidebar).toBeVisible()
   })
