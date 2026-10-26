@@ -77,6 +77,7 @@ jobs:
         env:
           NODE_ENV: cypress
           NEXT_PUBLIC_IS_TEST_E2E: 'true'
+          NEXT_PUBLIC_POLLING_INTERVAL: '2000'
           NEXT_PUBLIC_CONFIG_SERVICE_KEY: WALLET_WEB
           NEXT_PUBLIC_GATEWAY_URL_STAGING: http://localhost:8000/cgw
           NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: http://localhost:8000/cgw
