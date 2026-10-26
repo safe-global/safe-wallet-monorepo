@@ -36,44 +36,16 @@ export default {
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
-  /** Recovery and data import/export testing - Used in: recovery.cy.js, load_safe_2.cy.js, import_export_data.cy.js */
+  /** Data import/export testing - Used in: load_safe_2.cy.js, import_export_data_2.cy.js */
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
-  /** Recovery and balances testing - Used in: recovery.cy.js, balances_endpoints.cy.js */
+  /** Balances testing - Used in: balances_endpoints.cy.js */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
   /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Used in: dashboard.cy.js. Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
   ETH_STATIC_SAFE_OUTDATED_MASTERCOPY: 'eth:0x1230B3d59858296A31053C1b8562Ecf89A2f888b',
-
-  // Gnosis Chain Safes
-  /** Recovery testing - Used in: recovery.cy.js */
-  GNO_STATIC_SAFE_16: 'gno:0xB8d760a90a5ed54D3c2b3EFC231277e99188642A',
-
-  // Polygon (Matic) Safes
-  /** Recovery module testing - Used in: recovery.cy.js */
-  MATIC_STATIC_SAFE_17: 'matic:0x6D04edC44F7C88faa670683036edC2F6FC10b86e',
-
-  // BNB Chain Safes
-  /** BNB Chain testing */
-  BNB_STATIC_SAFE_18: 'bnb:0x1D28a316431bAFf410Fe53398c6C5BD566032Eec',
-
-  // Aurora Safes
-  /** Aurora testing */
-  AURORA_STATIC_SAFE_19: 'aurora:0xCEA454dD3d76Da856E72C3CBaDa8ee6A789aD167',
-
-  // Avalanche Safes
-  /** Avalanche testing */
-  AVAX_STATIC_SAFE_20: 'avax:0x480e5A3E90a3fF4a16AECCB5d638fAba96a15c28',
-
-  // Linea Safes
-  /** Linea testing */
-  LINEA_STATIC_SAFE_21: 'linea:0x95934e67299E0B3DD277907acABB512802f3536E',
-
-  // zkSync Safes
-  /** zkSync testing */
-  ZKSYNC_STATIC_SAFE_22: 'zksync:0x49136c0270c5682FFbb38Cb29Ecf0563b2E1F9f6',
 
   // More Sepolia Safes
   /** Transaction history, messages, and spending limits testing - Used in: spending_limits.cy.js */
@@ -97,7 +69,7 @@ export default {
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
   /** Proposers testing - Used in: proposers.cy.js, tx_share_block.cy.js */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js, swaps_queue.cy.js, limit_order_queue.cy.js, twaps_queue.cy.js */
+  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
   /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',

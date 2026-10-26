@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { renderHook } from '@testing-library/react'
 import * as router from 'next/router'
 
-import { render, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import * as safeInfo from '@/hooks/useSafeInfo'
@@ -161,6 +161,20 @@ describe('RecoveryModal', () => {
 
         expect(container).not.toBeEmptyDOMElement()
         expect(queryByText('recovery')).toBeFalsy()
+      })
+
+      it('should not show the proposal again after the recoverer chose to do it later', async () => {
+        const wallet = connectedWalletBuilder().build()
+        const queue = [] as Array<RecoveryQueueItem>
+
+        const firstVisit = render(<_RecoveryModal wallet={wallet} isOwner={false} isRecoverer queue={queue} />)
+        fireEvent.click(firstVisit.getByTestId('postpone-recovery-btn'))
+
+        await waitFor(() => expect(firstVisit.queryByTestId('recovery-proposal')).not.toBeInTheDocument())
+        firstVisit.unmount()
+
+        const nextVisit = render(<_RecoveryModal wallet={wallet} isOwner={false} isRecoverer queue={queue} />)
+        expect(nextVisit.queryByTestId('recovery-proposal')).not.toBeInTheDocument()
       })
 
       it('should not render the proposal modal when there is no queue for owners', () => {

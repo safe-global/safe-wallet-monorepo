@@ -1,4 +1,4 @@
-import { makeStore } from '@/store'
+import { makeStore, setStoreInstance } from '@/store'
 import { Provider } from 'react-redux'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { StoryContext } from 'storybook/internal/csf'
@@ -11,7 +11,12 @@ type StoreDecoratorProps = {
 }
 
 export const StoreDecorator = ({ initialState, children, context }: StoreDecoratorProps) => {
-  const [store] = useState(() => makeStore(initialState))
+  const [store] = useState(() => {
+    const newStore = makeStore(initialState)
+    // Code outside React (e.g. getTransactionQueue) reads the store through getStoreInstance, as in _app.tsx
+    setStoreInstance(newStore)
+    return newStore
+  })
 
   useEffect(() => {
     // Set the dark mode based on the theme from the context

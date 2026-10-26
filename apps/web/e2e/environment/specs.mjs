@@ -2,7 +2,6 @@
 const securityProviders = 'Blockaid, Hypernative and Tenderly are hosted providers'
 const positionsProvider = 'positions come from Zerion, a hosted provider'
 const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepolia, not the fork'
-const productionApp = 'the case opens the production app'
 const fourthChain = 'the list only appears when a chain is left to add, which needs a fourth fork'
 
 /**
@@ -41,7 +40,6 @@ export const isolatedSpecs = {
       '[Threat Analyse] Verify Malicious Native Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious Transfer detection - 9A': securityProviders,
       '[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious wallet_sendCalls(Eth) detection - 9A': securityProviders,
       '[Threat Analyse] Verify that Safe Shield shows no threat detected-9C': securityProviders,
       '[Threat Analyse] Verify that Safe Shield shows warning details for reverted txs-9B': securityProviders,
       '[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue': securityProviders,
@@ -57,7 +55,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
   'cypress/e2e/regression/import_export_data_2.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
-  'cypress/e2e/regression/limit_order_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/load_safe_2.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1] },
   'cypress/e2e/regression/load_safe_3.cy.js': { scenario: 'prepareLoadSafeScenario', chains: [1, 137] },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
@@ -94,15 +91,6 @@ export const isolatedSpecs = {
     },
   },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
-  'cypress/e2e/regression/recovery_2.cy.js': { scenario: 'prepareRecoveryScenario' },
-  'cypress/e2e/regression/recovery.cy.js': {
-    scenario: 'prepareRecoveryScenario',
-    skips: {
-      'Verify that the Security section contains Account recovery block on supported netwroks': productionApp,
-      'Verify that the Security and Login section does not contain Account recovery block on unsupported networks':
-        productionApp,
-    },
-  },
   'cypress/e2e/regression/safe_selector.cy.js': { scenario: 'prepareSafeSelectorScenario', chains: [1] },
   'cypress/e2e/regression/sidebar_new.cy.js': { scenario: 'prepareSafeSelectorScenario' },
   'cypress/e2e/regression/spaces_basicflow.cy.js': { scenario: 'prepareBasicScenario' },
@@ -111,7 +99,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/spending_limits.cy.js': { scenario: 'prepareSpendingLimitsScenario', chains: [137] },
   'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
-  'cypress/e2e/regression/swaps_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },
   // The swap widgets screen recipients against the Chainalysis sanctions oracle on Ethereum.
   'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
@@ -126,7 +113,6 @@ export const isolatedSpecs = {
       'Verify that the "Max" button sets the value as the max balance': swapWidgetBalances,
     },
   },
-  'cypress/e2e/regression/twaps_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
