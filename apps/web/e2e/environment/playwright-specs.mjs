@@ -25,6 +25,11 @@ export const playwrightSpecs = {
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
   'e2e/policies.spec.ts': {},
+  'e2e/positions.spec.ts': {
+    scenarios: ['prepareZerionPositionsScenario'],
+    safes: { ETH_ZERION_POSITIONS_SAFE: 'ETH_ZERION_POSITIONS_SAFE' },
+    chains: [1],
+  },
   'e2e/proposer.spec.ts': {},
   'e2e/proposer-settings.spec.ts': {},
   'e2e/recovery.spec.ts': {},
