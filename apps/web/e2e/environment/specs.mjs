@@ -16,7 +16,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/balances_pagination.cy.js': { scenario: 'preparePaginationScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/regression/bulk_execution.cy.js': { scenario: 'prepareBulkExecutionScenario' },
   'cypress/e2e/regression/copilot.cy.js': {
     scenario: 'prepareCopilotScenario',
     chains: [137],

@@ -1,13 +1,17 @@
 import { faker } from '@faker-js/faker'
 import type {
+  CreationTransactionInfo,
   Erc20Transfer,
   Erc721Transfer,
+  MultiSendTransactionInfo,
+  SettingsChangeTransaction,
   TransferTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { render, screen } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
+import { txInfoBuilder } from '@/tests/builders/safeTx'
 import * as useChains from '@/hooks/useChains'
-import { TransferTx } from '.'
+import TxInfo, { TransferTx } from '.'
 
 const TOKEN_PLACEHOLDER = '/images/common/token-placeholder.svg'
 const NFT_PLACEHOLDER = '/images/common/nft-placeholder.png'
@@ -89,5 +93,65 @@ describe('TransferTx', () => {
 
     expect(screen.getByText('1 FLOWER #6188')).toBeInTheDocument()
     expect(tokenIcon('FLOWER #6188').getAttribute('srcdoc')).toContain(NFT_PLACEHOLDER)
+  })
+})
+
+describe('TxInfo', () => {
+  const multiSend = (actionCount: number): MultiSendTransactionInfo => ({
+    type: 'Custom',
+    to: { value: faker.finance.ethereumAddress() },
+    dataSize: '0',
+    isCancellation: false,
+    methodName: 'multiSend',
+    actionCount,
+  })
+
+  it.each([
+    [3, '3 actions'],
+    [1, '1 action'],
+  ])('shows a batch of %i as "%s"', (actionCount, label) => {
+    render(<TxInfo info={multiSend(actionCount)} />)
+
+    expect(screen.getByText(label)).toBeInTheDocument()
+  })
+
+  it('shows the method name of a contract call', () => {
+    render(
+      <TxInfo
+        info={txInfoBuilder()
+          .with({ methodName: 'approve', to: { value: faker.finance.ethereumAddress() } })
+          .build()}
+      />,
+    )
+
+    expect(screen.getByText('approve')).toBeInTheDocument()
+  })
+
+  it('shows the shortened creator of a Safe creation', () => {
+    const creator = faker.finance.ethereumAddress()
+    const creation: CreationTransactionInfo = {
+      type: 'Creation',
+      creator: { value: creator },
+      transactionHash: faker.string.hexadecimal({ length: 64 }),
+    }
+
+    render(<TxInfo info={creation} />)
+
+    expect(screen.getByText(`Created by ${creator.slice(0, 6)}...${creator.slice(-4)}`)).toBeInTheDocument()
+  })
+
+  it('shows the module name when a module is enabled', () => {
+    const enableModule: SettingsChangeTransaction = {
+      type: 'SettingsChange',
+      dataDecoded: { method: 'enableModule', parameters: [] },
+      settingsInfo: {
+        type: 'ENABLE_MODULE',
+        module: { value: faker.finance.ethereumAddress(), name: 'Allowance module' },
+      },
+    }
+
+    render(<TxInfo info={enableModule} />)
+
+    expect(screen.getByText('Allowance module')).toBeInTheDocument()
   })
 })
