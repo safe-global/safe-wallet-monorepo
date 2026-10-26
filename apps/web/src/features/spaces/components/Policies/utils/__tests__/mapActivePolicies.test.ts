@@ -266,6 +266,14 @@ describe('mapActivePolicies', () => {
       expect(toAllowlists([mismatched])).toEqual([])
     })
 
+    it('ignores the guard slots of an erc20-transfer policy whose data has another shape', () => {
+      const mismatched = withGuards(mockErc20TransferDto({ data: { module: '0x1', spenders: [] } }), {})
+
+      const [policy] = toAllowlists([mockErc20TransferDto(), mismatched])
+
+      expect(policy).toMatchObject({ enabled: true, spendingLimitsCovered: true })
+    })
+
     it('leaves out the ETH entry when the chain config is not loaded', () => {
       const [policy] = toAllowlists([mockErc20TransferDto(), mockNativeTransferDto()], () => undefined)
 

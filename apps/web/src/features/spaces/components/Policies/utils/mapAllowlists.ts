@@ -25,7 +25,15 @@ const NO_ERC20_TOKEN: Erc20TokenResolver = () => undefined
 
 const NATIVE_TRANSFER_SELECTOR = '0x00000000'
 
-type AllowlistDto = ActivePolicyDto & { enforcement: Extract<ActivePolicyDto['enforcement'], { via: 'guard' }> }
+type GuardEnforcement = Extract<ActivePolicyDto['enforcement'], { via: 'guard' }>
+
+type Erc20AllowlistDto = ActivePolicyDto & {
+  type: 'erc20-transfer'
+  enforcement: GuardEnforcement
+  data: Erc20TransferPolicyDataDto
+}
+type NativeAllowlistDto = ActivePolicyDto & { type: 'native-transfer'; enforcement: GuardEnforcement }
+type AllowlistDto = Erc20AllowlistDto | NativeAllowlistDto
 
 type AllowlistGroup = {
   safe: PolicySafe
@@ -37,9 +45,8 @@ type AllowlistGroup = {
 }
 
 const isAllowlistDto = (dto: ActivePolicyDto): dto is AllowlistDto =>
-  (dto.type === 'erc20-transfer' || dto.type === 'native-transfer') && dto.enforcement.via === 'guard'
-
-const isAllowlistData = (data: ActivePolicyDto['data']): data is Erc20TransferPolicyDataDto => 'tokenAddress' in data
+  dto.enforcement.via === 'guard' &&
+  (dto.type === 'native-transfer' || (dto.type === 'erc20-transfer' && 'tokenAddress' in dto.data))
 
 /** CGW calls a policy enabled when either slot holds the guard, but owner transactions go through the transaction slot. */
 const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard
@@ -66,7 +73,6 @@ const addToGroup = (group: AllowlistGroup, dto: AllowlistDto): void => {
       group.nativeRecipients = addRecipients(group.nativeRecipients, [{ account: recipient, permission: 'ALWAYS' }])
     return
   }
-  if (!isAllowlistData(dto.data)) return
 
   const { tokenAddress, recipients } = dto.data
   const key = tokenAddress.toLowerCase()
@@ -143,7 +149,7 @@ export const getAllowlistTokenAddresses = (dtos: ActivePolicyDto[]): Map<string,
   const byChain = new Map<string, Set<string>>()
 
   for (const dto of dtos) {
-    if (!isAllowlistDto(dto) || dto.type !== 'erc20-transfer' || !isAllowlistData(dto.data)) continue
+    if (!isAllowlistDto(dto) || dto.type !== 'erc20-transfer') continue
     const addresses = byChain.get(dto.safe.chainId) ?? new Set<string>()
     addresses.add(dto.data.tokenAddress.toLowerCase())
     byChain.set(dto.safe.chainId, addresses)
