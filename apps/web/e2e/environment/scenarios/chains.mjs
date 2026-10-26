@@ -70,10 +70,6 @@ export async function prepareBalancesEndpointsScenario(env, owners) {
   return { safes: { static: safes } }
 }
 
-export async function prepareCopilotScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['MATIC_STATIC_SAFE_30']) } }
-}
-
 export async function preparePortfolioScenario(env, owners) {
   return { safes: { static: await rebuildStagingSafes(env, owners, ['MATIC_STATIC_SAFE_33']) } }
 }

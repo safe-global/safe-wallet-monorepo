@@ -1,7 +1,5 @@
 // Reasons for `skips`: the cases need a service the local stack cannot provide; staging runs keep them.
-const securityProviders = 'Blockaid, Hypernative and Tenderly are hosted providers'
 const positionsProvider = 'positions come from Zerion, a hosted provider'
-const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepolia, not the fork'
 const fourthChain = 'the list only appears when a chain is left to add, which needs a fourth fork'
 
 /**
@@ -16,24 +14,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/balances_pagination.cy.js': { scenario: 'preparePaginationScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/regression/copilot.cy.js': {
-    scenario: 'prepareCopilotScenario',
-    chains: [137],
-    skips: {
-      '[Recipient Analyse] Verify that Different setup warning is shown - 4D': securityProviders,
-      '[Recipient Analyse] Verify that Missing ownership warning is shown - 4B': securityProviders,
-      '[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A': securityProviders,
-      '[Recipient Analyse] Verify that Recurring recipient is shown with interaction count - 3B': securityProviders,
-      '[Recipient Analyse] Verify that Unsupported network warning is shown - 4C': securityProviders,
-      '[Tenderly Simulation] Verify failed simulation state': securityProviders,
-      '[Tenderly Simulation] Verify success simulation state': securityProviders,
-      '[Threat Analyse] Verify Malicious Approval detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious Native Transfer detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious Transfer detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A': securityProviders,
-      '[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue': securityProviders,
-    },
-  },
   'cypress/e2e/regression/counterfactual_pending_deletes.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/create_safe_cf.cy.js': { scenario: 'prepareCounterfactualScenario' },
   'cypress/e2e/regression/create_safe_simple_2.cy.js': { scenario: 'prepareCreateSafeOwnersScenario' },
@@ -91,15 +71,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
   'cypress/e2e/regression/tokens.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
-  'cypress/e2e/regression/twaps_integration.cy.js': {
-    scenario: 'prepareTwapWidgetScenario',
-    chains: [1],
-    skips: {
-      'Verify "Balances" tag and value is present for selected token': swapWidgetBalances,
-      'Verify list of tokens with balances is displayed in the token selector': swapWidgetBalances,
-      'Verify that the "Max" button sets the value as the max balance': swapWidgetBalances,
-    },
-  },
   'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
