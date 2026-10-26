@@ -51,10 +51,4 @@ export const events = {
     eventLabel: 'native_swap',
     eventType: 'tx_confirmed',
   },
-
-  txCopyShareBlockLink: {
-    action: 'Copy deeplink',
-    event: 'customClick',
-    category: 'tx-list',
-  },
 }

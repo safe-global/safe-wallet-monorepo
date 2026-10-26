@@ -23,7 +23,7 @@ export default {
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
   /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, spending_limits.cy.js */
   SEP_STATIC_SAFE_6: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
-  /** Queue replace testing - Used in: tx_queue_replace_btn.cy.js */
+  /** Used in: address_book_2.cy.js, safe_selector.cy.js, tx_history.cy.js, tx_history_2.cy.js, tx_history_5.cy.js */
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
@@ -34,11 +34,11 @@ export default {
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Sidebar non-owner testing */
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
-  /** Dashboard testing - Used in: dashboard.cy.js */
+  /** Available for general testing */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
   /** Data import/export testing - Used in: import_export_data_2.cy.js */
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
-  /** Dashboard testing - Used in: dashboard.cy.js */
+  /** Available for general testing */
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
@@ -67,9 +67,9 @@ export default {
   // More Sepolia Safes
   /** Available for general testing */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
-  /** Proposers testing - Used in: proposers.cy.js, tx_share_block.cy.js */
+  /** Proposers testing - Used in: proposers.cy.js */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js */
+  /** Queue transaction testing - Used in: tx_queue.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
   /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
@@ -101,7 +101,7 @@ export default {
   MATIC_STATIC_SAFE_30: 'matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013',
   /** Case #2 – Unsupported but migratable in-app (Warning, "Migrate" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0x0b26... */
   MATIC_STATIC_SAFE_31: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
-  /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
+  /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
   MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
   /** Positions static safe - Used in: portfolio.cy.js */
   MATIC_STATIC_SAFE_33: 'matic:0xc1f4652866ddB3811adcd3418c13eF640e88E1f6',

@@ -57,20 +57,17 @@ test('blocks a Safe backend request from the hosted CoW widget', () => {
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'
-const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
+const proposers = 'cypress/e2e/regression/proposers.cy.js'
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
   assert.deepEqual(selectCypressSpecs('regression/assets'), [assets])
   assert.deepEqual(selectCypressSpecs('spaces_basicflow'), ['cypress/e2e/regression/spaces_basicflow.cy.js'])
-  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/assets,tx_queue_reject_btn'), [
-    rejection,
-    assets,
-  ])
+  assert.deepEqual(selectCypressSpecs('proposers, regression/assets,proposers'), [proposers, assets])
 })
 
 test('rejects unknown or empty spec selection instead of running staging-dependent specs', () => {
-  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_replace_btn', 'tx_queue_replace_btn,']) {
+  for (const selection of ['', '*', 'not_registered_spec', '../proposers', 'proposers,']) {
     assert.throws(() => selectCypressSpecs(selection), /No isolated scenario/)
   }
 })

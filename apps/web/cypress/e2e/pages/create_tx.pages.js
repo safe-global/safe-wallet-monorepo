@@ -43,7 +43,6 @@ export const messageItem = '[data-testid="message-item"]'
 const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
-const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
@@ -59,7 +58,6 @@ export const altImgUsdt = 'iframe[title="USDT"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
-export const txShareLinkBtn = '[data-testid="share-tx-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
 const noteAlert = "[data-testid='tx-note-alert']"
 const recoredTxNote = '[data-testid="tx-note"]'
@@ -152,10 +150,6 @@ export function checkHashesExist(count) {
     })
 }
 
-export function clickOnReplaceTxOption() {
-  cy.get(replaceChoiceBtn).find('button').click()
-}
-
 export function getRejectButton() {
   return cy.get(rejectTxBtn)
 }
@@ -167,14 +161,6 @@ export function clickOnRejectBtn() {
 export function verifyPayNowOptionIsDisabled() {
   // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
   cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
-}
-
-export function verifyTxRejectModalVisible() {
-  main.verifyMinimumElementsCount(wallet.choiceBtn, 2)
-}
-
-export function clickOnRejectionChoiceBtn(choice) {
-  cy.get(wallet.choiceBtn).eq(choice).click()
 }
 
 export function typeNoteText(text) {
@@ -205,22 +191,6 @@ export function checkNoteCreator(creator) {
 export function checkNoteRecordedNoteReadOnly() {
   cy.get(recoredTxNote).then(($p) => {
     expect($p.prop('tagName')).to.equal('P')
-  })
-}
-
-export function clickOnShareLinkBtn() {
-  cy.get(txShareLinkBtn).click()
-}
-
-export function verifyCopiedURL() {
-  cy.window().then((win) => {
-    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
-  })
-
-  cy.url().then((currentUrl) => {
-    clickOnShareLinkBtn()
-
-    cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
   })
 }
 
@@ -777,20 +747,6 @@ export function selectComboButtonOption(option) {
   cy.get(comboButtonPopover).findByText(comboButtonOptions[option]).click()
 }
 
-export function checkThatComboButtonOptionIsNotPresent(option) {
-  cy.get('body').then(($body) => {
-    if ($body.find(comboButton).length > 0) {
-      cy.get(comboButton).then(($dropdown) => {
-        if ($dropdown.is(':visible')) {
-          cy.get(comboButton).click()
-          cy.get(comboButtonPopover).should('be.visible')
-          cy.get(comboButtonPopover).should('not.contain.text', option)
-          cy.get('body').click(0, 0)
-        }
-      })
-    }
-  })
-}
 //Functions for the happy path flow
 const deleteRequestDomainNames = ['Safe Queue Service', 'Safe Transaction Service']
 

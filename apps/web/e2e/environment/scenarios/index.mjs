@@ -15,10 +15,7 @@ import * as nested from './nested.mjs'
 import * as notes from './notes.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
-import * as rejection from './rejection.mjs'
-import * as replacement from './replacement.mjs'
 import * as safeApps from './safe-apps.mjs'
-import * as sharing from './sharing.mjs'
 import * as spaces from './spaces.mjs'
 import * as spendingLimits from './spending-limits.mjs'
 import * as transferForm from './transfer-form.mjs'
@@ -42,10 +39,7 @@ const modules = [
   notes,
   proposers,
   recovery,
-  rejection,
-  replacement,
   safeApps,
-  sharing,
   spaces,
   spendingLimits,
   transferForm,
