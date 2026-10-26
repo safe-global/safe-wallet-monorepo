@@ -187,6 +187,14 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(result.current.selectedItemId).toBe('1:0xSafe1')
   })
 
+  it('requests the overviews in the selected currency', () => {
+    ;(useAppSelector as jest.Mock).mockReturnValue('cad')
+
+    renderHook(() => useSpaceSafeSelectorItems())
+
+    expect(useGetMultipleSafeOverviewsQuery).toHaveBeenCalledWith(expect.objectContaining({ currency: 'cad' }))
+  })
+
   // ── unnamed safe shows empty name (address display handled by UI) ──
 
   it('uses empty string for name when safe has no name', () => {

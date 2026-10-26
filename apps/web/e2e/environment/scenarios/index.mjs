@@ -1,4 +1,3 @@
-import * as accounts from './accounts.mjs'
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
 import * as batch from './batch.mjs'
@@ -23,7 +22,6 @@ import * as transferForm from './transfer-form.mjs'
 import * as zerion from './zerion.mjs'
 
 const modules = [
-  accounts,
   assets,
   basic,
   batch,
