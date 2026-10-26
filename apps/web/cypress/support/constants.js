@@ -40,7 +40,6 @@ export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
 export const spaceDashboardUrl = '/spaces?spaceId='
-export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
@@ -77,7 +76,6 @@ export const getPermissionsUrl = '/get-permissions'
 export const appSettingsUrl = '/settings/safe-apps'
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
-export const securityUrl = '/settings/security?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
@@ -200,11 +198,6 @@ export const enabledStates = {
   disabled: 'be.disabled',
 }
 
-export const elementExistanceStates = {
-  exist: 'exist',
-  not_exist: 'not.exist',
-}
-
 export const transactionStatus = {
   received: 'Receive',
   sent: 'Send',
@@ -234,7 +227,6 @@ export const addressBookErrrMsg = {
   emptyAddress: 'Owner',
   safeAlreadyAdded: 'Safe account is already added',
   prefixMismatch: "doesn't match the current chain",
-  ownSafeGuardian: 'The Safe account cannot be a Recoverer of itself',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
   },
@@ -301,7 +293,6 @@ export const localStorageKeys = {
 }
 
 export const sessionStorageKeys = {
-  SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
   SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }
 
