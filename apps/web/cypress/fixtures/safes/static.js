@@ -36,7 +36,7 @@ export default {
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
-  /** Recovery and data import/export testing - Used in: recovery.cy.js, load_safe_2.cy.js, import_export_data.cy.js */
+  /** Recovery and data import/export testing - Used in: recovery.cy.js, import_export_data_2.cy.js */
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',

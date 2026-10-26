@@ -410,14 +410,6 @@ export function verifyElementsStatus(elements, status) {
   })
 }
 
-export function formatAddressInCaps(address) {
-  if (address.startsWith('sep:0x')) {
-    return '0x' + address.substring(6).toUpperCase()
-  } else {
-    return 'Invalid address format'
-  }
-}
-
 export function verifyTextVisibility(stringsArray) {
   stringsArray.forEach((string) => {
     cy.contains(string).should('be.visible')

@@ -3,7 +3,6 @@ import { ContractFactory, NonceManager } from 'ethers'
 import { prepareAssetsScenario } from './assets.mjs'
 import { prepareBasicScenario } from './basic.mjs'
 import { registerContract } from './contracts.mjs'
-import { setEnsName } from './ens.mjs'
 import { createSafe, openSafe, proposeTransaction } from './safe.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
 import { trustToken } from './tokens.mjs'
@@ -46,11 +45,8 @@ export async function prepareImportDataScenario(env, owners) {
 }
 
 export async function prepareLoadSafeScenario(env, owners) {
-  await setEnsName(env, 'testenssepolia.eth', owners.owner4.address)
-  const names = ['SEP_STATIC_SAFE_3', 'SEP_STATIC_SAFE_4', 'SEP_STATIC_SAFE_13']
-  // Only the Ethereum owner-name case needs the mainnet fork, so the other cases still run without it.
-  const funds = env.SAFE_E2E_CHAINS?.[1] ? await rebuildStagingSafes(env, owners, ['ETH_FUNDS_SAFE_13']) : {}
-  return { safes: { static: await rebuildStagingSafes(env, owners, names), funds } }
+  const names = ['SEP_STATIC_SAFE_3', 'SEP_STATIC_SAFE_4']
+  return { safes: { static: await rebuildStagingSafes(env, owners, names) } }
 }
 
 export async function prepareSafeSelectorScenario(env, owners) {

@@ -232,8 +232,6 @@ export const addressBookErrrMsg = {
   ownerAdded: 'This address is already a signer of this Safe Account',
   failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
-  safeAlreadyAdded: 'Safe account is already added',
-  prefixMismatch: "doesn't match the current chain",
   ownSafeGuardian: 'The Safe account cannot be a Recoverer of itself',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
