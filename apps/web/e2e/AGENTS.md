@@ -4,7 +4,7 @@ All new web E2E tests are written here. (Cypress in `../cypress/` is legacy — 
 
 **Before writing any test, follow the 12-step AI Test Output Format in [docs/AI_TEST_OUTPUT_FORMAT.md](docs/AI_TEST_OUTPUT_FORMAT.md) — code is step 11 of 12.** Full conventions: [docs/README.md](docs/README.md).
 
-Cypress → Playwright migration: follow [docs/CYPRESS_MIGRATION_GUIDE.md](docs/CYPRESS_MIGRATION_GUIDE.md) — it defines the mandatory per-test classification **and** the staged programme (one stage at a time, easiest area first; each stage is a migration PR followed by a separate deletion PR after CI has run the new specs). The specs still in `../cypress/e2e/` are the remaining work; record the classification of each spec in the PR description.
+Cypress → Playwright migration: move each Cypress test to the lowest level that covers it (unit or component test first, a Playwright journey only for a user flow), and delete what nothing needs. The specs still in `../cypress/e2e/` are the remaining work. In the PR description, list each migrated or deleted Cypress test with its replacement or the reason it goes.
 
 ## Layout
 
