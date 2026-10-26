@@ -9,7 +9,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { getAllowlistTokenAddresses, type Erc20TokenResolver } from '../utils/mapAllowlists'
+import { getAllowlistTokenAddresses, toChainAddressKey, type Erc20TokenResolver } from '../utils/mapAllowlists'
 
 /** The tokens endpoint takes at most this many addresses per request. */
 const MAX_ADDRESSES_PER_REQUEST = 20
@@ -32,7 +32,7 @@ const toResolver = (
   args.forEach(({ chainId }, index) => {
     for (const token of responses[index] ?? []) {
       if (token.type !== TokenType.ERC20) continue
-      byKey.set(`${chainId}:${token.address.toLowerCase()}`, {
+      byKey.set(toChainAddressKey(chainId, token.address), {
         address: token.address,
         symbol: token.symbol,
         decimals: token.decimals,
@@ -41,7 +41,7 @@ const toResolver = (
     }
   })
 
-  return (chainId, tokenAddress) => byKey.get(`${chainId}:${tokenAddress.toLowerCase()}`)
+  return (chainId, tokenAddress) => byKey.get(toChainAddressKey(chainId, tokenAddress))
 }
 
 /**

@@ -25,6 +25,8 @@ const NO_ERC20_TOKEN: Erc20TokenResolver = () => undefined
 
 const NATIVE_TRANSFER_SELECTOR = '0x00000000'
 
+export const toChainAddressKey = (chainId: string, address: string): string => `${chainId}:${address.toLowerCase()}`
+
 type GuardEnforcement = Extract<ActivePolicyDto['enforcement'], { via: 'guard' }>
 
 type Erc20AllowlistDto = ActivePolicyDto & {
@@ -124,7 +126,7 @@ export const toAllowlists = (
   for (const dto of dtos) {
     if (!isAllowlistDto(dto)) continue
 
-    const key = `${dto.safe.chainId}:${dto.safe.address.toLowerCase()}`
+    const key = toChainAddressKey(dto.safe.chainId, dto.safe.address)
     const { guards } = dto.enforcement
     const group: AllowlistGroup = bySafe.get(key) ?? {
       safe: dto.safe,
