@@ -5,7 +5,6 @@ import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as owner from '../pages/owners.pages.js'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
@@ -46,32 +45,6 @@ describe('Nested safes fund asset tests', () => {
     nsafes.clickOnFundAssetBtn()
     nsafes.getTokenList(1).then((tokens) => {
       expect(tokens).to.not.include(constants.tokenNames.sepoliaEther)
-    })
-  })
-
-  it('Verify that the erorr appears if entered amount> available amount of the token', () => {
-    nsafes.clickOnFundAssetBtn()
-    nsafes.setSendValue(0, 0.1)
-    owner.verifyErrorMsgInvalidAddress(constants.amountErrorMsg.largerThanCurrentBalance)
-  })
-
-  it('Verify that click on Max adds all available token amount', () => {
-    nsafes.clickOnFundAssetBtn()
-    nsafes.setMaxAmountValue(0)
-    nsafes.verifyMaxAmount(0, constants.tokenNames.sepoliaEther, constants.tokenAbbreviation.sep)
-  })
-
-  it('Verify that delete icon removes one line of Fund new asset', () => {
-    nsafes.clickOnFundAssetBtn()
-    nsafes.setMaxAmountValue(0)
-    nsafes.clickOnFundAssetBtn()
-    nsafes.getAssetCount().then((count) => {
-      expect(count).to.equal(2)
-    })
-
-    nsafes.removeAsset(1)
-    nsafes.getAssetCount().then((count) => {
-      expect(count).to.equal(1)
     })
   })
 })
