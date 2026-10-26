@@ -8,23 +8,66 @@ import { createInitialState } from '@/stories/mocks/defaults'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
 
 /**
- * Every screen of the fee payment spec ("Who pays the network fee"), one story per cell of its case
- * table. Toggles keep their own selection so the fee row follows the picked option.
+ * Every screen of the fee payment design (Prototype/Fee payment), one story per cell of its case
+ * table. Dropdowns keep their own selection so the fee rows follow the picked option.
  */
+const ZERO = '0x0000000000000000000000000000000000000000'
+const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+const ETH = {
+  address: ZERO,
+  symbol: 'ETH',
+  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+}
+const USDC_TOKEN = {
+  address: USDC,
+  symbol: 'USDC',
+  logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+  fiatBalance: '1200',
+}
+
+const signerFee: NetworkFee = { amount: '0.0004', currency: 'ETH', fiatAmount: '$1.46' }
+const safeFee: NetworkFee = { amount: '0.0004', currency: 'ETH', fiatAmount: '$1.46' }
+const feesLine = { amount: '0.0004', currency: 'ETH' }
+const outgoing = (withFees: boolean) => ({
+  primary: [{ amount: '0.5466', currency: 'ETH' }],
+  fees: withFees ? feesLine : undefined,
+  fiatTotal: withFees ? '$1,996.55' : '$1,995.09',
+})
+const free: FeePayerView['footer'] = { kind: 'upsell' }
+const pro = (left: number): FeePayerView['footer'] => ({
+  kind: 'counter',
+  left,
+  quota: 50,
+  resetsAt: '2026-11-11T00:00:00Z',
+})
+const safeTokens = {
+  tokens: [ETH, USDC_TOKEN],
+  selected: ZERO,
+  locked: false,
+  lockedReason: 'Fees are paid in ETH for now. More tokens are coming soon.',
+}
+const nativeLocked = { tokens: [ETH], selected: ZERO, locked: true }
+const base = { executionFee: {}, sponsored: false }
+
 const Harness = ({ view }: { view: FeePayerView }) => {
-  const [choice, setChoice] = useState<GasPayerChoice>(
-    view.kind === 'sponsored_toggle' || view.kind === 'safe_toggle' ? view.choice : 'WALLET',
-  )
-  const live: FeePayerView =
-    view.kind === 'sponsored_toggle'
-      ? { ...view, choice: choice === 'SPONSORED' ? 'SPONSORED' : 'WALLET' }
-      : view.kind === 'safe_toggle'
-        ? { ...view, choice: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET' }
-        : view
+  const [choice, setChoice] = useState<GasPayerChoice>(view.payer.value)
+  const [token, setToken] = useState(view.gasToken.selected)
+  const paysFromSafe = choice === 'PAY_FROM_SAFE'
+  const live: FeePayerView = {
+    ...view,
+    payer: view.payer.kind === 'choice' ? { ...view.payer, value: choice } : view.payer,
+    gasToken: { ...view.gasToken, selected: token },
+    sponsored: choice === 'SPONSORED',
+    gasFee:
+      view.payer.kind === 'choice' && !paysFromSafe && view.payer.options.includes('PAY_FROM_SAFE')
+        ? signerFee
+        : view.gasFee,
+    totalOutgoing: view.totalOutgoing && { ...view.totalOutgoing, fees: paysFromSafe ? feesLine : undefined },
+  }
 
   return (
-    <div className="w-[480px]">
-      <GasPayerSelector view={live} onChoiceChange={setChoice} />
+    <div className="w-[600px]">
+      <GasPayerSelector view={live} onChoiceChange={setChoice} onGasTokenChange={setToken} />
     </div>
   )
 }
@@ -54,83 +97,94 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const safeFee: NetworkFee = { amount: '0.0001', currency: 'ETH', fiatAmount: '€0.20' }
-const signerFee: NetworkFee = { amount: '0.00012', currency: 'ETH', fiatAmount: '€0.24' }
-const atExecution: NetworkFee = { note: 'Calculated at execution' }
-const ZERO = '0x0000000000000000000000000000000000000000'
-const gasTokens = [
-  { address: ZERO, symbol: 'ETH', logoUri: '', fiatBalance: '1250.00' },
-  { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', logoUri: '', fiatBalance: '10000.00' },
-]
-const nativeOnly = [gasTokens[0]]
+const choice = (value: GasPayerChoice, options: GasPayerChoice[]): FeePayerView['payer'] => ({
+  kind: 'choice',
+  value,
+  options,
+})
+const locked = (value: GasPayerChoice): FeePayerView['payer'] => ({ kind: 'locked', value })
 
-// Sign step, first signer
-
-export const SignFreePlan: Story = {
-  name: 'Sign · Free plan (fee + premium)',
+export const SignFreePlanSafe: Story = {
+  name: 'Sign · Free plan · Pay from Safe account',
   args: {
     view: {
-      kind: 'safe_toggle',
-      choice: 'WALLET',
-      safeFee,
-      signerFee: atExecution,
-      premium: true,
-      reachesThreshold: false,
-      gasTokens,
-      selectedGasToken: ZERO,
+      ...base,
+      payer: choice('PAY_FROM_SAFE', ['PAY_FROM_SAFE', 'WALLET']),
+      gasToken: safeTokens,
+      gasFee: safeFee,
+      totalOutgoing: outgoing(true),
+      footer: free,
+    },
+  },
+}
+
+export const SignFreePlanSigner: Story = {
+  name: 'Sign · Free plan · Pay from signer wallet',
+  args: {
+    view: {
+      ...base,
+      payer: choice('WALLET', ['PAY_FROM_SAFE', 'WALLET']),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      totalOutgoing: outgoing(false),
+      footer: free,
     },
   },
 }
 
 export const SignProSponsoredLeft: Story = {
-  name: 'Sign · Pro, sponsored left (info line)',
-  args: { view: { kind: 'sponsored_info' } },
+  name: 'Sign · Pro, sponsored left (Pro plan, locked)',
+  args: {
+    view: {
+      ...base,
+      payer: locked('SPONSORED'),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      sponsored: true,
+      totalOutgoing: outgoing(false),
+      footer: pro(49),
+    },
+  },
 }
 
 export const SignProNoSponsored: Story = {
-  name: 'Sign · Pro, 0 sponsored left (fee, no premium)',
+  name: 'Sign · Pro, 0 sponsored left · Pay from Safe account',
   args: {
     view: {
-      kind: 'safe_toggle',
-      choice: 'PAY_FROM_SAFE',
-      safeFee,
-      signerFee: atExecution,
-      premium: false,
-      reachesThreshold: false,
-      gasTokens,
-      selectedGasToken: ZERO,
+      ...base,
+      payer: choice('PAY_FROM_SAFE', ['PAY_FROM_SAFE', 'WALLET']),
+      gasToken: safeTokens,
+      gasFee: safeFee,
+      totalOutgoing: outgoing(true),
+      footer: pro(0),
     },
   },
 }
 
-export const SignNativeOnly: Story = {
-  name: 'Sign · only the native token can pay (M1)',
+export const SignLaterSignerSafe: Story = {
+  name: 'Sign · later signer · Safe account locked at signing',
   args: {
     view: {
-      kind: 'safe_toggle',
-      choice: 'PAY_FROM_SAFE',
-      safeFee,
-      signerFee: atExecution,
-      premium: false,
-      reachesThreshold: false,
-      gasTokens: nativeOnly,
-      selectedGasToken: ZERO,
+      ...base,
+      payer: locked('PAY_FROM_SAFE'),
+      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: "Set at signing and can't be changed." },
+      gasFee: safeFee,
+      totalOutgoing: outgoing(true),
+      footer: free,
     },
   },
 }
 
-export const SignAndExecute: Story = {
-  name: 'Sign · threshold-reaching signer, Pay from Safe',
+export const SignLaterSignerWallet: Story = {
+  name: 'Sign · later signer · Signer wallet',
   args: {
     view: {
-      kind: 'safe_toggle',
-      choice: 'PAY_FROM_SAFE',
-      safeFee,
-      signerFee,
-      premium: false,
-      reachesThreshold: true,
-      gasTokens,
-      selectedGasToken: ZERO,
+      ...base,
+      payer: locked('WALLET'),
+      gasToken: nativeLocked,
+      gasFee: { note: 'Calculated at execution' },
+      totalOutgoing: outgoing(false),
+      footer: free,
     },
   },
 }
@@ -139,14 +193,11 @@ export const SignQuoteLoading: Story = {
   name: 'Sign · quote loading',
   args: {
     view: {
-      kind: 'safe_toggle',
-      choice: 'PAY_FROM_SAFE',
-      safeFee: { loading: true },
-      signerFee: atExecution,
-      premium: false,
-      reachesThreshold: false,
-      gasTokens,
-      selectedGasToken: ZERO,
+      ...base,
+      payer: choice('PAY_FROM_SAFE', ['PAY_FROM_SAFE', 'WALLET']),
+      gasToken: safeTokens,
+      gasFee: { loading: true },
+      footer: free,
     },
   },
 }
@@ -155,46 +206,98 @@ export const SignQuoteError: Story = {
   name: 'Sign · quote error',
   args: {
     view: {
-      kind: 'safe_toggle',
-      choice: 'PAY_FROM_SAFE',
-      safeFee: { error: true },
-      signerFee: atExecution,
-      premium: false,
-      reachesThreshold: false,
-      gasTokens,
-      selectedGasToken: ZERO,
+      ...base,
+      payer: choice('PAY_FROM_SAFE', ['PAY_FROM_SAFE', 'WALLET']),
+      gasToken: safeTokens,
+      gasFee: { error: true },
+      footer: free,
     },
   },
 }
 
-// Execute step
+export const SignInsufficientBalance: Story = {
+  name: 'Sign · Safe cannot cover the fee',
+  args: {
+    view: {
+      ...base,
+      payer: choice('PAY_FROM_SAFE', ['PAY_FROM_SAFE', 'WALLET']),
+      gasToken: safeTokens,
+      gasFee: safeFee,
+      totalOutgoing: outgoing(true),
+      footer: free,
+      safeHasEnoughGas: false,
+    },
+  },
+}
 
 export const ExecuteLocked: Story = {
-  name: 'Execute · Pay from Safe locked at signing',
-  args: { view: { kind: 'locked', fee: safeFee } },
+  name: 'Execute · Safe account locked at signing',
+  args: {
+    view: {
+      ...base,
+      payer: locked('PAY_FROM_SAFE'),
+      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: "Set at signing and can't be changed." },
+      gasFee: safeFee,
+      totalOutgoing: outgoing(true),
+      footer: pro(49),
+    },
+  },
 }
 
 export const ExecuteProSponsoredLeft: Story = {
-  name: 'Execute · Pro, sponsored left (toggle)',
-  args: { view: { kind: 'sponsored_toggle', choice: 'SPONSORED', counter: '49/50', signerFee } },
+  name: 'Execute · Pro, sponsored left (Pro plan / Signer wallet)',
+  args: {
+    view: {
+      ...base,
+      payer: choice('SPONSORED', ['SPONSORED', 'WALLET']),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      sponsored: true,
+      totalOutgoing: outgoing(false),
+      footer: pro(49),
+    },
+  },
 }
 
 export const ExecuteProUnlimited: Story = {
   name: 'Execute · Enterprise, unlimited',
-  args: { view: { kind: 'sponsored_toggle', choice: 'SPONSORED', counter: 'Unlimited', signerFee } },
+  args: {
+    view: {
+      ...base,
+      payer: choice('SPONSORED', ['SPONSORED', 'WALLET']),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      sponsored: true,
+      totalOutgoing: outgoing(false),
+      footer: { kind: 'counter', left: null, quota: null, resetsAt: null },
+    },
+  },
 }
 
-export const ExecuteDailyFree: Story = {
-  name: 'Execute · Core on a daily-free chain',
-  args: { view: { kind: 'sponsored_toggle', choice: 'SPONSORED', counter: '1/1 today', signerFee } },
-}
-
-export const ExecuteProNoSponsored: Story = {
-  name: 'Execute · Pro, 0 sponsored left (text + message)',
-  args: { view: { kind: 'signer_only', reason: 'quota', resetsAt: '2026-11-11T13:15:00Z', signerFee } },
+export const ExecuteSponsoringRanOut: Story = {
+  name: 'Execute · Pro, sponsoring ran out before execution',
+  args: {
+    view: {
+      ...base,
+      payer: locked('WALLET'),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      totalOutgoing: outgoing(false),
+      footer: pro(0),
+    },
+  },
 }
 
 export const ExecuteFreePlan: Story = {
-  name: 'Execute · Free plan (text + upsell)',
-  args: { view: { kind: 'signer_only', reason: 'free', resetsAt: null, signerFee } },
+  name: 'Execute · Free plan · Signer wallet',
+  args: {
+    view: {
+      ...base,
+      payer: locked('WALLET'),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      totalOutgoing: outgoing(false),
+      footer: free,
+    },
+  },
 }

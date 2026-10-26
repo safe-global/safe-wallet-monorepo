@@ -9,14 +9,21 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useSafeProAccess, useSafeSponsoredTxs } from '@/features/spaces'
 import type { SponsoredOffer } from '@/utils/gasPayment'
-import type { FeePayerPlanState, FeePayerView, GasPayerChoice, NetworkFee } from '../types'
+import type {
+  FeePayerControl,
+  FeePayerFooter,
+  FeePayerPlanState,
+  FeePayerView,
+  GasPayerChoice,
+  NetworkFee,
+} from '../types'
 import { PAY_FROM_SAFE_ON_FREE_PLAN } from '../constants'
 import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { useGtfFeePreview } from './useGtfFeePreview'
 
 export type GasPayerSelection = {
-  /** The screen to render, or null when this signer sees nothing (later signer, signer-pays payload). */
+  /** The fee card to render, or null before the payload exists or where the chain does not list PAY_FROM_SAFE. */
   view: FeePayerView | null
   /** The effective choice: the user's, or the default for this payload. */
   choice: GasPayerChoice
@@ -30,17 +37,6 @@ export type GasPayerSelection = {
   planState: FeePayerPlanState
   fees: FeesPreviewData
   onGasTokenChange?: (address: string) => void
-}
-
-const counterLabel = (offer: SponsoredOffer): string => {
-  switch (offer.option) {
-    case 'SUBSCRIPTION':
-      return offer.left === null ? 'Unlimited' : `${offer.left}/${offer.meter?.quota ?? '∞'}`
-    case 'FREE_DAILY_LIMIT':
-      return offer.relays ? `${offer.relays.remaining}/${offer.relays.limit} today` : 'Free'
-    case 'NO_FEE_CAMPAIGN':
-      return `${offer.remaining}/${offer.limit}`
-  }
 }
 
 /**
@@ -66,12 +62,11 @@ export const useGasPayerSelection = ({
   const fees = useFeesPreview()
   const { gtfPaymentMode, setGtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const { hasProFeatures, isLoading: isProLoading } = useSafeProAccess()
-  const { isPro, left } = useSafeSponsoredTxs()
+  const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()
 
   const signatures = safeTx?.signatures.size ?? 0
   const isUnsigned = !!safeTx && signatures === 0
-  const reachesThreshold = !!safeTx && signatures === Math.max(safe.threshold - 1, 0)
   const isLocked = !!safeTx && isGtfSafePaid(safeTx.data)
   const isChainReady = isGtfFeePreviewAvailable(chain)
   const isGranted = !isProLoading && (hasProFeatures || PAY_FROM_SAFE_ON_FREE_PLAN)
@@ -151,69 +146,104 @@ export const useGasPayerSelection = ({
 
   const view = useMemo<FeePayerView | null>(() => {
     if (!safeTx || !isChainReady) return null
-    if (isLocked) return { kind: 'locked', fee: currentFee }
 
-    if (step === 'sign') {
-      // Later signers of a signer-pays payload see nothing.
-      if (!isUnsigned) return null
-      if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'sponsored_info' }
-      if (offersSafeToggle) {
+    const payer: FeePayerControl = (() => {
+      if (isLocked) return { kind: 'locked', value: 'PAY_FROM_SAFE' }
+      if (step === 'sign') {
+        // Design: a Pro Workspace with sponsored transactions left has nothing to pick at signing.
+        if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'locked', value: 'SPONSORED' }
+        if (offersSafeToggle) {
+          return {
+            kind: 'choice',
+            value: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
+            options: ['PAY_FROM_SAFE', 'WALLET'],
+          }
+        }
+        return { kind: 'locked', value: 'WALLET' }
+      }
+      if (hasSponsoredOffer) {
         return {
-          kind: 'safe_toggle',
-          choice: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
-          safeFee,
-          signerFee,
-          premium: planState === 'FREE',
-          reachesThreshold,
-          gasTokens: fees.availableGasTokens ?? [],
-          selectedGasToken: fees.selectedGasToken ?? ZERO_ADDRESS,
+          kind: 'choice',
+          value: choice === 'SPONSORED' ? 'SPONSORED' : 'WALLET',
+          options: ['SPONSORED', 'WALLET'],
         }
       }
-      return { kind: 'signer_only', reason: planState === 'FREE' ? 'free' : 'quota', resetsAt: null, signerFee }
-    }
+      if (offersSafeToggle) {
+        return {
+          kind: 'choice',
+          value: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
+          options: ['PAY_FROM_SAFE', 'WALLET'],
+        }
+      }
+      return { kind: 'locked', value: 'WALLET' }
+    })()
 
-    // Execute step.
-    if (hasSponsoredOffer && offer) {
-      return {
-        kind: 'sponsored_toggle',
-        choice: choice === 'SPONSORED' ? 'SPONSORED' : 'WALLET',
-        counter: counterLabel(offer),
-        signerFee,
-      }
+    const paysFromSafe = payer.value === 'PAY_FROM_SAFE'
+    const sponsored = payer.value === 'SPONSORED'
+    const tokens = fees.availableGasTokens ?? []
+    const nativeToken = tokens.find((t) => t.address === ZERO_ADDRESS) ?? tokens[0]
+    const gasToken: FeePayerView['gasToken'] = paysFromSafe
+      ? {
+          tokens,
+          selected: fees.selectedGasToken ?? nativeToken?.address ?? ZERO_ADDRESS,
+          locked: isLocked,
+          lockedReason: isLocked
+            ? "Set at signing and can't be changed."
+            : `Fees are paid in ${nativeToken?.symbol ?? chain?.nativeCurrency.symbol} for now. More tokens are coming soon.`,
+        }
+      : { tokens: nativeToken ? [nativeToken] : [], selected: nativeToken?.address ?? ZERO_ADDRESS, locked: true }
+
+    const gasFee: NetworkFee = isLocked ? currentFee : paysFromSafe ? safeFee : signerFee
+    const executionFee: NetworkFee = fees.executionFee.isFree
+      ? {}
+      : {
+          amount: fees.executionFee.amount,
+          currency: fees.executionFee.currency,
+          fiatAmount: fees.executionFee.fiatAmount,
+        }
+    // The fee leaves the Safe only when the Safe pays it.
+    const totalOutgoing =
+      fees.totalOutgoing && (isLocked || paysFromSafe)
+        ? fees.totalOutgoing
+        : fees.totalOutgoing && { ...fees.totalOutgoing, fees: undefined }
+
+    const footer: FeePayerFooter =
+      planState === 'FREE'
+        ? { kind: 'upsell' }
+        : { kind: 'counter', left, quota: meter?.quota ?? null, resetsAt: meter?.resetsAt ?? null }
+
+    return {
+      payer,
+      gasToken,
+      executionFee,
+      gasFee,
+      sponsored,
+      totalOutgoing,
+      footer,
+      safeHasEnoughGas: paysFromSafe && !isLocked ? fees.safeHasEnoughGas : undefined,
     }
-    if (offersSafeToggle) {
-      return {
-        kind: 'safe_toggle',
-        choice: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
-        safeFee,
-        signerFee,
-        premium: planState === 'FREE',
-        reachesThreshold,
-        gasTokens: fees.availableGasTokens ?? [],
-        selectedGasToken: fees.selectedGasToken ?? ZERO_ADDRESS,
-      }
-    }
-    const resetsAt = offer?.option === 'SUBSCRIPTION' ? (offer.meter?.resetsAt ?? null) : null
-    return { kind: 'signer_only', reason: planState === 'FREE' ? 'free' : 'quota', resetsAt, signerFee }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     safeTx,
     isChainReady,
     isLocked,
     step,
-    isUnsigned,
     planState,
     offersSafeToggle,
     choice,
     safeFee,
-    reachesThreshold,
     hasSponsoredOffer,
-    offer,
+    left,
+    meter,
+    chain,
     fees.gasFee,
+    fees.executionFee,
+    fees.totalOutgoing,
     fees.loading,
     fees.error,
     fees.availableGasTokens,
     fees.selectedGasToken,
+    fees.safeHasEnoughGas,
     gtfPaymentMode,
   ])
 

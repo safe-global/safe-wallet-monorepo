@@ -36,12 +36,12 @@ const PAYMENT_SOURCES = ['safe', 'signer'] as const satisfies readonly GtfPaymen
 
 const paymentSourceLabel = (source: GtfPaymentMode) => (source === 'safe' ? 'Safe' : 'Signer')
 
-const SignerFeeTooltip = (): ReactElement => (
+const SignerFeeTooltip = ({ text = SIGNER_FEE_TOOLTIP }: { text?: string }): ReactElement => (
   <Tooltip>
     <TooltipTrigger render={<span className={css.tooltipIcon} />}>
       <InfoIcon className="size-4 text-[var(--color-border-main)]" />
     </TooltipTrigger>
-    <TooltipContent side="top">{SIGNER_FEE_TOOLTIP}</TooltipContent>
+    <TooltipContent side="top">{text}</TooltipContent>
   </Tooltip>
 )
 
@@ -100,12 +100,15 @@ export const GasTokenSelector = ({
   onGasTokenChange,
   locked,
   forcedDisplay,
+  lockedTooltip,
 }: {
   availableGasTokens: FeesPreviewData['availableGasTokens']
   selectedGasToken: string
   onGasTokenChange?: (address: string) => void
   locked?: boolean
   forcedDisplay?: { symbol: string; logoUri: string }
+  /** Why the token cannot be changed; defaults to the signer-pays explanation. */
+  lockedTooltip?: string
 }): ReactElement => {
   const currency = useAppSelector(selectCurrency)
   // EVM addresses are case-insensitive; strict `===` would silently fall back to [0] when the
@@ -130,7 +133,7 @@ export const GasTokenSelector = ({
     return (
       <div className={cn(css.gasTokenSelector, css.gasTokenSelectorLocked)} data-testid="gas-token-selector">
         {display}
-        <SignerFeeTooltip />
+        <SignerFeeTooltip text={lockedTooltip} />
       </div>
     )
   }

@@ -1,26 +1,159 @@
 import type { ReactElement, ReactNode } from 'react'
 import NextLink from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronDown, Lock } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
-import { Label } from '@safe-global/views/components/ui/label'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Separator } from '@safe-global/views/components/ui/separator'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '@safe-global/views/features/gtf/components/shared/tooltips'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import type { FeePayerView, GasPayerChoice, NetworkFee } from '../../types'
-import { GasTokenSelector } from '../FeesPreview'
+import SponsoredTxsCounter from '@/components/tx/SponsoredTxsCounter'
+import Track from '@/components/common/Track'
+import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import type { FeePayerControl, FeePayerView, GasPayerChoice, NetworkFee } from '../../types'
+import { GasTokenSelector, TotalOutgoingSection } from '../FeesPreview'
+import feesCss from '../FeesPreview/styles.module.css'
 import css from './styles.module.css'
 
-const formatResetDate = (iso: string | null): string | null => {
-  if (!iso) return null
-  const timestamp = Date.parse(iso)
-  if (Number.isNaN(timestamp)) return null
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(timestamp)
+const PAYER_LABEL: Record<GasPayerChoice, string> = {
+  PAY_FROM_SAFE: 'Safe account',
+  WALLET: 'Signer wallet',
+  SPONSORED: 'Pro plan',
 }
 
-const FeeAmount = ({ fee }: { fee: NetworkFee }): ReactElement => {
-  if (fee.loading) return <Skeleton className="inline-block h-4 min-w-[5em]" />
+/** Why the locked pill cannot be changed, per payer. */
+const LOCKED_TOOLTIP: Record<GasPayerChoice, string> = {
+  PAY_FROM_SAFE: "Set at signing and can't be changed.",
+  WALLET: 'Whoever executes pays the gas fee.',
+  SPONSORED: 'Covered by your sponsored transactions.',
+}
+
+const PAYER_TEST_ID: Record<GasPayerChoice, string> = {
+  PAY_FROM_SAFE: 'fee-payer-safe',
+  WALLET: 'fee-payer-signer',
+  SPONSORED: 'fee-payer-sponsored',
+}
+
+const UPGRADE_PROMPT = {
+  [MixpanelEventParams.FEATURE]: UpgradeFeature.SPONSORED_TX,
+  [MixpanelEventParams.LOCATION]: UpgradeLocation.TX_FLOW_GAS,
+}
+
+const PillLabel = ({ children }: { children: ReactNode }): ReactElement => (
+  <Typography variant="paragraph-small-bold" className="tracking-[0.1px]">
+    {children}
+  </Typography>
+)
+
+/** The "Pay fees from" dropdown: the same pill as the fee token selector, with the payer options. */
+const PayerChoice = ({
+  value,
+  options,
+  onChange,
+}: {
+  value: GasPayerChoice
+  options: GasPayerChoice[]
+  onChange: (choice: GasPayerChoice) => void
+}): ReactElement => (
+  <DropdownMenu>
+    <DropdownMenuTrigger
+      data-testid="fee-payer-selector"
+      render={<div role="button" tabIndex={0} className={cn(feesCss.paymentSourceSelector, css.payerPill)} />}
+    >
+      <PillLabel>{PAYER_LABEL[value]}</PillLabel>
+      <ChevronDown className={feesCss.selectorCaret} />
+    </DropdownMenuTrigger>
+
+    <DropdownMenuContent align="start">
+      {options.map((option) => (
+        <DropdownMenuItem
+          key={option}
+          onClick={() => onChange(option)}
+          className={feesCss.selectorMenuItem}
+          data-testid={PAYER_TEST_ID[option]}
+        >
+          <Typography variant="paragraph-small-bold">{PAYER_LABEL[option]}</Typography>
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+)
+
+/** The same pill with no menu: what a later signer or the executor sees once there is nothing to choose. */
+const LockedPill = ({ children, tooltip }: { children: ReactNode; tooltip: string }): ReactElement => (
+  <Tooltip>
+    <TooltipTrigger
+      render={
+        <div
+          className={cn(feesCss.paymentSourceSelector, feesCss.gasTokenSelectorLocked, css.payerPill)}
+          data-testid="fee-payer-locked"
+        />
+      }
+    >
+      {children}
+      <Lock className={css.lockIcon} />
+    </TooltipTrigger>
+    <TooltipContent side="top">{tooltip}</TooltipContent>
+  </Tooltip>
+)
+
+const PayerControl = ({
+  control,
+  onChange,
+}: {
+  control: FeePayerControl
+  onChange: (choice: GasPayerChoice) => void
+}): ReactElement =>
+  control.kind === 'choice' ? (
+    <PayerChoice value={control.value} options={control.options} onChange={onChange} />
+  ) : (
+    <LockedPill tooltip={LOCKED_TOOLTIP[control.value]}>
+      <PillLabel>{PAYER_LABEL[control.value]}</PillLabel>
+    </LockedPill>
+  )
+
+const LabelledControl = ({ label, children }: { label: string; children: ReactNode }): ReactElement => (
+  <div className={feesCss.paymentRowGroup}>
+    <Typography variant="paragraph-small" color="muted">
+      {label}
+    </Typography>
+    {children}
+  </div>
+)
+
+const FeeLabel = ({ label, tooltip }: { label: string; tooltip: string }): ReactElement => (
+  <Typography variant="paragraph-small" className={css.feeLabel}>
+    {label}
+    <Tooltip>
+      <TooltipTrigger render={<span className={feesCss.tooltipIcon} />}>
+        <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  </Typography>
+)
+
+const ProBadge = (): ReactElement => (
+  <span className="block h-5 w-8 shrink-0" role="img" aria-label="Safe Pro">
+    <ProChip className="size-full" />
+  </span>
+)
+
+const FeeValue = ({ fee, sponsored }: { fee: NetworkFee; sponsored?: boolean }): ReactElement => {
+  if (fee.loading) return <Skeleton className="h-4 min-w-[7em]" />
   if (fee.error)
     return (
       <Typography variant="paragraph-small" className="text-[var(--color-warning-main)]">
@@ -33,13 +166,23 @@ const FeeAmount = ({ fee }: { fee: NetworkFee }): ReactElement => {
         {fee.note}
       </Typography>
     )
+  // Sponsored: the fee somebody else pays, struck through next to the Pro chip.
+  if (sponsored)
+    return (
+      <span className={css.feeAmount}>
+        <Typography variant="paragraph-small" color="muted" className="line-through">
+          {fee.amount} {fee.currency}
+        </Typography>
+        <ProBadge />
+      </span>
+    )
   return (
-    <span className={css.feeAmount}>
-      <Typography variant="paragraph-small-bold">
+    <span className={css.feeValue}>
+      <Typography variant="paragraph-small">
         {fee.amount} {fee.currency}
       </Typography>
       {fee.fiatAmount && (
-        <Typography variant="paragraph-small" color="muted">
+        <Typography variant="paragraph-mini" color="muted">
           {fee.fiatAmount}
         </Typography>
       )}
@@ -47,53 +190,43 @@ const FeeAmount = ({ fee }: { fee: NetworkFee }): ReactElement => {
   )
 }
 
-/** The one "Network fee" row of the spec, replacing Estimated / Max / Total outgoing. */
-const NetworkFeeRow = ({ fee, free }: { fee?: NetworkFee; free?: boolean }): ReactElement => (
-  <div className={css.feeRow} data-testid="network-fee-row">
-    <Typography variant="paragraph-small" color="muted">
-      Network fee
-    </Typography>
-    {free ? <Typography variant="paragraph-small-bold">Free</Typography> : fee ? <FeeAmount fee={fee} /> : null}
-  </div>
-)
-
-const Option = ({
-  value,
-  children,
-  testId,
-}: {
-  value: GasPayerChoice
-  children: ReactNode
-  testId: string
-}): ReactElement => (
-  <Label data-testid={testId} className={css.option}>
-    <RadioGroupItem value={value} />
-    <Typography className={css.optionLabel}>{children}</Typography>
-  </Label>
-)
-
-const Message = ({ children, testId }: { children: ReactNode; testId?: string }): ReactElement => (
-  <Typography variant="paragraph-small" color="muted" className={css.message} data-testid={testId}>
+const FeeRow = ({ children, testId }: { children: ReactNode; testId: string }): ReactElement => (
+  <div className={css.feeRow} data-testid={testId}>
     {children}
-  </Typography>
-)
-
-const ProUpsell = ({ children }: { children: ReactNode }): ReactElement => (
-  <div className={css.upsell} data-testid="fee-payer-upsell">
-    <Typography variant="paragraph-small">{children}</Typography>
-    <Button variant="outline" size="xs" render={<NextLink href={AppRoutes.welcome.spaces} />}>
-      Upgrade to
-      <span className="block h-4 w-6" aria-label="Safe Pro">
-        <ProChip className="size-full" />
-      </span>
-      <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
-    </Button>
   </div>
 )
+
+/** The free plan's strip: what Pro gives, and the way to it. */
+const ProUpsell = (): ReactElement => {
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, UPGRADE_PROMPT, true)
+
+  return (
+    <div className={css.upsell} data-testid="fee-payer-upsell">
+      <Typography variant="paragraph-small">Don&apos;t pay gas fees. Get sponsored transactions with Pro.</Typography>
+      <Track
+        {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
+        mixpanelParams={{
+          [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+          ...UPGRADE_PROMPT,
+        }}
+        className="shrink-0"
+      >
+        <Button variant="outline" size="xs" render={<NextLink href={AppRoutes.welcome.spaces} />}>
+          Upgrade to
+          <span className="block h-4 w-6" aria-label="Safe Pro">
+            <ProChip className="size-full" />
+          </span>
+          <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
+        </Button>
+      </Track>
+    </div>
+  )
+}
 
 /**
- * Who pays the network fee, one screen per state of the fee payment spec. Two options render as a
- * toggle; one option renders as text, never as a lone radio; a locked fee renders as a read-only line.
+ * The fee card of the fee payment design: who pays and in which token, the Execution and Gas fee rows,
+ * the total leaving the Safe, and the plan strip (Pro upsell or sponsored counter). Two payers render
+ * as a dropdown; one renders as a locked pill with the reason in its tooltip.
  */
 const GasPayerSelector = ({
   view,
@@ -104,101 +237,86 @@ const GasPayerSelector = ({
   onChoiceChange: (choice: GasPayerChoice) => void
   onGasTokenChange?: (address: string) => void
 }): ReactElement => {
-  switch (view.kind) {
-    case 'locked':
-      return (
-        <div className={css.locked} data-testid="fee-payer-locked">
-          <div className={css.feeRow}>
-            <Typography variant="paragraph-small-bold">Paid from Safe</Typography>
-            <FeeAmount fee={view.fee} />
-          </div>
-          <Message>Fee was set at signing and can&apos;t be changed.</Message>
-        </div>
-      )
+  const { payer, gasToken, executionFee, gasFee, sponsored, totalOutgoing, footer, safeHasEnoughGas } = view
+  const singleToken = gasToken.tokens.length <= 1
+  const displayedToken = gasToken.tokens.find((t) => t.address.toLowerCase() === gasToken.selected.toLowerCase())
 
-    case 'sponsored_info':
-      return (
-        <div className={css.single} data-testid="fee-payer-sponsored-info">
-          <Typography variant="paragraph-small-bold">Network fee: free, sponsored by Pro</Typography>
-        </div>
-      )
+  return (
+    <div className={feesCss.container} data-testid="gas-payer-selector">
+      <div className={feesCss.header}>
+        <Typography variant="paragraph-small-bold">Fees</Typography>
+      </div>
 
-    case 'sponsored_toggle':
-      return (
-        <div className={css.container} data-testid="fee-payer-sponsored-toggle">
-          <RadioGroup
-            value={view.choice}
-            onValueChange={(value) => onChoiceChange(value as GasPayerChoice)}
-            className={css.toggle}
-          >
-            <Option value="SPONSORED" testId="fee-payer-sponsored">
-              Sponsored <span className={css.counter}>· {view.counter}</span>
-            </Option>
-            <Option value="WALLET" testId="fee-payer-signer">
-              Pay from signer
-            </Option>
-          </RadioGroup>
-          <NetworkFeeRow free={view.choice === 'SPONSORED'} fee={view.signerFee} />
+      <div className={css.card}>
+        <div className={cn(feesCss.paymentRow, css.payerRow)}>
+          <LabelledControl label="Pay fees from:">
+            <PayerControl control={payer} onChange={onChoiceChange} />
+          </LabelledControl>
+          <LabelledControl label="Fees token:">
+            <GasTokenSelector
+              availableGasTokens={gasToken.tokens}
+              selectedGasToken={gasToken.selected}
+              onGasTokenChange={onGasTokenChange}
+              locked={gasToken.locked || singleToken}
+              forcedDisplay={displayedToken ?? gasToken.tokens[0]}
+              lockedTooltip={gasToken.lockedReason}
+            />
+          </LabelledControl>
         </div>
-      )
 
-    case 'safe_toggle':
-      return (
-        <div className={css.container} data-testid="fee-payer-safe-toggle">
-          <RadioGroup
-            value={view.choice}
-            onValueChange={(value) => onChoiceChange(value as GasPayerChoice)}
-            className={css.toggle}
-          >
-            <Option value="WALLET" testId="fee-payer-signer">
-              Pay from signer
-            </Option>
-            <Option value="PAY_FROM_SAFE" testId="fee-payer-safe">
-              Pay from Safe
-              {view.premium && <span className={css.counter}>+ premium</span>}
-            </Option>
-          </RadioGroup>
-          {view.choice === 'PAY_FROM_SAFE' && view.gasTokens.length > 0 && (
-            <div className={css.feeRow} data-testid="fee-token-row">
+        <Separator />
+
+        <div className={css.rows}>
+          <FeeRow testId="execution-fee-row">
+            <FeeLabel label="Execution fee" tooltip={EXECUTION_FEE_TOOLTIP} />
+            {executionFee.amount ? (
+              <FeeValue fee={executionFee} />
+            ) : (
               <Typography variant="paragraph-small" color="muted">
-                Fee token
+                Free
               </Typography>
-              <GasTokenSelector
-                availableGasTokens={view.gasTokens}
-                selectedGasToken={view.selectedGasToken}
-                onGasTokenChange={onGasTokenChange}
-                locked={view.gasTokens.length === 1}
-                forcedDisplay={view.gasTokens.length === 1 ? view.gasTokens[0] : undefined}
-              />
+            )}
+          </FeeRow>
+
+          <FeeRow testId="gas-fee-row">
+            <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
+            <FeeValue fee={gasFee} sponsored={sponsored} />
+          </FeeRow>
+
+          {totalOutgoing && (
+            <div className={css.totalOutgoing}>
+              <TotalOutgoingSection totalOutgoing={totalOutgoing} />
             </div>
           )}
-          <NetworkFeeRow fee={view.choice === 'PAY_FROM_SAFE' ? view.safeFee : view.signerFee} />
-          {view.choice === 'PAY_FROM_SAFE' && view.reachesThreshold && (
-            <Message testId="fee-payer-sign-and-execute">
-              Fee is paid from Safe. No gas needed from your wallet.
-            </Message>
-          )}
         </div>
-      )
 
-    case 'signer_only':
-      return (
-        <div className={css.container} data-testid="fee-payer-signer-only">
-          <div className={css.single}>
-            <Typography variant="paragraph-small-bold">Pay from signer</Typography>
-          </div>
-          <NetworkFeeRow fee={view.signerFee} />
-          {view.reason === 'quota' ? (
-            <Message testId="fee-payer-quota">
-              No sponsored transactions left.
-              {view.resetsAt && ` Resets ${formatResetDate(view.resetsAt)}.`} Your connected wallet pays the fee.
-            </Message>
+        <div className={css.footer}>
+          {footer.kind === 'upsell' ? (
+            <ProUpsell />
           ) : (
-            <ProUpsell>Sponsored transactions are included in Pro</ProUpsell>
+            <SponsoredTxsCounter
+              left={footer.left}
+              quota={footer.quota}
+              resetsAt={footer.resetsAt}
+              isSubscription
+              isPro
+            />
           )}
         </div>
-      )
-  }
+      </div>
+
+      {/* Safe-pays only: signing is not blocked, another signer or a top-up may cover it before execution. */}
+      {safeHasEnoughGas === false && !gasFee.loading && (
+        <Alert variant="warning" outlined={false} className="mt-2">
+          <AlertSeverityIcon variant="warning" />
+          <AlertDescription>
+            Insufficient {gasFee.currency} balance to cover the gas fee. Top up before execution, otherwise the
+            transaction will fail.
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  )
 }
 
 export default GasPayerSelector

@@ -9,7 +9,7 @@ export type FeePayerPlanState = 'FREE' | 'PRO_SPONSORED_LEFT' | 'PRO_NO_SPONSORE
 /** A token the Safe can pay the fee with. */
 export type GasTokenOption = { address: string; symbol: string; logoUri: string; fiatBalance?: string }
 
-/** The single "Network fee" row. */
+/** One row of the fee card: a priced amount, a note in its place, or a loading/error state. */
 export type NetworkFee = {
   amount?: string
   currency?: string
@@ -20,41 +20,36 @@ export type NetworkFee = {
   error?: boolean
 }
 
+/** A line of the "Total outgoing" row. */
+export type OutgoingLine = { amount: string; currency: string }
+
 /**
- * One screen of the fee payment spec. The hook decides which one applies; the selector only renders it.
- * - `locked`: Pay from Safe was picked at signing — a read-only line, no radio, no border.
- * - `sponsored_info`: Pro with sponsored transactions left, at the sign step — nothing to choose.
- * - `sponsored_toggle`: Sponsored · n/m vs Pay from signer, at execution.
- * - `safe_toggle`: Pay from signer vs Pay from Safe (fee, "+ premium" on the free plan), at signing.
- * - `signer_only`: one option, shown as text, with the quota message or the Pro upsell.
+ * The "Pay fees from" control: a dropdown when there is a choice, a locked pill when there is not
+ * (a later signer, the executor of a Safe-pays payload, or a plan with nothing to choose).
  */
-export type FeePayerView =
-  | { kind: 'locked'; fee: NetworkFee }
-  | { kind: 'sponsored_info' }
-  | {
-      kind: 'sponsored_toggle'
-      choice: Extract<GasPayerChoice, 'SPONSORED' | 'WALLET'>
-      /** "49/50", "1/1 today" or "Unlimited". */
-      counter: string
-      signerFee: NetworkFee
-    }
-  | {
-      kind: 'safe_toggle'
-      choice: Extract<GasPayerChoice, 'PAY_FROM_SAFE' | 'WALLET'>
-      safeFee: NetworkFee
-      signerFee: NetworkFee
-      /** Free plan: the fee carries a premium. */
-      premium: boolean
-      /** This signature reaches the threshold, so "Sign and execute" is on the CTA. */
-      reachesThreshold: boolean
-      /** Tokens the Safe holds that may pay the fee (native first, then the allowlisted stablecoins). */
-      gasTokens: GasTokenOption[]
-      selectedGasToken: string
-    }
-  | {
-      kind: 'signer_only'
-      reason: 'quota' | 'free'
-      /** ISO; the quota message names the reset date. */
-      resetsAt: string | null
-      signerFee: NetworkFee
-    }
+export type FeePayerControl =
+  { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] } | { kind: 'locked'; value: GasPayerChoice }
+
+/** The strip under the fee rows: the Pro upsell on the free plan, the sponsored counter on Pro. */
+export type FeePayerFooter =
+  { kind: 'upsell' } | { kind: 'counter'; left: number | null; quota: number | null; resetsAt: string | null }
+
+/**
+ * One screen of the fee card (design "Fee payment"): who pays and in which token, the Execution and
+ * Gas fee rows, the total leaving the Safe, and the plan strip. The hook decides the values; the
+ * selector only renders them.
+ */
+export type FeePayerView = {
+  payer: FeePayerControl
+  /** The fee token: the Safe's eligible tokens while it pays an unsigned payload, locked otherwise. */
+  gasToken: { tokens: GasTokenOption[]; selected: string; locked: boolean; lockedReason?: string }
+  executionFee: NetworkFee
+  gasFee: NetworkFee
+  /** The gas fee is covered by sponsoring: struck through, with the Pro chip. */
+  sponsored: boolean
+  /** What leaves the Safe: the transfer, plus the fee when the Safe pays it. */
+  totalOutgoing?: { primary: OutgoingLine[]; fees?: OutgoingLine; fiatTotal: string }
+  footer: FeePayerFooter
+  /** Safe-pays only: false when the Safe does not hold enough of the gas token to cover the fee. */
+  safeHasEnoughGas?: boolean
+}

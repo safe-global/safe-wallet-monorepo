@@ -227,7 +227,7 @@ export const ExecuteForm = ({
       <form onSubmit={handleSubmit}>
         <div
           className={classNames(commonCss.params, {
-            [css.noBottomBorderRadius]: showExecutionSelector || showsGasPayerSelector,
+            [css.noBottomBorderRadius]: showExecutionSelector,
           })}
         >
           <AdvancedParams
@@ -245,15 +245,7 @@ export const ExecuteForm = ({
             }
           />
 
-          {showsGasPayerSelector && selection.view ? (
-            <div className={css.noTopBorder}>
-              <GasPayerSelector
-                view={selection.view}
-                onChoiceChange={selection.setChoice}
-                onGasTokenChange={selection.onGasTokenChange}
-              />
-            </div>
-          ) : showExecutionSelector ? (
+          {showExecutionSelector && (
             <div className={css.noTopBorder}>
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
@@ -262,8 +254,17 @@ export const ExecuteForm = ({
                 showsProUpsell={showsProUpsell}
               />
             </div>
-          ) : null}
+          )}
         </div>
+
+        {/* The fee card of the fee payment design stands on its own, under the gas params. */}
+        {showsGasPayerSelector && selection.view && (
+          <GasPayerSelector
+            view={selection.view}
+            onChoiceChange={selection.setChoice}
+            onGasTokenChange={selection.onGasTokenChange}
+          />
+        )}
 
         {/* Error messages */}
         {cannotPropose ? (

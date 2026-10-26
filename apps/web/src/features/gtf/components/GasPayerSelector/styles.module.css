@@ -1,77 +1,88 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-2);
+.card {
+  overflow: hidden;
   border: 1px solid var(--color-border-light);
-  border-radius: var(--radius);
+  border-radius: 8px;
 }
 
-/* Read-only: no radio, no border. */
-.locked {
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--space-1) / 2);
-  padding: var(--space-1) 0;
-}
-
-/* One option = text, never a lone radio. */
-.single {
-  display: flex;
-  align-items: center;
-  min-height: 24px;
-}
-
-.toggle {
-  display: flex;
-  flex-direction: row;
+/* Spacing rule of the design: 16px sides, 56px top and bottom bands (32px control + 12px), 8px inside the middle. */
+.payerRow {
+  min-height: 56px;
+  padding: 12px 16px;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: var(--space-2);
 }
 
-.option {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: var(--space-1);
-  cursor: pointer;
+.payerPill {
+  width: auto;
+  gap: 8px;
   white-space: nowrap;
 }
 
-.optionLabel {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--space-1) / 2);
-  font-weight: 700;
+.lockIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-secondary);
 }
 
-.counter {
-  font-weight: 400;
-  color: var(--color-text-secondary);
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 16px;
 }
 
 .feeRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding-top: var(--space-1);
+  min-height: 40px;
+}
+
+.feeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feeValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .feeAmount {
   display: flex;
-  align-items: baseline;
-  gap: calc(var(--space-1) / 2);
+  align-items: center;
+  gap: 8px;
 }
 
-.message {
-  padding-top: calc(var(--space-1) / 2);
+.totalOutgoing {
+  margin: 0 -8px;
+}
+
+.totalOutgoing > div {
+  padding: 8px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.footer > * {
+  width: 100%;
+}
+
+.footer [data-testid='sponsored-txs-counter'] {
+  background: transparent;
 }
 
 .upsell {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding-top: var(--space-1);
+  gap: 12px;
+  padding: 12px 16px;
 }
