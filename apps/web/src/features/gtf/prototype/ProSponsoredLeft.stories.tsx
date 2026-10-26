@@ -14,16 +14,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const SignFirstSigner: Story = { name: 'Sign · First signer', args: { screenId: 'pro-sign-first' } }
+export const SponsoredByPro: Story = { name: 'Sponsored by Pro', args: { flowId: 'pro-sponsored' } }
 
-export const SignLaterSigner: Story = { name: 'Sign · Later signer', args: { screenId: 'pro-sign-later' } }
-
-export const ExecuteSponsoredOrSignerWallet: Story = {
-  name: 'Execute · Sponsored or signer wallet',
-  args: { screenId: 'pro-exec-choose' },
-}
-
-export const ExecuteSponsoringRanOut: Story = {
-  name: 'Execute · Sponsoring ran out',
-  args: { screenId: 'pro-exec-ran-out' },
-}
+export const SponsoringRanOut: Story = { name: 'Sponsoring ran out before execution', args: { flowId: 'pro-ran-out' } }

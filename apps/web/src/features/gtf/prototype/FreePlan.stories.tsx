@@ -14,26 +14,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const SignFirstSigner: Story = { name: 'Sign · First signer', args: { screenId: 'free-sign-first' } }
+export const PayFromSafeAccount: Story = { name: 'Pay from Safe account', args: { flowId: 'free-safe' } }
 
-export const SignLaterSignerSafeLocked: Story = {
-  name: 'Sign · Later signer, Safe account locked',
-  args: { screenId: 'free-sign-later-safe' },
-}
-
-export const SignLaterSignerSignerWallet: Story = {
-  name: 'Sign · Later signer, signer wallet picked',
-  args: { screenId: 'free-sign-later-signer' },
-}
-
-export const SignLastSignerSignAndExecute: Story = {
-  name: 'Sign · Last signer, sign and execute',
-  args: { screenId: 'free-sign-last-safe' },
-}
-
-export const ExecuteSafeLocked: Story = { name: 'Execute · Safe account locked', args: { screenId: 'free-exec-safe' } }
-
-export const ExecuteSignerWalletOnly: Story = {
-  name: 'Execute · Signer wallet only',
-  args: { screenId: 'free-exec-signer' },
-}
+export const PayFromSignerWallet: Story = { name: 'Pay from signer wallet', args: { flowId: 'free-signer' } }

@@ -14,26 +14,6 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const SignFirstSigner: Story = { name: 'Sign · First signer', args: { screenId: 'pnl-sign-first' } }
+export const PayFromSafeAccount: Story = { name: 'Pay from Safe account', args: { flowId: 'pnl-safe' } }
 
-export const SignLaterSignerSafeLocked: Story = {
-  name: 'Sign · Later signer, Safe account locked',
-  args: { screenId: 'pnl-sign-later-safe' },
-}
-
-export const SignLaterSignerSignerWallet: Story = {
-  name: 'Sign · Later signer, signer wallet picked',
-  args: { screenId: 'pnl-sign-later-signer' },
-}
-
-export const SignLastSignerSignAndExecute: Story = {
-  name: 'Sign · Last signer, sign and execute',
-  args: { screenId: 'pnl-sign-last-safe' },
-}
-
-export const ExecuteSafeLocked: Story = { name: 'Execute · Safe account locked', args: { screenId: 'pnl-exec-safe' } }
-
-export const ExecuteSignerWalletOnly: Story = {
-  name: 'Execute · Signer wallet only',
-  args: { screenId: 'pnl-exec-signer' },
-}
+export const PayFromSignerWallet: Story = { name: 'Pay from signer wallet', args: { flowId: 'pnl-signer' } }

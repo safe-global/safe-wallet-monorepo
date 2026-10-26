@@ -1,7 +1,7 @@
 import { useContext, useState, type ReactElement, type ReactNode } from 'react'
 import classnames from 'classnames'
 import { getAddress } from 'ethers'
-import { ArrowRight, Check, ChevronDown, Lock } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, Lock } from 'lucide-react'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FullAnalysisBuilder, RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
@@ -187,7 +187,16 @@ const ChoiceSelector = <T extends string>({
 )
 
 /** The same pill with no menu: what a later signer or the executor sees once there is nothing to choose. */
-const LockedSelector = ({ children, tooltip }: { children: ReactNode; tooltip: string }): ReactElement => (
+const LockedSelector = ({
+  children,
+  tooltip,
+  hasLeadingIcon = false,
+}: {
+  children: ReactNode
+  tooltip: string
+  /** A round icon first: inset it as far from the left edge as from the top, like the app's token pill. */
+  hasLeadingIcon?: boolean
+}): ReactElement => (
   <Tooltip>
     <TooltipTrigger
       render={
@@ -197,7 +206,7 @@ const LockedSelector = ({ children, tooltip }: { children: ReactNode; tooltip: s
             feesCss.gasTokenSelectorLocked,
             'w-auto gap-2 whitespace-nowrap',
           )}
-          style={{ width: 'auto' }}
+          style={{ width: 'auto', paddingLeft: hasLeadingIcon ? '3px' : undefined }}
         />
       }
     >
@@ -216,7 +225,7 @@ const LockedLabel = ({ children }: { children: ReactNode }): ReactElement => (
 
 /** FeesPreview's GasTokenSelector, locked: the first release only pays fees in the chain's gas token. */
 const FeeTokenSelector = (): ReactElement => (
-  <LockedSelector tooltip="Fees are paid in ETH for now. More tokens are coming soon.">
+  <LockedSelector tooltip="Fees are paid in ETH for now. More tokens are coming soon." hasLeadingIcon>
     <TokenIcon logoUri={ETH.logoUri ?? undefined} tokenSymbol={ETH.symbol} size={24} />
     <LockedLabel>{ETH.symbol}</LockedLabel>
   </LockedSelector>
@@ -441,11 +450,34 @@ const StepRail = ({ confirmations, threshold }: { confirmations: number; thresho
   )
 }
 
-const PrimaryAction = ({ screen, source }: { screen: ScreenProps; source: FeeSource }): ReactElement => {
+/** What a click on the screen's main button means for the flow: the next screen, or the end of it. */
+type FlowAction = 'next' | 'finish'
+
+const PrimaryAction = ({
+  screen,
+  source,
+  onAction,
+}: {
+  screen: ScreenProps
+  source: FeeSource
+  onAction: (action: FlowAction) => void
+}): ReactElement => {
   const { step, role = 'first', lockedSource = 'safe', plan } = screen
 
-  if (step === 'execute') return <Button size="submit">Execute</Button>
-  if (role === 'first') return <Button size="submit">Continue</Button>
+  if (step === 'execute') {
+    return (
+      <Button size="submit" onClick={() => onAction('finish')}>
+        Execute
+      </Button>
+    )
+  }
+  if (role === 'first') {
+    return (
+      <Button size="submit" onClick={() => onAction('next')}>
+        Continue
+      </Button>
+    )
+  }
 
   // One click only works when the Safe pays: the relayer can then execute right after the last signature.
   if (role === 'last' && lockedSource === 'safe' && plan !== 'pro' && source === 'safe') {
@@ -456,12 +488,17 @@ const PrimaryAction = ({ screen, source }: { screen: ScreenProps; source: FeeSou
             { id: 'sign-execute', label: 'Sign and execute' },
             { id: 'sign', label: 'Sign' },
           ]}
+          onClick={(option) => onAction(option.id === 'sign-execute' ? 'finish' : 'next')}
         />
       </div>
     )
   }
 
-  return <Button size="submit">Sign</Button>
+  return (
+    <Button size="submit" onClick={() => onAction('next')}>
+      Sign
+    </Button>
+  )
 }
 
 export type ScreenProps = {
@@ -483,15 +520,28 @@ const TITLE: Record<ScreenProps['step'], string> = {
   execute: 'Execute transaction',
 }
 
+const CONFIRMATIONS_BEFORE: Record<SignerRole, (threshold: number) => number> = {
+  first: () => 0,
+  later: (threshold) => Math.max(1, threshold - 2),
+  last: (threshold) => threshold - 1,
+}
+
 /** The app's tx layout (TxLayoutBase markup) around a "Send tokens" transaction with the new fee card. */
 export const FeeScreen = ({
   screenId,
+  onAction = () => {},
+  onBack,
+  onSourceChange,
   ...screen
 }: ScreenProps & {
   /** A new id resets the fee choices in place, so the layout around them never remounts. */
   screenId?: string
+  onAction?: (action: FlowAction) => void
+  onBack?: () => void
+  /** The first signer switched who pays, which moves the prototype to that payer's flow. */
+  onSourceChange?: (source: FeeSource) => void
 }): ReactElement => {
-  const { step, role = 'first', initialSource = 'signer', threshold = 2 } = screen
+  const { step, role = 'first', initialSource = 'signer', threshold = 3 } = screen
   const [source, setSource] = useState<FeeSource>(initialSource)
   const [payer, setPayer] = useState<ExecutionPayer>('sponsored')
   const [shownScreenId, setShownScreenId] = useState(screenId)
@@ -503,8 +553,13 @@ export const FeeScreen = ({
   }
   const defaults = useContext(SafeTxContext)
 
-  const card = getFeeCard({ screen, source, onSourceChange: setSource, payer, onPayerChange: setPayer })
-  const confirmations = step === 'sign' ? (role === 'first' ? 0 : threshold - 1) : threshold
+  const changeSource = (next: FeeSource) => {
+    setSource(next)
+    onSourceChange?.(next)
+  }
+
+  const card = getFeeCard({ screen, source, onSourceChange: changeSource, payer, onPayerChange: setPayer })
+  const confirmations = step === 'sign' ? CONFIRMATIONS_BEFORE[role](threshold) : threshold
   const isFirstSigner = step === 'sign' && role === 'first'
 
   return (
@@ -554,12 +609,13 @@ export const FeeScreen = ({
                         <PrimaryAction
                           screen={screen}
                           source={isFirstSigner ? source : (screen.lockedSource ?? 'safe')}
+                          onAction={onAction}
                         />
                       </TxCardActions>
                     </TxCard>
 
                     {(isFirstSigner || step === 'execute') && (
-                      <Button variant="outline" className={layoutCss.backButton}>
+                      <Button variant="outline" className={layoutCss.backButton} onClick={onBack}>
                         {isFirstSigner ? 'Back' : 'Execute later'}
                       </Button>
                     )}
@@ -588,118 +644,138 @@ export const FeeScreen = ({
   )
 }
 
-export type Screen = { id: string; label: string; props: ScreenProps }
+type FlowStep = { label: string; props: ScreenProps }
+export type Flow = { id: string; label: string; source?: FeeSource; steps: FlowStep[] }
 
-/** Every screen, grouped by the plan the first signer signs on. */
-export const CASES: { id: FeePlan; label: string; screens: Screen[] }[] = [
+/** First, second and last signer, then the executor, for a fee the first signer locks in (or not). */
+const signThenExecute = (plan: FeePlan, source: FeeSource | undefined, execute: Partial<ScreenProps> = {}) => {
+  const lockedSource = source ?? 'signer'
+  return [
+    { label: 'First signer', props: { plan, step: 'sign', role: 'first', initialSource: source } },
+    { label: 'Second signer', props: { plan, step: 'sign', role: 'later', lockedSource } },
+    { label: 'Last signer', props: { plan, step: 'sign', role: 'last', lockedSource, initialSource: source } },
+    { label: 'Executor', props: { plan, step: 'execute', lockedSource, ...execute } },
+  ] satisfies FlowStep[]
+}
+
+/** Every flow, grouped by the plan the first signer signs on. */
+export const CASES: { id: FeePlan; label: string; flows: Flow[] }[] = [
   {
     id: 'free',
     label: 'Free plan',
-    screens: [
-      { id: 'free-sign-first', label: 'Sign · First signer', props: { plan: 'free', step: 'sign', role: 'first' } },
+    flows: [
+      { id: 'free-safe', label: 'Pay from Safe account', source: 'safe', steps: signThenExecute('free', 'safe') },
       {
-        id: 'free-sign-later-safe',
-        label: 'Sign · Later signer, Safe account locked',
-        props: { plan: 'free', step: 'sign', role: 'later', lockedSource: 'safe', threshold: 3 },
-      },
-      {
-        id: 'free-sign-later-signer',
-        label: 'Sign · Later signer, signer wallet picked',
-        props: { plan: 'free', step: 'sign', role: 'later', lockedSource: 'signer', threshold: 3 },
-      },
-      {
-        id: 'free-sign-last-safe',
-        label: 'Sign · Last signer, sign and execute',
-        props: { plan: 'free', step: 'sign', role: 'last', lockedSource: 'safe', initialSource: 'safe' },
-      },
-      {
-        id: 'free-exec-safe',
-        label: 'Execute · Safe account locked',
-        props: { plan: 'free', step: 'execute', lockedSource: 'safe' },
-      },
-      {
-        id: 'free-exec-signer',
-        label: 'Execute · Signer wallet only',
-        props: { plan: 'free', step: 'execute', lockedSource: 'signer' },
+        id: 'free-signer',
+        label: 'Pay from signer wallet',
+        source: 'signer',
+        steps: signThenExecute('free', 'signer'),
       },
     ],
   },
   {
     id: 'pro',
     label: 'Pro, sponsored left',
-    screens: [
-      { id: 'pro-sign-first', label: 'Sign · First signer', props: { plan: 'pro', step: 'sign', role: 'first' } },
+    flows: [
+      { id: 'pro-sponsored', label: 'Sponsored by Pro', steps: signThenExecute('pro', undefined) },
       {
-        id: 'pro-sign-later',
-        label: 'Sign · Later signer',
-        props: { plan: 'pro', step: 'sign', role: 'later', threshold: 3 },
-      },
-      {
-        id: 'pro-exec-choose',
-        label: 'Execute · Sponsored or signer wallet',
-        props: { plan: 'pro', step: 'execute', lockedSource: 'signer' },
-      },
-      {
-        id: 'pro-exec-ran-out',
-        label: 'Execute · Sponsoring ran out',
-        props: { plan: 'pro', step: 'execute', lockedSource: 'signer', sponsoredLeftAtExecution: 0 },
+        id: 'pro-ran-out',
+        label: 'Sponsoring ran out before execution',
+        steps: signThenExecute('pro', undefined, { sponsoredLeftAtExecution: 0 }),
       },
     ],
   },
   {
     id: 'pro-none-left',
     label: 'Pro, none left',
-    screens: [
+    flows: [
       {
-        id: 'pnl-sign-first',
-        label: 'Sign · First signer',
-        props: { plan: 'pro-none-left', step: 'sign', role: 'first', initialSource: 'safe' },
+        id: 'pnl-safe',
+        label: 'Pay from Safe account',
+        source: 'safe',
+        steps: signThenExecute('pro-none-left', 'safe'),
       },
       {
-        id: 'pnl-sign-later-safe',
-        label: 'Sign · Later signer, Safe account locked',
-        props: { plan: 'pro-none-left', step: 'sign', role: 'later', lockedSource: 'safe', threshold: 3 },
-      },
-      {
-        id: 'pnl-sign-later-signer',
-        label: 'Sign · Later signer, signer wallet picked',
-        props: { plan: 'pro-none-left', step: 'sign', role: 'later', lockedSource: 'signer', threshold: 3 },
-      },
-      {
-        id: 'pnl-sign-last-safe',
-        label: 'Sign · Last signer, sign and execute',
-        props: { plan: 'pro-none-left', step: 'sign', role: 'last', lockedSource: 'safe', initialSource: 'safe' },
-      },
-      {
-        id: 'pnl-exec-safe',
-        label: 'Execute · Safe account locked',
-        props: { plan: 'pro-none-left', step: 'execute', lockedSource: 'safe' },
-      },
-      {
-        id: 'pnl-exec-signer',
-        label: 'Execute · Signer wallet only',
-        props: { plan: 'pro-none-left', step: 'execute', lockedSource: 'signer' },
+        id: 'pnl-signer',
+        label: 'Pay from signer wallet',
+        source: 'signer',
+        steps: signThenExecute('pro-none-left', 'signer'),
       },
     ],
   },
 ]
 
-export const getScreen = (id: string): Screen =>
-  CASES.flatMap(({ screens }) => screens).find((screen) => screen.id === id) ?? CASES[0].screens[0]
+const ALL_FLOWS = CASES.flatMap(({ flows }) => flows)
 
-/** FeeScreen with a floating "Jump to" menu, grouped by case, so every screen is reachable in full-screen mode. */
-export const FeePrototype = ({ screenId }: { screenId: string }): ReactElement => {
-  const [current, setCurrent] = useState(() => getScreen(screenId))
-  const currentCase = CASES.find(({ screens }) => screens.some(({ id }) => id === current.id))
+export const getFlow = (id: string): Flow => ALL_FLOWS.find((flow) => flow.id === id) ?? ALL_FLOWS[0]
+
+/** Clickable flows: each screen's buttons move to the next signer, and a floating bar steps and jumps between flows. */
+export const FeePrototype = ({ flowId }: { flowId: string }): ReactElement => {
+  const [flow, setFlow] = useState(() => getFlow(flowId))
+  const [stepIndex, setStepIndex] = useState(0)
+  const [isDone, setIsDone] = useState(false)
+  const currentCase = CASES.find(({ flows }) => flows.some(({ id }) => id === flow.id))
+  const step = flow.steps[stepIndex]
+  const isLast = stepIndex === flow.steps.length - 1
+
+  const goTo = (next: Flow, index = 0) => {
+    setFlow(next)
+    setStepIndex(index)
+    setIsDone(false)
+  }
+
+  const onAction = (action: FlowAction) => {
+    if (action === 'finish' || isLast) setIsDone(true)
+    else goTo(flow, stepIndex + 1)
+  }
+
+  // Switching who pays on the first screen moves to that payer's flow in the same case.
+  const onSourceChange = (source: FeeSource) => {
+    const sibling = currentCase?.flows.find((candidate) => candidate.source === source)
+    if (sibling && sibling.id !== flow.id) goTo(sibling)
+  }
 
   return (
     <>
-      <FeeScreen screenId={current.id} {...current.props} />
+      <FeeScreen
+        screenId={`${flow.id}-${stepIndex}`}
+        {...step.props}
+        onAction={onAction}
+        onBack={() => stepIndex > 0 && goTo(flow, stepIndex - 1)}
+        onSourceChange={onSourceChange}
+      />
 
-      <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-card shadow-lg">
+      <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-card p-1 shadow-lg">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Previous screen"
+          disabled={stepIndex === 0}
+          onClick={() => goTo(flow, stepIndex - 1)}
+        >
+          <ChevronLeft />
+        </Button>
+        <Typography variant="paragraph-small" className="min-w-40 text-center whitespace-nowrap">
+          {isDone ? 'Done' : `${stepIndex + 1} of ${flow.steps.length} · ${step.label}`}
+        </Typography>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Next screen"
+          disabled={isLast}
+          onClick={() => goTo(flow, stepIndex + 1)}
+        >
+          <ChevronRight />
+        </Button>
+        {isDone && (
+          <Button variant="ghost" size="sm" onClick={() => goTo(flow)}>
+            Restart
+          </Button>
+        )}
+
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="outline" />}>
-            Jump to: {currentCase?.label} · {current.label}
+            {currentCase?.label} · {flow.label}
             <ChevronDown data-icon="inline-end" />
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="center" className="max-h-[70vh] overflow-y-auto">
@@ -707,10 +783,10 @@ export const FeePrototype = ({ screenId }: { screenId: string }): ReactElement =
               <DropdownMenuGroup key={feeCase.id}>
                 {index > 0 && <DropdownMenuSeparator />}
                 <DropdownMenuLabel>{feeCase.label}</DropdownMenuLabel>
-                {feeCase.screens.map((screen) => (
-                  <DropdownMenuItem key={screen.id} onClick={() => setCurrent(screen)}>
-                    {screen.id === current.id && <Check className="size-4" />}
-                    {screen.label}
+                {feeCase.flows.map((candidate) => (
+                  <DropdownMenuItem key={candidate.id} onClick={() => goTo(candidate)}>
+                    {candidate.id === flow.id && <Check className="size-4" />}
+                    {candidate.label}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
