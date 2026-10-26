@@ -357,7 +357,7 @@ export async function prepareSwapQueueScenario(env, owners) {
     )
     return {
       safes: { static: { SEP_STATIC_SAFE_34: `sep:${context.safeAddress}` } },
-      fixtures: swapTxFixtures({ ...ids, swapQueue: ids.sellSwapQLimitOrder }),
+      fixtures: swapTxFixtures(ids),
     }
   } finally {
     context.provider.destroy()

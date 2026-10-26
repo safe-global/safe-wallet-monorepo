@@ -201,7 +201,7 @@ export function typeInNameInput(name) {
 }
 
 export function verifyNameWasChanged(name, editedName) {
-  cy.get(name).should('not.exist')
+  cy.contains(new RegExp(`^${name}$`)).should('not.exist')
   cy.contains(editedName).should('exist')
 }
 
