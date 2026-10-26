@@ -53,15 +53,18 @@ test.describe('Dashboard', { tag: '@smoke' }, () => {
 })
 
 test.describe('Dashboard pending transactions', { tag: '@smoke' }, () => {
-  test('should show the newest proposal of each queued nonce with its confirmations', async ({
+  test('should show only the newest of conflicting proposals for each queued nonce, with its confirmations', async ({
     safePage,
     safeApiClient,
     safes,
   }) => {
     const queue = await safeApiClient.getQueued(safeAddress(safes.SEP_QUEUE_SAFE))
-    // Precondition: the widget only has rows to check when the Safe has a queue.
-    expect(queue.length, `${safes.SEP_QUEUE_SAFE} has no queued transactions`).toBeGreaterThan(0)
-    const expected = latestProposalPerNonce(queue).slice(0, WIDGET_ROWS)
+    const latest = latestProposalPerNonce(queue)
+    // Precondition: some nonce has conflicting proposals, so the widget must leave all but the newest out.
+    expect(latest.length, `${safes.SEP_QUEUE_SAFE} has no nonce with two or more queued proposals`).toBeLessThan(
+      queue.length,
+    )
+    const expected = latest.slice(0, WIDGET_ROWS)
 
     const home = new HomePage(safePage)
     await home.goto(safes.SEP_QUEUE_SAFE)
