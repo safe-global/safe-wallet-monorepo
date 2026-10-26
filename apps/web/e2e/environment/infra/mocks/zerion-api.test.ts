@@ -27,6 +27,7 @@ const ROWS: Row[] = [
     value: 100,
     price: 1,
     app: { name: 'Aave', url: 'https://app.aave.com' },
+    name: 'Aave V3 Lending',
   },
   {
     chainId: '137',
@@ -41,6 +42,7 @@ const ROWS: Row[] = [
 type Call = { method?: string; path: string; query?: string; headers?: Record<string, string>; body?: string }
 type Position = {
   attributes: {
+    name: string
     position_type: string
     quantity: unknown
     application_metadata: unknown
@@ -129,6 +131,14 @@ describe('Zerion API mock', () => {
       icon: { url: null },
       url: 'https://app.aave.com',
     })
+  })
+
+  it('names a position by its registered name, or by its token', () => {
+    const [, body] = call<Positions>(registered(), { path: `/v1/wallets/${SAFE}/positions` })
+    assert.deepEqual(
+      body.data.map(({ attributes }) => attributes.name),
+      ['Ether', 'USD Coin', 'Scam', 'Aave V3 Lending', 'Polygon'],
+    )
   })
 
   it('sums the values per network for the wallet totals', () => {
