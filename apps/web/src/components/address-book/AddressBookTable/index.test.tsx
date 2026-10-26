@@ -121,17 +121,23 @@ describe('AddressBookTable', () => {
     )
   })
 
-  it('sorts the rows by name and by address when the headers are clicked', () => {
+  it('sorts the rows ascending, then descending, by name and by address when the headers are clicked', () => {
     const [lowAddress, midAddress, highAddress] = ['0x1', '0x2', '0x3'].map((prefix) => prefix.padEnd(42, '0'))
     mockUseAddressBook.mockReturnValue({ [highAddress]: 'Bob', [midAddress]: 'Alice', [lowAddress]: 'Carol' })
     render(<AddressBookTable />)
     const firstRowName = () => within(screen.getAllByTestId('table-row')[0]).getByTestId('table-cell-name')
     expect(firstRowName()).toHaveTextContent('Bob')
 
-    fireEvent.click(screen.getByRole('button', { name: /^Name/ }))
+    const nameHeader = screen.getByRole('button', { name: /^Name/ })
+    fireEvent.click(nameHeader)
     expect(firstRowName()).toHaveTextContent('Alice')
-
-    fireEvent.click(screen.getByRole('button', { name: /^Address/ }))
+    fireEvent.click(nameHeader)
     expect(firstRowName()).toHaveTextContent('Carol')
+
+    const addressHeader = screen.getByRole('button', { name: /^Address/ })
+    fireEvent.click(addressHeader)
+    expect(firstRowName()).toHaveTextContent('Carol')
+    fireEvent.click(addressHeader)
+    expect(firstRowName()).toHaveTextContent('Bob')
   })
 })
