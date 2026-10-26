@@ -5,7 +5,7 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/claude-code-review.yml':
         - 'actions/checkout@v7.0.1'
-        - 'anthropics/claude-code-action@v1.0.248'
+        - 'anthropics/claude-code-action@v1.0.253'
     '.github/workflows/mobile-checks.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -238,9 +238,9 @@ dependencies:
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
-    'anthropics/claude-code-action@v1.0.248':
-        ref: 'v1.0.248'
-        commit: 'sha1-1d6de8cb0c237e7c15e9e1bdf973826ebae490cc'
+    'anthropics/claude-code-action@v1.0.253':
+        ref: 'v1.0.253'
+        commit: 'sha1-5eb090f3c3afd701a0672cd32981197ca27688f6'
         owner_id: 76263028
         repo_id: 986421638
         uses:
