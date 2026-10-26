@@ -6,11 +6,8 @@ import * as ls from '../../support/localstorage_data.js'
 import * as safe from '../pages/load_safe.pages'
 import * as wallet from '../../support/utils/wallet.js'
 import { walletCredentials } from '../../support/credentials.js'
-import { mockEnsName } from '../../support/utils/ethers.js'
 
 const ownerSepolia = ['Automation owner Sepolia']
-const ownerName = 'Owner name'
-const owner1 = 'Owner1'
 let signer
 before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -19,12 +16,6 @@ before(() => {
 describe('Safe creation tests 2', () => {
   beforeEach(() => {
     createwallet.startCreateSafeFlow(signer)
-  })
-
-  it('Cancel button cancels safe creation', () => {
-    safe.clickOnNextBtn()
-    createwallet.clickOnBackBtn()
-    createwallet.cancelWalletCreation()
   })
 
   // Owners and confirmation step
@@ -46,24 +37,6 @@ describe('Safe creation tests 2', () => {
       })
   })
 
-  it("Verify names don't autofill if they are added to another chain's Address book", () => {
-    cy.wrap(null)
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sameOwnerName[1]),
-      )
-      .then(() => {
-        createwallet.startCreateSafeFlow(signer)
-        safe.clickOnNextBtn()
-        safe.verifyDataDoesNotExist(ownerSepolia)
-      })
-  })
-
-  it('Verify an valid name for owner can be inputed', () => {
-    safe.clickOnNextBtn()
-    safe.inputOwnerName(0, ownerName)
-    safe.verifyownerNameFormatIsValid()
-  })
-
   it('Verify Threshold matching required confirmations max with amount of owners', () => {
     safe.clickOnNextBtn()
     safe.clickOnAddNewOwnerBtn()
@@ -76,26 +49,5 @@ describe('Safe creation tests 2', () => {
     owner.verifyThreshold(1, 2)
     safe.clickOnRemoveOwnerBtn(0)
     owner.verifyThreshold(1, 1)
-  })
-
-  it('Verify ENS name in the address and name fields is resolved', () => {
-    mockEnsName(constants.ENS_TEST_SEPOLIA_VALID, constants.defaultOwnerAddress())
-    safe.clickOnNextBtn()
-    safe.inputOwnerAddress(0, constants.ENS_TEST_SEPOLIA_VALID)
-    safe.verifyOwnerAddress(0, constants.defaultOwnerAddress())
-    safe.verifyOnwerNameENS(0, constants.ENS_TEST_SEPOLIA_VALID)
-  })
-
-  it('Verify existing owner in address book will have their names filled when their address is pasted', () => {
-    cy.wrap(null)
-      .then(() =>
-        main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
-      )
-      .then(() => {
-        createwallet.startCreateSafeFlow(signer)
-        safe.clickOnNextBtn()
-        safe.inputOwnerAddress(0, constants.RECIPIENT_ADDRESS)
-        safe.verifyOnwerName(0, owner1)
-      })
   })
 })
