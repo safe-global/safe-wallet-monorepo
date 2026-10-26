@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { shallowEqual } from 'react-redux'
 import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { TokenType } from '@safe-global/store/gateway/types'
 import {
   cgwApi as tokensApi,
   type TokensGetTokensV1ApiArg,
@@ -30,7 +31,7 @@ const toResolver = (
 
   args.forEach(({ chainId }, index) => {
     for (const token of responses[index] ?? []) {
-      if (token.type !== 'ERC20') continue
+      if (token.type !== TokenType.ERC20) continue
       byKey.set(`${chainId}:${token.address.toLowerCase()}`, {
         address: token.address,
         symbol: token.symbol,
