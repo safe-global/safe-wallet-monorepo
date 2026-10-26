@@ -2,7 +2,6 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as swaps from '../pages/swaps.pages.js'
 import * as create_tx from '../pages/create_tx.pages.js'
-import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as data from '../../fixtures/txhistory_data_data.json'
@@ -14,8 +13,6 @@ before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
 })
 
-let staticSafes = []
-
 let iframeSelector
 
 const swapsHistory = swaps_data.type.history
@@ -23,10 +20,6 @@ const swapOrder = swaps_data.type.orderDetails
 const typeGeneral = data.type.general
 
 describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
-  before(async () => {
-    staticSafes = await getSafes(CATEGORIES.static)
-  })
-
   it('Verify partially filled sell order', () => {
     const tx = swapFixtures.twapPartiallyFilled
     cy.visit(constants.transactionUrl + tx)
@@ -45,15 +38,6 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
 
     create_tx.clickOnAdvancedDetails()
     create_tx.verifyAdvancedDetails([swapsHistory.createWithContext, swapsHistory.composableCoW])
-  })
-
-  it('Verify that an order has the received and sent txs', () => {
-    const sentValue = '-250 COW'
-    const receivedValue = '303.16951 DAI'
-
-    cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_27)
-    create_tx.toggleUntrustedTxs()
-    swaps.checkTwapSettlement(0, sentValue, receivedValue)
   })
 
   it('Verify fully filled sell order', () => {

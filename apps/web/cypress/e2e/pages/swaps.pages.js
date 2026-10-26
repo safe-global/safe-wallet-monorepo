@@ -2,16 +2,12 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import * as table from '../pages/tables.page.js'
 import { fixtureGetters } from '../../support/fixture.js'
 
-const explorerBtn = '[data-testid="explorer-btn"]'
-const groupedItems = '[data-testid="grouped-items"]'
 
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
 const buyAmountStr = 'Buy amount'
 const filledStr = 'Filled'
 const partDuration = 'Part duration'
-const orderIdStr = 'Order ID'
-const cowOrdersUrl = 'https://explorer.cow.fi/orders'
 
 export const swapTxs = fixtureGetters('swaps', {
   sell1Action:
@@ -58,16 +54,6 @@ export function checkTokenOrder(regexPattern, option) {
       cy.wrap($div).should(($div) => {
         expect(text).to.match(regex)
       })
-    })
-}
-
-export function verifyOrderIDUrl() {
-  cy.get(create_tx.txRowTitle)
-    .contains(orderIdStr)
-    .parent()
-    .parent()
-    .within(() => {
-      cy.get(explorerBtn).should('have.attr', 'href').and('include', cowOrdersUrl)
     })
 }
 
@@ -120,14 +106,5 @@ export function checkNumberOfParts(parts) {
           const partsInt = parseInt(text, 10)
           expect(partsInt).to.eq(parts)
         })
-    })
-}
-
-export function checkTwapSettlement(index, sentValue, receivedValue) {
-  cy.get(groupedItems)
-    .eq(index)
-    .within(() => {
-      cy.get(create_tx.transactionItem).eq(0).contains(sentValue).should('exist')
-      cy.get(create_tx.transactionItem).eq(1).contains(receivedValue).should('exist')
     })
 }

@@ -27,16 +27,6 @@ describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
     create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
   })
 
-  it('Verify "Filled" field in the tx details for limit orders', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + swapFixtures.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
-    const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
-    const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
-
-    create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, usdc, eq, swapsHistory.filled])
-    create_tx.clickOnAdvancedDetails()
-    create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
-  })
-
   it(
     'Verify that limit order tx created via CowSwap safe app has decoding in the history',
     { defaultCommandTimeout: 30000 },

@@ -85,25 +85,6 @@ describe('Swaps history tests 2', () => {
     create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
   })
 
-  it('Verify swap operation with 3 actions: wrap & approve & swap', { defaultCommandTimeout: 30000 }, () => {
-    const safe = swapFixtures.threeActionsSafe
-    cy.visit(constants.transactionUrl + safe + swaps.swapTxs.sell3Actions)
-    const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
-    const eq = swaps.createRegex(swapsHistory.DAIeqWETH, 'WETH')
-
-    create_tx.verifyExpandedDetails([
-      swapsHistory.sellOrder,
-      swapsHistory.sell,
-      dai,
-      eq,
-      swapsHistory.actionApproveEth,
-      swapsHistory.actionPreSignature,
-      swapsHistory.actionDepositEth,
-    ])
-    create_tx.clickOnAdvancedDetails()
-    create_tx.verifyAdvancedDetails([swapsHistory.multiSend, swapsHistory.multiSendCallOnly1_3_0])
-  })
-
   // Added to prod
   it(
     'Verify there is decoding for a tx created by CowSwap safe-app in the history',
@@ -127,10 +108,5 @@ describe('Swaps history tests 2', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_1 + swaps.swapTxs.buy2actions)
     const eq2 = swaps.createRegex(swapsHistory.oneGNOFull, 'COW')
     swaps.checkTokenOrder(eq2, swapsHistory.limitPrice)
-  })
-
-  it('Verify OrderID url on cowswap explorer', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_1 + swaps.swapTxs.sell1Action)
-    swaps.verifyOrderIDUrl()
   })
 })

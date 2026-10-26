@@ -13,7 +13,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
   'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
-  'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history_5.cy.js': { scenario: 'prepareHistorySummaryScenario' },
   'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_queue_reject_btn.cy.js': { scenario: 'prepareRejectionScenario' },
