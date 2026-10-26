@@ -3,9 +3,7 @@ import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
 import * as batch from './batch.mjs'
 import * as chains from './chains.mjs'
-import * as counterfactual from './counterfactual.mjs'
 import * as cow from './cow.mjs'
-import * as creation from './creation.mjs'
 import * as dashboard from './dashboard.mjs'
 import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as history from './history.mjs'
@@ -30,9 +28,7 @@ const modules = [
   basic,
   batch,
   chains,
-  counterfactual,
   cow,
-  creation,
   dashboard,
   fallbackHandlers,
   history,

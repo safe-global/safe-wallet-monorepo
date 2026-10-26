@@ -416,15 +416,6 @@ export const checkButtonByTextExists = (buttonText) => {
  * the value matches or the default command timeout elapses — needed for keys
  * the app writes asynchronously after sync completes.
  */
-export function verifyAppLocalStorageItemEquals(key, expectedValue) {
-  cy.window()
-    .its('localStorage')
-    .invoke('getItem', key)
-    .should((stored) => {
-      const parsed = stored ? JSON.parse(stored) : null
-      expect(parsed).to.deep.equal(expectedValue)
-    })
-}
 
 export function changeSafeChainName(originalChain, newChain) {
   return originalChain.replace(/^[^:]+:/, newChain + ':')

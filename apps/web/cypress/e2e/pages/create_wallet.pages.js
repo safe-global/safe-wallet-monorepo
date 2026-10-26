@@ -5,8 +5,6 @@ import * as constants from '../../support/constants'
 import * as wallet from '../../support/utils/wallet'
 import * as owner from './owners.pages'
 
-const ownerInput = 'input[name^="owners"][name$="name"]'
-const ownerAddress = 'input[name^="owners"][name$="address"]'
 export const removeOwnerBtn = 'button[aria-label="Remove signer"]'
 // Welcome "My accounts" redesign (V2): creation lives behind the "Add accounts" chooser rather than a
 // standalone create-safe button.
@@ -19,18 +17,9 @@ export const reviewStepNextBtn = '[data-testid="review-step-next-btn"]'
 const creationModalLetsGoBtn = '[data-testid="cf-creation-lets-go-btn"]'
 const nextBtn = '[data-testid="next-btn"]'
 const backBtn = '[data-testid="back-btn"]'
-const cancelBtn = '[data-testid="cancel-btn"]'
-export const addressAutocompleteOptions = '[data-testid="address-item"]'
-export const qrCode = '[data-testid="qr-code"]'
-export const addressInfo = '[data-testid="address-info"]'
 export const choiceBtn = '[data-testid="choice-btn"]'
-const addFundsBtn = '[data-testid="add-funds-btn"]'
 const createTxBtn = '[data-testid="create-tx-btn"]'
-const qrCodeSwitch = '[data-testid="qr-code-switch"]'
 export const activateAccountBtn = '[data-testid="activate-account-btn-cf"]'
-const notificationsSwitch = '[data-testid="notifications-switch"]'
-export const addFundsSection = '[data-testid="add-funds-section"]'
-export const noTokensAlert = '[data-testid="no-tokens-alert"]'
 const networkCheckbox = '[data-testid="network-checkbox"]'
 const cancelIcon = '[data-testid="CancelIcon"]'
 export const payNowLaterMessageBox = '[data-testid="pay-now-later-message-box"]'
@@ -46,52 +35,10 @@ export const continueWithWalletBtnConnected = '[data-testid="continue-with-walle
 const networkSelectorItem = '[data-testid="network-selector-item"]'
 const signInToWorkspaceBtn = '[data-testid="sign-in-to-workspace-btn"]'
 
-const policy1_2 = '1/1 policy'
-export const walletName = 'test1-sepolia-safe'
-export const defaultSepoliaPlaceholder = 'Sepolia Safe'
-const initialSteps = '0 of 2 steps completed'
 export const addSignerStr = 'Add signer'
 export const accountRecoveryStr = 'Account recovery'
 export const sendTokensStr = 'Send tokens'
-const noWalletConnectedMsg = 'No wallet connected'
-export const deployWalletStr = 'about to deploy this Safe account'
 export const yourSafeAccountPreviewStr = 'Your Safe account preview'
-
-export function waitForConnectionMsgDisappear() {
-  cy.contains(noWalletConnectedMsg).should('not.exist')
-}
-export function checkNotificationsSwitchIs(status) {
-  cy.get(notificationsSwitch).should(
-    status === constants.enabledStates.disabled ? 'have.attr' : 'not.have.attr',
-    'data-disabled',
-  )
-}
-
-export function clickOnActivateAccountBtn(index) {
-  // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
-  cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
-}
-
-export function clickOnQRCodeSwitch() {
-  // Force: the dialog overlay covers the switch while the open animation settles
-  cy.get(qrCodeSwitch).click({ force: true })
-}
-
-export function checkQRCodeSwitchStatus(state) {
-  cy.get(qrCodeSwitch).should(
-    'have.attr',
-    'aria-checked',
-    state === constants.checkboxStates.checked ? 'true' : 'false',
-  )
-}
-
-export function checkInitialStepsDisplayed() {
-  cy.contains(initialSteps).should('be.visible')
-}
-
-export function clickOnAddFundsBtn() {
-  cy.get(addFundsBtn).click()
-}
 
 export function clickOnCreateTxBtn() {
   cy.get(createTxBtn).click()
@@ -108,11 +55,6 @@ export function clickOnTxType(tx) {
 
 export function selectRelayOption() {
   cy.get(relayExecMethod).click()
-}
-
-export function cancelWalletCreation() {
-  cy.get(cancelBtn).click()
-  cy.url().should('include', constants.welcomeAccountUrl)
 }
 
 export function clickOnBackBtn() {
@@ -153,23 +95,6 @@ export function getCreatedSafeAddress() {
     })
 }
 
-export function verifyPolicy1_1() {
-  cy.contains(policy1_2).should('exist')
-  // TOD: Need data-cy for containers
-}
-
-export function verifyDefaultWalletName(name) {
-  cy.get(main.nameInput).invoke('attr', 'placeholder').should('include', name)
-}
-
-export function verifyNextBtnIsDisabled() {
-  cy.get('button').contains('Next').should('be.disabled')
-}
-
-export function verifyNextBtnIsEnabled() {
-  cy.get('button').contains('Next').should('not.be.disabled')
-}
-
 const CHOOSER_ATTEMPTS = 3
 
 // A click on the "Add accounts" chooser that comes right after the page renders can be lost, so click again.
@@ -198,13 +123,6 @@ export function clickOnContinueWithWalletBtn() {
 export function verifyConnectWalletBtnDisplayed() {
   return cy.get(connectWalletBtn).should('be.visible')
 }
-export function typeWalletName(name) {
-  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
-}
-
-export function clearWalletName() {
-  cy.get(main.nameInput).clear()
-}
 
 export function openNetworkSelector() {
   cy.get(networkSelectorItem).should('be.visible').click({ force: true })
@@ -227,15 +145,6 @@ export function selectMultiNetwork(index, network) {
  * Selects the network unless it is selected already: the form preselects the wallet's chain only when the
  * wallet is connected before the form mounts, so the starting selection depends on timing.
  */
-export function ensureMultiNetworkSelected(index, network) {
-  clickOnMultiNetworkInput(index)
-  enterNetwork(index, network)
-  cy.get(networkCheckbox)
-    .eq(0)
-    .then(($checkbox) => {
-      if ($checkbox.attr('aria-checked') !== 'true') clickOnNetwrokCheckbox()
-    })
-}
 
 export function clickOnNetwrokCheckbox() {
   // The checkbox itself is decorative (pointer-events: none); the click handler is on the option row.
@@ -261,27 +170,6 @@ export function clickOnYourSafeAccountPreview() {
   cy.contains(yourSafeAccountPreviewStr).click()
 }
 
-export function verifyOwnerName(name, index) {
-  cy.get(ownerInput).eq(index).should('have.value', name)
-}
-
-export function verifyOwnerAddress(address, index) {
-  cy.get(ownerAddress).eq(index).should('have.value', address)
-}
-
-export function clickOnSignerAddressInput(index) {
-  cy.get(getOwnerAddressInput(index)).click().clear()
-}
-
-export function selectSignerOnAutocomplete(index) {
-  cy.wait(500)
-  cy.get(addressAutocompleteOptions).eq(index).click()
-}
-
-export function typeOwnerName(name, index) {
-  cy.get(getOwnerNameInput(index)).type(name).should('have.value', name)
-}
-
 export function typeOwnerAddress(address, index, clearOnly = false) {
   if (clearOnly) {
     cy.get(getOwnerAddressInput(index)).clear()
@@ -291,44 +179,9 @@ export function typeOwnerAddress(address, index, clearOnly = false) {
   cy.get(getOwnerAddressInput(index)).clear().type(address).should('have.value', address)
 }
 
-export function clickOnAddNewOwnerBtn() {
-  cy.contains('button', 'Add new signer').click().wait(700)
-}
-
-export function addNewOwner(name, address, index) {
-  clickOnAddNewOwnerBtn()
-  typeOwnerName(name, index)
-  typeOwnerAddress(address, index)
-}
-
 export function updateThreshold(number) {
   owner.clickOnThresholdDropdown()
   owner.getThresholdOptions().contains(number).trigger('mousemove').click()
-}
-
-export function removeOwner(index) {
-  // Index for remove owner btn which does not equal to number of owners
-  cy.get(removeOwnerBtn).eq(index).click()
-}
-
-export function verifySafeNameInSummaryStep(name) {
-  cy.contains(name)
-}
-
-export function verifyOwnerNameInSummaryStep(name) {
-  cy.contains(name)
-}
-
-export function verifyOwnerAddressInSummaryStep(address) {
-  cy.contains(address)
-}
-
-export function verifyThresholdStringInSummaryStep(startThreshold, endThreshold) {
-  cy.contains(`${startThreshold} out of ${endThreshold}`)
-}
-
-export function verifySafeNetworkNameInSummaryStep(name) {
-  cy.get('div').contains('Name').parent().parent().contains(name)
 }
 
 export function verifyEstimatedFeeInSummaryStep() {
@@ -340,10 +193,6 @@ export function verifyEstimatedFeeInSummaryStep() {
       const pattern = /\d/
       expect(/\d/.test(text)).to.equal(true)
     })
-}
-
-function getOwnerNameInput(index) {
-  return `input[name="owners.${index}.name"]`
 }
 
 function getOwnerAddressInput(index) {

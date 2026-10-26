@@ -26,8 +26,6 @@ export const SIDEBAR_ADDRESS = '0x04f8...1a91'
 //ENS_TEST_SEPOLIA resolves to 0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F
 export const ENS_TEST_SEPOLIA = 'e2etestsafe.eth'
 export const ENS_TEST_GOERLI = 'goerli-safe-test.eth'
-export const ENS_TEST_SEPOLIA_INVALID = 'ivladitestenssepolia.eth'
-export const ENS_TEST_SEPOLIA_VALID = 'testenssepolia.eth'
 export const WRONGLY_CHECKSUMMED_ADDRESS = '0X6D0B6F96F665BB4490F9DDB2E450DA2F7E546DC1'
 
 export const BROWSER_PERMISSIONS_KEY = `${LS_NAMESPACE}SafeApps__browserPermissions`
@@ -62,7 +60,6 @@ export const welcomeAccountUrl = 'welcome/accounts'
 export const welcomeAccountsSepoliaUrl = 'welcome/accounts?chain=sep'
 export const welcomeSepoliaUrl = '/welcome?chain=sep'
 export const chainMaticUrl = '/welcome?chain=matic'
-export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
 export const loadNewSafeUrl = '/new-safe/load'
 export const advancedCreateSafeSepoliaUrl = '/new-safe/advanced-create?chain=sep'
 export const appsUrl = '/apps'
@@ -72,7 +69,6 @@ export const appSettingsUrl = '/settings/safe-apps'
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
 export const modulesUrl = '/settings/modules?safe='
-export const notificationsUrl = '/settings/notifications?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = (
@@ -89,7 +85,6 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
-export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
 export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
@@ -197,14 +192,10 @@ export const tokenNames = {
 }
 
 export const addressBookErrrMsg = {
-  invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
-  exceedChars: 'Maximum 50 symbols',
   ownSafeManage: 'Cannot use Safe account itself as signer',
   ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'This address is already a signer of this Safe Account',
-  ownerAdded: 'This address is already a signer of this Safe Account',
-  failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
@@ -262,9 +253,7 @@ export const localStorageKeys = {
   SAFE_v2__SafeApps__browserPermissions: 'SAFE_v2__SafeApps__browserPermissions',
   SAFE_v2__SafeApps__infoModal: 'SAFE_v2__SafeApps__infoModal',
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
-  SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
-  SAFE_v2__auth: 'SAFE_v2__auth',
   SAFE_v2__lastWallet: 'SAFE_v2__lastWallet',
   SAFE_v2__safeProAnnouncementSeen: 'SAFE_v2__safeProAnnouncementSeen',
 }
