@@ -75,7 +75,7 @@ const config: ConfigFile = {
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
       filterEndpoints: [
-        /^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|spacePolicies|addressBook|userAddressBook)/,
+        /^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|spacePolicies|spaceTransactions|addressBook|userAddressBook)/,
       ],
     },
     '../src/gateway/AUTO_GENERATED/counterfactual-safes.ts': {

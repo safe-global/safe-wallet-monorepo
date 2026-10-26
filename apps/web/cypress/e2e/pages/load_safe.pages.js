@@ -174,6 +174,10 @@ export function inputNameAndAddress(name, address) {
   inputAddress(address)
 }
 
+function inputName(name) {
+  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
+}
+
 export function inputAddress(address) {
   cy.get(main.addressInput).should('be.visible').clear().should('exist').type(address, { delay: 50 })
 }
