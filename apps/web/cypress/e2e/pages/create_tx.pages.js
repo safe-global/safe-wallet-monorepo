@@ -127,7 +127,6 @@ export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 
 //Arrays for the Transaction Details on Tx creation for different type of txs
 export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
-export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', constants.safeProxyFactoryLabel]
 
 export const txActions = {
   setFallbackHandler: 'setFallbackHandler',

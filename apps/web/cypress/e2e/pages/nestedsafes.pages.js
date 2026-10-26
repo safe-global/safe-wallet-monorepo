@@ -14,14 +14,12 @@ const tokenItem = '[data-testid="token-item"]'
 const selectContent = '[data-slot="select-content"][data-open]'
 const selectTrigger = '[data-slot="select-trigger"]'
 const selectItem = '[data-slot="select-item"]'
-const removeAssetIcon = '[data-testid="remove-asset-icon"]'
 const advancedDetailsSummary = '[data-testid="decoded-tx-summary"]'
 
 export const fundAssetsActions = [
   `${constants.safeProxyFactoryLabel}: createProxyWithNonce`,
   /2\s*Send.*0\.00002\s*ETH.*to/,
 ]
-export const nonfundAssetsActions = ['createProxyWithNonce', constants.safeProxyFactoryLabel]
 
 export function clickOnAdvancedDetails() {
   cy.get(advancedDetailsSummary).click()
@@ -37,14 +35,6 @@ export function actionsExist(actions) {
   actions.forEach((action) => {
     cy.get(cardContent).contains(action).should('exist')
   })
-}
-
-export function getAssetCount() {
-  return cy.get(assetData).its('length')
-}
-
-export function removeAsset(index) {
-  cy.get(removeAssetIcon).eq(index).click()
 }
 
 export function selectToken(index, token) {
