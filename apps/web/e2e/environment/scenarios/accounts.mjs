@@ -1,7 +1,5 @@
-import { readFile } from 'node:fs/promises'
 import { ContractFactory, NonceManager } from 'ethers'
 import { prepareAssetsScenario } from './assets.mjs'
-import { prepareBasicScenario } from './basic.mjs'
 import { registerContract } from './contracts.mjs'
 import { createSafe, openSafe, proposeTransaction } from './safe.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
@@ -18,30 +16,6 @@ async function queueTransfer(env, owners, safe, nonce) {
   })
   const { hash } = await proposeTransaction(context, transaction)
   await waitForQueued(env, context, [hash])
-}
-
-async function transactionBuilderId(env) {
-  const response = await fetch(`${env.SAFE_CGW_BASE_URL}/v1/chains/${SEPOLIA}/safe-apps`, {
-    signal: AbortSignal.timeout(10_000),
-  })
-  if (!response.ok) throw new Error(`Local Safe Apps catalog returned ${response.status}`)
-  const builder = (await response.json()).find((app) => app.name === 'Transaction Builder')
-  if (!builder) throw new Error('The local config service has no Transaction Builder app to pin')
-  return builder.id
-}
-
-/** Pins the local Transaction Builder in the imported file and stored apps instead of the staging app id. */
-export async function prepareImportDataScenario(env, owners) {
-  const scenario = await prepareBasicScenario(env, owners)
-  const builderId = await transactionBuilderId(env)
-  const name = 'data_import.json'
-  const imported = JSON.parse(await readFile(new URL(`../../../cypress/fixtures/${name}`, import.meta.url), 'utf8'))
-  imported.data.safeApps[SEPOLIA].pinned = [builderId]
-  return {
-    ...scenario,
-    fixtures: { 'pinnedApps.transactionBuilder': { [SEPOLIA]: { pinned: [builderId], opened: [] } } },
-    files: { [name]: imported },
-  }
 }
 
 export async function prepareSafeSelectorScenario(env, owners) {
