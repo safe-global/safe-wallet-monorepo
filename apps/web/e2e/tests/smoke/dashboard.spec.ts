@@ -13,15 +13,15 @@ import { safeAddress } from '../../src/data/constants'
 /** Rows the widget has room for — mirrors MAX_TXS in src/components/dashboard/PendingTxs/PendingTxsList.tsx */
 const WIDGET_ROWS = 4
 
-/** The first proposal of each nonce, in the order CGW lists the queue; CGW lists the newest proposal first. */
+/** The newest proposal of each nonce, in queue order — the widget sorts each conflict group by timestamp too. */
 function latestProposalPerNonce(queue: Transaction[]): Transaction[] {
-  const seen = new Set<number | undefined>()
-  return queue.filter((transaction) => {
+  const latest = new Map<number | undefined, Transaction>()
+  for (const transaction of queue) {
     const nonce = nonceOf(transaction)
-    if (seen.has(nonce)) return false
-    seen.add(nonce)
-    return true
-  })
+    const current = latest.get(nonce)
+    if (!current || transaction.timestamp > current.timestamp) latest.set(nonce, transaction)
+  }
+  return [...latest.values()]
 }
 
 function confirmationsLabel(transaction: Transaction): string {

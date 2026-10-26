@@ -1,3 +1,5 @@
+import type { Erc20TransferRecipientDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+
 /**
  * The resolved policy shape the UI consumes. It mirrors the CGW response, except that
  * `token` is joined from the tokens endpoint and `remaining` is derived.
@@ -6,14 +8,17 @@
  * they live in the space address book and the frontend resolves them.
  */
 
-export type PolicyType = 'spending-limit' | 'recovery' | 'proposer'
+export type PolicyType = 'spending-limit' | 'recovery' | 'proposer' | 'allowlist'
 
 /**
  * How the policy is enforced. A proposer grant is enforced by no contract, so it has no module
  * address and nothing to link to. This is on the wire so that components can branch on it instead
  * of checking the policy type.
  */
-export type PolicyEnforcement = { via: 'module'; moduleAddress: string } | { via: 'offchain'; source: 'delegates' }
+export type PolicyEnforcement =
+  | { via: 'module'; moduleAddress: string }
+  | { via: 'guard'; guardAddress: string }
+  | { via: 'offchain'; source: 'delegates' }
 
 /** CGW has no Safe ID. A Safe is identified by its chain and its address. */
 export type PolicySafe = {
@@ -89,6 +94,26 @@ export type ProposerPolicyData = {
   proposers: Proposer[]
 }
 
+export type AllowlistRecipient = Erc20TransferRecipientDto
+
+/** CGW returns one `erc20-transfer` policy per token; the table shows one allowlist per Safe holding them all. */
+export type AllowlistEntry = {
+  token: PolicyTokenInfo
+  recipients: AllowlistRecipient[]
+}
+
+export type AllowlistPolicyData = {
+  entries: AllowlistEntry[]
+}
+
+/** An executed change waiting out the guard's 24-hour delay. `create`: the allowlist is not enforced until then. */
+// Placeholder: CGW has no field for this yet, so the shape follows the design until the API defines it.
+export type AllowlistScheduledChange = {
+  operation: 'create' | 'update'
+  /** Unix SECONDS. */
+  appliesAt: number
+}
+
 type PolicyBase = {
   /** Stable across requests. Table rows and the open detail panel are keyed on it. */
   id: string
@@ -104,8 +129,13 @@ type PolicyBase = {
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type RecoveryPolicy = PolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPolicyData }
+export type AllowlistPolicy = PolicyBase & {
+  type: 'allowlist'
+  data: AllowlistPolicyData
+  scheduledChange?: AllowlistScheduledChange
+}
 
-export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy
+export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | AllowlistPolicy
 
 /** What a queued Safe transaction would do to a policy once it executes. */
 export type PendingPolicyOperation = 'create' | 'update' | 'remove'
@@ -125,24 +155,39 @@ type PendingPolicyBase = PolicyBase & {
 /** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
 export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
-export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
+// Placeholder: `failed` (executed but reverted, nothing changed) follows the design; CGW's pending API has no such state yet.
+export type PendingAllowlistPolicy = Omit<PendingPolicyBase, 'status'> & {
+  status: PendingPolicyBase['status'] | 'failed'
+  type: 'allowlist'
+  data: AllowlistPolicyData
+  // Placeholder: a draft CGW PR adds this timestamp to pending transactions; rename to match it once merged.
+  /** Unix SECONDS after which the queued transaction can no longer be signed. */
+  expiresAt?: number
+}
+export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy | PendingAllowlistPolicy
 
 /** Still in the queue, as opposed to executed and waiting for the indexer. */
 export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
+export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending' }
+export type FailedAllowlistPolicy = PendingAllowlistPolicy & { status: 'failed' }
 
-export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
+export type PolicyStatus =
+  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
 
 export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
-  policy.status === 'pending' || policy.status === 'activating'
+  policy.status === 'pending' || policy.status === 'activating' || policy.status === 'failed'
 
 export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
 
 export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
   policy.type === 'proposer'
+
+export const isAllowlistPolicy = (policy: Policy): policy is Extract<Policy, { type: 'allowlist' }> =>
+  policy.type === 'allowlist'
 
 export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { type: 'recovery' }> =>
   policy.type === 'recovery'
@@ -153,6 +198,7 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
   if (isPendingPolicy(policy)) return policy.status
+  if (isAllowlistPolicy(policy) && policy.scheduledChange) return 'change-pending'
   if (policy.enabled) return 'active'
 
   // A proposer grant has no module to switch on, so one that is not in force was never activated.

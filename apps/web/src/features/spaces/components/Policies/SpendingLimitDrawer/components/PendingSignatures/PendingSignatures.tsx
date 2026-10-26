@@ -7,11 +7,17 @@ export type PendingSignaturesProps = {
   safe: { address: string; name?: string }
   signed: number
   required: number
+  timeToSign?: string
 }
 
-const PendingSignatures = ({ safe, signed, required }: PendingSignaturesProps): ReactElement => (
+const PendingSignatures = ({ safe, signed, required, timeToSign }: PendingSignaturesProps): ReactElement => (
   <DrawerSection title="Pending signatures" rightNode={formatSignedCount(signed, required)}>
-    <DrawerList items={[{ label: 'Safe account', content: <AccountIdentity {...safe} showCopyButton /> }]} />
+    <DrawerList
+      items={[
+        ...(timeToSign ? [{ label: 'Time to sign', content: timeToSign }] : []),
+        { label: 'Safe account', content: <AccountIdentity {...safe} showCopyButton /> },
+      ]}
+    />
   </DrawerSection>
 )
 
