@@ -29,7 +29,10 @@ export const useAllowlistDetails = (policy: ActiveAllowlistPolicy, policies: Pol
     for (const other of policies) {
       if (!isSpendingLimitPolicy(other) || getPolicyStatus(other) !== 'active') continue
       if (other.safe.chainId !== chainId || !sameAddress(other.safe.address, safeAddress)) continue
-      count += other.data.spenders.reduce((sum, { allowances }) => sum + allowances.length, 0)
+      count += other.data.spenders.reduce(
+        (sum, { isActive, allowances }) => (isActive === false ? sum : sum + allowances.length),
+        0,
+      )
     }
     return count
   }, [policy.spendingLimitsCovered, policies, chainId, safeAddress])

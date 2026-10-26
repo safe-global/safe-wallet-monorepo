@@ -56,6 +56,8 @@ export type PolicyAllowance = {
 
 export type PolicySpender = {
   spender: string
+  /** False when the spender was removed as a delegate and cannot spend, though the allowances still exist. */
+  isActive?: boolean
   allowances: PolicyAllowance[]
 }
 

@@ -33,6 +33,13 @@ describe('mapActivePolicies', () => {
     expect(allowance.createdAt).toBe(1_790_000_000)
   })
 
+  it('should carry whether the spender is still registered', () => {
+    const [policy] = mapActivePolicies([mockSpendingLimitDto()])
+    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
+
+    expect(policy.data.spenders[0].isActive).toBe(true)
+  })
+
   it('should, when the allowance never resets, leave the reset time empty', () => {
     const dto = mockSpendingLimitDto()
     if (!('spenders' in dto.data)) throw new Error('expected spending limit data')

@@ -58,6 +58,19 @@ describe('useAllowlistDetails', () => {
       expect(result.current.uncoveredSpendingLimitCount).toBe(6)
     })
 
+    it('leaves out the allowances of a deregistered spender', () => {
+      const multi = mockMultiSpenderPolicy()
+      const [alice, bob, ...rest] = multi.data.spenders
+      const withDeregisteredBob = asActivePolicy({
+        ...multi,
+        data: { spenders: [{ ...alice, isActive: true }, { ...bob, isActive: false }, ...rest] },
+      })
+
+      const { result } = renderHook(() => useAllowlistDetails(uncovered, [withDeregisteredBob]))
+
+      expect(result.current.uncoveredSpendingLimitCount).toBe(3)
+    })
+
     it('matches the Safe address case-insensitively', () => {
       const lowercased = asActivePolicy(
         mockSpendingLimitPolicy({

@@ -50,6 +50,7 @@ const toSpendingLimit = (dto: ActivePolicyDto): SpendingLimitPolicy | null => {
     data: {
       spenders: dto.data.spenders.map((spender) => ({
         spender: spender.spender,
+        isActive: spender.isActive,
         allowances: spender.allowances.map(toAllowance),
       })),
     },
