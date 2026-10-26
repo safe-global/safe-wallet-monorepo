@@ -2,7 +2,6 @@
 const securityProviders = 'Blockaid, Hypernative and Tenderly are hosted providers'
 const positionsProvider = 'positions come from Zerion, a hosted provider'
 const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepolia, not the fork'
-const fourthChain = 'the list only appears when a chain is left to add, which needs a fourth fork'
 
 /**
  * Every spec that runs against the isolated backend: `scenario` names a function from scenarios/index.mjs,
@@ -48,14 +47,7 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/multichain_create_safe_flow.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
   'cypress/e2e/regression/multichain_create_safe.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
   'cypress/e2e/regression/multichain_network.cy.js': { scenario: 'prepareMultichainScenario', chains: [1, 137] },
-  'cypress/e2e/regression/multichain_networkswitch.cy.js': {
-    scenario: 'prepareMultichainScenario',
-    chains: [1, 137],
-    skips: {
-      'Verify the list of networks where the safe is already deployed with the same address when all networks added':
-        fourthChain,
-    },
-  },
+  'cypress/e2e/regression/multichain_networkswitch.cy.js': { scenario: 'prepareMultichainScenario', chains: [1, 137] },
   'cypress/e2e/regression/multichain_safe_selector.cy.js': { scenario: 'prepareMultichainScenario', chains: [137] },
   'cypress/e2e/regression/multichain_setup_new.cy.js': { scenario: 'prepareMultichainScenario', chains: [1, 137] },
   'cypress/e2e/regression/nested_safes_curation.cy.js': { scenario: 'prepareNestedCurationScenario' },
