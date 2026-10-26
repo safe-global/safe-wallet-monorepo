@@ -15,9 +15,9 @@ export default {
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
   /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, batch_tx.cy.js, tokens.cy.js, nfts.cy.js, assets.cy.js, safe-apps tests */
   SEP_STATIC_SAFE_2: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-  /** Load safe testing - Used in: load_safe_3.cy.js, spending_limits_nonowner.cy.js */
+  /** Used in: spending_limits_nonowner.cy.js */
   SEP_STATIC_SAFE_3: 'sep:0x33C4AA5729D91FfB3B87AEf8a324bb6304Fb905c',
-  /** Load safe testing - Used in: load_safe.cy.js, address_book.cy.js, load_safe_3.cy.js */
+  /** Used in: address_book.cy.js, address_book_2.cy.js, address_book_3.cy.js */
   SEP_STATIC_SAFE_4: 'sep:0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   /** Address book and CSV import testing - Used in: constants.js (CSV entry), address_book tests */
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',

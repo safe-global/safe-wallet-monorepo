@@ -44,11 +44,6 @@ export async function prepareImportDataScenario(env, owners) {
   }
 }
 
-export async function prepareLoadSafeScenario(env, owners) {
-  const names = ['SEP_STATIC_SAFE_3', 'SEP_STATIC_SAFE_4']
-  return { safes: { static: await rebuildStagingSafes(env, owners, names) } }
-}
-
 export async function prepareSafeSelectorScenario(env, owners) {
   const names = ['SEP_STATIC_SAFE_7', 'SEP_STATIC_SAFE_9', 'SEP_STATIC_SAFE_11']
   const safes = await rebuildStagingSafes(env, owners, names)

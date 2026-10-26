@@ -68,7 +68,6 @@ export const welcomeAccountsSepoliaUrl = 'welcome/accounts?chain=sep'
 export const welcomeSepoliaUrl = '/welcome?chain=sep'
 export const chainMaticUrl = '/welcome?chain=matic'
 export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
-export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
 export const loadNewSafeUrl = '/new-safe/load'
 export const advancedCreateSafeSepoliaUrl = '/new-safe/advanced-create?chain=sep'
 export const appsUrl = '/apps'
@@ -124,10 +123,6 @@ export const INVALID_QR_CODE_PATH = '../fixtures/invalid_image_QR_test.png'
 
 export const safeContractVersions = {
   v1_4_1_L2: '1.4.1+L2',
-}
-
-export const commonThresholds = {
-  oneOfOne: '1 out of 1 signer',
 }
 
 export const networkKeys = {
