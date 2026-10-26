@@ -16,8 +16,9 @@ describe('PositionsHeader', () => {
 
     expect(screen.getByText(aave.protocol_metadata.name)).toBeInTheDocument()
     expect(screen.getByText(share)).toBeInTheDocument()
+    // toHaveTextContent turns the hair space after the currency sign into a space, so the expected text must too
     expect(screen.getByText(aave.protocol_metadata.name).parentElement).toHaveTextContent(
-      formatCurrencyPrecise(aave.fiatTotal, 'usd'),
+      formatCurrencyPrecise(aave.fiatTotal, 'usd').replace(/\s/g, ' '),
     )
   })
 
