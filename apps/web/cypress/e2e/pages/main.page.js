@@ -321,22 +321,6 @@ export function verifyElementsIsVisible(elements) {
   })
 }
 
-export function getTextToArray(selector, textArray) {
-  cy.get(selector).each(($element) => {
-    textArray.push($element.text())
-  })
-}
-
-export function extractDigitsToArray(selector, digitsArray) {
-  cy.get(selector).each(($element) => {
-    const text = $element.text()
-    const digits = text.match(/\d+\.\d+|\d+\b/g)
-    if (digits) {
-      digitsArray.push(...digits)
-    }
-  })
-}
-
 export function isItemInLocalstorage(key, expectedValue, maxAttempts = 10, delay = 100) {
   return new Promise((resolve, reject) => {
     let attempts = 0
