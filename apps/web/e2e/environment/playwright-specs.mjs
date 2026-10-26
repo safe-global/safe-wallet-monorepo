@@ -34,6 +34,11 @@ export const playwrightSpecs = {
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'e2e/tx-history-filter.spec.ts': {},
+  'e2e/portfolio.spec.ts': {
+    scenarios: ['prepareZerionPortfolioScenario'],
+    safes: { ETH_ZERION_SAFE: 'ETH_ZERION_SAFE' },
+    chains: [1],
+  },
   'e2e/token-lists.spec.ts': {
     scenarios: ['prepareBalancesEndpointsScenario'],
     safes: { ETH_TOKEN_LIST_SAFE: 'ETH_STATIC_SAFE_15' },
