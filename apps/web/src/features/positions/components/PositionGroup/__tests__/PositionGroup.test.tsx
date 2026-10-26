@@ -29,7 +29,7 @@ describe('PositionGroup', () => {
         new RegExp(`${escape(symbol)}\\s*•\\s*${getReadablePositionType(position.position_type)}`),
       )
       expect(row).toHaveTextContent(`${formatVisualAmount(position.balance, decimals)} ${symbol}`)
-      expect(row).toHaveTextContent(formatCurrencyPrecise(position.fiatBalance, 'usd'))
+      expect(row).toHaveTextContent(formatCurrencyPrecise(position.fiatBalance, 'usd'), { normalizeWhitespace: false })
     })
   })
 
@@ -40,6 +40,6 @@ describe('PositionGroup', () => {
 
     const row = screen.getAllByTestId('table-row')[group.items.indexOf(loan)]
     expect(row).toHaveTextContent(`${loan.tokenInfo.symbol} • Debt`)
-    expect(row).toHaveTextContent(/-\$2,064,531\.91/)
+    expect(row).toHaveTextContent(/-\$\s2,064,531\.91/)
   })
 })

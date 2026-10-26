@@ -18,6 +18,7 @@ describe('PositionsHeader', () => {
     expect(screen.getByText(share)).toBeInTheDocument()
     expect(screen.getByText(aave.protocol_metadata.name).parentElement).toHaveTextContent(
       formatCurrencyPrecise(aave.fiatTotal, 'usd'),
+      { normalizeWhitespace: false },
     )
   })
 
