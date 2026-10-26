@@ -1,6 +1,6 @@
 # Cypress E2E (legacy — maintenance only)
 
-**No new Cypress tests.** All new E2E tests are Playwright — see [../e2e/AGENTS.md](../e2e/AGENTS.md). This file governs maintaining the existing suite (still active, mostly visual/Argos work). To migrate a spec: [../e2e/docs/CYPRESS_MIGRATION_GUIDE.md](../e2e/docs/CYPRESS_MIGRATION_GUIDE.md).
+**No new Cypress tests.** All new E2E tests are Playwright — see [../e2e/AGENTS.md](../e2e/AGENTS.md). This file governs maintaining the existing suite (still active, mostly visual/Argos work). Delete a Cypress test only when a Jest or Playwright test covers it, and list each deleted test with its replacement in the PR description.
 
 Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cypress:run` (headless).
 
