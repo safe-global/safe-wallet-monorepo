@@ -53,6 +53,15 @@ jest.mock('next/router', () => ({
 jest.mock('@/config/routes', () => ({
   AppRoutes: { home: '/home' },
 }))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpaceSafesGetV1Query: jest.fn(),
+}))
+jest.mock('@/store', () => ({
+  useAppSelector: jest.fn(),
+}))
+jest.mock('@/store/authSlice', () => ({
+  isAuthenticated: jest.fn(),
+}))
 
 import { useCurrentSpaceId } from '@/features/spaces'
 import { useSafeBarSafes } from '../useSafeBarSafes'
@@ -65,6 +74,8 @@ import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useRouter } from 'next/router'
 import { isMultiChainSafeItem } from '@/hooks/safes'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAppSelector } from '@/store'
 
 // ── helpers ────────────────────────────────────────────────────────────
 
@@ -117,7 +128,12 @@ function setupDefaults(
   ;(isMultiChainSafeItem as unknown as jest.Mock).mockImplementation(
     (item: SafeItem | MultiChainSafeItem) => 'safes' in item,
   )
+  ;(useAppSelector as jest.Mock).mockReturnValue(true)
+  ;(useSpaceSafesGetV1Query as jest.Mock).mockReturnValue({ currentData: undefined })
 }
+
+const mockSpaceSafes = (safes: Record<string, string[]>) =>
+  (useSpaceSafesGetV1Query as jest.Mock).mockReturnValue({ currentData: { safes } })
 
 // ── tests ──────────────────────────────────────────────────────────────
 
@@ -176,7 +192,43 @@ describe('useSpaceChainSelector', () => {
     })
   })
 
-  it('keeps the Workspace when it switches the chain', () => {
+  it('keeps the Workspace when it switches to a chain the Workspace holds', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)
+    mockSpaceSafes({ '1': ['0xsafe2'], '137': ['0xsafe2'] })
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    act(() => {
+      result.current.handleChainChange('137')
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/home',
+      query: { safe: 'matic:0xSafe2', spaceId },
+    })
+  })
+
+  it('opens a chain the Workspace does not hold outside the Workspace', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)
+    mockSpaceSafes({ '1': ['0xSafe2'] })
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    act(() => {
+      result.current.handleChainChange('137')
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/home',
+      query: { safe: 'matic:0xSafe2' },
+    })
+  })
+
+  it('keeps the Workspace while its Safes are still loading', () => {
     const spaceId = '11111111-1111-1111-1111-111111111111'
     setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)

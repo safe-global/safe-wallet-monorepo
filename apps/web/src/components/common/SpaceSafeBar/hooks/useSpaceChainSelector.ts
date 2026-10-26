@@ -11,6 +11,10 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
 import type { ChainInfo } from '@/features/spaces/types'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSafeBarSafes } from './useSafeBarSafes'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
@@ -23,6 +27,11 @@ export function useSpaceChainSelector() {
   const { configs: chainConfigs } = useChains()
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
+  const isSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: spaceSafes } = useSpaceSafesGetV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isSignedIn || !spaceId },
+  )
 
   const { deployedChains, deployedChainIds, safeName } = useMemo(() => {
     if (!currentSafe)
@@ -55,12 +64,16 @@ export function useSpaceChainSelector() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
+      // A chain the Workspace doesn't hold opens outside it, which the Safe page would do anyway
+      const isOutsideSpace =
+        spaceSafes !== undefined &&
+        !(spaceSafes.safes[chainId] ?? []).some((address) => sameAddress(address, safeAddress))
       router.push({
         pathname: AppRoutes.home,
-        query: withSpaceId({ safe: `${chain.shortName}:${safeAddress}` }, spaceId),
+        query: withSpaceId({ safe: `${chain.shortName}:${safeAddress}` }, isOutsideSpace ? null : spaceId),
       })
     },
-    [chainConfigs, router, safeAddress, spaceId],
+    [chainConfigs, router, safeAddress, spaceId, spaceSafes],
   )
 
   return {
