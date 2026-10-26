@@ -107,7 +107,7 @@ Once the target is clear, follow the [AI Test Output Format](./AI_TEST_OUTPUT_FO
 
 ## Migration Tracking
 
-Record every migration in [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md) — the live queue and the source of truth for stage membership. **Update it in the same PR as the migration.**
+Record every migration in the PR description, with one row for each Cypress test that the PR migrates, pushes down or deletes. The specs still in `cypress/e2e/` are the remaining work.
 
 For each test, document:
 
@@ -119,18 +119,18 @@ For each test, document:
 
 This tracking enables the eventual Cypress removal — we need to know when every valuable test has a Playwright equivalent.
 
-### Review rule — Verdict before Status
+### Review rule — Verdict for every test
 
-**A PR that changes a spec's `Status` without also filling in its `Verdict` is incomplete. Reviewers: request changes.**
+**A PR that migrates or deletes a Cypress test without a verdict for it in the PR description is incomplete. Reviewers: request changes.**
 
-A blank `Verdict` next to a changed `Status` means one of two things, and both are worth a review comment:
+A missing verdict means one of two things, and both are worth a review comment:
 
 - the classification never happened, and the spec was translated line by line — the exact failure this guide exists to prevent; or
 - it happened in someone's head and is now lost, so the next person cannot tell whether a thin Playwright spec is thin _because the rest was correctly pushed down the pyramid_, or because it silently dropped coverage.
 
-`Verdict` does not need prose. One line naming the routing decision is enough — `Critical UI flow → @smoke`, `Data assertion → @api test`, `Logic → unit test in useSafeInfo.test.ts`, `Duplicate of smoke/assets → won't-migrate`. What matters is that the decision is written down where the next reader will find it.
+A verdict does not need prose. One line naming the routing decision is enough — `Critical UI flow → @smoke`, `Data assertion → @api test`, `Logic → unit test in useSafeInfo.test.ts`, `Duplicate of smoke/assets → won't-migrate`. What matters is that the decision is written down where the next reader will find it.
 
-The same applies to `won't-migrate`: it is a legitimate and common outcome, but only with a `Verdict` saying which of the 8 questions produced it.
+The same applies to a test that is not migrated: deleting it is a legitimate and common outcome, but only with a verdict saying which of the 8 questions produced it.
 
 ---
 
@@ -138,7 +138,7 @@ The same applies to `won't-migrate`: it is a legitimate and common outcome, but 
 
 Migration runs **one stage at a time**, easiest feature area first, and every stage lands as **two PRs**: a _migration PR_ that adds the Playwright specs, and a _deletion PR_ that removes the Cypress specs only after CI has run the new specs on `dev`. Do not open a PR that spans stages, and never delete Cypress specs in the PR that introduces their replacement.
 
-**Scope: 117 specs.** The 3 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
+**Scope: 117 specs at the start.** The 3 Argos `visual/` specs are excluded.
 
 ### Why staged
 
@@ -150,7 +150,7 @@ Three reasons, all of them load-bearing:
 
 ### Stage order
 
-Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membership.
+Counts are from the start of the programme; the specs still in `cypress/e2e/` are what is left.
 
 | #   | Area                         | Specs | Why here                                                     | Main page object to port                   |
 | --- | ---------------------------- | ----- | ------------------------------------------------------------ | ------------------------------------------ |
@@ -173,21 +173,21 @@ Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membershi
 
 One stage = two PRs. All eight steps, every time — steps 1–5 in the migration PR, steps 6–8 in the deletion PR.
 
-**PR A — migration.** Cypress keeps running; the row's Status becomes `migrated`.
+**PR A — migration.** Cypress keeps running.
 
-1. **Classify** every spec in the area against the 8 questions in Step 1 above. Write the verdict into `CYPRESS_PW_MIGRATION_STATUS.md` **before writing code**. Expect some specs to be deleted, some demoted to unit/component tests, some turned into `@api` tests.
+1. **Classify** every spec in the area against the 8 questions in Step 1 above. Write down the verdict for each spec **before writing code**; it goes into the PR description. Expect some specs to be deleted, some demoted to unit/component tests, some turned into `@api` tests.
    > A stage that migrates fewer specs than it started with is a success, not a shortfall. Migrate business value, not code.
 2. **Write** the Playwright specs per [AI_TEST_OUTPUT_FORMAT.md](./AI_TEST_OUTPUT_FORMAT.md). Tag `@migration` plus the category tag; the tag must match the directory.
 3. **Stability gate** — `--repeat-each=10` must be 10/10. This is the README's existing rule, not a new one.
 4. **No regression in already-migrated work** — the full Playwright suite must be green.
-5. **Add unit/component tests** for whatever step 1 pushed down the pyramid, plus a unit guard for any new `data-testid` you add to app source (see Known hazards). Set the rows to `migrated` and merge.
+5. **Add unit/component tests** for whatever step 1 pushed down the pyramid, plus a unit guard for any new `data-testid` you add to app source (see Known hazards). Merge.
 
 **Wait for CI.** The new specs must have run green on `dev` through `web-pw-smoke.yml` (for `@smoke`/`@api`) or `web-pw-full-ondemand.yml` (for `@regression`) before the deletion PR is opened. A local 10/10 proves stability on one machine; the CI static build on :8080 is a different environment.
 
-**PR B — deletion.** Only after the wait above; the row's Status becomes `deleted`.
+**PR B — deletion.** Only after the wait above.
 
 6. **Prove the Cypress spec still passes** before deleting it. Never delete an already-broken spec: the diff would hide a real failure, and you would not know whether the new test is weaker.
-7. **Delete** the Cypress spec and any page-object functions it alone used. Update `CYPRESS_PW_MIGRATION_STATUS.md` to `deleted`.
+7. **Delete** the Cypress spec and any page-object functions it alone used. List each deleted test and its replacement in the PR description.
 8. **Re-run the Cypress suite.** ← _the real hazard in this migration._ Page objects are shared across specs, including with the excluded `visual/` specs, so removing helpers can break tests you never touched. **Non-negotiable.**
 
 ```bash
