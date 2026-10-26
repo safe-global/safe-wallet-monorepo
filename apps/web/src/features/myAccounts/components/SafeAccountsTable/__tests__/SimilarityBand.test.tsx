@@ -7,7 +7,7 @@ import { bandHeaderAt, SimilarityWarningIcon } from '../SimilarityBand'
 import type { SimilarWarning } from '@/features/address-poisoning'
 
 jest.mock('@/hooks/useChains')
-const mockUseChain = jest.requireMock('@/hooks/useChains').useChain as jest.Mock
+const mockUseChains = jest.requireMock('@/hooks/useChains').default as jest.Mock
 
 describe('bandHeaderAt', () => {
   const clusters =
@@ -38,17 +38,19 @@ describe('bandHeaderAt', () => {
 
 describe('SimilarityWarningIcon', () => {
   const warning = (over: Partial<SimilarWarning>): SimilarWarning => ({ trusted: [], owned: [], ...over })
+  const peerOf = (address: string, chainIds = ['1']) => ({ address, chainIds })
   const icon = () => screen.getByLabelText('Possible address poisoning')
   const rowAddress = fakerChecksummedAddress()
   const tooltipOf = async (label: string) =>
     (await screen.findByText(label)).closest('[data-slot="tooltip-content"]') as HTMLElement
 
   beforeEach(() => {
-    mockUseChain.mockReset()
+    mockUseChains.mockReset()
+    mockUseChains.mockReturnValue({ configs: [] })
   })
 
   it('lists only the non-empty peer section', async () => {
-    render(<SimilarityWarningIcon address={rowAddress} warning={warning({ owned: ['0xdead'] })} />)
+    render(<SimilarityWarningIcon address={rowAddress} warning={warning({ owned: [peerOf('0xdead')] })} />)
 
     await userEvent.hover(icon())
     expect(await screen.findByText('Similar accounts from owned safes:')).toBeInTheDocument()
@@ -57,7 +59,12 @@ describe('SimilarityWarningIcon', () => {
   })
 
   it('lists both sections when the cluster spans both lists', async () => {
-    render(<SimilarityWarningIcon address={rowAddress} warning={warning({ trusted: ['0xbeef'], owned: ['0xdead'] })} />)
+    render(
+      <SimilarityWarningIcon
+        address={rowAddress}
+        warning={warning({ trusted: [peerOf('0xbeef')], owned: [peerOf('0xdead')] })}
+      />,
+    )
 
     await userEvent.hover(icon())
     expect(await screen.findByText('Similar accounts from trusted safes:')).toBeInTheDocument()
@@ -68,7 +75,7 @@ describe('SimilarityWarningIcon', () => {
     const onRowClick = jest.fn()
     render(
       <div onClick={onRowClick}>
-        <SimilarityWarningIcon address={rowAddress} warning={warning({ owned: ['0xdead'] })} />
+        <SimilarityWarningIcon address={rowAddress} warning={warning({ owned: [peerOf('0xdead')] })} />
       </div>,
     )
 
@@ -78,7 +85,7 @@ describe('SimilarityWarningIcon', () => {
 
   it('bolds the ends each peer shares with the row address', async () => {
     const peer = fakerLookalikeAddress(rowAddress)
-    render(<SimilarityWarningIcon address={rowAddress} warning={warning({ trusted: [peer] })} />)
+    render(<SimilarityWarningIcon address={rowAddress} warning={warning({ trusted: [peerOf(peer)] })} />)
 
     await userEvent.hover(icon())
     const tooltip = await tooltipOf('Similar accounts from trusted safes:')
@@ -90,21 +97,42 @@ describe('SimilarityWarningIcon', () => {
     ])
   })
 
-  it('links each peer to the block explorer of the row chain', async () => {
-    const chain = chainBuilder().build()
-    mockUseChain.mockReturnValue(chain)
+  it("links a peer to the block explorer of the peer's own chain", async () => {
+    const rowChain = chainBuilder().with({ chainId: '1' }).build()
+    const peerChain = chainBuilder().with({ chainId: '137' }).build()
+    mockUseChains.mockReturnValue({ configs: [rowChain, peerChain] })
+    const peer = fakerLookalikeAddress(rowAddress)
+    render(
+      <SimilarityWarningIcon address={rowAddress} warning={warning({ owned: [peerOf(peer, [peerChain.chainId])] })} />,
+    )
+
+    await userEvent.hover(icon())
+    const tooltip = await tooltipOf('Similar accounts from owned safes:')
+
+    expect(tooltip.querySelector('a')).toHaveAttribute('href', getBlockExplorerLink(peerChain, peer)?.href)
+  })
+
+  it('does not link a peer that is listed on several chains', async () => {
+    const chains = [chainBuilder().with({ chainId: '1' }).build(), chainBuilder().with({ chainId: '137' }).build()]
+    mockUseChains.mockReturnValue({ configs: chains })
     const peer = fakerLookalikeAddress(rowAddress)
     render(
       <SimilarityWarningIcon
         address={rowAddress}
-        explorerChainId={chain.chainId}
-        warning={warning({ owned: [peer] })}
+        warning={warning({
+          owned: [
+            peerOf(
+              peer,
+              chains.map((chain) => chain.chainId),
+            ),
+          ],
+        })}
       />,
     )
 
     await userEvent.hover(icon())
     const tooltip = await tooltipOf('Similar accounts from owned safes:')
 
-    expect(tooltip.querySelector('a')).toHaveAttribute('href', getBlockExplorerLink(chain, peer)?.href)
+    expect(tooltip.querySelector('a')).not.toBeInTheDocument()
   })
 })

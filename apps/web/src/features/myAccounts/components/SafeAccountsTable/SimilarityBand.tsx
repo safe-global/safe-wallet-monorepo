@@ -6,22 +6,24 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import PeerAddress from '@/components/common/PeerAddress'
-import { useChain } from '@/hooks/useChains'
-import type { SimilarWarning } from '@/features/address-poisoning'
+import useChains from '@/hooks/useChains'
+import type { SimilarPeer, SimilarWarning } from '@/features/address-poisoning'
 
 /** Inline ⚠️ after a name, listing cross-list look-alike peers in its tooltip (same-list = band only). */
 export const SimilarityWarningIcon = ({
   address,
   warning,
-  explorerChainId,
 }: {
   /** The row's own address — each peer bolds the ends it shares with it. */
   address: string
   warning: SimilarWarning
-  /** Links peers to this chain's explorer; omit for multi-chain rows. */
-  explorerChainId?: string
 }) => {
-  const chain = useChain(explorerChainId ?? '')
+  const { configs } = useChains()
+  // A peer on several chains has no single explorer to link to.
+  const explorerLinkOf = ({ address: peer, chainIds }: SimilarPeer) => {
+    const chain = chainIds.length === 1 ? configs.find((config) => config.chainId === chainIds[0]) : undefined
+    return chain ? getBlockExplorerLink(chain, peer) : undefined
+  }
   const sections = (
     [
       ['Similar accounts from trusted safes:', warning.trusted],
@@ -46,10 +48,10 @@ export const SimilarityWarningIcon = ({
               <div className="font-semibold">{label}</div>
               {peers.map((peer) => (
                 <PeerAddress
-                  key={peer}
-                  address={peer}
-                  {...getCommonAffixLengths(peer, address)}
-                  explorerLink={chain ? getBlockExplorerLink(chain, peer) : undefined}
+                  key={peer.address}
+                  address={peer.address}
+                  {...getCommonAffixLengths(peer.address, address)}
+                  explorerLink={explorerLinkOf(peer)}
                 />
               ))}
             </div>

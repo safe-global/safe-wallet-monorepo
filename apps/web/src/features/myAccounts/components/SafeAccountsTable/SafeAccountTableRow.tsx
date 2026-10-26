@@ -104,15 +104,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={canRename ? onRename : undefined}
-      nameAdornment={
-        warning ? (
-          <SimilarityWarningIcon
-            address={line.address}
-            warning={warning}
-            explorerChainId={line.variant !== 'group' ? line.chainId : undefined}
-          />
-        ) : undefined
-      }
+      nameAdornment={warning ? <SimilarityWarningIcon address={line.address} warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
       nameLink={nameLink}

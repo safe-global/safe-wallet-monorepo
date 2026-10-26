@@ -9,4 +9,9 @@ export { default as useAddressPoisoningBatchCheck } from './hooks/useAddressPois
 export { default as useAnchorListMatches } from './hooks/useAnchorListMatches'
 export { default as useSimilarityClusters } from './hooks/useSimilarityClusters'
 
-export { bandGroupsForList, buildSimilarWarnings, type SimilarWarning } from './utils/crossListClusters'
+export {
+  bandGroupsForList,
+  buildSimilarWarnings,
+  type SimilarPeer,
+  type SimilarWarning,
+} from './utils/crossListClusters'
