@@ -113,6 +113,11 @@ def read_json(url, payload=None):
         return json.load(response)
 
 
+def read_content_type(url):
+    with urllib.request.urlopen(url, timeout=5) as response:
+        return response.headers.get_content_type()
+
+
 def public_config(config):
     services = config["services"]
     rpc = services["fork-rpc"]["environment"]
@@ -244,6 +249,20 @@ def check_gateway_chain(gateway_url, chain_id):
     chain_config = read_json(f"{gateway_url}/v1/chains/{chain_id}")
     if str(chain_config["chainId"]) != str(chain_id):
         raise RuntimeError("CGW returned a different chain")
+    check_chain_logo(gateway_url, chain_config["chainLogoUri"])
+
+
+# A broken media volume, nginx alias or MEDIA_URL breaks every logo the config service generated.
+def check_chain_logo(gateway_url, logo_url):
+    stack = urllib.parse.urlsplit(gateway_url)
+    logo = urllib.parse.urlsplit(logo_url)
+    if (logo.scheme, logo.netloc) != (stack.scheme, stack.netloc):
+        raise RuntimeError(
+            f"Chain logo {logo_url} is not served by the stack at {stack.netloc}; check MEDIA_URL"
+        )
+    content_type = read_content_type(logo_url)
+    if not content_type.startswith("image/"):
+        raise RuntimeError(f"Chain logo {logo_url} returned {content_type}, not an image")
 
 
 def check_stack(manifest):

@@ -36,7 +36,7 @@ export async function prepareSharingScenario(env, owners) {
           SEP_STATIC_SAFE_31: `sep:${context.safeAddress}`,
         },
       },
-      fixtures: { 'sharing.tx1': queued[0].id, 'sharing.tx3': queued[1].id, 'sharing.tx4': executed.id },
+      fixtures: { 'sharing.tx1': queued[0].id, 'sharing.tx3': queued[1].id },
     }
   } finally {
     context.provider.destroy()

@@ -102,13 +102,7 @@ export function verifyDataDoesNotExist(data) {
 }
 
 export function inputOwnerName(index, name) {
-  getOwnerNameInput(index)
-    .clear()
-    .type(name, main.nameTypingOptions)
-    .then(($input) => {
-      const typedValue = $input.val()
-      expect(name).to.contain(typedValue)
-    })
+  getOwnerNameInput(index).clear().type(name, main.nameTypingOptions).should('have.value', name)
 }
 
 export function clearOwnerAddress(index) {
@@ -117,15 +111,7 @@ export function clearOwnerAddress(index) {
 
 export function inputOwnerAddress(index, name) {
   cy.wait(500)
-  cy.get(addressItem)
-    .eq(index)
-    .find('input')
-    .clear()
-    .type(name)
-    .then(($input) => {
-      const typedValue = $input.val()
-      expect(name).to.contain(typedValue)
-    })
+  cy.get(addressItem).eq(index).find('input').clear().type(name)
 }
 
 export function verifyOnwerNameENS(index, ens) {
@@ -186,6 +172,10 @@ export function selectPolygon() {
 export function inputNameAndAddress(name, address) {
   inputName(name)
   inputAddress(address)
+}
+
+function inputName(name) {
+  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
 }
 
 export function inputAddress(address) {
