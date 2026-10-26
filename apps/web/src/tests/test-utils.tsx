@@ -1,5 +1,5 @@
 import type { RenderHookOptions } from '@testing-library/react'
-import { render, renderHook } from '@testing-library/react'
+import { render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
@@ -142,6 +142,21 @@ export const mockWeb3Provider = (
   jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValue(web3Provider)
   return web3Provider
 }
+
+/**
+ * Return the value cell of the transaction details row with this title (a `FieldsGrid` or `DataRow`)
+ */
+export const getFieldValue = (container: HTMLElement, title: string): HTMLElement => {
+  const titleCell = within(container)
+    .getAllByTestId('tx-row-title')
+    .find((cell) => cell.textContent === title)
+  const valueCell = titleCell?.nextElementSibling
+  if (!(valueCell instanceof HTMLElement)) {
+    throw new Error(`No transaction details row titled "${title}"`)
+  }
+  return valueCell
+}
+
 // re-export everything
 export * from '@testing-library/react'
 

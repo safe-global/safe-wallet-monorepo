@@ -5,7 +5,6 @@ import * as cow from './cow.mjs'
 import * as dashboard from './dashboard.mjs'
 import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as history from './history.mjs'
-import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
@@ -22,7 +21,6 @@ const modules = [
   dashboard,
   fallbackHandlers,
   history,
-  historySummary,
   ledger,
   proposers,
   recovery,
