@@ -21,7 +21,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacePoliciesGetPendingPoliciesV1Query } from '@/store/api/gateway/spacePolicies'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
-import { ALLOWLIST_POLICY_TYPES, PENDING_POLICY_TYPES } from '../hooks/useSpacePolicies'
+import { PENDING_POLICY_TYPES } from '../hooks/useSpacePolicies'
 
 /**
  * The configurations CGW stored for a requested root. `requestConfiguration` publishes only the root, and the
@@ -37,7 +37,7 @@ const useRequestedConfigurations = (
   const { currentData } = useSpacePoliciesGetPendingPoliciesV1Query(
     {
       spaceId: spaceId ?? '',
-      types: [...PENDING_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES],
+      types: PENDING_POLICY_TYPES,
       safes: [`${chainId}:${safeAddress}`],
     },
     { skip: !root || !isUserSignedIn || !spaceId },

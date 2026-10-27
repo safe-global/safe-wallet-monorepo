@@ -46,7 +46,7 @@ export const ALLOWLIST_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['typ
 
 /**
  * Proposer grants take effect off chain at once, so only spending limits and guard policies can be pending.
- * Every other guard type is asked for, so a change the table has no row type for still shows its progress.
+ * Every guard type is asked for, allowlists too: a pending change is on chain and owners must be able to finish it.
  */
 export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = [
   'spending-limit',
@@ -54,6 +54,7 @@ export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['type
   'allow',
   'deny',
   'cosigner',
+  ...ALLOWLIST_POLICY_TYPES,
 ]
 
 type PendingDto = SpacePoliciesGetPendingPoliciesV1ApiResponse[number]
@@ -121,7 +122,6 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const isWaitingForGate = !skip && isAllowlistActive === undefined
   const { configs: chains } = useChains()
   const types = isAllowlistActive ? [...TABLE_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : TABLE_POLICY_TYPES
-  const pendingTypes = isAllowlistActive ? [...PENDING_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : PENDING_POLICY_TYPES
 
   const active = useSpacePoliciesGetActivePoliciesV1Query(
     { spaceId: spaceId ?? '', types },
@@ -130,9 +130,9 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
-    { spaceId: spaceId ?? '', types: pendingTypes },
+    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },
     {
-      skip: skip || isWaitingForGate,
+      skip,
       ...SPACE_REFRESH_OPTIONS,
       pollingInterval: hasExecutable ? POLLING_INTERVAL : 0,
       skipPollingIfUnfocused: true,
@@ -172,12 +172,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     () => mapPendingPolicies(pendingDtos.filter(isQueuedSpendingLimit), activeRows),
     [pendingDtos, activeRows],
   )
-  const guardChangeRows = useMemo(() => {
-    const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
-    return mapPendingGuardChanges(pendingDtos).filter(
-      (row) => row.data.policyType !== 'allowlist' || allowlistChainIds.has(row.safe.chainId),
-    )
-  }, [pendingDtos, chains])
+  const guardChangeRows = useMemo(() => mapPendingGuardChanges(pendingDtos), [pendingDtos])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
     resetKey: spaceId,

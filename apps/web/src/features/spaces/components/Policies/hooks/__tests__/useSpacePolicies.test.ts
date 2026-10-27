@@ -380,6 +380,37 @@ describe('useSpacePolicies', () => {
     expect(result.current.policies.map((policy) => policy.type)).toEqual(['spending-limit', 'policy-change'])
   })
 
+  it('should, when allowlists are off in the workspace, still ask for pending allowlist changes', () => {
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenCalledWith(
+      { spaceId: SPACE_ID, types: expect.arrayContaining(ALLOWLIST_POLICY_TYPES) },
+      expect.objectContaining({ skip: false }),
+    )
+  })
+
+  it('should, while it is not yet known whether allowlists are on, already ask for the pending changes', () => {
+    mockUseIsAllowlistActiveInSpace.mockReturnValue(undefined)
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: false }))
+  })
+
+  it('should list a pending allowlist change on a chain without the allowlist feature', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockDelayedGuardDto()] })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.policies).toEqual([
+      expect.objectContaining({
+        type: 'policy-change',
+        safe: MOCK_SAFES.grants,
+        data: expect.objectContaining({ policyType: 'allowlist' }),
+      }),
+    ])
+  })
+
   it('should, while a guard change has a fully signed transaction queued, poll for it leaving the queue', () => {
     mockPendingQuery.mockReturnValue({
       ...idle,
