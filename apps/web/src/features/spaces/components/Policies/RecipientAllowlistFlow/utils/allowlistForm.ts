@@ -32,8 +32,10 @@ export const getSelectedRecipients = (values: RecipientAllowlistFormValues): All
   values.recipients.filter((recipient) => recipient.selected)
 
 export const getUniqueSelectedRecipients = (values: RecipientAllowlistFormValues): AllowlistFormRecipient[] => {
-  const unique = new Map(getSelectedRecipients(values).map((recipient) => [recipient.address.toLowerCase(), recipient]))
-  return [...unique.values()]
+  const selected = getSelectedRecipients(values)
+  return selected.filter(
+    ({ address }, index) => selected.findIndex((other) => sameAddress(other.address, address)) === index,
+  )
 }
 
 export const isAllowlistComplete = (heldTokens: readonly string[], values: RecipientAllowlistFormValues): boolean =>
