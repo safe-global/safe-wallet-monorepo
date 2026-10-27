@@ -8,10 +8,10 @@
 import { readFileSync } from 'node:fs'
 import { AbiCoder, Interface, getAddress, keccak256 } from 'ethers'
 import { registerGuardPolicies } from '../../environment/scenarios/policy-indexer.mjs'
-import { executeTransaction } from '../../environment/scenarios/safe.mjs'
+import { executeTransaction, openSafe } from '../../environment/scenarios/safe.mjs'
 import { readChain } from '../chain/local-provider'
 import { CHAIN_IDS } from '../data/constants'
-import type { JourneyEnvironment } from '../fixtures/journey.fixture'
+import type { Journey, JourneyEnvironment, OwnerName } from '../fixtures/journey.fixture'
 import type { SeededSafe } from './safe'
 
 type ContractName = 'SafePolicyGuard' | 'ERC20TransferPolicy' | 'ERC20ApprovePolicy'
@@ -79,11 +79,17 @@ export async function installPolicyEngine(env: JourneyEnvironment): Promise<void
 
 /**
  * Sets up the allowlist as the wallet's first setup does, in one Safe transaction: `configureImmediately`, then both
- * guard slots. Executes as the Safe's context signer and registers the binding in the indexer.
+ * guard slots. `cosigners` sign first, as a Safe with a threshold above 1 needs; the Safe's context signer signs last
+ * and executes. Registers the binding in the indexer.
  */
-export async function seedAllowlist(safe: SeededSafe, allowlist: TokenAllowlist): Promise<void> {
+export async function seedAllowlist(
+  journey: Journey,
+  safe: SeededSafe,
+  allowlist: TokenAllowlist,
+  { cosigners = [] }: { cosigners?: OwnerName[] } = {},
+): Promise<void> {
   const { context } = safe
-  const setup = await context.safe.createTransaction({
+  let setup = await context.safe.createTransaction({
     transactions: [
       {
         to: POLICY_GUARD,
@@ -95,6 +101,10 @@ export async function seedAllowlist(safe: SeededSafe, allowlist: TokenAllowlist)
     ],
     onlyCalls: true,
   })
+  for (const cosigner of cosigners) {
+    const { safe: signer } = await openSafe(journey.env, journey.owners[cosigner], safe.address)
+    setup = await signer.signTransaction(setup)
+  }
   await readChain(context.env, (provider) => executeTransaction({ ...context, provider }, setup))
   await registerAllowlist(safe, { allowlist })
 }
