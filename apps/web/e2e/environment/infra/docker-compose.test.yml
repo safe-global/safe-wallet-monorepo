@@ -292,7 +292,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # The gateway reads Workspace spending limits from a policy indexer; this one has no indexed state.
+  # The gateway reads Workspace spending limits and guard policies from a policy indexer. This one has no spending
+  # limits; journeys register a Safe's guard policy bindings and configuration roots in it.
   policy-indexer:
     <<: *mock
     command:
@@ -515,6 +516,8 @@ services:
       TEST_CHAIN_NAME: Sepolia
       TEST_CHAIN_SHORT_NAME: sep
       TEST_TXS_URL: http://nginx:8000/txs/
+      # The recipient allowlist is offered only to a Workspace that opts into it, so other specs keep their UI.
+      TEST_CHAIN_EXTRA_FEATURES: POLICY_RECIPIENT_ALLOWLIST,WORKSPACES_EXPERIMENTAL_FEATURES
     depends_on:
       postgres:
         condition: service_healthy
@@ -655,6 +658,9 @@ services:
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
       POLICY_INDEXER_BASE_URI: http://policy-indexer:8094
+      # Journeys register indexer state after the transaction executes, so a cached answer from before must not stay.
+      POLICY_INDEXER_EXPIRE_TIME_SECONDS: '2'
+      FF_GUARD_POLICIES: 'true'
       # The portfolio, the positions and the Safe overviews come from Zerion, as on staging. Testnets keep the
       # Transaction Service. Without a rate limit, a fast run does not push the overviews onto their fallback.
       FF_ZERION_ENABLED: 'true'
