@@ -429,6 +429,8 @@ const getApplyDescription = (
   }
 }
 
+const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this allowlist.'
+
 type PanelState =
   | { kind: 'live'; action: 'manage' | 'connect' | 'not-signer' }
   | { kind: 'change-pending' }
