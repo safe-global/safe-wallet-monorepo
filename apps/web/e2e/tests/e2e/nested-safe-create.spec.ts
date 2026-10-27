@@ -41,6 +41,10 @@ test.describe('Create a nested Safe', { tag: '@e2e' }, () => {
 
     await home.goto(parent.prefixedAddress)
     await nestedSafes.curateOnly(name)
+    await safePage.reload()
+    await nestedSafes.openButton.click()
+    await expect(nestedSafes.manageButton).toBeVisible()
+    await expect(nestedSafes.rows).toHaveCount(1)
     await nestedSafes.openSafeLink(name).click()
     await expect(safePage).toHaveURL((url) => openedSafe(url) === `sep:${nested}`)
 
@@ -57,7 +61,12 @@ test.describe('Create a nested Safe', { tag: '@e2e' }, () => {
 
     await new HomePage(safePage).goto(parent.prefixedAddress)
     await new NestedSafesPage(safePage).create('Funded', { fund: '0.01' })
-    await new TxReviewPage(safePage).signAndExecute()
+    const review = new TxReviewPage(safePage)
+    await expect(review.multiSendAction(1)).toContainText('SafeProxyFactory')
+    await expect(review.multiSendAction(2)).toContainText(/Send.*0\.01 ETH/)
+    await expect(review.multiSendAction(3)).toHaveCount(0)
+    await expect(review.transactionDetails).toContainText('multiSend')
+    await review.signAndExecute()
 
     const nested = await findDeployedNestedSafe(safeApiClient, journey, parent)
     const onChain = await readSafeSetup(journey.env, nested)

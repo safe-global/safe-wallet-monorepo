@@ -15,6 +15,8 @@ export class NestedSafesPage {
   readonly list: Locator
   readonly reviewButton: Locator
   readonly saveButton: Locator
+  /** Shown instead of the intro once the owner has curated the nested Safes */
+  readonly manageButton: Locator
   readonly rows: Locator
   readonly parentSafeLink: Locator
 
@@ -28,6 +30,7 @@ export class NestedSafesPage {
     this.list = page.getByTestId('nested-safe-list')
     this.reviewButton = page.getByTestId('review-nested-safes-button')
     this.saveButton = page.getByTestId('save-manage-nested-safes')
+    this.manageButton = page.getByTestId('manage-nested-safes-button')
     this.rows = page.getByTestId('safe-list-item')
     this.parentSafeLink = page.getByLabel('Parent Safe').getByRole('link')
   }
