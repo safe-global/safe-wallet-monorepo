@@ -1,9 +1,8 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
 import {
-  mockActivatingAllowlist,
   mockActiveAllowlist,
-  mockAllowlistChangePending,
+  mockAllowlistPolicy,
   mockExpiredPendingAllowlist,
   mockExpiredRequestAllowlist,
   mockFailedAllowlist,
@@ -14,6 +13,8 @@ import {
   mockUnenforcedAllowlist,
 } from '../../mocks/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+import type { AllowlistScheduledChange } from '@safe-global/views/features/spaces/components/Policies/types'
+import { asActivePolicy } from '../../mocks/policies'
 import type { AllowlistDrawerPolicy } from '../resolveState'
 import AllowlistDrawer from '../AllowlistDrawer'
 
@@ -22,6 +23,9 @@ jest.mock('@/components/common/ChainIndicator', () => {
   Mock.displayName = 'ChainIndicator'
   return { __esModule: true, default: Mock }
 })
+
+const mockAllowlistPolicyWithChange = (scheduledChange: AllowlistScheduledChange) =>
+  asActivePolicy(mockAllowlistPolicy({ scheduledChange }))
 
 const SHARED = {
   open: true,
@@ -247,89 +251,163 @@ describe('AllowlistDrawer', () => {
     expect(screen.getAllByText('Removed')).toHaveLength(2)
   })
 
-  it('says a new allowlist can only be applied after the delay, with the apply button disabled', () => {
-    render(<AllowlistDrawer {...SHARED} policy={mockActivatingAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+  describe('after the request executed', () => {
+    const NOW = Date.UTC(2026, 9, 27, 12)
+    const HOUR = 3_600
+    const at = (hoursFromNow: number) => NOW / 1_000 + hoursFromNow * HOUR
+    const change = (operation: 'create' | 'update', appliesIn: number, expiresIn: number) =>
+      mockAllowlistPolicyWithChange({
+        operation,
+        appliesAt: at(appliesIn),
+        expiresAt: at(expiresIn),
+        requestedAt: at(appliesIn - 24),
+      })
 
-    expect(screen.getByText('The allowlist can only be applied in 24 hours.')).toBeInTheDocument()
-    expect(screen.getByText(/^Come back after the wait to apply it with a second transaction\./)).toBeInTheDocument()
-    expect(screen.getByTestId('scheduled-applies-at')).toHaveTextContent(/^Applies in 24h · /)
-    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
-    expect(screen.getByRole('button', { name: /^Apply in \d+h \d+m$/ })).toBeDisabled()
-    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
-  })
+    beforeEach(() => {
+      jest.spyOn(Date, 'now').mockReturnValue(NOW)
+    })
 
-  it('lets a signer start the apply transaction once the delay is over', async () => {
-    jest.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 9, 27, 12))
-    const onApply = jest.fn()
-    const { user } = renderWithUserEvent(
-      <AllowlistDrawer
-        {...SHARED}
-        policy={mockReadyToApplyAllowlist()}
-        viewer={MOCK_VIEWERS.signer}
-        onApply={onApply}
-      />,
-    )
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
 
-    expect(screen.getByText('The 24-hour wait is over. Apply the allowlist to turn it on.')).toBeInTheDocument()
-    expect(screen.getByTestId('ready-apply-by')).toHaveTextContent(/^6 days left · apply by /)
-    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+    it('counts down the waiting period, with the apply button disabled', () => {
+      render(<AllowlistDrawer {...SHARED} policy={change('update', 24 - 1 / 60, 192)} viewer={MOCK_VIEWERS.signer} />)
 
-    expect(onApply).toHaveBeenCalledTimes(1)
-    jest.restoreAllMocks()
-  })
+      expect(screen.getByText('Your changes can be applied in 24 hours')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'From Oct 28, 2026 · 11:59 UTC, a second transaction will need to be executed to apply them. Until then, the current rules apply.',
+        ),
+      ).toBeInTheDocument()
+      expect(screen.getByText('Waiting period')).toBeInTheDocument()
+      expect(screen.getByText('23h 59m left')).toBeInTheDocument()
+      expect(screen.getByText('Requested')).toBeInTheDocument()
+      expect(screen.getByText('Oct 27, 2026 · 11:59 UTC')).toBeInTheDocument()
+      expect(screen.getByText('Can be applied from')).toBeInTheDocument()
+      expect(screen.getByText('Apply by')).toBeInTheDocument()
+      expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+      expect(screen.getByRole('button', { name: 'Apply in 23h 59m' })).toBeDisabled()
+      expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+    })
 
-  it('keeps apply disabled for a wallet that is not a signer', () => {
-    render(
-      <AllowlistDrawer
-        {...SHARED}
-        policy={mockReadyToApplyAllowlist()}
-        viewer={MOCK_VIEWERS.nonSigner}
-        onApply={jest.fn()}
-      />,
-    )
+    it('words the waiting period for a first allowlist', () => {
+      render(<AllowlistDrawer {...SHARED} policy={change('create', 5, 173)} viewer={MOCK_VIEWERS.signer} />)
 
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
-    expect(screen.getByText('Only signers of this Safe account can apply this allowlist.')).toBeInTheDocument()
-  })
+      expect(screen.getByText('Your allowlist can be applied in 5 hours')).toBeInTheDocument()
+      expect(screen.getByText(/Until then, transactions aren't checked against it\.$/)).toBeInTheDocument()
+    })
 
-  it('reports a request that was never applied in time as expired and failed', () => {
-    render(<AllowlistDrawer {...SHARED} policy={mockExpiredRequestAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+    it('hides the policy overview and the existing policies while the request waits', () => {
+      render(
+        <AllowlistDrawer
+          {...SHARED}
+          policy={change('update', 5, 173)}
+          viewer={MOCK_VIEWERS.signer}
+          uncoveredSpendingLimitCount={2}
+        />,
+      )
 
-    expect(screen.getByText('This request expired. The allowlist was never applied.')).toBeInTheDocument()
-    expect(screen.getByTestId('policy-status-failed')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Apply|Review transaction/ })).not.toBeInTheDocument()
-  })
+      expect(screen.queryByText('Policy overview')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('allowlist-uncovered-spending-limits')).not.toBeInTheDocument()
+      expect(screen.getByText('Safe account')).toBeInTheDocument()
+    })
 
-  it('lets a signer cancel a change that waits out the delay', async () => {
-    const onCancelChange = jest.fn()
-    const { user } = renderWithUserEvent(
-      <AllowlistDrawer
-        {...SHARED}
-        policy={mockAllowlistChangePending()}
-        viewer={MOCK_VIEWERS.signer}
-        onCancelChange={onCancelChange}
-      />,
-    )
+    it("names the Safe's signatures and the deadline once the delay is over, and lets a signer apply", async () => {
+      const onApply = jest.fn()
+      const { user } = renderWithUserEvent(
+        <AllowlistDrawer
+          {...SHARED}
+          policy={change('update', -1, 167)}
+          viewer={MOCK_VIEWERS.signer}
+          signatures={{ threshold: 2, owners: 3 }}
+          onApply={onApply}
+        />,
+      )
 
-    expect(screen.getByText('Any signer can cancel it before then.')).toBeInTheDocument()
+      expect(screen.getByText('Your changes are ready to apply')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'They take effect once a second transaction is executed. It needs 2 of 3 signatures and must be executed by Nov 3, 2026 · 11:00 UTC.',
+        ),
+      ).toBeInTheDocument()
+      expect(screen.getByText('Apply window')).toBeInTheDocument()
+      expect(screen.getByText('6 days left')).toBeInTheDocument()
+      expect(screen.getByText('Ready since')).toBeInTheDocument()
+      expect(screen.getByText('Any signer can start this transaction.')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Cancel change' }))
+      await user.click(screen.getByRole('button', { name: 'Review transaction' }))
 
-    expect(onCancelChange).toHaveBeenCalledTimes(1)
-  })
+      expect(onApply).toHaveBeenCalledTimes(1)
+    })
 
-  it('disables Cancel change for a wallet that is not a signer', () => {
-    render(
-      <AllowlistDrawer
-        {...SHARED}
-        policy={mockAllowlistChangePending()}
-        viewer={MOCK_VIEWERS.nonSigner}
-        onCancelChange={jest.fn()}
-      />,
-    )
+    it("falls back to the Safe account's signatures until its setup has loaded", () => {
+      render(<AllowlistDrawer {...SHARED} policy={change('create', -1, 167)} viewer={MOCK_VIEWERS.signer} />)
 
-    expect(screen.getByRole('button', { name: 'Cancel change' })).toBeDisabled()
-    expect(screen.getByText('Only signers of this Safe account can cancel this change.')).toBeInTheDocument()
+      expect(screen.getByText('Your allowlist is ready to apply')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          /^It takes effect once a second transaction is executed\. It needs the Safe account's signatures/,
+        ),
+      ).toBeInTheDocument()
+    })
+
+    it('keeps apply disabled for a wallet that is not a signer', () => {
+      render(
+        <AllowlistDrawer
+          {...SHARED}
+          policy={mockReadyToApplyAllowlist()}
+          viewer={MOCK_VIEWERS.nonSigner}
+          onApply={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+      expect(screen.getByText('Only signers of this Safe account can apply this allowlist.')).toBeInTheDocument()
+    })
+
+    it('reports an expired request in red with an Expired chip, and offers to discard it', async () => {
+      const onDiscard = jest.fn()
+      const { user } = renderWithUserEvent(
+        <AllowlistDrawer
+          {...SHARED}
+          policy={change('update', -200, -24)}
+          viewer={MOCK_VIEWERS.signer}
+          onDiscard={onDiscard}
+        />,
+      )
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Your changes expired')
+      expect(
+        screen.getByText(
+          "They weren't applied by Oct 26, 2026 · 12:00 UTC, so they can't take effect anymore. The current rules stay in place.",
+        ),
+      ).toBeInTheDocument()
+      expect(screen.getByText('Request')).toBeInTheDocument()
+      expect(screen.getAllByText('Expired')).toHaveLength(2)
+      expect(screen.getByTestId('policy-status-expired')).toHaveTextContent('Expired')
+      expect(screen.getByText('To make these changes, edit the allowlist again.')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Apply|Review transaction/ })).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Discard' }))
+
+      expect(onDiscard).toHaveBeenCalledTimes(1)
+    })
+
+    it('disables Discard until a discard flow is passed in', () => {
+      render(<AllowlistDrawer {...SHARED} policy={mockExpiredRequestAllowlist()} viewer={MOCK_VIEWERS.signer} />)
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Your allowlist expired')
+      expect(screen.getByRole('button', { name: 'Discard' })).toBeDisabled()
+    })
+
+    it('leaves the Requested row out when the request time is unknown', () => {
+      const policy = mockAllowlistPolicyWithChange({ operation: 'update', appliesAt: at(5), expiresAt: at(173) })
+      render(<AllowlistDrawer {...SHARED} policy={policy} viewer={MOCK_VIEWERS.signer} />)
+
+      expect(screen.queryByText('Requested')).not.toBeInTheDocument()
+      expect(screen.getByText('Can be applied from')).toBeInTheDocument()
+    })
   })
 
   it('says how long is left to sign a pending transaction', () => {

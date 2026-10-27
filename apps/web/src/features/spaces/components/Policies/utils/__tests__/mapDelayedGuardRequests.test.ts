@@ -52,7 +52,12 @@ describe('mapDelayedGuardRequest', () => {
 
     expect(policy).toMatchObject({
       status: 'active',
-      scheduledChange: { operation: 'create', appliesAt: 1_800_000_000, expiresAt: 1_800_604_800 },
+      scheduledChange: {
+        operation: 'create',
+        appliesAt: 1_800_000_000,
+        expiresAt: 1_800_604_800,
+        requestedAt: 1_799_900_000,
+      },
     })
   })
 

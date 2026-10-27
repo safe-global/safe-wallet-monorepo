@@ -126,27 +126,48 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
-  it('should offer a disabled apply while a new allowlist waits out the delay', () => {
-    expect(resolveAllowlistDrawerState(mockActivatingAllowlist(), MOCK_VIEWERS.signer, 'Treasury')).toEqual({
+  it.each([
+    ['a new allowlist', mockActivatingAllowlist(), 'create'],
+    ['an edit', mockAllowlistChangePending(), 'update'],
+  ] as const)('should offer a disabled apply while %s waits out the delay', (_, policy, operation) => {
+    expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Treasury')).toEqual({
       kind: 'scheduled',
-      operation: 'create',
+      operation,
       action: 'apply-later',
       disabled: true,
-      bannerTitle: 'The allowlist can only be applied in 24 hours.',
-      bannerLine2:
-        "Come back after the wait to apply it with a second transaction. Until then, transactions aren't checked against it.",
     })
   })
 
   it.each([
-    ['signer', MOCK_VIEWERS.signer, { action: 'apply', disabled: false }],
-    ['viewer without a wallet', MOCK_VIEWERS.disconnected, { action: 'connect', disabled: false }],
-    ['wallet that is not a signer', MOCK_VIEWERS.nonSigner, { action: 'apply', disabled: true }],
+    ['viewer without a wallet', MOCK_VIEWERS.disconnected],
+    ['wallet that is not a signer', MOCK_VIEWERS.nonSigner],
+  ])('should keep apply disabled for a %s while the delay runs', (_, viewer) => {
+    expect(resolveAllowlistDrawerState(mockAllowlistChangePending(), viewer, 'Treasury')).toMatchObject({
+      action: 'apply-later',
+      disabled: true,
+    })
+  })
+
+  it.each([
+    [
+      'signer',
+      MOCK_VIEWERS.signer,
+      { action: 'apply', disabled: false, helper: 'Any signer can start this transaction.' },
+    ],
+    [
+      'viewer without a wallet',
+      MOCK_VIEWERS.disconnected,
+      { action: 'connect', disabled: false, helper: 'Connect a signer wallet to apply the allowlist.' },
+    ],
+    [
+      'wallet that is not a signer',
+      MOCK_VIEWERS.nonSigner,
+      { action: 'apply', disabled: true, helper: 'Only signers of this Safe account can apply this allowlist.' },
+    ],
   ] as const)('should, for a %s, resolve a request whose delay is over', (_, viewer, expected) => {
-    expect(resolveAllowlistDrawerState(mockReadyToApplyAllowlist(), viewer, 'Treasury')).toMatchObject({
+    expect(resolveAllowlistDrawerState(mockReadyToApplyAllowlist(), viewer, 'Treasury')).toEqual({
       kind: 'ready-to-apply',
       operation: 'create',
-      bannerTitle: 'The 24-hour wait is over. Apply the allowlist to turn it on.',
       ...expected,
     })
   })
@@ -161,15 +182,13 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
-  it('should report a request whose apply window closed as expired, with no action', () => {
-    expect(resolveAllowlistDrawerState(mockExpiredRequestAllowlist(), MOCK_VIEWERS.signer, 'Treasury')).toEqual({
-      kind: 'expired-request',
-      operation: 'create',
-      action: 'none',
-      bannerTitle: 'This request expired. The allowlist was never applied.',
-      bannerLine2:
-        "It wasn't applied within 7 days after the wait ended, so it can no longer be used. Add the allowlist again to retry.",
-    })
+  it.each([
+    ['create', 'To use an allowlist, set it up again.'],
+    ['update', 'To make these changes, edit the allowlist again.'],
+  ] as const)('should offer to discard a %s request whose apply window closed', (operation, helper) => {
+    expect(
+      resolveAllowlistDrawerState(mockExpiredRequestAllowlist(operation), MOCK_VIEWERS.signer, 'Treasury'),
+    ).toEqual({ kind: 'expired-request', operation, action: 'discard', helper })
   })
 
   it('should resolve the waiting state against the time passed in', () => {
@@ -178,18 +197,6 @@ describe('resolveAllowlistDrawerState', () => {
 
     expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Treasury', undefined, afterDelay)).toMatchObject({
       kind: 'ready-to-apply',
-    })
-  })
-
-  it.each([
-    ['signer', MOCK_VIEWERS.signer, { action: 'cancel', disabled: false }],
-    ['viewer without a wallet', MOCK_VIEWERS.disconnected, { action: 'connect', disabled: false }],
-    ['wallet that is not a signer', MOCK_VIEWERS.nonSigner, { action: 'cancel', disabled: true }],
-  ] as const)('should, for a %s, resolve the change waiting out the delay', (_, viewer, expected) => {
-    expect(resolveAllowlistDrawerState(mockAllowlistChangePending(), viewer, 'Treasury')).toMatchObject({
-      kind: 'scheduled',
-      operation: 'update',
-      ...expected,
     })
   })
 

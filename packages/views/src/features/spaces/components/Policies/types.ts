@@ -116,6 +116,8 @@ export type AllowlistScheduledChange = {
   appliesAt: number
   /** Unix SECONDS the apply window closes (CGW `expiresAt`); unset when unknown. */
   expiresAt?: number
+  /** Unix SECONDS the wallet first stored the change (CGW `createdAt`); unset for a root requested elsewhere. */
+  requestedAt?: number
 }
 
 type PolicyBase = {
@@ -178,7 +180,7 @@ export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending'
 export type FailedAllowlistPolicy = PendingAllowlistPolicy & { status: 'failed' }
 
 export type PolicyStatus =
-  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending'
+  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending' | 'expired'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy

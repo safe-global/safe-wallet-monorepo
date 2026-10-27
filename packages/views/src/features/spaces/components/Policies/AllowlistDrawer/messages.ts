@@ -38,21 +38,6 @@ export const ACTIVATED_BANNER_TITLE = 'Your allowlist is now active'
 export const activatedBannerLine = (safeName: string, recipientCount: number): string =>
   `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take 24 hours to apply.`
 
-export const SCHEDULED_BANNER_TITLE: Record<'create' | 'update', string> = {
-  create: 'The allowlist can only be applied in 24 hours.',
-  update: 'Change pending',
-}
-
-export const SCHEDULED_BANNER_LINE: Record<'create' | 'update', string> = {
-  create:
-    "Come back after the wait to apply it with a second transaction. Until then, transactions aren't checked against it.",
-  update: 'Any signer can cancel it before then.',
-}
-
-export const CANCEL_CONNECT_HELPER = 'Connect a signer wallet to cancel the change.'
-
-export const CANCEL_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can cancel this change.'
-
 export const UNENFORCED_BANNER_TITLE = 'Safe policy guard removed'
 
 export const UNENFORCED_BANNER_LINE = 'Allowlist not applied as the guard is removed.'
@@ -61,25 +46,96 @@ export const NOT_COVERED_BADGE = 'Not covered'
 
 export const NOT_COVERED_LINE = 'They can still send any token to any address. Edit the allowlist to include them.'
 
-export const READY_BANNER_TITLE: Record<'create' | 'update', string> = {
-  create: 'The 24-hour wait is over. Apply the allowlist to turn it on.',
-  update: 'The 24-hour wait is over. Apply the change to use the new rules.',
+/** A delayed request after `requestConfiguration` executed: waiting out the delay, in its apply window, or past it. */
+export type ApplyStage = 'waiting' | 'ready' | 'expired'
+
+type ApplyOperation = 'create' | 'update'
+
+export const APPLY_SECTION_TITLE: Record<ApplyStage, string> = {
+  waiting: 'Waiting period',
+  ready: 'Apply window',
+  expired: 'Request',
 }
 
-export const READY_BANNER_LINE = "Applying is a second transaction that needs the Safe account's signatures."
-
-export const EXPIRED_BANNER_TITLE: Record<'create' | 'update', string> = {
-  create: 'This request expired. The allowlist was never applied.',
-  update: 'This request expired. The change was never applied.',
+export const APPLY_READY_LABEL: Record<ApplyStage, string> = {
+  waiting: 'Can be applied from',
+  ready: 'Ready since',
+  expired: 'Ready since',
 }
 
-export const EXPIRED_BANNER_LINE: Record<'create' | 'update', string> = {
-  create:
-    "It wasn't applied within 7 days after the wait ended, so it can no longer be used. Add the allowlist again to retry.",
-  update:
-    "It wasn't applied within 7 days after the wait ended, so it can no longer be used. Edit the allowlist again to retry.",
+export const APPLY_END_LABEL: Record<ApplyStage, string> = {
+  waiting: 'Apply by',
+  ready: 'Apply by',
+  expired: 'Expired',
 }
+
+export const REQUESTED_LABEL = 'Requested'
+
+export const SAFE_ACCOUNT_LABEL = 'Safe account'
+
+const formatHours = (hours: number): string => (hours === 1 ? '1 hour' : `${hours} hours`)
+
+// A first allowlist reads as one thing ("it"); an edit reads as the changes ("they"), as in the design.
+export const applyBannerTitle = (stage: ApplyStage, operation: ApplyOperation, hoursLeft: number): string => {
+  const isCreate = operation === 'create'
+
+  switch (stage) {
+    case 'waiting':
+      return `${isCreate ? 'Your allowlist' : 'Your changes'} can be applied in ${formatHours(hoursLeft)}`
+    case 'ready':
+      return isCreate ? 'Your allowlist is ready to apply' : 'Your changes are ready to apply'
+    case 'expired':
+      return isCreate ? 'Your allowlist expired' : 'Your changes expired'
+  }
+}
+
+export type ApplyBannerDetails = {
+  readyAt: string
+  /** Unset when CGW does not know when the apply window closes. */
+  endAt?: string
+  /** Unset until the Safe's setup has loaded. */
+  signatures?: { threshold: number; owners: number }
+}
+
+export const applyBannerLine = (
+  stage: ApplyStage,
+  operation: ApplyOperation,
+  { readyAt, endAt, signatures }: ApplyBannerDetails,
+): string => {
+  const isCreate = operation === 'create'
+
+  switch (stage) {
+    case 'waiting':
+      return isCreate
+        ? `From ${readyAt}, a second transaction will need to be executed to apply it. Until then, transactions aren't checked against it.`
+        : `From ${readyAt}, a second transaction will need to be executed to apply them. Until then, the current rules apply.`
+    case 'ready': {
+      const needs = signatures
+        ? `It needs ${signatures.threshold} of ${signatures.owners} signatures`
+        : "It needs the Safe account's signatures"
+      const deadline = endAt ? ` and must be executed by ${endAt}` : ''
+
+      return `${isCreate ? 'It takes' : 'They take'} effect once a second transaction is executed. ${needs}${deadline}.`
+    }
+    case 'expired': {
+      const by = endAt ? `by ${endAt}` : 'in time'
+
+      return isCreate
+        ? `It wasn't applied ${by}, so it can't take effect anymore. Transactions aren't checked against an allowlist.`
+        : `They weren't applied ${by}, so they can't take effect anymore. The current rules stay in place.`
+    }
+  }
+}
+
+export const APPLY_SIGNER_HELPER = 'Any signer can start this transaction.'
 
 export const APPLY_CONNECT_HELPER = 'Connect a signer wallet to apply the allowlist.'
 
 export const APPLY_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can apply this allowlist.'
+
+export const DISCARD_LABEL = 'Discard'
+
+export const EXPIRED_HELPER: Record<ApplyOperation, string> = {
+  create: 'To use an allowlist, set it up again.',
+  update: 'To make these changes, edit the allowlist again.',
+}

@@ -10,9 +10,7 @@ import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Pol
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { getPolicyTokens } from '../utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
-import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
 import {
-  formatApplyBy,
   formatApplyIn,
   formatTimeToSign,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
@@ -28,18 +26,24 @@ import {
   ACTIVATED_BANNER_TITLE,
   activatedBannerLine,
   type AllowlistTxOutcome,
+  type ApplyBannerDetails,
+  type ApplyStage,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
 import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
-import { inferAllowlistOutcome, resolveAllowlistDrawerState, type ActiveAllowlistPolicy } from './resolveState'
+import {
+  inferAllowlistOutcome,
+  resolveAllowlistDrawerState,
+  type ActiveAllowlistPolicy,
+  type AllowlistDrawerState,
+} from './resolveState'
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'
 import AllowlistTokens from './components/AllowlistTokens'
 import ActivatedBanner from './components/ActivatedBanner'
 import FailedBanner from './components/FailedBanner'
-import ScheduledBanner from './components/ScheduledBanner'
-import ReadyToApplyBanner from './components/ReadyToApplyBanner'
+import ApplyStatus from './components/ApplyStatus'
 import UncoveredSpendingLimits from './components/UncoveredSpendingLimits'
 
 type AllowlistDrawerBaseProps = {
@@ -58,7 +62,10 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   policy: ActiveAllowlistPolicy
   onEdit?: () => void
   onRemove?: () => void
-  onCancelChange?: () => void
+  /** Drops an expired request. */
+  onDiscard?: () => void
+  /** The Safe's threshold and owner count, which the ready-to-apply banner names. */
+  signatures?: ApplyBannerDetails['signatures']
   /** Opens the apply flow (`applyConfiguration`) once the guard's delay is over. */
   onApply?: () => void
   /** The first setup just became active: confirms it once at the top of the panel. */
@@ -80,6 +87,12 @@ export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlist
 
 const isPendingDrawer = (props: AllowlistDrawerProps): props is PendingAllowlistDrawerProps =>
   props.policy.status !== 'active'
+
+const APPLY_STAGE: Partial<Record<AllowlistDrawerState['kind'], ApplyStage>> = {
+  scheduled: 'waiting',
+  'ready-to-apply': 'ready',
+  'expired-request': 'expired',
+}
 
 /** Executed reads Pending while it waits out the delay; replaced and deleted can never execute, so they read Failed. */
 const OUTCOME_STATUS: Record<AllowlistTxOutcome, PolicyStatus | null> = {
@@ -103,13 +116,13 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const outcome = isPendingDrawer(props) ? (props.outcome ?? inferAllowlistOutcome(props.policy, now)) : undefined
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome, now)
   const Icon = getPolicyIcon(policy.type)
-  // An expired request can never apply, so it reads Failed like a transaction that can never execute.
   const status = outcome
     ? OUTCOME_STATUS[outcome]
     : state.kind === 'expired-request'
-      ? 'failed'
+      ? 'expired'
       : getPolicyStatus(policy)
   const scheduledChange = policy.status === 'active' ? policy.scheduledChange : undefined
+  const applyStage = scheduledChange ? APPLY_STAGE[state.kind] : undefined
   const isRemoved = 'operation' in state && state.operation === 'remove'
   const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
@@ -117,8 +130,8 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
     : {
         onEdit: props.onEdit,
         onRemove: props.onRemove,
-        onCancelChange: props.onCancelChange,
         onApply: props.onApply,
+        onDiscard: props.onDiscard,
         applyLaterLabel: scheduledChange ? formatApplyIn(scheduledChange.appliesAt, now) : undefined,
       }
 
@@ -148,21 +161,15 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               line2={activatedBannerLine(safe.name ?? 'This Safe account', recipients.length)}
             />
           )}
-          {state.kind === 'scheduled' && policy.status === 'active' && policy.scheduledChange && (
-            <ScheduledBanner
-              title={state.bannerTitle}
-              line2={state.bannerLine2}
-              appliesAt={formatAppliesAt(policy.scheduledChange.appliesAt, now)}
+          {applyStage && scheduledChange && (
+            <ApplyStatus
+              stage={applyStage}
+              change={scheduledChange}
+              safe={safe}
+              signatures={isPendingDrawer(props) ? undefined : props.signatures}
+              nowMs={now}
             />
           )}
-          {state.kind === 'ready-to-apply' && (
-            <ReadyToApplyBanner
-              title={state.bannerTitle}
-              line2={state.bannerLine2}
-              applyBy={scheduledChange?.expiresAt ? formatApplyBy(scheduledChange.expiresAt, now) : undefined}
-            />
-          )}
-          {state.kind === 'expired-request' && <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {state.kind === 'closed' &&
             (status === 'failed' ? (
               <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />
@@ -171,18 +178,25 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ))}
           <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
-          {!isPendingDrawer(props) && state.kind !== 'unenforced' && !!props.uncoveredSpendingLimitCount && (
-            <UncoveredSpendingLimits count={props.uncoveredSpendingLimitCount} />
+          {!isPendingDrawer(props) &&
+            !applyStage &&
+            state.kind !== 'unenforced' &&
+            !!props.uncoveredSpendingLimitCount && (
+              <UncoveredSpendingLimits count={props.uncoveredSpendingLimitCount} />
+            )}
+          {!applyStage && (
+            <PolicyOverview
+              {...overview}
+              appliesTo={{
+                ...safe,
+                href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
+              }}
+              chainId={policy.safe.chainId}
+              enforcedBy={
+                state.kind === 'unenforced' ? undefined : { label: overview.enforcedBy, href: enforcedByHref }
+              }
+            />
           )}
-          <PolicyOverview
-            {...overview}
-            appliesTo={{
-              ...safe,
-              href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
-            }}
-            chainId={policy.safe.chainId}
-            enforcedBy={state.kind === 'unenforced' ? undefined : { label: overview.enforcedBy, href: enforcedByHref }}
-          />
         </div>
       </DrawerBody>
 

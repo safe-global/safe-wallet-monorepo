@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@safe-global/views/components/ui/button'
+import { DISCARD_LABEL } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 import type { AllowlistDrawerState } from '../resolveState'
 import { PolicyDrawerActions } from '../../components/PolicyDrawerActions'
 import { CopyTransactionLink } from '../../SpendingLimitDrawer/components/CopyTransactionLink'
@@ -12,9 +13,10 @@ export type AllowlistActionsProps = {
   /** The edit and remove flows are not built yet; without a handler the button stays disabled. */
   onEdit?: () => void
   onRemove?: () => void
-  onCancelChange?: () => void
   /** Opens the apply flow once the guard's delay is over; without it the button stays disabled. */
   onApply?: () => void
+  /** Drops an expired request; there is no discard flow yet, so without it the button stays disabled. */
+  onDiscard?: () => void
   /** The disabled apply button's label while the delay runs, e.g. `Apply in 23h 59m`. */
   applyLaterLabel?: string
   transactionLink?: string
@@ -27,8 +29,8 @@ const AllowlistActions = ({
   onConnectWallet,
   onEdit,
   onRemove,
-  onCancelChange,
   onApply,
+  onDiscard,
   applyLaterLabel,
   transactionLink,
   reviewTransactionHref,
@@ -53,14 +55,13 @@ const AllowlistActions = ({
         </DrawerFooter>
       )
 
-    case 'cancel':
+    case 'discard':
       return (
         <PolicyDrawerActions
-          actionLabel="Cancel change"
-          variant="secondary"
-          onClick={onCancelChange}
+          actionLabel={DISCARD_LABEL}
+          onClick={onDiscard}
           hint={state.helper}
-          disabled={state.disabled || !onCancelChange}
+          disabled={!onDiscard}
         />
       )
 

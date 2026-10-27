@@ -20,37 +20,25 @@ import {
   signAndExecuteLine,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import {
-  CANCEL_CONNECT_HELPER,
-  CANCEL_NOT_A_SIGNER_HELPER,
   NOT_A_SIGNER_HELPER,
   OUTCOME_TITLE,
   PENDING_BANNER_TITLE,
-  SCHEDULED_BANNER_LINE,
-  SCHEDULED_BANNER_TITLE,
   APPLY_CONNECT_HELPER,
   APPLY_NOT_A_SIGNER_HELPER,
-  EXPIRED_BANNER_LINE,
-  EXPIRED_BANNER_TITLE,
-  READY_BANNER_LINE,
-  READY_BANNER_TITLE,
+  APPLY_SIGNER_HELPER,
+  EXPIRED_HELPER,
   UNENFORCED_BANNER_LINE,
   UNENFORCED_BANNER_TITLE,
   outcomeLine,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 
-/**
- * The request executed, waiting out the guard's delay. A new allowlist offers its apply button disabled until then;
- * only a change to a live allowlist can be cancelled.
- */
+/** The request executed and waits out the guard's delay: the apply button stays disabled until then. */
 export type ScheduledDrawerState = {
   kind: 'scheduled'
   operation: AllowlistScheduledChange['operation']
-  action: 'cancel' | 'connect' | 'apply-later' | 'none'
-  disabled: boolean
-  bannerTitle: string
-  bannerLine2: string
-  helper?: string
+  action: 'apply-later'
+  disabled: true
 }
 
 /** The delay is over: `applyConfiguration` can be proposed until the apply window closes. */
@@ -59,18 +47,15 @@ export type ReadyToApplyDrawerState = {
   operation: AllowlistScheduledChange['operation']
   action: 'apply' | 'connect'
   disabled: boolean
-  bannerTitle: string
-  bannerLine2: string
-  helper?: string
+  helper: string
 }
 
-/** The apply window closed: the requested root can no longer be applied. */
+/** The apply window closed: the requested root can no longer be applied, only discarded. */
 export type ExpiredRequestDrawerState = {
   kind: 'expired-request'
   operation: AllowlistScheduledChange['operation']
-  action: 'none'
-  bannerTitle: string
-  bannerLine2: string
+  action: 'discard'
+  helper: string
 }
 
 /** The guard is not in both slots. No flow can put it back yet, so there is nothing to offer. */
@@ -119,49 +104,29 @@ const UNENFORCED_STATE: UnenforcedAllowlistDrawerState = {
   bannerLine2: UNENFORCED_BANNER_LINE,
 }
 
-const resolveReadyToApply = ({ operation }: AllowlistScheduledChange, viewer: Viewer): ReadyToApplyDrawerState => {
-  const base = {
-    kind: 'ready-to-apply',
-    operation,
-    bannerTitle: READY_BANNER_TITLE[operation],
-    bannerLine2: READY_BANNER_LINE,
-  } as const
+const resolveReadyToApply = (
+  operation: AllowlistScheduledChange['operation'],
+  viewer: Viewer,
+): ReadyToApplyDrawerState => {
+  const base = { kind: 'ready-to-apply', operation } as const
 
   if (!viewer.address) return { ...base, action: 'connect', disabled: false, helper: APPLY_CONNECT_HELPER }
   if (!viewer.isSigner) return { ...base, action: 'apply', disabled: true, helper: APPLY_NOT_A_SIGNER_HELPER }
 
-  return { ...base, action: 'apply', disabled: false }
+  return { ...base, action: 'apply', disabled: false, helper: APPLY_SIGNER_HELPER }
 }
 
 const resolveScheduled = (
-  change: AllowlistScheduledChange,
+  { operation, appliesAt, expiresAt }: AllowlistScheduledChange,
   viewer: Viewer,
   nowMs: number,
 ): ScheduledDrawerState | ReadyToApplyDrawerState | ExpiredRequestDrawerState => {
-  const { operation, appliesAt, expiresAt } = change
   if (expiresAt !== undefined && expiresAt * 1_000 <= nowMs) {
-    return {
-      kind: 'expired-request',
-      operation,
-      action: 'none',
-      bannerTitle: EXPIRED_BANNER_TITLE[operation],
-      bannerLine2: EXPIRED_BANNER_LINE[operation],
-    }
+    return { kind: 'expired-request', operation, action: 'discard', helper: EXPIRED_HELPER[operation] }
   }
-  if (appliesAt * 1_000 <= nowMs) return resolveReadyToApply(change, viewer)
+  if (appliesAt * 1_000 <= nowMs) return resolveReadyToApply(operation, viewer)
 
-  const base = {
-    kind: 'scheduled',
-    operation,
-    bannerTitle: SCHEDULED_BANNER_TITLE[operation],
-    bannerLine2: SCHEDULED_BANNER_LINE[operation],
-  } as const
-
-  if (operation === 'create') return { ...base, action: 'apply-later', disabled: true }
-  if (!viewer.address) return { ...base, action: 'connect', disabled: false, helper: CANCEL_CONNECT_HELPER }
-  if (!viewer.isSigner) return { ...base, action: 'cancel', disabled: true, helper: CANCEL_NOT_A_SIGNER_HELPER }
-
-  return { ...base, action: 'cancel', disabled: false }
+  return { kind: 'scheduled', operation, action: 'apply-later', disabled: true }
 }
 
 const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName: string): PendingDrawerState => {

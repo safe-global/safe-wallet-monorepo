@@ -87,7 +87,12 @@ export const mapDelayedGuardRequest = (
       return {
         ...base,
         status: 'active',
-        scheduledChange: { operation, appliesAt: dto.readyAt, expiresAt: dto.expiresAt ?? undefined },
+        scheduledChange: {
+          operation,
+          appliesAt: dto.readyAt,
+          expiresAt: dto.expiresAt ?? undefined,
+          requestedAt: dto.createdAt ?? undefined,
+        },
       }
 
     case 'application-in-signing':
