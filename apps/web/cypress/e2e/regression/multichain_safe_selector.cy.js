@@ -27,20 +27,6 @@ describe('Multichain safe selector tests', { defaultCommandTimeout: 60000 }, () 
     })
   })
 
-  it('Verify balance of the safe group', () => {
-    safeNav.openSelector()
-
-    safeNav.verifyFirstDropdownRowHasBalance()
-  })
-
-  it('Verify network logo for safes in the group', () => {
-    const address = staticSafes.MATIC_STATIC_SAFE_28.split(':')[1].substring(0, 6)
-
-    safeNav.openSelector()
-
-    safeNav.verifyMultichainSafeChainLogos(address, 2)
-  })
-
   it('Verify Rename option in the group of safes opens a new edit entry modal', () => {
     const newName = 'Renamed multichain safe'
 

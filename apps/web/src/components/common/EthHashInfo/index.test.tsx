@@ -1,4 +1,4 @@
-import { blo } from 'blo'
+import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
 import { act } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
@@ -193,7 +193,7 @@ describe('EthHashInfo', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
 
       expect(container.querySelector('.icon')).toHaveStyle({
-        backgroundImage: `url(${blo(MOCK_SAFE_ADDRESS)})`,
+        backgroundImage: `url(${getIdenticonSrc(MOCK_SAFE_ADDRESS)})`,
         width: '40px',
         height: '40px',
       })
@@ -203,7 +203,7 @@ describe('EthHashInfo', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} avatarSize={100} />)
 
       expect(container.querySelector('.icon')).toHaveStyle({
-        backgroundImage: `url(${blo(MOCK_SAFE_ADDRESS)})`,
+        backgroundImage: `url(${getIdenticonSrc(MOCK_SAFE_ADDRESS)})`,
         width: '100px',
         height: '100px',
       })

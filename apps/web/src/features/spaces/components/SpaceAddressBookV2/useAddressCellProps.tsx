@@ -1,5 +1,5 @@
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { useCurrentChain } from '@/hooks/useChains'
 
 const renderAvatar = (address: string) => <Identicon address={address} size={24} />

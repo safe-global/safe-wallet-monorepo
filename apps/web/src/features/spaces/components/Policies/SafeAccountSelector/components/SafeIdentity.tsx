@@ -1,4 +1,4 @@
-import { blo } from 'blo'
+import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { TruncatedText, getInitials, getSafeDisplayInfo } from '@/components/common/AccountRow'
 
@@ -13,7 +13,7 @@ const SafeIdentity = ({ address, name }: { address: string; name?: string }) => 
   return (
     <>
       <Avatar size="sm" className="shrink-0">
-        <AvatarImage src={blo(address as `0x${string}`)} alt={displayName} />
+        <AvatarImage src={getIdenticonSrc(address)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
       </Avatar>
 
