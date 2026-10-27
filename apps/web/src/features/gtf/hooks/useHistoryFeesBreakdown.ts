@@ -5,10 +5,10 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useIsPayFromSafeEnabled } from './useIsPayFromSafeEnabled'
 import useBalances from '@/hooks/useBalances'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -48,7 +48,7 @@ const buildFees = (
  * Deps are narrowed to scalars so polling `balances` doesn't re-trigger the receipt RPC.
  */
 export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryFeesData | null => {
-  const isGtfEnabled = useHasFeature(FEATURES.GTF)
+  const isGtfEnabled = useIsPayFromSafeEnabled()
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()

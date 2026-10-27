@@ -51,7 +51,8 @@ describe('useIsGtfSlotVisible', () => {
 
   it.each<[GasPayer | undefined, boolean]>([
     [undefined, true],
-    ['WALLET', true],
+    // Any mounted execute form owns the fee card, whoever pays.
+    ['WALLET', false],
     ['FREE_DAILY_LIMIT', false],
     ['SUBSCRIPTION', false],
   ])('with GTF enabled and gas payment option %s returns %s', (gasPaymentOption, expected) => {

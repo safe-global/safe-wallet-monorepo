@@ -12,7 +12,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
-import { useSafeProAccess } from '@/features/spaces'
 import { useGtfFeePreview } from './useGtfFeePreview'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
@@ -20,7 +19,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
-import { IS_RELAYING_LIVE, PAY_FROM_SAFE_ON_FREE_PLAN } from '../constants'
+import { IS_RELAYING_LIVE } from '../constants'
 import {
   computeTotalOutgoing,
   getSendInGasToken,
@@ -143,14 +142,11 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
+  // Chains that do not list PAY_FROM_SAFE can't quote Safe-pays fees at all
   // — render the signer-pays variant: free execution fee, no
-  // gas-token selector, and no call to the preview endpoint.
-  // Paying from the Safe is a Safe Pro feature: without a live plan on the current Workspace the
-  // section renders as signer-pays, as on a chain that cannot quote.
-  const { hasProFeatures, isLoading: isProLoading } = useSafeProAccess()
-  const feePreviewAvailable =
-    isGtfFeePreviewAvailable(chain) && !isProLoading && (hasProFeatures || PAY_FROM_SAFE_ON_FREE_PLAN)
+  // gas-token selector, and no call to the preview endpoint. Paying from the Safe is open to every
+  // plan; only sponsoring depends on the Workspace.
+  const feePreviewAvailable = isGtfFeePreviewAvailable(chain)
   const isSignerMode =
     !isConfirmation &&
     (!IS_RELAYING_LIVE || !feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)

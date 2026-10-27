@@ -1,7 +1,6 @@
 import { useContext } from 'react'
-import { useHasFeature } from '@/hooks/useChains'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsPayFromSafeEnabled } from './useIsPayFromSafeEnabled'
 
 /**
  * The standalone fee card renders only while no execute form is mounted: once one is, its gas payer
@@ -10,6 +9,6 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
  */
 export const useIsGtfSlotVisible = (): boolean => {
   const { gasPaymentOption } = useContext(TxFlowContext)
-  const isGtfEnabled = !!useHasFeature(FEATURES.GTF)
+  const isGtfEnabled = !!useIsPayFromSafeEnabled()
   return isGtfEnabled && gasPaymentOption === undefined
 }

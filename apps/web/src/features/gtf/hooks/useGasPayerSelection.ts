@@ -7,7 +7,7 @@ import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useSafeProAccess, useSafeSponsoredTxs } from '@/features/spaces'
+import { useSafeSponsoredTxs } from '@/features/spaces'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import type {
   FeePayerControl,
@@ -17,7 +17,6 @@ import type {
   GasPayerChoice,
   NetworkFee,
 } from '../types'
-import { PAY_FROM_SAFE_ON_FREE_PLAN } from '../constants'
 import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { useGtfFeePreview } from './useGtfFeePreview'
@@ -45,8 +44,8 @@ export type GasPayerSelection = {
  * a 1/n Safe); sponsoring and the connected wallet are decided at execution. The choice is mirrored
  * into `gtfPaymentMode`, which is what merges the fee params into the payload right before signing.
  *
- * Paying from the Safe is granted to Pro Workspaces (`useSafeProAccess`, until the `gas_relaying`
- * entitlement exists) and, while {@link PAY_FROM_SAFE_ON_FREE_PLAN} is on, to the free plan with a premium.
+ * Paying from the Safe is open to every plan (the free plan pays a premium on top of the network
+ * fee); only sponsoring depends on the Workspace's plan.
  */
 export const useGasPayerSelection = ({
   safeTx,
@@ -61,7 +60,6 @@ export const useGasPayerSelection = ({
   const { safe, safeAddress } = useSafeInfo()
   const fees = useFeesPreview()
   const { gtfPaymentMode, setGtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
-  const { hasProFeatures, isLoading: isProLoading } = useSafeProAccess()
   const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()
 
@@ -69,7 +67,6 @@ export const useGasPayerSelection = ({
   const isUnsigned = !!safeTx && signatures === 0
   const isLocked = !!safeTx && isGtfSafePaid(safeTx.data)
   const isChainReady = isGtfFeePreviewAvailable(chain)
-  const isGranted = !isProLoading && (hasProFeatures || PAY_FROM_SAFE_ON_FREE_PLAN)
   const hasSponsoredOffer = !!offer && !offer.disabledReason
 
   const planState: FeePayerPlanState = !isPro ? 'FREE' : left === 0 ? 'PRO_NO_SPONSORED' : 'PRO_SPONSORED_LEFT'
@@ -78,7 +75,6 @@ export const useGasPayerSelection = ({
   const canPayFromSafe =
     !isLocked &&
     isChainReady &&
-    isGranted &&
     isUnsigned &&
     !fees.isLegacySigned &&
     fees.canCoverFees &&

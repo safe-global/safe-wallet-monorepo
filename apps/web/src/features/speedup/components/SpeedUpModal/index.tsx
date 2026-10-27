@@ -30,6 +30,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsPayFromSafeEnabled } from '@/features/gtf'
 
 type Props = {
   open: boolean
@@ -45,7 +46,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isGtfChain = useIsPayFromSafeEnabled() ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()

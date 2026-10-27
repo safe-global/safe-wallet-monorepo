@@ -1,8 +1,16 @@
-import { createFeatureHandle } from '@/features/__core__'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { FeatureHandle } from '@/features/__core__'
 import type { GTFContract } from './contract'
+import { useIsPayFromSafeEnabled } from './hooks/useIsPayFromSafeEnabled'
 
-export const GTFFeature = createFeatureHandle<GTFContract>('gtf', FEATURES.GTF)
+// Hand-rolled instead of `createFeatureHandle`: the flag is read through `useIsPayFromSafeEnabled`,
+// which accepts both the new `PAY_FROM_SAFE` name and the legacy `GTF` one.
+export const GTFFeature: FeatureHandle<GTFContract> = {
+  name: 'gtf',
+  useIsEnabled: useIsPayFromSafeEnabled,
+  load: () => import(/* webpackMode: "lazy" */ './feature'),
+}
+
+export { useIsPayFromSafeEnabled } from './hooks/useIsPayFromSafeEnabled'
 
 export type { GTFContract } from './contract'
 export { useFeesPreview } from './hooks/useFeesPreview'
