@@ -216,3 +216,18 @@ jobs:
           message-failure: |
             ## Branch preview
             ❌  Deploy failed!
+
+  # Datadog DORA deployment event for the dev and staging deploys (not PR previews).
+  # Production is sent from safe-production-promotions.
+  dora:
+    needs: deploy
+    if: github.event_name == 'push' && needs.deploy.result == 'success'
+    uses: safe-global/github-reusable-workflows/.github/workflows/_dora-deployment.yml@6ce19196ac4b69fa23a81241ef61770b8f95c7a0 # v2.4.55
+    permissions:
+      actions: read
+    with:
+      service: safe-wallet-web
+      env: ${{ github.ref_name == 'main' && 'staging' || 'dev' }}
+      version: ${{ github.sha }}
+    secrets:
+      dd_api_key: ${{ secrets.DD_API_KEY_DORA }}
