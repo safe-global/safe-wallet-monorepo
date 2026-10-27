@@ -1,7 +1,7 @@
 import { AbiCoder, Interface, isAddress } from 'ethers'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { RECIPIENT_DATA_TYPE } from '../components/Policies/shared/erc20TransferPolicy'
+import { PERMISSION_NONE, RECIPIENT_DATA_TYPE } from '../components/Policies/shared/erc20TransferPolicy'
 import {
   APPLY_CONFIGURATION_ABI,
   CONFIGURE_IMMEDIATELY_ABI,
@@ -102,7 +102,7 @@ export const canDecodePolicyTx = (hexData?: string | null): boolean => !!policyT
 export type PolicyPayload =
   /** Allow, Deny and native transfers read no payload. */
   | { kind: 'none' }
-  /** ERC20TransferPolicy: `abi.encode(RecipientData[])`. `allowed: false` removes a recipient. */
+  /** ERC20TransferPolicy: `abi.encode(RecipientData[])`. No permission removes a recipient. */
   | { kind: 'recipients'; recipients: Array<{ address: string; allowed: boolean }> }
   /** CoSignerPolicy: `abi.encode(address cosigner)`. The zero address clears it. */
   | { kind: 'cosigner'; cosigner: string }
@@ -112,9 +112,9 @@ export type PolicyPayload =
 const decodeRecipients = (data: string): PolicyPayload | undefined => {
   try {
     const [entries] = AbiCoder.defaultAbiCoder().decode([RECIPIENT_DATA_TYPE], data)
-    const recipients = (entries as Array<[string, boolean]>).map((entry) => ({
+    const recipients = (entries as Array<[string, bigint]>).map((entry) => ({
       address: entry[0],
-      allowed: entry[1],
+      allowed: Number(entry[1]) !== PERMISSION_NONE,
     }))
 
     return recipients.every((r) => isAddress(r.address)) ? { kind: 'recipients', recipients } : undefined

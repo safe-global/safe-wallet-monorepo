@@ -1,7 +1,11 @@
 import { AbiCoder, Interface } from 'ethers'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { RECIPIENT_DATA_TYPE } from '../../components/Policies/shared/erc20TransferPolicy'
+import {
+  PERMISSION_ALWAYS,
+  PERMISSION_NONE,
+  RECIPIENT_DATA_TYPE,
+} from '../../components/Policies/shared/erc20TransferPolicy'
 import {
   APPLY_CONFIGURATION_ABI,
   CONFIGURE_IMMEDIATELY_ABI,
@@ -25,7 +29,7 @@ const COSIGNER = '0x8b0aB586dF1Ca1f360cb26b34eEC2C3AF969E821'
 const ROOT = `0x${'ab'.repeat(32)}`
 const TRANSFER = '0xa9059cbb'
 
-const recipientData = (recipients: Array<[string, boolean]>) =>
+const recipientData = (recipients: Array<[string, number]>) =>
   AbiCoder.defaultAbiCoder().encode([RECIPIENT_DATA_TYPE], [recipients])
 
 const configuration = (data: string) => [TOKEN, TRANSFER, 0, POLICY, data]
@@ -45,7 +49,7 @@ describe('isPolicyTxMethod', () => {
 
 describe('decodeConfigurations', () => {
   it('decodes a configureImmediately calldata', () => {
-    const data = recipientData([[RECIPIENT, true]])
+    const data = recipientData([[RECIPIENT, PERMISSION_ALWAYS]])
     const hexData = new Interface(CONFIGURE_IMMEDIATELY_ABI).encodeFunctionData('configureImmediately', [
       [configuration(data)],
     ])
@@ -132,8 +136,8 @@ describe('policyTxMethodOf', () => {
 describe('decodePolicyPayload', () => {
   it('reads an ERC20 transfer allowlist, keeping removals distinct', () => {
     const data = recipientData([
-      [RECIPIENT, true],
-      [COSIGNER, false],
+      [RECIPIENT, PERMISSION_ALWAYS],
+      [COSIGNER, PERMISSION_NONE],
     ])
 
     expect(decodePolicyPayload(data, PolicyType.TokenWithdraw)).toEqual({
@@ -167,7 +171,7 @@ describe('decodePolicyPayload', () => {
 
   // Outside a space the policy type is unknown, so the shape has to carry it.
   it('falls back to the payload shape when the type is unknown', () => {
-    const recipients = recipientData([[RECIPIENT, true]])
+    const recipients = recipientData([[RECIPIENT, PERMISSION_ALWAYS]])
     const cosigner = AbiCoder.defaultAbiCoder().encode(['address'], [COSIGNER])
 
     expect(decodePolicyPayload(recipients).kind).toBe('recipients')

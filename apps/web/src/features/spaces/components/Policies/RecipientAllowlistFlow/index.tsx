@@ -4,6 +4,8 @@ import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowType } from '@/services/analytics'
 import CreateRecipientAllowlistPolicy from './CreateStep'
+import ReviewRecipientAllowlistPolicy from './ReviewStep'
+import { createRecipientAllowlistFormValues } from './types'
 import { CREATE_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import FlowSubtitle from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/FlowSubtitle'
 import RecipientAllowlistIcon from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/RecipientAllowlistIcon'
@@ -15,6 +17,8 @@ const RecipientAllowlistFlow = (): ReactElement => (
       icon={RecipientAllowlistIcon}
       subtitle={<FlowSubtitle />}
       eventCategory={TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST}
+      initialData={createRecipientAllowlistFormValues()}
+      ReviewTransactionComponent={ReviewRecipientAllowlistPolicy}
     >
       <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
         <CreateRecipientAllowlistPolicy />

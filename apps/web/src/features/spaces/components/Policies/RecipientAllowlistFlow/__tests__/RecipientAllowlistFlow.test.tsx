@@ -38,6 +38,15 @@ describe('RecipientAllowlistFlow', () => {
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ eventCategory: TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST })
   })
 
+  it('reviews the allowlist after the Create step', () => {
+    render(<RecipientAllowlistFlow />)
+
+    expect(mockTxFlow.mock.calls[0][0]).toMatchObject({
+      initialData: { tokens: [{ address: '' }], recipients: [{ address: '' }] },
+      ReviewTransactionComponent: expect.any(Function),
+    })
+  })
+
   it('names the policy in the subtitle with a link to the help article', () => {
     render(<RecipientAllowlistFlow />)
     render(<>{mockTxFlow.mock.calls[0][0].subtitle}</>)

@@ -7,7 +7,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { availablePolicyBuilder } from '@/tests/builders/policies'
 import { useAvailablePolicies } from '../../hooks/useAvailablePolicies'
 import { useActivePolicies } from '../../hooks/useActivePolicies'
-import { RECIPIENT_DATA_TYPE } from '../../shared/erc20TransferPolicy'
+import { PERMISSION_ALWAYS, PERMISSION_NONE, RECIPIENT_DATA_TYPE } from '../../shared/erc20TransferPolicy'
 import { mockDelayedGuardDto } from '../../mocks/pendingPolicies'
 import {
   APPLY_CONFIGURATION_ABI,
@@ -90,7 +90,7 @@ const mockCatalogue = () => {
   })
 }
 
-const recipientData = (recipients: Array<[string, boolean]>) =>
+const recipientData = (recipients: Array<[string, number]>) =>
   AbiCoder.defaultAbiCoder().encode([RECIPIENT_DATA_TYPE], [recipients])
 
 const configuration = (overrides: Partial<PolicyConfiguration> = {}): PolicyConfiguration => ({
@@ -98,7 +98,7 @@ const configuration = (overrides: Partial<PolicyConfiguration> = {}): PolicyConf
   selector: TRANSFER,
   operation: OPERATION_CALL,
   policy: CONTRACTS[PolicyType.TokenWithdraw],
-  data: recipientData([[RECIPIENT, true]]),
+  data: recipientData([[RECIPIENT, PERMISSION_ALWAYS]]),
   ...overrides,
 })
 
@@ -136,8 +136,8 @@ describe('PolicyTxDetails', () => {
       configureImmediatelyData([
         configuration({
           data: recipientData([
-            [RECIPIENT, true],
-            [REMOVED, false],
+            [RECIPIENT, PERMISSION_ALWAYS],
+            [REMOVED, PERMISSION_NONE],
           ]),
         }),
       ]),
@@ -208,7 +208,15 @@ describe('PolicyTxDetails', () => {
 
   it('decodes an applyConfiguration the same way', () => {
     const hexData = new Interface(APPLY_CONFIGURATION_ABI).encodeFunctionData('applyConfiguration', [
-      [[TOKEN, TRANSFER, OPERATION_CALL, CONTRACTS[PolicyType.TokenWithdraw], recipientData([[RECIPIENT, true]])]],
+      [
+        [
+          TOKEN,
+          TRANSFER,
+          OPERATION_CALL,
+          CONTRACTS[PolicyType.TokenWithdraw],
+          recipientData([[RECIPIENT, PERMISSION_ALWAYS]]),
+        ],
+      ],
     ])
 
     renderTx(hexData, 'applyConfiguration')

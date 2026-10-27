@@ -9,7 +9,7 @@ import { useLoadFeature } from '@/features/__core__'
 const APPLY_CONFIGURATION_ABI = [
   'function applyConfiguration(tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)[] configurations)',
 ]
-const RECIPIENT_DATA_TYPE = 'tuple(address recipient, bool allowed)[]'
+const RECIPIENT_DATA_TYPE = 'tuple(address recipient, uint8 permission)[]'
 
 // The policy view is lazy-loaded; its own suite covers what it renders. Here it stands in
 // for "the policy branch was taken".
@@ -32,7 +32,7 @@ const mockSpacesFeature = ({
 const applyConfigurationData = () => {
   const policyData = AbiCoder.defaultAbiCoder().encode(
     [RECIPIENT_DATA_TYPE],
-    [[['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', true]]],
+    [[['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 2]]],
   )
 
   return new Interface(APPLY_CONFIGURATION_ABI).encodeFunctionData('applyConfiguration', [

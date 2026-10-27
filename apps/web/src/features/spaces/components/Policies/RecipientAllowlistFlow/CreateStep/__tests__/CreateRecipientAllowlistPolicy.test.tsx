@@ -1,5 +1,7 @@
 import { faker } from '@faker-js/faker'
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { useFormContext } from 'react-hook-form'
+import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { GuardStatus } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -33,6 +35,28 @@ jest.mock('../../../SafeAccountSelector', () => ({
     </div>
   ),
 }))
+
+const TOKEN = faker.finance.ethereumAddress()
+const RECIPIENT = faker.finance.ethereumAddress()
+
+// The fields have their own selector and address inputs; here only what the step does with their values is under test.
+jest.mock('../AllowlistFields', () => {
+  const MockAllowlistFields = () => {
+    const { setValue } = useFormContext()
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setValue('tokens.0.address', TOKEN)
+          setValue('recipients.0.address', RECIPIENT)
+        }}
+      >
+        fill allowlist
+      </button>
+    )
+  }
+  return { __esModule: true, default: MockAllowlistFields }
+})
 
 const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction<
   typeof useRecipientAllowlistSafeAccounts
@@ -68,26 +92,29 @@ const guard = (status?: GuardStatus, retry = jest.fn()) => mockUseGuardStatus.mo
 
 const renderStep = (scopeKey?: string) => {
   const setScope = jest.fn()
+  const onNext = jest.fn()
   render(
-    <SafeScopeContext.Provider
-      value={{
-        scope: scopeKey
-          ? {
-              chainId: SEPOLIA,
-              safeAddress: scopeKey.split(':')[1],
-              scopeKey: scopeKey as `${string}:${string}`,
-              safeLoaded: true,
-              safeLoading: false,
-            }
-          : undefined,
-        setScope,
-        clearScope: jest.fn(),
-      }}
-    >
-      <CreateRecipientAllowlistPolicy />
-    </SafeScopeContext.Provider>,
+    <TxFlowContext.Provider value={{ onNext } as never}>
+      <SafeScopeContext.Provider
+        value={{
+          scope: scopeKey
+            ? {
+                chainId: SEPOLIA,
+                safeAddress: scopeKey.split(':')[1],
+                scopeKey: scopeKey as `${string}:${string}`,
+                safeLoaded: true,
+                safeLoading: false,
+              }
+            : undefined,
+          setScope,
+          clearScope: jest.fn(),
+        }}
+      >
+        <CreateRecipientAllowlistPolicy />
+      </SafeScopeContext.Provider>
+    </TxFlowContext.Provider>,
   )
-  return { setScope }
+  return { setScope, onNext }
 }
 
 describe('CreateRecipientAllowlistPolicy', () => {
@@ -125,19 +152,40 @@ describe('CreateRecipientAllowlistPolicy', () => {
   it.each<GuardStatus>([
     { status: 'loading' },
     { status: 'error' },
-    { status: 'none' },
-    { status: 'known' },
     { status: 'partial', missingSlot: 'module' },
     { status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] },
     { status: 'unsupported' },
     { status: 'not-activated' },
-  ])('keeps Next disabled until the allowlist form exists, with guard state %o', (status) => {
+  ])('hides the allowlist and keeps Next disabled with guard state %o', (status) => {
     accounts([option(SAFE_A)])
     guard(status)
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
+    expect(screen.queryByRole('button', { name: 'fill allowlist' })).not.toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
+
+  it.each<GuardStatus>([{ status: 'none' }, { status: 'known' }])(
+    'continues with the tokens and recipients once both are set, with guard state %o',
+    async (status) => {
+      accounts([option(SAFE_A)])
+      guard(status)
+      const { onNext } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+      expect(screen.getByTestId('next-btn')).toBeDisabled()
+
+      fireEvent.click(screen.getByRole('button', { name: 'fill allowlist' }))
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+
+      fireEvent.click(screen.getByTestId('next-btn'))
+      await waitFor(() =>
+        expect(onNext).toHaveBeenCalledWith(
+          { tokens: [{ address: TOKEN }], recipients: [{ address: RECIPIENT }] },
+          expect.anything(),
+        ),
+      )
+    },
+  )
 
   it('links to the Safe settings in the current Workspace', () => {
     mockUseUrlSpaceId.mockReturnValue(SPACE_ID)
