@@ -27,6 +27,9 @@ import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hyper
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
+import PolicyGuardCheck from '../PolicyGuardCheck'
+import { toGuardCheckCalls } from '../../utils/toGuardCheckCalls'
+import type { GuardCheckTransaction } from '@safe-global/utils/services/policy-guard'
 
 export const SafeShieldContent = ({
   recipient,
@@ -34,6 +37,7 @@ export const SafeShieldContent = ({
   threat,
   deadlock,
   safeTx,
+  policyCalls,
   overallStatus,
   hypernativeAuth,
   showHypernativeInfo = true,
@@ -49,6 +53,8 @@ export const SafeShieldContent = ({
   threat: AsyncResult<ThreatAnalysisResults>
   deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
+  /** Calls a flow has registered before it has built a transaction. */
+  policyCalls?: GuardCheckTransaction[]
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
@@ -85,6 +91,10 @@ export const SafeShieldContent = ({
   const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
+  // A flow registers its calls while still composing them; once it has built a transaction, that
+  // is what will be executed, so it wins.
+  const guardCheckCalls = toGuardCheckCalls(safeTx) ?? policyCalls
+
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
 
   const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
@@ -117,6 +127,9 @@ export const SafeShieldContent = ({
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
+        {/* The guard's verdict is a fact about this Safe, not an analysis, so it leads. */}
+        <PolicyGuardCheck calls={guardCheckCalls} />
+
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}

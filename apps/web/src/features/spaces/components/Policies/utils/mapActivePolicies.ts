@@ -4,13 +4,18 @@ import type {
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import type {
+  MultiSendPolicy,
   Policy,
   PolicyAllowance,
   ProposerPolicy,
+  SafeManagementChange,
+  SafeManagementPolicy,
   SpendingLimitPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { toAllowlists, type Erc20TokenResolver, type NativeTokenResolver } from './mapAllowlists'
+import { SAFE_MANAGEMENT_FUNCTIONS, safeManagementFunctionBySelector } from '../SafeManagementPolicy/contracts'
 import { toPolicyToken } from './toPolicyToken'
 
 export type { Erc20TokenResolver, NativeTokenResolver }
@@ -73,6 +78,85 @@ const toProposers = (dto: ActivePolicyDto): ProposerPolicy[] => {
   }))
 }
 
+/** The SafePolicyGuard enforcing a policy, in whichever slot holds it. */
+const guardAddressOf = (dto: ActivePolicyDto): string => {
+  if (dto.enforcement.via !== 'guard') return ''
+  const { transactionGuard, moduleGuard } = dto.enforcement.guards
+  return (transactionGuard ?? moduleGuard)?.safePolicyGuard ?? getPolicyGuardAddress(dto.safe.chainId) ?? ''
+}
+
+/** The guard keys a policy by its access, so that is what makes a row unique. */
+const guardId = (prefix: string, dto: ActivePolicyDto): string | null => {
+  if (dto.enforcement.via !== 'guard') return null
+  const { target, selector, operation } = dto.enforcement.access
+  return `${prefix}:${dto.safe.chainId}:${dto.safe.address}:${target}:${selector}:${operation}`
+}
+
+const toMultiSend = (dto: ActivePolicyDto): MultiSendPolicy | null => {
+  const id = guardId('multisend', dto)
+  if (!id || dto.enforcement.via !== 'guard') return null
+
+  return {
+    id,
+    type: 'multisend',
+    safe: dto.safe,
+    enforcement: { via: 'guard', guardAddress: guardAddressOf(dto), access: dto.enforcement.access },
+    enabled: dto.enabled,
+    data: {},
+  }
+}
+
+/**
+ * The management selector an `allow` policy keeps permitted, or null when it is not one: an `allow`
+ * on anything but the Safe itself, on an unknown selector, is the guard's catch-all fallback.
+ */
+const toManagementChange = (dto: ActivePolicyDto): SafeManagementChange | null => {
+  if (dto.enforcement.via !== 'guard' || !dto.enforcement.access) return null
+
+  const { target, selector, operation } = dto.enforcement.access
+  if (operation !== 'CALL') return null
+  if (target.toLowerCase() !== dto.safe.address.toLowerCase()) return null
+
+  const fn = safeManagementFunctionBySelector(selector)
+  return fn ? { selector, label: fn.label } : null
+}
+
+/**
+ * The guard stores one policy per selector, but a Safe's management rules read as one thing, so
+ * every permitted change on a Safe becomes a single row.
+ */
+const toSafeManagementRows = (dtos: ActivePolicyDto[]): SafeManagementPolicy[] => {
+  const bySafe = new Map<
+    string,
+    { safe: ActivePolicyDto['safe']; guardAddress: string; enabled: boolean; changes: SafeManagementChange[] }
+  >()
+
+  for (const dto of dtos) {
+    if (dto.type !== 'allow') continue
+    const change = toManagementChange(dto)
+    if (!change) continue
+
+    const key = `${dto.safe.chainId}:${dto.safe.address.toLowerCase()}`
+    const group = bySafe.get(key)
+    if (group) {
+      group.changes.push(change)
+      // One disabled binding means the Safe's management rules are not fully in force.
+      group.enabled = group.enabled && dto.enabled
+    } else {
+      bySafe.set(key, { safe: dto.safe, guardAddress: guardAddressOf(dto), enabled: dto.enabled, changes: [change] })
+    }
+  }
+
+  return [...bySafe.entries()].map(([key, { safe, guardAddress, enabled, changes }]) => ({
+    id: `safe-management:${key}`,
+    type: 'safe-management',
+    safe,
+    enforcement: { via: 'guard', guardAddress },
+    enabled,
+    data: { changes, total: SAFE_MANAGEMENT_FUNCTIONS.length },
+  }))
+}
+
 const toPolicies = (dto: ActivePolicyDto): Policy[] => {
   switch (dto.type) {
     case 'spending-limit': {
@@ -81,6 +165,10 @@ const toPolicies = (dto: ActivePolicyDto): Policy[] => {
     }
     case 'proposer':
       return toProposers(dto).map((policy) => ({ ...policy, status: 'active' }))
+    case 'multisend': {
+      const policy = toMultiSend(dto)
+      return policy ? [{ ...policy, status: 'active' }] : []
+    }
     default:
       return []
   }
@@ -106,4 +194,6 @@ export const mapActivePolicies = (
     ...policy,
     status: 'active' as const,
   })),
+  // Grouped across the response rather than per DTO: one row holds every change a Safe permits.
+  ...toSafeManagementRows(dtos).map((policy) => ({ ...policy, status: 'active' as const })),
 ]

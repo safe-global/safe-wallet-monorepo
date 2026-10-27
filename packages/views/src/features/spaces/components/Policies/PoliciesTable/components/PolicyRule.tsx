@@ -1,10 +1,10 @@
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { getPolicyLabel, getPolicySummary } from '../../utils/policyLabel'
+import { getPolicyDisplayType, getPolicyLabel, getPolicySummary } from '../../utils/policyLabel'
 import { getPolicyIcon } from '../../utils/policyIcon'
 import type { Policy } from '../../types'
 
 const PolicyRule = ({ policy }: { policy: Policy }) => {
-  const Icon = getPolicyIcon(policy.type)
+  const Icon = getPolicyIcon(getPolicyDisplayType(policy))
 
   return (
     <div className="flex items-center gap-3">

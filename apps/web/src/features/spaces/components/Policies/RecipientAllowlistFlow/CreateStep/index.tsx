@@ -1,63 +1,44 @@
-import { useContext, useState, type ReactElement } from 'react'
-import { useRouter } from 'next/router'
-import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
-import { TxModalContext } from '@/components/tx-flow'
+import { useContext, type ReactElement } from 'react'
+import NextLink from 'next/link'
+import { isAddress } from 'ethers'
+import { FormProvider, useForm } from 'react-hook-form'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Link } from '@safe-global/views/components/ui/link'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
-import { chainLabel, findSafeAccount } from '../../SafeAccountSelector/utils'
-import { SafeIdentity } from '../../components/SafeIdentity'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { AccountIdentity } from '../../components/AccountIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
-import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
-import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
-import {
-  createDefaultAllowlistValues,
-  type RecipientAllowlistFlowData,
-  type RecipientAllowlistFormValues,
-} from '../types'
-import { buildAllowlistRules, isAllowlistComplete } from '../utils/allowlistForm'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
-import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import {
   NESTED_SAFES_NOTICE_TITLE,
   getNestedSafesNoticeText,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
-  getAllowlistAccountLabel,
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { createRecipientAllowlistFormValues, type RecipientAllowlistFormValues } from '../types'
+import AllowlistFields from './AllowlistFields'
 
-const renderGuardAddress = (address: string, name: string) => <SafeIdentity address={address} name={name} />
+const renderGuardAddress = (address: string) => <AccountIdentity address={address} showCopyButton />
 
-/** The guard states an allowlist can be set up on. */
-const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
+// Only a Safe without a guard, or with the policy guard in both slots, can take the change as built
+const isGuardReady = (guard?: GuardStatus): boolean => guard?.status === 'none' || guard?.status === 'known'
 
-export type CreateRecipientAllowlistPolicyProps = {
-  dismissedCallouts: Record<CalloutSection, boolean>
-  onDismissCallout: (section: CalloutSection) => void
-}
+const hasEntries = (rows: Array<{ address: string }> = []) => rows.some((row) => isAddress(row.address))
 
-const CreateRecipientAllowlistPolicy = ({
-  dismissedCallouts,
-  onDismissCallout,
-}: CreateRecipientAllowlistPolicyProps): ReactElement => {
-  const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
-  const { setTxFlow } = useContext(TxModalContext)
-  const router = useRouter()
-  const [values, setValues] = useState<RecipientAllowlistFormValues>(() => {
-    const { excludedTokens, addedTokens, recipients } = data ?? createDefaultAllowlistValues()
-    return { excludedTokens, addedTokens, recipients }
-  })
+const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
   const { setScope } = useSafeScopeControls()
   const spaceId = useUrlSpaceId()
@@ -70,20 +51,18 @@ const CreateRecipientAllowlistPolicy = ({
       : undefined
   const { guard, retry } = useGuardStatus(target)
 
-  const heldTokens = useHeldTokenAddresses()
-
-  useSafeShieldForAddressPoisoning(values.recipients.map((recipient) => recipient.address))
-
-  // Reset during render, not in an effect, so the remounted recipients section never sees the old Safe's values.
-  const [trackedScopeKey, setTrackedScopeKey] = useState(scopeKey)
-  if (trackedScopeKey !== scopeKey) {
-    setTrackedScopeKey(scopeKey)
-    setValues(createDefaultAllowlistValues())
-  }
-
-  const canContinue = guard !== undefined && READY_GUARD_STATES.includes(guard.status)
-  const canGoNext =
-    canContinue && !heldTokens.isLoading && !heldTokens.isError && isAllowlistComplete(heldTokens.addresses, values)
+  const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFormValues>>(TxFlowContext)
+  const formMethods = useForm<RecipientAllowlistFormValues>({
+    defaultValues: data ?? createRecipientAllowlistFormValues(),
+    mode: 'onChange',
+  })
+  const values = formMethods.watch()
+  const canContinue =
+    !!target &&
+    isGuardReady(guard) &&
+    hasEntries(values.tokens) &&
+    hasEntries(values.recipients) &&
+    Object.keys(formMethods.formState.errors).length === 0
 
   const isSettled = !isLoading && !isError
   const settingsHref = selectedSafe?.chain
@@ -92,28 +71,14 @@ const CreateRecipientAllowlistPolicy = ({
         spaceId,
       )
     : undefined
-  const safeName = selectedSafe && (selectedSafe.name || shortenAddress(selectedSafe.address))
 
   return (
     <TxCard>
-      <div className="flex flex-col gap-5" data-testid="recipient-allowlist-create-step">
-        <RecipientAllowlistForm
-          values={values}
-          onChange={setValues}
-          heldTokens={heldTokens}
-          account={
-            selectedSafe && safeName && target
-              ? {
-                  chainId: selectedSafe.chainId,
-                  address: selectedSafe.address,
-                  label: getAllowlistAccountLabel(safeName, chainLabel(selectedSafe)),
-                }
-              : undefined
-          }
-          showSections={!selectedSafe || canContinue}
-          isGuardEnabled={guard?.status === 'known' || guard?.status === 'partial'}
-          dismissedCallouts={dismissedCallouts}
-          onDismissCallout={onDismissCallout}
+      <FormProvider {...formMethods}>
+        <form
+          onSubmit={formMethods.handleSubmit(onNext)}
+          className="flex flex-col gap-5"
+          data-testid="recipient-allowlist-create-step"
         >
           <SafeAccountSelector
             accounts={accounts}
@@ -134,49 +99,37 @@ const CreateRecipientAllowlistPolicy = ({
           />
 
           {isSettled && hasWallet && !hasSelectableAccount && (
-            <StatusAlert
-              tone="warning"
-              title={NO_ELIGIBLE_SAFES_TITLE}
-              description={NO_ELIGIBLE_SAFES_DESCRIPTION}
+            <Alert
+              variant="warning"
+              outlined={false}
+              className="*:data-[slot=alert-description]:text-muted-foreground"
               data-testid="no-eligible-safes"
-            />
+            >
+              <AlertSeverityIcon variant="warning" />
+              <AlertTitle>{NO_ELIGIBLE_SAFES_TITLE}</AlertTitle>
+              <AlertDescription>{NO_ELIGIBLE_SAFES_DESCRIPTION}</AlertDescription>
+            </Alert>
           )}
 
-          {safeName && guard && (
+          {selectedSafe && guard && (
             <GuardStatusBanner
               guard={guard}
-              safeName={safeName}
-              settingsLink={
-                settingsHref && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setTxFlow(undefined)
-                      router.push(settingsHref)
-                    }}
-                  >
-                    Go to Safe settings
-                  </Button>
-                )
-              }
+              safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
+              settingsLink={settingsHref && <Link render={<NextLink href={settingsHref} />}>Go to Safe settings</Link>}
               renderAddress={renderGuardAddress}
               onRetry={retry}
             />
           )}
-        </RecipientAllowlistForm>
 
-        <TxCardActions>
-          <Button
-            type="button"
-            size="submit"
-            disabled={!canGoNext}
-            onClick={() => onNext({ ...values, rules: buildAllowlistRules(heldTokens.addresses, values) })}
-            data-testid="next-btn"
-          >
-            {NEXT_LABEL}
-          </Button>
-        </TxCardActions>
-      </div>
+          {target && isGuardReady(guard) && <AllowlistFields />}
+
+          <TxCardActions>
+            <Button type="submit" size="submit" disabled={!canContinue} data-testid="next-btn">
+              {NEXT_LABEL}
+            </Button>
+          </TxCardActions>
+        </form>
+      </FormProvider>
     </TxCard>
   )
 }

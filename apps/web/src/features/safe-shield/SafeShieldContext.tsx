@@ -19,6 +19,7 @@ import {
 import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import type { GuardCheckTransaction } from '@safe-global/utils/services/policy-guard'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import {
   type ContractAnalysisResults,
@@ -37,6 +38,12 @@ type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setPoisoningAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
+  /**
+   * The calls a flow intends to make, registered while it is still being composed so the policy
+   * guard's verdict can be shown before a transaction exists to check.
+   */
+  policyCalls?: GuardCheckTransaction[]
+  setPolicyCalls: Dispatch<SetStateAction<GuardCheckTransaction[] | undefined>>
   safeTx?: SafeTransaction
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -86,6 +93,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   // Addresses registered for the poisoning check only (flows without recipient analysis)
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
+  const [policyCalls, setPolicyCalls] = useState<GuardCheckTransaction[] | undefined>(undefined)
 
   const { hasProFeatures, isSafePro } = useSafeProAccess()
   const recipientOnlyAnalysis = useRecipientAnalysis(hasProFeatures ? recipientAddresses : undefined)
@@ -145,6 +153,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         setPoisoningAddresses,
         setSafeTx,
         safeTx: safeShieldTx,
+        policyCalls,
+        setPolicyCalls,
         recipient,
         contract,
         threat,
@@ -214,6 +224,19 @@ export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undef
  * Hook to register transaction data for Safe Shield analysis
  * @param txData - Transaction data to analyze
  */
+/**
+ * Register the calls a flow is about to make, so the policy guard's verdict can be shown while
+ * the user can still change them. Keyed on the calls' contents: a form rebuilds them every render.
+ */
+export const useSafeShieldForPolicyCalls = (calls: GuardCheckTransaction[] | undefined) => {
+  const { setPolicyCalls } = useSafeShield()
+  const key = calls?.length ? JSON.stringify(calls) : undefined
+
+  useEffect(() => {
+    setPolicyCalls(key ? (JSON.parse(key) as GuardCheckTransaction[]) : undefined)
+  }, [key, setPolicyCalls])
+}
+
 export const useSafeShieldForTxData = (txData: SafeTransaction | undefined) => {
   const { setSafeTx } = useSafeShield()
 

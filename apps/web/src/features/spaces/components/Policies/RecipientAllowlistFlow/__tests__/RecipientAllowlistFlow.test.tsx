@@ -1,7 +1,8 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { render, screen } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics'
-import { createDefaultAllowlistValues } from '../types'
+import { FLOW_HELP_LABEL } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import RecipientAllowlistFlow from '..'
 
 jest.mock('@/components/tx-flow/TxFlow', () => ({
@@ -16,17 +17,7 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
 }))
 jest.mock('../CreateStep', () => ({
   __esModule: true,
-  default: ({
-    dismissedCallouts,
-    onDismissCallout,
-  }: {
-    dismissedCallouts: { tokens: boolean; recipients: boolean }
-    onDismissCallout: (section: 'tokens' | 'recipients') => void
-  }) => (
-    <div data-testid="create-step" data-dismissed={JSON.stringify(dismissedCallouts)}>
-      <button onClick={() => onDismissCallout('recipients')}>dismiss recipients</button>
-    </div>
-  ),
+  default: () => <div data-testid="create-step" />,
 }))
 
 const mockTxFlow = TxFlow as jest.MockedFunction<typeof TxFlow>
@@ -47,31 +38,20 @@ describe('RecipientAllowlistFlow', () => {
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ eventCategory: TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST })
   })
 
-  it('seeds the flow with an empty allowlist form', () => {
+  it('reviews the allowlist after the Create step', () => {
     render(<RecipientAllowlistFlow />)
 
-    expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ initialData: createDefaultAllowlistValues() })
+    expect(mockTxFlow.mock.calls[0][0]).toMatchObject({
+      initialData: { tokens: [{ address: '' }], recipients: [{ address: '' }] },
+      ReviewTransactionComponent: expect.any(Function),
+    })
   })
 
-  it('remembers dismissed callouts per section', () => {
-    render(<RecipientAllowlistFlow />)
-    expect(screen.getByTestId('create-step')).toHaveAttribute(
-      'data-dismissed',
-      JSON.stringify({ tokens: false, recipients: false }),
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: 'dismiss recipients' }))
-
-    expect(screen.getByTestId('create-step')).toHaveAttribute(
-      'data-dismissed',
-      JSON.stringify({ tokens: false, recipients: true }),
-    )
-  })
-
-  it('names the policy in the subtitle', () => {
+  it('names the policy in the subtitle with a link to the help article', () => {
     render(<RecipientAllowlistFlow />)
     render(<>{mockTxFlow.mock.calls[0][0].subtitle}</>)
 
-    expect(screen.getByText('Allowlist')).toBeInTheDocument()
+    expect(screen.getByText('Recipient allowlist')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: FLOW_HELP_LABEL })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 })

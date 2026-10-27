@@ -133,3 +133,34 @@ export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   name: 'USD Coin',
   trusted: true,
 })
+
+export const mockMultiSendDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'multisend',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: {
+      target: '0x9641d764fc13c8B624c04430C7356C1C7C8102e2',
+      selector: '0x8d80ff0a',
+      operation: 'DELEGATECALL',
+    },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** `addOwnerWithThreshold`, a call the Safe makes to itself. */
+export const mockSafeManagementDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'allow',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: MOCK_SAFES.treasury.address, selector: '0x0d582f13', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})

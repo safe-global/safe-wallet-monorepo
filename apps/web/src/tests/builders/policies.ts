@@ -1,0 +1,193 @@
+import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import {
+  PolicyType,
+  type Enforcement,
+  type TokenInfo,
+  type PolicyContracts,
+  type SpendingLimitPolicy,
+  type RecoveryPolicy,
+  type TokenWithdrawPolicy,
+  type CosignerPolicy,
+  type StatelessPolicy,
+  type ProposerPolicy,
+  type SafeRef,
+  type ActivePolicy,
+  type PolicyInfo,
+  type PendingPolicy,
+  type AvailablePolicy,
+} from '@safe-global/store/gateway/policies/types'
+
+import { Builder, type IBuilder } from '../Builder'
+
+const address = () => checksumAddress(faker.finance.ethereumAddress())
+/** A decimal wei string, matching the CGW uint256-as-string convention. */
+const weiString = () => faker.number.bigInt({ min: 1n, max: 10n ** 24n }).toString()
+
+export const tokenInfoBuilder = (): IBuilder<TokenInfo> =>
+  Builder.new<TokenInfo>().with({
+    address: address(),
+    symbol: faker.finance.currencyCode(),
+    decimals: faker.helpers.arrayElement([6, 8, 18]),
+    logoUri: faker.image.url(),
+  })
+
+export const policyContractsBuilder = (): IBuilder<PolicyContracts> =>
+  Builder.new<PolicyContracts>().with({
+    policyContract: address(),
+    safePolicyGuard: address(),
+  })
+
+/** Every active policy names the Safe it applies to: the read is space-wide. */
+const safeRef = (): SafeRef => ({ chainId: '11155111', address: address() })
+
+type GuardEnforcement = Extract<Enforcement, { via: 'guard' }>
+
+/** Module-enforced policies (spending limit, recovery): a Safe module is enabled, no guard. */
+const moduleEnforced = (): Enforcement => ({ via: 'module', moduleAddress: address() })
+/**
+ * Guard-enforced policies (token withdraw, cosigner): a SafePolicyGuard in the tx-guard slot.
+ * CGW always names the access a guard policy occupies, so the default carries one; flows that
+ * assert on a specific access override it.
+ */
+const guardEnforced = (): GuardEnforcement => ({
+  ...guardWiring(),
+  access: { target: address(), selector: faker.string.hexadecimal({ length: 8 }).toLowerCase(), operation: 'CALL' },
+})
+
+/** The same wiring without an access: a catalogue entry is not bound to one yet. */
+const guardWiring = (): GuardEnforcement => ({
+  via: 'guard',
+  guards: { transactionGuard: policyContractsBuilder().build() },
+})
+
+export const spendingLimitPolicyBuilder = (): IBuilder<SpendingLimitPolicy> =>
+  Builder.new<SpendingLimitPolicy>().with({
+    type: PolicyType.SpendingLimit,
+    enabled: true,
+    enforcement: moduleEnforced(),
+    safe: safeRef(),
+    data: {
+      module: address(),
+      spenders: [
+        {
+          spender: address(),
+          isActive: true,
+          allowances: [
+            {
+              tokenAddress: address(),
+              tokenMetadata: tokenInfoBuilder().build(),
+              amount: weiString(),
+              spent: weiString(),
+              resetPeriodMinutes: 1440,
+              resetsAtMinute: 29863614,
+              resetBoundaryIsExact: true,
+              isDelegateActive: true,
+              createdAt: 1789378356,
+              updatedAt: 1789378488,
+            },
+          ],
+        },
+      ],
+    },
+  })
+
+export const recoveryPolicyBuilder = (): IBuilder<RecoveryPolicy> =>
+  Builder.new<RecoveryPolicy>().with({
+    type: PolicyType.Recovery,
+    enabled: true,
+    enforcement: moduleEnforced(),
+    safe: safeRef(),
+    data: { recoverers: [address()], cooldownSec: '2419200', expirySec: '0' },
+  })
+
+export const tokenWithdrawPolicyBuilder = (): IBuilder<TokenWithdrawPolicy> =>
+  Builder.new<TokenWithdrawPolicy>().with({
+    type: PolicyType.TokenWithdraw,
+    enabled: true,
+    enforcement: guardEnforced(),
+    safe: safeRef(),
+    data: {
+      allowlist: [{ tokenAddress: address(), recipients: [{ account: address(), permission: 'ALWAYS' }] }],
+    },
+  })
+
+export const cosignerPolicyBuilder = (): IBuilder<CosignerPolicy> =>
+  Builder.new<CosignerPolicy>().with({
+    type: PolicyType.Cosigner,
+    enabled: true,
+    enforcement: guardEnforced(),
+    safe: safeRef(),
+    data: { cosignerAddress: address() },
+  })
+
+/** One binding of a pending request, as CGW reports it. `data` is hashed into the root. */
+export const policyInfoBuilder = (): IBuilder<PolicyInfo> =>
+  Builder.new<PolicyInfo>().with({
+    id: faker.string.hexadecimal({ length: 64 }),
+    target: address(),
+    selector: '0xa9059cbb',
+    operation: 'CALL',
+    policyContract: address(),
+    data: '0x',
+  })
+
+/** A stateless guard entry (Allow/Deny/NativeTransfer/MultiSend): the wire sends `{}`. */
+export const allowPolicyBuilder = (): IBuilder<StatelessPolicy> =>
+  Builder.new<StatelessPolicy>().with({
+    type: PolicyType.Allow,
+    enabled: true,
+    enforcement: guardEnforced(),
+    safe: safeRef(),
+    data: {},
+  })
+
+/** Proposer grants are enforced off-chain by the gateway, not by a module or guard. */
+export const proposerPolicyBuilder = (): IBuilder<ProposerPolicy> =>
+  Builder.new<ProposerPolicy>().with({
+    type: PolicyType.Proposer,
+    enabled: true,
+    enforcement: { via: 'offchain', source: 'delegate' },
+    safe: safeRef(),
+    data: { proposers: [{ proposer: address(), delegatedBy: [{ delegator: address(), label: 'test proposer' }] }] },
+  })
+
+export const activePolicyBuilder = (): IBuilder<ActivePolicy> => tokenWithdrawPolicyBuilder()
+
+/**
+ * A pending row as CGW returns it: request metadata wrapping the decoded change.
+ * `policy` is null for roots CGW cannot decode — pass one explicitly to model that.
+ */
+export const pendingPolicyBuilder = (): IBuilder<PendingPolicy> => {
+  const requestedAt = Math.floor(faker.date.recent().getTime() / 1000)
+  return Builder.new<PendingPolicy>().with({
+    configureRoot: faker.string.hexadecimal({ length: 64 }),
+    isRootConfigured: true,
+    requestedAt,
+    readyAt: requestedAt + 86_400,
+    isReady: false,
+    safePolicyGuard: address(),
+    policies: [policyInfoBuilder().build()],
+    policy: tokenWithdrawPolicyBuilder().with({ enabled: false }).build(),
+  })
+}
+
+/** Catalogue entry. CGW reports `enforcement: null` when it has no wiring for the type. */
+export const availablePolicyBuilder = (): IBuilder<AvailablePolicy> =>
+  Builder.new<AvailablePolicy>().with({
+    type: PolicyType.TokenWithdraw,
+    title: 'Token withdraw allowlist',
+    description: faker.lorem.sentence(),
+    available: true,
+    isFallback: false,
+    configuredCount: faker.number.int({ min: 0, max: 5 }),
+    enforcement: guardWiring(),
+  })
+
+/** A catalogue entry for the guard's single fallback slot (Allow / Deny / native transfers). */
+export const fallbackPolicyBuilder = (): IBuilder<AvailablePolicy> =>
+  availablePolicyBuilder().with({
+    type: PolicyType.Allow,
+    title: 'Allow by default',
+    isFallback: true,
+  })

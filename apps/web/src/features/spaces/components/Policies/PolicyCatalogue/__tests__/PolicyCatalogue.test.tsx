@@ -17,16 +17,30 @@ describe('PolicyCatalogue', () => {
     jest.clearAllMocks()
   })
 
-  it('renders the three tiles in the designed order, Spending limit first', () => {
+  it('renders every tile in the designed order, Spending limit first and the feedback tile last', () => {
     render(<PolicyCatalogue />)
 
     const buttons = screen.getAllByRole('button')
 
-    expect(buttons).toHaveLength(3)
+    expect(buttons).toHaveLength(5)
     expect(buttons[0]).toHaveAccessibleName('Set policy: Spending limit')
     expect(buttons[1]).toHaveAccessibleName('Set policy: Proposer role')
-    expect(buttons[2]).toHaveAccessibleName('Give feedback: Something missing?')
+    expect(buttons[2]).toHaveAccessibleName('Set policy: Batched transactions')
+    expect(buttons[3]).toHaveAccessibleName('Set policy: Safe management')
+    expect(buttons[4]).toHaveAccessibleName('Give feedback: Something missing?')
   })
+
+  it.each(['multisend', 'safe-management'] as const)(
+    'reports the %s tile by its id, so the page can open its builder',
+    async (id) => {
+      const onSelect = jest.fn()
+      const { user } = renderWithUserEvent(<PolicyCatalogue onSelect={onSelect} />)
+
+      await user.click(within(screen.getByTestId(`policy-catalogue-tile-${id}`)).getByRole('button'))
+
+      expect(onSelect).toHaveBeenCalledWith(id)
+    },
+  )
 
   it('gives every tile a test id of its own', () => {
     render(<PolicyCatalogue />)
@@ -140,13 +154,13 @@ describe('PolicyCatalogue', () => {
       expect(screen.queryByTestId('policy-catalogue-tile-recipient-allowlist')).not.toBeInTheDocument()
     })
 
-    it('comes first, with the other tiles in two columns, when a chain has it enabled', () => {
+    it('comes first when a chain has it enabled', () => {
       render(<PolicyCatalogue isAllowlistAvailable />)
 
       const buttons = screen.getAllByRole('button')
-      expect(buttons).toHaveLength(4)
+      expect(buttons).toHaveLength(6)
       expect(buttons[0]).toHaveAccessibleName('Set policy: Recipient allowlist')
-      expect(screen.getByTestId('policy-catalogue')).toHaveClass('md:grid-cols-2')
+      expect(screen.getByTestId('policy-catalogue')).toHaveClass('md:grid-cols-3')
     })
 
     it('opens the allowlist flow', async () => {

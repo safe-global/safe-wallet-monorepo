@@ -36,15 +36,30 @@ export const getTokenAllowances = async (
   }))
   const results = await multicall(provider, calls)
 
-  const tokenAllowances = results.map(
-    (result) => contract.interface.decodeFunctionResult('getTokenAllowance', result.returnData)[0],
-  )
+  // Multicall returns { success, returnData } per call. A reverted sub-call has
+  // returnData = '0x', which would crash decodeFunctionResult with "invalid
+  // bytes32 - not 32 bytes long". Drop failed entries so one bad delegate/token
+  // doesn't take the whole load down.
+  type DecodedAllowance = {
+    index: number
+    tokenAllowance: ReturnType<AllowanceModule['interface']['decodeFunctionResult']>[number]
+  }
+  const decoded = results
+    .map((result, index): DecodedAllowance | null => {
+      if (!result.success || !result.returnData || result.returnData === '0x') return null
+      try {
+        const tokenAllowance = contract.interface.decodeFunctionResult('getTokenAllowance', result.returnData)[0]
+        return { index, tokenAllowance }
+      } catch {
+        return null
+      }
+    })
+    .filter((entry): entry is DecodedAllowance => entry !== null)
 
   // Removed limits are discarded later, so their tokens aren't looked up.
-  const missingTokenAddresses = tokenAllowances
-    .map((tokenAllowance, index) => ({ tokenAllowance, token: allowanceRequests[index].token }))
+  const missingTokenAddresses = decoded
     .filter(({ tokenAllowance: [amount, , resetTimeMin] }) => !(amount === 0n && resetTimeMin === 0n))
-    .map(({ token }) => token)
+    .map(({ index }) => allowanceRequests[index].token)
     .filter(
       (tokenAddress) =>
         !sameAddress(tokenAddress, ZERO_ADDRESS) && !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress),
@@ -57,7 +72,7 @@ export const getTokenAllowances = async (
     )
   ).flatMap((tokenInfos) => tokenInfos ?? [])
 
-  return tokenAllowances.map((tokenAllowance, index) => {
+  return decoded.map(({ index, tokenAllowance }) => {
     const { delegate, token } = allowanceRequests[index]
     const [amount, spent, resetTimeMin, lastResetMin, nonce] = tokenAllowance
     return {
@@ -90,9 +105,16 @@ export const getTokensForDelegates = async (
   }))
 
   const results = await multicall(provider, calls)
-  const tokens = results.map(
-    (result) => contract.interface.decodeFunctionResult('getTokens', result.returnData)[0] as string[],
-  )
+  // Same robustness as getTokenAllowances: drop sub-calls that reverted so a
+  // bad delegate doesn't take down the whole listing.
+  const tokens = results.map((result) => {
+    if (!result.success || !result.returnData || result.returnData === '0x') return [] as string[]
+    try {
+      return contract.interface.decodeFunctionResult('getTokens', result.returnData)[0] as string[]
+    } catch {
+      return [] as string[]
+    }
+  })
 
   // `delegates` is an ethers Result, whose inherited flatMap turns an empty list into `[0]`.
   const spendingLimitRequests = Array.from(delegates).flatMap((delegate, idx) => {

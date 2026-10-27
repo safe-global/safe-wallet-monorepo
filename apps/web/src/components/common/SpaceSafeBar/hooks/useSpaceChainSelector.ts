@@ -58,10 +58,13 @@ export function useSpaceChainSelector() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
-      router.push({
-        pathname: AppRoutes.home,
-        query: withSpaceId({ safe: `${chain.shortName}:${safeAddress}` }, spaceId),
-      })
+      const safeParam = `${chain.shortName}:${safeAddress}`
+      // Switching chains inside the policies wizard stays in the wizard, so its reset effect can snap back to step 1.
+      if (router.pathname === AppRoutes.spaces.policies) {
+        router.push({ pathname: router.pathname, query: { ...router.query, safe: safeParam } })
+      } else {
+        router.push({ pathname: AppRoutes.home, query: withSpaceId({ safe: safeParam }, spaceId) })
+      }
     },
     [chainConfigs, router, safeAddress, spaceId],
   )
