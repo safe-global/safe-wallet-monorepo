@@ -7,7 +7,6 @@ const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
 const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const safeSelectorThreshold = '[data-testid="account-threshold"]'
-const nestedSafesButton = '[data-testid="nested-safes-button"]'
 
 // SafeSelectorDropdown dropdown list
 const dropdownContent = '[data-slot="select-content"]'
@@ -23,8 +22,4 @@ export function verifySafeSelectorTriggerAddress(address) {
 
 export function clickCopyAddressBtn() {
   cy.get(copyAddressBtn).should('be.visible').click()
-}
-
-export function clickOnNestedSafesBtn() {
-  cy.get(nestedSafesButton).should('be.visible').click()
 }

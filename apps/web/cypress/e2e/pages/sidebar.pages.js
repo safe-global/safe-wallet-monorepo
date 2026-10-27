@@ -64,50 +64,10 @@ const addSafeBtn = '[data-testid="add-safe-button"]'
 const indexStatusSection = '[data-testid="index-status"]'
 const needHelpBtn = '[data-testid="list-item-need-help"]'
 const openNestedSafeListBtn = '[data-track="nested-safes: Open nested Safe list"]'
-const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
-const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
-const parentSafeItem = 'div[aria-label="Parent Safe"]'
-const nestedSafeItem = 'div[aria-label="Nested Safe"]'
 const safeIconItem = '[data-testid="safe-icon"]'
 
 export function clickOnOpenNestedSafeListBtn() {
   cy.get(openNestedSafeListBtn).click()
-}
-
-export function checkSafesInPopverList(safes) {
-  main.verifyValuesExist(nestedSafeListPopover, safes)
-}
-
-export function clickOnSafeInPopover(safe) {
-  // Rows are overlay links: the content layer is pointer-events-none, so click the row's
-  // covering "Open Safe" anchor directly (force: the copy button sits above its center).
-  cy.get(nestedSafeListPopover)
-    .contains('[data-testid="safe-list-item"]', safe)
-    .find('a[aria-label="Open Safe"]')
-    .click({ force: true })
-}
-
-export function clickOnParentSafeInBreadcrumb() {
-  cy.wait(1000) // Needs time to render
-  cy.get(breadcrumpContainer).within(() => {
-    cy.get(parentSafeItem).within(() => {
-      cy.get('a').click()
-    })
-  })
-}
-
-export function checkParentSafeInBreadcrumb(name, address) {
-  cy.get(breadcrumpContainer).within(() => {
-    cy.get(parentSafeItem).within(() => {
-      cy.get(`a[href*="${address}"]`).should('contain', name)
-    })
-  })
-}
-
-export function checkNestedSafeInBreadcrumb(name) {
-  cy.get(breadcrumpContainer).within(() => {
-    cy.get(nestedSafeItem).should('contain', name)
-  })
 }
 
 export const importBtnStr = 'Import'
