@@ -2,7 +2,6 @@ import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as createWallet from '../pages/create_wallet.pages'
 import * as navigation from '../pages/navigation.page'
-import * as addressBook from '../pages/address_book.page'
 
 const tooltipLabel = (label) => `span[aria-label="${label}"]`
 const removeOwnerBtn = 'span[data-track="settings: Remove owner"] > span > button'
@@ -20,7 +19,6 @@ const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
-const signerList = '[data-testid="signer-list"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
@@ -29,14 +27,6 @@ const backbtnStr = 'Back'
 
 export const safeAccountNonceStr = 'Safe account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe account'
-
-export function checkExistingSignerCount(count) {
-  cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
-}
-
-export function checkExistingSignerAddress(index, address) {
-  cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
-}
 
 export function clickOnThresholdDropdown() {
   cy.get(thresholdDropdown).eq(0).click()

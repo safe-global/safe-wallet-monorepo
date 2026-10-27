@@ -252,17 +252,6 @@ export function checkTextsExistWithinElement(element, texts) {
       })
   })
 }
-export function checkTextsExistWithinElementScroll(element, texts) {
-  texts.forEach((text) => {
-    cy.get(element)
-      .scrollIntoView()
-      .should('be.visible')
-      .within(() => {
-        cy.get('div').contains(text).scrollIntoView().should('be.visible')
-      })
-  })
-}
-
 export function verifyCheckboxeState(element, index, state) {
   cy.get(element).eq(index).should(state)
 }

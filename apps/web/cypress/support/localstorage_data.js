@@ -296,13 +296,6 @@ export const addressBookData = {
       '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b': 'AD Proposer2',
     },
   }),
-  nestedsafes: aliasedStorage({
-    11155111: {
-      '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': 'Main nested safe',
-      '0x22e5093F4A75c2E99A8EcabfBF8c5c7fDcaDCf9d': 'Nested safe1',
-      '0xE5577b9E75F94C4a900E74F63F79A7968e812208': 'Nested safe2',
-    },
-  }),
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },
@@ -621,17 +614,6 @@ export const addedSafes = {
       },
     },
   },
-  /** Sidebar tests: pending-actions safe (SEP_STATIC_SAFE_7) on Sepolia */
-  /** Nested safes: parent safe SEP_STATIC_SAFE_45 on Sepolia */
-  nestedParentSafe45: aliasedStorage({
-    11155111: {
-      '0x5958B92f412408bF12Bbc8638d524ebe5878E795': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
 }
 
 export const customApps = (url) => ({
