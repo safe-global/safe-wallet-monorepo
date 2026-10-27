@@ -1,6 +1,5 @@
 // Reasons for `skips`: the cases need a service the local stack cannot provide; staging runs keep them.
 const securityProviders = 'Blockaid, Hypernative and Tenderly are hosted providers'
-const positionsProvider = 'positions come from Zerion, a hosted provider'
 const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepolia, not the fork'
 const fourthChain = 'the list only appears when a chain is left to add, which needs a fourth fork'
 
@@ -12,8 +11,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/address_book.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/assets_2.cy.js': { scenario: 'prepareAssetsSecondScenario' },
-  'cypress/e2e/regression/assets.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/balances_pagination.cy.js': { scenario: 'preparePaginationScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
   'cypress/e2e/regression/copilot.cy.js': {
@@ -62,21 +59,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/nested_safes_fund_asset.cy.js': { scenario: 'prepareNestedFundingScenario' },
   'cypress/e2e/regression/nested_safes_review.cy.js': { scenario: 'prepareNestedFundingScenario' },
   'cypress/e2e/regression/nested_safes.cy.js': { scenario: 'prepareNestedScenario' },
-  'cypress/e2e/regression/portfolio.cy.js': {
-    scenario: 'preparePortfolioScenario',
-    chains: [137],
-    skips: {
-      'Verify that clicking "View all" on the Positions widget navigates to Assets → Positions tab': positionsProvider,
-      ['Verify that each protocol accordion in the Positions tab is expandable and shows position groups with ' +
-      'token name, symbol, position type, balance and fiat value']: positionsProvider,
-      'Verify that the "Total positions value" title and a fiat value are visible on the Positions tab':
-        positionsProvider,
-      'Verify that the Positions tab lists all protocols with their name, icon, fiat value, and percentage share':
-        positionsProvider,
-      'Verify that the Positions widget on the dashboard displays all protocols with name and fiat value':
-        positionsProvider,
-    },
-  },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/safe_selector.cy.js': { scenario: 'prepareSafeSelectorScenario', chains: [1] },
   'cypress/e2e/regression/sidebar_new.cy.js': { scenario: 'prepareSafeSelectorScenario' },
