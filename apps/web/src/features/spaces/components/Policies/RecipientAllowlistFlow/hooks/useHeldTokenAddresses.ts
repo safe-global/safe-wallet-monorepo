@@ -3,7 +3,7 @@ import useSpendingLimitTokenOptions, {
   type TokenOptionsResult,
 } from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 
-type HeldTokenAddresses = TokenOptionsResult & {
+export type HeldTokenAddresses = TokenOptionsResult & {
   addresses: string[]
 }
 
