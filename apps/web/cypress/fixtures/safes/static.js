@@ -42,7 +42,7 @@ export default {
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
-  /** Balances testing - Used in: balances_endpoints.cy.js */
+  /** Balances testing - Used in: Playwright token-lists.spec.ts */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
   /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Used in: dashboard.cy.js. Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
   ETH_STATIC_SAFE_OUTDATED_MASTERCOPY: 'eth:0x1230B3d59858296A31053C1b8562Ecf89A2f888b',

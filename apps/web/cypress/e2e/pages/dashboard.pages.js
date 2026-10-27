@@ -1,16 +1,6 @@
-import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-
-const transactionQueueStr = 'Pending transactions'
-const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total'
-const sendStr = 'Send'
-const receiveStr = 'Receive'
-const viewAllStr = 'View all'
-const explorePossibleStr = "Explore what's possible"
-const swapSuggestion = 'Swap tokens instantly'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
@@ -130,42 +120,6 @@ export function verifyShareBtnWorks(index, data) {
         })
       }),
     )
-}
-
-export function verifyOverviewWidgetData() {
-  // Alias for the Overview section
-  cy.contains('div', overviewStr).parents('section').as('overviewSection')
-
-  cy.get('@overviewSection').within(() => {
-    // Prefix is separated across elements in EthHashInfo
-    cy.get('button').contains(sendStr)
-    cy.get('button').contains(receiveStr)
-  })
-}
-
-export function verifyTxQueueWidget() {
-  // Alias for the Transaction queue section
-  cy.contains('p', transactionQueueStr).parents('section').as('txQueueSection')
-
-  cy.get('@txQueueSection').within(() => {
-    // There should be queued transactions
-    cy.contains(noTransactionStr).should('not.exist')
-
-    // Queued txns
-    cy.contains(
-      `a[href^="/transactions/tx?id=multisig_0x"]`,
-      'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
-    ).should('exist')
-
-    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
-
-    cy.get(viewAllLink).should('exist').and('contain.text', viewAllStr)
-  })
-}
-
-export function verifyExplorePossibleSection() {
-  cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
-  cy.get('@explorePossibleSection').contains(swapSuggestion)
 }
 
 export function expandActionRequiredPanel() {

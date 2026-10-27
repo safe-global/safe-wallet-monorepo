@@ -15,7 +15,10 @@ const mockUseRowOverviews: jest.Mock = jest.fn(() => ({ current: null }))
 jest.mock('../useRowOverviews', () => ({
   useRowOverviews: (...args: unknown[]) => mockUseRowOverviews(...args),
 }))
-jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: () => <div data-testid="identicon" /> }))
+jest.mock('@safe-global/views/components/common/Identicon', () => ({
+  __esModule: true,
+  default: () => <div data-testid="identicon" />,
+}))
 jest.mock('../../AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
 }))

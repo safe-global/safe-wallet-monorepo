@@ -4,10 +4,11 @@ import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/Sa
 import { SlotProvider } from '@/components/tx-flow/slots'
 import RiskConfirmationSlot from '@/components/tx-flow/features/RiskConfirmation'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import { useThreatAnalysis } from '@/features/safe-shield/hooks'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import ReviewTransactionContent from '../ReviewTransactionContent'
+
+const mockUseThreatAnalysis = jest.fn()
 
 jest.mock('@/features/safe-shield/hooks', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
@@ -16,7 +17,7 @@ jest.mock('@/features/safe-shield/hooks', () => ({
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
-  useThreatAnalysis: jest.fn(),
+  useThreatAnalysis: () => mockUseThreatAnalysis(),
   useRecipientAnalysisWithPoisoning: jest.fn(() => [undefined, undefined, false]),
 }))
 
@@ -33,8 +34,6 @@ jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
   default: ({ children }: { children: (ok: boolean) => ReactElement }) => children(true),
 }))
-
-const mockUseThreatAnalysis = useThreatAnalysis as jest.MockedFunction<typeof useThreatAnalysis>
 
 const renderReview = () => {
   const onSubmit = jest.fn()

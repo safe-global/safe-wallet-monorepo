@@ -8,6 +8,8 @@ import { PositionGroup } from '../index'
 // Aave V3 Lending of the EF Safe, recorded from staging: deposits and a GHO loan.
 const group = positionsFixtures.efSafe[0].items[0]
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+// toHaveTextContent turns the hair space after the currency sign into a space, so the expected text must too
+const fiatText = (value: string | number) => formatCurrencyPrecise(value, 'usd').replace(/\s/g, ' ')
 
 describe('PositionGroup', () => {
   it('titles the table with the group name', () => {
@@ -29,7 +31,7 @@ describe('PositionGroup', () => {
         new RegExp(`${escape(symbol)}\\s*•\\s*${getReadablePositionType(position.position_type)}`),
       )
       expect(row).toHaveTextContent(`${formatVisualAmount(position.balance, decimals)} ${symbol}`)
-      expect(row).toHaveTextContent(formatCurrencyPrecise(position.fiatBalance, 'usd'))
+      expect(row).toHaveTextContent(fiatText(position.fiatBalance))
     })
   })
 
@@ -40,6 +42,6 @@ describe('PositionGroup', () => {
 
     const row = screen.getAllByTestId('table-row')[group.items.indexOf(loan)]
     expect(row).toHaveTextContent(`${loan.tokenInfo.symbol} • Debt`)
-    expect(row).toHaveTextContent(/-\$2,064,531\.91/)
+    expect(row).toHaveTextContent(/-\$\s2,064,531\.91/)
   })
 })

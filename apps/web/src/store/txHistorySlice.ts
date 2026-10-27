@@ -9,7 +9,7 @@ import {
   isTransactionListItem,
 } from '@/utils/transaction-guards'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { clearPendingTx, selectPendingTxs } from './pendingTxsSlice'
+import { clearPendingTx, selectPendingTxIdsBySafe, selectPendingTxs } from './pendingTxsSlice'
 import { makeLoadableSlice } from './common'
 import { selectSafeInfo } from './slices'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
@@ -29,24 +29,28 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
   listenerMiddleware.startListening({
     actionCreator: txHistorySlice.actions.set,
     effect: (action, listenerApi) => {
-      if (!action.payload.data) {
+      const state = listenerApi.getState()
+      const safe = selectSafeInfo(state).data
+      if (!action.payload.data || !safe) {
         return
       }
 
-      const pendingTxs = selectPendingTxs(listenerApi.getState())
+      const pendingTxs = selectPendingTxs(state)
+      // Only this Safe's: the pending tx of a nested Safe can have the same nonce as its parent's
+      const pendingTxIds = selectPendingTxIdsBySafe(state, safe.chainId, safe.address.value)
 
       for (const result of action.payload.data.results) {
-        if (!isTransactionListItem(result)) {
+        if (!isTransactionListItem(result) || !isMultisigExecutionInfo(result.transaction.executionInfo)) {
           continue
         }
 
-        const pendingTxByNonce = Object.entries(pendingTxs).find(([, pendingTx]) =>
-          isMultisigExecutionInfo(result.transaction.executionInfo)
-            ? pendingTx.nonce === result.transaction.executionInfo.nonce
-            : false,
-        )
+        const txId = result.transaction.id
+        const { nonce } = result.transaction.executionInfo
+        const pendingTxId = pendingTxIds.includes(txId)
+          ? txId
+          : pendingTxIds.find((id) => pendingTxs[id].nonce === nonce)
 
-        if (!pendingTxByNonce) continue
+        if (!pendingTxId) continue
 
         // Invalidate getOwnedSafe cache as nested Safe was (likely) created
         if (isCustomTxInfo(result.transaction.txInfo)) {
@@ -55,25 +59,17 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
           const likelyDeployedSafe = method === 'multiSend'
 
           if (deployedSafe || likelyDeployedSafe) {
-            const safe = selectSafeInfo(listenerApi.getState())
-            const safeAddress = safe.data?.address?.value
-            const chainId = safe.data?.chainId
-
-            if (chainId && safeAddress) {
-              listenerApi.dispatch(
-                cgwApi.util.invalidateTags([
-                  {
-                    type: 'owners',
-                  },
-                ]),
-              )
-            }
+            listenerApi.dispatch(
+              cgwApi.util.invalidateTags([
+                {
+                  type: 'owners',
+                },
+              ]),
+            )
           }
         }
 
-        const txId = result.transaction.id
-
-        const [pendingTxId, pendingTx] = pendingTxByNonce
+        const pendingTx = pendingTxs[pendingTxId]
 
         if (pendingTxId === txId) {
           const txHash = 'txHash' in pendingTx ? pendingTx.txHash : undefined
@@ -82,7 +78,7 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
             txId,
             chainId: pendingTx.chainId,
             safeAddress: pendingTx.safeAddress,
-            groupKey: pendingTxs[txId].groupKey,
+            groupKey: pendingTx.groupKey,
             txHash,
           })
         } else {
