@@ -6,7 +6,8 @@ export type PolicyEngineContract =
 
 type Deployment = { networkAddresses: Record<string, string> }
 
-// Source: https://github.com/safe-global/policy-indexer/blob/main/config.yaml
+// Source: https://github.com/safe-global/policy-indexer/blob/main/config.yaml (guard and event-emitting policies)
+// and src/policies/registry.ts (policies without events, which CGW classifies by address)
 // One guard per root-activation delay, all with a 604800s expiry
 const POLICY_GUARD_BY_DELAY = {
   '0s': '0x55c241591E12CE3c58491D02b737F12D3199ae95',
@@ -24,21 +25,12 @@ const onIndexedChains = (address: string): Deployment => ({
   networkAddresses: Object.fromEntries(INDEXED_CHAIN_IDS.map((chainId) => [chainId, address])),
 })
 
-const NATIVE_POLICY_CHAIN_IDS = ['100', '11155111', '84532']
-
-// TODO: read from CGW once a policies catalogue endpoint exists
-const NATIVE_TRANSFER_POLICY: Deployment = {
-  networkAddresses: Object.fromEntries(
-    NATIVE_POLICY_CHAIN_IDS.map((chainId) => [chainId, '0x77d29DEaE811D5E42fbe292d3f2729403e11cA3A']),
-  ),
-}
-
 // The policy indexer's addresses: configurations against any other deployment are invisible to CGW
 const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
   SafePolicyGuard: onIndexedChains(SAFE_POLICY_GUARD),
   ERC20ApprovePolicy: onIndexedChains('0xfF86DD4caf79672E55e0C3e3A5410746600d60F4'),
   ERC20TransferPolicy: onIndexedChains('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187'),
-  NativeTransferPolicy: NATIVE_TRANSFER_POLICY,
+  NativeTransferPolicy: onIndexedChains('0x2868C263EBF3672211E4C32e0B21689FF0584ca3'),
 }
 
 export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineContract): string | undefined =>

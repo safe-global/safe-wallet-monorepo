@@ -61,7 +61,7 @@ describe('allowlistConfigurations', () => {
   })
 
   it('throws when a native rule is on a chain without the native policy', () => {
-    expect(() => buildAllowlistConfigurations('1', [{ tokenAddress: ZERO_ADDRESS, recipients: [ALICE] }])).toThrow(
+    expect(() => buildAllowlistConfigurations('100', [{ tokenAddress: ZERO_ADDRESS, recipients: [ALICE] }])).toThrow(
       NATIVE_POLICY_UNAVAILABLE_ERROR,
     )
   })
