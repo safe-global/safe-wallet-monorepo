@@ -57,15 +57,16 @@ test('blocks a Safe backend request from the hosted CoW widget', () => {
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'
+const batch = 'cypress/e2e/regression/batch_tx.cy.js'
 const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
-  assert.deepEqual(selectCypressSpecs('regression/assets'), [assets])
-  assert.deepEqual(selectCypressSpecs('tx_notes'), ['cypress/e2e/regression/tx_notes.cy.js'])
-  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/assets,tx_queue_reject_btn'), [
+  assert.deepEqual(selectCypressSpecs('regression/batch_tx'), [batch])
+  assert.deepEqual(selectCypressSpecs('tx_details_queue'), ['cypress/e2e/regression/tx_details_queue.cy.js'])
+  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/batch_tx,tx_queue_reject_btn'), [
     rejection,
-    assets,
+    batch,
   ])
 })
 
