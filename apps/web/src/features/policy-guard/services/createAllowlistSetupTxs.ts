@@ -27,7 +27,6 @@ export const createAllowlistSetupTxs = ({
       return createFirstSetupTxs({ safeAddress, guardAddress, configurations })
     case 'known':
       return [requestTx()]
-    // configureImmediately reverts once our guard is in either slot, so a partial setup must use a request
     case 'partial':
       return [
         requestTx(),

@@ -6,8 +6,7 @@ export type PolicyEngineContract =
 
 type Deployment = { networkAddresses: Record<string, string> }
 
-// Source: https://github.com/safe-global/policy-indexer/blob/main/config.yaml (guard and event-emitting policies)
-// and src/policies/registry.ts (policies without events, which CGW classifies by address)
+// Source: https://github.com/safe-global/policy-indexer (config.yaml and src/policies/registry.ts)
 // One guard per root-activation delay, all with a 604800s expiry
 const POLICY_GUARD_BY_DELAY = {
   '0s': '0x55c241591E12CE3c58491D02b737F12D3199ae95',
