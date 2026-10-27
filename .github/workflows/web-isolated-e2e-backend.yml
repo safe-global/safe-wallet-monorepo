@@ -30,47 +30,45 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      run: ${{ github.event_name == 'workflow_dispatch' || steps.changes.outputs.relevant == 'true' }}
+      run: ${{ steps.changes.outputs.relevant }}
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
       - name: Detect changes that the isolated E2E covers
         id: changes
-        if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[].filename')
-          relevant=false
-          while read -r file; do
-            case "$file" in
-              .github/workflows/web-isolated-e2e-backend.yml | .github/actions/isolated-e2e-backend/* | \
-                .github/actions/build/* | .github/actions/yarn/* | .github/actions/corepack/* | \
-                .github/actions/cache-deps/* | apps/web/* | apps/tx-builder/* | packages/* | config/* | \
-                package.json | yarn.lock | .yarnrc.yml | .yarn/patches/*)
-                relevant=true
-                break
-                ;;
-            esac
-          done <<< "$files"
-          echo "relevant=$relevant" >> "$GITHUB_OUTPUT"
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            .github/workflows/web-isolated-e2e-backend.yml
+            .github/actions/isolated-e2e-backend/**
+            .github/actions/build/**
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/cache-deps/**
+            apps/web/**
+            apps/tx-builder/**
+            packages/**
+            config/**
+            package.json
+            yarn.lock
+            .yarnrc.yml
+            .yarn/patches/**
 
       # Fork pull requests get no secrets for the backend, so they cannot pass the check.
       - name: Block fork pull requests
         if: >-
-          steps.changes.outputs.relevant == 'true' &&
+          github.event_name == 'pull_request' && steps.changes.outputs.relevant == 'true' &&
           github.event.pull_request.head.repo.full_name != github.repository
         run: |
           echo '::error::Isolated E2E cannot run on a fork pull request; push the branch to this repository'
           exit 1
 
       - uses: actions/checkout@v7.0.1
-        if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.relevant == 'true'
+        if: steps.changes.outputs.relevant == 'true'
         with:
           persist-credentials: false
       - name: Plan shards
         id: plan
-        if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.relevant == 'true'
+        if: steps.changes.outputs.relevant == 'true'
         env:
           SAFE_E2E_SHARDS: ${{ inputs.shards || '3' }}
         run: echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
@@ -268,22 +266,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
-      - name: Fail unless every needed job passed
-        env:
-          PLAN: ${{ needs.plan.result }}
-          RUN: ${{ needs.plan.outputs.run }}
-          BUILD: ${{ needs.build.result }}
-          E2E: ${{ needs.e2e.result }}
-        run: |
-          if [ "$PLAN" != success ]; then
-            echo "The plan job ended with $PLAN" >&2
-            exit 1
-          fi
-          if [ "$RUN" != true ]; then
-            echo 'No change that the isolated E2E covers'
-            exit 0
-          fi
-          if [ "$BUILD" != success ] || [ "$E2E" != success ]; then
-            echo "The build job ended with $BUILD and the Playwright shards with $E2E" >&2
-            exit 1
-          fi
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.plan.outputs.run }}
