@@ -43,6 +43,24 @@ describe('NameInput', () => {
       })
     })
 
+    it('accepts a name of exactly 50 characters', async () => {
+      render(
+        <Wrapper>
+          <NameInput name="name" label="Name" />
+        </Wrapper>,
+      )
+
+      // Over the limit first, so the assertion below waits for a validation run, not the initial state
+      fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'a'.repeat(51) } })
+      const input = await screen.findByRole('textbox', { name: 'Maximum 50 symbols' })
+      fireEvent.change(input, { target: { value: 'a'.repeat(50) } })
+
+      await waitFor(() => {
+        expect(screen.getByRole('textbox', { name: 'Name' })).not.toHaveAttribute('aria-invalid', 'true')
+      })
+      expect(screen.queryByText('Maximum 50 symbols')).not.toBeInTheDocument()
+    })
+
     it('trims the value on blur', async () => {
       render(
         <Wrapper>

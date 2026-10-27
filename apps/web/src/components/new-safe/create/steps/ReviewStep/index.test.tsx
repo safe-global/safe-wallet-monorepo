@@ -4,8 +4,8 @@ import * as relay from '@/utils/relaying'
 import * as remainingRelays from '@/hooks/useRemainingRelays'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-import { render } from '@/tests/test-utils'
-import ReviewStep, { NetworkFee } from '@/components/new-safe/create/steps/ReviewStep/index'
+import { fakerChecksummedAddress, render } from '@/tests/test-utils'
+import ReviewStep, { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep/index'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
@@ -766,5 +766,25 @@ describe('ReviewStep', () => {
 
       expect(persistSpy).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null }))
     })
+  })
+})
+
+describe('SafeSetupOverview', () => {
+  it('shows the name, signer names and threshold of the new Safe', () => {
+    render(
+      <SafeSetupOverview
+        name="Treasury"
+        owners={[
+          { name: 'David', address: fakerChecksummedAddress() },
+          { name: '', address: fakerChecksummedAddress() },
+        ]}
+        threshold={1}
+        networks={[mockChain]}
+      />,
+    )
+
+    expect(screen.getByText('Treasury')).toBeInTheDocument()
+    expect(screen.getByText('David')).toBeInTheDocument()
+    expect(screen.getByText('1 out of 2 signers')).toBeInTheDocument()
   })
 })

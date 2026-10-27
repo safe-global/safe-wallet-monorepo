@@ -375,12 +375,6 @@ export const addressBookData = {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
     },
   },
-  get sameOwnerName() {
-    return {
-      11155111: { [defaultOwnerAddress()]: 'Automation owner Sepolia' },
-      1: { [defaultOwnerAddress()]: 'Automation owner Eth' },
-    }
-  },
   safeSchiledAddressBook: {
     137: {
       '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0': 'Test Recipient',
@@ -888,15 +882,6 @@ export const safeLabsTerms = {
 
 export const safeProAnnouncement = {
   seen: 'true',
-}
-
-export const pendingCfDeletes = {
-  // Two ghost entries pointing at already-deleted CGW records. Used to reproduce
-  // the "[CF Sync] Failed to flush pending CF delete" 404 spam regression.
-  twoGhostEntries: [
-    { chainId: '11155111', address: '0x111111111111111111111111111111111111aaaa' },
-    { chainId: '11155111', address: '0x222222222222222222222222222222222222bbbb' },
-  ],
 }
 
 export const undeployedSafe = {

@@ -20,8 +20,6 @@ const thresholdList = '[data-slot="select-content"]'
 const thresholdDropdown = '[data-testid="threshold-selector"]'
 const thresholdOption = '[data-slot="select-item"]'
 const existingOwnerAddressInput = (index) => `input[name="owners.${index}.address"]`
-const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
-const singleOwnerNameInput = 'input[name="name"]'
 const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
@@ -47,35 +45,8 @@ export function checkExistingSignerAddress(index, address) {
   cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
 }
 
-export function verifyNumberOfOwners(count) {
-  const indices = Array.from({ length: count }, (_, index) => index)
-  const names = indices.map(existingOwnerNameInput)
-  const addresses = indices.map(existingOwnerAddressInput)
-
-  names.forEach((selector) => {
-    cy.get(selector).should('have.length', 1)
-  })
-
-  addresses.forEach((selector) => {
-    cy.get(selector).should('have.length', 1)
-  })
-}
-
-export function verifyExistingOwnerAddress(index, address) {
-  cy.get(existingOwnerAddressInput(index)).should('have.value', address)
-}
-
 export function typeOwnerAddressCreateSafeStep(index, address) {
   cy.get(existingOwnerAddressInput(index)).clear().type(address)
-}
-
-export function verifyExistingOwnerName(index, name) {
-  cy.get(existingOwnerNameInput(index)).should('have.value', name)
-}
-
-export function typeExistingOwnerName(name) {
-  cy.get(singleOwnerNameInput).clear().type(name, main.nameTypingOptions)
-  main.verifyInputValue(singleOwnerNameInput, name)
 }
 
 export function clickOnThresholdDropdown() {
@@ -90,13 +61,6 @@ export function selectThresholdOption(index) {
   // Base UI select items only commit a click once highlighted; hover first so the
   // highlight renders before the click lands.
   getThresholdOptions().eq(index).trigger('mousemove').click()
-}
-
-export function verifyThresholdLimit(startValue, endValue) {
-  cy.get('p').contains(`out of ${endValue} signer${endValue > 1 ? 's' : ''}`)
-  clickOnThresholdDropdown()
-  getThresholdOptions().eq(0).should('have.text', startValue)
-  selectThresholdOption(0)
 }
 
 export function openRemoveOwnerWindow(btn) {
@@ -162,9 +126,6 @@ export function verifyErrorMsgInvalidAddress(errorMsg) {
   cy.get('label').contains(errorMsg).should('exist')
 }
 
-export function verifyValidWalletName(errorMsg) {
-  cy.get('label').contains(errorMsg).should('not.exist')
-}
 //Type owner address on the manage signers form
 export function typeOwnerAddress(address) {
   cy.get(newOwnerAddress)
@@ -203,18 +164,6 @@ export function verifyConfirmTransactionWindowDisplayed() {
   cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
   cy.get('button').contains(continueBtnStr).should('exist')
   cy.get('button').contains(backbtnStr).should('exist')
-}
-
-export function verifyThreshold(startValue, endValue) {
-  cy.get(thresholdDropdown).should('contain.text', startValue)
-  cy.get('p')
-    .contains(`out of ${endValue} signer${endValue > 1 ? 's' : ''}`)
-    .should('be.visible')
-  cy.get(thresholdDropdown).click()
-  cy.get(thresholdList).contains(endValue).should('be.visible')
-  cy.get(thresholdList).find(thresholdOption).should('have.length', endValue)
-  cy.get('body').type('{esc}')
-  cy.get(thresholdList).should('not.be.visible')
 }
 
 export function clickOnChangeThresholdBtn() {
