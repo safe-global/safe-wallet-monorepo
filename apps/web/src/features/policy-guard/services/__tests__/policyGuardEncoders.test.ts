@@ -1,3 +1,4 @@
+import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
 import { getAddress, id, Interface, keccak256 } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
@@ -140,5 +141,8 @@ describe('describeSetupCall', () => {
   it('returns undefined for a call it does not know', () => {
     expect(describeSetupCall({ data: '0xa9059cbb' })).toBeUndefined()
     expect(describeSetupCall({ data: '0x' })).toBeUndefined()
+    expect(
+      describeSetupCall({ data: Safe__factory.createInterface().encodeFunctionData('changeThreshold', [1]) }),
+    ).toBeUndefined()
   })
 })

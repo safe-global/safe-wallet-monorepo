@@ -1,18 +1,12 @@
-import type { MetaTransactionData, OperationType } from '@safe-global/types-kit'
+import type { MetaTransactionData } from '@safe-global/types-kit'
+import type {
+  CreatePolicyConfigurationRequestDto,
+  PolicyConfigurationDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-export type PolicyConfiguration = {
-  target: string
-  selector: string
-  operation: OperationType
-  policy: string
-  data: string
-}
+export type PolicyConfiguration = PolicyConfigurationDto
 
-export type AllowlistSetup = {
-  txs: MetaTransactionData[]
-  configurations: PolicyConfiguration[]
-  configureRoot: string
-}
+export type AllowlistSetup = CreatePolicyConfigurationRequestDto & { txs: MetaTransactionData[] }
 
 export type GuardSlot = 'transaction' | 'module'
 
