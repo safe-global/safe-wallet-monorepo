@@ -1,5 +1,5 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllowlistRule } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { AllowlistRule } from '../types'
 import {
   isSpendingLimitPolicy,
   type Policy,

@@ -4,7 +4,7 @@ import { RESTRICTED_SPENDING_LIMITS_DESCRIPTION } from '@safe-global/views/featu
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import type { PolicyAllowance } from '@safe-global/views/features/spaces/components/Policies/types'
-import type { RecipientAllowlistFlowData } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { RecipientAllowlistFlowData } from '../../types'
 import { useSpendingLimitImpacts } from '../../hooks/useSpendingLimitImpacts'
 import type { SpendingLimitImpact } from '../../utils/spendingLimitImpacts'
 import ExistingPoliciesStep from '..'

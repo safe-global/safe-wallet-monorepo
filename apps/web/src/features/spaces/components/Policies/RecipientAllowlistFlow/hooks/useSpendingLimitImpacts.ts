@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
-import type { AllowlistRule } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { AllowlistRule } from '../types'
 import { useSpacePolicies } from '../../hooks/useSpacePolicies'
 import { getSpendingLimitImpacts, type SpendingLimitImpact } from '../utils/spendingLimitImpacts'
 
