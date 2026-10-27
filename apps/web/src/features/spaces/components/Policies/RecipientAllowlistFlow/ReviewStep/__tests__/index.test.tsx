@@ -41,6 +41,7 @@ const renderReview = (
     safePolicyGuard: GUARD,
     policyContract: ERC20_POLICY,
     fallbackPolicy: undefined,
+    multiSendDefaults: undefined,
     currentGuard: isGuardSet ? GUARD : undefined,
     currentModuleGuard: isGuardSet ? GUARD : undefined,
     isGuardSet,

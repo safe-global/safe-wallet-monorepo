@@ -11,6 +11,7 @@ const SAFE = '0x1111111111111111111111111111111111111111' as Address
 const GUARD = '0x2222222222222222222222222222222222222222' as Address
 const POLICY = '0x3333333333333333333333333333333333333333' as Address
 const ALLOW = '0x4444444444444444444444444444444444444444' as Address
+const MULTI_SEND = { policy: '0x5555555555555555555555555555555555555555' as Address, targets: [GUARD] }
 
 const contracts = (overrides: Partial<GuardPolicyContracts> = {}): GuardPolicyContracts => ({
   chainId: '11155111',
@@ -18,6 +19,7 @@ const contracts = (overrides: Partial<GuardPolicyContracts> = {}): GuardPolicyCo
   safePolicyGuard: GUARD,
   policyContract: POLICY,
   fallbackPolicy: ALLOW,
+  multiSendDefaults: MULTI_SEND,
   currentGuard: undefined,
   currentModuleGuard: undefined,
   isGuardSet: false,
@@ -28,7 +30,7 @@ const contracts = (overrides: Partial<GuardPolicyContracts> = {}): GuardPolicyCo
 })
 
 describe('buildGuardPolicy', () => {
-  it('hands the builder both guard slots and the default fallback', () => {
+  it('hands the builder both guard slots and the setup defaults', () => {
     const build = jest.fn().mockReturnValue({ txs: [], mode: 'request', configurations: [], configureRoot: '0x' })
 
     buildGuardPolicy(contracts({ currentGuard: GUARD, currentModuleGuard: GUARD }), build)
@@ -39,6 +41,7 @@ describe('buildGuardPolicy', () => {
         currentModuleGuard: GUARD,
         safePolicyGuard: GUARD,
         fallbackPolicy: ALLOW,
+        multiSendDefaults: MULTI_SEND,
       }),
       POLICY,
     )

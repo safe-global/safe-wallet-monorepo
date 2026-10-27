@@ -65,6 +65,51 @@ describe('assemblePolicyBatch', () => {
     expect(applied).toHaveLength(3)
   })
 
+  it('binds each official MultiSendCallOnly to MultiSendPolicy on DELEGATECALL', () => {
+    const multiSend = '0x7777777777777777777777777777777777777777' as Address
+    const targets = [
+      '0x8888888888888888888888888888888888888888',
+      '0x9999999999999999999999999999999999999999',
+    ] as Address[]
+
+    const { configurations: installed } = assemblePolicyBatch(
+      { ...context, fallbackPolicy: undefined, multiSendDefaults: { policy: multiSend, targets } },
+      configurations,
+    )
+
+    expect(installed).toEqual([
+      ...configurations,
+      ...targets.map((target) => ({
+        target,
+        selector: '0x8d80ff0a',
+        operation: OPERATION_DELEGATECALL,
+        policy: multiSend,
+        data: '0x',
+      })),
+    ])
+  })
+
+  it('does not bind a MultiSendCallOnly the policy already configures', () => {
+    const target = '0x8888888888888888888888888888888888888888' as Address
+    const own = { target, selector: '0x8d80ff0a', operation: OPERATION_DELEGATECALL, policy: POLICY, data: '0x' }
+
+    const { configurations: installed } = assemblePolicyBatch(
+      { ...context, fallbackPolicy: undefined, multiSendDefaults: { policy: ALLOW, targets: [target] } },
+      [own],
+    )
+
+    expect(installed).toEqual([own])
+  })
+
+  it('adds no setup defaults to a requested change', () => {
+    const { configurations: requested } = assemblePolicyBatch(
+      { ...context, currentGuard: GUARD, multiSendDefaults: { policy: ALLOW, targets: [SAFE] } },
+      configurations,
+    )
+
+    expect(requested).toEqual(configurations)
+  })
+
   it('keeps a fallback the policy sets itself instead of adding the default', () => {
     const deny = '0x6666666666666666666666666666666666666666'
     const ownFallback = [{ target: ZERO, selector: NO_SELECTOR, operation: OPERATION_CALL, policy: deny, data: '0x' }]

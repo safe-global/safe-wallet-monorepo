@@ -11,12 +11,14 @@ import {
   computeConfigureRoot,
 } from './guardTx'
 import type { PolicyConfiguration } from './guardTx'
+import { MULTI_SEND_POLICY_DATA, MULTI_SEND_SELECTOR } from '../MultiSendPolicy/contracts'
+import type { MultiSendDefaults } from './defaultMultiSend'
 
 /**
  * How the batch configures the guard:
  *  - `immediate`: guard not yet active → `configureImmediately` + `setGuard` + `setModuleGuard`,
- *    applied in one signed batch. Unless the policy sets its own fallback, the default fallback
- *    policy (AllowPolicy unless configured to deny) takes the fallback access.
+ *    applied in one signed batch. It also binds every official MultiSendCallOnly to MultiSendPolicy and,
+ *    unless the policy sets its own fallback, gives the fallback access to the default fallback policy.
  *  - `request`: guard already active in either slot → `requestConfiguration(root)` only. `configureImmediately`
  *    reverts in the guard's `checkTransaction` once it is live, so the change takes effect via a
  *    separate `applyConfiguration` once the on-chain DELAY has elapsed.
@@ -34,6 +36,8 @@ export type PolicyBatchContext = {
   safePolicyGuard: Address
   /** The policy a first setup installs as the fallback; undefined installs none. */
   fallbackPolicy: Address | undefined
+  /** The MultiSendPolicy a first setup binds batches to, so each call in a batch faces the other policies. */
+  multiSendDefaults?: MultiSendDefaults
   /**
    * Allow overwriting a DIFFERENT (non-policy) guard already on the Safe, in either slot. Guard-rail:
    * without it the builder throws, since the setters would silently replace the existing guard. Wizards
@@ -52,6 +56,27 @@ export type PolicyBatch = {
 }
 
 const isSameGuard = (a: string | undefined, b: string): boolean => !!a && a.toLowerCase() === b.toLowerCase()
+
+const withDefaultMultiSend = (
+  configurations: PolicyConfiguration[],
+  multiSendDefaults: MultiSendDefaults | undefined,
+): PolicyConfiguration[] => {
+  if (!multiSendDefaults) return configurations
+  if (!isAddress(multiSendDefaults.policy)) throw new Error('Invalid MultiSendPolicy address')
+
+  const configured = new Set(configurations.map((configuration) => accessId(configuration)))
+  const bindings = multiSendDefaults.targets
+    .map((target) => ({
+      target,
+      selector: MULTI_SEND_SELECTOR,
+      operation: OPERATION_DELEGATECALL,
+      policy: multiSendDefaults.policy,
+      data: MULTI_SEND_POLICY_DATA,
+    }))
+    .filter((binding) => !configured.has(accessId(binding)))
+
+  return [...configurations, ...bindings]
+}
 
 // The guard refuses any call no access covers, so a first setup without a fallback would block everything else
 const withDefaultFallback = (
@@ -88,6 +113,7 @@ export const assemblePolicyBatch = (
     currentModuleGuard,
     safePolicyGuard,
     fallbackPolicy,
+    multiSendDefaults,
     allowOverwriteGuard,
   }: PolicyBatchContext,
   configurations: PolicyConfiguration[],
@@ -113,7 +139,7 @@ export const assemblePolicyBatch = (
     }
   }
 
-  const installed = withDefaultFallback(configurations, fallbackPolicy)
+  const installed = withDefaultFallback(withDefaultMultiSend(configurations, multiSendDefaults), fallbackPolicy)
 
   // Configure BEFORE installing the guard. `configureImmediately` opens with
   // `require(!_isGuardEnabled(msg.sender), GuardAlreadyEnabled())`, so with `setGuard` first

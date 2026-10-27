@@ -97,7 +97,7 @@ describe('mapPendingGuardChanges', () => {
   it('leaves a change mixing policies, or setting the fallback, without a policy type', () => {
     const mixed = [
       mockAllowlistConfiguration(),
-      mockAllowlistConfiguration({ selector: '0x8d80ff0a', operation: 1, policy: MULTISEND_POLICY }),
+      mockAllowlistConfiguration({ target: MOCK_SAFES.grants.address, selector: ADD_OWNER_SELECTOR }),
     ]
     const fallback = [
       mockAllowlistConfiguration({
@@ -129,6 +129,21 @@ describe('mapPendingGuardChanges', () => {
     const [row] = mapPendingGuardChanges([mockImmediateGuardDto({ configurations: [multisend, ...defaultFallback] })])
 
     expect(row.data.policyType).toBe('multisend')
+  })
+
+  it('names a first allowlist setup by the allowlist, not the batch bindings it adds', () => {
+    const batchBindings = [
+      '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D',
+      '0x9641d764fc13c8B624c04430C7356C1C7C8102e2',
+    ].map((target) =>
+      mockAllowlistConfiguration({ target, selector: '0x8d80ff0a', operation: 1, policy: MULTISEND_POLICY }),
+    )
+
+    const [row] = mapPendingGuardChanges([
+      mockImmediateGuardDto({ configurations: [mockAllowlistConfiguration(), ...batchBindings] }),
+    ])
+
+    expect(row.data.policyType).toBe('allowlist')
   })
 
   it('keys a draft apart from the same root requested on a guard', () => {

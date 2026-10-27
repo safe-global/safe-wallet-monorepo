@@ -4,6 +4,7 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { usePolicyContracts } from '../../shared/usePolicyContracts'
 import { usePolicyGuard } from '../../hooks/usePolicyGuard'
 import { getDefaultFallbackPolicy } from '../../shared/defaultFallbackPolicy'
+import { getDefaultMultiSend, type MultiSendDefaults } from '../../shared/defaultMultiSend'
 
 export type GuardPolicyContracts = {
   chainId: string
@@ -12,6 +13,8 @@ export type GuardPolicyContracts = {
   policyContract: Address | undefined
   /** The policy a first setup installs as the fallback. */
   fallbackPolicy: Address | undefined
+  /** The MultiSendPolicy a first setup binds every official MultiSendCallOnly to. */
+  multiSendDefaults: MultiSendDefaults | undefined
   currentGuard: Address | undefined
   currentModuleGuard: Address | undefined
   /** The policy guard is already the Safe's guard, so the change is requested rather than applied. */
@@ -40,6 +43,7 @@ export const useGuardPolicyContracts = (type: PolicyType): GuardPolicyContracts 
     safePolicyGuard: safePolicyGuard as Address | undefined,
     policyContract: policyContract as Address | undefined,
     fallbackPolicy: getDefaultFallbackPolicy(chainId),
+    multiSendDefaults: getDefaultMultiSend(chainId),
     currentGuard: currentGuard as Address | undefined,
     currentModuleGuard: currentModuleGuard as Address | undefined,
     isGuardSet: isSet,

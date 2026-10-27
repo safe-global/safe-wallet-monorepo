@@ -1,4 +1,8 @@
-import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
+import { getAddress } from 'ethers'
+import { getMultiSendCallOnlyDeployment, getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
+
+/** The Safe versions whose MultiSendCallOnly a first guard setup puts under MultiSendPolicy. */
+const GOVERNED_MULTI_SEND_VERSIONS = ['1.3.0', '1.4.1', '1.5.0']
 
 /**
  * The MultiSend deployment a Safe batches through, which is the access target the policy
@@ -15,4 +19,13 @@ export const getMultiSendAddress = (chainId: string, safeVersion?: string | null
     getMultiSendCallOnlyDeployment({ network: chainId })
 
   return deployment?.networkAddresses[chainId] ?? deployment?.defaultAddress
+}
+
+/** Every official MultiSendCallOnly of the governed versions on this chain, including 1.3.0's canonical and eip155 ones. */
+export const getOfficialMultiSendCallOnlyAddresses = (chainId: string): string[] => {
+  const addresses = GOVERNED_MULTI_SEND_VERSIONS.flatMap((version) => {
+    const address = getMultiSendCallOnlyDeployments({ network: chainId, version })?.networkAddresses[chainId]
+    return address === undefined ? [] : [address].flat()
+  })
+  return [...new Set(addresses.map((address) => getAddress(address)))]
 }

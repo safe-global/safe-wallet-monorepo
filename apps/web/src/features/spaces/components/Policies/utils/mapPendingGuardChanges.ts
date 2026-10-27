@@ -13,7 +13,8 @@ import type {
   PendingGuardChange,
   PolicySafe,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import { accessId, isFallbackAccessId, NO_SELECTOR } from '../shared/accessSelector'
+import { accessId, isFallbackAccessId, NO_SELECTOR, OPERATION_DELEGATECALL } from '../shared/accessSelector'
+import { MULTI_SEND_SELECTOR } from '../MultiSendPolicy/contracts'
 import { getPolicyDeployments } from '../shared/policyDeployments'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import { ERC20_TRANSFER_FROM_SELECTOR, ERC20_TRANSFER_SELECTOR } from '../shared/erc20TransferPolicy'
@@ -48,9 +49,16 @@ const classify = (configuration: PolicyConfigurationDto, safe: PolicySafe): Guar
   return contractType ? POLICY_TYPE_BY_CONTRACT_TYPE[contractType] : undefined
 }
 
+/** A first setup adds these next to the policy itself: the fallback and the MultiSendPolicy bindings. */
+const isSetupDefault = (configuration: PolicyConfigurationDto, safe: PolicySafe): boolean =>
+  isFallbackAccessId(accessId(configuration)) ||
+  (isSelector(configuration.selector, MULTI_SEND_SELECTOR) &&
+    configuration.operation === OPERATION_DELEGATECALL &&
+    sameAddress(configuration.policy, getPolicyDeployments(safe.chainId)?.policies[PolicyType.MultiSend]))
+
 /**
  * One type when every configuration is the same recognised policy; otherwise the row is a generic change.
- * A fallback next to other rules is the default a first setup adds, so it doesn't count.
+ * The defaults a first setup adds next to other rules don't count.
  */
 const policyTypeOf = (
   configurations: PolicyConfigurationDto[] | null,
@@ -58,8 +66,11 @@ const policyTypeOf = (
 ): GuardPolicyType | undefined => {
   if (!configurations?.length) return undefined
 
-  const rules = configurations.filter((configuration) => !isFallbackAccessId(accessId(configuration)))
-  const types = new Set((rules.length ? rules : configurations).map((configuration) => classify(configuration, safe)))
+  // A multisend policy's own rule is also a setup default, so it is named after the fallback is set aside
+  const rules = configurations.filter((configuration) => !isSetupDefault(configuration, safe))
+  const withoutFallback = configurations.filter((configuration) => !isFallbackAccessId(accessId(configuration)))
+  const counted = rules.length ? rules : withoutFallback.length ? withoutFallback : configurations
+  const types = new Set(counted.map((configuration) => classify(configuration, safe)))
   const [type] = types
   return types.size === 1 ? type : undefined
 }

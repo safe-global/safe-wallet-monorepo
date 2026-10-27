@@ -30,6 +30,7 @@ import {
 import { flattenSafes } from '../safeRefs'
 import { usePolicyGuard } from '../hooks/usePolicyGuard'
 import { getDefaultFallbackPolicy } from '../shared/defaultFallbackPolicy'
+import { getDefaultMultiSend } from '../shared/defaultMultiSend'
 import { GUARD_READ_ERROR } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
 import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { useStorePolicyRequest } from '../hooks/useStorePolicyRequest'
@@ -166,6 +167,7 @@ const CosignerPolicyFlow = () => {
       currentGuard: currentGuard as Address | undefined,
       currentModuleGuard: currentModuleGuard as Address | undefined,
       fallbackPolicy: getDefaultFallbackPolicy(chainId),
+      multiSendDefaults: getDefaultMultiSend(chainId),
       safePolicyGuard: guardAddress as Address,
       policyContract: policyContract as Address,
       cosigner: getAddress(cosignerTrimmed) as Address,
