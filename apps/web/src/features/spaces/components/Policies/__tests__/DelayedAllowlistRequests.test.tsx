@@ -51,7 +51,7 @@ describe('Policies page with delayed allowlist requests', () => {
     serveAllowlistRpc(workspace)
   })
 
-  it('says a first allowlist can only be applied after the delay, with apply disabled', async () => {
+  it('says a first allowlist can be applied once the waiting period is over, with apply disabled', async () => {
     serveAllowlistWorkspace(workspace, {
       pending: [delayedGuardRequest(workspace, { readyAt: nowSeconds() + DAY, expiresAt: nowSeconds() + 8 * DAY })],
     })
@@ -59,7 +59,8 @@ describe('Policies page with delayed allowlist requests', () => {
 
     const drawer = await openOnlyRow(view)
 
-    expect(within(drawer).getByText('The allowlist can only be applied in 24 hours.')).toBeInTheDocument()
+    expect(within(drawer).getByText('Your allowlist can be applied in 24 hours')).toBeInTheDocument()
+    expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: /^Apply in \d+h \d+m$/ })).toBeDisabled()
   })
 
@@ -70,20 +71,18 @@ describe('Policies page with delayed allowlist requests', () => {
     const view = renderPage(workspace)
 
     const drawer = await openOnlyRow(view)
-    expect(within(drawer).getByText('The 24-hour wait is over. Apply the allowlist to turn it on.')).toBeInTheDocument()
+    expect(within(drawer).getByText('Your allowlist is ready to apply')).toBeInTheDocument()
+    expect(within(drawer).getByText('Apply window')).toBeInTheDocument()
     const review = await within(drawer).findByRole('button', { name: 'Review transaction' })
     await waitFor(() => expect(review).toBeEnabled())
+    expect(within(drawer).getByText('Any signer can start this transaction.')).toBeInTheDocument()
     await view.user.click(review)
 
     expect(await screen.findByRole('dialog')).toHaveTextContent('Allowlist')
-    await waitFor(() =>
-      expect(
-        screen.queryByText('The 24-hour wait is over. Apply the allowlist to turn it on.'),
-      ).not.toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.queryByText('Your allowlist is ready to apply')).not.toBeInTheDocument())
   })
 
-  it('reports a request that was never applied in time as expired, with no action', async () => {
+  it('reports a request that was never applied in time as expired, offering only to discard it', async () => {
     serveAllowlistWorkspace(workspace, {
       pending: [
         delayedGuardRequest(workspace, {
@@ -97,8 +96,9 @@ describe('Policies page with delayed allowlist requests', () => {
 
     const drawer = await openOnlyRow(view)
 
-    expect(within(drawer).getByText('This request expired. The allowlist was never applied.')).toBeInTheDocument()
-    expect(within(drawer).getByTestId('policy-status-failed')).toBeInTheDocument()
+    expect(within(drawer).getByText('Your allowlist expired')).toBeInTheDocument()
+    expect(within(drawer).getByText('Request')).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Discard' })).toBeInTheDocument()
     expect(within(drawer).queryByRole('button', { name: /Apply|Review transaction/ })).not.toBeInTheDocument()
   })
 
@@ -147,7 +147,8 @@ describe('Policies page with delayed allowlist requests', () => {
 
     const drawer = await openOnlyRow(view)
 
-    expect(within(drawer).getByText('Change pending')).toBeInTheDocument()
-    expect(within(drawer).getByText('Any signer can cancel it before then.')).toBeInTheDocument()
+    expect(within(drawer).getByText('Your changes can be applied in 24 hours')).toBeInTheDocument()
+    expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: /^Apply in \d+h \d+m$/ })).toBeDisabled()
   })
 })
