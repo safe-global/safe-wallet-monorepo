@@ -30,6 +30,8 @@ import {
 } from '../wizardCommon'
 import { flattenSafes } from '../safeRefs'
 import { usePolicyGuard } from '../hooks/usePolicyGuard'
+import { GUARD_READ_ERROR } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
+import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { useStorePolicyRequest } from '../hooks/useStorePolicyRequest'
 import { useAvailablePolicies } from '../hooks/useAvailablePolicies'
 import { useActivePolicies } from '../hooks/useActivePolicies'
@@ -103,7 +105,17 @@ const FallbackPolicyFlow = () => {
   const { safePolicyGuard: guardAddress, policyContract } = useFallbackPolicyContracts(chainId, safeAddress, policyType)
   const hasPolicyContracts = !!guardAddress && !!policyContract
 
-  const { currentGuard, isSet: isGuardSet, isUnknownGuard } = usePolicyGuard(chainId, safeAddress, guardAddress)
+  const {
+    currentGuard,
+    currentModuleGuard,
+    isSet: isGuardSet,
+    isUnknownGuard,
+    isUnsupportedVersion,
+    isLoading: isGuardLoading,
+    error: guardError,
+  } = usePolicyGuard(chainId, safeAddress, guardAddress)
+  // Without both guard slots read, the batch could apply a change that has to be requested
+  const isGuardBlocked = isGuardLoading || isUnsupportedVersion || !!guardError
 
   const targetTrimmed = targetInput.trim()
   const isTargetValid = targetTrimmed === '' || isAddress(targetTrimmed)
@@ -135,7 +147,7 @@ const FallbackPolicyFlow = () => {
     if (step === 'apply-to') return !selectedSafe
     if (step === 'scope') return !isTargetValid
     // Deny blocks everything uncovered, so it takes an explicit acknowledgement.
-    return !hasPolicyContracts || (copy.isDestructive && !denyConfirmed)
+    return !hasPolicyContracts || isGuardBlocked || (copy.isDestructive && !denyConfirmed)
   })()
 
   const goBack = () => {
@@ -152,11 +164,12 @@ const FallbackPolicyFlow = () => {
   }
 
   const onReview = async () => {
-    if (!selectedSafe || !guardAddress || !policyContract) return
+    if (isGuardBlocked || !selectedSafe || !guardAddress || !policyContract) return
 
     const { txs, mode, configurations, configureRoot } = buildFallbackPolicyBatch({
       safeAddress: safeAddress as Address,
       currentGuard: currentGuard as Address | undefined,
+      currentModuleGuard: currentModuleGuard as Address | undefined,
       safePolicyGuard: guardAddress as Address,
       policyContract: policyContract as Address,
       policyType,
@@ -273,11 +286,25 @@ const FallbackPolicyFlow = () => {
                 </Alert>
               )}
 
+              {isUnsupportedVersion && (
+                <Alert variant="destructive">
+                  <AlertSeverityIcon variant="destructive" />
+                  <AlertDescription>{INELIGIBILITY_TEXT['unsupported-safe-version']}</AlertDescription>
+                </Alert>
+              )}
+
+              {guardError && (
+                <Alert variant="destructive">
+                  <AlertSeverityIcon variant="destructive" />
+                  <AlertDescription>{GUARD_READ_ERROR}</AlertDescription>
+                </Alert>
+              )}
+
               {isUnknownGuard && (
                 <Alert variant="warning">
                   <AlertSeverityIcon variant="warning" />
                   <AlertDescription>
-                    This Safe already has a different transaction guard. Continuing will overwrite it.
+                    This Safe already has a different transaction or module guard. Continuing will overwrite it.
                   </AlertDescription>
                 </Alert>
               )}

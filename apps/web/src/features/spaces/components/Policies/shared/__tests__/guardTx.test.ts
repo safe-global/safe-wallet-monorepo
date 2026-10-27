@@ -1,11 +1,13 @@
 import { AbiCoder, Interface, keccak256 } from 'ethers'
 import {
   buildSetGuardTx,
+  buildSetModuleGuardTx,
   encodeConfiguration,
   encodeRequestConfiguration,
   encodeApplyConfiguration,
   computeConfigureRoot,
   SAFE_SET_GUARD_ABI,
+  SAFE_SET_MODULE_GUARD_ABI,
   CONFIGURE_IMMEDIATELY_ABI,
   REQUEST_CONFIGURATION_ABI,
   APPLY_CONFIGURATION_ABI,
@@ -28,6 +30,18 @@ describe('buildSetGuardTx', () => {
     expect(tx.value).toBe('0')
 
     const [decodedGuard] = new Interface(SAFE_SET_GUARD_ABI).decodeFunctionData('setGuard', tx.data)
+    expect(decodedGuard.toLowerCase()).toBe(GUARD.toLowerCase())
+  })
+})
+
+describe('buildSetModuleGuardTx', () => {
+  it('encodes setModuleGuard(guard) as a call to the Safe itself', () => {
+    const tx = buildSetModuleGuardTx(SAFE, GUARD)
+
+    expect(tx.to).toBe(SAFE)
+    expect(tx.value).toBe('0')
+
+    const [decodedGuard] = new Interface(SAFE_SET_MODULE_GUARD_ABI).decodeFunctionData('setModuleGuard', tx.data)
     expect(decodedGuard.toLowerCase()).toBe(GUARD.toLowerCase())
   })
 })

@@ -1,14 +1,20 @@
 import { isAddress } from 'ethers'
 import type { Address } from 'viem'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import { buildSetGuardTx, encodeConfiguration, encodeRequestConfiguration, computeConfigureRoot } from './guardTx'
+import {
+  buildSetGuardTx,
+  buildSetModuleGuardTx,
+  encodeConfiguration,
+  encodeRequestConfiguration,
+  computeConfigureRoot,
+} from './guardTx'
 import type { PolicyConfiguration } from './guardTx'
 
 /**
  * How the batch configures the guard:
- *  - `immediate`: guard not yet active → `setGuard` + `configureImmediately`, applied in one
- *    signed batch.
- *  - `request`: guard already active → `requestConfiguration(root)` only. `configureImmediately`
+ *  - `immediate`: guard not yet active → `configureImmediately` + `setGuard` + `setModuleGuard`,
+ *    applied in one signed batch.
+ *  - `request`: guard already active in either slot → `requestConfiguration(root)` only. `configureImmediately`
  *    reverts in the guard's `checkTransaction` once it is live, so the change takes effect via a
  *    separate `applyConfiguration` once the on-chain DELAY has elapsed.
  */
@@ -19,11 +25,13 @@ export type PolicyBatchContext = {
   safeAddress: Address
   /** The Safe's currently installed guard (from SafeState.guard), if any. */
   currentGuard?: Address
+  /** The Safe's currently installed module guard, if any. */
+  currentModuleGuard?: Address
   /** The SafePolicyGuard deployment for this chain. */
   safePolicyGuard: Address
   /**
-   * Allow overwriting a DIFFERENT (non-policy) guard already on the Safe. Guard-rail: without
-   * it the builder throws, since `setGuard` would silently replace the existing guard. Wizards
+   * Allow overwriting a DIFFERENT (non-policy) guard already on the Safe, in either slot. Guard-rail:
+   * without it the builder throws, since the setters would silently replace the existing guard. Wizards
    * set it only after an explicit confirmation.
    */
   allowOverwriteGuard?: boolean
@@ -48,15 +56,19 @@ const isSameGuard = (a: string | undefined, b: string): boolean => !!a && a.toLo
  * caller resolves the addresses and the Safe's current guard and passes them in.
  */
 export const assemblePolicyBatch = (
-  { safeAddress, currentGuard, safePolicyGuard, allowOverwriteGuard }: PolicyBatchContext,
+  { safeAddress, currentGuard, currentModuleGuard, safePolicyGuard, allowOverwriteGuard }: PolicyBatchContext,
   configurations: PolicyConfiguration[],
 ): PolicyBatch => {
   if (!isAddress(safePolicyGuard)) throw new Error('Missing or invalid SafePolicyGuard address')
   if (configurations.length === 0) throw new Error('A policy needs at least one configuration')
 
-  const guardAlreadySet = isSameGuard(currentGuard, safePolicyGuard)
-  if (!!currentGuard && !guardAlreadySet && !allowOverwriteGuard) {
-    throw new Error('A different transaction guard is already set on this Safe; overwriting it must be confirmed')
+  // configureImmediately reverts once the policy guard is in either slot
+  const guardAlreadySet = [currentGuard, currentModuleGuard].some((guard) => isSameGuard(guard, safePolicyGuard))
+  const hasForeignGuard = [currentGuard, currentModuleGuard].some(
+    (guard) => !!guard && !isSameGuard(guard, safePolicyGuard),
+  )
+  if (!guardAlreadySet && hasForeignGuard && !allowOverwriteGuard) {
+    throw new Error('A different guard is already set on this Safe; overwriting it must be confirmed')
   }
 
   const configureRoot = computeConfigureRoot(configurations)
@@ -76,7 +88,11 @@ export const assemblePolicyBatch = (
   // state rather than relying on `checkTransaction`, which the contract notes is deliberate:
   // a permissive fallback policy would otherwise let a CALL through and defeat the timelock.
   return {
-    txs: [encodeConfiguration(safePolicyGuard, configurations), buildSetGuardTx(safeAddress, safePolicyGuard)],
+    txs: [
+      encodeConfiguration(safePolicyGuard, configurations),
+      buildSetGuardTx(safeAddress, safePolicyGuard),
+      buildSetModuleGuardTx(safeAddress, safePolicyGuard),
+    ],
     mode: 'immediate',
     configurations,
     configureRoot,

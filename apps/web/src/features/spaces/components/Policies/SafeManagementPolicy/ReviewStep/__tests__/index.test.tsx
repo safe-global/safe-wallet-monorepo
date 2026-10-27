@@ -34,8 +34,10 @@ const renderReview = (functionIds: string[]) => {
     safePolicyGuard: GUARD as `0x${string}`,
     policyContract: POLICY as `0x${string}`,
     currentGuard: undefined,
+    currentModuleGuard: undefined,
     isGuardSet: false,
     isUnknownGuard: false,
+    isUnsupportedVersion: false,
     isLoading: false,
   })
 

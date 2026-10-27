@@ -24,7 +24,7 @@ describe('buildSafeManagementBatch', () => {
     const { txs, mode } = buildSafeManagementBatch(base)
 
     expect(mode).toBe('immediate')
-    expect(txs).toHaveLength(2)
+    expect(txs).toHaveLength(3)
 
     const [guardArg] = new Interface(SAFE_SET_GUARD_ABI).decodeFunctionData('setGuard', txs[1].data)
     expect(guardArg.toLowerCase()).toBe(GUARD.toLowerCase())
@@ -96,7 +96,7 @@ describe('buildSafeManagementBatch', () => {
   it('refuses to silently replace a foreign guard', () => {
     const foreign = '0x5555555555555555555555555555555555555555' as Address
 
-    expect(() => buildSafeManagementBatch({ ...base, currentGuard: foreign })).toThrow(/different transaction guard/i)
+    expect(() => buildSafeManagementBatch({ ...base, currentGuard: foreign })).toThrow(/different guard/i)
   })
 })
 

@@ -31,7 +31,7 @@ describe('buildCosignerBatch', () => {
     const { txs, mode } = buildCosignerBatch(base)
 
     expect(mode).toBe('immediate')
-    expect(txs).toHaveLength(2)
+    expect(txs).toHaveLength(3)
 
     // Configure first, then install the guard: configureImmediately reverts once it is live.
     expect(txs[0].to).toBe(GUARD)
@@ -112,7 +112,7 @@ describe('buildCosignerBatch', () => {
   it('refuses to overwrite a foreign guard unless confirmed', () => {
     const foreign = '0x9999999999999999999999999999999999999999' as Address
 
-    expect(() => buildCosignerBatch({ ...base, currentGuard: foreign })).toThrow(/different transaction guard/i)
+    expect(() => buildCosignerBatch({ ...base, currentGuard: foreign })).toThrow(/different guard/i)
     expect(buildCosignerBatch({ ...base, currentGuard: foreign, allowOverwriteGuard: true }).mode).toBe('immediate')
   })
 

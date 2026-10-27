@@ -4,6 +4,7 @@ import type { Address } from 'viem'
 import { GUARD_DELAY_SECONDS } from './policyDeployments'
 
 export const SAFE_SET_GUARD_ABI = ['function setGuard(address guard)'] as const
+export const SAFE_SET_MODULE_GUARD_ABI = ['function setModuleGuard(address moduleGuard)'] as const
 
 /** The `Configuration` tuple, shared by every SafePolicyGuard config method. */
 const CONFIGURATION_TUPLE = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -38,6 +39,7 @@ export const OPERATION_CALL = 0
 export const POLICY_GUARD_DELAY_SEC = GUARD_DELAY_SECONDS
 
 const safeIface = new Interface(SAFE_SET_GUARD_ABI)
+const moduleGuardIface = new Interface(SAFE_SET_MODULE_GUARD_ABI)
 const guardIface = new Interface(CONFIGURE_IMMEDIATELY_ABI)
 const requestIface = new Interface(REQUEST_CONFIGURATION_ABI)
 const applyIface = new Interface(APPLY_CONFIGURATION_ABI)
@@ -60,6 +62,13 @@ export const buildSetGuardTx = (safeAddress: Address, policyEngine: Address): Me
   to: safeAddress,
   value: '0',
   data: safeIface.encodeFunctionData('setGuard', [policyEngine]),
+})
+
+/** Builds the `setModuleGuard(policyEngine)` tx, so module transactions are checked too. Safe v1.5.0+ only. */
+export const buildSetModuleGuardTx = (safeAddress: Address, policyEngine: Address): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: moduleGuardIface.encodeFunctionData('setModuleGuard', [policyEngine]),
 })
 
 /** Configuration[] as the positional tuples ethers expects for encoding. */

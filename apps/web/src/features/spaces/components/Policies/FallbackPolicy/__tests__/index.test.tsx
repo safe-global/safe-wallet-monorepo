@@ -66,6 +66,7 @@ const mockAll = (guardOverrides = {}) => {
     currentGuard: undefined,
     isSet: false,
     isUnknownGuard: false,
+    isUnsupportedVersion: false,
     isLoading: false,
     ...guardOverrides,
   })

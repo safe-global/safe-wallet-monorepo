@@ -28,7 +28,7 @@ describe('buildFallbackPolicyBatch', () => {
     const { txs, mode } = buildFallbackPolicyBatch(base)
 
     expect(mode).toBe('immediate')
-    expect(txs).toHaveLength(2)
+    expect(txs).toHaveLength(3)
 
     const [guardArg] = new Interface(SAFE_SET_GUARD_ABI).decodeFunctionData('setGuard', txs[1].data)
     expect(guardArg.toLowerCase()).toBe(GUARD.toLowerCase())
@@ -91,7 +91,7 @@ describe('buildFallbackPolicyBatch', () => {
   it('refuses to overwrite a foreign guard unless confirmed', () => {
     const foreign = '0x9999999999999999999999999999999999999999' as Address
 
-    expect(() => buildFallbackPolicyBatch({ ...base, currentGuard: foreign })).toThrow(/different transaction guard/i)
+    expect(() => buildFallbackPolicyBatch({ ...base, currentGuard: foreign })).toThrow(/different guard/i)
     expect(buildFallbackPolicyBatch({ ...base, currentGuard: foreign, allowOverwriteGuard: true }).mode).toBe(
       'immediate',
     )

@@ -1,5 +1,9 @@
 import type { Address } from 'viem'
-import { NO_POLICY_CONTRACTS_ERROR } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
+import {
+  GUARD_READ_ERROR,
+  NO_POLICY_CONTRACTS_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
+import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import type { PolicyBatch, PolicyBatchContext } from '../shared/buildPolicyBatch'
 import type { GuardPolicyContracts } from './hooks/useGuardPolicyContracts'
 import type { GuardPolicyBuild } from './hooks/useBuildGuardPolicyTransaction'
@@ -15,15 +19,27 @@ export const buildGuardPolicy = (
   contracts: GuardPolicyContracts,
   build: (context: PolicyBatchContext, policyContract: Address) => PolicyBatch,
 ): GuardPolicyBuild => {
-  const { safeAddress, safePolicyGuard, policyContract, currentGuard, isUnknownGuard, isLoading } = contracts
+  const {
+    safeAddress,
+    safePolicyGuard,
+    policyContract,
+    currentGuard,
+    currentModuleGuard,
+    isUnknownGuard,
+    isUnsupportedVersion,
+    isLoading,
+    guardError,
+  } = contracts
   if (!safeAddress || isLoading) return {}
+  if (isUnsupportedVersion) return { error: new Error(INELIGIBILITY_TEXT['unsupported-safe-version']) }
+  if (guardError) return { error: new Error(GUARD_READ_ERROR) }
   if (!safePolicyGuard || !policyContract) return { error: new Error(NO_POLICY_CONTRACTS_ERROR) }
 
   try {
     return {
       batch: build(
         // The review warns before a foreign guard is replaced; confirming it is the consent.
-        { safeAddress, currentGuard, safePolicyGuard, allowOverwriteGuard: isUnknownGuard },
+        { safeAddress, currentGuard, currentModuleGuard, safePolicyGuard, allowOverwriteGuard: isUnknownGuard },
         policyContract,
       ),
     }

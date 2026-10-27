@@ -59,6 +59,7 @@ const mockAll = (guardOverrides = {}) => {
     currentGuard: undefined,
     isSet: false,
     isUnknownGuard: false,
+    isUnsupportedVersion: false,
     isLoading: false,
     ...guardOverrides,
   })
@@ -107,7 +108,7 @@ describe('CosignerPolicyFlow', () => {
     await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
 
     const txs = setTxFlow.mock.calls[0][0].props.txs
-    expect(txs).toHaveLength(2)
+    expect(txs).toHaveLength(3)
 
     // The guard call carries the cosigner as a bare address, per CoSignerPolicy.configure.
     const [configurations] = new Interface(CONFIGURE_IMMEDIATELY_ABI).decodeFunctionData(

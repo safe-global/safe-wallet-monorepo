@@ -27,7 +27,7 @@ describe('buildMultiSendPolicyBatch', () => {
     const { txs, mode } = buildMultiSendPolicyBatch(base)
 
     expect(mode).toBe('immediate')
-    expect(txs).toHaveLength(2)
+    expect(txs).toHaveLength(3)
 
     const [guardArg] = new Interface(SAFE_SET_GUARD_ABI).decodeFunctionData('setGuard', txs[1].data)
     expect(guardArg.toLowerCase()).toBe(GUARD.toLowerCase())
@@ -71,7 +71,7 @@ describe('buildMultiSendPolicyBatch', () => {
   it('refuses to silently replace a foreign guard', () => {
     const foreign = '0x5555555555555555555555555555555555555555' as Address
 
-    expect(() => buildMultiSendPolicyBatch({ ...base, currentGuard: foreign })).toThrow(/different transaction guard/i)
+    expect(() => buildMultiSendPolicyBatch({ ...base, currentGuard: foreign })).toThrow(/different guard/i)
     expect(() => buildMultiSendPolicyBatch({ ...base, currentGuard: foreign, allowOverwriteGuard: true })).not.toThrow()
   })
 

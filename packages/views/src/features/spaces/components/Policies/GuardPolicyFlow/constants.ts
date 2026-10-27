@@ -10,10 +10,12 @@ export const APPLIES_TO_LABEL = 'Applies to'
 
 export const NO_POLICY_CONTRACTS_ERROR = "The policy engine isn't available for this Safe's network yet."
 
+export const GUARD_READ_ERROR = "Couldn't read this Safe's module guard. Check your connection and try again."
+
 export const UNKNOWN_GUARD_WARNING_TITLE = 'This replaces the Safe’s current guard'
 
 export const UNKNOWN_GUARD_WARNING_TEXT =
-  'This Safe already has a different transaction guard. Confirming this policy installs the policy guard in its place.'
+  'This Safe already has a different transaction or module guard. Confirming this policy installs the policy guard in its place.'
 
 export const TIME_LOCKED_TITLE = 'This change takes three steps'
 

@@ -4,6 +4,7 @@ import {
   CONFIGURE_IMMEDIATELY_ABI,
   REQUEST_CONFIGURATION_ABI,
   SAFE_SET_GUARD_ABI,
+  SAFE_SET_MODULE_GUARD_ABI,
   computeConfigureRoot,
   type PolicyConfiguration,
 } from '../guardTx'
@@ -27,11 +28,11 @@ describe('assemblePolicyBatch', () => {
    * first therefore reverts the configure call and the whole batch with it, so the order
    * here is a contract requirement rather than a preference.
    */
-  it('configures before installing the guard', () => {
+  it('configures before installing the guard in both slots', () => {
     const { txs, mode } = assemblePolicyBatch(context, configurations)
 
     expect(mode).toBe('immediate')
-    expect(txs).toHaveLength(2)
+    expect(txs).toHaveLength(3)
 
     expect(txs[0].to).toBe(GUARD)
     expect(() =>
@@ -41,6 +42,10 @@ describe('assemblePolicyBatch', () => {
     expect(txs[1].to).toBe(SAFE)
     const [guardArg] = new Interface(SAFE_SET_GUARD_ABI).decodeFunctionData('setGuard', txs[1].data)
     expect(guardArg.toLowerCase()).toBe(GUARD.toLowerCase())
+
+    expect(txs[2].to).toBe(SAFE)
+    const [moduleGuardArg] = new Interface(SAFE_SET_MODULE_GUARD_ABI).decodeFunctionData('setModuleGuard', txs[2].data)
+    expect(moduleGuardArg.toLowerCase()).toBe(GUARD.toLowerCase())
   })
 
   // Once the guard is live the immediate path is closed, so there is nothing to order.
@@ -56,12 +61,29 @@ describe('assemblePolicyBatch', () => {
     expect(root).toBe(computeConfigureRoot(configurations))
   })
 
+  it('requests a delayed configuration when only the module guard is the policy guard', () => {
+    const { txs, mode } = assemblePolicyBatch({ ...context, currentModuleGuard: GUARD }, configurations)
+
+    expect(mode).toBe('request')
+    expect(txs).toHaveLength(1)
+    expect(txs[0].to).toBe(GUARD)
+  })
+
+  it('refuses to silently replace a foreign module guard', () => {
+    const foreign = '0x5555555555555555555555555555555555555555' as Address
+
+    expect(() => assemblePolicyBatch({ ...context, currentModuleGuard: foreign }, configurations)).toThrow(
+      /different guard/i,
+    )
+    expect(
+      assemblePolicyBatch({ ...context, currentModuleGuard: foreign, allowOverwriteGuard: true }, configurations).txs,
+    ).toHaveLength(3)
+  })
+
   it('refuses to silently replace a foreign guard', () => {
     const foreign = '0x5555555555555555555555555555555555555555' as Address
 
-    expect(() => assemblePolicyBatch({ ...context, currentGuard: foreign }, configurations)).toThrow(
-      /different transaction guard/i,
-    )
+    expect(() => assemblePolicyBatch({ ...context, currentGuard: foreign }, configurations)).toThrow(/different guard/i)
     expect(() =>
       assemblePolicyBatch({ ...context, currentGuard: foreign, allowOverwriteGuard: true }, configurations),
     ).not.toThrow()
@@ -76,7 +98,7 @@ describe('assemblePolicyBatch', () => {
       configurations,
     )
 
-    expect(txs.map((tx) => tx.to)).toEqual([GUARD, SAFE])
+    expect(txs.map((tx) => tx.to)).toEqual([GUARD, SAFE, SAFE])
   })
 
   it.each([

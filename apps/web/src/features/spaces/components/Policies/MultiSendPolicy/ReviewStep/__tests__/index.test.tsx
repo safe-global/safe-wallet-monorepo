@@ -37,8 +37,10 @@ const renderReview = (chainId: string, version: string | null = '1.4.1') => {
     safePolicyGuard: GUARD as `0x${string}`,
     policyContract: POLICY as `0x${string}`,
     currentGuard: undefined,
+    currentModuleGuard: undefined,
     isGuardSet: false,
     isUnknownGuard: false,
+    isUnsupportedVersion: false,
     isLoading: false,
   })
 
