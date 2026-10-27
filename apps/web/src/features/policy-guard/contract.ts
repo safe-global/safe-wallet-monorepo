@@ -6,7 +6,7 @@ import type {
   getConfigurationRoot,
 } from './services/policyGuardEncoders'
 
-import type { buildAllowlistConfigurations } from './services/allowlistConfigurations'
+import type { buildAllowlistConfigurations, decodeErc20TransferPolicyData } from './services/allowlistConfigurations'
 import type { createAllowlistSetupTxs } from './services/createAllowlistSetupTxs'
 
 export interface PolicyGuardContract {
@@ -16,5 +16,6 @@ export interface PolicyGuardContract {
   getConfigurationRoot: typeof getConfigurationRoot
   describeSetupCall: typeof describeSetupCall
   buildAllowlistConfigurations: typeof buildAllowlistConfigurations
+  decodeErc20TransferPolicyData: typeof decodeErc20TransferPolicyData
   createAllowlistSetupTxs: typeof createAllowlistSetupTxs
 }

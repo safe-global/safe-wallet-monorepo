@@ -36,12 +36,19 @@ const SCOPE_KEY: `${string}:${string}` = `${SEPOLIA}:${SAFE}`
 const WALLET = checksumAddress(faker.finance.ethereumAddress())
 const TOM = checksumAddress(faker.finance.ethereumAddress())
 const PRIYA = checksumAddress(faker.finance.ethereumAddress())
-const { buildAllowlistConfigurations }: Pick<PolicyGuardContract, 'buildAllowlistConfigurations'> = jest.requireActual(
-  '@/features/policy-guard/services/allowlistConfigurations',
-)
+const {
+  buildAllowlistConfigurations,
+  encodeErc20TransferPolicyData,
+}: Pick<PolicyGuardContract, 'buildAllowlistConfigurations'> & {
+  encodeErc20TransferPolicyData: (recipients: string[]) => string
+} = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
 const { createAllowlistSetupTxs }: Pick<PolicyGuardContract, 'createAllowlistSetupTxs'> = jest.requireActual(
   '@/features/policy-guard/services/createAllowlistSetupTxs',
 )
+const { decodeErc20TransferPolicyData: mockDecodeRecipients }: Pick<
+  PolicyGuardContract,
+  'decodeErc20TransferPolicyData'
+> = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
 const { describeSetupCall: mockDescribeSetupCall }: Pick<PolicyGuardContract, 'describeSetupCall'> = jest.requireActual(
   '@/features/policy-guard/services/policyGuardEncoders',
 )
@@ -67,7 +74,7 @@ jest.mock('@/features/__core__', () => {
     ...actual,
     useLoadFeature: (handle: { name: string }) =>
       handle.name === 'policy-guard'
-        ? { $isReady: true, describeSetupCall: mockDescribeSetupCall }
+        ? { $isReady: true, describeSetupCall: mockDescribeSetupCall, decodeErc20TransferPolicyData: mockDecodeRecipients }
         : actual.useLoadFeature(handle),
   }
 })
@@ -379,6 +386,28 @@ describe('ReviewRecipientAllowlist', () => {
     expect(within(rules[0]).queryByText('Allowed recipients')).not.toBeInTheDocument()
     expect(within(rules[1]).getByText('Token withdraw allowlist')).toBeInTheDocument()
     expect(within(rules[1]).getByText('Allowed recipients')).toBeInTheDocument()
+  })
+
+  it('lists the recipients encoded in the configuration, not the form rules', () => {
+    const [native, erc20] = configurations
+    const encodedOnlyOther = { ...erc20, data: encodeErc20TransferPolicyData([OTHER]) }
+    mockBuild.mockReturnValue({
+      guardState: { status: 'none' },
+      configurations: [native, encodedOnlyOther],
+      calls: createAllowlistSetupTxs({
+        safeAddress: SAFE,
+        guardAddress,
+        guardState: { status: 'none' },
+        configurations: [native, encodedOnlyOther],
+      }),
+    })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const erc20Rule = screen.getAllByTestId('allowlist-rule')[1]
+    expect(erc20Rule).toHaveTextContent(OTHER)
+    expect(erc20Rule).not.toHaveTextContent(RECIPIENT)
   })
 
   it('never shows the configuration root or the raw calldata', () => {
