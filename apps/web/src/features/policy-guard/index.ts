@@ -13,6 +13,7 @@ export type {
   GuardSlot,
   ForeignGuard,
   PolicyConfiguration,
+  AllowlistSetup,
   AllowlistEligibility,
   AllowlistIneligibilityReason,
   PolicyGuardTarget,

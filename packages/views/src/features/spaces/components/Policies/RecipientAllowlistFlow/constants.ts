@@ -61,4 +61,5 @@ export const getAllowlistAccountLabel = (name: string, chainName: string): strin
 
 export const NATIVE_POLICY_UNAVAILABLE_ERROR = 'Native token allowlists are not available on this chain'
 export const TOO_MANY_CONFIGURATIONS_ERROR = 'This allowlist is too large. Remove some tokens or recipients.'
+export const EMPTY_ALLOWLIST_ERROR = 'Select at least one token and one recipient.'
 export const GUARD_NOT_SUPPORTED_ERROR = "This Safe account's guard setup doesn't support allowlists."

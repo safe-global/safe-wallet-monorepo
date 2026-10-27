@@ -1,6 +1,8 @@
-import type { MetaTransactionData } from '@safe-global/types-kit'
-import { GUARD_NOT_SUPPORTED_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { PolicyConfiguration, PolicyGuardState } from '../types'
+import {
+  EMPTY_ALLOWLIST_ERROR,
+  GUARD_NOT_SUPPORTED_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
 import {
   createFirstSetupTxs,
   createRequestConfigurationTx,
@@ -19,21 +21,25 @@ export const createAllowlistSetupTxs = ({
   guardAddress: string
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
-}): MetaTransactionData[] => {
-  const requestTx = () => createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+}): AllowlistSetup => {
+  if (configurations.length === 0) throw new Error(EMPTY_ALLOWLIST_ERROR)
+
+  const configureRoot = getConfigurationRoot(configurations)
+  const withTxs = (txs: AllowlistSetup['txs']): AllowlistSetup => ({ txs, configurations, configureRoot })
+  const requestTx = () => createRequestConfigurationTx(guardAddress, configureRoot)
 
   switch (guardState.status) {
     case 'none':
-      return createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+      return withTxs(createFirstSetupTxs({ safeAddress, guardAddress, configurations }))
     case 'known':
-      return [requestTx()]
+      return withTxs([requestTx()])
     case 'partial':
-      return [
+      return withTxs([
         requestTx(),
         guardState.missingSlot === 'transaction'
           ? createSetGuardTx(safeAddress, guardAddress)
           : createSetModuleGuardTx(safeAddress, guardAddress),
-      ]
+      ])
     case 'unknown':
     case 'unsupported':
       throw new Error(GUARD_NOT_SUPPORTED_ERROR)
