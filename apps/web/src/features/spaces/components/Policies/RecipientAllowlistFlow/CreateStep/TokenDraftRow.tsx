@@ -25,9 +25,9 @@ import {
   TOKEN_SELECTOR_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import {
-  ADD_TOKEN_CONFIRM_LABEL,
   ADD_TOKEN_PLACEHOLDER,
   CANCEL_ADD_TOKEN_LABEL,
+  CONFIRM_TOKEN_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { ALLOWLIST_ROW_CLASSES } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -116,7 +116,7 @@ const TokenDraftRow = ({ options, onConfirm, onCancel }: TokenDraftRowProps): Re
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={ADD_TOKEN_CONFIRM_LABEL}
+                aria-label={CONFIRM_TOKEN_LABEL}
                 disabled={!firstMatch}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => firstMatch && confirm(firstMatch.address)}

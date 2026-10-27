@@ -42,7 +42,7 @@ describe('TokenDraftRow', () => {
 
     await user.type(screen.getByRole('combobox', { name: 'Token' }), 'chain')
     // user-event's click does not reach this button while the list is open; a browser click does
-    fireEvent.click(screen.getByRole('button', { name: 'Add token' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add matching token' }))
 
     expect(onConfirm).toHaveBeenCalledWith(LINK.address)
   })
@@ -52,7 +52,7 @@ describe('TokenDraftRow', () => {
 
     await user.type(screen.getByRole('combobox', { name: 'Token' }), 'nothing')
 
-    expect(screen.getByRole('button', { name: 'Add token' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Add matching token' })).toBeDisabled()
   })
 
   it('drops the row when closed before anything is typed', async () => {
