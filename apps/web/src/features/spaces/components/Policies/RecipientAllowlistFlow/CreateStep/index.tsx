@@ -10,11 +10,12 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
-import { chainLabel, findSafeAccount } from '../../SafeAccountSelector/utils'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { SafeIdentity } from '../../components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import { getAllowlistSafeLabel, isAllowlistGuardEnabled } from '../utils/allowlistDisplay'
 import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
@@ -32,7 +33,6 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
-  getAllowlistAccountLabel,
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -106,12 +106,12 @@ const CreateRecipientAllowlistPolicy = ({
               ? {
                   chainId: selectedSafe.chainId,
                   address: selectedSafe.address,
-                  label: getAllowlistAccountLabel(safeName, chainLabel(selectedSafe)),
+                  label: getAllowlistSafeLabel(selectedSafe),
                 }
               : undefined
           }
           showSections={!selectedSafe || canContinue}
-          isGuardEnabled={guard?.status === 'known' || guard?.status === 'partial'}
+          isGuardEnabled={isAllowlistGuardEnabled(guard)}
           dismissedCallouts={dismissedCallouts}
           onDismissCallout={onDismissCallout}
         >

@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useMemo, type ReactElement } from 'react'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -7,11 +6,16 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import {
-  getAllowlistAccountLabel,
   getNextSignersText,
   REVIEW_SUMMARY_DESCRIPTION,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import { getUniqueSelectedRecipients } from '../utils/allowlistForm'
+import {
+  getAllowlistRecipientLabel,
+  getAllowlistSafeLabel,
+  isAllowlistGuardEnabled,
+  toAllowlistRecipients,
+  toAllowlistTokens,
+} from '../utils/allowlistDisplay'
 import type { RecipientAllowlistFlowData } from '../types'
 import { REVIEW_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
@@ -22,16 +26,14 @@ import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/Revie
 import { useLoadFeature } from '@/features/__core__'
 import { PolicyGuardFeature } from '@/features/policy-guard'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
-import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
-import { chainLabel, findSafeAccount } from '../../SafeAccountSelector/utils'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { joinNames } from '../../SpendingLimitFlow/Summary/describePolicy'
-import { findTokenOption, tokenOptionLabel } from '../../SpendingLimitFlow/utils/tokenOptions'
 import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useSaveAllowlistConfiguration } from '../hooks/useSaveAllowlistConfiguration'
-import AllowlistPolicyDetails, { type ReviewRecipient, type ReviewToken } from './AllowlistPolicyDetails'
+import AllowlistPolicyDetails from './AllowlistPolicyDetails'
 import AllowlistSetupActions from './AllowlistSetupActions'
 import { useBuildAllowlistTransaction } from './useBuildAllowlistTransaction'
 
@@ -41,7 +43,6 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const { safeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
   const chainId = scope?.chainId
-  const chain = useChain(chainId ?? '')
   const { accounts } = useRecipientAllowlistSafeAccounts()
   const { options: tokenOptions } = useSpendingLimitTokenOptions()
   const addressBook = useMergedAddressBooks(chainId)
@@ -82,29 +83,18 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const selected = findSafeAccount(accounts, scope?.scopeKey)
 
   const tokens = useMemo(
-    (): ReviewToken[] =>
-      rules.map(({ tokenAddress }) => {
-        const option = findTokenOption(tokenOptions, tokenAddress)
-        const isNative = tokenAddress === ZERO_ADDRESS
-        return {
-          address: tokenAddress,
-          symbol:
-            (option ? tokenOptionLabel(option) : isNative ? chain?.nativeCurrency.symbol : undefined) ||
-            shortenAddress(tokenAddress),
-          logoUri: option?.logoUri ?? (isNative ? chain?.nativeCurrency.logoUri : undefined),
-        }
-      }),
-    [rules, tokenOptions, chain],
+    () =>
+      toAllowlistTokens(
+        rules.map(({ tokenAddress }) => tokenAddress),
+        tokenOptions,
+      ),
+    [rules, tokenOptions],
   )
 
-  const recipients = useMemo((): ReviewRecipient[] => {
-    if (!data || !chainId) return []
-    return getUniqueSelectedRecipients(data).map(({ address, name, fromAddressBook }) => ({
-      address,
-      name: name || addressBook.get(address, chainId)?.name,
-      isInAddressBook: Boolean(fromAddressBook) || addressBook.has(address, chainId),
-    }))
-  }, [data, chainId, addressBook])
+  const recipients = useMemo(
+    () => (data && chainId ? toAllowlistRecipients(data, addressBook, chainId) : []),
+    [data, chainId, addressBook],
+  )
 
   const otherSigners = useMemo(() => {
     if (!chainId) return ''
@@ -146,13 +136,10 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
     >
       {hasSummary && selected && (
         <AllowlistSummary
-          accountLabel={getAllowlistAccountLabel(
-            selected.name || shortenAddress(selected.address),
-            chainLabel(selected),
-          )}
+          accountLabel={getAllowlistSafeLabel(selected)}
           tokenSymbols={tokens.map(({ symbol }) => symbol)}
-          recipientNames={recipients.map(({ name, address }) => name || shortenAddress(address))}
-          isGuardEnabled={guardState?.status !== 'none'}
+          recipientNames={recipients.map(getAllowlistRecipientLabel)}
+          isGuardEnabled={isAllowlistGuardEnabled(guardState)}
           description={REVIEW_SUMMARY_DESCRIPTION}
         />
       )}

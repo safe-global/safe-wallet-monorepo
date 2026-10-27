@@ -17,16 +17,14 @@ import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
 import { AccountBalance, toStatChains } from '../../SafeAccountSelector/components/SafeAccountRow'
 import { SafeIdentity } from '../../components/SafeIdentity'
 import RecipientIdentity from '../components/RecipientIdentity'
-
-export type ReviewToken = { address: string; symbol: string; logoUri?: string }
-export type ReviewRecipient = { address: string; name?: string; isInAddressBook: boolean }
+import type { AllowlistRecipientDisplay, AllowlistTokenDisplay } from '../utils/allowlistDisplay'
 
 const ADDRESS_CLASS = 'flex min-w-0 items-center gap-2 text-sm leading-none font-medium'
 
 type AllowlistPolicyDetailsProps = {
   safe: SafeAccountOption
-  tokens: ReviewToken[]
-  recipients: ReviewRecipient[]
+  tokens: AllowlistTokenDisplay[]
+  recipients: AllowlistRecipientDisplay[]
 }
 
 /** The account on its own card, then the tokens and recipients as one card, since they are one policy. */
