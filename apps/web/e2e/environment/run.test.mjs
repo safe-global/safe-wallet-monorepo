@@ -156,16 +156,22 @@ test('plans one matrix entry per Playwright shard, each with the forks that any 
     'e2e/multichain.spec.ts': { chains: [1, 137] },
     'e2e/mainnet.spec.ts': { chains: [1] },
   }
-  assert.deepEqual(planMatrix(2, registry), {
+  assert.deepEqual(planMatrix(2, {}, registry), {
     include: [
       { shard: 1, chains: 'mainnet polygon' },
       { shard: 2, chains: 'mainnet polygon' },
     ],
   })
-  assert.deepEqual(planMatrix(1, { 'e2e/sepolia.spec.ts': {} }), { include: [{ shard: 1, chains: '' }] })
+  assert.deepEqual(planMatrix(1, {}, { 'e2e/sepolia.spec.ts': {} }), { include: [{ shard: 1, chains: '' }] })
   for (const count of [0, -1, 1.5, NaN]) {
-    assert.throws(() => planMatrix(count, registry), /positive integer/)
+    assert.throws(() => planMatrix(count, {}, registry), /positive integer/)
   }
+})
+
+test('refuses to plan a run whose SAFE_E2E_SPECS filter matches no registered spec', () => {
+  const registry = { 'e2e/batch.spec.ts': {} }
+  assert.deepEqual(planMatrix(3, { SAFE_E2E_SPECS: 'batch' }, registry).include.length, 3)
+  assert.throws(() => planMatrix(3, { SAFE_E2E_SPECS: 'no-such-spec' }, registry), /matches no registered/)
 })
 
 test('selects the Playwright specs that SAFE_E2E_SPECS matches, as Playwright does', () => {

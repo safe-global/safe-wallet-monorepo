@@ -70,6 +70,7 @@ jobs:
         id: plan
         if: steps.changes.outputs.relevant == 'true'
         env:
+          SAFE_E2E_SPECS: ${{ inputs.specs }}
           SAFE_E2E_SHARDS: ${{ inputs.shards || '3' }}
         run: echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
 

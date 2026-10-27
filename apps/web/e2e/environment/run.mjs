@@ -130,8 +130,12 @@ export function missingChainCommands(specs, manifest, infrastructure, registry =
  * The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. Playwright assigns the specs to
  * shards only when it runs, so every shard starts the forks that any registered spec needs.
  */
-export function planMatrix(shardCount, registry = playwrightSpecs) {
+export function planMatrix(shardCount, env = process.env, registry = playwrightSpecs) {
   if (!Number.isInteger(shardCount) || shardCount < 1) throw new Error('Shard count must be a positive integer')
+  // A sharded Playwright run that matches no test passes, so an unmatched filter must fail here.
+  if (!selectPlaywrightSpecs(env, registry).length) {
+    throw new Error(`SAFE_E2E_SPECS matches no registered Playwright spec: ${env.SAFE_E2E_SPECS}`)
+  }
   const chains = requiredChains(Object.keys(registry), registry).map((chainId) => chainProfiles[chainId])
   return { include: Array.from({ length: shardCount }, (_, index) => ({ shard: index + 1, chains: chains.join(' ') })) }
 }
