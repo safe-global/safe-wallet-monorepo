@@ -2,15 +2,17 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { renderHook } from '@/tests/test-utils'
 import * as safesApi from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import * as moduleGuardApi from '@/features/policy-guard/store/moduleGuardApi'
+import { useGetModuleGuardQuery } from '@/features/policy-guard/store'
 import { usePolicyGuard } from '../usePolicyGuard'
+
+jest.mock('@/features/policy-guard/store', () => ({ useGetModuleGuardQuery: jest.fn() }))
 
 const CHAIN_ID = '1'
 const SAFE = '0x1111111111111111111111111111111111111111'
 const GUARD = '0x2222222222222222222222222222222222222222'
 const OTHER_GUARD = '0x9999999999999999999999999999999999999999'
 
-type ModuleGuardQuery = ReturnType<typeof moduleGuardApi.useGetModuleGuardQuery>
+type ModuleGuardQuery = ReturnType<typeof useGetModuleGuardQuery>
 
 const mockSafe = (guard?: string, version: string | null = '1.5.0') =>
   jest.spyOn(safesApi, 'useSafesGetSafeV1Query').mockReturnValue({
@@ -19,9 +21,10 @@ const mockSafe = (guard?: string, version: string | null = '1.5.0') =>
   } as never)
 
 const mockModuleGuard = (query: Partial<ModuleGuardQuery> = { currentData: ZERO_ADDRESS }) =>
-  jest.spyOn(moduleGuardApi, 'useGetModuleGuardQuery').mockReturnValue(query as ModuleGuardQuery)
+  jest.mocked(useGetModuleGuardQuery).mockReturnValue(query as ModuleGuardQuery)
 
 describe('usePolicyGuard', () => {
+  beforeEach(() => jest.mocked(useGetModuleGuardQuery).mockReset())
   afterEach(() => jest.restoreAllMocks())
 
   it('reports not-set when the Safe has no guard in either slot', () => {

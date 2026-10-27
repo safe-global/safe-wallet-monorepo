@@ -18,9 +18,12 @@ const TARGET = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 const OTHER_TARGET = '0x6b175474e89094c44da98b954eedeac495271d0f'
 const TRANSFER = '0xa9059cbb'
 
+const FALLBACK_POLICY = '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2' as Address
+
 const base = {
   safeAddress: SAFE,
   safePolicyGuard: GUARD,
+  fallbackPolicy: FALLBACK_POLICY,
   policyContract: POLICY,
   cosigner: COSIGNER,
   accesses: [{ target: TARGET, selector: TRANSFER, operation: OPERATION_CALL }],
@@ -44,7 +47,8 @@ describe('buildCosignerBatch', () => {
   it('encodes the configuration data as a bare cosigner address', () => {
     const { txs, configurations } = buildCosignerBatch(base)
 
-    expect(configurations).toHaveLength(1)
+    // The cosigner rule, then the default fallback on CALL and DELEGATECALL
+    expect(configurations).toHaveLength(3)
     expect(configurations[0]).toMatchObject({
       target: getAddress(TARGET),
       selector: TRANSFER,
@@ -56,7 +60,7 @@ describe('buildCosignerBatch', () => {
     expect(decoded.toLowerCase()).toBe(COSIGNER.toLowerCase())
 
     const [applied] = new Interface(CONFIGURE_IMMEDIATELY_ABI).decodeFunctionData('configureImmediately', txs[0].data)
-    expect(applied).toHaveLength(1)
+    expect(applied).toHaveLength(3)
     expect(applied[0].policy.toLowerCase()).toBe(POLICY.toLowerCase())
   })
 
@@ -86,9 +90,10 @@ describe('buildCosignerBatch', () => {
       ],
     })
 
-    expect(configurations.map((c) => c.target)).toEqual([getAddress(TARGET), getAddress(OTHER_TARGET)])
+    const rules = configurations.filter((c) => c.policy === POLICY)
+    expect(rules.map((c) => c.target)).toEqual([getAddress(TARGET), getAddress(OTHER_TARGET)])
     // Same cosigner payload on both.
-    expect(new Set(configurations.map((c) => c.data)).size).toBe(1)
+    expect(new Set(rules.map((c) => c.data)).size).toBe(1)
   })
 
   // Guard already live → configureImmediately reverts, so the change goes through the delay.

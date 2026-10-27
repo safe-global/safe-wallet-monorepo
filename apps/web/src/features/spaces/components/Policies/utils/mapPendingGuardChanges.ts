@@ -13,7 +13,7 @@ import type {
   PendingGuardChange,
   PolicySafe,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import { NO_SELECTOR } from '../shared/accessSelector'
+import { accessId, isFallbackAccessId, NO_SELECTOR } from '../shared/accessSelector'
 import { getPolicyDeployments } from '../shared/policyDeployments'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import { ERC20_TRANSFER_FROM_SELECTOR, ERC20_TRANSFER_SELECTOR } from '../shared/erc20TransferPolicy'
@@ -48,14 +48,18 @@ const classify = (configuration: PolicyConfigurationDto, safe: PolicySafe): Guar
   return contractType ? POLICY_TYPE_BY_CONTRACT_TYPE[contractType] : undefined
 }
 
-/** One type when every configuration is the same recognised policy; otherwise the row is a generic change. */
+/**
+ * One type when every configuration is the same recognised policy; otherwise the row is a generic change.
+ * A fallback next to other rules is the default a first setup adds, so it doesn't count.
+ */
 const policyTypeOf = (
   configurations: PolicyConfigurationDto[] | null,
   safe: PolicySafe,
 ): GuardPolicyType | undefined => {
   if (!configurations?.length) return undefined
 
-  const types = new Set(configurations.map((configuration) => classify(configuration, safe)))
+  const rules = configurations.filter((configuration) => !isFallbackAccessId(accessId(configuration)))
+  const types = new Set((rules.length ? rules : configurations).map((configuration) => classify(configuration, safe)))
   const [type] = types
   return types.size === 1 ? type : undefined
 }

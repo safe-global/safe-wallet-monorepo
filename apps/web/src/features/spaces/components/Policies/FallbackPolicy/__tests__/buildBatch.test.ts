@@ -16,9 +16,12 @@ const GUARD = '0x2222222222222222222222222222222222222222' as Address
 const POLICY = '0x3333333333333333333333333333333333333333' as Address
 const RECIPIENT = '0x4444444444444444444444444444444444444444' as Address
 
+const FALLBACK_POLICY = '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2' as Address
+
 const base = {
   safeAddress: SAFE,
   safePolicyGuard: GUARD,
+  fallbackPolicy: FALLBACK_POLICY,
   policyContract: POLICY,
   policyType: PolicyType.Allow as const,
 }

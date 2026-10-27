@@ -29,6 +29,7 @@ import {
 } from '../wizardCommon'
 import { flattenSafes } from '../safeRefs'
 import { usePolicyGuard } from '../hooks/usePolicyGuard'
+import { useDefaultFallbackPolicy } from '../shared/useDefaultFallbackPolicy'
 import { GUARD_READ_ERROR } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
 import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { useStorePolicyRequest } from '../hooks/useStorePolicyRequest'
@@ -106,6 +107,7 @@ const CosignerPolicyFlow = () => {
     isLoading: isGuardLoading,
     error: guardError,
   } = usePolicyGuard(chainId, safeAddress, guardAddress)
+  const defaultFallbackPolicy = useDefaultFallbackPolicy(chainId)
   // Without both guard slots read, the batch could apply a change that has to be requested
   const isGuardBlocked = isGuardLoading || isUnsupportedVersion || !!guardError
 
@@ -164,6 +166,7 @@ const CosignerPolicyFlow = () => {
       safeAddress: safeAddress as Address,
       currentGuard: currentGuard as Address | undefined,
       currentModuleGuard: currentModuleGuard as Address | undefined,
+      fallbackPolicy: defaultFallbackPolicy,
       safePolicyGuard: guardAddress as Address,
       policyContract: policyContract as Address,
       cosigner: getAddress(cosignerTrimmed) as Address,

@@ -23,6 +23,7 @@ export const buildGuardPolicy = (
     safeAddress,
     safePolicyGuard,
     policyContract,
+    allowPolicy,
     currentGuard,
     currentModuleGuard,
     isUnknownGuard,
@@ -39,7 +40,14 @@ export const buildGuardPolicy = (
     return {
       batch: build(
         // The review warns before a foreign guard is replaced; confirming it is the consent.
-        { safeAddress, currentGuard, currentModuleGuard, safePolicyGuard, allowOverwriteGuard: isUnknownGuard },
+        {
+          safeAddress,
+          currentGuard,
+          currentModuleGuard,
+          safePolicyGuard,
+          fallbackPolicy: allowPolicy,
+          allowOverwriteGuard: isUnknownGuard,
+        },
         policyContract,
       ),
     }

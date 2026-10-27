@@ -115,6 +115,22 @@ describe('mapPendingGuardChanges', () => {
     expect(rows.map((row) => row.data.policyType)).toEqual([undefined, undefined])
   })
 
+  it('names a first setup by its policy, not the default fallback it adds', () => {
+    const defaultFallback = [0, 1].map((operation) =>
+      mockAllowlistConfiguration({
+        target: '0x0000000000000000000000000000000000000000',
+        selector: '0x00000000',
+        operation: operation as 0 | 1,
+        policy: '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2',
+      }),
+    )
+    const multisend = mockAllowlistConfiguration({ selector: '0x8d80ff0a', operation: 1, policy: MULTISEND_POLICY })
+
+    const [row] = mapPendingGuardChanges([mockImmediateGuardDto({ configurations: [multisend, ...defaultFallback] })])
+
+    expect(row.data.policyType).toBe('multisend')
+  })
+
   it('keys a draft apart from the same root requested on a guard', () => {
     const rows = mapPendingGuardChanges([mockDelayedGuardDto(), mockDelayedGuardDto({ status: 'draft', guard: null })])
 

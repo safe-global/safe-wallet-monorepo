@@ -15,9 +15,12 @@ const GUARD = '0x2222222222222222222222222222222222222222' as Address
 const POLICY = '0x3333333333333333333333333333333333333333' as Address
 const MULTI_SEND = '0x9641d764fc13c8b624c04430c7356c1c7c8102e2' as Address
 
+const FALLBACK_POLICY = '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2' as Address
+
 const base = {
   safeAddress: SAFE,
   safePolicyGuard: GUARD,
+  fallbackPolicy: FALLBACK_POLICY,
   policyContract: POLICY,
   multiSendAddress: MULTI_SEND,
 }
@@ -38,7 +41,8 @@ describe('buildMultiSendPolicyBatch', () => {
   it('pins the access to multiSend on DELEGATECALL with no payload', () => {
     const { configurations } = buildMultiSendPolicyBatch(base)
 
-    expect(configurations).toHaveLength(1)
+    // The multisend rule, then the default fallback on CALL and DELEGATECALL
+    expect(configurations).toHaveLength(3)
     expect(configurations[0]).toMatchObject({
       selector: MULTI_SEND_SELECTOR,
       operation: OPERATION_DELEGATECALL,
@@ -79,7 +83,7 @@ describe('buildMultiSendPolicyBatch', () => {
     const { txs } = buildMultiSendPolicyBatch(base)
     const [applied] = new Interface(CONFIGURE_IMMEDIATELY_ABI).decodeFunctionData('configureImmediately', txs[0].data)
 
-    expect(applied).toHaveLength(1)
+    expect(applied).toHaveLength(3)
     expect(applied[0].selector).toBe(MULTI_SEND_SELECTOR)
     expect(Number(applied[0].operation)).toBe(OPERATION_DELEGATECALL)
   })

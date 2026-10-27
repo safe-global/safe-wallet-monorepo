@@ -33,6 +33,7 @@ const renderReview = (functionIds: string[]) => {
     safeAddress: SAFE_ADDRESS as `0x${string}`,
     safePolicyGuard: GUARD as `0x${string}`,
     policyContract: POLICY as `0x${string}`,
+    allowPolicy: '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2',
     currentGuard: undefined,
     currentModuleGuard: undefined,
     isGuardSet: false,
@@ -59,8 +60,9 @@ describe('ReviewSafeManagementPolicy', () => {
   it('builds the batch as an Allow policy, one access per selected change', () => {
     renderReview(SAFE_MANAGEMENT_FUNCTION_IDS)
 
-    const build = captured.build as { batch?: { configurations: unknown[] } }
-    expect(build.batch?.configurations).toHaveLength(SAFE_MANAGEMENT_FUNCTIONS.length)
+    const build = captured.build as { batch?: { configurations: { policy: string }[] } }
+    const rules = build.batch?.configurations.filter((c) => c.policy === POLICY)
+    expect(rules).toHaveLength(SAFE_MANAGEMENT_FUNCTIONS.length)
   })
 
   // What is left out is the actual restriction, so the review has to name both sides.

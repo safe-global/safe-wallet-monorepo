@@ -8,7 +8,7 @@ import {
   computeConfigureRoot,
   type PolicyConfiguration,
 } from '../guardTx'
-import { OPERATION_CALL } from '../accessSelector'
+import { NO_SELECTOR, OPERATION_CALL, OPERATION_DELEGATECALL } from '../accessSelector'
 import { assemblePolicyBatch } from '../buildPolicyBatch'
 
 const SAFE = '0x1111111111111111111111111111111111111111' as Address
@@ -19,7 +19,10 @@ const configurations: PolicyConfiguration[] = [
   { target: SAFE, selector: '0x0d582f13', operation: OPERATION_CALL, policy: POLICY, data: '0x' },
 ]
 
-const context = { safeAddress: SAFE, safePolicyGuard: GUARD }
+const ALLOW = '0x4444444444444444444444444444444444444444' as Address
+const ZERO = '0x0000000000000000000000000000000000000000'
+
+const context = { safeAddress: SAFE, safePolicyGuard: GUARD, fallbackPolicy: ALLOW }
 
 describe('assemblePolicyBatch', () => {
   /**
@@ -48,13 +51,46 @@ describe('assemblePolicyBatch', () => {
     expect(moduleGuardArg.toLowerCase()).toBe(GUARD.toLowerCase())
   })
 
+  it('adds AllowPolicy as the fallback on CALL and DELEGATECALL so other calls keep working', () => {
+    const { txs, configurations: installed, configureRoot } = assemblePolicyBatch(context, configurations)
+
+    expect(installed).toEqual([
+      ...configurations,
+      { target: ZERO, selector: NO_SELECTOR, operation: OPERATION_CALL, policy: ALLOW, data: '0x' },
+      { target: ZERO, selector: NO_SELECTOR, operation: OPERATION_DELEGATECALL, policy: ALLOW, data: '0x' },
+    ])
+    expect(configureRoot).toBe(computeConfigureRoot(installed))
+
+    const [applied] = new Interface(CONFIGURE_IMMEDIATELY_ABI).decodeFunctionData('configureImmediately', txs[0].data)
+    expect(applied).toHaveLength(3)
+  })
+
+  it('keeps a fallback the policy sets itself instead of adding the default', () => {
+    const deny = '0x6666666666666666666666666666666666666666'
+    const ownFallback = [{ target: ZERO, selector: NO_SELECTOR, operation: OPERATION_CALL, policy: deny, data: '0x' }]
+
+    expect(assemblePolicyBatch(context, ownFallback).configurations).toEqual(ownFallback)
+  })
+
+  it('adds no fallback without a default fallback policy', () => {
+    const { configurations: installed } = assemblePolicyBatch({ ...context, fallbackPolicy: undefined }, configurations)
+
+    expect(installed).toEqual(configurations)
+  })
+
   // Once the guard is live the immediate path is closed, so there is nothing to order.
   it('requests a delayed configuration when the guard is already the policy guard', () => {
-    const { txs, mode, configureRoot } = assemblePolicyBatch({ ...context, currentGuard: GUARD }, configurations)
+    const {
+      txs,
+      mode,
+      configureRoot,
+      configurations: requested,
+    } = assemblePolicyBatch({ ...context, currentGuard: GUARD }, configurations)
 
     expect(mode).toBe('request')
     expect(txs).toHaveLength(1)
     expect(txs[0].to).toBe(GUARD)
+    expect(requested).toEqual(configurations)
 
     const [root] = new Interface(REQUEST_CONFIGURATION_ABI).decodeFunctionData('requestConfiguration', txs[0].data)
     expect(root).toBe(configureRoot)

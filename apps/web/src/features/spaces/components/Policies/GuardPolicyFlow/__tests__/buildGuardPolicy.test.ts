@@ -10,12 +10,14 @@ import type { GuardPolicyContracts } from '../hooks/useGuardPolicyContracts'
 const SAFE = '0x1111111111111111111111111111111111111111' as Address
 const GUARD = '0x2222222222222222222222222222222222222222' as Address
 const POLICY = '0x3333333333333333333333333333333333333333' as Address
+const ALLOW = '0x4444444444444444444444444444444444444444' as Address
 
 const contracts = (overrides: Partial<GuardPolicyContracts> = {}): GuardPolicyContracts => ({
   chainId: '11155111',
   safeAddress: SAFE,
   safePolicyGuard: GUARD,
   policyContract: POLICY,
+  allowPolicy: ALLOW,
   currentGuard: undefined,
   currentModuleGuard: undefined,
   isGuardSet: false,
@@ -26,13 +28,18 @@ const contracts = (overrides: Partial<GuardPolicyContracts> = {}): GuardPolicyCo
 })
 
 describe('buildGuardPolicy', () => {
-  it('hands the builder both guard slots', () => {
+  it('hands the builder both guard slots and the default fallback', () => {
     const build = jest.fn().mockReturnValue({ txs: [], mode: 'request', configurations: [], configureRoot: '0x' })
 
     buildGuardPolicy(contracts({ currentGuard: GUARD, currentModuleGuard: GUARD }), build)
 
     expect(build).toHaveBeenCalledWith(
-      expect.objectContaining({ currentGuard: GUARD, currentModuleGuard: GUARD, safePolicyGuard: GUARD }),
+      expect.objectContaining({
+        currentGuard: GUARD,
+        currentModuleGuard: GUARD,
+        safePolicyGuard: GUARD,
+        fallbackPolicy: ALLOW,
+      }),
       POLICY,
     )
   })

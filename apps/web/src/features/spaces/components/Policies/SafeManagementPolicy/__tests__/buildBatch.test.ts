@@ -1,7 +1,12 @@
 import { Interface } from 'ethers'
 import type { Address } from 'viem'
-import { CONFIGURE_IMMEDIATELY_ABI, REQUEST_CONFIGURATION_ABI, SAFE_SET_GUARD_ABI } from '../../shared/guardTx'
-import { parseAccessId, accessId, OPERATION_CALL } from '../../shared/accessSelector'
+import {
+  CONFIGURE_IMMEDIATELY_ABI,
+  REQUEST_CONFIGURATION_ABI,
+  SAFE_SET_GUARD_ABI,
+  type PolicyConfiguration,
+} from '../../shared/guardTx'
+import { parseAccessId, accessId, isFallbackAccessId, OPERATION_CALL } from '../../shared/accessSelector'
 import { buildSafeManagementBatch } from '../buildBatch'
 import { SAFE_MANAGEMENT_FUNCTIONS, SAFE_MANAGEMENT_SELECTORS, safeManagementFunctionBySelector } from '../contracts'
 
@@ -12,9 +17,15 @@ const ALLOW_POLICY = '0x3333333333333333333333333333333333333333' as Address
 const ADD_OWNER = '0x0d582f13'
 const CHANGE_THRESHOLD = '0x694e80c3'
 
+const FALLBACK_POLICY = '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2' as Address
+
+const ownRules = (configurations: PolicyConfiguration[]) =>
+  configurations.filter((configuration) => !isFallbackAccessId(accessId(configuration)))
+
 const base = {
   safeAddress: SAFE,
   safePolicyGuard: GUARD,
+  fallbackPolicy: FALLBACK_POLICY,
   policyContract: ALLOW_POLICY,
   selectors: [ADD_OWNER, CHANGE_THRESHOLD],
 }
@@ -32,7 +43,7 @@ describe('buildSafeManagementBatch', () => {
 
   // Management calls are calls the Safe makes to itself, so every access targets the Safe.
   it('binds each selected function to the Safe itself on CALL', () => {
-    const { configurations } = buildSafeManagementBatch(base)
+    const configurations = ownRules(buildSafeManagementBatch(base).configurations)
 
     expect(configurations).toHaveLength(2)
     for (const configuration of configurations) {
@@ -46,7 +57,9 @@ describe('buildSafeManagementBatch', () => {
 
   // One access per selector is what lets a later change touch a single function.
   it('emits one access per function rather than a single catch-all', () => {
-    const { configurations } = buildSafeManagementBatch({ ...base, selectors: SAFE_MANAGEMENT_SELECTORS })
+    const configurations = ownRules(
+      buildSafeManagementBatch({ ...base, selectors: SAFE_MANAGEMENT_SELECTORS }).configurations,
+    )
 
     expect(configurations).toHaveLength(SAFE_MANAGEMENT_FUNCTIONS.length)
     expect(new Set(configurations.map((c) => accessId(c))).size).toBe(SAFE_MANAGEMENT_FUNCTIONS.length)
@@ -73,8 +86,8 @@ describe('buildSafeManagementBatch', () => {
     const { txs } = buildSafeManagementBatch(base)
     const [applied] = new Interface(CONFIGURE_IMMEDIATELY_ABI).decodeFunctionData('configureImmediately', txs[0].data)
 
-    expect(applied).toHaveLength(2)
-    expect(applied.map((c: { selector: string }) => c.selector)).toEqual([ADD_OWNER, CHANGE_THRESHOLD])
+    expect(applied).toHaveLength(4)
+    expect(applied.slice(0, 2).map((c: { selector: string }) => c.selector)).toEqual([ADD_OWNER, CHANGE_THRESHOLD])
   })
 
   it('rejects a selector that is not a Safe management function', () => {

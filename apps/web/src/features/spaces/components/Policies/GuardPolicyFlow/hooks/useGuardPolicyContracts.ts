@@ -3,12 +3,15 @@ import type { PolicyType } from '@safe-global/store/gateway/policies/types'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { usePolicyContracts } from '../../shared/usePolicyContracts'
 import { usePolicyGuard } from '../../hooks/usePolicyGuard'
+import { useDefaultFallbackPolicy } from '../../shared/useDefaultFallbackPolicy'
 
 export type GuardPolicyContracts = {
   chainId: string
   safeAddress: Address | undefined
   safePolicyGuard: Address | undefined
   policyContract: Address | undefined
+  /** The AllowPolicy a first setup installs as the fallback; undefined while the chain's flag is off. */
+  allowPolicy: Address | undefined
   currentGuard: Address | undefined
   currentModuleGuard: Address | undefined
   /** The policy guard is already the Safe's guard, so the change is requested rather than applied. */
@@ -30,12 +33,14 @@ export const useGuardPolicyContracts = (type: PolicyType): GuardPolicyContracts 
   const { safePolicyGuard, policyContract } = usePolicyContracts(chainId, safeAddress, type)
   const { currentGuard, currentModuleGuard, isSet, isUnknownGuard, isUnsupportedVersion, isLoading, error } =
     usePolicyGuard(chainId, safeAddress, safePolicyGuard)
+  const allowPolicy = useDefaultFallbackPolicy(chainId)
 
   return {
     chainId,
     safeAddress: (safeAddress || undefined) as Address | undefined,
     safePolicyGuard: safePolicyGuard as Address | undefined,
     policyContract: policyContract as Address | undefined,
+    allowPolicy,
     currentGuard: currentGuard as Address | undefined,
     currentModuleGuard: currentModuleGuard as Address | undefined,
     isGuardSet: isSet,

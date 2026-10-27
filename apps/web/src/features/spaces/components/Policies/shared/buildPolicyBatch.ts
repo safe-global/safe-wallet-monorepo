@@ -1,6 +1,8 @@
 import { isAddress } from 'ethers'
 import type { Address } from 'viem'
 import type { MetaTransactionData } from '@safe-global/types-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { accessId, isFallbackAccessId, NO_SELECTOR, OPERATION_CALL, OPERATION_DELEGATECALL } from './accessSelector'
 import {
   buildSetGuardTx,
   buildSetModuleGuardTx,
@@ -13,7 +15,8 @@ import type { PolicyConfiguration } from './guardTx'
 /**
  * How the batch configures the guard:
  *  - `immediate`: guard not yet active → `configureImmediately` + `setGuard` + `setModuleGuard`,
- *    applied in one signed batch.
+ *    applied in one signed batch. With a default fallback policy, and unless the policy sets its own
+ *    fallback, AllowPolicy takes the fallback access so the Safe's other calls keep working.
  *  - `request`: guard already active in either slot → `requestConfiguration(root)` only. `configureImmediately`
  *    reverts in the guard's `checkTransaction` once it is live, so the change takes effect via a
  *    separate `applyConfiguration` once the on-chain DELAY has elapsed.
@@ -29,6 +32,8 @@ export type PolicyBatchContext = {
   currentModuleGuard?: Address
   /** The SafePolicyGuard deployment for this chain. */
   safePolicyGuard: Address
+  /** The AllowPolicy a first setup installs as the fallback; undefined installs none. */
+  fallbackPolicy: Address | undefined
   /**
    * Allow overwriting a DIFFERENT (non-policy) guard already on the Safe, in either slot. Guard-rail:
    * without it the builder throws, since the setters would silently replace the existing guard. Wizards
@@ -48,6 +53,27 @@ export type PolicyBatch = {
 
 const isSameGuard = (a: string | undefined, b: string): boolean => !!a && a.toLowerCase() === b.toLowerCase()
 
+// The guard refuses any call no access covers, so a first setup without a fallback would block everything else
+const withDefaultFallback = (
+  configurations: PolicyConfiguration[],
+  fallbackPolicy: Address | undefined,
+): PolicyConfiguration[] => {
+  if (!fallbackPolicy) return configurations
+  if (configurations.some((configuration) => isFallbackAccessId(accessId(configuration)))) return configurations
+  if (!isAddress(fallbackPolicy)) throw new Error('Invalid AllowPolicy address')
+
+  return [
+    ...configurations,
+    ...[OPERATION_CALL, OPERATION_DELEGATECALL].map((operation) => ({
+      target: ZERO_ADDRESS,
+      selector: NO_SELECTOR,
+      operation,
+      policy: fallbackPolicy,
+      data: '0x',
+    })),
+  ]
+}
+
 /**
  * Turns a policy's `Configuration[]` into the transactions that commit it.
  *
@@ -56,7 +82,14 @@ const isSameGuard = (a: string | undefined, b: string): boolean => !!a && a.toLo
  * caller resolves the addresses and the Safe's current guard and passes them in.
  */
 export const assemblePolicyBatch = (
-  { safeAddress, currentGuard, currentModuleGuard, safePolicyGuard, allowOverwriteGuard }: PolicyBatchContext,
+  {
+    safeAddress,
+    currentGuard,
+    currentModuleGuard,
+    safePolicyGuard,
+    fallbackPolicy,
+    allowOverwriteGuard,
+  }: PolicyBatchContext,
   configurations: PolicyConfiguration[],
 ): PolicyBatch => {
   if (!isAddress(safePolicyGuard)) throw new Error('Missing or invalid SafePolicyGuard address')
@@ -71,16 +104,16 @@ export const assemblePolicyBatch = (
     throw new Error('A different guard is already set on this Safe; overwriting it must be confirmed')
   }
 
-  const configureRoot = computeConfigureRoot(configurations)
-
   if (guardAlreadySet) {
     return {
       txs: [encodeRequestConfiguration(safePolicyGuard, configurations)],
       mode: 'request',
       configurations,
-      configureRoot,
+      configureRoot: computeConfigureRoot(configurations),
     }
   }
+
+  const installed = withDefaultFallback(configurations, fallbackPolicy)
 
   // Configure BEFORE installing the guard. `configureImmediately` opens with
   // `require(!_isGuardEnabled(msg.sender), GuardAlreadyEnabled())`, so with `setGuard` first
@@ -89,12 +122,12 @@ export const assemblePolicyBatch = (
   // a permissive fallback policy would otherwise let a CALL through and defeat the timelock.
   return {
     txs: [
-      encodeConfiguration(safePolicyGuard, configurations),
+      encodeConfiguration(safePolicyGuard, installed),
       buildSetGuardTx(safeAddress, safePolicyGuard),
       buildSetModuleGuardTx(safeAddress, safePolicyGuard),
     ],
     mode: 'immediate',
-    configurations,
-    configureRoot,
+    configurations: installed,
+    configureRoot: computeConfigureRoot(installed),
   }
 }
