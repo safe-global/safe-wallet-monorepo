@@ -4,6 +4,7 @@ import { runInLocalService } from './scenarios/local-service.mjs'
 import { registerContract } from './scenarios/contracts.mjs'
 import { ensFixtureFiles, setEnsName } from './scenarios/ens.mjs'
 import { localAddress } from './scenarios/staging.mjs'
+import { registerGuardPolicies } from './scenarios/policy-indexer.mjs'
 
 test('metadata commands reject unrelated projects and services before accessing Docker', async () => {
   for (const project of [undefined, 'production', '../safe-e2e-local', 'safe-e2e-local;echo']) {
@@ -11,6 +12,17 @@ test('metadata commands reject unrelated projects and services before accessing 
   }
   for (const service of ['anvil', 'cgw-web', 'txs-web;echo']) {
     await assert.rejects(runInLocalService({ SAFE_E2E_PROJECT: 'safe-e2e-local' }, service, []), /does not support/)
+  }
+})
+
+test('guard policy registration requires a numeric chain ID and a Safe address before accessing Docker', async () => {
+  const env = { SAFE_E2E_PROJECT: 'safe-e2e-local' }
+  const safe = '0x0000000000000000000000000000000000000001'
+  for (const target of [
+    { chainId: '11155111', safe },
+    { chainId: 11155111, safe: 'invalid' },
+  ]) {
+    await assert.rejects(registerGuardPolicies(env, target, {}), /numeric chain ID and a Safe address/)
   }
 })
 
