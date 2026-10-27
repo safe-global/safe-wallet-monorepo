@@ -1,6 +1,7 @@
 import { useContext, useState, type ReactElement } from 'react'
-import NextLink from 'next/link'
+import { useRouter } from 'next/router'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
+import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
@@ -51,6 +52,8 @@ const CreateRecipientAllowlistPolicy = ({
   onDismissCallout,
 }: CreateRecipientAllowlistPolicyProps): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
+  const { setTxFlow } = useContext(TxModalContext)
+  const router = useRouter()
   const [values, setValues] = useState<RecipientAllowlistFormValues>(() => {
     const { excludedTokens, addedTokens, recipients } = data ?? createDefaultAllowlistValues()
     return { excludedTokens, addedTokens, recipients }
@@ -108,6 +111,7 @@ const CreateRecipientAllowlistPolicy = ({
               : undefined
           }
           showSections={!selectedSafe || canContinue}
+          isGuardEnabled={guard?.status === 'known' || guard?.status === 'partial'}
           dismissedCallouts={dismissedCallouts}
           onDismissCallout={onDismissCallout}
         >
@@ -144,7 +148,13 @@ const CreateRecipientAllowlistPolicy = ({
               safeName={safeName}
               settingsLink={
                 settingsHref && (
-                  <Button variant="outline" render={<NextLink href={settingsHref} />}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setTxFlow(undefined)
+                      router.push(settingsHref)
+                    }}
+                  >
                     Go to Safe settings
                   </Button>
                 )

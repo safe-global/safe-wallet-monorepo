@@ -2,6 +2,8 @@ import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { render, screen, fireEvent } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
+import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import {
@@ -22,6 +24,9 @@ const SEPOLIA = '11155111'
 const SAFE_A = faker.finance.ethereumAddress()
 const SAFE_B = faker.finance.ethereumAddress()
 const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
+
+const mockSetTxFlow = jest.fn()
+const mockPush = jest.fn()
 
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
@@ -112,30 +117,32 @@ const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
   const setScope = jest.fn()
   const onNext = jest.fn()
   const tree = (key?: string) => (
-    <TxFlowContext.Provider value={{ ...initialContext, data: data && { ...data, rules: [] }, onNext }}>
-      <SafeScopeContext.Provider
-        value={{
-          scope: key
-            ? {
-                chainId: SEPOLIA,
-                safeAddress: key.split(':')[1],
-                scopeKey: key as `${string}:${string}`,
-                safeLoaded: true,
-                safeLoading: false,
-              }
-            : undefined,
-          setScope,
-          clearScope: jest.fn(),
-        }}
-      >
-        <CreateRecipientAllowlistPolicy
-          dismissedCallouts={{ tokens: false, recipients: false }}
-          onDismissCallout={jest.fn()}
-        />
-      </SafeScopeContext.Provider>
-    </TxFlowContext.Provider>
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() }}>
+      <TxFlowContext.Provider value={{ ...initialContext, data: data && { ...data, rules: [] }, onNext }}>
+        <SafeScopeContext.Provider
+          value={{
+            scope: key
+              ? {
+                  chainId: SEPOLIA,
+                  safeAddress: key.split(':')[1],
+                  scopeKey: key as `${string}:${string}`,
+                  safeLoaded: true,
+                  safeLoading: false,
+                }
+              : undefined,
+            setScope,
+            clearScope: jest.fn(),
+          }}
+        >
+          <CreateRecipientAllowlistPolicy
+            dismissedCallouts={{ tokens: false, recipients: false }}
+            onDismissCallout={jest.fn()}
+          />
+        </SafeScopeContext.Provider>
+      </TxFlowContext.Provider>
+    </TxModalContext.Provider>
   )
-  const { rerender } = render(tree(scopeKey))
+  const { rerender } = render(tree(scopeKey), { routerProps: { push: mockPush } })
   return { setScope, onNext, switchTo: (key?: string) => rerender(tree(key)), rerender: () => rerender(tree(scopeKey)) }
 }
 
@@ -329,17 +336,32 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('links an unknown guard to the Safe settings and keeps Next disabled', () => {
+  it('closes the flow without a discard prompt and opens the Safe settings for an unknown guard', async () => {
     accounts([option(SAFE_A)])
     guard({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
-      'href',
-      expect.stringContaining(`/settings/modules?safe=sep:${SAFE_A}`),
-    )
     expect(screen.getByTestId('installed-policies')).toHaveTextContent('Unknown policy')
     expect(screen.getByTestId('next-btn')).toBeDisabled()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Go to Safe settings' }))
+
+    expect(mockSetTxFlow).toHaveBeenCalledWith(undefined)
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining(`/settings/modules?safe=sep:${SAFE_A}`))
+  })
+
+  it.each<[GuardStatus, string]>([
+    [{ status: 'none' }, 'take effect as soon as this transaction is executed'],
+    [{ status: 'known' }, 'policy guard is already enabled'],
+    [{ status: 'partial', missingSlot: 'module' }, 'policy guard is already enabled'],
+  ])('explains when the changes apply for guard status %o', async (status, copy) => {
+    accounts([option(SAFE_A)])
+    guard(status)
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    await userEvent.hover(screen.getByRole('button', { name: 'When this takes effect' }))
+
+    expect(await screen.findByText(new RegExp(copy))).toBeInTheDocument()
   })
 
   it('retries a failed guard check', () => {
