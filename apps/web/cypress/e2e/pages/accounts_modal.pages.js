@@ -128,10 +128,6 @@ export function renameSafe(oldName, newName) {
   clickSaveBtn()
 }
 
-export function clickOnImportBtn() {
-  cy.get(importBtn).scrollIntoView().should('be.visible').click()
-}
-
 export function verifyImportBtnVisible() {
   cy.get(importBtn).scrollIntoView().should('be.visible')
 }
