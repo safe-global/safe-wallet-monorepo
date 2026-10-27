@@ -4,7 +4,12 @@ import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 export type SafeAccountEligibility = 'signer' | 'proposer' | 'signer-and-proposer'
 
 export type SafeAccountIneligibility =
-  'not-activated' | 'unsupported-chain' | 'no-spending-limits' | 'no-recipient-allowlists' | 'unsupported-safe-version'
+  | 'not-activated'
+  | 'unsupported-chain'
+  | 'no-spending-limits'
+  | 'no-recipient-allowlists'
+  | 'unsupported-safe-version'
+  | 'no-policy-engine'
 
 /** One selectable entry: a Safe on exactly one chain. */
 export type SafeAccountOption = {

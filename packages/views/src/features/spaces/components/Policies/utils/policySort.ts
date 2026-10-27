@@ -1,5 +1,5 @@
 import { getPolicyLabel } from './policyLabel'
-import { getPolicyStatus, type Policy, type PolicySafe } from '../types'
+import { getPolicyStatus, type Policy, type PolicySafe, type PolicyStatus } from '../types'
 
 export const POLICY_SORT_OPTIONS = [
   { value: 'rule', label: 'Rule A–Z' },
@@ -19,16 +19,22 @@ export type PolicySortContext = {
   getChainName: (chainId: string) => string
 }
 
-// Pending is first because it is the only status where the user has something to do.
-const STATUS_ORDER = {
+// The statuses where the user has something to do come first.
+const STATUS_ORDER: Record<PolicyStatus, number> = {
   pending: 0,
+  'needs-signatures': 0,
+  'ready-to-execute': 0,
+  'ready-to-apply': 0,
+  expired: 0,
+  'not-requested': 0,
   activating: 1,
   'change-pending': 1,
+  'security-delay': 1,
   unenforced: 2,
   'not-activated': 2,
   failed: 2,
   active: 3,
-} as const
+}
 
 // A named Safe is listed before an unnamed one, which only has its address to sort by.
 const compareSafes = (a: PolicySafe, b: PolicySafe, getSafeName: PolicySortContext['getSafeName']): number => {

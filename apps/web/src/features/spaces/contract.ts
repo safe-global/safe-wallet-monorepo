@@ -26,6 +26,7 @@ import type SpaceMembersPage from './components/Members/Page'
 import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import type SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import type SpaceSettingsPage from './components/SpaceSettings/Page'
+import type PolicyTxDetails from './components/Policies/txDecoding/PolicyTxDetails'
 import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
@@ -72,6 +73,9 @@ export interface SpacesContract {
   SpacePlansPage: typeof SpacePlansPage
   SpacePoliciesPage: typeof SpacePoliciesPage
   SpaceTransactionsPage: typeof SpaceTransactionsPage
+
+  /** Policy details for a SafePolicyGuard configuration transaction. */
+  PolicyTxDetails: typeof PolicyTxDetails
 
   // Modal components (PascalCase) - stub renders null
   SelectSafeModal: typeof SelectSafeModal

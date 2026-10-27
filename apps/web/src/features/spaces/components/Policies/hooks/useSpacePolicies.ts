@@ -9,6 +9,7 @@ import type {
   PendingPolicyDto,
   SpacePoliciesGetActivePoliciesV1ApiArg,
   SpacePoliciesGetPendingPoliciesV1ApiArg,
+  SpacePoliciesGetPendingPoliciesV1ApiResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   useSpacePoliciesGetActivePoliciesV1Query,
@@ -22,21 +23,52 @@ import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
+import { getNextGuardBoundary, mapPendingGuardChanges } from '../utils/mapPendingGuardChanges'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useAllowlistTokenResolver } from './useAllowlistTokenResolver'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
-export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']
+export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
+  'spending-limit',
+  'proposer',
+  'erc20-transfer',
+  'native-transfer',
+  'multisend',
+  'allow',
+]
 
 export const ALLOWLIST_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
   'erc20-transfer',
   'native-transfer',
 ]
 
-/** Proposer grants take effect off chain at once, so only spending limits can be pending. */
-export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = ['spending-limit']
+/**
+ * Proposer grants take effect off chain at once, so only spending limits and guard policies can be pending.
+ * Every other guard type is asked for, so a change the table has no row type for still shows its progress.
+ */
+export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = [
+  'spending-limit',
+  'multisend',
+  'allow',
+  'deny',
+  'cosigner',
+]
+
+type PendingDto = SpacePoliciesGetPendingPoliciesV1ApiResponse[number]
+
+const isQueuedSpendingLimit = (dto: PendingDto): dto is PendingDto & PendingPolicyDto =>
+  dto.kind === 'queued-transaction'
+
+/** Whether a fully signed transaction is in the queue, which can be executed from anywhere. */
+const isExecutable = (dto: PendingDto): boolean => {
+  const tx = dto.kind === 'queued-transaction' ? dto : dto.transaction
+  return !!tx && tx.confirmations >= tx.confirmationsRequired
+}
+
+// setTimeout overflows past about 24.8 days.
+const MAX_TIMEOUT_MS = 2 ** 31 - 1
 
 const PENDING_REFETCH_EVENTS = [
   TxEvent.PROPOSED,
@@ -50,7 +82,7 @@ const PENDING_REFETCH_EVENTS = [
 const ACTIVE_REFETCH_EVENTS = [TxEvent.SUCCESS]
 
 const NO_POLICIES: ActivePolicyDto[] = []
-const NO_PENDING: PendingPolicyDto[] = []
+const NO_PENDING: PendingDto[] = []
 
 /** CGW sends no metadata with a native-transfer policy, so the coin comes from the chain config. */
 const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
@@ -89,6 +121,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const isWaitingForGate = !skip && isAllowlistActive === undefined
   const { configs: chains } = useChains()
   const types = isAllowlistActive ? [...TABLE_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : TABLE_POLICY_TYPES
+  const pendingTypes = isAllowlistActive ? [...PENDING_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : PENDING_POLICY_TYPES
 
   const active = useSpacePoliciesGetActivePoliciesV1Query(
     { spaceId: spaceId ?? '', types },
@@ -97,9 +130,9 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
-    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },
+    { spaceId: spaceId ?? '', types: pendingTypes },
     {
-      skip,
+      skip: skip || isWaitingForGate,
       ...SPACE_REFRESH_OPTIONS,
       pollingInterval: hasExecutable ? POLLING_INTERVAL : 0,
       skipPollingIfUnfocused: true,
@@ -114,12 +147,37 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const pendingDtos = pending.currentData ?? NO_PENDING
 
   useEffect(() => {
-    setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
+    setHasExecutable(pendingDtos.some(isExecutable))
   }, [pendingDtos])
+
+  // A delayed guard change moves on by the clock, so the rows are re-read when its delay ends or its window closes.
+  const nextGuardBoundary = useMemo(
+    () => getNextGuardBoundary(pendingDtos, Math.floor(Date.now() / 1000)),
+    [pendingDtos],
+  )
+  const refetchPending = pending.refetch
+  useEffect(() => {
+    if (skip || nextGuardBoundary === undefined) return
+
+    const delayMs = nextGuardBoundary * 1000 - Date.now() + 1000
+    if (delayMs > MAX_TIMEOUT_MS) return
+
+    const timeout = setTimeout(refetchPending, Math.max(delayMs, 0))
+    return () => clearTimeout(timeout)
+  }, [skip, nextGuardBoundary, refetchPending])
 
   const resolveErc20Token = useAllowlistTokenResolver(dtos)
   const activeRows = useMemo(() => toActiveRows(dtos, chains, resolveErc20Token), [dtos, chains, resolveErc20Token])
-  const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
+  const pendingRows = useMemo(
+    () => mapPendingPolicies(pendingDtos.filter(isQueuedSpendingLimit), activeRows),
+    [pendingDtos, activeRows],
+  )
+  const guardChangeRows = useMemo(() => {
+    const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
+    return mapPendingGuardChanges(pendingDtos).filter(
+      (row) => row.data.policyType !== 'allowlist' || allowlistChainIds.has(row.safe.chainId),
+    )
+  }, [pendingDtos, chains])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
     resetKey: spaceId,
@@ -127,8 +185,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   })
 
   const policies = useMemo(
-    () => [...activeRows, ...pendingRows, ...activatingRows],
-    [activeRows, pendingRows, activatingRows],
+    () => [...activeRows, ...pendingRows, ...activatingRows, ...guardChangeRows],
+    [activeRows, pendingRows, activatingRows, guardChangeRows],
   )
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.

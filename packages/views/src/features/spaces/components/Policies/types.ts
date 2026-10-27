@@ -8,7 +8,8 @@ import type { Erc20TransferRecipientDto } from '@safe-global/store/gateway/AUTO_
  * they live in the space address book and the frontend resolves them.
  */
 
-export type PolicyType = 'spending-limit' | 'recovery' | 'proposer' | 'allowlist'
+export type PolicyType =
+  'spending-limit' | 'recovery' | 'proposer' | 'allowlist' | 'multisend' | 'safe-management' | 'policy-change'
 
 /**
  * How the policy is enforced. A proposer grant is enforced by no contract, so it has no module
@@ -17,8 +18,18 @@ export type PolicyType = 'spending-limit' | 'recovery' | 'proposer' | 'allowlist
  */
 export type PolicyEnforcement =
   | { via: 'module'; moduleAddress: string }
-  | { via: 'guard'; guardAddress: string }
+  | { via: 'guard'; guardAddress: string; access?: PolicyAccess }
   | { via: 'offchain'; source: 'delegates' }
+
+/**
+ * The `(target, selector, operation)` the policy guard keys a policy by. Absent on a row that
+ * groups several accesses, as the allowlist and Safe-management rows do.
+ */
+export type PolicyAccess = {
+  target: string
+  selector: string
+  operation: 'CALL' | 'DELEGATECALL'
+}
 
 /** CGW has no Safe ID. A Safe is identified by its chain and its address. */
 export type PolicySafe = {
@@ -128,7 +139,29 @@ type PolicyBase = {
   enabled: boolean
 }
 
+/** The multisend policy takes no payload: it only re-enters the engine for each call in a batch. */
+export type MultiSendPolicyData = Record<string, never>
+
+/** One management change the Safe still permits, named by its selector. */
+export type SafeManagementChange = {
+  selector: string
+  /** From the known management functions; absent for a selector the client does not recognise. */
+  label?: string
+}
+
+/**
+ * The guard keys one policy per selector, but a reader thinks in terms of one rule per Safe, so
+ * the row groups every permitted change together.
+ */
+export type SafeManagementPolicyData = {
+  changes: SafeManagementChange[]
+  /** How many management changes exist in all, so the row can say what is left out. */
+  total: number
+}
+
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
+export type MultiSendPolicy = PolicyBase & { type: 'multisend'; data: MultiSendPolicyData }
+export type SafeManagementPolicy = PolicyBase & { type: 'safe-management'; data: SafeManagementPolicyData }
 export type RecoveryPolicy = PolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPolicyData }
 export type AllowlistPolicy = PolicyBase & {
@@ -139,7 +172,8 @@ export type AllowlistPolicy = PolicyBase & {
   scheduledChange?: AllowlistScheduledChange
 }
 
-export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | AllowlistPolicy
+export type ActivePolicy =
+  SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | AllowlistPolicy | MultiSendPolicy | SafeManagementPolicy
 
 /** What a queued Safe transaction would do to a policy once it executes. */
 export type PendingPolicyOperation = 'create' | 'update' | 'remove'
@@ -175,14 +209,121 @@ export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: '
 export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending' }
 export type FailedAllowlistPolicy = PendingAllowlistPolicy & { status: 'failed' }
 
+/** The queued Safe transaction a guard change is waiting on. */
+export type GuardSetupTransaction = {
+  safeTxHash: string
+  nonce: number
+  confirmationsSubmitted: number
+  confirmationsRequired: number
+  proposedAt: number
+}
+
+/** One `Configuration` of the SafePolicyGuard, exactly as hashed into its root. */
+export type GuardConfiguration = {
+  target: string
+  selector: string
+  operation: 0 | 1
+  policy: string
+  data: string
+}
+
+/** CGW's view of a delayed change; the app refines it by the clock between polls. */
+export type DelayedGuardSetupStatus =
+  | 'draft'
+  | 'configuration-in-signing'
+  | 'pending-application'
+  | 'application-in-signing'
+  | 'application-ready'
+  | 'expired'
+
+/**
+ * How a guard change reaches the chain. Before the guard is enabled it is one transaction; once it is
+ * enabled, the change is requested, waits out the guard's delay, and is then applied.
+ */
+export type GuardSetup =
+  | { flow: 'immediate'; guard: string; transaction: GuardSetupTransaction }
+  | {
+      flow: 'delayed'
+      status: DelayedGuardSetupStatus
+      /** Null for a draft, which has not been requested on a guard yet. */
+      guard: string | null
+      root: string
+      /** Null when CGW does not hold the configurations behind the root. */
+      configurations: GuardConfiguration[] | null
+      /** Unix seconds; null until the request executes. */
+      readyAt: number | null
+      expiresAt: number | null
+      transaction: GuardSetupTransaction | null
+    }
+
+export type GuardSetupStepState = 'complete' | 'current' | 'upcoming' | 'failed'
+
+export type GuardSetupStep = {
+  id: 'request' | 'delay' | 'apply' | 'sign' | 'execute'
+  title: string
+  description: string
+  state: GuardSetupStepState
+}
+
+/** What the viewer can do next: open the queued transaction, or propose the next one. */
+export type GuardSetupAction = 'review-transaction' | 'apply' | 'request'
+
+/** Where a guard change stands, as the app resolved it. */
+export type GuardSetupProgress = {
+  status: PolicyStatus
+  steps: GuardSetupStep[]
+  /** Where the change is, short enough for a table row. */
+  summary: string
+  /** Null while only time has to pass. */
+  action: GuardSetupAction | null
+}
+
+/** The guard policies a change can be recognised as. */
+export type GuardPolicyType = 'allowlist' | 'multisend' | 'safe-management'
+
+/** A guard change that has not taken effect yet, as the table lists it. */
+export type PendingGuardChange = PolicyBase & {
+  type: 'policy-change'
+  status: 'pending'
+  setup: GuardSetup
+  progress: GuardSetupProgress
+  data: {
+    /** Unset when the change holds several kinds of policy, or none the app recognises. */
+    policyType?: GuardPolicyType
+    /** Null when CGW does not hold the configurations behind the root. */
+    ruleCount: number | null
+  }
+}
+
 export type PolicyStatus =
-  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending'
+  | 'active'
+  | 'pending'
+  | 'activating'
+  | 'unenforced'
+  | 'not-activated'
+  | 'failed'
+  | 'change-pending'
+  | 'not-requested'
+  | 'needs-signatures'
+  | 'ready-to-execute'
+  | 'security-delay'
+  | 'ready-to-apply'
+  | 'expired'
 
 /** One table row: an active or a pending policy. */
-export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
+export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy | PendingGuardChange
+
+/** The guard-enforced rows the generic guard drawer shows; the allowlist has its own. */
+export type GuardPolicy = Extract<Policy, { type: 'multisend' | 'safe-management' }>
+
+export const isGuardPolicy = (policy: Policy): policy is GuardPolicy =>
+  policy.type === 'multisend' || policy.type === 'safe-management'
 
 export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
-  policy.status === 'pending' || policy.status === 'activating' || policy.status === 'failed'
+  policy.type !== 'policy-change' &&
+  (policy.status === 'pending' || policy.status === 'activating' || policy.status === 'failed')
+
+export const isGuardChange = (policy: Policy): policy is PendingGuardChange => policy.type === 'policy-change'
 
 export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
@@ -204,6 +345,7 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  * Calling it active would tell the user the Safe is protected when it is not.
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
+  if (isGuardChange(policy)) return policy.progress.status
   if (isPendingPolicy(policy)) return policy.status
   if (isAllowlistPolicy(policy) && policy.scheduledChange) return 'change-pending'
   if (policy.enabled) return 'active'

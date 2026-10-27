@@ -63,6 +63,8 @@ export enum TxFlowType {
   SETUP_SPACE_RECIPIENT_ALLOWLIST = 'setup-space-recipient-allowlist',
   EDIT_SPACE_SPENDING_LIMIT = 'edit-space-spending-limit',
   ENABLE_SPACE_SPENDING_LIMIT_MODULE = 'enable-space-spending-limit-module',
+  SETUP_SPACE_MULTISEND_POLICY = 'setup-space-multisend-policy',
+  SETUP_SPACE_SAFE_MANAGEMENT = 'setup-space-safe-management',
   SIGN_MESSAGE_ON_CHAIN = 'sign-message-on-chain',
   SIGNERS_STRUCTURE = 'signers-structure',
   START_RECOVERY = 'propose-recovery',

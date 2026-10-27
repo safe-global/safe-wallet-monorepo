@@ -8,8 +8,10 @@ import {
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import {
   mockErc20TransferDto,
+  mockMultiSendDto,
   mockNativeTransferDto,
   mockProposerDto,
+  mockSafeManagementDto,
   mockSpendingLimitDto,
   mockTreasuryAllowlistDtos,
 } from '../../mocks/activePolicies'
@@ -349,5 +351,61 @@ describe('mapActivePolicies', () => {
 
       expect(policy).toMatchObject({ enabled: true, spendingLimitsCovered: false })
     })
+  })
+})
+
+describe('mapActivePolicies — guard-enforced policies', () => {
+  it('maps a multisend policy', () => {
+    const [policy] = mapActivePolicies([mockMultiSendDto()])
+
+    expect(policy.type).toBe('multisend')
+    expect(policy.status).toBe('active')
+  })
+
+  // An `allow` is only a Safe-management policy when it targets the Safe on a known selector.
+  it('names the management function an allow policy keeps permitted', () => {
+    const [policy] = mapActivePolicies([mockSafeManagementDto()])
+
+    expect(policy.type).toBe('safe-management')
+    if (policy.type !== 'safe-management') throw new Error('expected a safe management policy')
+
+    expect(policy.data.changes).toEqual([{ selector: '0x0d582f13', label: 'Add a signer' }])
+  })
+
+  // The guard keys one policy per selector; a reader wants one rule per Safe.
+  it('groups every permitted change on a Safe into one row', () => {
+    const removeSigner = mockSafeManagementDto()
+    if (removeSigner.enforcement.via !== 'guard' || !removeSigner.enforcement.access) {
+      throw new Error('expected guard enforcement')
+    }
+    removeSigner.enforcement.access = { ...removeSigner.enforcement.access, selector: '0xf8dc5dd9' }
+
+    const policies = mapActivePolicies([mockSafeManagementDto(), removeSigner])
+
+    expect(policies).toHaveLength(1)
+    const [policy] = policies
+    if (policy.type !== 'safe-management') throw new Error('expected a safe management policy')
+
+    expect(policy.data.changes.map((change) => change.label)).toEqual(['Add a signer', 'Remove a signer'])
+    expect(policy.data.total).toBe(9)
+  })
+
+  it('keeps the management changes of each Safe in its own row', () => {
+    const other = mockSafeManagementDto({ safe: MOCK_SAFES.payroll })
+    if (other.enforcement.via !== 'guard' || !other.enforcement.access) throw new Error('expected guard enforcement')
+    other.enforcement.access = { ...other.enforcement.access, target: MOCK_SAFES.payroll.address }
+
+    const policies = mapActivePolicies([mockSafeManagementDto(), other])
+
+    expect(policies).toHaveLength(2)
+    expect(policies[0].id).not.toBe(policies[1].id)
+  })
+
+  it('drops an allow policy that is not a Safe-management call', () => {
+    const dto = mockSafeManagementDto()
+    if (dto.enforcement.via !== 'guard') throw new Error('expected guard enforcement')
+    dto.enforcement.access = { target: MOCK_TOKENS.usdc.address, selector: '0xa9059cbb', operation: 'CALL' }
+
+    expect(mapActivePolicies([dto])).toEqual([])
   })
 })

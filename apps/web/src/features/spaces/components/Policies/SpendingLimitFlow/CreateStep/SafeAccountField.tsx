@@ -7,7 +7,12 @@ import {
   NESTED_SAFES_NOTICE_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import type { SafeAccountEntry } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import type { GuardPolicyBaseFormValues } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/types'
+
+const SPENDING_LIMITS_NOTICE = {
+  title: NESTED_SAFES_NOTICE_TITLE,
+  description: getNestedSafesNoticeText('spending limits'),
+}
 
 export type SafeAccountFieldProps = {
   accounts: SafeAccountEntry[]
@@ -18,6 +23,9 @@ export type SafeAccountFieldProps = {
   /** The picked `${chainId}:${address}`, already split. */
   onSafeChange: (chainId: string, address: string) => void
   readOnly?: boolean
+  /** Defaults to the spending limit's nested Safes notice; `null` shows none. */
+  notice?: { title: string; description: string } | null
+  id?: string
 }
 
 const SafeAccountField = ({
@@ -28,8 +36,11 @@ const SafeAccountField = ({
   hasWallet,
   onSafeChange,
   readOnly = false,
+  notice = SPENDING_LIMITS_NOTICE,
+  id = 'spending-limit-safe-account',
 }: SafeAccountFieldProps): ReactElement => {
-  const { control } = useFormContext<SpendingLimitPolicyFormValues>()
+  // Any policy form keyed by `safe`: the spending limit's and the guard policies'.
+  const { control } = useFormContext<GuardPolicyBaseFormValues>()
 
   return (
     <Controller
@@ -50,9 +61,9 @@ const SafeAccountField = ({
           onRetry={onRetry}
           hasWallet={hasWallet}
           readOnly={readOnly}
-          notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('spending limits') }}
+          notice={notice ?? undefined}
           name={field.name}
-          id="spending-limit-safe-account"
+          id={id}
         />
       )}
     />

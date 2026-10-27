@@ -327,14 +327,13 @@ describe('Policies', () => {
       expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
     })
 
-    it('is offered first, in one column, when a chain has it enabled', async () => {
+    it('is offered first when a chain has it enabled', async () => {
       mockIsAllowlistAvailable = true
 
       await openAddPolicyDialog()
 
       const options = within(screen.getByTestId('add-policy-options')).getAllByRole('button')
       expect(options[0]).toHaveAttribute('data-testid', 'add-policy-option-recipient-allowlist')
-      expect(screen.getByTestId('add-policy-options')).not.toHaveClass('sm:grid-cols-2')
     })
 
     it('explains the allowlist before the flow starts', async () => {

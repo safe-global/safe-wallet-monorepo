@@ -12,7 +12,12 @@ import {
   mockProposerDto,
   mockSpendingLimitDto,
 } from '../../mocks/activePolicies'
-import { mockPendingDto } from '../../mocks/pendingPolicies'
+import {
+  mockDelayedGuardDto,
+  mockImmediateGuardDto,
+  mockPendingDto,
+  mockPendingTransactionDto,
+} from '../../mocks/pendingPolicies'
 import { MOCK_SAFES, MOCK_TOKENS, mockActivatingPolicy } from '../../mocks/policies'
 import { ALLOWLIST_POLICY_TYPES, PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
@@ -362,5 +367,54 @@ describe('useSpacePolicies', () => {
 
       expect(result.current.policies.map((policy) => policy.safe)).toEqual([MOCK_SAFES.treasury])
     })
+  })
+
+  it('should list a pending guard change beside the spending-limit rows', () => {
+    mockPendingQuery.mockReturnValue({
+      ...idle,
+      currentData: [mockPendingDto(), mockDelayedGuardDto({ configurations: null })],
+    })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.policies.map((policy) => policy.type)).toEqual(['spending-limit', 'policy-change'])
+  })
+
+  it('should, while a guard change has a fully signed transaction queued, poll for it leaving the queue', () => {
+    mockPendingQuery.mockReturnValue({
+      ...idle,
+      currentData: [mockImmediateGuardDto({ transaction: mockPendingTransactionDto({ confirmations: 2 }) })],
+    })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+    )
+  })
+
+  it('should, while a guard change sits out its delay, re-read the pending rows when the delay ends', () => {
+    jest.useFakeTimers()
+    const nowSec = Math.floor(Date.now() / 1000)
+    const refetchPending = jest.fn()
+    mockPendingQuery.mockReturnValue({
+      ...idle,
+      currentData: [mockDelayedGuardDto({ readyAt: nowSec + 60, expiresAt: nowSec + 3_600 })],
+      refetch: refetchPending,
+    })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: 0 }),
+    )
+    jest.advanceTimersByTime(30_000)
+    expect(refetchPending).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(32_000)
+    expect(refetchPending).toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
   })
 })

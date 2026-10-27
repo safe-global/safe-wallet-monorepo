@@ -42,8 +42,10 @@ describe('AddPolicyDialog', () => {
     expect(onSelect).toHaveBeenCalledWith('proposer')
   })
 
+  // The column count follows the list length, so both cases pass an explicit list rather than
+  // the catalogue, which grows as policies are added.
   it('lays out four or fewer policies in a single column', () => {
-    renderDialog({ options: [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] })
+    renderDialog({ options: [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS.slice(0, 3)] })
 
     expect(screen.getByTestId('add-policy-options')).not.toHaveClass('sm:grid-cols-2')
   })
@@ -51,7 +53,7 @@ describe('AddPolicyDialog', () => {
   it('splits more than four policies into two columns', () => {
     const options: AddPolicyOption[] = [
       RECIPIENT_ALLOWLIST_POLICY_OPTION,
-      ...ADD_POLICY_OPTIONS,
+      ...ADD_POLICY_OPTIONS.slice(0, 3),
       RECOVERY_POLICY_OPTION,
     ]
 

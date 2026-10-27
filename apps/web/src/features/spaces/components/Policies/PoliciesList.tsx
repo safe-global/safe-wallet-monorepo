@@ -18,10 +18,14 @@ import {
   type PolicySortOption,
 } from '@safe-global/views/features/spaces/components/Policies/utils/policySort'
 import type { Policy, PolicyType } from '@safe-global/views/features/spaces/components/Policies/types'
+import { getPolicyDisplayType } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 
 const POLICY_TYPE_FILTERS: { type: PolicyType; label: string }[] = [
   { type: 'spending-limit', label: 'Spending limits' },
   { type: 'proposer', label: 'Proposers' },
+  { type: 'allowlist', label: 'Allowlists' },
+  { type: 'multisend', label: 'Batched transactions' },
+  { type: 'safe-management', label: 'Safe management' },
 ]
 
 export type PoliciesListProps = {
@@ -53,7 +57,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
 
   const { policies: matches, matchedSpenderNames } = usePolicySearch(policies, query)
   const rows = useMemo(() => {
-    const filtered = typeFilter ? matches.filter((policy) => policy.type === typeFilter) : matches
+    const filtered = typeFilter ? matches.filter((policy) => getPolicyDisplayType(policy) === typeFilter) : matches
     return sortPolicies(filtered, sort ?? DEFAULT_POLICY_SORT, sortContext)
   }, [matches, typeFilter, sort, sortContext])
 

@@ -42,6 +42,7 @@ export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
     "The spending limit module isn't deployed on this network yet, so new spending limits can't be created here.",
   'no-recipient-allowlists': 'Not available on this network yet',
   'unsupported-safe-version': `Requires Safe v${MIN_POLICY_GUARD_SAFE_VERSION} or newer`,
+  'no-policy-engine': "The policy engine isn't deployed on this network yet, so this policy can't be set here.",
 }
 
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'

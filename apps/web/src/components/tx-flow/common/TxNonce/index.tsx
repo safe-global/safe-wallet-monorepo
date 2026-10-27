@@ -265,10 +265,14 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
       <Typography variant="paragraph-bold" className="inline">
         #
       </Typography>
-      {nonce === undefined || recommendedNonce === undefined ? (
+      {/* Only the nonce itself gates the skeleton. `recommendedNonce` is the editable form's
+          suggestion, so a missing one drops to the read-only value rather than hiding a nonce we
+          already know — which is what left the policy flows showing a skeleton forever, their
+          nonce coming from the prebuilt batch while the recommendation never resolved. */}
+      {nonce === undefined ? (
         // h-9 matches the ComboboxInput/SelectTrigger it stands in for, so the row doesn't shift on load
         <Skeleton style={{ width: skeletonMinWidth }} className="h-9" />
-      ) : canEdit && !isReadOnly ? (
+      ) : canEdit && !isReadOnly && recommendedNonce !== undefined ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
       ) : (
         <Typography variant="paragraph-bold" className="-ml-2">

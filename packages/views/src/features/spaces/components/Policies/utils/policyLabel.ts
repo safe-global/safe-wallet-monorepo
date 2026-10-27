@@ -3,12 +3,16 @@ import { getAllowlistRecipients } from './allowlistRecipients'
 import {
   hasRecoveryData,
   isAllowlistPolicy,
+  isGuardChange,
   isPendingPolicy,
   isSpendingLimitPolicy,
   type Policy,
   type PolicyAllowance,
   type PolicyTokenInfo,
+  type PolicyType,
 } from '../types'
+
+export const MULTISEND_SUMMARY = 'Every call inside a batch'
 
 /**
  * Labels are derived from the policy. CGW returns no policy name, so a row cannot fall back to an
@@ -39,6 +43,9 @@ export const POLICY_TYPE_LABELS = {
   recovery: 'Account recovery',
   proposer: 'Proposer',
   allowlist: 'Allowlist',
+  multisend: 'Batched transactions',
+  'safe-management': 'Safe management',
+  'policy-change': 'Policy change',
 } as const
 
 export const formatTokenAmount = (amount: string, token: PolicyTokenInfo): string =>
@@ -78,6 +85,8 @@ const describeSpendingLimit = (policy: Extract<Policy, { type: 'spending-limit' 
  * single allowance that represents it, so the summary counts them instead.
  */
 export const getPolicySummary = (policy: Policy): string => {
+  if (isGuardChange(policy)) return policy.progress.summary
+
   if (isSpendingLimitPolicy(policy)) {
     if (!isPendingPolicy(policy) || policy.operation !== 'remove') return describeSpendingLimit(policy)
 
@@ -97,11 +106,22 @@ export const getPolicySummary = (policy: Policy): string => {
     return `${formatDays(policy.data.reviewWindowSeconds)} review window`
   }
 
+  if (policy.type === 'multisend') return MULTISEND_SUMMARY
+
+  if (policy.type === 'safe-management') {
+    const { changes, total } = policy.data
+    return `${changes.length} of ${total} change${maybePlural(total)} allowed`
+  }
+
   return 'Never expires'
 }
 
+/** The policy a row reads as: a pending guard change reads as the policy it sets up, when that is known. */
+export const getPolicyDisplayType = (policy: Policy): PolicyType =>
+  isGuardChange(policy) ? (policy.data.policyType ?? policy.type) : policy.type
+
 /** The name shown in the RULE column and as the detail panel title. */
-export const getPolicyLabel = (policy: Policy): string => POLICY_TYPE_LABELS[policy.type]
+export const getPolicyLabel = (policy: Policy): string => POLICY_TYPE_LABELS[getPolicyDisplayType(policy)]
 
 /** "Name (0x1234...abcd)" when the contact has a name, otherwise the shortened address alone. */
 export const formatContactLabel = (address: string, name?: string): string =>
