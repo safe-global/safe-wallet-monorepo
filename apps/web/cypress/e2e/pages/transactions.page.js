@@ -4,7 +4,6 @@ import { continueSignBtn, clickOnContinueSignTransactionBtn, signAndOpenExecuteS
 import * as constants from '../../support/constants.js'
 
 const connectedWalletExecutionMethod = '[data-testid="connected-wallet-execution-method"]'
-const relayExecutionMethod = '[data-testid="relay-execution-method"]'
 const txStatus = '[data-testid="transaction-status"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const executeBtn = '[data-testid="combo-submit-execute"]'
@@ -50,15 +49,6 @@ export function selectConnectedWalletIfOffered() {
 function continueToSubmitStep() {
   cy.get(continueSignBtn, { timeout: 30000 }).should('be.enabled')
   clickOnContinueSignTransactionBtn()
-}
-
-// The Safe creation review also uses the connected-wallet test ID for its Pay later option.
-export function selectRelayOtion() {
-  cy.get(relayExecutionMethod).click()
-}
-
-export function verifyRelayExecutionMethodChecked() {
-  cy.get(relayExecutionMethod).find(radioItem).should('have.attr', 'aria-checked', 'true')
 }
 
 export function clickOnExecuteBtn() {

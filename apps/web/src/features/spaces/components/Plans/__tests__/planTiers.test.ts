@@ -382,6 +382,20 @@ describe('getPlanCta on a card', () => {
       label: 'Change via your account team',
     })
   })
+
+  it('asks a custom Enterprise plan on a free period without a card for a payment method', () => {
+    const currentEnterprise = tier({ id: 'current', name: 'Enterprise', isCurrent: true, currentPriceId: 'price_e35m' })
+    const pick = { tier: currentEnterprise, option: option({ priceId: 'price_e35m', paymentLinkId: null }) }
+
+    expect(getPlanCta(pick, currentPlan({ name: 'Enterprise', isTrialing: true }))).toEqual({
+      kind: 'billing',
+      label: 'Add payment method',
+    })
+    expect(getPlanCta(pick, currentPlan({ name: 'Enterprise', isTrialing: true, hasPaymentMethod: true }))).toEqual({
+      kind: 'account-team',
+      label: 'Change via your account team',
+    })
+  })
 })
 
 describe('getPlanPrice', () => {

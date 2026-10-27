@@ -4,7 +4,6 @@ import * as modal from './modals.page.js'
 import * as file from './import_export.pages.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
-import sidebar from '../../fixtures/sidebar.js'
 
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
@@ -123,28 +122,7 @@ const activateStr = 'You need to activate your Safe first'
 const emptyPinnedMessage = 'Personalize your account list by clicking theicon on the accounts most important to you.'
 
 export const addedSafesEth = ['0x8675...a19b']
-export const addedSafesSepolia = ['0x6d0b...6dC1', '0x5912...fFdb', '0x0637...708e', '0xD157...DE9a']
 export const sideBarListItems = ['Home', 'Assets', 'Transactions', 'Address book', 'Apps', 'Settings', 'Swap']
-export const sideBarListItemsNew = ['Overview', 'Assets', 'Transactions', 'Address book', 'Apps']
-export const sideBarSafes = {
-  safe1: '0xBb26E3717172d5000F87DeFd391994f789D80aEB',
-  safe2: '0x905934aA8758c06B2422F0C90D97d2fbb6677811',
-  safe3: '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B',
-  safe1short: '0xBb26...0aEB',
-  safe1short_: '0xBb26',
-  safe2short: '0x9059...7811',
-  safe3short: '0x86Cb...2C27',
-  safe4short: '0x9261...7E00',
-  multichain_short_: '0xC96e',
-}
-
-// 0x926186108f74dB20BFeb2b6c888E523C78cb7E00
-export const sideBarSafesPendingActions = {
-  safe1: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
-  get safe1short() {
-    return sidebar.pendingSafeShort
-  },
-}
 const receiveAssetsStr = 'Receive assets'
 const emptyPinnedListStr = 'Watch any Safe account to keep an eye on its activity'
 const emptySafeListStr = "You don't have any safes yet"
@@ -333,15 +311,6 @@ export function verifySideListItems() {
 
 export function verifyTxCounter(counter) {
   cy.get(sideBarListItem).contains(sideBarListItems[2]).should('contain', counter)
-}
-
-export function verifySideListItemsNew() {
-  main.verifyValuesExist(sideBarListItem, sideBarListItemsNew)
-  main.verifyElementsExist([sidebarSettingsItem, sideBarListItemNeedHelp])
-}
-
-export function verifyTxCounterNew(counter) {
-  cy.get('[data-testid="queued-tx-info"]').should('be.visible').and('contain.text', String(counter))
 }
 
 export function verifyNavItemDisabled(item) {

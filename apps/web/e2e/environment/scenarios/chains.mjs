@@ -1,8 +1,6 @@
-import { hexlify, randomBytes } from 'ethers'
-import { createSafe, executeTransaction, onChain } from './safe.mjs'
-import { polygonOwner, rebuildStagingSafes } from './staging-safes.mjs'
+import { onChain } from './safe.mjs'
+import { rebuildStagingSafes } from './staging-safes.mjs'
 import { registerTokens, trustTokens } from './tokens.mjs'
-import { SEPOLIA } from './chain.mjs'
 
 // On-chain these report DAI, cDAI and LUNA; the hosted Transaction Service lists the curated names.
 const curatedTokens = [
@@ -20,47 +18,6 @@ const defaultTokens = [
   '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07', // OMG
   '0x1A5F9352Af8aF974bFC03399e3767DF6370d82e4', // OWL
 ]
-
-/** Deploys the same Safe, with one salt and one setup, on each chain so it gets the same address everywhere. */
-export async function createMultichainSafe(env, owners, chainIds, options) {
-  const saltNonce = BigInt(hexlify(randomBytes(16))).toString()
-  const contexts = {}
-  for (const chainId of chainIds) {
-    contexts[chainId] = await createSafe(onChain(env, chainId), owners, { ...options, saltNonce })
-  }
-  if (new Set(Object.values(contexts).map(({ safeAddress }) => safeAddress)).size !== 1) {
-    throw new Error('Multichain Safe got different addresses; check the factory and singleton on every fork')
-  }
-  return contexts
-}
-
-async function addOwners(context, additions) {
-  for (const { ownerAddress, threshold } of additions) {
-    await executeTransaction(context, await context.safe.createAddOwnerTx({ ownerAddress, threshold }))
-  }
-}
-
-/**
- * MATIC_STATIC_SAFE_28: one Safe on Polygon and Sepolia with the signer setups of staging, which diverged after
- * the shared creation with OWNER_4 as the only owner.
- */
-export async function prepareMultichainScenario(env, owners) {
-  const contexts = await createMultichainSafe(env, owners, [SEPOLIA, 137], {
-    ownerAddresses: [owners.owner4.address],
-    threshold: 1,
-  })
-  try {
-    await addOwners(contexts[SEPOLIA], [{ ownerAddress: owners.owner1.address, threshold: 1 }])
-    await addOwners(contexts[137], [
-      { ownerAddress: owners.owner3.address, threshold: 1 },
-      { ownerAddress: owners.owner1.address, threshold: 1 },
-      { ownerAddress: polygonOwner, threshold: 2 },
-    ])
-    return { safes: { static: { MATIC_STATIC_SAFE_28: `matic:${contexts[137].safeAddress}` } } }
-  } finally {
-    for (const context of Object.values(contexts)) context.provider.destroy()
-  }
-}
 
 export async function prepareBalancesEndpointsScenario(env, owners) {
   const mainnet = onChain(env, 1)

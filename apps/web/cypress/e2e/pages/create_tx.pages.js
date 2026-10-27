@@ -21,7 +21,6 @@ const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
-export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
@@ -162,11 +161,6 @@ export function getRejectButton() {
 
 export function clickOnRejectBtn() {
   getRejectButton().click()
-}
-
-export function verifyPayNowOptionIsDisabled() {
-  // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
-  cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
 }
 
 export function verifyTxRejectModalVisible() {

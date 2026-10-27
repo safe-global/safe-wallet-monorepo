@@ -99,9 +99,12 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
 
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
-    if (pick.tier.name === ENTERPRISE_TIER.name) return { kind: 'account-team', label: 'Change via your account team' }
+    const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
+    if (pick.tier.name === ENTERPRISE_TIER.name && !isAwaitingPaymentMethod) {
+      return { kind: 'account-team', label: 'Change via your account team' }
+    }
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
-      return current?.isTrialing && !current.hasPaymentMethod
+      return isAwaitingPaymentMethod
         ? { kind: 'billing', label: 'Add payment method' }
         : { kind: 'current', label: 'Current plan' }
     }
