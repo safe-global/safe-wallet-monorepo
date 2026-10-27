@@ -15,7 +15,6 @@ import {
   useSpacePoliciesGetPendingPoliciesV1Query,
 } from '@/store/api/gateway/spacePolicies'
 import useChains from '@/hooks/useChains'
-import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
 import { isAllowlistEnabled } from '@/features/policy-guard/services'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
@@ -28,9 +27,9 @@ import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
-export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']
-
-export const ALLOWLIST_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
+export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
+  'spending-limit',
+  'proposer',
   'erc20-transfer',
   'native-transfer',
 ]
@@ -84,15 +83,11 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const skip = !isUserSignedIn || !spaceId
-  const isAllowlistActive = useIsAllowlistActiveInSpace(spaceId ?? undefined)
-  // Waiting for the gate keeps the request from running once without allowlists and again with them.
-  const isWaitingForGate = !skip && isAllowlistActive === undefined
   const { configs: chains } = useChains()
-  const types = isAllowlistActive ? [...TABLE_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : TABLE_POLICY_TYPES
 
   const active = useSpacePoliciesGetActivePoliciesV1Query(
-    { spaceId: spaceId ?? '', types },
-    { skip: skip || isWaitingForGate, ...SPACE_REFRESH_OPTIONS },
+    { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
+    { skip, ...SPACE_REFRESH_OPTIONS },
   )
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
@@ -132,7 +127,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   )
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
-  const isLoadingActive = isWaitingForGate || (active.isFetching && !active.currentData)
+  const isLoadingActive = active.isFetching && !active.currentData
 
   const refetch = () => {
     active.refetch()
