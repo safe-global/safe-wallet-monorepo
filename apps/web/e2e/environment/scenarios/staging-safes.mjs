@@ -8,7 +8,6 @@ const { owner1, owner3, owner4, sepoliaOwner2 } = stagingOwners
 const beneficiary = '0x4c8bF5541D21288836F5B7AdE01E102F074c5F4a'
 const automationOwner = '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
 const sharedOwner = '0xb43470d6913f548Bf90E299De2fe3f94140aaf7c'
-const polygonOwner = '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
 
 const shortNames = { [SEPOLIA]: 'sep', 1: 'eth', 137: 'matic' }
 
@@ -114,18 +113,6 @@ export const stagingSafes = {
       { address: '0xF5DCe57282A584D2746FaF1593d3121Fcac444dC', amount: parseUnits('1.825', 8) }, // cSAI
       { address: '0xd2877702675e6cEb975b4A1dFf9fb7BAF4C91ea9', amount: parseEther('0.004583') }, // LUNC
       { address: '0x7701996420A116F25bD414c02381f6DB698bF2EB', amount: parseEther('5') }, // BUN
-    ],
-  },
-  MATIC_STATIC_SAFE_30: {
-    chainId: 137,
-    owners: [owner3, owner4, owner1, polygonOwner],
-    threshold: 2,
-    nonce: 3,
-    ether: parseEther('0.00999'),
-    tokens: [
-      { address: '0xD6DF932A45C0f255f85145f286eA0b292B21C90B', amount: parseEther('0.01') }, // AAVE
-      { address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063', amount: parseEther('1') }, // DAI
-      { address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', amount: 100n }, // USDT0
     ],
   },
 }

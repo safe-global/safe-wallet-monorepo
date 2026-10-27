@@ -1,31 +1,9 @@
-// Reasons for `skips`: the cases need a service the local stack cannot provide; staging runs keep them.
-const securityProviders = 'Blockaid, Hypernative and Tenderly are hosted providers'
-const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepolia, not the fork'
-
 /**
  * Every spec that runs against the isolated backend: `scenario` names a function from scenarios/index.mjs,
- * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
+ * `chains` the forks besides Sepolia.
  */
 export const isolatedSpecs = {
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/regression/copilot.cy.js': {
-    scenario: 'prepareCopilotScenario',
-    chains: [137],
-    skips: {
-      '[Recipient Analyse] Verify that Different setup warning is shown - 4D': securityProviders,
-      '[Recipient Analyse] Verify that Missing ownership warning is shown - 4B': securityProviders,
-      '[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A': securityProviders,
-      '[Recipient Analyse] Verify that Recurring recipient is shown with interaction count - 3B': securityProviders,
-      '[Recipient Analyse] Verify that Unsupported network warning is shown - 4C': securityProviders,
-      '[Tenderly Simulation] Verify failed simulation state': securityProviders,
-      '[Tenderly Simulation] Verify success simulation state': securityProviders,
-      '[Threat Analyse] Verify Malicious Approval detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious Native Transfer detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious Transfer detection - 9A': securityProviders,
-      '[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A': securityProviders,
-      '[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue': securityProviders,
-    },
-  },
   'cypress/e2e/regression/create_tx_2.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/create_tx.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
@@ -40,15 +18,6 @@ export const isolatedSpecs = {
   // The swap widgets screen recipients against the Chainalysis sanctions oracle on Ethereum.
   'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
   'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
-  'cypress/e2e/regression/twaps_integration.cy.js': {
-    scenario: 'prepareTwapWidgetScenario',
-    chains: [1],
-    skips: {
-      'Verify "Balances" tag and value is present for selected token': swapWidgetBalances,
-      'Verify list of tokens with balances is displayed in the token selector': swapWidgetBalances,
-      'Verify that the "Max" button sets the value as the max balance': swapWidgetBalances,
-    },
-  },
   'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },

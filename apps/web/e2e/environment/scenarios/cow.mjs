@@ -271,11 +271,6 @@ export async function prepareSwapWidgetScenario(env, owners) {
   return { safes: { static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_1']) } }
 }
 
-export async function prepareTwapWidgetScenario(env, owners) {
-  await registerCowContracts(env)
-  return { safes: { static: { SEP_STATIC_SAFE_27: `sep:${await buildTwapSafe(env, owners)}` } } }
-}
-
 export async function prepareTwapHistoryScenario(env, owners) {
   await registerCowContracts(env)
   const twapSafe = await buildTwapSafe(env, owners)

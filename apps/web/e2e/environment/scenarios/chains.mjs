@@ -26,7 +26,3 @@ export async function prepareBalancesEndpointsScenario(env, owners) {
   await trustTokens(mainnet, defaultTokens)
   return { safes: { static: safes } }
 }
-
-export async function prepareCopilotScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['MATIC_STATIC_SAFE_30']) } }
-}

@@ -355,13 +355,6 @@ export const addressBookData = {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
     },
   },
-  safeSchiledAddressBook: {
-    137: {
-      '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0': 'Test Recipient',
-      '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D': 'Test Safe Address',
-      '0x9445deb174C1eCbbfce8d31D33F438B8e7a0F1BA': 'Test Signer (Owner 4)',
-    },
-  },
   cookies: cookieState,
 }
 
