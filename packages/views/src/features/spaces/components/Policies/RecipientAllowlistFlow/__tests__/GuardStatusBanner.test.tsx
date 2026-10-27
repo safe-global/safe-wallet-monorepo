@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import GuardStatusBanner, { type GuardStatus } from '../GuardStatusBanner'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const FOREIGN_GUARD = faker.finance.ethereumAddress()
 
@@ -20,30 +19,53 @@ describe('GuardStatusBanner', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it.each<[string, GuardStatus]>([
-    ['a transaction guard', { status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] }],
-    ['a module guard', { status: 'unknown', foreignGuards: [{ slot: 'module', address: FOREIGN_GUARD }] }],
-    [
-      'guards in both slots',
-      {
-        status: 'unknown',
-        foreignGuards: [
-          { slot: 'transaction', address: FOREIGN_GUARD },
-          { slot: 'module', address: FOREIGN_GUARD },
-        ],
-      },
-    ],
-  ])('asks to remove an unknown policy and links to the help article for %s', (_, guard) => {
-    renderBanner(guard)
+  it('asks to remove an unknown policy and leads to the Safe settings', () => {
+    render(
+      <GuardStatusBanner
+        guard={{ status: 'unknown', foreignGuards: [{ slot: 'module', address: FOREIGN_GUARD }] }}
+        safeName="Treasury"
+        settingsLink={<a href="/settings">Go to Safe settings</a>}
+      />,
+    )
 
     expect(screen.getByText('This Safe account has an unknown policy installed')).toBeInTheDocument()
-    expect(screen.getByText('Remove it to set up an allowlist.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'How to remove it' })).toHaveAttribute(
-      'href',
-      HelpCenterArticle.TRANSACTION_GUARD,
+    expect(
+      screen.getByText('A Safe account can only have one policy of this kind, remove it to set up an allowlist.'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute('href', '/settings')
+  })
+
+  it('lists every installed unknown policy', () => {
+    const moduleGuard = faker.finance.ethereumAddress()
+    render(
+      <GuardStatusBanner
+        guard={{
+          status: 'unknown',
+          foreignGuards: [
+            { slot: 'transaction', address: FOREIGN_GUARD },
+            { slot: 'module', address: moduleGuard },
+          ],
+        }}
+        safeName="Treasury"
+        renderAddress={(address, name) => <span data-testid={`policy-${address}`}>{name}</span>}
+      />,
     )
-    expect(screen.queryByText(/Transaction guard|Module guard/)).not.toBeInTheDocument()
-    expect(screen.queryByText(new RegExp(FOREIGN_GUARD.slice(0, 6)))).not.toBeInTheDocument()
+
+    const list = screen.getByTestId('installed-policies')
+    expect(list).toHaveTextContent('Installed policies')
+    expect(list).toHaveTextContent('Unknown policy 1')
+    expect(list).toHaveTextContent('Unknown policy 2')
+    expect(screen.getByTestId(`policy-${FOREIGN_GUARD}`)).toHaveTextContent('Unknown policy 1')
+    expect(screen.getByTestId(`policy-${moduleGuard}`)).toHaveTextContent('Unknown policy 2')
+  })
+
+  it('shows the short address of an unknown policy without an app renderer', () => {
+    renderBanner({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: FOREIGN_GUARD }] })
+
+    const list = screen.getByTestId('installed-policies')
+    expect(list).toHaveTextContent(FOREIGN_GUARD.slice(-4))
+    expect(screen.getByText('Unknown policy')).toBeInTheDocument()
+    expect(list).not.toHaveTextContent('Unknown policy 1')
   })
 
   it('warns that modules skip the policies and the module guard can be set later', () => {

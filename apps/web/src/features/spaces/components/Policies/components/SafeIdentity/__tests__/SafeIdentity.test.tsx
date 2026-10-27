@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import SafeIdentity from '../components/SafeIdentity'
+import SafeIdentity from '../SafeIdentity'
 
 // Render the tooltip primitives inline so the wired content is assertable without a portal.
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({

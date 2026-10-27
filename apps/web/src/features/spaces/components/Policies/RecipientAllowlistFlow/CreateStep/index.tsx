@@ -1,10 +1,14 @@
 import type { ReactElement } from 'react'
+import NextLink from 'next/link'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { AppRoutes } from '@/config/routes'
+import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { SafeIdentity } from '../../components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import GuardStatusBanner from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -19,9 +23,12 @@ import {
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
+const renderGuardAddress = (address: string, name: string) => <SafeIdentity address={address} name={name} />
+
 const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
   const { setScope } = useSafeScopeControls()
+  const spaceId = useUrlSpaceId()
   const scopeKey = useSafeScope()?.scopeKey
 
   const selectedSafe = findSafeAccount(accounts, scopeKey)
@@ -32,6 +39,12 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { guard, retry } = useGuardStatus(target)
 
   const isSettled = !isLoading && !isError
+  const settingsHref = selectedSafe?.chain
+    ? withSpaceIdInUrl(
+        `${AppRoutes.settings.modules}?safe=${selectedSafe.chain.shortName}:${selectedSafe.address}`,
+        spaceId,
+      )
+    : undefined
 
   return (
     <TxCard>
@@ -67,6 +80,14 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
           <GuardStatusBanner
             guard={guard}
             safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
+            settingsLink={
+              settingsHref && (
+                <Button variant="outline" render={<NextLink href={settingsHref} />}>
+                  Go to Safe settings
+                </Button>
+              )
+            }
+            renderAddress={renderGuardAddress}
             onRetry={retry}
           />
         )}

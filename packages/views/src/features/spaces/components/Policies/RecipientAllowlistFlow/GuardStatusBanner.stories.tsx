@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
+import { Button } from '@safe-global/views/components/ui/button'
+import { SafeIdentity } from '@/features/spaces/components/Policies/components/SafeIdentity'
 import GuardStatusBanner from './GuardStatusBanner'
 
 const FOREIGN_GUARD = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
+const FOREIGN_MODULE_GUARD = '0x8f3b5C4e2D1a9B7c6E0f4A3d2B1c9E8f7A6b31b0'
 
 const meta = {
   title: 'Features/Spaces/Policies/RecipientAllowlistFlow/GuardStatusBanner',
@@ -19,6 +22,8 @@ const meta = {
   args: {
     safeName: 'Treasury',
     onRetry: fn(),
+    settingsLink: <Button variant="outline">Go to Safe settings</Button>,
+    renderAddress: (address, name) => <SafeIdentity address={address} name={name} />,
     guard: { status: 'loading' },
   },
 } satisfies Meta<typeof GuardStatusBanner>
@@ -39,7 +44,7 @@ export const UnknownGuardInBothSlots: Story = {
       status: 'unknown',
       foreignGuards: [
         { slot: 'transaction', address: FOREIGN_GUARD },
-        { slot: 'module', address: FOREIGN_GUARD },
+        { slot: 'module', address: FOREIGN_MODULE_GUARD },
       ],
     },
   },

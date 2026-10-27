@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
@@ -159,15 +158,16 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('guard-status-destructive')).toHaveTextContent('This Safe account needs an update')
   })
 
-  it('links an unknown guard to the help article', () => {
+  it('links an unknown guard to the Safe settings', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.getByRole('link', { name: 'How to remove it' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
       'href',
-      HelpCenterArticle.TRANSACTION_GUARD,
+      expect.stringContaining(`/settings/modules?safe=sep:${SAFE_A}`),
     )
+    expect(screen.getByTestId('installed-policies')).toHaveTextContent('Unknown policy')
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 

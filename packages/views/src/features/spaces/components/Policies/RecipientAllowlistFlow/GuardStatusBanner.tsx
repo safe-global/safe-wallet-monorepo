@@ -1,9 +1,9 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 import StatusAlert from '@safe-global/views/components/common/StatusAlert'
+import ShortAddress from './ShortAddress'
 
 export type GuardSlotName = 'transaction' | 'module'
 
@@ -21,6 +21,10 @@ export type GuardStatus =
 export type GuardStatusBannerProps = {
   guard: GuardStatus
   safeName: string
+  /** Leads to the Safe's settings, where an unknown guard can be removed. */
+  settingsLink?: ReactNode
+  /** The app's identity row for a guard address; its name and a short address without it. */
+  renderAddress?: (address: string, name: string) => ReactNode
   onRetry?: () => void
 }
 
@@ -46,7 +50,39 @@ const Banner = ({
   />
 )
 
-const GuardStatusBanner = ({ guard, safeName, onRetry }: GuardStatusBannerProps): ReactElement | null => {
+const defaultRenderAddress = (address: string, name: string): ReactNode => (
+  <div className="flex min-w-0 flex-col gap-0.5">
+    <Typography variant="paragraph">{name}</Typography>
+    <ShortAddress address={address} />
+  </div>
+)
+
+const InstalledPolicies = ({
+  addresses,
+  renderAddress = defaultRenderAddress,
+}: {
+  addresses: string[]
+  renderAddress?: (address: string, name: string) => ReactNode
+}): ReactElement => (
+  <section className="flex flex-col gap-3" data-testid="installed-policies">
+    <Typography variant="paragraph">Installed policies</Typography>
+    <ul className="m-0 flex list-none flex-col divide-y rounded-xl border p-0">
+      {addresses.map((address, index) => (
+        <li key={`${index}-${address}`} className="flex min-w-0 items-center gap-3 p-4">
+          {renderAddress(address, addresses.length === 1 ? 'Unknown policy' : `Unknown policy ${index + 1}`)}
+        </li>
+      ))}
+    </ul>
+  </section>
+)
+
+const GuardStatusBanner = ({
+  guard,
+  safeName,
+  settingsLink,
+  renderAddress,
+  onRetry,
+}: GuardStatusBannerProps): ReactElement | null => {
   switch (guard.status) {
     case 'loading':
       return <StatusAlert tone="loading" title={`Checking guards on ${safeName}…`} data-testid="guard-status-loading" />
@@ -58,17 +94,15 @@ const GuardStatusBanner = ({ guard, safeName, onRetry }: GuardStatusBannerProps)
 
     case 'unknown':
       return (
-        <Banner
-          variant="destructive"
-          title="This Safe account has an unknown policy installed"
-          action={
-            <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD} mode="button">
-              How to remove it
-            </ExternalLink>
-          }
-        >
-          Remove it to set up an allowlist.
-        </Banner>
+        <div className="flex flex-col gap-5">
+          <Banner variant="destructive" title="This Safe account has an unknown policy installed" action={settingsLink}>
+            A Safe account can only have one policy of this kind, remove it to set up an allowlist.
+          </Banner>
+          <InstalledPolicies
+            addresses={guard.foreignGuards.map(({ address }) => address)}
+            renderAddress={renderAddress}
+          />
+        </div>
       )
 
     case 'partial':
