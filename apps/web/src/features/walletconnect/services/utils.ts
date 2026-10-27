@@ -57,3 +57,9 @@ export const getPeerName = (peer: SessionTypes.Struct['peer'] | ProposalTypes.St
 export const splitError = (message: string): string[] => {
   return message.split(/: (.+)/).slice(0, 2)
 }
+
+// WalletConnect deletes a proposal when it expires and reports it only through these messages
+export const isExpiredProposalError = (error: Error): boolean => {
+  const message = error.message.toLowerCase()
+  return message.includes('record was recently deleted') || message.includes('no matching key')
+}

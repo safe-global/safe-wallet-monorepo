@@ -12,9 +12,12 @@ import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Label } from '@safe-global/views/components/ui/label'
 import { InputGroup, InputGroupInput, InputGroupAddon } from '@safe-global/views/components/ui/input-group'
-import { useCallback, useContext, useEffect, useId, useState } from 'react'
+import { useCallback, useContext, useEffect, useId, useRef, useState } from 'react'
 
-const PROPOSAL_TIMEOUT = 30_000
+export const PROPOSAL_TIMEOUT = 30_000
+
+const TIMEOUT_ERROR =
+  'Connection timed out. If you already used this pairing code, copy a new one from the dApp and try again.'
 
 const useTrackErrors = (error?: Error) => {
   const debouncedErrorMessage = useDebounce(error?.message, 1000)
@@ -33,6 +36,15 @@ const WcInput = ({ uri }: { uri: string }) => {
   const [inputError, setInputError] = useState<Error>()
   const inputId = useId()
   useTrackErrors(inputError)
+
+  // The timeout callback runs after many renders, so it reads the latest loading state from a ref
+  const loadingRef = useRef(loading)
+  useEffect(() => {
+    loadingRef.current = loading
+  }, [loading])
+
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(timeoutRef.current), [])
 
   const onInput = useCallback(
     async (val: string) => {
@@ -56,15 +68,18 @@ const WcInput = ({ uri }: { uri: string }) => {
       } catch (e) {
         setInputError(asError(e))
         setLoading(null)
+        return
       }
-      setTimeout(() => {
-        if (loading && loading !== WCLoadingState.APPROVE) {
+
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => {
+        if (loadingRef.current === WCLoadingState.CONNECT) {
           setLoading(null)
-          setError(new Error('Connection timed out'))
+          setError(new Error(TIMEOUT_ERROR))
         }
       }, PROPOSAL_TIMEOUT)
     },
-    [loading, setError, setLoading, walletConnect],
+    [setError, setLoading, walletConnect],
   )
 
   // Insert a pre-filled uri
