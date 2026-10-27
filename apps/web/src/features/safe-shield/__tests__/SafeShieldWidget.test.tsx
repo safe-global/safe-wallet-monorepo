@@ -73,6 +73,7 @@ describe('SafeShieldWidget', () => {
       setRecipientAddresses: jest.fn(),
       setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
+      setPolicyCalls: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
       hasProFeatures: true,

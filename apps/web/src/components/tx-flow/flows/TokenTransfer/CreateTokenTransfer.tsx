@@ -47,7 +47,10 @@ import {
   useIsNoFeeCampaignEnabled,
 } from '@/features/no-fee-campaign'
 import { useLoadFeature } from '@/features/__core__'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForPolicyCalls, useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
+import { isAddress } from 'ethers'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
@@ -172,6 +175,31 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
   )
 
   useSafeShieldForRecipients(recipientAddresses)
+
+  // The calls this form will make, so a policy guard can refuse them while they can still be changed.
+  // Each transfer is checked on its own: a batch only exists after this step, and a policy refusing
+  // one call refuses the batch too.
+  const policyCalls = useMemo(
+    () =>
+      recipientsWatched
+        .filter((recipient) => isAddress(recipient.recipient) && Number(recipient.amount) > 0)
+        .map((recipient) => {
+          const token = balancesItems.find((item) => sameAddress(item.tokenInfo.address, recipient.tokenAddress))
+          if (!token) return undefined
+
+          const { to, value, data } = createTokenTransferParams(
+            recipient.recipient,
+            recipient.amount,
+            token.tokenInfo.decimals,
+            recipient.tokenAddress,
+          )
+          return { to, value, data, operation: 0 }
+        })
+        .filter((call): call is NonNullable<typeof call> => !!call),
+    [recipientsWatched, balancesItems],
+  )
+
+  useSafeShieldForPolicyCalls(policyCalls)
 
   return (
     <TxCard>

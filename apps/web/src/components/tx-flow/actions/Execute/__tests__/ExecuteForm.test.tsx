@@ -109,6 +109,7 @@ describe('ExecuteForm', () => {
       setRecipientAddresses: jest.fn(),
       setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
+      setPolicyCalls: jest.fn(),
       recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
       contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
       threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
