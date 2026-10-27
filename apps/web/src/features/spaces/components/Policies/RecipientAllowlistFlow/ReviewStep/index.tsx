@@ -154,9 +154,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
       {children}
 
-      {chainId && calls && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
+      {calls && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
         <AllowlistSetupActions
-          chainId={chainId}
           calls={calls}
           configurations={configurations}
           describeCall={describeSetupCall}

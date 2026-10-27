@@ -2,7 +2,6 @@ import { useState, type ReactElement, type ReactNode } from 'react'
 import classnames from 'classnames'
 import { Code } from 'lucide-react'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   Accordion,
@@ -26,12 +25,11 @@ import MethodCall from '@/components/transactions/TxDetails/TxData/DecodedData/M
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import singleTxCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
 import type { PolicyConfiguration, SetupCallDescription } from '@/features/policy-guard'
-import { getPolicyEngineAddress } from '@/features/policy-guard/services'
+import { NATIVE_TRANSFER_SELECTOR } from '@safe-global/utils/features/policy-guard/constants'
 
 type AddressInfo = { name?: string; logoUri?: string }
 
 type AllowlistSetupActionsProps = {
-  chainId: string
   calls: MetaTransactionData[]
   configurations: PolicyConfiguration[]
   describeCall: (call: MetaTransactionData) => SetupCallDescription | undefined
@@ -143,7 +141,6 @@ const PolicyRuleRows = ({
 
 /** The app's Multisend rebuilt so the configuring call lists "Rule N of M", which the generic decoder can't. */
 const AllowlistSetupActions = ({
-  chainId,
   calls,
   configurations,
   describeCall,
@@ -151,7 +148,6 @@ const AllowlistSetupActions = ({
   getAddressInfo,
 }: AllowlistSetupActionsProps): ReactElement => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
-  const nativePolicy = getPolicyEngineAddress(chainId, 'NativeTransferPolicy')
 
   return (
     <div data-testid="allowlist-setup-actions">
@@ -186,7 +182,7 @@ const AllowlistSetupActions = ({
                             configuration={configuration}
                             index={ruleIndex}
                             count={configurations.length}
-                            isNative={!!nativePolicy && sameAddress(configuration.policy, nativePolicy)}
+                            isNative={configuration.selector.toLowerCase() === NATIVE_TRANSFER_SELECTOR}
                             decodeRecipients={decodeRecipients}
                             getAddressInfo={getAddressInfo}
                           />
