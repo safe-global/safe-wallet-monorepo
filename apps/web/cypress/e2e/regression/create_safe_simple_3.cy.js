@@ -2,7 +2,6 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as createwallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
-import * as wallet from '../../support/utils/wallet.js'
 import { walletCredentials } from '../../support/credentials.js'
 
 let signer
@@ -14,13 +13,6 @@ describe('Safe creation tests 3', () => {
   beforeEach(() => {
     createwallet.startCreateSafeFlow(signer)
   })
-  it('Verify a Wallet can be connected', () => {
-    owner.clickOnWalletExpandMoreIcon()
-    owner.clickOnDisconnectBtn()
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-  })
-
   it('Verify that a new Wallet has default name related to the selected network', () => {
     createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
   })

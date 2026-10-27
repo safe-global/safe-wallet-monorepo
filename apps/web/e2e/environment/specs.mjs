@@ -26,7 +26,6 @@ export const isolatedSpecs = {
       '[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue': securityProviders,
     },
   },
-  'cypress/e2e/regression/counterfactual_pending_deletes.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/create_safe_cf.cy.js': { scenario: 'prepareCounterfactualScenario' },
   'cypress/e2e/regression/create_safe_simple_2.cy.js': { scenario: 'prepareCreateSafeOwnersScenario' },
   'cypress/e2e/regression/create_safe_simple_3.cy.js': { scenario: 'prepareBasicScenario' },
