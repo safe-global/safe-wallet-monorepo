@@ -149,8 +149,14 @@ describe('useBuildAllowlistTransaction', () => {
     expect(setSafeTxError).not.toHaveBeenCalledWith(expect.anything())
   })
 
-  it('sets the error when native tokens are unavailable on the chain', () => {
-    ;(useSafeScope as jest.Mock).mockReturnValue({ ...scope, chainId: '1' })
+  it('sets the error when the configurations cannot be built', () => {
+    ;(useLoadFeature as jest.Mock).mockReturnValue({
+      $isReady: true,
+      buildAllowlistConfigurations: () => {
+        throw new Error(NATIVE_POLICY_UNAVAILABLE_ERROR)
+      },
+      createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
+    })
     mockGuard({ state: { status: 'none' } })
     const { result } = renderHook(() => useBuildAllowlistTransaction(nativeRules), { wrapper })
 
