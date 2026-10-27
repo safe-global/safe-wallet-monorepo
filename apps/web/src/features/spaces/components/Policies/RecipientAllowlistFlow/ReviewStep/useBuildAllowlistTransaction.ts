@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
-import type { MetaTransactionData } from '@safe-global/types-kit'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import {
@@ -12,6 +11,7 @@ import { useLoadFeature } from '@/features/__core__'
 import {
   PolicyGuardFeature,
   usePolicyGuard,
+  type AllowlistSetup,
   type PolicyConfiguration,
   type PolicyGuardState,
 } from '@/features/policy-guard'
@@ -21,10 +21,11 @@ import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 type BuiltAllowlist = {
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
-  calls: MetaTransactionData[]
+  configureRoot: string
+  calls: AllowlistSetup['txs']
 }
 
-/** Returns `configurations` and `calls` only once their tx is set, so the review and the CGW save always match it. */
+/** Returns `configurations`, `configureRoot` and `calls` only once their tx is set, so the review and the CGW save always match it. */
 export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<BuiltAllowlist> => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
@@ -56,11 +57,10 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
     }
     if (!$isReady || !sdk || !chainId || !safeAddress || !guardAddress) return
 
-    let configurations: PolicyConfiguration[]
-    let txs: ReturnType<typeof createAllowlistSetupTxs>
+    let setup: AllowlistSetup
     try {
-      configurations = buildAllowlistConfigurations(chainId, JSON.parse(rulesKey))
-      txs = createAllowlistSetupTxs({ safeAddress, guardAddress, guardState: state, configurations })
+      const configurations = buildAllowlistConfigurations(chainId, JSON.parse(rulesKey))
+      setup = createAllowlistSetupTxs({ safeAddress, guardAddress, guardState: state, configurations })
     } catch (e) {
       setSafeTxError(asError(e))
       return
@@ -68,11 +68,16 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
-    createMultiSendCallOnlyTx(txs, scope)
+    createMultiSendCallOnlyTx(setup.txs, scope)
       .then((tx) => {
         if (isStale) return
         setSafeTx(tx)
-        setBuilt({ guardState: state, configurations, calls: txs })
+        setBuilt({
+          guardState: state,
+          configurations: setup.configurations,
+          configureRoot: setup.configureRoot,
+          calls: setup.txs,
+        })
       })
       .catch((e) => {
         if (!isStale) setSafeTxError(asError(e))

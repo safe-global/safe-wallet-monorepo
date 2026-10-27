@@ -14,7 +14,6 @@ import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
 
 const mockConfigs = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
 const mockSetup = jest.requireActual('@/features/policy-guard/services/createAllowlistSetupTxs')
-const mockEncoders = jest.requireActual('@/features/policy-guard/services/policyGuardEncoders')
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
@@ -56,14 +55,14 @@ describe('allowlist configuration root', () => {
       $isReady: true,
       buildAllowlistConfigurations: mockConfigs.buildAllowlistConfigurations,
       createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
-      getConfigurationRoot: mockEncoders.getConfigurationRoot,
     })
 
     const build = renderHook(() => useBuildAllowlistTransaction(rules), { wrapper })
     await waitFor(() => expect(build.result.current.configurations).toBeDefined())
+    const { configurations, configureRoot } = build.result.current
     const save = renderHook(() => useSaveAllowlistConfiguration(), { wrapper })
     await act(async () => {
-      await save.result.current.save(build.result.current.configurations!)
+      await save.result.current.save({ configurations: configurations!, configureRoot: configureRoot! })
     })
 
     const [[txs]] = (createMultiSendCallOnlyTx as jest.Mock).mock.calls
