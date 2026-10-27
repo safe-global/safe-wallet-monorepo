@@ -163,7 +163,7 @@ const SpaceAddressBook = () => {
                   item when empty, so the row's gap-2 pushed the search 8px right of the table card
                   it sits above — three different left edges for viewers without admin rights. */}
               {(isAdmin && activeTab === 'workspace') || (isPrivateAddressBookEnabled && activeTab === 'mine') ? (
-                <div className="flex shrink-0 gap-2">
+                <div className="flex max-w-full shrink-0 flex-wrap gap-2">
                   {isAdmin && activeTab === 'workspace' && (
                     <>
                       <Track {...SPACE_EVENTS.ADD_ADDRESS}>
