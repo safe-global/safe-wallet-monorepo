@@ -36,7 +36,6 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
-export const spaceDashboardUrl = '/spaces?spaceId='
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
@@ -91,7 +90,6 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 
 export const usersEndpoint = '**/v1/users'
 export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
-export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const appsEndpoint = '**/v1/**/safe-apps*'

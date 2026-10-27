@@ -19,7 +19,6 @@ import * as rejection from './rejection.mjs'
 import * as replacement from './replacement.mjs'
 import * as safeApps from './safe-apps.mjs'
 import * as sharing from './sharing.mjs'
-import * as spaces from './spaces.mjs'
 import * as transferForm from './transfer-form.mjs'
 import * as zerion from './zerion.mjs'
 
@@ -45,7 +44,6 @@ const modules = [
   replacement,
   safeApps,
   sharing,
-  spaces,
   transferForm,
   zerion,
 ]

@@ -80,8 +80,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/safe_selector.cy.js': { scenario: 'prepareSafeSelectorScenario', chains: [1] },
   'cypress/e2e/regression/sidebar_new.cy.js': { scenario: 'prepareSafeSelectorScenario' },
-  'cypress/e2e/regression/spaces_basicflow.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/spaces_dashboard.cy.js': { scenario: 'prepareSpacesDashboardScenario' },
   'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
   'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },

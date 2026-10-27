@@ -62,7 +62,7 @@ const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
   assert.deepEqual(selectCypressSpecs('regression/assets'), [assets])
-  assert.deepEqual(selectCypressSpecs('spaces_basicflow'), ['cypress/e2e/regression/spaces_basicflow.cy.js'])
+  assert.deepEqual(selectCypressSpecs('tx_notes'), ['cypress/e2e/regression/tx_notes.cy.js'])
   assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/assets,tx_queue_reject_btn'), [
     rejection,
     assets,
