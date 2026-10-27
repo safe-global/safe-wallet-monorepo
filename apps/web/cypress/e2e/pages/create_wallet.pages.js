@@ -141,11 +141,6 @@ export function selectMultiNetwork(index, network) {
   clickOnNetwrokCheckbox()
 }
 
-/**
- * Selects the network unless it is selected already: the form preselects the wallet's chain only when the
- * wallet is connected before the form mounts, so the starting selection depends on timing.
- */
-
 export function clickOnNetwrokCheckbox() {
   // The checkbox itself is decorative (pointer-events: none); the click handler is on the option row.
   cy.get(networkCheckbox).eq(0).closest('li[role="option"]').click()
