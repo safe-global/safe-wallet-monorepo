@@ -7,7 +7,7 @@ import {
   GUARD_NOT_SUPPORTED_ERROR,
   GUARD_READ_ERROR,
   GUARD_UNAVAILABLE_ERROR,
-  NATIVE_POLICY_UNAVAILABLE_ERROR,
+  ALLOWLIST_UNAVAILABLE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistRule } from '../../types'
 import { useLoadFeature } from '@/features/__core__'
@@ -79,7 +79,7 @@ describe('useBuildAllowlistTransaction', () => {
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
     expect(result.current.guardState).toEqual({ status: 'none' })
     expect(result.current.configurations).toHaveLength(1)
-    expect(result.current.configureRoot).toMatch(/^0x[0-9a-f]{64}$/)
+    expect(result.current.root).toMatch(/^0x[0-9a-f]{64}$/)
     expect(result.current.calls).toEqual(sentBatch())
   })
 
@@ -154,14 +154,14 @@ describe('useBuildAllowlistTransaction', () => {
     ;(useLoadFeature as jest.Mock).mockReturnValue({
       $isReady: true,
       buildAllowlistConfigurations: () => {
-        throw new Error(NATIVE_POLICY_UNAVAILABLE_ERROR)
+        throw new Error(ALLOWLIST_UNAVAILABLE_ERROR)
       },
       createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
     })
     mockGuard({ state: { status: 'none' } })
     const { result } = renderHook(() => useBuildAllowlistTransaction(nativeRules), { wrapper })
 
-    expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: NATIVE_POLICY_UNAVAILABLE_ERROR }))
+    expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: ALLOWLIST_UNAVAILABLE_ERROR }))
     expect(setSafeTx).not.toHaveBeenCalledWith(expect.anything())
     expect(result.current.configurations).toBeUndefined()
   })

@@ -10,7 +10,7 @@ import { showNotification } from '@/store/notificationsSlice'
 
 /** Saves the configuration request in CGW, which needs it stored before it can activate the policy later. */
 export const useSaveAllowlistConfiguration = (): {
-  save: (setup: Pick<AllowlistSetup, 'configurations' | 'configureRoot'>) => Promise<boolean>
+  save: (request: Pick<AllowlistSetup, 'configurations' | 'root'>) => Promise<boolean>
   isSaving: boolean
 } => {
   const dispatch = useAppDispatch()
@@ -22,23 +22,14 @@ export const useSaveAllowlistConfiguration = (): {
   const safeAddress = scope?.safeAddress
 
   const save = useCallback(
-    async ({
-      configurations,
-      configureRoot,
-    }: Pick<AllowlistSetup, 'configurations' | 'configureRoot'>): Promise<boolean> => {
+    async ({ configurations, root }: Pick<AllowlistSetup, 'configurations' | 'root'>): Promise<boolean> => {
       try {
         if (!spaceId || !chainId || !safeAddress) throw new Error('Missing save context')
         await createRequest({
           spaceId,
           chainId,
           safeAddress,
-          createPolicyConfigurationRequestDto: {
-            root: configureRoot,
-            configurations: configurations.map((configuration) => ({
-              ...configuration,
-              operation: configuration.operation === 1 ? 1 : 0,
-            })),
-          },
+          createPolicyConfigurationRequestDto: { root, configurations },
         }).unwrap()
         return true
       } catch (e) {

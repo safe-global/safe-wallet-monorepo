@@ -224,13 +224,13 @@ const guardAddress = getPolicyGuardAddress(SEPOLIA)!
 
 const built = (guardState?: PolicyGuardState) => {
   if (!guardState) return mockBuild.mockReturnValue({})
-  const { txs, configureRoot } = createAllowlistSetupTxs({
+  const { txs, root } = createAllowlistSetupTxs({
     safeAddress: SAFE,
     guardAddress,
     guardState,
     configurations,
   })
-  return mockBuild.mockReturnValue({ guardState, configurations, configureRoot, calls: txs })
+  return mockBuild.mockReturnValue({ guardState, configurations, root, calls: txs })
 }
 
 const mockOwners = (owners: string[], threshold = 2) =>
@@ -448,7 +448,7 @@ describe('ReviewRecipientAllowlist', () => {
     fireEvent.click(screen.getAllByTestId('action-item')[0])
 
     const {
-      configureRoot: root,
+      root,
       txs: [request],
     } = createAllowlistSetupTxs({
       safeAddress: SAFE,
@@ -477,13 +477,13 @@ describe('ReviewRecipientAllowlist', () => {
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
-    const { configureRoot } = createAllowlistSetupTxs({
+    const { root } = createAllowlistSetupTxs({
       safeAddress: SAFE,
       guardAddress,
       guardState: { status },
       configurations,
     })
-    expect(mockSave).toHaveBeenCalledWith({ configurations, configureRoot })
+    expect(mockSave).toHaveBeenCalledWith({ configurations, root })
     expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
   })
 

@@ -54,7 +54,7 @@ describe('useSaveAllowlistConfiguration', () => {
 
     let saved: boolean | undefined
     await act(async () => {
-      saved = await result.current.save({ configurations, configureRoot: ROOT })
+      saved = await result.current.save({ configurations, root: ROOT })
     })
 
     expect(saved).toBe(true)
@@ -72,7 +72,7 @@ describe('useSaveAllowlistConfiguration', () => {
 
     let saved: boolean | undefined
     await act(async () => {
-      saved = await result.current.save({ configurations, configureRoot: ROOT })
+      saved = await result.current.save({ configurations, root: ROOT })
     })
 
     expect(saved).toBe(false)
@@ -88,7 +88,7 @@ describe('useSaveAllowlistConfiguration', () => {
 
     let saved: boolean | undefined
     await act(async () => {
-      saved = await result.current.save({ configurations, configureRoot: ROOT })
+      saved = await result.current.save({ configurations, root: ROOT })
     })
 
     expect(saved).toBe(false)

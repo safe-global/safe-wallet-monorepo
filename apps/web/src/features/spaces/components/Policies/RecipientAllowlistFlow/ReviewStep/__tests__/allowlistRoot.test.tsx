@@ -59,10 +59,10 @@ describe('allowlist configuration root', () => {
 
     const build = renderHook(() => useBuildAllowlistTransaction(rules), { wrapper })
     await waitFor(() => expect(build.result.current.configurations).toBeDefined())
-    const { configurations, configureRoot } = build.result.current
+    const { configurations, root } = build.result.current
     const save = renderHook(() => useSaveAllowlistConfiguration(), { wrapper })
     await act(async () => {
-      await save.result.current.save({ configurations: configurations!, configureRoot: configureRoot! })
+      await save.result.current.save({ configurations: configurations!, root: root! })
     })
 
     const [[txs]] = (createMultiSendCallOnlyTx as jest.Mock).mock.calls
