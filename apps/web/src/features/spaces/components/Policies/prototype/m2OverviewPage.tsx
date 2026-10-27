@@ -1,4 +1,4 @@
-import { useId, useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { createContext, useContext, useId, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -7,14 +7,13 @@ import {
   ListTree,
   Plus,
   SearchX,
+  ShieldCheck,
   Users,
   X,
   type LucideIcon,
 } from 'lucide-react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge, BadgeDot, badgeVariants } from '@safe-global/views/components/ui/badge'
@@ -32,6 +31,7 @@ import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@safe-glo
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
 import { PoliciesNoSearchResults } from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
 import type { PolicyStatus } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -77,6 +77,8 @@ export type PaymentsSnapshot = {
   account?: M2Account
   recipients?: Person[]
   spendingLimit?: SpendingLimitState
+  /** The setup's "apply to existing policies" choice: whether the Ops bot's limit follows the allowlist. */
+  coversSpendingLimits?: boolean
 }
 
 const DEFAULT_PAYMENTS: PaymentsSnapshot = { state: 'waiting', signedCount: 1, pendingChange: false }
@@ -567,11 +569,6 @@ const accountColumns: DataTableColumn<AccountRow>[] = [
 const OverviewHeading = ({ onAddPolicy }: { onAddPolicy?: () => void }): ReactElement => (
   <PageHeading
     title="Policies"
-    subtitle={
-      <Typography variant="paragraph-small" color="muted">
-        Limits that apply to every transaction from an account.
-      </Typography>
-    }
     action={
       <Button onClick={onAddPolicy} className="shrink-0">
         <Plus className="size-4 text-green-500" aria-hidden />
@@ -661,7 +658,17 @@ export const POLICY_ROW_LABELS: Record<M2PolicyType, string> = {
   allowlist: 'Allowlist',
 }
 
-const POLICY_ROW_TYPE_ORDER: M2PolicyType[] = ['spending-limit', 'proposer', 'allowlist']
+/** Every policy by its own name: the allowlist is a policy like the others, and the protection lives on the account. */
+const TABLE_TYPE_LABELS: Record<M2PolicyType, string> = POLICY_ROW_LABELS
+
+/** Opens an account's protection overview, from the "Protected" label on its row or a policy's "Protection applied" tag. */
+const OpenProtectionContext = createContext<((account: M2Account) => void) | undefined>(undefined)
+
+/** Inside an account group, the protection comes first and the permissions it covers follow. */
+const ACCOUNT_GROUP_TYPE_ORDER: M2PolicyType[] = ['allowlist', 'spending-limit', 'proposer']
+
+/** Whether a permission's transactions go through the account's protection. */
+export type Coverage = 'follows' | 'not-covered'
 
 /** M1's statuses plus M2's: a change waiting out the delay, a failed setup, a spending limit the allowlist blocks. */
 export type RowStatus = PolicyStatus | 'change-pending' | 'failed' | 'blocked'
@@ -715,12 +722,17 @@ export type PolicyRow = {
   blockedTokens?: string[]
   /** Allowlist rows other than the setup: who the side panel shows it to; the "already signed" signer unless set. */
   viewer?: PanelViewer
+  /** Permissions on an account with protection only. */
+  coverage?: Coverage
+  /** Protection rows only: how many of the account's policies follow it. */
+  coveredCount?: number
 }
 
 /** The row id of the allowlist the prototype's setup flow creates. */
 export const SETUP_ROW_ID = 'setup-allowlist'
 
 export const TOM_ADDRESS = '0x1De7F5cc55653C581d1c842AD155f88cE389E0B2'
+const PRIYA_ADDRESS = '0x7c3A9b2E4d6F8a0C1e3B5d7F9a1C3e5B7d9F2a64'
 
 const TRADING_RECIPIENTS: Person[] = [
   { name: 'Exchange deposit', address: '0x9d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f7' },
@@ -750,12 +762,22 @@ const toSpendingLimitRow = (limit: SpendingLimitMock): PolicyRow => ({
   spendingLimit: limit,
 })
 
-/** Unaffected when the allowlist leaves existing permissions alone, blocked without the limit's token, else locked. */
+/** Not covered when the allowlist leaves existing permissions alone, blocked without the limit's token, else following it. */
 const withAllowlist = (row: PolicyRow, limit: SpendingLimitMock): PolicyRow => {
   const { excludedTokens, applyToSpendingLimits } = getAllowlistSettings(limit.account)
-  if (!applyToSpendingLimits) return row
-  if (excludedTokens.includes(limit.token)) return { ...row, status: 'blocked', blockedTokens: [limit.token] }
-  return { ...row, locked: true }
+  if (!applyToSpendingLimits) return { ...row, coverage: 'not-covered' }
+  if (excludedTokens.includes(limit.token))
+    return { ...row, status: 'blocked', blockedTokens: [limit.token], coverage: 'follows' }
+  return { ...row, coverage: 'follows' }
+}
+
+const getPaymentsLimitCoverage = (payments: PaymentsSnapshot): Coverage | undefined => {
+  const isProtected =
+    payments.state !== 'not-set-up' &&
+    !payments.failed &&
+    getAccountKey(payments.account ?? PAYMENTS) === getAccountKey(PAYMENTS)
+  if (!isProtected) return undefined
+  return payments.coversSpendingLimits === false ? 'not-covered' : 'follows'
 }
 
 /** The new allowlist's row follows the prototype's setup state. */
@@ -792,12 +814,13 @@ const getPaymentsSetupStatus = ({
 export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): PolicyRow[] => {
   const setupRecipients = payments.recipients ?? PREFILLED_RECIPIENTS.map(({ name, address }) => ({ name, address }))
 
-  return [
+  const rows: PolicyRow[] = [
     // M1's Ops bot limit: the allowlist setup never removes it, so its row always shows.
     {
       ...toSpendingLimitRow(PAYMENTS_LIMIT),
       status: payments.spendingLimit === 'blocked' ? 'blocked' : 'active',
       locked: payments.spendingLimit === 'locked',
+      coverage: getPaymentsLimitCoverage(payments),
     },
     {
       id: 'treasury-proposer',
@@ -831,6 +854,16 @@ export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): Po
     },
     ...TRADING_DESK_SPENDING_LIMITS.map((limit) => withAllowlist(toSpendingLimitRow(limit), limit)),
     {
+      id: 'trading-proposer',
+      type: 'proposer',
+      account: TRADING_DESK,
+      summary: 'Priya Shah',
+      status: 'active',
+      people: [{ name: 'Priya Shah', address: PRIYA_ADDRESS }],
+      // A proposer only drafts: whatever they propose is checked like any other transaction.
+      coverage: 'follows',
+    },
+    {
       id: 'treasury-base-allowlist',
       type: 'allowlist',
       account: TREASURY_BASE,
@@ -851,6 +884,18 @@ export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): Po
       lastUpdated: 'Oct 9, 2026 · 17:30 UTC',
     },
   ]
+
+  // The protection row counts the policies that follow it, so a flat list still says what it covers.
+  return rows.map((row) =>
+    row.type === 'allowlist'
+      ? {
+          ...row,
+          coveredCount: rows.filter(
+            (other) => other.coverage === 'follows' && getAccountKey(other.account) === getAccountKey(row.account),
+          ).length,
+        }
+      : row,
+  )
 }
 
 /** Accounts that already have an allowlist, keyed like getAccountKey: the create flow disables them. */
@@ -860,8 +905,54 @@ export const getAllowlistAccountKeys = (payments: PaymentsSnapshot = DEFAULT_PAY
     .filter(({ type, status }) => type === 'allowlist' && status !== 'failed')
     .map(({ account }) => getAccountKey(account))
 
-/** M1's PolicyRule markup: icon tile, policy name, muted one-line summary. */
-const PolicyCell = ({ type, summary }: { type: M2PolicyType; summary: string }): ReactElement => {
+const COVERAGE_TAGS: Record<Coverage, { label: string; variant: 'subtle' | 'warning' }> = {
+  follows: { label: 'Protection applied', variant: 'subtle' },
+  'not-covered': { label: 'Protection not applied', variant: 'warning' },
+}
+
+/** On a spending limit or proposer: whether the account's protection checks it; a click opens that protection. */
+const CoverageTag = ({ coverage, account }: { coverage: Coverage; account: M2Account }): ReactElement => {
+  const { label, variant } = COVERAGE_TAGS[coverage]
+  const openProtection = useContext(OpenProtectionContext)
+  // Named, so the link to the protection holds in the flat list too, where it isn't the row above.
+  const tooltip =
+    coverage === 'follows'
+      ? `Its transactions are checked by ${account.name}’s account protection, like every other transaction.`
+      : `Its transactions skip ${account.name}’s account protection: it can send its tokens to any address.`
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            className="inline-flex shrink-0 cursor-pointer rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            // The row opens the policy's own panel, so the tag keeps its click to itself.
+            onClick={(event) => {
+              event.stopPropagation()
+              openProtection?.(account)
+            }}
+            data-m2-new="New · Protection applied tag"
+          />
+        }
+      >
+        <Badge variant={variant} shape="tag">
+          <ShieldCheck aria-hidden />
+          {label}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+/** M1's PolicyRule markup: icon tile, policy name, muted one-line summary. The allowlist is a row like the others. */
+const PolicyCell = ({
+  type,
+  summary,
+  coverage,
+  account,
+}: Pick<PolicyRow, 'type' | 'summary' | 'coverage' | 'account'>): ReactElement => {
   const { Icon } = POLICY_TYPES[type]
 
   return (
@@ -871,9 +962,12 @@ const PolicyCell = ({ type, summary }: { type: M2PolicyType; summary: string }):
       </div>
 
       <div className="flex min-w-0 flex-col">
-        <Typography variant="paragraph-bold" className="truncate">
-          {POLICY_ROW_LABELS[type]}
-        </Typography>
+        <div className="flex min-w-0 items-center gap-2">
+          <Typography variant="paragraph-bold" className="truncate">
+            {TABLE_TYPE_LABELS[type]}
+          </Typography>
+          {coverage && <CoverageTag coverage={coverage} account={account} />}
+        </div>
         <Typography variant="paragraph-small" className="truncate text-muted-foreground">
           {summary}
         </Typography>
@@ -896,7 +990,7 @@ export const getStatusDetail = ({
     return signed >= required ? 'Ready to execute' : `${signed} of ${required} signatures`
   }
   if (status === 'failed') return 'The transaction failed. Nothing changed on this account.'
-  if (status === 'active' && locked) return 'Locked by the allowlist'
+  if (status === 'active' && locked) return 'Locked by account protection'
   return undefined
 }
 
@@ -949,7 +1043,8 @@ const spacerColumn = (id: string): DataTableColumn<PolicyRow> => ({
 })
 
 // Widest content plus the table's cell padding: 16px on the table's outer edges, 8px elsewhere.
-const POLICY_COLUMN_WIDTH = 16 + 224 + 8
+// Room for icon, name and the "Protection applied" tag.
+const POLICY_COLUMN_WIDTH = 16 + 304 + 8
 const SAFE_ACCOUNT_COLUMN_WIDTH = 8 + 136 + 8
 // Room for the group-by button on both sides of the centred header label.
 const NETWORK_COLUMN_WIDTH = 8 + 120 + 8
@@ -963,9 +1058,9 @@ const policyRowColumns: DataTableColumn<PolicyRow>[] = [
     width: 'fit',
     sticky: true,
     minWidth: POLICY_COLUMN_WIDTH,
-    cell: ({ type, summary }) => (
+    cell: (row) => (
       <RowCell>
-        <PolicyCell type={type} summary={summary} />
+        <PolicyCell {...row} />
       </RowCell>
     ),
   },
@@ -1061,12 +1156,53 @@ const GROUPINGS: Record<
 
 const GROUPING_ORDER: Grouping[] = ['account', 'network', 'status']
 
-type GroupHeadingRow = { kind: 'group'; id: string; grouping: Grouping; first: PolicyRow; count: number }
+type GroupHeadingRow = {
+  kind: 'group'
+  id: string
+  grouping: Grouping
+  first: PolicyRow
+  count: number
+  /** Account groups only: the account's protection, shown as its state next to the policy count. */
+  protection?: ProtectionState
+  /** Account groups only: its rows are showing. */
+  expanded?: boolean
+}
 
-type ByPolicyTableRow = { kind: 'policy'; row: PolicyRow } | GroupHeadingRow
+type ByPolicyTableRow = { kind: 'policy'; row: PolicyRow; isLastInGroup?: boolean } | GroupHeadingRow
 
-const toTableRows = (rows: PolicyRow[], grouping: Grouping | null): ByPolicyTableRow[] => {
-  if (!grouping) return rows.map((row): ByPolicyTableRow => ({ kind: 'policy', row }))
+type ProtectionState = 'protected' | 'pending' | 'none'
+
+const PROTECTION_LABELS: Record<ProtectionState, string> = {
+  protected: 'Protected',
+  pending: 'Protection pending',
+  none: 'Not protected',
+}
+
+/** Protected once executed (a change waiting out its delay still protects); a failed setup left none. */
+const getProtectionState = (group: PolicyRow[]): ProtectionState => {
+  const protection = group.find(({ type }) => type === 'allowlist')
+  if (!protection || protection.status === 'failed') return 'none'
+  if (protection.status === 'pending' || protection.status === 'activating') return 'pending'
+  return 'protected'
+}
+
+// Grouped by account, every row in a group shares its account and network, so the band shows them instead.
+const ACCOUNT_GROUP_HIDDEN_COLUMNS = ['appliesTo', 'gap-account-network', 'network']
+
+const toTableRows = (
+  rows: PolicyRow[],
+  grouping: Grouping | null,
+  isExpanded: (groupId: string) => boolean,
+): ByPolicyTableRow[] => {
+  // Ungrouped, each account's protection still comes first with its policies right after, so they read together.
+  if (!grouping)
+    return [...rows]
+      .sort(
+        (a, b) =>
+          GROUPINGS.account.compare(a, b) ||
+          rank(ACCOUNT_GROUP_TYPE_ORDER, a.type) - rank(ACCOUNT_GROUP_TYPE_ORDER, b.type),
+      )
+      .map((row): ByPolicyTableRow => ({ kind: 'policy', row }))
 
   const { getKey, compare } = GROUPINGS[grouping]
   const groups = new Map<string, PolicyRow[]>()
@@ -1074,15 +1210,43 @@ const toTableRows = (rows: PolicyRow[], grouping: Grouping | null): ByPolicyTabl
 
   return [...groups.values()]
     .sort((a, b) => compare(a[0], b[0]))
-    .flatMap((group): ByPolicyTableRow[] => [
-      { kind: 'group', id: `group:${getKey(group[0])}`, grouping, first: group[0], count: group.length },
-      ...group.map((row): ByPolicyTableRow => ({ kind: 'policy', row })),
-    ])
+    .flatMap((group): ByPolicyTableRow[] => {
+      const byAccount = grouping === 'account'
+      const ordered = byAccount
+        ? [...group].sort((a, b) => rank(ACCOUNT_GROUP_TYPE_ORDER, a.type) - rank(ACCOUNT_GROUP_TYPE_ORDER, b.type))
+        : group
+      const id = `group:${getKey(group[0])}`
+      // Only account groups fold: they're the overview; the other groupings are a sort.
+      const expanded = !byAccount || isExpanded(id)
+
+      return [
+        {
+          kind: 'group',
+          id,
+          grouping,
+          first: group[0],
+          count: group.length,
+          protection: byAccount ? getProtectionState(group) : undefined,
+          expanded: byAccount ? expanded : undefined,
+        },
+        ...(expanded ? ordered : []).map((row, index): ByPolicyTableRow => ({
+          kind: 'policy',
+          row,
+          isLastInGroup: index === ordered.length - 1,
+        })),
+      ]
+    })
 }
 
 /** A muted band that doesn't take the rows' hover, pointer or divider: it isn't clickable. */
 const GROUP_ROW_CLASS =
   'cursor-default! bg-none! [&>td]:bg-muted/60! [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg'
+
+/** The account row is a plain table row, as in M1: white, divider lines, grey only on hover. */
+const ACCOUNT_GROUP_ROW_CLASS = 'cursor-pointer'
+
+// The panel table draws its divider as the row's background image (table.module.css), so this clears it.
+const NO_DIVIDER_CLASS = 'bg-none!'
 
 /** The group's value as its column shows it: the account with its network, the chain logo, or the status chip. */
 const GroupValue = ({ grouping, row }: { grouping: Grouping; row: PolicyRow }): ReactElement => {
@@ -1091,16 +1255,22 @@ const GroupValue = ({ grouping, row }: { grouping: Grouping; row: PolicyRow }): 
   switch (grouping) {
     case 'account':
       return (
-        <SafeAddress
-          name={row.account.name}
-          address={row.account.address}
-          chainId={row.account.chainId}
-          nameSuffix={
-            <Typography variant="paragraph-small" color="muted" className="shrink-0">
-              · {networkName}
-            </Typography>
-          }
-        />
+        <div className="flex items-center gap-3">
+          <SafeAddress name={row.account.name} address={row.account.address} chainId={row.account.chainId} />
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span
+                  className="inline-flex shrink-0 rounded-full border border-border bg-card p-0.5"
+                  data-m2-new="New · Network chip"
+                />
+              }
+            >
+              <ChainIndicator chainId={row.account.chainId} onlyLogo showUnknown imageSize={16} />
+            </TooltipTrigger>
+            <TooltipContent>{networkName}</TooltipContent>
+          </Tooltip>
+        </div>
       )
     case 'network':
       return (
@@ -1114,16 +1284,90 @@ const GroupValue = ({ grouping, row }: { grouping: Grouping; row: PolicyRow }): 
   }
 }
 
-const GroupRowCell = ({ columnId, group }: { columnId: string; group: GroupHeadingRow }): ReactElement | null => {
-  if (columnId === 'policy') return <GroupValue grouping={group.grouping} row={group.first} />
+const GroupRowCell = ({
+  columnId,
+  group,
+  onProtectAccount,
+}: {
+  columnId: string
+  group: GroupHeadingRow
+  onProtectAccount?: (account: M2Account) => void
+}): ReactElement | null => {
+  if (columnId === 'policy') {
+    if (group.expanded === undefined) return <GroupValue grouping={group.grouping} row={group.first} />
+    const Chevron = group.expanded ? ChevronDown : ChevronRight
+
+    return (
+      <div className="flex items-center gap-2" data-m2-new="New · Collapsible account row">
+        <Chevron className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        <GroupValue grouping={group.grouping} row={group.first} />
+      </div>
+    )
+  }
   if (columnId !== 'status') return null
 
+  // The allowlist counts as a policy like the others; the protection is shown as the account's state instead.
+  const count = group.count
+  const countText = count === 0 ? null : `${count} ${count === 1 ? 'policy' : 'policies'}`
+
   return (
-    <div className="flex justify-end" data-m2-new="New · Group band row" data-m2-new-compact="">
-      <Typography variant="paragraph-small" color="muted">
-        {group.count} {group.count === 1 ? 'policy' : 'policies'}
-      </Typography>
+    <div className="flex items-center justify-end gap-3" data-m2-new="New · Group band row" data-m2-new-compact="">
+      {group.protection === 'protected' || group.protection === 'pending' ? (
+        <ProtectedLabel account={group.first.account} protection={group.protection} />
+      ) : (
+        group.protection && (
+          <Typography variant="paragraph-small" color="muted">
+            {PROTECTION_LABELS[group.protection]}
+          </Typography>
+        )
+      )}
+      {countText && (
+        <Typography variant="paragraph-small" color="muted">
+          {group.protection ? `· ${countText}` : countText}
+        </Typography>
+      )}
+      {/* The row itself opens and closes, so the button keeps its click to itself. */}
+      {group.protection === 'none' && onProtectAccount && (
+        <Button
+          variant="outline"
+          size="xs"
+          onClick={(event) => {
+            event.stopPropagation()
+            onProtectAccount(group.first.account)
+          }}
+          data-m2-new="New · Set up protection from the row"
+        >
+          Set up protection
+        </Button>
+      )}
     </div>
+  )
+}
+
+/** "Protected" on the account's row, in the protection's mint: a click opens the account's protection overview. */
+const ProtectedLabel = ({
+  account,
+  protection,
+}: {
+  account: M2Account
+  protection: 'protected' | 'pending'
+}): ReactElement => {
+  const openProtection = useContext(OpenProtectionContext)
+
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        // The row itself opens and closes; this opens the overview instead.
+        event.stopPropagation()
+        openProtection?.(account)
+      }}
+      className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-mint px-2.5 py-1 text-xs font-medium text-accent-secondary-foreground hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      data-m2-new="New · Protected label"
+    >
+      <ShieldCheck className="size-3.5" aria-hidden />
+      {PROTECTION_LABELS[protection]}
+    </button>
   )
 }
 
@@ -1162,9 +1406,11 @@ const GroupByHeader = ({
 const getByPolicyColumns = (
   grouping: Grouping | null,
   onToggle: (grouping: Grouping) => void,
+  onProtectAccount?: (account: M2Account) => void,
 ): DataTableColumn<ByPolicyTableRow>[] =>
-  policyRowColumns.map(
-    ({ id, header, cell, width, sticky, minWidth, priority, align }): DataTableColumn<ByPolicyTableRow> => {
+  policyRowColumns
+    .filter(({ id }) => grouping !== 'account' || !ACCOUNT_GROUP_HIDDEN_COLUMNS.includes(id))
+    .map(({ id, header, cell, width, sticky, minWidth, priority, align }): DataTableColumn<ByPolicyTableRow> => {
       const columnGrouping = GROUPING_ORDER.find((option) => GROUPINGS[option].columnId === id)
 
       return {
@@ -1185,11 +1431,18 @@ const getByPolicyColumns = (
         ) : (
           header
         ),
-        cell: (row, context) =>
-          row.kind === 'policy' ? cell(row.row, context) : <GroupRowCell columnId={id} group={row} />,
+        cell: (row, context) => {
+          if (row.kind === 'group')
+            return <GroupRowCell columnId={id} group={row} onProtectAccount={onProtectAccount} />
+          if (id !== 'policy') return cell(row.row, context)
+          return (
+            <RowCell>
+              <PolicyCell {...row.row} />
+            </RowCell>
+          )
+        },
       }
-    },
-  )
+    })
 
 export type PolicyFilters = {
   query: string
@@ -1201,6 +1454,9 @@ export type PolicyFilters = {
 
 const NO_POLICY_FILTERS: PolicyFilters = { query: '', accounts: [], networks: [], types: [], statuses: [] }
 
+const hasPolicyPillFilter = ({ accounts, networks, types, statuses }: PolicyFilters): boolean =>
+  [accounts, networks, types, statuses].some((values) => values.length > 0)
+
 const matchesPolicyFilters = (filters: PolicyFilters, row: PolicyRow): boolean =>
   (filters.accounts.length === 0 || filters.accounts.includes(row.account.address)) &&
   (filters.networks.length === 0 || filters.networks.includes(row.account.chainId)) &&
@@ -1208,6 +1464,7 @@ const matchesPolicyFilters = (filters: PolicyFilters, row: PolicyRow): boolean =
   (filters.statuses.length === 0 || filters.statuses.includes(toStatusOption(row.status))) &&
   matchesQuery(filters.query, [
     POLICY_ROW_LABELS[row.type],
+    TABLE_TYPE_LABELS[row.type],
     row.account.name,
     row.account.address,
     ...row.people.flatMap(({ name, address }) => [name, address]),
@@ -1354,21 +1611,8 @@ const ActiveFilterChips = ({
   )
 }
 
-/** M1's policies page heading (Policies/index.tsx): title, then the intro line with its help link. */
-const ByPolicyHeading = (): ReactElement => (
-  <PageHeading
-    title="Policies"
-    subtitle={
-      <Typography variant="paragraph-medium">
-        Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-        automatically.{' '}
-        <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
-          Learn more
-        </ExternalLink>
-      </Typography>
-    }
-  />
-)
+/** M1's policies page heading without the intro line: its help link now sits in the How it works step. */
+const ByPolicyHeading = (): ReactElement => <PageHeading title="Policies" />
 
 export type PoliciesByPolicyPageProps = Pick<
   PoliciesOverviewPageProps,
@@ -1378,6 +1622,14 @@ export type PoliciesByPolicyPageProps = Pick<
   onSelectPolicy?: (row: PolicyRow) => void
   /** Search and filters to start from, e.g. for the All states canvas. */
   initialFilters?: Partial<PolicyFilters>
+  /** The row whose side panel is open: its account stays expanded behind the panel. */
+  activeRowId?: string
+  /** "Set up protection" on an unprotected account's row. */
+  onProtectAccount?: (account: M2Account) => void
+  /** How the table opens: by Safe account (default), or null for one list of policies. */
+  initialGrouping?: Grouping | null
+  /** "Protected" on an account's row, or "Protection applied" on a policy: the account's protection overview. */
+  onOpenProtection?: (account: M2Account) => void
 }
 
 /** M1's policy list (PoliciesList + PoliciesTable), one row per policy, with the M2 types and the account view's filter pills. */
@@ -1387,13 +1639,32 @@ export const PoliciesByPolicyPage = ({
   onSelectAccount,
   onSelectPolicy,
   initialFilters,
+  activeRowId,
+  onProtectAccount,
+  initialGrouping = 'account',
+  onOpenProtection,
 }: PoliciesByPolicyPageProps): ReactElement => {
   const [filters, setFilters] = useState<PolicyFilters>({ ...NO_POLICY_FILTERS, ...initialFilters })
   const allRows = useMemo(() => getPolicyRows(payments), [payments])
   const rows = useMemo(() => allRows.filter((row) => matchesPolicyFilters(filters, row)), [allRows, filters])
-  const [grouping, setGrouping] = useState<Grouping | null>(null)
-  const tableRows = useMemo(() => toTableRows(rows, grouping), [rows, grouping])
-  const columns = getByPolicyColumns(grouping, (next) => setGrouping((current) => (current === next ? null : next)))
+  // By account first: that's where the protection and the permissions it covers read as one hierarchy.
+  const [grouping, setGrouping] = useState<Grouping | null>(initialGrouping)
+  // Accounts start folded; searching or filtering opens them all, so every match shows.
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([])
+  const isFiltering = filters.query !== '' || hasPolicyPillFilter(filters)
+  const activeRow = allRows.find(({ id }) => id === activeRowId)
+  const activeGroupId = activeRow && `group:${GROUPINGS.account.getKey(activeRow)}`
+  const tableRows = useMemo(
+    () => toTableRows(rows, grouping, (id) => isFiltering || id === activeGroupId || expandedGroups.includes(id)),
+    [rows, grouping, isFiltering, activeGroupId, expandedGroups],
+  )
+  const toggleGroup = (id: string) =>
+    setExpandedGroups((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
+  const columns = getByPolicyColumns(
+    grouping,
+    (next) => setGrouping((current) => (current === next ? null : next)),
+    onProtectAccount,
+  )
 
   const accountOptions = unique(allRows.map(({ account }) => account.address)).map((address) => ({
     value: address,
@@ -1426,11 +1697,11 @@ export const PoliciesByPolicyPage = ({
       onChange: (networks) => setFilters({ ...filters, networks }),
     },
     {
-      label: 'Policy type',
-      options: POLICY_ROW_TYPE_ORDER.map((type) => ({ value: type, label: POLICY_ROW_LABELS[type] })),
+      label: 'Type',
+      options: ACCOUNT_GROUP_TYPE_ORDER.map((type) => ({ value: type, label: TABLE_TYPE_LABELS[type] })),
       selected: filters.types,
       onChange: (types) =>
-        setFilters({ ...filters, types: POLICY_ROW_TYPE_ORDER.filter((type) => types.includes(type)) }),
+        setFilters({ ...filters, types: ACCOUNT_GROUP_TYPE_ORDER.filter((type) => types.includes(type)) }),
     },
     {
       label: 'Status',
@@ -1446,48 +1717,58 @@ export const PoliciesByPolicyPage = ({
 
   return (
     <PolicyPage header={<ByPolicyHeading />}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <SearchInput
-            variant="surface"
-            value={filters.query}
-            onChange={(event) => setFilters({ ...filters, query: event.target.value })}
-            onClear={() => setFilters({ ...filters, query: '' })}
-            placeholder="Search"
-            aria-label="Search policies"
-            autoComplete="off"
-            className="flex-1"
-          />
-
-          <FiltersPopover groups={filterGroups} onClearAll={clearFilters} />
-
-          <Button onClick={onAddPolicy} className="shrink-0">
-            <Plus className="size-4 text-green-500" aria-hidden />
-            New
-          </Button>
-        </div>
-
-        <ActiveFilterChips groups={filterGroups} onClearAll={clearFilters} />
-
-        {/* A 4px bottom border in place of the card's padding, so the last row's hover ends 4px inside, like the sides. */}
-        <TableCard className="pb-0 [&_tbody_tr:last-child_td]:border-b-4">
-          {rows.length === 0 ? (
-            <PoliciesNoSearchResults query={filters.query} />
-          ) : (
-            <PaginatedDataTable
-              columns={columns}
-              rows={tableRows}
-              getRowKey={(row) => (row.kind === 'policy' ? row.row.id : row.id)}
-              getRowClassName={(row) => (row.kind === 'group' ? GROUP_ROW_CLASS : '')}
-              onRowClick={(row) => {
-                if (row.kind === 'policy') selectRow(row.row)
-              }}
-              // Grouped, everything sits on one page so no group is split across pages.
-              pageSize={grouping ? tableRows.length : undefined}
+      <OpenProtectionContext.Provider value={onOpenProtection}>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <SearchInput
+              variant="surface"
+              value={filters.query}
+              onChange={(event) => setFilters({ ...filters, query: event.target.value })}
+              onClear={() => setFilters({ ...filters, query: '' })}
+              placeholder="Search"
+              aria-label="Search policies"
+              autoComplete="off"
+              className="flex-1"
             />
-          )}
-        </TableCard>
-      </div>
+
+            <FiltersPopover groups={filterGroups} onClearAll={clearFilters} />
+
+            <Button onClick={onAddPolicy} className="shrink-0">
+              <Plus className="size-4 text-green-500" aria-hidden />
+              New
+            </Button>
+          </div>
+
+          <ActiveFilterChips groups={filterGroups} onClearAll={clearFilters} />
+
+          {/* A 4px bottom border in place of the card's padding, so the last row's hover ends 4px inside, like the sides. */}
+          <TableCard className="pb-0 [&_tbody_tr:last-child_td]:border-b-4">
+            {rows.length === 0 ? (
+              <PoliciesNoSearchResults query={filters.query} />
+            ) : (
+              <PaginatedDataTable
+                columns={columns}
+                rows={tableRows}
+                getRowKey={(row) => (row.kind === 'policy' ? row.row.id : row.id)}
+                getRowClassName={(row) => {
+                  // Lines only between Safe accounts: an open account and its policies read as one block.
+                  if (row.kind === 'group') {
+                    if (row.expanded === undefined) return GROUP_ROW_CLASS
+                    return row.expanded ? `${ACCOUNT_GROUP_ROW_CLASS} ${NO_DIVIDER_CLASS}` : ACCOUNT_GROUP_ROW_CLASS
+                  }
+                  return grouping === 'account' && !row.isLastInGroup ? NO_DIVIDER_CLASS : ''
+                }}
+                onRowClick={(row) => {
+                  if (row.kind === 'policy') selectRow(row.row)
+                  else if (row.expanded !== undefined) toggleGroup(row.id)
+                }}
+                // Grouped, everything sits on one page so no group is split across pages.
+                pageSize={grouping ? tableRows.length : undefined}
+              />
+            )}
+          </TableCard>
+        </div>
+      </OpenProtectionContext.Provider>
     </PolicyPage>
   )
 }

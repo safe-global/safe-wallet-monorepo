@@ -1,57 +1,78 @@
 import type { ReactElement } from 'react'
-import { Ban, Check, Clock, ShieldCheck, UsersRound } from 'lucide-react'
+import { Ban, BadgeCheck, Clock, FileCode2, ShieldCheck, UsersRound, type LucideIcon } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import Identicon from '@/components/common/Identicon'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import PolicyIntroDialog, {
   type PolicyIntroExplainer,
 } from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [
-  { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },
-  { Icon: ShieldCheck, text: 'It is checked onchain, so a blocked transfer fails even if every signer approves it.' },
+  {
+    Icon: ShieldCheck,
+    text: 'Every transaction on the Safe account is checked onchain, including changes to signers, the threshold and policies.',
+  },
+  { Icon: Ban, text: 'Anything the rules don’t allow is blocked, even if every signer approves it.' },
   {
     Icon: Clock,
-    text: 'Setting it up, changing it or removing it requires a transaction. Every change waits 24 hours before it applies.',
+    text: 'Setting it up or changing it needs a transaction. Every change waits 24 hours before it applies.',
   },
 ]
 
-const ALLOWED = [
-  '0x4bc91d2e3f4a5b6c7d8e9f0a1b2c3d4e5f60a88b',
-  '0x7a219e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b4412',
-  '0x1f8e2a3b4c5d6e7f8091a2b3c4d5e6f708195517',
+type Rule = { name: string; description: string; Icon: LucideIcon; available: boolean }
+
+const RULES: Rule[] = [
+  {
+    name: 'Allowlist',
+    description: 'Only send chosen tokens to chosen recipients.',
+    Icon: UsersRound,
+    available: true,
+  },
+  { name: 'Contract rules', description: 'Only allow chosen apps and actions.', Icon: FileCode2, available: false },
+  { name: 'Cosigner', description: 'An independent check on every transaction.', Icon: BadgeCheck, available: false },
 ]
-const BLOCKED = '0x6D0a9f2c71b8e04d6a3c5b17e92f08d4c6a13e58'
 
-const PreviewRow = ({ address, isBlocked = false }: { address: string; isBlocked?: boolean }): ReactElement => (
-  <div className="flex items-center gap-2 rounded-md bg-muted p-2">
-    <Identicon address={address} size={20} />
-    <span className="h-2 w-24 rounded-full bg-border" />
-    {isBlocked ? (
-      <Ban className="ml-auto size-4 text-destructive" />
-    ) : (
-      <Check className="ml-auto size-4 text-badge-dot-success" />
-    )}
-  </div>
-)
-
-/** SpendingLimitPreview's frame and card style: the allowed recipients go through, any other address is stopped. */
-const AllowlistPreview = (): ReactElement => (
-  // Hidden from assistive tech: the addresses are invented and the copy already explains the allowlist.
+/** Where the first rule is picked: the allowlist is the only one so far, so it's the one selected. */
+const RulePicker = (): ReactElement => (
   <div
-    aria-hidden
-    className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken"
-    data-m2-new="New · Allowlist preview"
+    className="flex w-full flex-col gap-2 rounded-xl bg-mint p-3"
+    role="radiogroup"
+    aria-label="First rule"
+    data-m2-new="New · Protection rule picker"
   >
-    <div className="flex w-[300px] flex-col gap-1.5 rounded-md bg-card p-3 shadow-lg">
-      <Typography variant="paragraph-mini-medium">Allowed recipients</Typography>
-      {ALLOWED.map((address) => (
-        <PreviewRow key={address} address={address} />
-      ))}
-      <div className="opacity-60">
-        <PreviewRow address={BLOCKED} isBlocked />
+    <Typography variant="paragraph-mini-medium" className="px-1 text-accent-secondary-foreground">
+      Start with a rule
+    </Typography>
+    {RULES.map(({ name, description, Icon, available }) => (
+      <div
+        key={name}
+        role="radio"
+        aria-checked={available}
+        aria-disabled={!available}
+        className={cn(
+          'flex items-center gap-3 rounded-lg border bg-card p-3',
+          available ? 'border-foreground' : 'border-transparent opacity-60',
+        )}
+      >
+        <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Typography variant="paragraph-small-medium">{name}</Typography>
+          <Typography variant="paragraph-small" color="muted">
+            {description}
+          </Typography>
+        </div>
+        {available ? (
+          <span className="flex size-4 items-center justify-center rounded-full border border-foreground" aria-hidden>
+            <span className="size-2 rounded-full bg-foreground" />
+          </span>
+        ) : (
+          <Badge variant="subtle" shape="tag">
+            Coming soon
+          </Badge>
+        )}
       </div>
-    </div>
+    ))}
   </div>
 )
 
@@ -61,18 +82,18 @@ export type AllowlistIntroDialogProps = {
   onProceed: () => void
 }
 
-/** The allowlist's intro, in M1's PolicyIntroDialog like SpendingLimitIntroDialog and ProposerIntroDialog. */
+/** The account protection's intro, in M1's PolicyIntroDialog, with the rule picker where M1 shows its preview. */
 export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => (
   <PolicyIntroDialog
     open={open}
     onOpenChange={onOpenChange}
     onProceed={onProceed}
-    title="Allowlist"
-    description="Only addresses on your list can receive funds. Everything else is blocked."
+    title="Account protection"
+    description="A layer of rules above everything else on a Safe account. Pick the first rule to start; you can add more later."
     helpArticle={HelpCenterArticle.POLICIES}
-    helpLabel="Learn more about allowlists"
+    helpLabel="Learn more about account protection"
     explainers={EXPLAINERS}
-    preview={<AllowlistPreview />}
+    preview={<RulePicker />}
     proceedLabel="Set up allowlist"
     testId="recipient-allowlist-intro-dialog"
   />

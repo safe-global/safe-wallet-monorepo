@@ -13,8 +13,10 @@ import {
   type ReactElement,
   type ReactNode,
   type Ref,
+  type RefObject,
 } from 'react'
 import { concat, dataLength, getAddress, Interface, isAddress, solidityPacked } from 'ethers'
+import ChainIndicator from '@/components/common/ChainIndicator'
 import { http, HttpResponse } from 'msw'
 import { EthSafeTransaction } from '@safe-global/protocol-kit'
 import type {
@@ -53,13 +55,18 @@ import {
   Building2,
   Check,
   ChevronDown,
+  ChevronRight,
+  Clock,
   Code,
   HardDrive,
   Info,
   Search,
+  Settings2,
+  ShieldCheck,
   Plus,
   TriangleAlert,
   Users,
+  UsersRound,
   X,
   type LucideIcon,
 } from 'lucide-react'
@@ -126,7 +133,6 @@ import {
   INELIGIBILITY_TEXT,
   NESTED_SAFES_NOTICE_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
-import { EDIT_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { POLICY_ICONS } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import type {
@@ -159,22 +165,35 @@ import {
   type SignerId,
 } from './m2Prototype'
 
-/** One per stepper item; Policies is skipped for an account that has none. */
-export const WIZARD_STEP_NAMES = ['Create', 'Policies', 'Settings', 'Review', 'Confirm', 'Execute'] as const
+/**
+ * One per stepper item, in the order of the first-time setup (the onboarding): how it works, account settings,
+ * the first policy, then the spending limits it covers. Spending limits is skipped for an account that has none.
+ */
+export const WIZARD_STEP_NAMES = [
+  'How it works',
+  'Settings',
+  'Allowlist',
+  'Spending limits',
+  'Review',
+  'Confirm',
+  'Execute',
+] as const
 
-export const CREATE_STEP = WIZARD_STEP_NAMES.indexOf('Create')
+export const INTRO_STEP = WIZARD_STEP_NAMES.indexOf('How it works')
 export const SETTINGS_STEP = WIZARD_STEP_NAMES.indexOf('Settings')
-export const PERMISSIONS_STEP = WIZARD_STEP_NAMES.indexOf('Policies')
+export const CREATE_STEP = WIZARD_STEP_NAMES.indexOf('Allowlist')
+export const PERMISSIONS_STEP = WIZARD_STEP_NAMES.indexOf('Spending limits')
 export const REVIEW_STEP = WIZARD_STEP_NAMES.indexOf('Review')
 export const CONFIRM_STEP = WIZARD_STEP_NAMES.indexOf('Confirm')
 export const EXECUTE_STEP = WIZARD_STEP_NAMES.indexOf('Execute')
 
-/** Page titles per screen, following M1: "Create new policy", "Confirm policy", then ConfirmTxReceipt's "Review details". */
+/** Page titles per screen, in WIZARD_STEP_NAMES order; the receipts keep ConfirmTxReceipt's "Review details". */
 const STEP_TITLES = [
-  'Create new policy',
-  'Existing policies',
+  'Set up account protection',
   'Safe account settings',
-  'Confirm policy',
+  'Add your first policy',
+  'Spending limits',
+  'Confirm account protection',
   'Review details',
   'Review details',
 ] as const
@@ -182,9 +201,13 @@ const STEP_TITLES = [
 /** Create sets up a new allowlist; edit changes a live one, on its own account, as M1's EditSpendingLimitFlow does. */
 export type WizardMode = 'create' | 'edit'
 
-/** M1's edit flow swaps only the first title, "Edit policy"; the rest are the create flow's. */
+/** The edit swaps only the allowlist's title; the rest are the setup's. */
 const getStepTitle = (mode: WizardMode, step: number): string =>
-  mode === 'edit' && step === 0 ? EDIT_STEP_TITLE : STEP_TITLES[step]
+  mode === 'edit' && step === CREATE_STEP
+    ? 'Edit allowlist'
+    : mode === 'edit' && step === REVIEW_STEP
+      ? 'Confirm allowlist'
+      : STEP_TITLES[step]
 
 /** The pre-setup checks on the account: all pass, or the one that blocks setup. */
 export type Preflight = 'ready' | 'old-version' | 'other-guard'
@@ -200,7 +223,7 @@ const PREFLIGHT_FAILURES: Record<
   },
   'other-guard': {
     title: 'This Safe account has an unknown policy installed',
-    description: 'Remove it to set up an allowlist.',
+    description: 'Remove it to set up account protection.',
     action: 'How to remove it',
     href: HelpCenterArticle.TRANSACTION_GUARD,
   },
@@ -250,7 +273,7 @@ const FIAT_TOTALS: Record<string, string> = {
 
 // Prototype only: M1's selector has a fixed set of reasons, so this one is registered on its text map at runtime.
 const HAS_ALLOWLIST = 'has-allowlist' as string as SafeAccountIneligibility
-INELIGIBILITY_TEXT[HAS_ALLOWLIST] = 'Already has an allowlist'
+INELIGIBILITY_TEXT[HAS_ALLOWLIST] = 'Already protected'
 
 /** An M2 account as M1's Safe account row takes it, so "Applies to" and the dropdown are M1's own rows. */
 const toSafeAccountOption = (account: M2Account, ineligibleReason?: SafeAccountIneligibility): SafeAccountOption => ({
@@ -301,7 +324,7 @@ const getAccountEntries = (disabledKeys: string[]): SafeAccountEntry[] =>
 
 const NESTED_SAFES_NOTICE = {
   title: NESTED_SAFES_NOTICE_TITLE,
-  description: 'To manage allowlists for the Nested Safe accounts, go to the Safe account settings.',
+  description: 'To manage account protection for nested Safe accounts, go to the Safe account settings.',
 }
 
 const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
@@ -361,6 +384,8 @@ export type SetupChoices = {
   blockedSettings: string[]
   /** Whether the allowlist also checks the account's existing spending limits (the Permissions step's switch). */
   applyToSpendingLimits: boolean
+  /** Existing spending limits (ExistingPermission ids) left out under Advanced; every one follows by default. */
+  uncoveredLimits?: string[]
 }
 
 export const DEFAULT_CHOICES: SetupChoices = {
@@ -480,7 +505,8 @@ const isUnchangedChoices = (choices: SetupChoices, initial: SetupChoices, accoun
   isSameSet(getSelectedRecipients(choices).map(recipientKey), getSelectedRecipients(initial).map(recipientKey)) &&
   isSameSet(getAllowedTokens(choices, account).map(tokenKey), getAllowedTokens(initial, account).map(tokenKey)) &&
   isSameSet(choices.blockedSettings, initial.blockedSettings) &&
-  choices.applyToSpendingLimits === initial.applyToSpendingLimits
+  choices.applyToSpendingLimits === initial.applyToSpendingLimits &&
+  [...(choices.uncoveredLimits ?? [])].sort().join() === [...(initial.uncoveredLimits ?? [])].sort().join()
 
 /** The CHANGE_BADGE verdicts an allowlist edit can give a recipient or a token. */
 type ListChange = 'added' | 'removed'
@@ -752,10 +778,18 @@ const RecipientDraftRow = ({
   listedAddresses,
   onConfirm,
   onRemove,
+  onNameClick,
+  onNameChange,
+  onAddressStep,
 }: {
   listedAddresses: string[]
   onConfirm: (recipient: Contact) => void
   onRemove: () => void
+  /** The name field doubles as the contacts search: clicking it opens the address book under the row. */
+  onNameClick?: () => void
+  onNameChange?: (name: string) => void
+  /** A typed address replaces the contacts, so the address book closes. */
+  onAddressStep?: () => void
 }): ReactElement => {
   const methods = useForm<DraftFields>({ mode: 'onChange', defaultValues: { address: '', name: '' } })
   const address = methods.watch('address') ?? ''
@@ -772,6 +806,7 @@ const RecipientDraftRow = ({
     if (step === 'address') return confirmAddress(event)
     event.preventDefault()
     setStep('address')
+    onAddressStep?.()
   }
 
   return (
@@ -804,9 +839,10 @@ const RecipientDraftRow = ({
               autoFocus
               // eslint-disable-next-line no-restricted-syntax -- borderless inline name field inside a row; no Input variant renders it bare
               className="min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-              placeholder="Name (optional)"
-              aria-label="Name (optional)"
-              {...methods.register('name')}
+              placeholder="Search contacts or type a name"
+              aria-label="Search contacts or type a name"
+              onClick={onNameClick}
+              {...methods.register('name', { onChange: (event) => onNameChange?.(event.target.value) })}
             />
           ) : (
             <div className="flex min-w-0 flex-1 flex-col">
@@ -920,13 +956,19 @@ const AddFromAddressBook = ({
   onOpenChange,
   listedAddresses,
   onAdd,
+  anchorRef,
+  externalQuery,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   listedAddresses: string[]
   onAdd: (contacts: Contact[]) => void
+  /** Opens under this element instead of its own button, searched by `externalQuery` (the recipient row's field). */
+  anchorRef?: RefObject<HTMLDivElement | null>
+  externalQuery?: string
 }): ReactElement => {
-  const [query, setQuery] = useState('')
+  const [ownQuery, setQuery] = useState('')
+  const query = externalQuery ?? ownQuery
   const [picked, setPicked] = useState<string[]>([])
   const triggerRef = useRef<HTMLButtonElement>(null)
   const search = query.trim().toLowerCase()
@@ -941,12 +983,15 @@ const AddFromAddressBook = ({
   useEffect(() => {
     if (!open) return
     const frame = requestAnimationFrame(() =>
-      triggerRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }),
+      (anchorRef?.current ?? triggerRef.current)?.scrollIntoView({ block: 'center', behavior: 'smooth' }),
     )
     return () => cancelAnimationFrame(frame)
-  }, [open])
+  }, [open, anchorRef])
 
-  const changeOpen = (next: boolean) => {
+  const changeOpen = (next: boolean, details?: { event?: Event }) => {
+    // A click back into the row's field is outside the popover, but it's where the search is typed: stay open.
+    const target = details?.event?.target
+    if (!next && anchorRef?.current && target instanceof Node && anchorRef.current.contains(target)) return
     if (!next) {
       setQuery('')
       setPicked([])
@@ -966,30 +1011,40 @@ const AddFromAddressBook = ({
 
   return (
     <Popover open={open} onOpenChange={changeOpen}>
-      <PopoverTrigger ref={triggerRef} render={<Button variant="outline" size="sm" />}>
-        Add from address book
-      </PopoverTrigger>
+      {!anchorRef && (
+        <PopoverTrigger ref={triggerRef} render={<Button variant="outline" size="sm" />}>
+          Add from address book
+        </PopoverTrigger>
+      )}
       {/* Capped at the room below the button: search and Add stay put, only the contact list scrolls. */}
       <PopoverContent
-        align="end"
+        anchor={anchorRef}
+        align={anchorRef ? 'start' : 'end'}
         side="bottom"
         sideOffset={4}
         collisionAvoidance={{ side: 'none' }}
-        className="flex max-h-(--available-height) w-[480px] max-w-[calc(100vw-32px)] flex-col gap-0 overflow-hidden rounded-lg p-0 shadow-lg ring-1 ring-foreground/10"
+        // Under the row, focus stays in its field so typing keeps searching.
+        initialFocus={anchorRef ? false : undefined}
+        className={classnames(
+          'flex max-h-(--available-height) max-w-[calc(100vw-32px)] flex-col gap-0 overflow-hidden rounded-lg p-0 shadow-lg ring-1 ring-foreground/10',
+          anchorRef ? 'w-(--anchor-width)' : 'w-[480px]',
+        )}
         data-m2-new="New · Address book popover"
         data-m2-new-corner="end"
       >
-        <div className="shrink-0 p-2">
-          <SearchInput
-            inputSize="sm"
-            className="w-full"
-            placeholder="Search contacts"
-            aria-label="Search contacts"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onClear={() => setQuery('')}
-          />
-        </div>
+        {!anchorRef && (
+          <div className="shrink-0 p-2">
+            <SearchInput
+              inputSize="sm"
+              className="w-full"
+              placeholder="Search contacts"
+              aria-label="Search contacts"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onClear={() => setQuery('')}
+            />
+          </div>
+        )}
 
         {groups.length === 0 ? (
           <div className="px-4 pb-3">
@@ -1438,6 +1493,13 @@ const RecipientsGroup = ({
   const [isBookOpen, setIsBookOpen] = useState(false)
   // With no recipients yet, the entry row starts open, so the first one can be typed straight away.
   const [isDrafting, setIsDrafting] = useState(() => getShownRecipients(choices, account).length === 0)
+  const [draftQuery, setDraftQuery] = useState('')
+  const draftRef = useRef<HTMLDivElement>(null)
+  const endDraft = () => {
+    setIsDrafting(false)
+    setIsBookOpen(false)
+    setDraftQuery('')
+  }
   const reservePageRoom = useContext(PageRoomContext)
   const recipients = getShownRecipients(choices, account)
 
@@ -1466,7 +1528,7 @@ const RecipientsGroup = ({
       ...choices,
       recipients: [...choices.recipients, { name: name || 'New recipient', address, selected: true }],
     })
-    setIsDrafting(false)
+    endDraft()
   }
 
   // A contact already held but hidden (a suggestion, before an account is picked) is replaced, not listed twice.
@@ -1479,6 +1541,7 @@ const RecipientsGroup = ({
         ...contacts.map((contact) => ({ ...contact, source: 'address-book' as const, selected: true })),
       ],
     })
+    endDraft()
   }
 
   return (
@@ -1516,26 +1579,44 @@ const RecipientsGroup = ({
             </div>
           )}
           {isDrafting && (
-            <RecipientDraftRow
-              listedAddresses={listedAddresses}
-              onConfirm={addTyped}
-              onRemove={() => setIsDrafting(false)}
-            />
+            <div ref={draftRef}>
+              <RecipientDraftRow
+                listedAddresses={listedAddresses}
+                onConfirm={addTyped}
+                onRemove={endDraft}
+                onNameClick={() => setIsBookOpen(true)}
+                onNameChange={(name) => {
+                  setDraftQuery(name)
+                  setIsBookOpen(true)
+                }}
+                onAddressStep={() => setIsBookOpen(false)}
+              />
+            </div>
           )}
         </div>
       )}
 
-      <div className="flex justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={() => setIsDrafting(true)}>
+      <AddFromAddressBook
+        open={isDrafting && isBookOpen}
+        onOpenChange={setIsBookOpen}
+        listedAddresses={listedAddresses}
+        onAdd={addFromBook}
+        anchorRef={draftRef}
+        externalQuery={draftQuery}
+      />
+
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setIsDrafting(true)
+            setIsBookOpen(true)
+          }}
+        >
           <Plus data-icon="inline-start" />
           Add a recipient
         </Button>
-        <AddFromAddressBook
-          open={isBookOpen}
-          onOpenChange={setIsBookOpen}
-          listedAddresses={listedAddresses}
-          onAdd={addFromBook}
-        />
       </div>
     </GroupSurface>
   )
@@ -1580,6 +1661,7 @@ const CreateStep = ({
   choices,
   onChoicesChange,
   preflight,
+  preflightBanner,
   onNext,
   isEditMode = false,
   isUnchangedEdit = false,
@@ -1588,6 +1670,7 @@ const CreateStep = ({
 }: ChoiceHandlers & {
   account?: M2Account
   preflight: Preflight
+  preflightBanner?: ReactNode
   onNext: () => void
   /** M1's edit mode: the account fixed. */
   isEditMode?: boolean
@@ -1622,7 +1705,7 @@ const CreateStep = ({
       <div className="flex flex-col gap-5">
         {/* A failed check leaves only the account and its banner: there is nothing to set up until it's resolved. */}
         {account && isBlockingPreflight(preflight) ? (
-          <PreflightFailure preflight={preflight} />
+          (preflightBanner ?? <PreflightFailure preflight={preflight} />)
         ) : (
           <div className="flex min-w-0 flex-col gap-4">
             <TokensGroup
@@ -1702,6 +1785,10 @@ const getExistingPermissions = (account: M2Account): ExistingPermission[] =>
     Icon: POLICY_ICONS['spending-limit'],
   }))
 
+/** The spending limits left out of the protection; switching all of them off is the old "don't apply" choice. */
+const getUncoveredLimits = (choices: SetupChoices, permissions: ExistingPermission[]): string[] =>
+  choices.applyToSpendingLimits ? (choices.uncoveredLimits ?? []) : permissions.map(({ id }) => id)
+
 /** Whether the flow shows the Permissions step for this account. */
 const hasExistingPermissions = (account: M2Account): boolean => getExistingPermissions(account).length > 0
 
@@ -1712,7 +1799,7 @@ const PERMISSION_STATUS_BADGE: Record<
   PermissionStatus,
   { label: string; variant: 'success' | 'warning'; Icon: LucideIcon }
 > = {
-  covered: { label: 'Follows the allowlist', variant: 'success', Icon: Check },
+  covered: { label: 'Follows protection', variant: 'success', Icon: Check },
   blocked: { label: 'Will be blocked', variant: 'warning', Icon: TriangleAlert },
   'not-covered': { label: 'Not covered', variant: 'warning', Icon: TriangleAlert },
 }
@@ -1722,12 +1809,16 @@ const PermissionRow = ({
   permission: { kind, holder, detail, token, Icon },
   status,
   onChangeTokens,
+  followSwitch,
 }: {
   permission: ExistingPermission
   status: PermissionStatus
   onChangeTokens?: () => void
+  /** Set per spending limit: the row's own switch, which then says what the status badge did. */
+  followSwitch?: { id: string; checked: boolean; onChange: (checked: boolean) => void }
 }): ReactElement => {
   const badge = PERMISSION_STATUS_BADGE[status]
+  const showBadge = !followSwitch || status === 'blocked'
 
   return (
     <ItemSurface>
@@ -1743,14 +1834,24 @@ const PermissionRow = ({
           <MutedLine>{status === 'blocked' ? `${token} isn't an allowed token` : detail}</MutedLine>
         </div>
 
-        <Badge variant={badge.variant} size="status" shape="status">
-          <badge.Icon aria-hidden />
-          {badge.label}
-        </Badge>
+        {showBadge && (
+          <Badge variant={badge.variant} size="status" shape="status">
+            <badge.Icon aria-hidden />
+            {badge.label}
+          </Badge>
+        )}
         {status === 'blocked' && onChangeTokens && (
           <Button variant="outline" size="sm" onClick={onChangeTokens}>
             Change tokens
           </Button>
+        )}
+        {followSwitch && (
+          <Switch
+            id={followSwitch.id}
+            checked={followSwitch.checked}
+            onCheckedChange={followSwitch.onChange}
+            aria-label={`${holder} follows the account protection`}
+          />
         )}
       </div>
     </ItemSurface>
@@ -1773,32 +1874,57 @@ const ExistingPermissions = ({
   /** `group`: a grey section among others; `card`: the whole step, straight on its white card. */
   surface?: 'group' | 'card'
 }): ReactElement | null => {
-  const switchId = useId()
+  const idPrefix = useId()
   const permissions = getExistingPermissions(account)
-  // `applyToSpendingLimits` covers every existing permission; spending limits are the only kind so far.
-  const isApplied = choices.applyToSpendingLimits
+  const uncovered = getUncoveredLimits(choices, permissions)
+  // The settings-page pattern: one switch for all, or "Set per spending limit" for a switch on each row.
+  // A mixed choice can only be shown per row, so it opens that way.
+  const [isPerLimit, setIsPerLimit] = useState(uncovered.length > 0 && uncovered.length < permissions.length)
 
   if (permissions.length === 0) return null
 
-  const statusOf = ({ token }: ExistingPermission): PermissionStatus =>
-    !isApplied ? 'not-covered' : choices.excludedTokens.includes(token) ? 'blocked' : 'covered'
+  const isAllFollowing = uncovered.length === 0
+
+  const statusOf = ({ id, token }: ExistingPermission): PermissionStatus =>
+    uncovered.includes(id) ? 'not-covered' : choices.excludedTokens.includes(token) ? 'blocked' : 'covered'
+
+  const setUncovered = (next: string[]) =>
+    onChoicesChange?.({ ...choices, applyToSpendingLimits: next.length < permissions.length, uncoveredLimits: next })
+
+  const setFollows = (id: string, follows: boolean) =>
+    setUncovered(follows ? uncovered.filter((item) => item !== id) : [...uncovered, id])
+
+  // Back to one switch, it starts from the recommended choice: every limit follows.
+  const useOneSetting = () => {
+    setUncovered([])
+    setIsPerLimit(false)
+  }
 
   const frame = (
     <div className="flex flex-col gap-4">
-      <Field orientation="horizontal">
-        <FieldContent>
-          <span className="flex flex-wrap items-center gap-2">
-            <FieldLabel htmlFor={switchId}>Apply this allowlist&apos;s rules to your spending limits</FieldLabel>
-            {isApplied && <Badge variant="positive">Recommended</Badge>}
-          </span>
-        </FieldContent>
-        <Switch
-          id={switchId}
-          checked={isApplied}
-          disabled={!onChoicesChange}
-          onCheckedChange={(checked) => onChoicesChange?.({ ...choices, applyToSpendingLimits: checked })}
-        />
-      </Field>
+      {isPerLimit ? (
+        <div className="flex items-center justify-between gap-3" data-m2-new="New · Per spending limit">
+          <Typography variant="paragraph-small-medium">Choose for each spending limit</Typography>
+          <Button variant="ghost-muted" size="sm" onClick={useOneSetting}>
+            Use one setting for all
+          </Button>
+        </div>
+      ) : (
+        <Field orientation="horizontal">
+          <FieldContent>
+            <span className="flex flex-wrap items-center gap-2">
+              <FieldLabel htmlFor={`${idPrefix}-all`}>Spending limits follow the account protection</FieldLabel>
+              {isAllFollowing && <Badge variant="positive">Recommended</Badge>}
+            </span>
+          </FieldContent>
+          <Switch
+            id={`${idPrefix}-all`}
+            checked={isAllFollowing}
+            disabled={!onChoicesChange}
+            onCheckedChange={(checked) => setUncovered(checked ? [] : permissions.map(({ id }) => id))}
+          />
+        </Field>
+      )}
 
       <ItemList>
         {permissions.map((permission) => (
@@ -1807,9 +1933,30 @@ const ExistingPermissions = ({
             permission={permission}
             status={statusOf(permission)}
             onChangeTokens={onChangeTokens}
+            followSwitch={
+              isPerLimit
+                ? {
+                    id: `${idPrefix}-${permission.id}`,
+                    checked: !uncovered.includes(permission.id),
+                    onChange: (checked) => setFollows(permission.id, checked),
+                  }
+                : undefined
+            }
           />
         ))}
       </ItemList>
+
+      {!isPerLimit && onChoicesChange && permissions.length > 1 && (
+        <Button
+          variant="ghost-muted"
+          size="sm"
+          className="self-start"
+          onClick={() => setIsPerLimit(true)}
+          data-m2-new="New · Set per spending limit"
+        >
+          Set per spending limit
+        </Button>
+      )}
     </div>
   )
 
@@ -1876,8 +2023,8 @@ export const ACCOUNT_SETTING_GROUPS: { title: string; settings: AccountSetting[]
       },
       {
         id: 'change-allowlist',
-        title: 'Replace or remove this allowlist',
-        description: 'Replaces the policy that checks every transaction, including this allowlist.',
+        title: 'Replace or remove the account protection',
+        description: 'Replaces the protection that checks every transaction, including its allowlist.',
       },
     ],
   },
@@ -1969,6 +2116,138 @@ const SettingsGroup = ({
   )
 }
 
+/** A static stand-in for Dev's animation: signers approve, the protection checks, the transaction runs or stops. */
+const ProtectionDiagram = (): ReactElement => {
+  const node = 'flex flex-col items-center gap-2 text-center'
+  const tile = 'flex size-11 items-center justify-center rounded-xl'
+
+  return (
+    <div
+      aria-hidden
+      className="flex items-center justify-center gap-3 rounded-xl bg-muted px-4 py-6"
+      data-m2-new="New · How protection works diagram"
+    >
+      <div className={node}>
+        <div className={classnames(tile, 'border border-border bg-card')}>
+          <UsersRound className="size-5 text-muted-foreground" />
+        </div>
+        <Typography variant="paragraph-mini-medium">Signers approve</Typography>
+      </div>
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+      <div className={node}>
+        <div className={classnames(tile, 'bg-mint')}>
+          <ShieldCheck className="size-5" />
+        </div>
+        <Typography variant="paragraph-mini-medium">Protection checks it</Typography>
+      </div>
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+      <div className="flex flex-col gap-2">
+        <span className="flex items-center gap-2 rounded-lg bg-card px-3 py-2">
+          <Check className="size-4 text-success-strong" />
+          <Typography variant="paragraph-mini-medium">Allowed: it runs</Typography>
+        </span>
+        <span className="flex items-center gap-2 rounded-lg bg-card px-3 py-2">
+          <X className="size-4 text-destructive" />
+          <Typography variant="paragraph-mini-medium">Not allowed: blocked</Typography>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+const PROTECTION_FACTS: { Icon: LucideIcon; title: string; description: string }[] = [
+  {
+    Icon: ShieldCheck,
+    title: 'Checked right before it runs',
+    description:
+      'After your signers approve a transaction, account protection checks it against your policies. If it isn’t allowed, it’s blocked, even with every signature.',
+  },
+  {
+    Icon: Clock,
+    title: 'Changes wait 24 hours',
+    description:
+      'Setting it up applies right away. After that, any change to your protection or policies waits 24 hours, so no one can quietly switch it off.',
+  },
+]
+
+/** The onboarding's first page, shown once per Safe account: what protection does, confirmed before setting it up. */
+const IntroStep = ({
+  account,
+  hasUnderstood,
+  onUnderstoodChange,
+  onNext,
+}: {
+  account?: M2Account
+  hasUnderstood: boolean
+  onUnderstoodChange: (hasUnderstood: boolean) => void
+  onNext: () => void
+}): ReactElement => {
+  const checkboxId = useId()
+
+  return (
+    <TxCard>
+      <div className="flex flex-col gap-5" data-m2-new="New · How it works step">
+        <div className="flex flex-col gap-1">
+          <Typography variant="h4">
+            {account ? `Protect ${account.name} with account protection` : 'How account protection works'}
+          </Typography>
+          <MutedLine>
+            A one-time setup: choose what can still change on the account, then add your first policy.
+          </MutedLine>
+        </div>
+
+        <ProtectionDiagram />
+
+        <div className="flex flex-col gap-4">
+          {PROTECTION_FACTS.map(({ Icon, title, description }) => (
+            <div key={title} className="flex items-start gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+                <Icon className="size-4 text-muted-foreground" aria-hidden />
+              </div>
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <Typography variant="paragraph-small-medium">{title}</Typography>
+                <MutedLine>{description}</MutedLine>
+              </div>
+            </div>
+          ))}
+          <ExternalLink href={HelpCenterArticle.POLICIES} className="pl-12 text-sm">
+            Learn more about account protection
+          </ExternalLink>
+        </div>
+
+        <label
+          htmlFor={checkboxId}
+          className="flex cursor-pointer items-start gap-3 rounded-xl border border-border p-4"
+          data-m2-new="New · I understand"
+        >
+          <Checkbox
+            id={checkboxId}
+            checked={hasUnderstood}
+            onCheckedChange={(checked) => onUnderstoodChange(checked === true)}
+          />
+          <Typography variant="paragraph-small">
+            I understand that transactions outside my policies will be blocked, and that changes take 24 hours to apply.
+          </Typography>
+        </label>
+
+        <PrimaryAction
+          label="Get started"
+          disabled={!hasUnderstood}
+          disabledHint="Tick the box to confirm you understand how account protection works."
+          onClick={onNext}
+        />
+      </div>
+    </TxCard>
+  )
+}
+
+/** Each group in one plain line, for the summary most people read and move on from. */
+const SETTING_GROUP_SUMMARIES: Record<string, { Icon: LucideIcon; summary: string }> = {
+  Signers: { Icon: UsersRound, summary: 'Add, remove or replace signers, and change the threshold.' },
+  Policies: { Icon: ShieldCheck, summary: 'Add or remove policies, and change the account protection.' },
+  Advanced: { Icon: Settings2, summary: 'Batched transactions and how unknown calls are handled.' },
+}
+
 /** After Policies, before Review: which changes to the Safe account itself the allowlist still lets through. */
 const SettingsStep = ({
   choices,
@@ -1979,28 +2258,76 @@ const SettingsStep = ({
   onNext: () => void
   /** The last step before Review in an edit: Next stays off until something changes, as in M1. */
   isUnchangedEdit?: boolean
-}): ReactElement => (
-  <TxCard>
-    <div className="flex flex-col gap-5" data-m2-new="New · Safe account settings step">
-      {ACCOUNT_SETTING_GROUPS.map(({ title, settings }) => (
-        <SettingsGroup
-          key={title}
-          title={title}
-          settings={settings}
-          choices={choices}
-          onChoicesChange={onChoicesChange}
-        />
-      ))}
+}): ReactElement => {
+  // A summary first, editing on request: the common pattern for settings most people leave alone.
+  const [isCustomizing, setIsCustomizing] = useState(false)
 
-      <PrimaryAction
-        label="Next"
-        disabled={isUnchangedEdit}
-        disabledHint="Nothing has changed yet. Change a token, recipient, policy or account change to continue."
-        onClick={onNext}
-      />
-    </div>
-  </TxCard>
-)
+  return (
+    <TxCard>
+      <div className="flex flex-col gap-5" data-m2-new="New · Safe account settings step">
+        {isCustomizing ? (
+          <div className="flex flex-col gap-4" data-m2-new="New · Customize account settings">
+            <div className="flex items-center justify-between gap-3">
+              <MutedLine>Turn off anything you want the protection to block.</MutedLine>
+              <Button variant="outline" size="sm" onClick={() => setIsCustomizing(false)}>
+                Done
+              </Button>
+            </div>
+            {ACCOUNT_SETTING_GROUPS.map(({ title, settings }) => (
+              <SettingsGroup
+                key={title}
+                title={title}
+                settings={settings}
+                choices={choices}
+                onChoicesChange={onChoicesChange}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 rounded-xl bg-muted p-4" data-m2-new="New · Account settings summary">
+            <div className="flex flex-col gap-1">
+              <Typography variant="paragraph-bold">What you can still change</Typography>
+              <MutedLine>Your policies limit where funds go. Managing the account works as usual.</MutedLine>
+            </div>
+            <ItemList>
+              {ACCOUNT_SETTING_GROUPS.map(({ title, settings }) => {
+                const { Icon, summary } = SETTING_GROUP_SUMMARIES[title] ?? { Icon: Settings2, summary: '' }
+                const blocked = settings.filter(({ id }) => choices.blockedSettings.includes(id)).length
+
+                return (
+                  <ItemSurface key={title}>
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+                        <Icon className="size-4 text-muted-foreground" aria-hidden />
+                      </div>
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <Typography variant="paragraph-small-medium">{title}</Typography>
+                        <MutedLine>{summary}</MutedLine>
+                      </div>
+                      <Badge variant={blocked === 0 ? 'success' : 'warning'} size="status" shape="status">
+                        {blocked === 0 ? 'Allowed' : `${blocked} blocked`}
+                      </Badge>
+                    </div>
+                  </ItemSurface>
+                )
+              })}
+            </ItemList>
+            <Button variant="outline" size="sm" className="self-start" onClick={() => setIsCustomizing(true)}>
+              Customize
+            </Button>
+          </div>
+        )}
+
+        <PrimaryAction
+          label="Next"
+          disabled={isUnchangedEdit}
+          disabledHint="Nothing has changed yet. Change a token, recipient, policy or account change to continue."
+          onClick={onNext}
+        />
+      </div>
+    </TxCard>
+  )
+}
 
 /** Its own step between Create and Settings; the flow skips it for an account with no existing permissions. */
 const PermissionsStep = ({
@@ -2880,12 +3207,19 @@ const useSetupSummary = (
   const allowedRule =
     isComplete && who
       ? `${who} will only be able to send ${describeTokens(tokens)} to ${describeRecipients(recipients)}.`
-      : `To create an allowlist policy on ${who}, select at least one token and one recipient.`
-  const limitCount = account ? getExistingPermissions(account).length : 0
+      : `Pick which tokens ${who} can send and who can receive them.`
+  const existingPermissions = account ? getExistingPermissions(account) : []
+  const limitCount = existingPermissions.length
+  const followingCount = limitCount - getUncoveredLimits(choices, existingPermissions).length
   const limits = limitCount === 1 ? 'Your spending limit' : `Your ${limitCount} spending limits`
   const allowedSettingCount = getAllowedSettings(choices).length
   // Each step's own title and line; the timing sits behind the ⓘ on every step.
   const STEP_BANNERS: Record<number, SetupSummary> = {
+    // The intro hides the banner; this only fills the compact header if it ever shows.
+    [INTRO_STEP]: {
+      title: `Set up account protection on ${who}.`,
+      description: 'Choose what can still change on the account, then add your first policy.',
+    },
     [CREATE_STEP]: isEditMode
       ? {
           title: isExistingFromCreate
@@ -2894,58 +3228,82 @@ const useSetupSummary = (
           description: 'Anything you deselect will be blocked once the change applies.',
         }
       : { title: allowedRule, description: 'Anything you leave out will be blocked.' },
-    [PERMISSIONS_STEP]: choices.applyToSpendingLimits
-      ? {
-          title: `${limits} will follow this allowlist's rules.`,
-          description: 'They can only send allowed tokens to allowed recipients.',
-        }
-      : {
-          title: `${limits} won't follow this allowlist's rules.`,
-          description: 'They can still send any token to any address, so your Safe account could be exposed.',
-          tone: 'warning',
-        },
+    [PERMISSIONS_STEP]:
+      followingCount === limitCount
+        ? {
+            title: `${limits} will follow the account protection.`,
+            description: 'They can only send allowed tokens to allowed recipients.',
+          }
+        : followingCount === 0
+          ? {
+              title: `${limits} won't follow the account protection.`,
+              description: 'They can still send any token to any address, so your Safe account could be exposed.',
+              tone: 'warning',
+            }
+          : {
+              title: `${followingCount} of ${limitCount} spending limits will follow the account protection.`,
+              description: 'The others can still send any token to any address.',
+              tone: 'warning',
+            },
     // Nothing selected locks the Safe account, so it turns yellow and says what that means.
     [SETTINGS_STEP]:
       allowedSettingCount === 0
         ? {
             title: 'No account changes will be allowed.',
-            description: "You won't be able to change signers, the threshold or policies, including this allowlist.",
+            description: "You won't be able to change signers, the threshold or policies, including this protection.",
             tone: 'warning',
           }
         : {
-            title: `${allowedSettingCount} of ${ALL_ACCOUNT_SETTINGS.length} account changes will stay allowed.`,
+            title:
+              allowedSettingCount === ALL_ACCOUNT_SETTINGS.length
+                ? 'All your account settings will stay allowed.'
+                : `${allowedSettingCount} of ${ALL_ACCOUNT_SETTINGS.length} account settings will stay allowed.`,
             description:
-              'Only the account changes you select below can still be made. Every other change will be blocked.',
+              allowedSettingCount === ALL_ACCOUNT_SETTINGS.length
+                ? 'Only block a setting if you want extra protection against changes.'
+                : 'Anyone trying to change a blocked setting will be stopped by the protection.',
           },
     // Spending limits left out turn it yellow; in edit mode it points at the Added/Removed marks instead.
     [REVIEW_STEP]: isEditMode
       ? {
-          title: `You're changing the allowlist on ${who}.`,
-          description: "Check what's added and removed below before you sign.",
+          title: allowedRule,
+          description:
+            'Check the details below before you sign. This starts a 24-hour wait, and a second transaction will be needed to apply the changes to the policy.',
         }
-      : limitCount > 0 && !choices.applyToSpendingLimits
-        ? {
-            title: allowedRule,
-            description: `${limits} won't follow these rules, so your Safe account could be exposed.`,
-            tone: 'warning',
-          }
-        : { title: allowedRule, description: 'Check the details below before you sign.' },
+      : // The whole setup in one place: the allowlist, the account settings, and the spending limits it covers.
+        {
+          title: allowedRule,
+          description: [
+            allowedSettingCount === ALL_ACCOUNT_SETTINGS.length
+              ? 'All account settings stay allowed.'
+              : `${allowedSettingCount} of ${ALL_ACCOUNT_SETTINGS.length} account settings stay allowed.`,
+            limitCount === 0
+              ? 'No spending limits yet; any you add will follow the protection.'
+              : followingCount === limitCount
+                ? `${limitCount === 1 ? 'Your spending limit follows' : `All ${limitCount} spending limits follow`} the protection.`
+                : `Only ${followingCount} of ${limitCount} spending limits follow the protection, so your Safe account could be exposed.`,
+          ].join(' '),
+          tone: followingCount < limitCount ? 'warning' : undefined,
+        },
     [CONFIRM_STEP]: {
-      title: `Sign to add the ${isEditMode ? 'change' : 'allowlist'} to the queue.`,
+      title: `Sign to add the ${isEditMode ? 'change' : 'account protection'} to the queue.`,
       description:
         otherSigners > 0
           ? `${otherSigners} more ${otherSigners === 1 ? 'signer needs' : 'signers need'} to confirm before it can be executed.`
           : 'Your signature is the only one needed. It can be executed right after.',
     },
     [EXECUTE_STEP]: isEditMode
-      ? { title: 'Execute to start the 24-hour wait.', description: 'The change applies after that.' }
-      : { title: 'Execute to turn the allowlist on.', description: 'It applies right away.' },
+      ? {
+          title: 'Execute to start the 24-hour wait.',
+          description: 'After that, a second transaction will be needed to apply the changes to the policy.',
+        }
+      : { title: 'Execute to turn on account protection.', description: 'It applies right away.' },
   }
   const banner: SetupSummary = who
     ? STEP_BANNERS[step]
     : {
-        title: 'Pick a Safe account to start.',
-        description: 'Then choose which tokens it can send and who can receive them.',
+        title: 'Pick a Safe account to protect.',
+        description: 'Then pick which tokens it can send and who can receive them.',
       }
 
   // The timing is always in the ⓘ; a step can put its own detail first, e.g. the risk when spending limits are left out.
@@ -2954,9 +3312,7 @@ const useSetupSummary = (
   const timing = !who
     ? undefined
     : isEditMode
-      ? step === EXECUTE_STEP
-        ? 'Any signer can cancel the change before then.'
-        : 'Changes apply 24 hours after this transaction is executed. Any signer can cancel them before then.'
+      ? 'Any signer can cancel the change before it applies.'
       : step === EXECUTE_STEP
         ? 'Further changes will take 24 hours to apply.'
         : 'These changes take effect as soon as this transaction is executed. Further changes will take 24 hours to apply.'
@@ -3095,11 +3451,18 @@ const CompactHeaderTile = ({ account, summary }: { account?: M2Account; summary:
   </div>
 )
 
-/** The card header's name, where M1 has "Spending limit"; M1's info link is left out for now. */
-const FlowSubtitle = (): ReactElement => <span>Allowlist</span>
+/** The card header's name, where M1 has "Spending limit": the allowlist on its own step and in an edit, else the setup. */
+const isAllowlistHeader = (mode: WizardMode, step: number): boolean => mode === 'edit' || step === CREATE_STEP
+
+const FlowSubtitle = ({ mode, step }: { mode: WizardMode; step: number }): ReactElement => (
+  <span>{isAllowlistHeader(mode, step) ? 'Allowlist' : 'Account protection'}</span>
+)
 
 /** The allowlist's icon, as in the policy table and side panel. */
 const ShieldIcon = (): ReactElement => <Users aria-hidden />
+
+/** Account protection's icon, as on the protection row in the table. */
+const ProtectionIcon = (): ReactElement => <ShieldCheck aria-hidden />
 
 const StepLabel = ({ children }: { children: ReactNode }): ReactElement => (
   <span className="truncate text-sm leading-5 group-enabled:group-hover:underline">{children}</span>
@@ -3284,7 +3647,11 @@ const PolicySetupLayout = ({
                   className={classnames('overflow-hidden rounded-t-xl bg-card', layoutCss.header)}
                 >
                   <div ref={policyRowRef}>
-                    <TxLayoutHeader subtitle={<FlowSubtitle />} icon={ShieldIcon} hideNonce={step < REVIEW_STEP} />
+                    <TxLayoutHeader
+                      subtitle={<FlowSubtitle mode={mode} step={step} />}
+                      icon={isAllowlistHeader(mode, step) ? ShieldIcon : ProtectionIcon}
+                      hideNonce={step < REVIEW_STEP}
+                    />
                   </div>
                   {!hideSummary && <SetupSentence {...summary} />}
                   {belowSummary}
@@ -3330,6 +3697,8 @@ export type SetUpPoliciesFlowProps = ChoiceHandlers & {
   step: number
   onStepChange: (step: number) => void
   preflight?: Preflight
+  /** Handoff stories only: shown in place of the failed check's banner. */
+  preflightBanner?: ReactNode
   viewer?: SignerId
   /** Render the flow on the page, as M1's story renders TxFlow; otherwise inside the app's tx modal, as the app does. */
   inline?: boolean
@@ -3343,6 +3712,8 @@ export type SetUpPoliciesFlowProps = ChoiceHandlers & {
   topBar?: ReactNode
   /** The account field is read-only; an edit started from Create, by picking an account with an allowlist, keeps it changeable. */
   isAccountLocked?: boolean
+  /** Started from the account's row in the table: Create shows the account as a line instead of the dropdown. */
+  accountFromRow?: boolean
 }
 
 export const SetUpPoliciesFlow = ({
@@ -3354,6 +3725,7 @@ export const SetUpPoliciesFlow = ({
   choices,
   onChoicesChange,
   preflight = 'ready',
+  preflightBanner,
   viewer = 'nadia',
   inline = false,
   onSign,
@@ -3363,6 +3735,7 @@ export const SetUpPoliciesFlow = ({
   initialChoices,
   topBar,
   isAccountLocked = mode === 'edit',
+  accountFromRow = false,
 }: SetUpPoliciesFlowProps): ReactElement => {
   // "Change tokens" on Permissions: Create scrolls to its tokens once it shows, then clears this.
   const [isTokensScrollPending, setIsTokensScrollPending] = useState(false)
@@ -3373,12 +3746,20 @@ export const SetUpPoliciesFlow = ({
   const reviewedAccount = account ?? PAYMENTS
   // Shown until an account without permissions is picked, and kept while a jump is showing it.
   const hasPermissionsStep = !account || hasExistingPermissions(account) || currentStep === PERMISSIONS_STEP
-  const visibleSteps = WIZARD_STEP_NAMES.map((_, index) => index).filter(
-    (index) => index !== PERMISSIONS_STEP || hasPermissionsStep,
+  // The onboarding steps (how it works, settings, spending limits) are the first-time setup only. Once an account is
+  // protected, a policy is the short wizard: the allowlist, then Review, Confirm and Execute.
+  // From "New" there's no account yet, so whether it's a first setup isn't known: the short steps until one is picked.
+  const isShortWizard = isEditMode || !account
+  const visibleSteps = WIZARD_STEP_NAMES.map((_, index) => index).filter((index) =>
+    isShortWizard
+      ? ![INTRO_STEP, SETTINGS_STEP, PERMISSIONS_STEP].includes(index)
+      : index !== PERMISSIONS_STEP || hasPermissionsStep,
   )
   const earlierSteps = visibleSteps.filter((index) => index < currentStep)
   const next = () => onStepChange(visibleSteps.find((index) => index > currentStep) ?? currentStep)
-  const back = () => onStepChange(earlierSteps[earlierSteps.length - 1] ?? CREATE_STEP)
+  const back = () => onStepChange(earlierSteps[earlierSteps.length - 1] ?? visibleSteps[0])
+  // The intro's "I understand": kept here, so going back to it doesn't untick it.
+  const [hasUnderstood, setHasUnderstood] = useState(false)
   const isUnchangedEdit = editBaseline !== undefined && isUnchangedChoices(choices, editBaseline, account)
   const setupTx = useMemo(
     () => buildSetupTransaction({ choices, mode, account: reviewedAccount }).safeTx,
@@ -3404,7 +3785,7 @@ export const SetUpPoliciesFlow = ({
 
   const flow = (
     <PolicySetupLayout
-      title={getStepTitle(mode, currentStep)}
+      title={!account && currentStep === CREATE_STEP ? 'Add allowlist' : getStepTitle(mode, currentStep)}
       step={currentStep}
       visibleSteps={visibleSteps}
       threshold={reviewedAccount.threshold}
@@ -3419,24 +3800,56 @@ export const SetUpPoliciesFlow = ({
         currentStep === CREATE_STEP && (
           // The card's own padding, which the field had inside Create's card.
           <div className="px-[var(--space-3)] pt-[var(--space-3)]">
-            <AccountSelect
-              accounts={accountEntries}
-              value={account ? getAccountKey(account) : undefined}
-              onChange={(id) => {
-                const picked = findM2Account(id)
-                if (picked) onAccountChange(picked)
-              }}
-              notice={NESTED_SAFES_NOTICE}
-              id="recipient-allowlist-safe-account"
-              readOnly={isAccountLocked}
-            />
+            {/* Started from an account's row, the account is a given: a line, not a field. "New" still asks. */}
+            {account && accountFromRow ? (
+              <div className="flex flex-col gap-1.5" data-m2-new="New · Safe account statement">
+                <Typography variant="paragraph-small" color="muted">
+                  Safe account
+                </Typography>
+                <div className="flex items-center gap-3">
+                  <SafeAddress name={account.name} address={account.address} chainId={account.chainId} />
+                  <span className="flex items-center gap-1.5">
+                    <ChainIndicator chainId={account.chainId} onlyLogo imageSize={16} />
+                    <Typography variant="paragraph-small" color="muted">
+                      {CHAIN_INFO[account.chainId]?.chainName ?? account.chainId}
+                    </Typography>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <AccountSelect
+                accounts={accountEntries}
+                value={account ? getAccountKey(account) : undefined}
+                onChange={(id) => {
+                  const picked = findM2Account(id)
+                  if (picked) onAccountChange(picked)
+                }}
+                notice={NESTED_SAFES_NOTICE}
+                id="recipient-allowlist-safe-account"
+                readOnly={isAccountLocked}
+              />
+            )}
           </div>
         )
       }
       summary={summary}
-      hideSummary={isPreflightBlocked}
+      hideSummary={isPreflightBlocked || currentStep === INTRO_STEP}
       summaryAccount={summaryAccount}
     >
+      <IntroStep
+        key="intro"
+        account={account}
+        hasUnderstood={hasUnderstood}
+        onUnderstoodChange={setHasUnderstood}
+        onNext={next}
+      />
+      <SettingsStep
+        key="settings"
+        choices={choices}
+        onChoicesChange={onChoicesChange}
+        onNext={next}
+        isUnchangedEdit={false}
+      />
       <CreateStep
         key="create"
         account={account}
@@ -3444,10 +3857,11 @@ export const SetUpPoliciesFlow = ({
         onChoicesChange={onChoicesChange}
         // The pre-setup checks passed when the allowlist was created.
         preflight={isEditMode ? 'ready' : preflight}
+        preflightBanner={preflightBanner}
         onNext={next}
         isEditMode={isEditMode}
-        // Settings, the last step before Review, can still change the edit, so the check waits for its Next.
-        isUnchangedEdit={false}
+        // The short wizard goes straight to Review from here, so Next waits for a change.
+        isUnchangedEdit={isUnchangedEdit}
         scrollToTokens={isTokensScrollPending}
         onScrolledToTokens={clearTokensScroll}
       />
@@ -3458,13 +3872,6 @@ export const SetUpPoliciesFlow = ({
         onChoicesChange={onChoicesChange}
         onChangeTokens={changeTokens}
         onNext={next}
-      />
-      <SettingsStep
-        key="settings"
-        choices={choices}
-        onChoicesChange={onChoicesChange}
-        onNext={next}
-        isUnchangedEdit={isUnchangedEdit}
       />
       <ReviewStep
         key="review"

@@ -5,8 +5,11 @@ import { getAllowlistAccountKeys } from './m2OverviewPage'
 import { createM1FlowStory, PAYMENTS, type M2Account } from './m2Prototype'
 import {
   CONFIRM_STEP,
+  CREATE_STEP,
   DEFAULT_CHOICES,
+  INTRO_STEP,
   EXECUTE_STEP,
+  PREFILLED_RECIPIENTS,
   PERMISSIONS_STEP,
   SETTINGS_STEP,
   REVIEW_STEP,
@@ -17,6 +20,7 @@ import {
   WIZARD_STORE,
   type Preflight,
   type SetupChoices,
+  type WizardMode,
 } from './m2SetupFlow'
 
 type WizardStoryProps = {
@@ -25,6 +29,9 @@ type WizardStoryProps = {
   initialAccount?: M2Account | null
   initialChoices?: SetupChoices
   preflight?: Preflight
+  mode?: WizardMode
+  /** Edit only: the allowlist as it is now, so Review marks what's added and removed. */
+  liveChoices?: SetupChoices
   onSign?: () => void
   onClose?: () => void
 }
@@ -34,6 +41,8 @@ const WizardStory = ({
   initialAccount = PAYMENTS,
   initialChoices = DEFAULT_CHOICES,
   preflight,
+  mode,
+  liveChoices,
   onSign,
   onClose,
 }: WizardStoryProps): ReactElement => {
@@ -51,6 +60,8 @@ const WizardStory = ({
       choices={choices}
       onChoicesChange={setChoices}
       preflight={preflight}
+      mode={mode}
+      initialChoices={liveChoices}
       inline
       onSign={onSign}
       onClose={onClose}
@@ -70,7 +81,7 @@ const meta = {
     msw: { handlers: [...SETUP_PREVIEW_HANDLERS, ...shell.parameters.msw.handlers] },
   },
   args: {
-    initialStep: 0,
+    initialStep: CREATE_STEP,
     preflight: 'ready',
     onSign: fn(),
     onClose: fn(),
@@ -86,6 +97,11 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+/** The onboarding's first page: how account protection works, with "I understand" before Get started. */
+export const HowItWorks: Story = {
+  args: { initialStep: INTRO_STEP },
+}
 
 /** Create before an account is picked: M1's dropdown alone; accounts with an allowlist are disabled. */
 export const CreateNoAccount: Story = {
@@ -139,4 +155,29 @@ export const Execute: Story = {
 export const SecondSignerConfirmView: Story = {
   name: 'SecondSignerConfirm',
   render: (args) => <SecondSignerConfirm choices={DEFAULT_CHOICES} onConfirm={args.onSign} onClose={args.onClose} />,
+}
+
+/** Payments' allowlist with its first recipient removed: the edit the edit stories walk through. */
+const EDITED_CHOICES: SetupChoices = {
+  ...DEFAULT_CHOICES,
+  recipients: PREFILLED_RECIPIENTS.map((recipient, index) =>
+    index === 0 ? { ...recipient, selected: false } : recipient,
+  ),
+}
+
+const EDIT_ARGS = { mode: 'edit', liveChoices: DEFAULT_CHOICES, initialChoices: EDITED_CHOICES } as const
+
+/** Edit an allowlist on an already protected Safe account: the short wizard, Allowlist → Review → Confirm → Execute. */
+export const EditAllowlist: Story = {
+  args: EDIT_ARGS,
+}
+
+/** Edit, Review: executing the edit starts a 24-hour wait, and a second transaction applies it. */
+export const EditReview: Story = {
+  args: { ...EDIT_ARGS, initialStep: REVIEW_STEP },
+}
+
+/** Edit, Execute: starts the 24-hour wait. */
+export const EditExecute: Story = {
+  args: { ...EDIT_ARGS, initialStep: EXECUTE_STEP },
 }
