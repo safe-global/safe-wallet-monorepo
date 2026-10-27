@@ -19,7 +19,7 @@ import {
 import { ALLOWLIST_ROW_CLASSES } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import { cn } from '@safe-global/views/utils/cn'
 import AddressInput from '@/components/common/AddressInput'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 
 type DraftFields = { name: string; address: string }
 

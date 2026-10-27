@@ -22,7 +22,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { addAllowlistRecipients } from '../utils/allowlistForm'
 import type { AllowlistFormRecipient, RecipientAllowlistFormValues } from '../types'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import AddFromAddressBook from './AddFromAddressBook'
