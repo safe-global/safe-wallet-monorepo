@@ -20,11 +20,19 @@ type RequestToAddButtonProps = {
   chainIds: string[]
   alreadyRequested?: boolean
   isCompact?: boolean
+  location?: string
 }
 
-const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
+const RequestToAddButton = ({
+  address,
+  name,
+  chainIds,
+  alreadyRequested,
+  isCompact,
+  location,
+}: RequestToAddButtonProps) => {
   const chains = useChains()
-  const addOrRequestContact = useAddOrRequestWorkspaceContact()
+  const addOrRequestContact = useAddOrRequestWorkspaceContact(undefined, location)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [open, setOpen] = useState(false)

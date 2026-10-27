@@ -46,6 +46,7 @@ const CONFIRMATIONS: Partial<Record<WorkspaceContactResult, Confirmation>> = {
  */
 export const useAddOrRequestWorkspaceContact = (
   source?: SPACE_LABELS,
+  location?: string,
 ): ((contact: WorkspaceSafeName) => Promise<WorkspaceContactResult>) => {
   const spaceId = useCurrentSpaceId()
   const isAdmin = useIsAdmin()
@@ -81,14 +82,20 @@ export const useAddOrRequestWorkspaceContact = (
       const confirmation = CONFIRMATIONS[result]
       if (confirmation) {
         const { event, ...notification } = confirmation
-        if (event && source) trackEvent(event, { [MixpanelEventParams.SOURCE]: source })
-        else if (event) trackEvent(event)
+        if (event) {
+          const params = {
+            ...(source && { [MixpanelEventParams.SOURCE]: source }),
+            ...(location && { [MixpanelEventParams.LOCATION]: location }),
+          }
+          if (Object.keys(params).length) trackEvent(event, params)
+          else trackEvent(event)
+        }
         dispatch(showNotification({ ...notification, autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS }))
       }
       if (error) dispatch(showNotification({ variant: 'error', groupKey: 'workspace-contact-error', message: error }))
 
       return result
     },
-    [items, spaceId, isInvited, submit, source, dispatch],
+    [items, spaceId, isInvited, submit, source, location, dispatch],
   )
 }

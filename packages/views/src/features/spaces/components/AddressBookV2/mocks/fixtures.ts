@@ -3,7 +3,7 @@
  * Contract addresses are the real mainnet deployments; every person, vendor and Safe is made up.
  */
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
-import type { AddressBookContact } from '../types'
+import type { AddressBookContact, SuggestedContact } from '../types'
 
 const logo = (chainId: string) => `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
 
@@ -69,4 +69,31 @@ export const LOCAL_CONTACTS: AddressBookContact[] = [
   { address: ADDRESSES.hardwareWallet, name: 'My hardware wallet', chains: [ethereum, base] },
   { address: ADDRESSES.treasuryLookAlike, name: 'Old treasury', chains: [ethereum] },
   { address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum], isShared: true },
+]
+
+export const SUGGESTED_SIGNERS: SuggestedContact[] = [
+  {
+    address: '0x60E543e244f513795d6a7fbCf0479A4DBA950a9A',
+    chains: [ethereum, arbitrum, optimism],
+    suggestedName: 'Treasury signer 4',
+    reason: { kind: 'signer', safes: ['Treasury'] },
+  },
+  {
+    address: '0xFf23675C1fc258d5DB60fd1A6259d2209255221D',
+    chains: [base, ethereum],
+    suggestedName: 'Payroll signer 3',
+    reason: { kind: 'signer', safes: ['Payroll'] },
+  },
+  {
+    address: '0x834984C04f21A982f8BfC1f18157087E5B52B21C',
+    chains: [gnosis, optimism, arbitrum],
+    suggestedName: 'Ops multisig signer 2',
+    reason: { kind: 'signer', safes: ['Ops multisig', 'Grants program'] },
+  },
+  {
+    address: '0x19cc57aF6C4bcd078b72522c3ef6B6705c6d1d22',
+    chains: [optimism, arbitrum],
+    suggestedName: 'Grants program signer 3',
+    reason: { kind: 'signer', safes: ['Grants program'] },
+  },
 ]

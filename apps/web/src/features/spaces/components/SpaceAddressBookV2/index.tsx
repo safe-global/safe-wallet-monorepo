@@ -11,6 +11,8 @@ import useChains, { useHasFeature } from '@/hooks/useChains'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import PendingRequestsTable from '../SpaceAddressBook/PendingRequestsTable'
 import LocalContacts from './LocalContacts'
+import SuggestedTab from './SuggestedTab'
+import { useSuggestedContacts } from './useSuggestedContacts'
 import WorkspaceContacts from './WorkspaceContacts'
 import { toLocalContacts } from './utils'
 
@@ -31,6 +33,7 @@ const SpaceAddressBookV2 = () => {
   const requests = useAddressBookRequestsState()
   const localBooks = useAllAddressBooks()
   const { configs } = useChains()
+  const suggested = useSuggestedContacts()
 
   const isWorkspaceSettled = !workspaceBook.isLoading && !workspaceBook.isError
   const isRequestsSettled = !requests.isLoading && !requests.isError
@@ -59,6 +62,12 @@ const SpaceAddressBookV2 = () => {
                 tooltip="Shared contacts visible to everyone in this Workspace"
               />
             </TabsTrigger>
+            <TabsTrigger value="suggested" className="cursor-pointer">
+              <TabLabel
+                label={withCount('Suggested', suggested.suggestions.length, !suggested.isLoading && !suggested.isError)}
+                tooltip="Addresses worth adding to the Workspace address book"
+              />
+            </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
                 <TabsTrigger value="mine" className="cursor-pointer">
@@ -85,6 +94,20 @@ const SpaceAddressBookV2 = () => {
               onReload={workspaceBook.refetch}
               isAdmin={isAdmin}
               isInvited={isInvited}
+            />
+          </TabsContent>
+
+          <TabsContent value="suggested">
+            <SuggestedTab
+              suggestions={suggested.suggestions}
+              isLoading={suggested.isLoading}
+              isError={suggested.isError}
+              onReload={suggested.refetch}
+              isAdmin={isAdmin}
+              isInvited={isInvited}
+              isPrivateAddressBookEnabled={isPrivateAddressBookEnabled}
+              pendingRequests={requests.items}
+              isRequestsSettled={isRequestsSettled}
             />
           </TabsContent>
 

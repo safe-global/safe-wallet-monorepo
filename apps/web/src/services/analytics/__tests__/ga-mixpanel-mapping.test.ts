@@ -35,6 +35,7 @@ describe('GA to Mixpanel Mapping', () => {
       [SPACE_EVENTS.ADDRESS_REQUEST_APPROVED.action, MixpanelEvent.WORKSPACE_ADDRESS_REQUEST_APPROVED],
       [SPACE_EVENTS.ADDRESS_REQUEST_REJECTED.action, MixpanelEvent.WORKSPACE_ADDRESS_REQUEST_REJECTED],
       [SPACE_EVENTS.LOCAL_CONTACT_ADDED.action, MixpanelEvent.WORKSPACE_LOCAL_CONTACT_ADDED],
+      [SPACE_EVENTS.SUGGESTED_CONTACTS_ADDED.action, MixpanelEvent.WORKSPACE_SUGGESTED_CONTACTS_ADDED],
     ])('should map "%s" to "%s"', (action, mixpanelEvent) => {
       expect(GA_TO_MIXPANEL_MAPPING[action]).toBe(mixpanelEvent)
     })

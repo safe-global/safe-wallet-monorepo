@@ -317,6 +317,10 @@ export const SPACE_EVENTS = {
     action: 'Local contact added',
     category: SPACE_CATEGORY,
   },
+  SUGGESTED_CONTACTS_ADDED: {
+    action: 'Suggested contacts added',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {

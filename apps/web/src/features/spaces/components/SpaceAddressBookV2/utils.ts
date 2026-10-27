@@ -5,7 +5,7 @@ import type { AddressBookContact } from '@safe-global/views/features/spaces/comp
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import type { AddressBookState } from '@/store/addressBookSlice'
 
-const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>
+export const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>
   chainIds.map((chainId) => {
     const chain = configs.find((config) => config.chainId === chainId)
     return chain
