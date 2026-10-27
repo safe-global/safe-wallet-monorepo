@@ -17,9 +17,6 @@ export const EOA = '0x03042B890b99552b60A073F808100517fb148F60'
 export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
 export { defaultOwnerAddress } from './credentials.js'
-// AllowanceModule contract addresses — keyed by contract version, not by network
-export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
-export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
 export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
 export const SIDEBAR_ADDRESS = '0x04f8...1a91'
@@ -86,8 +83,6 @@ export const usersEndpoint = '**/v1/users'
 export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
-export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
-export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
@@ -101,7 +96,6 @@ export const portfolioEndpoint = '**/v1/portfolio/**'
 export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
 export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
 export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
-export const delegatesEndpoint = /\/v[23]\/chains\/\d+\/delegates\?/
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -185,7 +179,6 @@ export const transactionStatus = {
 export const tokenNames = {
   wrappedEther: 'Wrapped Ether',
   sepoliaEther: 'Sepolia Ether',
-  qaToken: 'QAtest10',
   cow: 'CoW Protocol Token',
 }
 
@@ -198,12 +191,6 @@ export const addressBookErrrMsg = {
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
   },
-}
-
-export const amountErrorMsg = {
-  negativeValue: 'The value must be greater than 0',
-  randomString: 'The value must be a number',
-  largerThanCurrentBalance: /Maximum value is \d+(\.\d+)?/,
 }
 
 export const nonceTooltipMsg = {
@@ -261,4 +248,3 @@ export const sessionStorageKeys = {
 }
 
 // Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
-export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'

@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as ls from '../../support/localstorage_data.js'
 
 // Common button text strings
 export const nextBtnStr = 'Next'
@@ -253,17 +252,6 @@ export function checkTextsExistWithinElement(element, texts) {
       })
   })
 }
-export function checkTextsExistWithinElementScroll(element, texts) {
-  texts.forEach((text) => {
-    cy.get(element)
-      .scrollIntoView()
-      .should('be.visible')
-      .within(() => {
-        cy.get('div').contains(text).scrollIntoView().should('be.visible')
-      })
-  })
-}
-
 export function verifyCheckboxeState(element, index, state) {
   cy.get(element).eq(index).should(state)
 }
@@ -360,21 +348,6 @@ export function addToAppLocalStorage(key, jsonValue) {
   return cy.window().then((win) => {
     win.localStorage.setItem(key, JSON.stringify(jsonValue))
   })
-}
-
-/**
- * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
- * This function sets up the settings and verifies they are stored correctly before proceeding
- * @returns {Promise} A promise that resolves when settings are set and verified
- */
-export function setupSafeSettingsWithAllTokens() {
-  const settings = {
-    ...ls.safeSettings.slimitSettings,
-  }
-  return cy
-    .wrap(null)
-    .then(() => addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, settings))
-    .then(() => isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, settings))
 }
 
 export function checkTextOrder(selector, expectedTextArray) {

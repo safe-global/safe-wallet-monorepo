@@ -92,7 +92,6 @@ export const stagingSafes = {
     ],
   },
   SEP_STATIC_SAFE_42: { owners: [owner4], threshold: 1, ether: parseEther('0.0003') },
-  SEP_STATIC_SAFE_47: { owners: [sharedOwner, owner4], threshold: 1, ether: parseEther('0.001') },
   ETH_STATIC_SAFE_15: {
     chainId: 1,
     owners: [
@@ -116,7 +115,6 @@ export const stagingSafes = {
       { address: '0x7701996420A116F25bD414c02381f6DB698bF2EB', amount: parseEther('5') }, // BUN
     ],
   },
-  MATIC_STATIC_SAFE_34: { chainId: 137, owners: [sharedOwner, owner4], threshold: 1, ether: parseEther('0.11') },
 }
 
 // On-chain state of the staging Safe App Safes at the fork block.
