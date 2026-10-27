@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - dev
-      - ci/yarn-cache-pr-restore-only
     paths:
       - yarn.lock
       - '**/package.json'
@@ -41,4 +40,3 @@ jobs:
       - uses: $/.github/actions/yarn
         with:
           after-install: 'false'
-# DO NOT MERGE: second measuring run
