@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { basename } from 'node:path'
 import { test } from 'node:test'
 import {
   cypressEnvironment,
@@ -57,18 +58,26 @@ test('blocks a Safe backend request from the hosted CoW widget', () => {
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'
-const batch = 'cypress/e2e/regression/batch_tx.cy.js'
-const proposers = 'cypress/e2e/regression/proposers.cy.js'
+const specName = (spec) => basename(spec, '.cy.js')
+// Samples come from the registry, so a deleted Cypress spec cannot break these tests
+const [first, second] = Object.keys(isolatedSpecs).filter(
+  (path, _, all) =>
+    path.startsWith('cypress/e2e/regression/') &&
+    all.filter((other) => specName(other) === specName(path)).length === 1,
+)
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
-  assert.deepEqual(selectCypressSpecs('regression/batch_tx'), [batch])
-  assert.deepEqual(selectCypressSpecs('spaces_basicflow'), ['cypress/e2e/regression/spaces_basicflow.cy.js'])
-  assert.deepEqual(selectCypressSpecs('proposers, regression/batch_tx,proposers'), [proposers, batch])
+  assert.deepEqual(selectCypressSpecs(specName(first)), [first])
+  assert.deepEqual(selectCypressSpecs(`regression/${specName(second)}`), [second])
+  assert.deepEqual(selectCypressSpecs(`${specName(first)}, regression/${specName(second)},${specName(first)}`), [
+    first,
+    second,
+  ])
 })
 
 test('rejects unknown or empty spec selection instead of running staging-dependent specs', () => {
-  for (const selection of ['', '*', 'not_registered_spec', '../proposers', 'proposers,']) {
+  for (const selection of ['', '*', 'not_registered_spec', `../${specName(first)}`, `${specName(first)},`]) {
     assert.throws(() => selectCypressSpecs(selection), /No isolated scenario/)
   }
 })
