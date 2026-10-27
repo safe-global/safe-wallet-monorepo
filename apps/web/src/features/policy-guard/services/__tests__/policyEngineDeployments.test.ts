@@ -10,12 +10,12 @@ describe('policyEngineDeployments', () => {
     expect(getPolicyEngineAddress(chainId, 'ERC20TransferPolicy')).toBe('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187')
   })
 
-  it.each(['100', '11155111', '84532'])('returns the native transfer policy on chain %s', (chainId) => {
-    expect(getPolicyEngineAddress(chainId, 'NativeTransferPolicy')).toBe('0x77d29DEaE811D5E42fbe292d3f2729403e11cA3A')
+  it.each(['1', '137', '11155111'])('returns the indexer-classified native transfer policy on chain %s', (chainId) => {
+    expect(getPolicyEngineAddress(chainId, 'NativeTransferPolicy')).toBe('0x2868C263EBF3672211E4C32e0B21689FF0584ca3')
   })
 
-  it('has no native transfer policy on mainnet', () => {
-    expect(getPolicyEngineAddress('1', 'NativeTransferPolicy')).toBeUndefined()
+  it.each(['100', '84532'])('has no native transfer policy on chain %s, which has no guard', (chainId) => {
+    expect(getPolicyEngineAddress(chainId, 'NativeTransferPolicy')).toBeUndefined()
   })
 
   it('returns undefined for a chain without a deployment', () => {
