@@ -3,12 +3,13 @@ import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERAT
 import { Operation, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { render } from '@/tests/test-utils'
 import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import Summary from '@/components/transactions/TxDetails/Summary'
 import ConfirmationView from '.'
 
 const CHAIN_ID = '11155111'
 
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '11155111' }))
-jest.mock('@/components/transactions/TxDetails/Summary', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/components/transactions/TxDetails/Summary', () => ({ __esModule: true, default: jest.fn(() => null) }))
 
 const moduleAddress = getLatestSpendingLimitAddress(CHAIN_ID)!
 const spender = faker.finance.ethereumAddress()
@@ -80,5 +81,19 @@ describe('ConfirmationView', () => {
     )
 
     expect(queryByTestId('spending-limit-batch-summary')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    [undefined, true],
+    [false, false],
+  ])('passes withMultisend=%s to the summary as showMultisend=%s', (withMultisend, showMultisend) => {
+    render(
+      <ConfirmationView
+        withMultisend={withMultisend}
+        txPreview={preview([action(token, 'transfer', [spender, '1'])])}
+      />,
+    )
+
+    expect(Summary).toHaveBeenLastCalledWith(expect.objectContaining({ showMultisend }), undefined)
   })
 })
