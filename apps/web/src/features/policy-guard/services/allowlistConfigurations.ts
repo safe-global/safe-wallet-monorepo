@@ -2,6 +2,7 @@ import { AbiCoder } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import type { AllowlistRule } from '@/features/spaces'
 import {
   NATIVE_POLICY_UNAVAILABLE_ERROR,
@@ -12,7 +13,7 @@ import { getPolicyEngineAddress } from './policyEngineDeployments'
 
 export const MAX_POLICY_CONFIGURATIONS = 100
 
-const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
+const ERC20_TRANSFER_SELECTOR = ERC20__factory.createInterface().getFunction('transfer').selector
 const NATIVE_TRANSFER_SELECTOR = '0x00000000'
 const PERMISSION_ALWAYS = 2
 
