@@ -1,4 +1,5 @@
 import semverSatisfies from 'semver/functions/satisfies'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 
 export type PolicyEngineContract =
@@ -37,6 +38,9 @@ export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineCo
 
 export const getPolicyGuardAddress = (chainId: string): string | undefined =>
   getPolicyEngineAddress(chainId, 'SafePolicyGuard')
+
+export const isPolicyGuard = (address?: string | null): boolean =>
+  Object.values(POLICY_GUARD_BY_DELAY).some((guard) => sameAddress(guard, address ?? undefined))
 
 export const isSafeVersionSupported = (version?: string | null): boolean =>
   !!version && semverSatisfies(version, `>=${MIN_POLICY_GUARD_SAFE_VERSION}`)
