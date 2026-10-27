@@ -69,4 +69,3 @@ export async function prepareBalancesEndpointsScenario(env, owners) {
   await trustTokens(mainnet, defaultTokens)
   return { safes: { static: safes } }
 }
-
