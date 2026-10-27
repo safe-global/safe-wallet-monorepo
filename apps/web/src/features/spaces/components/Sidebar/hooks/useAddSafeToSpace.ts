@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import { parse, stringify } from 'querystring'
+import { stringify } from 'querystring'
 import { useSpaceSafesCreateV1Mutation, type SpaceSafeDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -14,6 +14,7 @@ import { Errors, logError } from '@/services/exceptions'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 type AddOutcome = 'added' | 'stepUp' | 'failed'
@@ -26,6 +27,7 @@ interface UseAddSafeToSpaceResult {
 /** Adds the current Safe to a Workspace, then opens the Safe in that Workspace. */
 export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
@@ -80,9 +82,8 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     const toAdd = { chainId: chain.chainId, address: safe.address.value }
-    // router.query stays empty until the router is ready, which can be after the user clicks
-    const currentQuery = router.isReady ? router.query : parse(window.location.search.slice(1))
-    const { spaceId: _replaced, ...query } = currentQuery
+    // The Safe comes from safeLinkQuery: router.query is still empty if the user clicks before the router is ready
+    const { spaceId: _replaced, ...query } = { ...router.query, ...safeLinkQuery }
     const spaceQuery = withSpaceId(query, spaceId)
     // A step-up reloads the page, so it returns to this URL instead
     const stepUpReturnUrl = `${router.pathname}?${stringify(spaceQuery)}`
