@@ -2,6 +2,7 @@ import { AbiCoder } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
+  EMPTY_ALLOWLIST_ERROR,
   NATIVE_POLICY_UNAVAILABLE_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -63,6 +64,16 @@ describe('allowlistConfigurations', () => {
   it('throws when a native rule is on a chain without the native policy', () => {
     expect(() => buildAllowlistConfigurations('100', [{ tokenAddress: ZERO_ADDRESS, recipients: [ALICE] }])).toThrow(
       NATIVE_POLICY_UNAVAILABLE_ERROR,
+    )
+  })
+
+  it('throws when there are no rules', () => {
+    expect(() => buildAllowlistConfigurations(CHAIN_ID, [])).toThrow(EMPTY_ALLOWLIST_ERROR)
+  })
+
+  it.each([TOKEN, ZERO_ADDRESS])('throws when a rule for %s has no recipients', (tokenAddress) => {
+    expect(() => buildAllowlistConfigurations(CHAIN_ID, [{ tokenAddress, recipients: [] }])).toThrow(
+      EMPTY_ALLOWLIST_ERROR,
     )
   })
 

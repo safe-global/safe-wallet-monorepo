@@ -1,4 +1,4 @@
-import type { OperationType } from '@safe-global/types-kit'
+import type { MetaTransactionData, OperationType } from '@safe-global/types-kit'
 
 export type PolicyConfiguration = {
   target: string
@@ -6,6 +6,12 @@ export type PolicyConfiguration = {
   operation: OperationType
   policy: string
   data: string
+}
+
+export type AllowlistSetup = {
+  txs: MetaTransactionData[]
+  configurations: PolicyConfiguration[]
+  configureRoot: string
 }
 
 export type GuardSlot = 'transaction' | 'module'

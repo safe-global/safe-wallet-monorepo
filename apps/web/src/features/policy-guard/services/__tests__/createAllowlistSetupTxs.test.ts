@@ -1,7 +1,10 @@
 import { getAddress, Interface } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
-import { GUARD_NOT_SUPPORTED_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import {
+  EMPTY_ALLOWLIST_ERROR,
+  GUARD_NOT_SUPPORTED_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration, PolicyGuardState } from '../../types'
 import { createAllowlistSetupTxs } from '../createAllowlistSetupTxs'
 import { getConfigurationRoot } from '../policyGuardEncoders'
@@ -27,7 +30,7 @@ const configurations: PolicyConfiguration[] = [
 ]
 
 const build = (guardState: PolicyGuardState) =>
-  createAllowlistSetupTxs({ safeAddress, guardAddress, guardState, configurations })
+  createAllowlistSetupTxs({ safeAddress, guardAddress, guardState, configurations }).txs
 
 const describeCalls = (guardState: PolicyGuardState) =>
   build(guardState).map((tx) => ({ to: tx.to, name: iface.parseTransaction({ data: tx.data })?.name }))
@@ -68,6 +71,22 @@ describe('createAllowlistSetupTxs', () => {
     const txs = build({ status: 'partial', missingSlot: 'module' })
     expect(iface.parseTransaction({ data: txs[0].data })?.args[0]).toBe(getConfigurationRoot(configurations))
     expect(iface.parseTransaction({ data: txs[1].data })?.args[0]).toBe(guardAddress)
+  })
+
+  it.each<PolicyGuardState>([{ status: 'none' }, { status: 'known' }, { status: 'partial', missingSlot: 'module' }])(
+    'returns the configurations and their root for $status',
+    (guardState) => {
+      const setup = createAllowlistSetupTxs({ safeAddress, guardAddress, guardState, configurations })
+
+      expect(setup.configurations).toEqual(configurations)
+      expect(setup.configureRoot).toBe(getConfigurationRoot(configurations))
+    },
+  )
+
+  it('throws when there are no configurations', () => {
+    expect(() =>
+      createAllowlistSetupTxs({ safeAddress, guardAddress, guardState: { status: 'none' }, configurations: [] }),
+    ).toThrow(EMPTY_ALLOWLIST_ERROR)
   })
 
   it('throws for a foreign guard', () => {

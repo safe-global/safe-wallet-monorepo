@@ -5,6 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import type { AllowlistRule } from '@/features/spaces'
 import {
+  EMPTY_ALLOWLIST_ERROR,
   NATIVE_POLICY_UNAVAILABLE_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -24,6 +25,10 @@ export const encodeErc20TransferPolicyData = (recipients: string[]): string =>
   )
 
 export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRule[]): PolicyConfiguration[] => {
+  if (rules.length === 0 || rules.some(({ recipients }) => recipients.length === 0)) {
+    throw new Error(EMPTY_ALLOWLIST_ERROR)
+  }
+
   const configurations = rules.flatMap(({ tokenAddress, recipients }): PolicyConfiguration[] => {
     if (sameAddress(tokenAddress, ZERO_ADDRESS)) {
       const policy = getPolicyEngineAddress(chainId, 'NativeTransferPolicy')
