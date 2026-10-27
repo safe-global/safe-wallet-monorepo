@@ -45,10 +45,11 @@ const {
 const { createAllowlistSetupTxs }: Pick<PolicyGuardContract, 'createAllowlistSetupTxs'> = jest.requireActual(
   '@/features/policy-guard/services/createAllowlistSetupTxs',
 )
-const { decodeErc20TransferPolicyData: mockDecodeRecipients }: Pick<
-  PolicyGuardContract,
-  'decodeErc20TransferPolicyData'
-> = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
+const {
+  decodeErc20TransferPolicyData: mockDecodeRecipients,
+}: Pick<PolicyGuardContract, 'decodeErc20TransferPolicyData'> = jest.requireActual(
+  '@/features/policy-guard/services/allowlistConfigurations',
+)
 const { describeSetupCall: mockDescribeSetupCall }: Pick<PolicyGuardContract, 'describeSetupCall'> = jest.requireActual(
   '@/features/policy-guard/services/policyGuardEncoders',
 )
@@ -74,7 +75,11 @@ jest.mock('@/features/__core__', () => {
     ...actual,
     useLoadFeature: (handle: { name: string }) =>
       handle.name === 'policy-guard'
-        ? { $isReady: true, describeSetupCall: mockDescribeSetupCall, decodeErc20TransferPolicyData: mockDecodeRecipients }
+        ? {
+            $isReady: true,
+            describeSetupCall: mockDescribeSetupCall,
+            decodeErc20TransferPolicyData: mockDecodeRecipients,
+          }
         : actual.useLoadFeature(handle),
   }
 })
