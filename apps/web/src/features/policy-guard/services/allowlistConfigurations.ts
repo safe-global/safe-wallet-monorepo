@@ -31,6 +31,11 @@ const requirePolicy = (chainId: string, contract: PolicyEngineContract): string 
   return policy
 }
 
+export const decodeErc20TransferPolicyData = (data: string): string[] => {
+  const [entries] = AbiCoder.defaultAbiCoder().decode(['tuple(address recipient, uint8 permission)[]'], data)
+  return entries.map(({ recipient }: { recipient: string }) => recipient)
+}
+
 export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRule[]): PolicyConfiguration[] => {
   if (rules.length === 0 || rules.some(({ recipients }) => recipients.length === 0)) {
     throw new Error(EMPTY_ALLOWLIST_ERROR)

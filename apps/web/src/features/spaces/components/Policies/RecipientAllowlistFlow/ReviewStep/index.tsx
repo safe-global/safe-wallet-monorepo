@@ -47,7 +47,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const addressBook = useMergedAddressBooks(chainId)
   const { safe } = useSafeInfo()
   const wallet = useWallet()
-  const { describeSetupCall } = useLoadFeature(PolicyGuardFeature)
+  const { describeSetupCall, decodeErc20TransferPolicyData } = useLoadFeature(PolicyGuardFeature)
 
   const rules = useMemo(() => data?.rules ?? [], [data?.rules])
   const { guardState, configurations, calls } = useBuildAllowlistTransaction(rules)
@@ -161,13 +161,13 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
       {children}
 
-      {chainId && calls && configurations && describeSetupCall && (
+      {chainId && calls && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
         <AllowlistSetupActions
           chainId={chainId}
           calls={calls}
           configurations={configurations}
-          rules={rules}
           describeCall={describeSetupCall}
+          decodeRecipients={decodeErc20TransferPolicyData}
           getAddressInfo={getAddressInfo}
         />
       )}

@@ -20,7 +20,6 @@ import {
   RULE_RECIPIENTS_LABEL,
   RULE_TARGET_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { AllowlistRule } from '../types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import MethodCall from '@/components/transactions/TxDetails/TxData/DecodedData/MethodCall'
@@ -35,8 +34,8 @@ type AllowlistSetupActionsProps = {
   chainId: string
   calls: MetaTransactionData[]
   configurations: PolicyConfiguration[]
-  rules: AllowlistRule[]
   describeCall: (call: MetaTransactionData) => SetupCallDescription | undefined
+  decodeRecipients: (data: string) => string[]
   getAddressInfo: (address: string) => AddressInfo
 }
 
@@ -98,14 +97,14 @@ const PolicyRuleRows = ({
   index,
   count,
   isNative,
-  recipients,
+  decodeRecipients,
   getAddressInfo,
 }: {
   configuration: PolicyConfiguration
   index: number
   count: number
   isNative: boolean
-  recipients: string[]
+  decodeRecipients: (data: string) => string[]
   getAddressInfo: (address: string) => AddressInfo
 }): ReactElement => (
   <div className="flex flex-col gap-1.5" data-testid="allowlist-rule">
@@ -133,7 +132,7 @@ const PolicyRuleRows = ({
     {!isNative && (
       <TxDataRow title={RULE_RECIPIENTS_LABEL}>
         <div className="flex flex-col gap-1">
-          {recipients.map((address) => (
+          {decodeRecipients(configuration.data).map((address) => (
             <RuleAddress key={address} address={address} info={getAddressInfo(address)} />
           ))}
         </div>
@@ -147,8 +146,8 @@ const AllowlistSetupActions = ({
   chainId,
   calls,
   configurations,
-  rules,
   describeCall,
+  decodeRecipients,
   getAddressInfo,
 }: AllowlistSetupActionsProps): ReactElement => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
@@ -188,10 +187,7 @@ const AllowlistSetupActions = ({
                             index={ruleIndex}
                             count={configurations.length}
                             isNative={!!nativePolicy && sameAddress(configuration.policy, nativePolicy)}
-                            recipients={
-                              rules.find(({ tokenAddress }) => sameAddress(tokenAddress, configuration.target))
-                                ?.recipients ?? []
-                            }
+                            decodeRecipients={decodeRecipients}
                             getAddressInfo={getAddressInfo}
                           />
                         ))}
