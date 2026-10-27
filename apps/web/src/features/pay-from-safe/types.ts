@@ -32,7 +32,15 @@ export type FeePayerControl =
 
 /** The strip under the fee rows: the Pro upsell on the free plan, the sponsored counter on Pro. */
 export type FeePayerFooter =
-  { kind: 'upsell' } | { kind: 'counter'; left: number | null; quota: number | null; resetsAt: string | null }
+  | { kind: 'upsell' }
+  | {
+      kind: 'counter'
+      left: number | null
+      quota: number | null
+      resetsAt: string | null
+      /** A plan's allowance per cycle (Pro), or the chain's free daily limit. */
+      isSubscription: boolean
+    }
 
 /**
  * One screen of the fee card (design "Fee payment"): who pays and in which token, the Execution and

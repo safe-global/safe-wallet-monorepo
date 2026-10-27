@@ -310,8 +310,8 @@ const GasPayerSelector = ({
               left={footer.left}
               quota={footer.quota}
               resetsAt={footer.resetsAt}
-              isSubscription
-              isPro
+              isSubscription={footer.isSubscription}
+              isPro={footer.isSubscription}
             />
           )}
         </div>

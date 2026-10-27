@@ -203,10 +203,34 @@ export const useGasPayerSelection = ({
         ? fees.totalOutgoing
         : fees.totalOutgoing && { ...fees.totalOutgoing, fees: undefined }
 
+    // At execution the offer is the truth (it already accounts for a quota used up since signing);
+    // at signing there is none, so the Workspace's meter stands in.
     const footer: FeePayerFooter =
-      planState === 'FREE'
-        ? { kind: 'upsell' }
-        : { kind: 'counter', left, quota: meter?.quota ?? null, resetsAt: meter?.resetsAt ?? null }
+      offer?.option === 'SUBSCRIPTION'
+        ? {
+            kind: 'counter',
+            left: offer.left,
+            quota: offer.meter?.quota ?? null,
+            resetsAt: offer.meter?.resetsAt ?? null,
+            isSubscription: true,
+          }
+        : offer?.option === 'FREE_DAILY_LIMIT'
+          ? {
+              kind: 'counter',
+              left: offer.relays?.remaining ?? null,
+              quota: offer.relays?.limit ?? null,
+              resetsAt: null,
+              isSubscription: false,
+            }
+          : planState === 'FREE'
+            ? { kind: 'upsell' }
+            : {
+                kind: 'counter',
+                left,
+                quota: meter?.quota ?? null,
+                resetsAt: meter?.resetsAt ?? null,
+                isSubscription: true,
+              }
 
     return {
       payer,

@@ -39,6 +39,7 @@ const pro = (left: number): FeePayerView['footer'] => ({
   left,
   quota: 50,
   resetsAt: '2026-11-11T00:00:00Z',
+  isSubscription: true,
 })
 const safeTokens = {
   tokens: [ETH, USDC_TOKEN],
@@ -269,7 +270,7 @@ export const ExecuteProUnlimited: Story = {
       gasFee: signerFee,
       sponsored: true,
       totalOutgoing: outgoing(false),
-      footer: { kind: 'counter', left: null, quota: null, resetsAt: null },
+      footer: { kind: 'counter', left: null, quota: null, resetsAt: null, isSubscription: true },
     },
   },
 }
