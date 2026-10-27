@@ -14,6 +14,10 @@ export class HomePage {
   readonly sidebar: Locator
   readonly safeHeaderInfo: Locator
   readonly connectWalletBtn: Locator
+  /** Total balance and the Send / Receive / Swap actions */
+  readonly overviewWidget: Locator
+  readonly overviewSendBtn: Locator
+  readonly overviewReceiveBtn: Locator
   readonly pendingTxWidget: Locator
   /** One row per nonce, each a link to the transaction */
   readonly pendingTxRows: Locator
@@ -27,6 +31,9 @@ export class HomePage {
     this.sidebar = page.getByRole('navigation')
     this.safeHeaderInfo = page.getByTestId('safe-header-info')
     this.connectWalletBtn = page.getByTestId('connect-wallet-btn')
+    this.overviewWidget = page.getByTestId('overview-widget')
+    this.overviewSendBtn = this.overviewWidget.getByRole('button', { name: 'Send' })
+    this.overviewReceiveBtn = this.overviewWidget.getByRole('button', { name: 'Receive' })
     this.pendingTxWidget = page.getByTestId('pending-tx-widget')
     this.pendingTxRows = this.pendingTxWidget.getByTestId('tx-pending-item')
     this.viewAllLink = page.getByRole('link', { name: /view all/i })

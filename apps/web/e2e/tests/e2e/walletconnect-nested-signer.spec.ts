@@ -75,6 +75,8 @@ const test = base.extend<NestedSignerFixtures>({
     const parentWalletConnect = new WalletConnectPage(safePage)
     await parentWalletConnect.pair(uri)
     await parentWalletConnect.approveButton.click()
+    // A reload before the child has the session leaves it without a wallet: the app reconnects only a saved one
+    await expect(new WalletPage(childPage).accountCenter).toContainText(short(parent.address))
 
     await provide({ parent, child })
   },

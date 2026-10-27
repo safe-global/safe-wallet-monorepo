@@ -10,7 +10,6 @@ Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cyp
 cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.page*.js)
-│   ├── smoke/          # Functional smoke tests (CI on every PR)
 │   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
 │   └── safe-apps/      # Safe Apps tests
@@ -23,11 +22,10 @@ cypress/
 
 | Category   | Folder            | CI trigger                           | Naming                    |
 | ---------- | ----------------- | ------------------------------------ | ------------------------- |
-| Smoke      | `e2e/smoke/`      | Every PR                             | `[SMOKE] Verify ...`      |
 | Visual     | `e2e/visual/`     | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
 | Regression | `e2e/regression/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+The PR smoke gate is Playwright `@smoke` (`web-pw-smoke.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)); on PRs, Cypress specs run only through the isolated job (`web-isolated-e2e-backend.yml`, registry in `e2e/environment/specs.mjs`). The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
 
 CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
