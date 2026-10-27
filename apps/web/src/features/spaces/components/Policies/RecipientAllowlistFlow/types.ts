@@ -1,3 +1,5 @@
+import type { AllowlistRule } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+
 export type AllowlistFormRecipient = {
   address: string
   name?: string
@@ -19,7 +21,6 @@ export const createDefaultAllowlistValues = (): RecipientAllowlistFormValues => 
   recipients: [],
 })
 
-/** `tokenAddress` is `ZERO_ADDRESS` for the native currency. */
-export type AllowlistRule = { tokenAddress: string; recipients: string[] }
+export type { AllowlistRule }
 
 export type RecipientAllowlistFlowData = RecipientAllowlistFormValues & { rules: AllowlistRule[] }

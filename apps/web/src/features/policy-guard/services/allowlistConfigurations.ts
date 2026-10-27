@@ -2,7 +2,7 @@ import { AbiCoder } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllowlistRule } from '@/features/spaces/components/Policies/RecipientAllowlistFlow/types'
+import type { AllowlistRule } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import {
   NATIVE_POLICY_UNAVAILABLE_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
