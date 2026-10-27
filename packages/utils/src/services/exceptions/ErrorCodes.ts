@@ -53,6 +53,7 @@ enum ErrorCodes {
   _653 = '653: Error reading the Safe module guard',
   _654 = '654: Error loading the module guard reader',
   _655 = '655: Error saving an allowlist configuration request',
+  _656 = '656: Error simulating the policy guard check',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',
