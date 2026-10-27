@@ -217,17 +217,47 @@ jobs:
             ## Branch preview
             ❌  Deploy failed!
 
-  # Datadog DORA deployment event for the dev and staging deploys (not PR previews).
-  # Production is sent from safe-production-promotions.
+  # Datadog DORA deployment event for the dev and staging deploys (not PR previews),
+  # with the run commit so Datadog can compute change lead time. Production is sent
+  # from safe-production-promotions. Inline because this repo is public and cannot
+  # call the private reusable workflows. Best-effort: a failure only warns.
   dora:
     needs: deploy
     if: github.event_name == 'push' && needs.deploy.result == 'success'
-    uses: safe-global/github-reusable-workflows/.github/workflows/_dora-deployment.yml@6ce19196ac4b69fa23a81241ef61770b8f95c7a0 # v2.4.55
+    runs-on: ubuntu-latest
     permissions:
       actions: read
-    with:
-      service: safe-wallet-web
-      env: ${{ github.ref_name == 'main' && 'staging' || 'dev' }}
-      version: ${{ github.sha }}
-    secrets:
-      dd_api_key: ${{ secrets.DD_API_KEY_DORA }}
+    steps:
+      - name: Send DORA deployment event
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY_DORA }}
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_ENV: ${{ github.ref_name == 'main' && 'staging' || 'dev' }}
+          JOBS_API: repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
+          REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -uo pipefail
+          [ -n "$DD_API_KEY" ] || { echo "::warning::DD_API_KEY_DORA is not available, DORA event not sent"; exit 0; }
+          FINISHED_AT=$(date +%s)
+          # The deploy started when the first job of this run attempt started.
+          STARTED_AT=$(gh api --paginate "$JOBS_API" --jq '.jobs[] | select(.status == "completed" and .started_at != null) | .started_at | fromdateiso8601' 2>/dev/null | sort -n | head -1)
+          [[ "$STARTED_AT" =~ ^[0-9]+$ ]] && [ "$STARTED_AT" -lt "$FINISHED_AT" ] || STARTED_AT=$((FINISHED_AT - 1))
+          BODY=$(jq -n \
+            --arg env "$DEPLOY_ENV" --arg sha "$COMMIT_SHA" --arg repo "$REPOSITORY_URL" \
+            --argjson started "$STARTED_AT" --argjson finished "$FINISHED_AT" \
+            '{data: {attributes: {
+              service: "safe-wallet-web", env: $env, version: $sha,
+              started_at: ($started * 1000000000), finished_at: ($finished * 1000000000),
+              git: {repository_url: $repo, commit_sha: $sha}
+            }}}')
+          STATUS=$(curl -sS -o "${RUNNER_TEMP}/dora-response.json" -w '%{http_code}' \
+            --retry 3 --retry-all-errors --max-time 30 \
+            -X POST "https://api.datadoghq.eu/api/v2/dora/deployment" \
+            -H "Content-Type: application/json" \
+            -H @<(printf 'DD-API-KEY: %s\n' "$DD_API_KEY") \
+            -d "$BODY") || STATUS=000
+          case "$STATUS" in
+            200|202) echo "DORA deployment sent: $(jq -r '.data.id // ""' "${RUNNER_TEMP}/dora-response.json")" ;;
+            *) echo "::warning::Datadog DORA API answered ${STATUS}: $(head -c 500 "${RUNNER_TEMP}/dora-response.json" 2>/dev/null)" ;;
+          esac
