@@ -42,7 +42,7 @@ jest.mock('@/components/common/EthHashInfo', () => {
   )
   return EthHashInfo
 })
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = ({ address }: { address: string }) => <span data-testid="identicon" data-address={address} />
   return Identicon
 })

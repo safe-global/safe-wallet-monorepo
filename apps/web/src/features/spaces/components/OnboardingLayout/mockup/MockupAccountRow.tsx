@@ -1,4 +1,4 @@
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
