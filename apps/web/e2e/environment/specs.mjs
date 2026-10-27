@@ -11,7 +11,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/address_book.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/balances_pagination.cy.js': { scenario: 'preparePaginationScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
   'cypress/e2e/regression/copilot.cy.js': {
     scenario: 'prepareCopilotScenario',
@@ -71,7 +70,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },
   // The swap widgets screen recipients against the Chainalysis sanctions oracle on Ethereum.
   'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
-  'cypress/e2e/regression/tokens.cy.js': { scenario: 'prepareAssetsScenario' },
   'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
   'cypress/e2e/regression/twaps_integration.cy.js': {
     scenario: 'prepareTwapWidgetScenario',

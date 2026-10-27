@@ -1,5 +1,4 @@
 import { readFile } from 'node:fs/promises'
-import { prepareAssetsScenario } from './assets.mjs'
 import { prepareBasicScenario } from './basic.mjs'
 import { openSafe, proposeTransaction } from './safe.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
@@ -53,10 +52,4 @@ export async function prepareSafeSelectorScenario(env, owners) {
       'sidebar.pendingSafeShort': short(addressOf(safes.SEP_STATIC_SAFE_7)),
     },
   }
-}
-
-export async function preparePaginationScenario(env, owners) {
-  // 27 tokens and the native balance fill the 28 rows the spec pages through.
-  const { safes } = await prepareAssetsScenario(env, owners, 27)
-  return { safes: { static: {} }, fixtures: { 'pagination.safe': safes.static.SEP_STATIC_SAFE_2 } }
 }
