@@ -7,9 +7,8 @@ const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepol
  * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareAddressBookHistoryScenario' },
+  'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/address_book.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
   'cypress/e2e/regression/copilot.cy.js': {
     scenario: 'prepareCopilotScenario',
@@ -37,7 +36,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/create_tx_2.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/create_tx.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
-  'cypress/e2e/regression/import_export_data_2.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/multichain_create_safe_flow.cy.js': { scenario: 'prepareBasicScenario', chains: [137] },
