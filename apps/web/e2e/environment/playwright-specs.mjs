@@ -76,6 +76,10 @@ export const playwrightSpecs = {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
   },
+  'regression/wallet-reconnect.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_STATIC_SAFE_2: 'SEP_STATIC_SAFE_0' },
+  },
   'regression/auth0/step-up-billing.spec.ts': {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
