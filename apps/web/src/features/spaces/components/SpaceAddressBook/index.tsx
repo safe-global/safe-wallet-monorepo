@@ -28,6 +28,7 @@ import AddLocalContact from './AddLocalContact'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import PendingRequestsTable from './PendingRequestsTable'
 import ImportAddressBook from './Import'
+import LocalContactsCsvActions from './LocalContactsCsvActions'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
@@ -171,7 +172,12 @@ const SpaceAddressBook = () => {
                       <ImportAddressBook />
                     </>
                   )}
-                  {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
+                  {isPrivateAddressBookEnabled && activeTab === 'mine' && (
+                    <>
+                      <AddLocalContact />
+                      <LocalContactsCsvActions hasContacts={sortedLocalContacts.length > 0} />
+                    </>
+                  )}
                 </div>
               ) : null}
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
