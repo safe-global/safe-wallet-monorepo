@@ -1,4 +1,5 @@
 import { act, render, screen, fireEvent } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
 const mockUseIsMobile = jest.fn(() => false)
@@ -372,6 +373,89 @@ describe('PaginatedDataTable', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
 
       expect(screen.getByText('detail-a')).toBeInTheDocument()
+      expect(onRowClick).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('selection', () => {
+    const makeKeys = (count: number) => Array.from({ length: count }, () => faker.string.uuid())
+
+    const selectableTable = (
+      rows: string[],
+      props: Partial<React.ComponentProps<typeof PaginatedDataTable<string>>> = {},
+    ) => (
+      <PaginatedDataTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row}
+        selectable
+        getSelectionLabel={(row) => `Select ${row}`}
+        {...props}
+      />
+    )
+
+    it('renders no checkboxes unless selectable', () => {
+      const rows = makeKeys(2)
+
+      render(<PaginatedDataTable columns={columns} rows={rows} getRowKey={(row) => row} />)
+
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    })
+
+    it('reports the toggled row key through onSelectionChange', () => {
+      const rows = makeKeys(3)
+      const onSelectionChange = jest.fn()
+
+      render(selectableTable(rows, { selectedKeys: new Set(), onSelectionChange }))
+      fireEvent.click(screen.getByRole('checkbox', { name: `Select ${rows[1]}` }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set([rows[1]]))
+    })
+
+    it('selects only the current page from the header checkbox', () => {
+      const rows = makeKeys(30)
+      const onSelectionChange = jest.fn()
+
+      render(selectableTable(rows, { pageSize: 25, selectedKeys: new Set(), onSelectionChange }))
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select all rows on this page' }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set(rows.slice(0, 25)))
+    })
+
+    it('clears the page when every row on it is selected', () => {
+      const rows = makeKeys(3)
+      const onSelectionChange = jest.fn()
+
+      render(selectableTable(rows, { selectedKeys: new Set(rows), onSelectionChange }))
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Deselect all rows on this page' }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set())
+    })
+
+    it('disables rows that isRowSelectable rejects and skips them in the header toggle', () => {
+      const rows = makeKeys(3)
+      const onSelectionChange = jest.fn()
+
+      render(
+        selectableTable(rows, {
+          selectedKeys: new Set(),
+          onSelectionChange,
+          isRowSelectable: (row) => row !== rows[0],
+        }),
+      )
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select all rows on this page' }))
+
+      expect(screen.getByRole('checkbox', { name: `Select ${rows[0]}` })).toHaveAttribute('aria-disabled', 'true')
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set([rows[1], rows[2]]))
+    })
+
+    it('does not fire onRowClick when a checkbox is clicked', () => {
+      const rows = makeKeys(2)
+      const onRowClick = jest.fn()
+
+      render(selectableTable(rows, { selectedKeys: new Set(), onSelectionChange: jest.fn(), onRowClick }))
+      fireEvent.click(screen.getByRole('checkbox', { name: `Select ${rows[0]}` }))
+
       expect(onRowClick).not.toHaveBeenCalled()
     })
   })
