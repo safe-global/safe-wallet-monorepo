@@ -51,7 +51,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const { describeSetupCall, decodeErc20TransferPolicyData } = useLoadFeature(PolicyGuardFeature)
 
   const rules = useMemo(() => data?.rules ?? [], [data?.rules])
-  const { guardState, configurations, configureRoot, calls } = useBuildAllowlistTransaction(rules)
+  const { guardState, configurations, root, calls } = useBuildAllowlistTransaction(rules)
 
   const { save, isSaving } = useSaveAllowlistConfiguration()
   const { setIsSubmitLoading, setIsSubmitDisabled } = useContext(TxFlowContext)
@@ -74,10 +74,10 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const handleSubmit = useCallback<SubmitCallback>(
     async (args) => {
-      if (!configurations || !configureRoot) return
-      if (await save({ configurations, configureRoot })) onSubmit(args)
+      if (!configurations || !root) return
+      if (await save({ configurations, root })) onSubmit(args)
     },
-    [configurations, configureRoot, save, onSubmit],
+    [configurations, root, save, onSubmit],
   )
 
   const selected = findSafeAccount(accounts, scope?.scopeKey)
