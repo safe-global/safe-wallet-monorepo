@@ -253,7 +253,11 @@ describe('useSafenetCheck', () => {
     it('polls an open dispute every 5 minutes, not at the fast rate its far-off deadline would give', () => {
       mockQuery.mockReturnValue(
         queryResult({
-          data: buildSnapshot({ status: CheckStatus.DISPUTED, headBlock: '48838950', deadlineBlock: '49322741' }),
+          currentData: buildSnapshot({
+            status: CheckStatus.DISPUTED,
+            headBlock: '48838950',
+            deadlineBlock: '49322741',
+          }),
         }),
       )
 
