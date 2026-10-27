@@ -91,7 +91,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const { hasProFeatures: hasProAccess, isSafePro } = useSafeProAccess()
   const scopeContext = useSafeScopeContext()
   // A Workspace-level flow picks its Safe in step 1; until then nothing can be checked, so nothing is locked.
-  const hasProFeatures = hasProAccess || (!!scopeContext && !scopeContext.scope)
+  const isPickingSafe = scopeContext !== undefined && scopeContext.scope === undefined
+  const hasProFeatures = hasProAccess || isPickingSafe
   const recipientOnlyAnalysis = useRecipientAnalysis(hasProFeatures ? recipientAddresses : undefined)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx, hasProFeatures)
   const [{ token: hypernativeAuthToken }] = useAuthToken()
