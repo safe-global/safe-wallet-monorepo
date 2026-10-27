@@ -74,7 +74,15 @@ const PayerChoice = ({
   <DropdownMenu>
     <DropdownMenuTrigger
       data-testid="fee-payer-selector"
-      render={<div role="button" tabIndex={0} className={cn(feesCss.paymentSourceSelector, css.payerPill)} />}
+      render={
+        <div
+          role="button"
+          tabIndex={0}
+          className={cn(feesCss.paymentSourceSelector, css.payerPill)}
+          // Inline: `.paymentSourceSelector` fixes a width and CSS-module order decides which rule wins.
+          style={{ width: 'auto' }}
+        />
+      }
     >
       <PillLabel>{PAYER_LABEL[value]}</PillLabel>
       <ChevronDown className={feesCss.selectorCaret} />
@@ -102,6 +110,7 @@ const LockedPill = ({ children, tooltip }: { children: ReactNode; tooltip: strin
       render={
         <div
           className={cn(feesCss.paymentSourceSelector, feesCss.gasTokenSelectorLocked, css.payerPill)}
+          style={{ width: 'auto' }}
           data-testid="fee-payer-locked"
         />
       }

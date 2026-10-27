@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Lock } from 'lucide-react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
@@ -131,10 +131,17 @@ export const GasTokenSelector = ({
   // is nothing to choose and an interactive control would imply otherwise.
   if (locked) {
     return (
-      <div className={cn(css.gasTokenSelector, css.gasTokenSelectorLocked)} data-testid="gas-token-selector">
-        {display}
-        <SignerFeeTooltip text={lockedTooltip} />
-      </div>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <div className={cn(css.gasTokenSelector, css.gasTokenSelectorLocked)} data-testid="gas-token-selector" />
+          }
+        >
+          {display}
+          <Lock className={css.lockIcon} aria-label={lockedTooltip ?? SIGNER_FEE_TOOLTIP} />
+        </TooltipTrigger>
+        <TooltipContent side="top">{lockedTooltip ?? SIGNER_FEE_TOOLTIP}</TooltipContent>
+      </Tooltip>
     )
   }
 

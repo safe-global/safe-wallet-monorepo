@@ -95,6 +95,14 @@
 
 .gasTokenSelectorLocked {
   cursor: default;
+  padding-right: 8px;
+}
+
+.lockIcon {
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+  color: var(--color-text-secondary);
 }
 
 .selectorPopoverPaper:global(.MuiPaper-root) {
