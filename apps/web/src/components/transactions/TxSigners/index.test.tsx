@@ -770,7 +770,7 @@ describe('TxSigners (Audit Log)', () => {
         isStale: false,
         refetch: jest.fn(),
       })
-      // The Safenet chain's explorer builds the attestation link.
+      // A configured block explorer must not replace the Safenet explorer link.
       useChain.mockReturnValue({
         blockExplorerUriTemplate: {
           txHash: 'https://gnosisscan.io/tx/{{txHash}}',
@@ -784,7 +784,7 @@ describe('TxSigners (Audit Log)', () => {
 
       // The feature loads lazily — the step appears once the chunk resolves.
       // Cold CI runners can take seconds to transform the chunk's module graph.
-      await waitFor(() => expect(screen.getByTestId('safenet-attestation-link')).toHaveTextContent('Safenet'), {
+      await waitFor(() => expect(screen.getByTestId('safenet-explorer-link')).toHaveTextContent('Safenet'), {
         timeout: 10_000,
       })
       expect(screen.getByText('No issues found')).toBeInTheDocument()
@@ -794,9 +794,9 @@ describe('TxSigners (Audit Log)', () => {
         1_700_000_000_000,
         expect.objectContaining({ chainId: expect.any(String) }),
       )
-      expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
+      expect(screen.getByTestId('safenet-explorer-link')).toHaveAttribute(
         'href',
-        `https://gnosisscan.io/tx/${attested.transactionHash}`,
+        expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`),
       )
     }, 15_000)
 
