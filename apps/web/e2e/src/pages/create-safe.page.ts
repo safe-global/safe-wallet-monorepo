@@ -11,8 +11,13 @@ const DEPLOYMENT_TIMEOUT_MS = 120_000
 // The relay option waits for the owners' relays, which a fork under load can take long to read
 const RELAYS_LOAD_TIMEOUT_MS = 60_000
 
+/** Signers besides the connected wallet and the threshold; without them the wallet is the only owner, threshold 1 */
+type SignerSetup = { owners?: string[]; threshold?: number }
+
 export class CreateSafePage {
   readonly nextButton: Locator
+  readonly addSignerButton: Locator
+  readonly thresholdSelector: Locator
   readonly signInToWorkspaceButton: Locator
   readonly reviewNextButton: Locator
   readonly letsGoButton: Locator
@@ -26,6 +31,8 @@ export class CreateSafePage {
 
   constructor(private readonly page: Page) {
     this.nextButton = page.getByTestId('next-btn')
+    this.addSignerButton = page.getByTestId('add-new-signer')
+    this.thresholdSelector = page.getByTestId('threshold-selector')
     this.signInToWorkspaceButton = page.getByTestId('sign-in-to-workspace-btn')
     this.reviewNextButton = page.getByTestId('review-step-next-btn')
     this.letsGoButton = page.getByTestId('cf-creation-lets-go-btn')
@@ -46,9 +53,10 @@ export class CreateSafePage {
     return this.finishPayLaterCreation()
   }
 
-  /** From the name step: keep the defaults, sign in to a Workspace and create the Safe as pay-later */
-  private async finishPayLaterCreation(): Promise<string> {
+  /** From the name step: set the signers, sign in to a Workspace and create the Safe as pay-later */
+  private async finishPayLaterCreation(signers: SignerSetup = {}): Promise<string> {
     await this.nextButton.click()
+    await this.setSigners(signers)
     await this.nextButton.click()
     // A pay-later Safe needs a Workspace session
     await this.signInToWorkspaceButton.click()
@@ -59,11 +67,23 @@ export class CreateSafePage {
     return new URL(this.page.url()).searchParams.get('safe')!.split(':')[1]
   }
 
+  /** On the signers step: add each of `owners` after the connected wallet and pick `threshold` */
+  private async setSigners({ owners = [], threshold }: SignerSetup): Promise<void> {
+    for (const owner of owners) {
+      await this.addSignerButton.click()
+      await this.page.getByTestId('address-book-input').last().getByRole('combobox').fill(owner)
+    }
+    if (threshold) {
+      await this.thresholdSelector.click()
+      await this.page.getByRole('option', { name: String(threshold), exact: true }).click()
+    }
+  }
+
   /**
-   * Create a pay-later Safe on several networks, e.g. ['Sepolia', 'Ethereum', 'Polygon'], with the connected wallet
-   * as the only owner. The first network is the one whose dashboard opens. Returns the address of the new Safe.
+   * Create a pay-later Safe on several networks, e.g. ['Sepolia', 'Ethereum', 'Polygon']. The connected wallet is
+   * the first owner. The first network is the one whose dashboard opens. Returns the address of the new Safe.
    */
-  async createMultichainPayLaterSafe(networks: string[]): Promise<string> {
+  async createMultichainPayLaterSafe(networks: string[], signers: SignerSetup = {}): Promise<string> {
     await this.page.goto('/new-safe/create?chain=sep')
     await this.removeNetworkIcon.first().click()
     for (const network of networks) {
@@ -75,7 +95,7 @@ export class CreateSafePage {
         .click()
     }
     await this.page.getByText('Your Safe account preview').click()
-    return this.finishPayLaterCreation()
+    return this.finishPayLaterCreation(signers)
   }
 
   /**

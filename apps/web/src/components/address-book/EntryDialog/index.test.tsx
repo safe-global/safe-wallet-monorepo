@@ -110,12 +110,12 @@ describe('EntryDialog scope', () => {
     ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(upsertWorkspaceName)
   })
 
-  const renderDialog = (scope?: 'local' | 'workspace') =>
+  const renderDialog = (scope?: 'local' | 'workspace', chainIds = ['1']) =>
     render(
       <EntryDialog
         handleClose={jest.fn()}
         scope={scope}
-        chainIds={['1']}
+        chainIds={chainIds}
         defaultValues={{ name: 'Old name', address: ADDRESS }}
         disableAddressInput
       />,
@@ -145,6 +145,16 @@ describe('EntryDialog scope', () => {
 
     await waitFor(() => expect(spy).toHaveBeenCalled())
     expect(upsertWorkspaceName).not.toHaveBeenCalled()
+  })
+
+  it('names the Safe on every given network in the local address book', async () => {
+    renderDialog(undefined, ['1', '137'])
+    await save('Treasury')
+
+    await waitFor(() => {
+      const { addressBook } = getStoreInstance().getState()
+      expect([addressBook['1']?.[ADDRESS], addressBook['137']?.[ADDRESS]]).toEqual(['Treasury', 'Treasury'])
+    })
   })
 
   it('names the workspace it is about to write to, and stays silent for a local write', () => {

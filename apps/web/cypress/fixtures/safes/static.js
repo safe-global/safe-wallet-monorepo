@@ -30,8 +30,6 @@ export default {
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
   /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js, create_tx.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Sidebar non-owner testing */
-  SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
