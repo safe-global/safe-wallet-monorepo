@@ -7,14 +7,15 @@ import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type {
+  PendingAllowlistPolicy,
   PendingSpendingLimitPolicy,
   QueuedSpendingLimitPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction } from './usePendingPolicyTransaction'
 
-export type PendingSpendingLimitActions = {
-  policy: QueuedSpendingLimitPolicy
+export type PendingPolicyActions<T extends PendingSpendingLimitPolicy | PendingAllowlistPolicy> = {
+  policy: T & { status: 'pending' }
   viewer: Viewer
   /** Undefined until the chain configs have loaded. */
   transactionLink?: string
@@ -23,11 +24,16 @@ export type PendingSpendingLimitActions = {
   outcome?: PendingTxOutcome
 }
 
-export const usePendingSpendingLimitActions = (
-  policy: PendingSpendingLimitPolicy,
+export type PendingSpendingLimitActions = PendingPolicyActions<PendingSpendingLimitPolicy> & {
+  policy: QueuedSpendingLimitPolicy
+}
+
+/** The queued transaction's links and fresh signatures, for any policy drawer that recycles the pending panel. */
+export const usePendingPolicyActions = <T extends PendingSpendingLimitPolicy | PendingAllowlistPolicy>(
+  policy: T,
   viewer: Viewer,
   isUnlisted = false,
-): PendingSpendingLimitActions => {
+): PendingPolicyActions<T> => {
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
   const chain = useChain(chainId)
@@ -60,3 +66,9 @@ export const usePendingSpendingLimitActions = (
     outcome: resolvedOutcome,
   }
 }
+
+export const usePendingSpendingLimitActions = (
+  policy: PendingSpendingLimitPolicy,
+  viewer: Viewer,
+  isUnlisted = false,
+): PendingSpendingLimitActions => usePendingPolicyActions(policy, viewer, isUnlisted)

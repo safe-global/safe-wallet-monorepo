@@ -5,12 +5,14 @@ import type {
   PendingDelayedGuardPoliciesDto,
   PolicyConfigurationDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type {
-  AllowlistEntry,
-  AllowlistPolicyData,
-  AllowlistRecipient,
-  PolicyTokenInfo,
-  QueuedAllowlistPolicy,
+import {
+  isActiveAllowlistPolicy,
+  type AllowlistEntry,
+  type AllowlistPolicyData,
+  type AllowlistRecipient,
+  type Policy,
+  type PolicyTokenInfo,
+  type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
@@ -116,3 +118,48 @@ export const getApplyAllowlistRequest = (dto: PendingDelayedGuardPoliciesDto): A
         configurations: dto.configurations,
       }
     : undefined
+
+export type MergedDelayedGuardRequests = {
+  /** The active rows, with a waiting or expired request folded into the Safe's live allowlist as an `update`. */
+  active: Policy[]
+  /** Rows of their own: a first allowlist waiting for its apply, or any queued apply. */
+  added: Policy[]
+  /** What the apply flow replays, keyed by the row id that offers it. */
+  applyRequests: ReadonlyMap<string, ApplyAllowlistFlowData>
+}
+
+export const mergeDelayedGuardRequests = (
+  dtos: readonly PendingDelayedGuardPoliciesDto[],
+  active: readonly Policy[],
+  resolveToken: (chainId: string, address: string) => PolicyTokenInfo,
+): MergedDelayedGuardRequests => {
+  const replaced = new Map<string, Policy>()
+  const added: Policy[] = []
+  const applyRequests = new Map<string, ApplyAllowlistFlowData>()
+
+  for (const dto of dtos) {
+    const live = active.find(
+      (policy): policy is ActiveAllowlistPolicy =>
+        isActiveAllowlistPolicy(policy) &&
+        policy.safe.chainId === dto.safe.chainId &&
+        sameAddress(policy.safe.address, dto.safe.address),
+    )
+    const row = mapDelayedGuardRequest(dto, {
+      operation: live ? 'update' : 'create',
+      resolveToken: (address) => resolveToken(dto.safe.chainId, address),
+    })
+    if (!row) continue
+
+    const request = getApplyAllowlistRequest(dto)
+    if (live && row.status === 'active') {
+      replaced.set(live.id, { ...live, scheduledChange: row.scheduledChange })
+      if (request) applyRequests.set(live.id, request)
+      continue
+    }
+
+    added.push(row)
+    if (request) applyRequests.set(row.id, request)
+  }
+
+  return { active: active.map((policy) => replaced.get(policy.id) ?? policy), added, applyRequests }
+}

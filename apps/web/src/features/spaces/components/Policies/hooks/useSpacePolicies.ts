@@ -1,3 +1,4 @@
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -6,6 +7,7 @@ import { TxEvent } from '@/services/tx/txEvents'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type {
   ActivePolicyDto,
+  PendingDelayedGuardPoliciesDto,
   PendingPolicyDto,
   SpacePoliciesGetActivePoliciesV1ApiArg,
   SpacePoliciesGetPendingPoliciesV1ApiArg,
@@ -22,6 +24,8 @@ import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
+import { mergeDelayedGuardRequests } from '../utils/mapDelayedGuardRequests'
+import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useAllowlistTokenResolver } from './useAllowlistTokenResolver'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
@@ -51,6 +55,7 @@ const ACTIVE_REFETCH_EVENTS = [TxEvent.SUCCESS]
 
 const NO_POLICIES: ActivePolicyDto[] = []
 const NO_PENDING: PendingPolicyDto[] = []
+const NO_DELAYED: PendingDelayedGuardPoliciesDto[] = []
 
 /** CGW sends no metadata with a native-transfer policy, so the coin comes from the chain config. */
 const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
@@ -74,6 +79,8 @@ const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[], resolveErc20Toke
 
 export type SpacePoliciesResult = {
   policies: Policy[]
+  /** What the apply flow replays for an allowlist row whose guard delay has passed, keyed by row id. */
+  allowlistApplyRequests: ReadonlyMap<string, ApplyAllowlistFlowData>
   isLoading: boolean
   isError: boolean
   refetch: () => void
@@ -97,9 +104,12 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
-    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },
     {
-      skip,
+      spaceId: spaceId ?? '',
+      types: isAllowlistActive ? [...PENDING_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : PENDING_POLICY_TYPES,
+    },
+    {
+      skip: skip || isWaitingForGate,
       ...SPACE_REFRESH_OPTIONS,
       pollingInterval: hasExecutable ? POLLING_INTERVAL : 0,
       skipPollingIfUnfocused: true,
@@ -119,12 +129,33 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     [pending.currentData],
   )
 
+  const delayedDtos = useMemo(
+    () =>
+      pending.currentData?.filter(
+        (dto): dto is PendingDelayedGuardPoliciesDto & { kind: 'delayed-guard-policies' } =>
+          dto.kind === 'delayed-guard-policies',
+      ) ?? NO_DELAYED,
+    [pending.currentData],
+  )
+
   useEffect(() => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
   }, [pendingDtos])
 
   const resolveErc20Token = useAllowlistTokenResolver(dtos)
   const activeRows = useMemo(() => toActiveRows(dtos, chains, resolveErc20Token), [dtos, chains, resolveErc20Token])
+  const delayed = useMemo(() => {
+    const resolveNative = toNativeTokenResolver(chains)
+    // A token the active policies never named has no fetched metadata, so its address stands in for the symbol.
+    const resolveToken = (chainId: string, address: string) =>
+      (address === ZERO_ADDRESS ? resolveNative(chainId) : resolveErc20Token(chainId, address)) ?? {
+        address,
+        symbol: shortenAddress(address),
+        decimals: 18,
+        logoUri: null,
+      }
+    return mergeDelayedGuardRequests(delayedDtos, activeRows, resolveToken)
+  }, [delayedDtos, activeRows, chains, resolveErc20Token])
   const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
@@ -133,8 +164,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   })
 
   const policies = useMemo(
-    () => [...activeRows, ...pendingRows, ...activatingRows],
-    [activeRows, pendingRows, activatingRows],
+    () => [...delayed.active, ...delayed.added, ...pendingRows, ...activatingRows],
+    [delayed, pendingRows, activatingRows],
   )
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
@@ -147,6 +178,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
 
   return {
     policies,
+    allowlistApplyRequests: delayed.applyRequests,
     isLoading: isLoadingActive,
     isError: active.isError,
     refetch,
