@@ -7,6 +7,7 @@ import {
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
+  mockUnenforcedAllowlist,
 } from '../../mocks/allowlistPolicies'
 import { inferAllowlistOutcome, resolveAllowlistDrawerState } from '../resolveState'
 
@@ -34,6 +35,24 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
+  it.each([
+    ['a signer', MOCK_VIEWERS.signer],
+    ['a viewer without a wallet', MOCK_VIEWERS.disconnected],
+  ])('should, for %s, report an unenforced allowlist with no action', (_, viewer) => {
+    expect(resolveAllowlistDrawerState(mockUnenforcedAllowlist(), viewer, 'Treasury')).toEqual({
+      kind: 'unenforced',
+      action: 'none',
+      bannerTitle: 'Safe policy guard removed',
+      bannerLine2: 'Allowlist not applied as the guard is removed.',
+    })
+  })
+
+  it('should show a change waiting out the delay even when the allowlist is not enforced', () => {
+    const policy = { ...mockAllowlistChangePending(), enabled: false }
+
+    expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Treasury').kind).toBe('scheduled')
+  })
+
   it('should send a signer who has not signed to review the transaction', () => {
     expect(resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toEqual({
       kind: 'pending',
@@ -43,6 +62,15 @@ describe('resolveAllowlistDrawerState', () => {
       bannerLine2: 'Sign and execute the transaction to activate.',
       signed: 1,
       required: 2,
+    })
+  })
+
+  it('should send a signer to review the transaction while it is not known whether they have signed', () => {
+    const signer = { ...MOCK_VIEWERS.signer, hasSigned: undefined }
+
+    expect(resolveAllowlistDrawerState(mockPendingAllowlist(), signer, 'Payroll')).toMatchObject({
+      kind: 'pending',
+      action: 'review',
     })
   })
 

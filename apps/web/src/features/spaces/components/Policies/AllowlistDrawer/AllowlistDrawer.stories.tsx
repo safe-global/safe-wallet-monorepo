@@ -3,8 +3,10 @@ import { fn } from 'storybook/test'
 import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../mocks/policies'
 import {
   mockActivatingAllowlist,
-  mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockCgwAllowlist,
+  mockCgwUncoveredAllowlist,
+  mockCgwUnenforcedAllowlist,
   mockExpiredPendingAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
@@ -40,7 +42,7 @@ const meta = {
     onRemove: fn(),
     onCancelChange: fn(),
     onConnectWallet: fn(),
-    policy: mockActiveAllowlist(),
+    policy: mockCgwAllowlist(),
     viewer: MOCK_VIEWERS.signer,
   },
 } satisfies Meta<typeof AllowlistDrawer>
@@ -51,6 +53,14 @@ type Story = StoryObj<typeof meta>
 export const ActiveSigner: Story = {}
 
 export const ActiveJustActivated: Story = { args: { justActivated: true } }
+
+export const ActiveSpendingLimitsNotCovered: Story = {
+  args: { policy: mockCgwUncoveredAllowlist(), uncoveredSpendingLimitCount: 2 },
+}
+
+export const ActiveOneSpendingLimitNotCovered: Story = {
+  args: { policy: mockCgwUncoveredAllowlist(), uncoveredSpendingLimitCount: 1 },
+}
 
 export const ActiveNoWallet: Story = { args: { viewer: MOCK_VIEWERS.disconnected } }
 
@@ -105,6 +115,8 @@ export const PendingExpired: Story = {
 }
 
 export const Activating: Story = { args: { policy: mockActivatingAllowlist() } }
+
+export const Unenforced: Story = { args: { policy: mockCgwUnenforcedAllowlist() } }
 
 export const ChangePending: Story = { args: { policy: mockAllowlistChangePending() } }
 

@@ -21,6 +21,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../mocks/policies'
+import { mockActiveAllowlist, mockPendingAllowlist } from '../mocks/allowlistPolicies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import { mockWallet } from '@/tests/mocks/hooks'
@@ -616,6 +617,39 @@ describe('Policies', () => {
       expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
     })
 
+    it('should, when an active allowlist row is clicked, open its side panel', () => {
+      render(<Policies policies={[mockActiveAllowlist()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
+    })
+
+    it('should confirm an allowlist that turns up while the page is open, the first time its panel opens', async () => {
+      const { rerender, user } = renderWithUserEvent(<Policies policies={[]} />)
+      rerender(<Policies policies={[mockActiveAllowlist()]} />)
+
+      await user.click(screen.getByTestId('policy-open-button'))
+      expect(screen.getByText('Your allowlist is now active')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+      await user.click(screen.getByTestId('policy-open-button'))
+      expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+    })
+
+    it('should not confirm an allowlist that was there when the page loaded', () => {
+      render(<Policies policies={[mockActiveAllowlist()]} />)
+      fireEvent.click(screen.getByTestId('policy-open-button'))
+
+      expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+    })
+
+    it('should, when a pending allowlist row is clicked, open no panel yet', () => {
+      render(<Policies policies={[mockPendingAllowlist()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
+    })
+
     it('should hold one open panel at a time, so a second row replaces the first', () => {
       render(<Policies policies={[asActivePolicy(mockProposerPolicy()), mockActiveSpendingLimit()]} />)
       const [proposerRow, spendingLimitRow] = screen.getAllByTestId('policy-open-button')
@@ -932,6 +966,17 @@ describe('Policies', () => {
       await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
 
       expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
+    })
+
+    it('hides the allowlist panel while a flow is open', () => {
+      render(
+        <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies policies={[mockActiveAllowlist()]} />
+        </TxModalContext.Provider>,
+      )
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
     })
   })
 })
