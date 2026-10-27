@@ -34,12 +34,15 @@ import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import type { RootState } from '@/store'
+import { initialState as initialSettings } from '@/store/settingsSlice'
+import { AppRoutes } from '@/config/routes'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
 import * as useTrustSafeHook from '@/features/myAccounts'
 
-const renderWithSafeShield = (ui: ReactElement) => {
-  return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
+const renderWithSafeShield = (ui: ReactElement, initialReduxState?: Partial<RootState>) => {
+  return render(<SafeShieldProvider>{ui}</SafeShieldProvider>, { initialReduxState })
 }
 
 let mockProvider = {
@@ -980,6 +983,34 @@ describe('SignMessage', () => {
       await waitFor(() => {
         expect(getByText('Sign')).toBeEnabled()
       })
+    })
+
+    it('blocks signing a blind-signing payload while blind signing is off', async () => {
+      const { findByText, getByRole, getByText } = renderWithSafeShield(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="0x0000000" requestId="123" />,
+      )
+
+      expect(await findByText(/This request involves/)).toBeInTheDocument()
+      expect(getByText(/If you wish to proceed, you must first/)).toBeInTheDocument()
+      expect(getByRole('link', { name: 'enable blind signing' })).toHaveAttribute(
+        'href',
+        expect.stringContaining(AppRoutes.settings.security),
+      )
+      expect(getByText('Sign')).toBeDisabled()
+    })
+
+    it('warns but allows signing a blind-signing payload once blind signing is on', async () => {
+      const blindSigningOn = {
+        settings: { ...initialSettings, signing: { ...initialSettings.signing, blindSigning: true } },
+      }
+
+      const { findByText, getByText } = renderWithSafeShield(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="0x0000000" requestId="123" />,
+        blindSigningOn,
+      )
+
+      expect(await findByText(/Proceed with caution\./)).toBeInTheDocument()
+      await waitFor(() => expect(getByText('Sign')).toBeEnabled())
     })
 
     it('shows RiskConfirmation checkbox when threat is detected', async () => {

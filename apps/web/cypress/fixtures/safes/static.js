@@ -28,7 +28,7 @@ export default {
   /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
-  /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js */
+  /** Messages (onchain/offchain) testing */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Available for general testing */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
@@ -58,7 +58,7 @@ export default {
   // More Sepolia Safes
   /** Available for general testing */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
-  /** Proposers testing - Used in: proposers.cy.js */
+  /** Available for general testing */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
   /** Queue transaction testing - Used in: tx_queue.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
