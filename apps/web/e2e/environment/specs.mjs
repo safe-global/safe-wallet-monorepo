@@ -7,8 +7,6 @@ const swapWidgetBalances = 'the hosted CoW widget reads balances from real Sepol
  * `chains` the forks besides Sepolia, `skips` maps titles to reasons.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/regression/address_book_2.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/address_book_3.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
   'cypress/e2e/regression/copilot.cy.js': {
     scenario: 'prepareCopilotScenario',
