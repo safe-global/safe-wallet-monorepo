@@ -29,6 +29,10 @@ describe('NumberField', () => {
     expect(_formatNumber('123,456,789')).toBe('123.456789')
     expect(_formatNumber('123,456,,,,789')).toBe('123.456789')
   })
+  it('should drop the minus sign of a negative number', () => {
+    expect(_formatNumber('-1')).toBe('1')
+  })
+
   it('should not be possible to enter characters', () => {
     expect(_formatNumber('abc')).toBe('')
     expect(_formatNumber('abc123')).toBe('123')

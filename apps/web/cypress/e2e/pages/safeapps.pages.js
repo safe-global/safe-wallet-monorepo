@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants'
-import { accordionActionItem } from '../pages/nfts.pages'
+import { accordionActionItem } from '../pages/batches.pages'
 import * as main from '../pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
 
@@ -73,7 +73,6 @@ export const pinWalletConnectStr = /pin walletconnect/i
 export const transactionBuilderStr = 'Transaction Builder'
 export const cowswapStr = 'CowSwap'
 export const basicTypesTestContractStr = 'BasicTypesTestContract'
-export const testAddressValueStr = 'testAddressValue'
 
 export function checkActions(count, action) {
   cy.get(accordionActionItem).filter(`:contains("${action}")`).should('have.length', count)

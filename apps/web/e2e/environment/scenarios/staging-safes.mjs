@@ -8,7 +8,7 @@ const { owner1, owner3, owner4, sepoliaOwner2 } = stagingOwners
 const beneficiary = '0x4c8bF5541D21288836F5B7AdE01E102F074c5F4a'
 const automationOwner = '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
 const sharedOwner = '0xb43470d6913f548Bf90E299De2fe3f94140aaf7c'
-export const polygonOwner = '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
+const polygonOwner = '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
 
 const shortNames = { [SEPOLIA]: 'sep', 1: 'eth', 137: 'matic' }
 
@@ -34,7 +34,6 @@ export const stagingSafes = {
   SEP_STATIC_SAFE_3: { owners: [sepoliaOwner2], threshold: 1, ether: parseEther('0.001') },
   SEP_STATIC_SAFE_4: { owners: [owner4], threshold: 1, nonce: 3, ether: parseEther('0.000001') },
   SEP_STATIC_SAFE_6: { owners: [owner3, owner4], threshold: 1, nonce: 5, ether: parseEther('0.00998') },
-  SEP_STATIC_SAFE_7: { owners: [owner3, owner4, sepoliaOwner2], threshold: 2, nonce: 17, ether: parseEther('0.4424') },
   SEP_STATIC_SAFE_8: {
     owners: [beneficiary, owner4, sepoliaOwner2],
     threshold: 1,
@@ -51,24 +50,11 @@ export const stagingSafes = {
     ],
     tokens: [{ address: '0x8Eacc9DCa0b92C360D7896Aa5907b949C2A846f6', amount: parseEther('5') }],
   },
-  SEP_STATIC_SAFE_9: {
-    owners: [sepoliaOwner2, owner4],
-    threshold: 2,
-    nonce: 3,
-    ether: parseEther('0.0009'),
-    allowances: [{ delegate: owner4, amount: parseEther('0.0001') }],
-  },
   SEP_STATIC_SAFE_10: {
     owners: [sepoliaOwner2, automationOwner, owner4],
     threshold: 2,
     nonce: 5,
     ether: parseEther('0.00948'),
-  },
-  SEP_STATIC_SAFE_11: {
-    owners: [automationOwner],
-    threshold: 1,
-    nonce: 1,
-    allowances: [{ delegate: owner4, amount: parseEther('1') }],
   },
   SEP_STATIC_SAFE_13: { owners: [sepoliaOwner2, owner4], threshold: 1, nonce: 1 },
   SEP_STATIC_SAFE_23: {
@@ -78,7 +64,6 @@ export const stagingSafes = {
     ether: parseEther('0.0002'),
     allowances: [{ delegate: owner4, amount: parseEther('0.0001') }],
   },
-  SEP_STATIC_SAFE_24: { owners: [owner4, owner1], threshold: 2, nonce: 2 },
   SEP_STATIC_SAFE_26: { owners: [owner1, owner4], threshold: 2, nonce: 1 },
   SEP_STATIC_SAFE_34: {
     owners: [owner4, sepoliaOwner2],
@@ -144,21 +129,7 @@ export const stagingSafes = {
       { address: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', amount: 100n }, // USDT0
     ],
   },
-  MATIC_STATIC_SAFE_33: {
-    chainId: 137,
-    owners: [sharedOwner, '0x11B1D54B66e5e226D6f89069c21A569A22D98cfd', owner4],
-    threshold: 1,
-    nonce: 19,
-    ether: parseEther('13.61'),
-  },
   MATIC_STATIC_SAFE_34: { chainId: 137, owners: [sharedOwner, owner4], threshold: 1, ether: parseEther('0.11') },
-  // Funds category; its 575 executed transactions are not replayed.
-  ETH_FUNDS_SAFE_13: {
-    chainId: 1,
-    owners: ['0xd0ba955b8F34561907Abb588603a2400e06BD2d2', '0x4c3c38a459F0bAABB763290111B66ed01b5fEfA2', polygonOwner],
-    threshold: 2,
-    ether: 1137693581890135n,
-  },
 }
 
 // On-chain state of the staging Safe App Safes at the fork block.

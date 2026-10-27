@@ -79,9 +79,11 @@ const toSpenders = (dto: PendingPolicyDto, active: ActiveSpendingLimit | undefin
       // Re-enabling an unenforced policy's module applies its indexed limits again, unchanged.
       case 'enable-module':
         if (active && !active.enabled) {
-          active.data.spenders.forEach(({ spender, allowances }) =>
-            spenderFor(spender).allowances.push(...allowances.map((allowance) => ({ ...allowance }))),
-          )
+          active.data.spenders.forEach(({ spender, isActive, allowances }) => {
+            const queued = spenderFor(spender)
+            queued.isActive = isActive
+            queued.allowances.push(...allowances.map((allowance) => ({ ...allowance })))
+          })
         }
         break
       case 'add-delegate':

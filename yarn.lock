@@ -13777,7 +13777,7 @@ __metadata:
     "@reown/appkit-react-native": "npm:^2.0.3"
     "@reown/walletkit": "npm:^1.2.7"
     "@rtk-query/codegen-openapi": "npm:^2.2.0"
-    "@safe-global/protocol-kit": "npm:^8.0.7"
+    "@safe-global/protocol-kit": "npm:^8.0.10"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
@@ -13882,7 +13882,7 @@ __metadata:
     redux-persist: "npm:^6.0.0"
     semver: "npm:^7.7.2"
     siwe: "npm:^3.0.0"
-    storybook: "npm:^10.6.0"
+    storybook: "npm:^10.6.2"
     tamagui: "npm:2.0.0-rc.26"
     timezone-mock: "npm:^1.3.6"
     ts-node: "npm:^10.9.2"
@@ -13902,14 +13902,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^8.0.5, @safe-global/protocol-kit@npm:^8.0.7":
-  version: 8.0.7
-  resolution: "@safe-global/protocol-kit@npm:8.0.7"
+"@safe-global/protocol-kit@npm:^8.0.10, @safe-global/protocol-kit@npm:^8.0.5":
+  version: 8.0.10
+  resolution: "@safe-global/protocol-kit@npm:8.0.10"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.63"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.10"
+    "@safe-global/safe-deployments": "npm:^1.37.65"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.12"
     "@safe-global/types-kit": "npm:^4.0.1"
     abitype: "npm:^1.2.3"
     semver: "npm:^7.8.0"
@@ -13919,7 +13919,7 @@ __metadata:
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/6f7e3ffa1218fe8d70325a228ba09775dd14f49ecf38f6b27ec1ce5f81245e38a74f9212e173b35c4e525a7b08d2a8889122ae06abc90487324a25abca2223f1
+  checksum: 10/4604c53002566712b67e01b7c6e0ff18185fa99827d56e661a1057b31d45b6425f6192a43d4e8b8920fc39bc83254cef3ed04a8f3bb113d9f5b2cc829e647cb2
   languageName: node
   linkType: hard
 
@@ -13954,12 +13954,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.63":
-  version: 1.37.63
-  resolution: "@safe-global/safe-deployments@npm:1.37.63"
+"@safe-global/safe-deployments@npm:^1.37.65":
+  version: 1.37.65
+  resolution: "@safe-global/safe-deployments@npm:1.37.65"
   dependencies:
     semver: "npm:^7.6.2"
-  checksum: 10/b53c258238ad68de304d24d8561c9e4aa40451630b88f3aaeed9918799c957136c2a77e5d8c77612f5354c3c5764d2260b862135f679bf59ea02bbf49dcd3156
+  checksum: 10/6e140f684e878ee710f1370afc0211c94ca5cc835985f4bff7285f997eda1f44f767de0634aaec79e991dadcc6eb7b93d3caafbc7fc9133994fe6389dba6ba87
   languageName: node
   linkType: hard
 
@@ -13977,10 +13977,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^3.0.10":
-  version: 3.0.10
-  resolution: "@safe-global/safe-modules-deployments@npm:3.0.10"
-  checksum: 10/d193090628fd5e760264c9a52d86db14a15b26da11eb8f3cb924c09607c1518f0706b5063ddce41dd3d97af2d18195d10252dd86aa074e28ecdba3183598335b
+"@safe-global/safe-modules-deployments@npm:^3.0.12":
+  version: 3.0.12
+  resolution: "@safe-global/safe-modules-deployments@npm:3.0.12"
+  checksum: 10/54d2f2bb1748b6ecb947cdf8e49564c3435cac304852eca6562b8bfe4c627721f3365b20c2c1908a853d7470f3e6e60ed535acc37f5ad7cde44a7efd488908ba
   languageName: node
   linkType: hard
 
@@ -13999,7 +13999,7 @@ __metadata:
     lint-staged: "npm:^16.2.7"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.9.9"
-    storybook: "npm:^10.6.0"
+    storybook: "npm:^10.6.2"
     turbo: "npm:^2.11.3"
   dependenciesMeta:
     cypress:
@@ -14093,7 +14093,7 @@ __metadata:
     "@safe-global/safe-apps-provider": "npm:^0.18.6"
     "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.63"
+    "@safe-global/safe-deployments": "npm:^1.37.65"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
     "@safe-global/utils": "workspace:^"
     "@testing-library/dom": "npm:^10.4.2"
@@ -14171,7 +14171,7 @@ __metadata:
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.70.1"
   peerDependencies:
-    "@safe-global/protocol-kit": ^8.0.7
+    "@safe-global/protocol-kit": ^8.0.10
     "@safe-global/store": "*"
     "@safe-global/types-kit": ^3.1.x
   languageName: unknown
@@ -14184,11 +14184,12 @@ __metadata:
     "@base-ui/react": "npm:^1.1.0"
     "@eslint/js": "npm:^9.18.0"
     "@hello-pangea/dnd": "npm:^18.0.1"
-    "@safe-global/protocol-kit": "npm:^8.0.7"
+    "@safe-global/protocol-kit": "npm:^8.0.10"
     "@safe-global/store": "workspace:^"
     "@safe-global/types-kit": "npm:^4.0.1"
     "@safe-global/utils": "workspace:^"
     "@shadcn/lint": "npm:^0.2.1"
+    blo: "npm:^1.1.1"
     class-variance-authority: "npm:^0.7.1"
     classnames: "npm:^2.5.1"
     clsx: "npm:^2.1.1"
@@ -14295,10 +14296,10 @@ __metadata:
     "@reown/walletkit": "npm:^1.2.7"
     "@rspack/plugin-react-refresh": "npm:^1.0.0"
     "@safe-global/api-kit": "npm:^5.0.2"
-    "@safe-global/protocol-kit": "npm:^8.0.7"
+    "@safe-global/protocol-kit": "npm:^8.0.10"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.63"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.10"
+    "@safe-global/safe-deployments": "npm:^1.37.65"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.12"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
@@ -14346,7 +14347,6 @@ __metadata:
     "@web3-onboard/hw-common": "npm:^2.3.3"
     "@web3-onboard/injected-wallets": "npm:^2.11.3"
     "@web3-onboard/walletconnect": "npm:2.6.2"
-    blo: "npm:^1.1.1"
     cheerio: "npm:^1.2.0"
     class-variance-authority: "npm:^0.7.1"
     classnames: "npm:^2.5.1"
@@ -14407,7 +14407,7 @@ __metadata:
     semver: "npm:^7.7.1"
     shadcn: "npm:^3.7.0"
     sonner: "npm:^2.0.7"
-    storybook: "npm:^10.6.0"
+    storybook: "npm:^10.6.2"
     tailwind-merge: "npm:^3.4.0"
     tailwindcss: "npm:^4.1.18"
     ts-prune: "npm:^0.10.3"
@@ -39884,31 +39884,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.12.3, qs@npm:^6.4.0":
-  version: 6.14.2
-  resolution: "qs@npm:6.14.2"
-  dependencies:
-    side-channel: "npm:^1.1.0"
-  checksum: 10/682933a85bb4b7bd0d66e13c0a40d9e612b5e4bcc2cb9238f711a9368cd22d91654097a74fff93551e58146db282c56ac094957dfdc60ce64ea72c3c9d7779ac
-  languageName: node
-  linkType: hard
-
-"qs@npm:^6.14.0":
-  version: 6.15.0
-  resolution: "qs@npm:6.15.0"
-  dependencies:
-    side-channel: "npm:^1.1.0"
-  checksum: 10/a3458f2f389285c3512e0ebc55522ee370ac7cb720ba9f0eff3e30fb2bb07631caf556c08e2a3d4481a371ac14faa9ceb7442a0610c5a7e55b23a5bdee7b701c
-  languageName: node
-  linkType: hard
-
-"qs@npm:^6.15.2":
-  version: 6.15.3
-  resolution: "qs@npm:6.15.3"
+"qs@npm:^6.12.3, qs@npm:^6.14.0, qs@npm:^6.15.2, qs@npm:^6.4.0":
+  version: 6.16.1
+  resolution: "qs@npm:6.16.1"
   dependencies:
     es-define-property: "npm:^1.0.1"
     side-channel: "npm:^1.1.1"
-  checksum: 10/1cbb4b050872a19ba8a311445be29babb8f66ea5d6462b3c48c6efb2c95187cd286b69734cd4caea1878cca3b9d1f0e9b49335336be9e999a7d8d7cf137ba60d
+  checksum: 10/e33e0a5ceecb7bef81ea1f855365482045f55ba55278f40b8dbf9ee18eae8ef82d44246fe4e4009d6b6f102cbf2885a34b88c4272536cd628cde40b4ac9912c2
   languageName: node
   linkType: hard
 
@@ -43496,9 +43478,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"storybook@npm:^10.6.0":
-  version: 10.6.0
-  resolution: "storybook@npm:10.6.0"
+"storybook@npm:^10.6.2":
+  version: 10.6.2
+  resolution: "storybook@npm:10.6.2"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
     "@storybook/icons": "npm:^2.0.2"
@@ -43530,7 +43512,7 @@ __metadata:
       optional: true
   bin:
     storybook: ./dist/bin/dispatcher.js
-  checksum: 10/749aa2b471d19ae288b8103638ebf342a23cbf636b3e47a793a8cd855d2712a0b9eea8058002e6e2d58a238f99552be6bf0d7bbc36b57b0d77015e65627322c1
+  checksum: 10/81f1623a51e9c2e331f0b0e984e45d474af368b6b6e4602d602de83d6aa49dfb8c00e2491bea316cbe5f41831a9c7272fdd41ce37ced1a591435e0ef47c98050
   languageName: node
   linkType: hard
 
@@ -45730,9 +45712,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^7.19.0":
-  version: 7.29.1
-  resolution: "undici@npm:7.29.1"
-  checksum: 10/8b9eaf83615e96f83826c9b6b129bd378c26f750f183e931df89bf07dfae24a39736b3648c16c25904e59e34f9e151e7a852c82ef0f1fb8e8a1297c52ff3170c
+  version: 7.30.1
+  resolution: "undici@npm:7.30.1"
+  checksum: 10/306a28e4c715652a0e2cd59bcc98cf8b6083b989151054fafaac27bdab6f2bc7e0f33f5847f72f5ba257971226372d04705e0e984b26b42a03271d5a35eb99b1
   languageName: node
   linkType: hard
 

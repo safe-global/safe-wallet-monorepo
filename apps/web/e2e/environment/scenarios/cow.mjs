@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { Contract, Interface, MaxUint256, getAddress, id, parseEther, toQuantity } from 'ethers'
+import { Contract, Interface, getAddress, id, parseEther, toQuantity } from 'ethers'
 import { registerContracts } from './contracts.mjs'
 import { runInLocalService } from './local-service.mjs'
 import { createSafe, proposeTransaction } from './safe.mjs'
@@ -357,46 +357,9 @@ export async function prepareSwapQueueScenario(env, owners) {
     )
     return {
       safes: { static: { SEP_STATIC_SAFE_34: `sep:${context.safeAddress}` } },
-      fixtures: swapTxFixtures({ ...ids, swapQueue: ids.sellSwapQLimitOrder }),
+      fixtures: swapTxFixtures(ids),
     }
   } finally {
     context.provider.destroy()
-  }
-}
-
-/**
- * Rebuilds SEP_STATIC_SAFE_1 with the settlement of its CoW Swap Safe App order: 10 COW sold for 363.19846 DAI.
- * The vault relayer approval stands in for the earlier staging approvals.
- */
-export async function buildSwapSettlementSafe(env, owners) {
-  await registerCowContracts(env)
-  const context = await deploySafe(env, owners, safe1)
-  const { provider, safeAddress } = context
-  try {
-    const sold = parseEther('10')
-    await dealToken(provider, COW, owners.owner4.address, sold)
-    await send(provider, owners.owner4.address, {
-      to: COW,
-      data: erc20.encodeFunctionData('transfer', [safeAddress, sold]),
-    })
-    await execute(provider, safeAddress, context.signers, {
-      to: COW,
-      data: new Interface(['function approve(address,uint256)']).encodeFunctionData('approve', [
-        VAULT_RELAYER,
-        MaxUint256,
-      ]),
-    })
-    await executeOrders(env, context, ['safeAppSwapOrder'])
-    await settleOrder(env, provider, safeAddress, owners.owner4.address, {
-      validTo: 1719486675,
-      sold,
-      bought: 363198460147836860990n,
-    })
-    await waitUntil(env, `${context.path}/transactions/history?trusted=false`, (history) =>
-      history.results.some(({ transaction }) => transaction?.txInfo.type === 'SwapTransfer'),
-    )
-    return safeAddress
-  } finally {
-    provider.destroy()
   }
 }

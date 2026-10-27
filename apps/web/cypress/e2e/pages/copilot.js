@@ -14,7 +14,6 @@ import * as ls from '../../support/localstorage_data.js'
 
 // Main Safe Shield widget (data-testid targets)
 export const safeShieldWidget = '[data-testid="safe-shield-widget"]'
-export const safeShieldStatusBar = '[data-testid="safe-shield-status"]'
 export const TEST_RECIPIENT = '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0'
 export const TEST_SAFE_ADDRESS = '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D'
 
@@ -42,9 +41,6 @@ export const testTransactions = {
   // Threat analysis test - transaction with threat analysis failure
   threatAnalysisFailed:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x531e49fc6655b8013148d08f0e669b91fc29ee23c9ab005948d93447eaef079b',
-  // Threat analysis test - transaction with no threat detected
-  threatAnalysisNoThreat:
-    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
   // Threat analysis test - transaction with malicious approval (drainer contract)
   threatAnalysisMaliciousApproval:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x657afdcb7589bb4b6386c39d71692840f3f616c512401dff51bef1ccb46592d7',
@@ -57,15 +53,9 @@ export const testTransactions = {
   // Threat analysis test - transaction with malicious address (wallet_sendCalls)
   threatAnalysisMaliciousAddress:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x5727020cc864376612fba6ee8fd146a8d2e8b671857b22efc9ef45062f7a517f',
-  // Threat analysis test - transaction with malicious address (wallet_sendCalls with Eth)
-  threatAnalysisMaliciousAddressEth:
-    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x228751aa0f0442baf8a670e3af8bbe93c22c7e9a0ad14527620f9a50b972f52c',
   // Tenderly simulation test - transaction for simulation testing
   tenderlySimulation:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
-  // Recipient analysis test - transaction with low activity recipient (address has few transactions)
-  recipientAnalysisLowActivity:
-    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xc764a15c522af6477ebbe7d808a509806879a68bd097b8594e1437c71fb345f1',
   // Recipient analysis test - transaction for known/unknown/recurring recipient tests
   recipientAnalysisKnownUnknown:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
@@ -104,10 +94,6 @@ const emptyStateStr = 'Transaction details will be automatically scanned for pot
 
 // Threat messages
 const maliciousThreatStr = 'Malicious threat detected'
-const threatAnalysisFailedStr = 'Threat analysis failed'
-const threatReviewBeforeProcessingStr = 'Threat analysis failed. Review before processing'
-const noThreatDetectedStr = 'No threat detected'
-const threatAnalysisFoundNoIssuesStr = 'Threat analysis found no issues'
 export const maliciousApprovalMessageStr = 'The transaction approves erc20 tokens to a known malicious address'
 export const maliciousTransferMessageStr = 'The transaction transfers tokens to a known malicious address'
 export const maliciousNativeTransferMessageStr =
@@ -120,13 +106,7 @@ export const drainerTransferMessageStr = 'The transaction transfers tokens to a 
 export const drainerNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer contract'
 
 // Recipient analysis messages
-export const lowActivityRecipientStr = 'Low activity recipient'
 export const recurringRecipientStr = 'Recurring recipient'
-export const unknownRecipientStr = 'Unknown recipient'
-export const addressInAddressBookStr = 'This address is in your address book'
-export const addressNotInAddressBookStr = 'This address is not in your address book or a Safe you own'
-export const addressIsSafeYouOwnStr = 'This address is a Safe you own'
-export const fewTransactionsStr = 'This address has few transactions'
 export const firstTimeInteractionStr = 'You are interacting with this address for the first time'
 export const interactedTwoTimesStr = 'You have interacted with this address 2 times'
 export const missingOwnershipStr = 'Missing ownership'
@@ -144,11 +124,6 @@ export const differentSetupMessageStr =
 // Verify Safe Shield widget is displayed
 export function verifySafeShieldDisplayed() {
   cy.get(safeShieldWidget).should('be.visible')
-}
-
-// Verify Safe Shield logo footer is displayed
-export function verifySecuredByFooter() {
-  cy.get('[data-testid="safe-shield-widget"]').find('[data-testid="safe-shield-logo"]').should('be.visible')
 }
 
 // Verify status shows "Checks passed"
@@ -186,11 +161,6 @@ export function verifyNotLoading() {
   cy.get(progressBar).should('not.exist')
 }
 
-// Verify empty state message is displayed
-export function verifyEmptyState() {
-  cy.contains(emptyStateStr).should('be.visible')
-}
-
 // Verify empty state is not displayed
 export function verifyNotEmptyState() {
   cy.contains(emptyStateStr).should('not.exist')
@@ -223,11 +193,6 @@ export function verifyWidgetContainsText(text) {
   cy.get(safeShieldWidget).should('contain', text)
 }
 
-// Verify Safe Shield header shows Issues found
-export function verifyIssuesFoundWarningHeader() {
-  cy.get(safeShieldStatusBar).should('contain.text', issuesFoundStr)
-}
-
 // Verify recipient analysis group card is displayed
 export function verifyRecipientAnalysisGroupCard() {
   cy.get(recipientAnalysisGroupCard).should('be.visible')
@@ -243,11 +208,6 @@ export function verifyThreatAnalysisGroupCard() {
   cy.get(threatAnalysisGroupCard).should('be.visible')
 }
 
-// Verify threat analysis warning icon and state
-export function verifyThreatAnalysisWarningState() {
-  cy.get(threatAnalysisGroupCard).should('contain.text', threatAnalysisFailedStr)
-}
-
 // Verify Tenderly simulation group card is displayed
 export function verifyTenderlySimulation() {
   cy.get(tenderlySimulation).should('be.visible')
@@ -256,21 +216,6 @@ export function verifyTenderlySimulation() {
 // Expand threat analysis card
 export function expandThreatAnalysisCard() {
   cy.get(threatAnalysisGroupCard).click()
-}
-
-// Verify threat analysis failed details
-export function verifyThreatAnalysisFailedDetails() {
-  main.verifyTextVisibility([threatAnalysisFailedStr, threatReviewBeforeProcessingStr])
-}
-
-// Verify threat analysis shows no threat detected state
-export function verifyThreatAnalysisNoThreatState() {
-  cy.get(threatAnalysisGroupCard).should('contain.text', noThreatDetectedStr)
-}
-
-// Verify threat analysis found no issues details
-export function verifyThreatAnalysisFoundNoIssues() {
-  main.verifyTextVisibility([threatAnalysisFoundNoIssuesStr])
 }
 
 // Verify threat analysis shows malicious threat detected state

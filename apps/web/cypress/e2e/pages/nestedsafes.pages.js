@@ -5,7 +5,6 @@ import { addToBatchBtn } from '../pages/create_tx.pages.js'
 import { nameTypingOptions } from '../pages/main.page.js'
 
 const addNestedSafeBtn = '[data-testid="add-nested-safe-button"]'
-const nestedSafeNameInput = '[data-testid="nested-safe-name-input"]'
 const nextBtn = '[data-testid="next-button"]'
 const fundAssetBtn = '[data-testid="fund-asset-button"]'
 const assetData = '[data-testid="asset-data"]'
@@ -109,15 +108,6 @@ export function clickOnAddNextBtn() {
 export function clickOnAddNestedSafeBtn() {
   // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
   cy.get(addNestedSafeBtn).should('be.enabled').click()
-}
-
-// The testid lands directly on the <input> element of the shadcn field.
-export function typeName(name) {
-  cy.get(nestedSafeNameInput).clear().type(name, nameTypingOptions).should('have.value', name)
-}
-
-export function nameInputHasPlaceholder() {
-  cy.get(nestedSafeNameInput).should('have.attr', 'placeholder').and('not.be.empty')
 }
 
 // Nested safes curation (hide/show) functions
@@ -322,26 +312,6 @@ export function completeIntroScreenSelectAll() {
   // Select all safes — clicking the row toggles selection (the checkbox inside works too)
   cy.get(nestedSafeList)
     .find(safeListItem)
-    .each(($item) => {
-      cy.wrap($item).click()
-    })
-  cy.get(saveManageBtn).click()
-  // Wait for normal view to load after save
-  cy.get(manageNestedSafesBtn).should('be.visible')
-}
-
-// Complete intro screen flow, selecting only valid (non-suspicious) safes
-export function completeIntroScreenSelectValid() {
-  // Wait for intro screen to load
-  cy.get(nestedSafeList).should('be.visible')
-  cy.get(reviewNestedSafesBtn).should('be.visible').click()
-  // Wait for manage mode to load
-  cy.get(saveManageBtn).should('be.visible')
-  // Select only valid safes (without warning icon) — clicking the row toggles selection
-  // (the checkbox inside works too).
-  cy.get(nestedSafeList)
-    .find(safeListItem)
-    .filter(`:not(:has(${suspiciousWarningIcon}))`)
     .each(($item) => {
       cy.wrap($item).click()
     })
