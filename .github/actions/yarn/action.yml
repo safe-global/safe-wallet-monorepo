@@ -22,9 +22,9 @@ runs:
     - uses: $/.github/actions/corepack
 
     - uses: actions/setup-node@v6.4.0
+      id: node
       with:
         node-version: '24.22.1'
-        cache: 'yarn'
 
     - name: Export Turbo remote cache env
       if: inputs.turbo-token != ''
@@ -34,30 +34,52 @@ runs:
         echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
         echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
-    - name: Restore Yarn Cache & Types
-      id: restore-yarn-types
-      uses: $/.github/actions/cache-deps
+    # Archives are stored by checksum, so an older cache is safe to restore and saves most downloads.
+    - name: Restore Yarn download cache
+      id: downloads
+      uses: actions/cache/restore@v5.0.5
       with:
-        mode: restore-yarn
+        path: ~/.yarn/berry/cache
+        key: ${{ runner.os }}-${{ runner.arch }}-yarn-downloads-${{ hashFiles('yarn.lock') }}
+        restore-keys: ${{ runner.os }}-${{ runner.arch }}-yarn-downloads-
 
-    - name: Echo cache hit
-      shell: bash
-      run: |
-        echo "Yarn cache hit: ${{ steps.restore-yarn-types.outputs.cache-hit-yarn }}"
+    # Restored only on an exact match: an older tree could keep packages that the lockfile dropped.
+    - name: Restore node_modules
+      id: modules
+      uses: actions/cache/restore@v5.0.5
+      with:
+        path: |
+          **/node_modules
+          ~/.cache/Cypress
+          .yarn/install-state.gz
+        key: >-
+          ${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-modules-${{
+          hashFiles('yarn.lock', '**/package.json', '.yarnrc.yml', '.yarn/patches/**') }}
 
+    # Runs on a cache hit too: Yarn then only checks the tree against the lockfile.
     - name: Yarn install
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
       run: yarn install --immutable
 
     - name: Yarn after-install to generate contracts types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && inputs.after-install == 'true'
+      if: inputs.after-install == 'true'
       shell: bash
       run: yarn workspace @safe-global/web after-install
 
-    - name: Save Yarn Cache & Types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
-      uses: $/.github/actions/cache-deps
+    # Pull request runs only restore: their caches serve no other branch and evict the shared ones.
+    - name: Save Yarn download cache
+      if: ${{ !startsWith(github.event_name, 'pull_request') && steps.downloads.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@v5.0.5
       with:
-        mode: save-yarn
-        key: ${{ steps.restore-yarn-types.outputs.computed-cache-key-yarn }}
+        path: ~/.yarn/berry/cache
+        key: ${{ steps.downloads.outputs.cache-primary-key }}
+
+    - name: Save node_modules
+      if: ${{ !startsWith(github.event_name, 'pull_request') && steps.modules.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@v5.0.5
+      with:
+        path: |
+          **/node_modules
+          ~/.cache/Cypress
+          .yarn/install-state.gz
+        key: ${{ steps.modules.outputs.cache-primary-key }}
