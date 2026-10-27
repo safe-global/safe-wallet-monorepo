@@ -37,6 +37,8 @@ runs:
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
         key: ${{ runner.os }}-${{ runner.arch }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ runner.arch }}-web-core-modules-
 
     - name: Set composite outputs yarn
       if: ${{ inputs.mode == 'restore-yarn' }}
