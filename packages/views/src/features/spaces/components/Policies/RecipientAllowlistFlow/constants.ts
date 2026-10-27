@@ -78,8 +78,27 @@ export const getRuleTitle = (index: number, count: number): string => `Rule ${in
 export const RULE_POLICY_LABEL = 'Policy'
 export const RULE_TARGET_LABEL = 'Applies to'
 export const RULE_RECIPIENTS_LABEL = 'Allowed recipients'
+export const RULE_DELEGATE_CALL_LABEL = 'Delegate call'
 export const POLICY_LABELS = {
   erc20: 'Token withdraw allowlist',
   native: 'Native transfers',
+  allow: 'Allow everything else',
+  deny: 'Block everything else',
+  multiSend: 'Batched transactions',
 } as const
+export const FALLBACK_TARGET_NAME = 'Any address'
+
+export const REVIEW_FALLBACK_LABEL = 'Everything else'
+export const REVIEW_FALLBACK_ALLOW =
+  'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.'
+export const REVIEW_FALLBACK_DENY = 'Blocked. Only the transfers on this allowlist can be made.'
+
+export const ALLOWLIST_GAPS_TITLE = "What this allowlist doesn't cover"
+export const ALLOWLIST_GAP_APPROVALS =
+  'Token approvals are not restricted. An address you approve can still move the selected tokens with transferFrom.'
+export const ALLOWLIST_GAP_NATIVE =
+  'Native token transfers to recipients not on the list stay allowed, because everything else stays allowed.'
+export const ALLOWLIST_GAP_DELEGATE_CALLS =
+  'Delegate calls are not restricted, except Safe batches, whose transactions are each checked against the allowlist.'
+
 export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."

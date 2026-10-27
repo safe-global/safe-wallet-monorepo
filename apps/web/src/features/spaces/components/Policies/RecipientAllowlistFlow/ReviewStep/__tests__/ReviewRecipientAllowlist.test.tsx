@@ -56,6 +56,13 @@ const { describeSetupCall: mockDescribeSetupCall }: Pick<PolicyGuardContract, 'd
 )
 
 jest.mock('../useBuildAllowlistTransaction', () => ({ useBuildAllowlistTransaction: jest.fn() }))
+let mockDefaultFallback = 'allow'
+jest.mock('@/config/constants', () => ({
+  ...jest.requireActual('@/config/constants'),
+  get POLICY_DEFAULT_FALLBACK() {
+    return mockDefaultFallback
+  },
+}))
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   ...jest.requireActual('@safe-global/views/components/ui/tooltip'),
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -224,15 +231,18 @@ const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}, flowRe
 const configurations = buildAllowlistConfigurations(SEPOLIA, rules)
 const guardAddress = getPolicyGuardAddress(SEPOLIA)!
 
+const setupFor = (guardState: PolicyGuardState, input = configurations) =>
+  createAllowlistSetupTxs({ chainId: SEPOLIA, safeAddress: SAFE, guardAddress, guardState, configurations: input })
+
 const built = (guardState?: PolicyGuardState) => {
   if (!guardState) return mockBuild.mockReturnValue({})
-  const { txs, root } = createAllowlistSetupTxs({
-    safeAddress: SAFE,
-    guardAddress,
+  const setup = setupFor(guardState)
+  return mockBuild.mockReturnValue({
     guardState,
-    configurations,
+    configurations: setup.configurations,
+    root: setup.root,
+    txs: setup.txs,
   })
-  return mockBuild.mockReturnValue({ guardState, configurations, root, txs })
 }
 
 const mockOwners = (owners: string[], threshold = 2) =>
@@ -411,14 +421,60 @@ describe('ReviewRecipientAllowlist', () => {
     fireEvent.click(screen.getAllByTestId('action-item')[0])
 
     const rules = screen.getAllByTestId('allowlist-rule')
-    expect(rules.map((rule) => within(rule).getByText(/^Rule \d of \d$/).textContent)).toEqual([
-      'Rule 1 of 2',
-      'Rule 2 of 2',
-    ])
-    expect(within(rules[0]).getByText('Native transfers')).toBeInTheDocument()
-    expect(within(rules[0]).queryByText('Allowed recipients')).not.toBeInTheDocument()
-    expect(within(rules[1]).getByText('Token withdraw allowlist')).toBeInTheDocument()
-    expect(within(rules[1]).getByText('Allowed recipients')).toBeInTheDocument()
+    const count = setupFor({ status: 'none' }).configurations.length
+    expect(rules.map((rule) => within(rule).getByText(/^Rule \d of \d$/).textContent)).toEqual(
+      Array.from({ length: count }, (_, index) => `Rule ${index + 1} of ${count}`),
+    )
+    const [native, token, ...defaults] = rules
+    expect(within(native).getByText('Native transfers')).toBeInTheDocument()
+    expect(within(native).queryByText('Allowed recipients')).not.toBeInTheDocument()
+    expect(within(token).getByText('Token withdraw allowlist')).toBeInTheDocument()
+    expect(within(token).getByText('Allowed recipients')).toBeInTheDocument()
+    const fallbacks = defaults.slice(-2)
+    defaults.slice(0, -2).forEach((rule) => expect(within(rule).getByText('Batched transactions')).toBeInTheDocument())
+    fallbacks.forEach((rule) => {
+      expect(within(rule).getByText('Allow everything else')).toBeInTheDocument()
+      expect(within(rule).getByText('Any address')).toBeInTheDocument()
+      expect(within(rule).queryByText('ETH')).not.toBeInTheDocument()
+    })
+    expect(fallbacks[0]).not.toHaveTextContent('Delegate call')
+    expect(fallbacks[1]).toHaveTextContent('Delegate call')
+  })
+
+  it('says everything else stays allowed on a first setup and lists the gaps', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    const summary = within(screen.getByTestId('allowlist-review-summary'))
+    expect(summary.getByText('Everything else')).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent(
+      'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.',
+    )
+    const gaps = within(screen.getByTestId('allowlist-gaps'))
+    expect(gaps.getByText("What this allowlist doesn't cover")).toBeInTheDocument()
+    expect(gaps.getByText(/Token approvals are not restricted/)).toBeInTheDocument()
+    expect(gaps.getByText(/Native token transfers to recipients not on the list stay allowed/)).toBeInTheDocument()
+    expect(gaps.getByText(/Delegate calls are not restricted/)).toBeInTheDocument()
+  })
+
+  it('says everything else is blocked when the first setup installs the deny fallback', () => {
+    mockDefaultFallback = 'deny'
+    built({ status: 'none' })
+    mockDefaultFallback = 'allow'
+    renderReview()
+
+    expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent(
+      'Blocked. Only the transfers on this allowlist can be made.',
+    )
+    expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
+  })
+
+  it('shows no fallback row or gaps when the guard is already set, since nothing new is installed', () => {
+    built({ status: 'known' })
+    renderReview()
+
+    expect(screen.queryByText('Everything else')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
   })
 
   it('lists the recipients encoded in the configuration, not the form rules', () => {
@@ -427,12 +483,7 @@ describe('ReviewRecipientAllowlist', () => {
     mockBuild.mockReturnValue({
       guardState: { status: 'none' },
       configurations: [native, encodedOnlyOther],
-      txs: createAllowlistSetupTxs({
-        safeAddress: SAFE,
-        guardAddress,
-        guardState: { status: 'none' },
-        configurations: [native, encodedOnlyOther],
-      }).txs,
+      txs: setupFor({ status: 'none' }, [native, encodedOnlyOther]).txs,
     })
     renderReview()
 
@@ -452,13 +503,8 @@ describe('ReviewRecipientAllowlist', () => {
     const {
       root,
       txs: [request],
-    } = createAllowlistSetupTxs({
-      safeAddress: SAFE,
-      guardAddress,
-      guardState: { status: 'known' },
-      configurations,
-    })
-    expect(screen.getAllByTestId('allowlist-rule')).toHaveLength(2)
+    } = setupFor({ status: 'known' })
+    expect(screen.getAllByTestId('allowlist-rule')).toHaveLength(configurations.length)
     expect(document.body.textContent).not.toContain(root)
     expect(document.body.textContent).not.toContain(request.data)
   })
@@ -479,13 +525,8 @@ describe('ReviewRecipientAllowlist', () => {
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
-    const { root } = createAllowlistSetupTxs({
-      safeAddress: SAFE,
-      guardAddress,
-      guardState: { status },
-      configurations,
-    })
-    expect(mockSave).toHaveBeenCalledWith({ configurations, root })
+    const { configurations: installed, root } = setupFor({ status })
+    expect(mockSave).toHaveBeenCalledWith({ configurations: installed, root })
     expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
   })
 

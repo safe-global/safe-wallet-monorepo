@@ -20,7 +20,7 @@ import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 
 type BuiltAllowlist = AllowlistSetup & { guardState: PolicyGuardState }
 
-/** Returns the setup only once its tx is set, so the review and the CGW save always match it. */
+/** Returns the installed setup only once its tx is set, so the review and the CGW save always match it. */
 export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<BuiltAllowlist> => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
@@ -63,7 +63,7 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
     let setup: AllowlistSetup
     try {
       const configurations = buildAllowlistConfigurations(chainId, stableRules)
-      setup = createAllowlistSetupTxs({ safeAddress, guardAddress, guardState: state, configurations })
+      setup = createAllowlistSetupTxs({ chainId, safeAddress, guardAddress, guardState: state, configurations })
     } catch (e) {
       setSafeTxError(asError(e))
       return
