@@ -1,26 +1,26 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
 import {
-  GTFFeature,
-  isGtfFeePreviewAvailable,
+  PayFromSafeFeature,
+  isPayFromSafeAvailable,
   useFeesPreview,
   useGasPayerSelection,
-  useIsGtfSlotVisible,
-} from '@/features/gtf'
+  useIsPayFromSafeSlotVisible,
+} from '@/features/pay-from-safe'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { useCurrentChain } from '@/hooks/useChains'
 import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 
-/** Legacy GTF fee card: chains with the GTF flag that do not list PAY_FROM_SAFE. */
+/** Legacy Pay from Safe fee card: chains with the Pay from Safe flag that do not list PAY_FROM_SAFE. */
 const LegacyFeesPreview = (): ReactElement => {
-  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(GTFFeature)
+  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(PayFromSafeFeature)
   const feesData = useFeesPreview()
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
 
   // Block submit while the CGW fee preview is resolving. Otherwise a fast click on Continue/Execute
-  // signs before `gtfSelectedGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
+  // signs before `feeGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
   useEffect(() => {
     setIsSubmitDisabled(!!feesData.loading)
     return () => setIsSubmitDisabled(false)
@@ -36,7 +36,7 @@ const LegacyFeesPreview = (): ReactElement => {
  * the one choice made at signing); later signers see the locked line, or nothing.
  */
 const FeePayerSignStep = (): ReactElement | null => {
-  const { GasPayerSelector, $isReady } = useLoadFeature(GTFFeature)
+  const { GasPayerSelector, $isReady } = useLoadFeature(PayFromSafeFeature)
   const { safeTx } = useContext(SafeTxContext)
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
   const selection = useGasPayerSelection({ safeTx, offer: null, step: 'sign' })
@@ -62,14 +62,14 @@ const FeePayerSignStep = (): ReactElement | null => {
 
 const FeesPreview = (): ReactElement | null => {
   const chain = useCurrentChain()
-  return isGtfFeePreviewAvailable(chain) ? <FeePayerSignStep /> : <LegacyFeesPreview />
+  return isPayFromSafeAvailable(chain) ? <FeePayerSignStep /> : <LegacyFeesPreview />
 }
 
 const FeesPreviewSlot = withSlot({
   Component: FeesPreview,
   slotName: SlotName.Main,
   id: 'feesPreview',
-  useSlotCondition: useIsGtfSlotVisible,
+  useSlotCondition: useIsPayFromSafeSlotVisible,
 })
 
 export default FeesPreviewSlot

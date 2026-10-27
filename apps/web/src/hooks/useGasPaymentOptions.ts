@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -37,7 +37,7 @@ export const useGasPaymentOptions = ({
     () => getGasPaymentOptions(chain).filter((option) => !isBatch || option !== 'NO_FEE_CAMPAIGN'),
     [chain, isBatch],
   )
-  const isRefundTx = !!safeTx && isGtfSafePaid(safeTx.data)
+  const isRefundTx = !!safeTx && isPaidFromSafe(safeTx.data)
   const canWalletRelay = isBatch || walletCanRelay === true
   const isCampaignEligible = !!isCampaignEnabled && !!campaign.isEligible && !campaign.blockedAddress
 

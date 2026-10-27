@@ -37,7 +37,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useGasPayerSelection } from '@/features/gtf'
+import { PayFromSafeFeature, useGasPayerSelection } from '@/features/pay-from-safe'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 
 export const ExecuteForm = ({
@@ -91,10 +91,10 @@ export const ExecuteForm = ({
   const { gasPayer: offeredGasPayer, sponsorSpaceId: offeredSponsorSpaceId } = getGasPayment(offer, executionMethod)
 
   // The fee payment spec's selector where the chain lists PAY_FROM_SAFE; the sponsored/wallet one elsewhere.
-  const { GasPayerSelector, $isReady: isGtfReady } = useLoadFeature(GTFFeature)
+  const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(PayFromSafeFeature)
   const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
   const isPayFromSafe = selection.isPayFromSafe
-  const showsGasPayerSelector = isGtfReady && selection.view !== null
+  const showsGasPayerSelector = isPayFromSafeReady && selection.view !== null
 
   // Paying from the Safe relays through the public route, never against a Workspace allowance: the
   // Safe refunds the relayer on-chain (`handlePayment()`), and `WorkspaceRelayer` refuses such payloads.

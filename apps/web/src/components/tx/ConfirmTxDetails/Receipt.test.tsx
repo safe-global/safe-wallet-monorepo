@@ -32,9 +32,9 @@ jest.mock('@/hooks/useBalances', () => ({
   default: () => ({ balances: { items: mockBalanceItems } }),
 }))
 
-const mockUseGtfFeePreview = jest.fn()
-jest.mock('@/features/gtf/hooks/useGtfFeePreview', () => ({
-  useGtfFeePreview: () => mockUseGtfFeePreview(),
+const mockUsePayFromSafeFeePreview = jest.fn()
+jest.mock('@/features/pay-from-safe/hooks/usePayFromSafeFeePreview', () => ({
+  usePayFromSafeFeePreview: () => mockUsePayFromSafeFeePreview(),
 }))
 
 jest.mock('@/components/transactions/TxDetails/Summary/SafeTxHashDataRow', () => ({
@@ -79,8 +79,8 @@ const baseSafeTxData = {
 
 const renderReceipt = (ctx: Partial<SafeTxContextParams>, safeTxData: SafeTransaction['data'] = baseSafeTxData) => {
   const value = {
-    gtfPaymentMode: 'safe',
-    gtfSelectedGasToken: GAS_TOKEN,
+    feePaymentMode: 'safe',
+    feeGasToken: GAS_TOKEN,
     safeTx: { data: baseSafeTxData, signatures: new Map() } as unknown as SafeTransaction,
     ...ctx,
   } as unknown as SafeTxContextParams
@@ -92,7 +92,7 @@ const renderReceipt = (ctx: Partial<SafeTxContextParams>, safeTxData: SafeTransa
   )
 }
 
-describe('Receipt GTF fee preview', () => {
+describe('Receipt Pay from Safe fee preview', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRelayer = {
@@ -102,7 +102,7 @@ describe('Receipt GTF fee preview', () => {
 
   it('ignores the preview on chains without a RELAY_FEE relayer', () => {
     mockRelayer = null
-    mockUseGtfFeePreview.mockReturnValue({
+    mockUsePayFromSafeFeePreview.mockReturnValue({
       data: {
         txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: REFUND_RECEIVER },
       },
@@ -116,7 +116,7 @@ describe('Receipt GTF fee preview', () => {
   })
 
   it('previews the resolved gas fields before signing instead of the base zeros', () => {
-    mockUseGtfFeePreview.mockReturnValue({
+    mockUsePayFromSafeFeePreview.mockReturnValue({
       data: {
         txData: { safeTxGas: '12936', baseGas: '72094', gasPrice: '456199317491', refundReceiver: REFUND_RECEIVER },
       },
@@ -132,7 +132,7 @@ describe('Receipt GTF fee preview', () => {
   })
 
   it('falls back to the base safeTx values when no preview is available', () => {
-    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+    mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
 
     const { getAllByText } = renderReceipt({})
 
@@ -141,7 +141,7 @@ describe('Receipt GTF fee preview', () => {
   })
 
   it('shows the signed payload values once the tx is signed (no preview)', () => {
-    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+    mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
     const signedData = { ...baseSafeTxData, safeTxGas: '999', baseGas: '888', gasPrice: '777' }
     const signed = {
       data: signedData,
@@ -150,7 +150,7 @@ describe('Receipt GTF fee preview', () => {
 
     const { getByText } = renderReceipt({ safeTx: signed }, signedData)
 
-    // shouldPreviewGtf is false (signed), so the signed payload's own fields are shown.
+    // shouldPreviewPayFromSafe is false (signed), so the signed payload's own fields are shown.
     expect(getByText('999')).toBeInTheDocument()
     expect(getByText('888')).toBeInTheDocument()
     expect(getByText('777')).toBeInTheDocument()
@@ -164,7 +164,7 @@ describe('Receipt GasToken identity', () => {
     jest.clearAllMocks()
     mockRelayer = { type: 'RELAY_FEE' }
     mockBalanceItems = []
-    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+    mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
 
   it("labels a native gas token with the chain's currency logo and symbol", () => {
@@ -181,7 +181,7 @@ describe('Receipt GasToken identity', () => {
     ]
     const erc20Data = { ...baseSafeTxData, gasToken: ERC20_GAS_TOKEN }
 
-    const { getByTestId } = renderReceipt({ gtfSelectedGasToken: ERC20_GAS_TOKEN }, erc20Data)
+    const { getByTestId } = renderReceipt({ feeGasToken: ERC20_GAS_TOKEN }, erc20Data)
 
     const icon = getByTestId('gas-token-icon')
     expect(icon).toHaveAttribute('data-logo', 'https://example.com/uni.png')
@@ -191,7 +191,7 @@ describe('Receipt GasToken identity', () => {
   it('omits the icon for an ERC-20 gas token the Safe does not hold', () => {
     const erc20Data = { ...baseSafeTxData, gasToken: ERC20_GAS_TOKEN }
 
-    const { queryByTestId } = renderReceipt({ gtfSelectedGasToken: ERC20_GAS_TOKEN }, erc20Data)
+    const { queryByTestId } = renderReceipt({ feeGasToken: ERC20_GAS_TOKEN }, erc20Data)
 
     expect(queryByTestId('gas-token-icon')).not.toBeInTheDocument()
   })
@@ -201,7 +201,7 @@ describe('Receipt To row', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRelayer = { type: 'RELAY_FEE' }
-    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+    mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
 
   it('renders the name chip beside the label and the address on a right-aligned full-width line below', () => {

@@ -5,7 +5,7 @@ import ExecuteForm from './ExecuteForm'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
-import { useIsPayFromSafeSignAndExecute } from '@/features/gtf'
+import { useIsPayFromSafeSignAndExecute } from '@/features/pay-from-safe'
 
 export const Execute = ({
   onSubmit,

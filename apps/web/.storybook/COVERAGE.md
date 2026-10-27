@@ -365,12 +365,12 @@ Mid-level view - components grouped by directory.
 <details>
 <summary>📁 Gtf (4 families, 4 components) - ✅ 4/4 covered (3 with own stories), 30 exports</summary>
 
-| Family               | Path                                         | Components | Story                              | Exports                                             |
-| -------------------- | -------------------------------------------- | ---------- | ---------------------------------- | --------------------------------------------------- |
-| FeeInfoBanner        | features/gtf/components/FeeInfoBanner        | 1          | `FeeInfoBanner.stories.tsx`        | Default                                             |
-| FeesPreview          | features/gtf/components/FeesPreview          | 1          | `FeesPreview.stories.tsx`          | Confirmation, ConfirmationTwoCurrencies, Default... |
-| HistoryFeesAccordion | features/gtf/components/HistoryFeesAccordion | 1          | `HistoryFeesAccordion.stories.tsx` | Collapsed, FreeExecutionFee, NoFiat...              |
-| Shared               | features/gtf/components/shared               | 1          | ↑ group (Gtf)                      | —                                                   |
+| Family               | Path                                                   | Components | Story                              | Exports                                             |
+| -------------------- | ------------------------------------------------------ | ---------- | ---------------------------------- | --------------------------------------------------- |
+| FeeInfoBanner        | features/pay-from-safe/components/FeeInfoBanner        | 1          | `FeeInfoBanner.stories.tsx`        | Default                                             |
+| FeesPreview          | features/pay-from-safe/components/FeesPreview          | 1          | `FeesPreview.stories.tsx`          | Confirmation, ConfirmationTwoCurrencies, Default... |
+| HistoryFeesAccordion | features/pay-from-safe/components/HistoryFeesAccordion | 1          | `HistoryFeesAccordion.stories.tsx` | Collapsed, FreeExecutionFee, NoFiat...              |
+| Shared               | features/pay-from-safe/components/shared               | 1          | ↑ group (Gtf)                      | —                                                   |
 
 </details>
 
@@ -1520,10 +1520,10 @@ Detailed view - every component with its coverage status.
 | ExternalLink                     | common      | components/common/ExternalLink/index.tsx                                                              | Family (ExternalLink)                    |
 | FallbackHandlerWarning           | settings    | components/settings/FallbackHandler/index.tsx                                                         | Group (Settings)                         |
 | FallbackSwapWidget               | other       | features/swap/components/FallbackSwapWidget/index.tsx                                                 | Group (Swap)                             |
-| FeeBreakdownRow                  | other       | features/gtf/components/shared/FeeBreakdownRow.tsx                                                    | Group (Gtf)                              |
-| FeeInfoBanner                    | other       | features/gtf/components/FeeInfoBanner/index.tsx                                                       | Family (FeeInfoBanner)                   |
+| FeeBreakdownRow                  | other       | features/pay-from-safe/components/shared/FeeBreakdownRow.tsx                                          | Group (Gtf)                              |
+| FeeInfoBanner                    | other       | features/pay-from-safe/components/FeeInfoBanner/index.tsx                                             | Family (FeeInfoBanner)                   |
 | FeeInfoBannerSlot                | feature     | components/tx-flow/features/FeeInfoBanner.tsx                                                         | Group (Tx-flow)                          |
-| FeesPreview                      | other       | features/gtf/components/FeesPreview/index.tsx                                                         | Family (FeesPreview)                     |
+| FeesPreview                      | other       | features/pay-from-safe/components/FeesPreview/index.tsx                                               | Family (FeesPreview)                     |
 | FeesPreviewSlot                  | feature     | components/tx-flow/features/FeesPreview.tsx                                                           | Group (Tx-flow)                          |
 | FeeTokenPreference               | settings    | components/settings/FeeTokenPreference/index.tsx                                                      | Group (Settings)                         |
 | FiatBalance                      | balance     | components/balances/AssetsTable/FiatBalance.tsx                                                       | Family (AssetsTable)                     |
@@ -1565,7 +1565,7 @@ Detailed view - every component with its coverage status.
 | HexEncodedData                   | transaction | components/transactions/HexEncodedData/index.tsx                                                      | Group (Transactions)                     |
 | HiddenTokenButton                | balance     | components/balances/HiddenTokenButton/index.tsx                                                       | Family (HiddenTokenButton)               |
 | HiddenTokensInfo                 | balance     | components/balances/AssetsTable/HiddenTokensInfo.tsx                                                  | Family (AssetsTable)                     |
-| HistoryFeesAccordion             | other       | features/gtf/components/HistoryFeesAccordion/index.tsx                                                | Family (HistoryFeesAccordion)            |
+| HistoryFeesAccordion             | other       | features/pay-from-safe/components/HistoryFeesAccordion/index.tsx                                      | Family (HistoryFeesAccordion)            |
 | HnActivatedSettingsBanner        | other       | features/hypernative/components/HnActivatedSettingsBanner/HnActivatedSettingsBanner.tsx               | Own story (HnActivatedSettingsBanner)    |
 | HnAnalysisGroupCard              | other       | features/hypernative/components/HnAnalysisGroupCard/index.tsx                                         | Group (Hypernative)                      |
 | HnBanner                         | other       | features/hypernative/components/HnBanner/HnBanner.tsx                                                 | Own story (HnBanner)                     |

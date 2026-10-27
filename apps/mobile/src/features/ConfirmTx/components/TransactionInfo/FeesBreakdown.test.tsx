@@ -60,13 +60,13 @@ const renderWithTheme = () =>
 describe('FeesBreakdown — GTF gating', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('renders nothing when the GTF feature is disabled', () => {
+  it('renders nothing when the Pay from Safe feature is disabled', () => {
     mockHasFeature.mockReturnValue(false)
     renderWithTheme()
     expect(screen.queryByTestId('fees-breakdown')).toBeNull()
   })
 
-  it('renders the fees block when the GTF feature is enabled', () => {
+  it('renders the fees block when the Pay from Safe feature is enabled', () => {
     mockHasFeature.mockReturnValue(true)
     renderWithTheme()
     expect(screen.getByTestId('fees-breakdown')).toBeTruthy()

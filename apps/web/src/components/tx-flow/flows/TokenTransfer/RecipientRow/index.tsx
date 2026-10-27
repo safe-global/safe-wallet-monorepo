@@ -27,7 +27,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { X } from 'lucide-react'
-import { useResolvedGasToken, useIsPayFromSafeEnabled, type FeePreviewTx } from '@/features/gtf'
+import { useResolvedGasToken, useIsPayFromSafeEnabled, type FeePreviewTx } from '@/features/pay-from-safe'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
 
@@ -83,17 +83,17 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  const isGtfEnabled = useIsPayFromSafeEnabled()
+  const isPayFromSafeEnabled = useIsPayFromSafeEnabled()
   const [maxPressed, setMaxPressed] = useState(false)
 
   // Probe only after Max click — eager probing on every edit wastes network for the common case.
   const previewTx = useMemo<FeePreviewTx | undefined>(() => {
-    if (!isGtfEnabled || !maxPressed || !isAddressValid || !selectedToken) return undefined
+    if (!isPayFromSafeEnabled || !maxPressed || !isAddressValid || !selectedToken) return undefined
     const params = createTokenTransferParams(recipient, '1', selectedToken.tokenInfo.decimals, tokenAddress)
     return { ...params, operation: OperationType.Call }
-  }, [isGtfEnabled, maxPressed, isAddressValid, recipient, selectedToken, tokenAddress])
+  }, [isPayFromSafeEnabled, maxPressed, isAddressValid, recipient, selectedToken, tokenAddress])
 
-  const resolution = useResolvedGasToken(isGtfEnabled ? tokenAddress : undefined, previewTx)
+  const resolution = useResolvedGasToken(isPayFromSafeEnabled ? tokenAddress : undefined, previewTx)
   const sentTokenIsFeeToken = resolution.status === 'resolved' && sameAddress(tokenAddress, resolution.address)
 
   // Reset banner when token changes
@@ -101,7 +101,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
     setMaxPressed(false)
   }, [tokenAddress])
 
-  const showFeeBanner = !!isGtfEnabled && !isSpendingLimitType && maxPressed && sentTokenIsFeeToken
+  const showFeeBanner = !!isPayFromSafeEnabled && !isSpendingLimitType && maxPressed && sentTokenIsFeeToken
 
   const onRemove = useCallback(() => {
     remove?.(fieldArray.index)
@@ -132,7 +132,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
         </div>
 
         {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
+          <Alert data-testid="pay-from-safe-fee-banner" variant="info" className="items-center">
             <AlertSeverityIcon variant="info" />
             <AlertDescription className="flex w-full items-center justify-between gap-2">
               <span>

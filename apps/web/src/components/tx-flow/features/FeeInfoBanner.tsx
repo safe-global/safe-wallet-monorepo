@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useIsGtfSlotVisible, IS_RELAYING_LIVE } from '@/features/gtf'
+import { PayFromSafeFeature, useIsPayFromSafeSlotVisible, IS_RELAYING_LIVE } from '@/features/pay-from-safe'
 import { SlotName, withSlot } from '../slots'
 
 const FeeInfoBanner = (): ReactElement => {
-  const { FeeInfoBanner: FeeInfoBannerComponent } = useLoadFeature(GTFFeature)
+  const { FeeInfoBanner: FeeInfoBannerComponent } = useLoadFeature(PayFromSafeFeature)
 
   return <FeeInfoBannerComponent />
 }
@@ -13,7 +13,7 @@ const FeeInfoBannerSlot = withSlot({
   Component: FeeInfoBanner,
   slotName: SlotName.Sidebar,
   id: 'feeInfoBanner',
-  useSlotCondition: () => useIsGtfSlotVisible() && IS_RELAYING_LIVE,
+  useSlotCondition: () => useIsPayFromSafeSlotVisible() && IS_RELAYING_LIVE,
 })
 
 export default FeeInfoBannerSlot

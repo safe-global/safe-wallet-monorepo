@@ -32,8 +32,8 @@ import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonc
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature } from '@/features/gtf'
-import { mergeGtfFeeParams } from '@/features/gtf/services'
+import { PayFromSafeFeature } from '@/features/pay-from-safe'
+import { mergePayFromSafeFeeParams } from '@/features/pay-from-safe/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -78,8 +78,8 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
-  const gtfFeature = useLoadFeature(GTFFeature)
-  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const payFromSafeFeature = useLoadFeature(PayFromSafeFeature)
+  const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
   const nestedChildTx = flowData?.nestedChildTx
@@ -90,13 +90,13 @@ export const useTxActions = (): TxActions => {
     const safeAddress = scope?.safeAddress ?? safe.address.value
     const chainId = scope?.chainId ?? safe.chainId
 
-    const withGtfFeeParams = (safeTx: SafeTransaction) =>
-      mergeGtfFeeParams({
+    const withPayFromSafeFeeParams = (safeTx: SafeTransaction) =>
+      mergePayFromSafeFeeParams({
         safeTx,
         chain,
-        gtfPaymentMode,
-        gtfSelectedGasToken,
-        gtfFeature,
+        feePaymentMode,
+        feeGasToken,
+        payFromSafeFeature,
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
@@ -141,7 +141,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      safeTx = await withGtfFeeParams(safeTx)
+      safeTx = await withPayFromSafeFeeParams(safeTx)
 
       // Smart contract wallets can't sign off-chain
       const viaSafe = isSafeSigner(signer)
@@ -279,9 +279,9 @@ export const useTxActions = (): TxActions => {
     onboard,
     chain,
     dispatch,
-    gtfFeature,
-    gtfPaymentMode,
-    gtfSelectedGasToken,
+    payFromSafeFeature,
+    feePaymentMode,
+    feeGasToken,
     currency,
     nestedChildTx,
   ])

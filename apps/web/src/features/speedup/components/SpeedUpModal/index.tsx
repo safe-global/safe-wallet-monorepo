@@ -23,14 +23,14 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useIsPayFromSafeEnabled } from '@/features/gtf'
+import { useIsPayFromSafeEnabled } from '@/features/pay-from-safe'
 
 type Props = {
   open: boolean
@@ -46,7 +46,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
-  const isGtfChain = useIsPayFromSafeEnabled() ?? false
+  const isPayFromSafeChain = useIsPayFromSafeEnabled() ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -99,7 +99,11 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
         )
         const { data: details } = await trigger({ chainId: chainInfo.chainId, id: txId })
         const txType = getTransactionTrackingType(details)
-        const gasPaymentSource = isGtfChain ? (isGtfSafePaid(safeTx.data) ? 'safe' : 'signing_wallet') : undefined
+        const gasPaymentSource = isPayFromSafeChain
+          ? isPaidFromSafe(safeTx.data)
+            ? 'safe'
+            : 'signing_wallet'
+          : undefined
         trackEvent(
           { ...TX_EVENTS.SPEED_UP, label: txType },
           gasPaymentSource ? { [MixpanelEventParams.GAS_PAYMENT_SOURCE]: gasPaymentSource } : undefined,
@@ -146,7 +150,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     dispatch,
     gasLimit,
     handleClose,
-    isGtfChain,
+    isPayFromSafeChain,
     onboard,
     pendingTx,
     safeAddress,
