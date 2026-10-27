@@ -91,7 +91,6 @@
     "@web3-onboard/hw-common": "^2.3.3",
     "@web3-onboard/injected-wallets": "^2.11.3",
     "@web3-onboard/walletconnect": "2.6.2",
-    "blo": "^1.1.1",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

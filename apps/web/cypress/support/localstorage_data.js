@@ -880,7 +880,6 @@ export const safeAppSafePermissions = (appUrl) => ({
 
 export const cookies = {
   acceptedCookies: JSON.stringify(cookieState),
-  acceptedTokenListOnboarding: true,
 }
 
 export const safeLabsTerms = {

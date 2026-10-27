@@ -105,11 +105,11 @@ test('removes stale Safe keys and categories on reset', async (t) => {
 })
 
 test('skips only the listed cases of a spec and keeps its other tests', async (t) => {
-  const runner = await fixtureRunner(t, 'cypress/e2e/regression/multichain_networkswitch.cy.js')
-  const skipped =
-    'Verify the list of networks where the safe is already deployed with the same address when all networks added'
-  await assert.rejects(runner.runBeforeEach(skipped), /skipped/)
-  await runner.runBeforeEach('Verify that the network switch opens the network list')
+  const runner = await fixtureRunner(t, 'cypress/e2e/regression/twaps_integration.cy.js')
+  await assert.rejects(runner.runBeforeEach('Verify "Balances" tag and value is present for selected token'), /skipped/)
+  await runner.runBeforeEach(
+    'Verify "Sell amount too small" is shown when the per-part sell amount is below CoW\'s minimum',
+  )
 })
 
 test('waits for setup and propagates backend failures instead of loading hosted fixtures', async (t) => {
