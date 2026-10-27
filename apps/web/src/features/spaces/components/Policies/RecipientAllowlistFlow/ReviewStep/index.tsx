@@ -137,7 +137,13 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const hasSummary = Boolean(guardState && selected && chainId)
 
   return (
-    <ReviewTransaction {...props} title={REVIEW_STEP_TITLE} withDecodedData={false} onSubmit={handleSubmit}>
+    <ReviewTransaction
+      {...props}
+      title={REVIEW_STEP_TITLE}
+      withDecodedData={false}
+      withMultisend={false}
+      onSubmit={handleSubmit}
+    >
       {hasSummary && selected && (
         <AllowlistSummary
           accountLabel={getAllowlistAccountLabel(

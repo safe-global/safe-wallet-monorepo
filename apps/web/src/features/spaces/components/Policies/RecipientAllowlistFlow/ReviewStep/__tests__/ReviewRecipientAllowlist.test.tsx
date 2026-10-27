@@ -124,8 +124,25 @@ jest.mock('@/components/tx-flow/TxFlowStep', () => ({
 }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
-  default: ({ title, children, onSubmit }: { title?: string; children?: ReactNode; onSubmit: () => void }) => (
-    <div data-testid="review-transaction" data-title={title}>
+  default: ({
+    title,
+    children,
+    onSubmit,
+    withDecodedData,
+    withMultisend,
+  }: {
+    title?: string
+    children?: ReactNode
+    onSubmit: () => void
+    withDecodedData?: boolean
+    withMultisend?: boolean
+  }) => (
+    <div
+      data-testid="review-transaction"
+      data-title={title}
+      data-with-decoded-data={String(withDecodedData)}
+      data-with-multisend={String(withMultisend)}
+    >
       {children}
       <button onClick={() => onSubmit()}>continue</button>
     </div>
@@ -279,6 +296,15 @@ describe('ReviewRecipientAllowlist', () => {
     expect(screen.getByTestId('review-transaction')).toBeInTheDocument()
     expect(screen.queryByTestId('review-skeleton')).not.toBeInTheDocument()
     expect(screen.queryByTestId('allowlist-review-summary')).not.toBeInTheDocument()
+  })
+
+  it('hides the generic decoded data and action list, since it lists the setup calls itself', () => {
+    built({ status: 'partial', missingSlot: 'module' })
+    renderReview()
+
+    const review = screen.getByTestId('review-transaction')
+    expect(review).toHaveAttribute('data-with-decoded-data', 'false')
+    expect(review).toHaveAttribute('data-with-multisend', 'false')
   })
 
   it('shows the banner with the review description', () => {
