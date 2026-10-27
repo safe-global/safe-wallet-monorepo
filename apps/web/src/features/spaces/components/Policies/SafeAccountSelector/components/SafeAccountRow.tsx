@@ -11,7 +11,7 @@ import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSe
 import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
 import type { SafeItemDataChain } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
-import SafeIdentity from './SafeIdentity'
+import { SafeIdentity } from '../../components/SafeIdentity'
 import type {
   SafeAccountIneligibility,
   SafeAccountOption,

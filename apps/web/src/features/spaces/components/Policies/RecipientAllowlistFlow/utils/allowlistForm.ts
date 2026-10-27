@@ -7,11 +7,15 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistFormRecipient, AllowlistRule, RecipientAllowlistFormValues } from '../types'
 
-const uniqueAddresses = (addresses: readonly string[]): string[] =>
-  addresses.reduce<string[]>(
-    (unique, address) => (unique.some((existing) => sameAddress(existing, address)) ? unique : [...unique, address]),
-    [],
-  )
+const uniqueAddresses = (addresses: readonly string[]): string[] => {
+  const seen = new Set<string>()
+  return addresses.filter((address) => {
+    const key = address.toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
 
 export const getFormTokenAddresses = (heldTokens: readonly string[], values: RecipientAllowlistFormValues): string[] =>
   uniqueAddresses([...heldTokens, ...values.addedTokens])
@@ -43,7 +47,7 @@ export const buildAllowlistRules = (
   }))
 }
 
-/** Adding a recipient that is listed but deselected selects it again instead of listing it twice. */
+/** Added recipients are selected; one already listed is selected again instead of listed twice. */
 export const addAllowlistRecipients = (
   recipients: readonly AllowlistFormRecipient[],
   added: readonly AllowlistFormRecipient[],
@@ -52,7 +56,10 @@ export const addAllowlistRecipients = (
     const match = added.find(({ address }) => sameAddress(address, recipient.address))
     return match ? { ...recipient, name: recipient.name ?? match.name, selected: true } : recipient
   })
-  const fresh = added.filter(({ address }) => !recipients.some((recipient) => sameAddress(recipient.address, address)))
+  const fresh = added
+    .filter(({ address }, index) => added.findIndex((other) => sameAddress(other.address, address)) === index)
+    .filter(({ address }) => !recipients.some((recipient) => sameAddress(recipient.address, address)))
+    .map((recipient) => ({ ...recipient, selected: true }))
 
   return [...reselected, ...fresh]
 }

@@ -5,7 +5,7 @@ import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowType } from '@/services/analytics'
 import CreateRecipientAllowlistPolicy from './CreateStep'
 import { CREATE_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import FlowSubtitle from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/FlowSubtitle'
+import { FLOW_SUBTITLE } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import RecipientAllowlistIcon from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/RecipientAllowlistIcon'
 
 /** The SafeScopeProvider sits above TxFlow so every tx-flow provider and hook resolves the Safe picked in step 1. */
@@ -13,7 +13,7 @@ const RecipientAllowlistFlow = (): ReactElement => (
   <SafeScopeProvider>
     <TxFlow
       icon={RecipientAllowlistIcon}
-      subtitle={<FlowSubtitle />}
+      subtitle={FLOW_SUBTITLE}
       eventCategory={TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST}
     >
       <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>

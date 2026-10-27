@@ -11,16 +11,9 @@ import CreateRecipientAllowlistPolicy from '..'
 const SEPOLIA = '11155111'
 const SAFE_A = faker.finance.ethereumAddress()
 const SAFE_B = faker.finance.ethereumAddress()
-const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
-
-const mockUseUrlSpaceId = jest.fn<string | null, []>()
-jest.mock('@/hooks/useUrlSpaceId', () => ({
-  ...jest.requireActual('@/hooks/useUrlSpaceId'),
-  useUrlSpaceId: () => mockUseUrlSpaceId(),
-}))
 
 // The selector has its own suite; here only what the step does with a pick is under test.
 jest.mock('../../../SafeAccountSelector', () => ({
@@ -93,7 +86,6 @@ const renderStep = (scopeKey?: string) => {
 describe('CreateRecipientAllowlistPolicy', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseUrlSpaceId.mockReturnValue(null)
     guard(undefined)
   })
 
@@ -139,36 +131,44 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('links to the Safe settings in the current Workspace', () => {
-    mockUseUrlSpaceId.mockReturnValue(SPACE_ID)
+  it.each<GuardStatus>([{ status: 'none' }, { status: 'known' }])(
+    'shows no guard banner when an allowlist can be set up, with guard state %o',
+    (status) => {
+      accounts([option(SAFE_A)])
+      guard(status)
+      renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+      expect(screen.queryByTestId(/^guard-status-/)).not.toBeInTheDocument()
+    },
+  )
+
+  it('shows the partial guard warning', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'partial', missingSlot: 'module' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
-      'href',
-      `/settings/modules?safe=sep:${SAFE_A}&spaceId=${SPACE_ID}`,
-    )
+    expect(screen.getByTestId('guard-status-warning')).toHaveTextContent('The Safe policy guard is only partly enabled')
   })
 
-  it('links to the Safe settings without a Workspace when the URL has none', () => {
+  it('shows the guard banner when the guard blocks an allowlist', () => {
     accounts([option(SAFE_A)])
-    guard({ status: 'partial', missingSlot: 'module' })
+    guard({ status: 'unsupported' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
-      'href',
-      `/settings/modules?safe=sep:${SAFE_A}`,
-    )
+    expect(screen.getByTestId('guard-status-destructive')).toHaveTextContent('This Safe account needs an update')
   })
 
-  it('shows an unknown guard as a shortened, copyable address', () => {
+  it('links an unknown guard to the Safe settings', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'unknown', foreignGuards: [{ slot: 'transaction', address: SAFE_B }] })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.getByText(new RegExp(`${SAFE_B.slice(0, 6)}\\.\\.\\.${SAFE_B.slice(-4)}`, 'i'))).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /copy/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+      'href',
+      expect.stringContaining(`/settings/modules?safe=sep:${SAFE_A}`),
+    )
+    expect(screen.getByTestId('installed-policies')).toHaveTextContent('Unknown policy')
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
   it('retries a failed guard check', () => {

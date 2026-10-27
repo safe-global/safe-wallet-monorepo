@@ -2,18 +2,17 @@ import type { ReactElement } from 'react'
 import NextLink from 'next/link'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Link } from '@safe-global/views/components/ui/link'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
-import { AccountIdentity } from '../../components/AccountIdentity'
+import { SafeIdentity } from '../../components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import GuardStatusBanner from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
+import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import {
   NESTED_SAFES_NOTICE_TITLE,
   getNestedSafesNoticeText,
@@ -24,7 +23,7 @@ import {
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
-const renderGuardAddress = (address: string) => <AccountIdentity address={address} showCopyButton />
+const renderGuardAddress = (address: string, name: string) => <SafeIdentity address={address} name={name} />
 
 const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
@@ -69,23 +68,25 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
         />
 
         {isSettled && hasWallet && !hasSelectableAccount && (
-          <Alert
-            variant="warning"
-            outlined={false}
-            className="*:data-[slot=alert-description]:text-muted-foreground"
+          <StatusAlert
+            tone="warning"
+            title={NO_ELIGIBLE_SAFES_TITLE}
+            description={NO_ELIGIBLE_SAFES_DESCRIPTION}
             data-testid="no-eligible-safes"
-          >
-            <AlertSeverityIcon variant="warning" />
-            <AlertTitle>{NO_ELIGIBLE_SAFES_TITLE}</AlertTitle>
-            <AlertDescription>{NO_ELIGIBLE_SAFES_DESCRIPTION}</AlertDescription>
-          </Alert>
+          />
         )}
 
         {selectedSafe && guard && (
           <GuardStatusBanner
             guard={guard}
             safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
-            settingsLink={settingsHref && <Link render={<NextLink href={settingsHref} />}>Go to Safe settings</Link>}
+            settingsLink={
+              settingsHref && (
+                <Button variant="outline" render={<NextLink href={settingsHref} />}>
+                  Go to Safe settings
+                </Button>
+              )
+            }
             renderAddress={renderGuardAddress}
             onRetry={retry}
           />
