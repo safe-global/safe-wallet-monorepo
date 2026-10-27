@@ -1,10 +1,10 @@
 import { formatSignedCount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
-import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
+import { isActiveAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** Tells the pending states apart: signatures still missing, ready to execute, or waiting out the delay. */
 export const getPendingStatusDetail = (policy: Policy, nowMs = Date.now()): string | undefined => {
-  if (isAllowlistPolicy(policy) && policy.status === 'active' && policy.scheduledChange) {
+  if (isActiveAllowlistPolicy(policy) && policy.scheduledChange) {
     return formatAppliesAt(policy.scheduledChange.appliesAt, nowMs)
   }
   if (policy.status === 'failed') return 'The transaction failed. Nothing changed on this account.'

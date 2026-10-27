@@ -9,7 +9,7 @@
 
 export default {
   // Sepolia Safes
-  /** Create Safe CF and multichain testing - Used in: create_safe_cf.cy.js, notifications.cy.js */
+  /** Create Safe CF and multichain testing - Used in: notifications.cy.js */
   SEP_STATIC_SAFE_0: 'sep:0x926186108f74dB20BFeb2b6c888E523C78cb7E00',
   /** Swaps and swap history testing - Used in: swaps_history.cy.js, limit_order_history.cy.js, apps_list.cy.js */
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
@@ -30,8 +30,6 @@ export default {
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
   /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js, create_tx.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Sidebar non-owner testing */
-  SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',

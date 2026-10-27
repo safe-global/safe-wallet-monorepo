@@ -3,6 +3,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent } from '@/services/tx/txEvents'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type {
   ActivePolicyDto,
   PendingPolicyDto,
@@ -13,16 +14,26 @@ import {
   useSpacePoliciesGetActivePoliciesV1Query,
   useSpacePoliciesGetPendingPoliciesV1Query,
 } from '@/store/api/gateway/spacePolicies'
+import useChains from '@/hooks/useChains'
+import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
+import { isAllowlistEnabled } from '@/features/policy-guard/services'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
-import { mapActivePolicies } from '../utils/mapActivePolicies'
+import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { useActivatingPolicies } from './useActivatingPolicies'
+import { useAllowlistTokenResolver } from './useAllowlistTokenResolver'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
-import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
+import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
 export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']
+
+export const ALLOWLIST_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
+  'erc20-transfer',
+  'native-transfer',
+]
 
 /** Proposer grants take effect off chain at once, so only spending limits can be pending. */
 export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = ['spending-limit']
@@ -41,6 +52,26 @@ const ACTIVE_REFETCH_EVENTS = [TxEvent.SUCCESS]
 const NO_POLICIES: ActivePolicyDto[] = []
 const NO_PENDING: PendingPolicyDto[] = []
 
+/** CGW sends no metadata with a native-transfer policy, so the coin comes from the chain config. */
+const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
+  const byChainId = new Map(chains.map((chain) => [chain.chainId, chain.nativeCurrency]))
+
+  return (chainId) => {
+    const native = byChainId.get(chainId)
+    return native
+      ? { address: ZERO_ADDRESS, symbol: native.symbol, decimals: native.decimals, logoUri: native.logoUri }
+      : undefined
+  }
+}
+
+const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[], resolveErc20Token: Erc20TokenResolver): Policy[] => {
+  const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
+
+  return mapActivePolicies(dtos, toNativeTokenResolver(chains), resolveErc20Token).filter(
+    (policy) => !isAllowlistPolicy(policy) || allowlistChainIds.has(policy.safe.chainId),
+  )
+}
+
 export type SpacePoliciesResult = {
   policies: Policy[]
   isLoading: boolean
@@ -53,10 +84,15 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const skip = !isUserSignedIn || !spaceId
+  const isAllowlistActive = useIsAllowlistActiveInSpace(spaceId ?? undefined)
+  // Waiting for the gate keeps the request from running once without allowlists and again with them.
+  const isWaitingForGate = !skip && isAllowlistActive === undefined
+  const { configs: chains } = useChains()
+  const types = isAllowlistActive ? [...TABLE_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] : TABLE_POLICY_TYPES
 
   const active = useSpacePoliciesGetActivePoliciesV1Query(
-    { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
-    { skip, ...SPACE_REFRESH_OPTIONS },
+    { spaceId: spaceId ?? '', types },
+    { skip: skip || isWaitingForGate, ...SPACE_REFRESH_OPTIONS },
   )
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
@@ -81,7 +117,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
   }, [pendingDtos])
 
-  const activeRows = useMemo(() => mapActivePolicies(dtos), [dtos])
+  const resolveErc20Token = useAllowlistTokenResolver(dtos)
+  const activeRows = useMemo(() => toActiveRows(dtos, chains, resolveErc20Token), [dtos, chains, resolveErc20Token])
   const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
@@ -95,7 +132,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   )
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
-  const isLoadingActive = active.isFetching && !active.currentData
+  const isLoadingActive = isWaitingForGate || (active.isFetching && !active.currentData)
 
   const refetch = () => {
     active.refetch()

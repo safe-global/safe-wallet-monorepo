@@ -8,18 +8,22 @@ import { NetworkSelector } from '../../src/pages/network-selector.page'
 
 const NETWORKS = { Sepolia: 11155111, Ethereum: 1 }
 
+const sorted = (addresses: string[]): string[] => [...addresses].sort()
+
 test.describe('Create a Safe on several networks', { tag: '@e2e' }, () => {
-  test('should deploy the Safe at one address on Sepolia and Ethereum, on the L1 singleton only on Ethereum', async ({
+  test('should deploy the Safe at one address with two signers and threshold 2 on Sepolia and Ethereum, on the L1 singleton only on Ethereum', async ({
     safePage,
     journey,
   }) => {
     // Each activation waits until the gateway indexes the deployment
     test.slow()
-    const { owner4 } = journey.owners
+    const { owner3, owner4 } = journey.owners
     const create = new CreateSafePage(safePage)
     const networkSelector = new NetworkSelector(safePage)
 
-    const address = getAddress(await create.createMultichainPayLaterSafe(Object.keys(NETWORKS)))
+    const address = getAddress(
+      await create.createMultichainPayLaterSafe(Object.keys(NETWORKS), { owners: [owner3.address], threshold: 2 }),
+    )
     journey.recordSafe({ prefixedAddress: `sep:${address}` })
     await create.activate()
     await networkSelector.switchTo('Ethereum')
@@ -29,7 +33,10 @@ test.describe('Create a Safe on several networks', { tag: '@e2e' }, () => {
       await test.step(`${network} has the Safe at ${address}`, async () => {
         const env = forkEnvironment(journey.env, chainId)
         const { owners, threshold } = await readSafeSetup(env, address)
-        expect({ owners, threshold }).toEqual({ owners: [owner4.address], threshold: 1 })
+        expect({ owners: sorted(owners), threshold }).toEqual({
+          owners: sorted([owner4.address, owner3.address]),
+          threshold: 2,
+        })
         const { version, singleton } = await readSingleton(env, address)
         expect(singleton).toBe(multichainSingleton(chainId, version))
       })
