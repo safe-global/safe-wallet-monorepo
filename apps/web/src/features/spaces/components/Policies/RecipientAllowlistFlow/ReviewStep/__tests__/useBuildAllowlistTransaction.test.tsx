@@ -79,6 +79,7 @@ describe('useBuildAllowlistTransaction', () => {
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
     expect(result.current.guardState).toEqual({ status: 'none' })
     expect(result.current.configurations).toHaveLength(1)
+    expect(result.current.configureRoot).toMatch(/^0x[0-9a-f]{64}$/)
     expect(result.current.calls).toEqual(sentBatch())
   })
 

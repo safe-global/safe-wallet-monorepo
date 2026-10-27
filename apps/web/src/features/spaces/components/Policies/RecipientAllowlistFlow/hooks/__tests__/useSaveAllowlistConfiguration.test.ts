@@ -2,7 +2,6 @@ import { act, renderHook } from '@/tests/test-utils'
 import { OperationType } from '@safe-global/types-kit'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { SAVE_CONFIGURATION_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import { useLoadFeature } from '@/features/__core__'
 import type { PolicyConfiguration } from '@/features/policy-guard'
 import { usePoliciesCreateConfigurationRequestV1Mutation } from '@/store/api/gateway/spacePolicies'
 import { showNotification } from '@/store/notificationsSlice'
@@ -13,10 +12,6 @@ import { useSaveAllowlistConfiguration } from '../useSaveAllowlistConfiguration'
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
-}))
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(),
 }))
 jest.mock('@/store/api/gateway/spacePolicies', () => ({ usePoliciesCreateConfigurationRequestV1Mutation: jest.fn() }))
 jest.mock('@/services/exceptions', () => ({
@@ -31,7 +26,6 @@ jest.mock('@/store/notificationsSlice', () => ({
 
 const SAFE = '0x0000000000000000000000000000000000000001'
 const ROOT = '0xroot'
-const getConfigurationRoot = jest.fn()
 const configurations: PolicyConfiguration[] = [
   {
     target: '0x0000000000000000000000000000000000000def',
@@ -53,8 +47,6 @@ describe('useSaveAllowlistConfiguration', () => {
     ;(usePoliciesCreateConfigurationRequestV1Mutation as jest.Mock).mockReturnValue([mutate, { isLoading: false }])
     ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: '11155111', safeAddress: SAFE })
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue('42')
-    getConfigurationRoot.mockReturnValue(ROOT)
-    ;(useLoadFeature as jest.Mock).mockReturnValue({ $isReady: true, getConfigurationRoot })
   })
 
   it('posts root and configurations for the scoped Safe in the current space', async () => {
@@ -62,11 +54,10 @@ describe('useSaveAllowlistConfiguration', () => {
 
     let saved: boolean | undefined
     await act(async () => {
-      saved = await result.current.save(configurations)
+      saved = await result.current.save({ configurations, configureRoot: ROOT })
     })
 
     expect(saved).toBe(true)
-    expect(getConfigurationRoot).toHaveBeenCalledWith(configurations)
     expect(mutate).toHaveBeenCalledWith({
       spaceId: '42',
       chainId: '11155111',
@@ -81,7 +72,7 @@ describe('useSaveAllowlistConfiguration', () => {
 
     let saved: boolean | undefined
     await act(async () => {
-      saved = await result.current.save(configurations)
+      saved = await result.current.save({ configurations, configureRoot: ROOT })
     })
 
     expect(saved).toBe(false)
@@ -97,7 +88,7 @@ describe('useSaveAllowlistConfiguration', () => {
 
     let saved: boolean | undefined
     await act(async () => {
-      saved = await result.current.save(configurations)
+      saved = await result.current.save({ configurations, configureRoot: ROOT })
     })
 
     expect(saved).toBe(false)

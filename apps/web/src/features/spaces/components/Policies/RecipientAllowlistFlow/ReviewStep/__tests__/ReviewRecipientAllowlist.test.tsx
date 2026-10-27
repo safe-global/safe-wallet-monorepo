@@ -205,16 +205,16 @@ const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}, flowRe
 const configurations = buildAllowlistConfigurations(SEPOLIA, rules)
 const guardAddress = getPolicyGuardAddress(SEPOLIA)!
 
-const built = (guardState?: PolicyGuardState) =>
-  mockBuild.mockReturnValue(
-    guardState
-      ? {
-          guardState,
-          configurations,
-          calls: createAllowlistSetupTxs({ safeAddress: SAFE, guardAddress, guardState, configurations }),
-        }
-      : {},
-  )
+const built = (guardState?: PolicyGuardState) => {
+  if (!guardState) return mockBuild.mockReturnValue({})
+  const { txs, configureRoot } = createAllowlistSetupTxs({
+    safeAddress: SAFE,
+    guardAddress,
+    guardState,
+    configurations,
+  })
+  return mockBuild.mockReturnValue({ guardState, configurations, configureRoot, calls: txs })
+}
 
 const mockOwners = (owners: string[], threshold = 2) =>
   (useSafeInfo as jest.Mock).mockReturnValue({
@@ -404,7 +404,7 @@ describe('ReviewRecipientAllowlist', () => {
         guardAddress,
         guardState: { status: 'none' },
         configurations: [native, encodedOnlyOther],
-      }),
+      }).txs,
     })
     renderReview()
 
@@ -421,13 +421,15 @@ describe('ReviewRecipientAllowlist', () => {
 
     fireEvent.click(screen.getAllByTestId('action-item')[0])
 
-    const [request] = createAllowlistSetupTxs({
+    const {
+      configureRoot: root,
+      txs: [request],
+    } = createAllowlistSetupTxs({
       safeAddress: SAFE,
       guardAddress,
       guardState: { status: 'known' },
       configurations,
     })
-    const root = `0x${request.data.slice(10)}`
     expect(screen.getAllByTestId('allowlist-rule')).toHaveLength(2)
     expect(document.body.textContent).not.toContain(root)
     expect(document.body.textContent).not.toContain(request.data)
@@ -449,7 +451,13 @@ describe('ReviewRecipientAllowlist', () => {
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
-    expect(mockSave).toHaveBeenCalledWith(configurations)
+    const { configureRoot } = createAllowlistSetupTxs({
+      safeAddress: SAFE,
+      guardAddress,
+      guardState: { status },
+      configurations,
+    })
+    expect(mockSave).toHaveBeenCalledWith({ configurations, configureRoot })
     expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
   })
 
