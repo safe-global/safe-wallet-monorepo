@@ -71,6 +71,7 @@ export const mockErc20TransferDto = (overrides: Partial<ActivePolicyDto> = {}): 
   safe: MOCK_SAFES.treasury,
   data: {
     tokenAddress: MOCK_TOKENS.usdc.address,
+    tokenMetadata: mockUsdcMetadata(),
     recipients: [
       { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },
       { account: MOCK_ADDRESSES.bob, permission: 'ONCE' },
@@ -117,6 +118,7 @@ export const mockTreasuryAllowlistDtos = (guards: GuardSlotsDto = GUARD_SLOTS): 
       },
       data: {
         tokenAddress: MOCK_TOKENS.usdt.address,
+        tokenMetadata: mockUsdtMetadata(),
         recipients: [{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }],
       },
     }),
@@ -131,5 +133,15 @@ export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   decimals: MOCK_TOKENS.usdc.decimals,
   logoUri: MOCK_TOKENS.usdc.logoUri,
   name: 'USD Coin',
+  trusted: true,
+})
+
+export const mockUsdtMetadata = (): Erc20TokenMetadataDto => ({
+  type: 'ERC20',
+  address: MOCK_TOKENS.usdt.address,
+  symbol: MOCK_TOKENS.usdt.symbol,
+  decimals: MOCK_TOKENS.usdt.decimals,
+  logoUri: MOCK_TOKENS.usdt.logoUri,
+  name: 'Tether USD',
   trusted: true,
 })

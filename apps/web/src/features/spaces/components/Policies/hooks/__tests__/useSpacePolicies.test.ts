@@ -22,7 +22,6 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
 const mockPendingQuery = jest.fn()
 const mockUseActivatingPolicies = jest.fn()
-const mockUseAllowlistTokenResolver = jest.fn()
 let mockIsAuthenticated = true
 
 const mainnet = chainBuilder()
@@ -61,10 +60,6 @@ jest.mock('../useActivatingPolicies', () => ({
   useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
 }))
 
-jest.mock('../useAllowlistTokenResolver', () => ({
-  useAllowlistTokenResolver: (...args: unknown[]) => mockUseAllowlistTokenResolver(...args),
-}))
-
 const idle = { currentData: undefined, isLoading: false, isFetching: false, isError: false, refetch: jest.fn() }
 
 describe('useSpacePolicies', () => {
@@ -75,7 +70,6 @@ describe('useSpacePolicies', () => {
     mockPoliciesQuery.mockReturnValue(idle)
     mockPendingQuery.mockReturnValue(idle)
     mockUseActivatingPolicies.mockReturnValue([])
-    mockUseAllowlistTokenResolver.mockReturnValue(() => undefined)
   })
 
   it('should, when signed in with a space, ask for the types the table renders', () => {
@@ -314,15 +308,12 @@ describe('useSpacePolicies', () => {
       })
     })
 
-    it('should name the ERC-20 entries with the metadata the token resolver finds for the active policies', () => {
-      const dtos = [mockErc20TransferDto()]
-      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: dtos })
-      mockUseAllowlistTokenResolver.mockReturnValue(() => MOCK_TOKENS.usdc)
+    it('should name the ERC-20 entries with the token metadata of the active policies', () => {
+      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockErc20TransferDto()] })
 
       const { result } = renderHook(() => useSpacePolicies())
       const [policy] = result.current.policies.filter(isAllowlistPolicy)
 
-      expect(mockUseAllowlistTokenResolver).toHaveBeenCalledWith(dtos)
       expect(policy.data.entries[0].token).toEqual(MOCK_TOKENS.usdc)
     })
 
