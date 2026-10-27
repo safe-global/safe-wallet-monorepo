@@ -1,7 +1,7 @@
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AccountItem } from '@/features/myAccounts'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { TriangleAlert, RotateCw } from 'lucide-react'

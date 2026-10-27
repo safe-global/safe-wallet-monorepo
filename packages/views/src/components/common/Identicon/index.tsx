@@ -11,20 +11,27 @@ export interface IdenticonProps {
   size?: number
 }
 
+export const getIdenticonSrc = (address: string): string | undefined => {
+  try {
+    if (!isAddress(address)) {
+      return undefined
+    }
+    return blo(address as `0x${string}`)
+  } catch {
+    return undefined
+  }
+}
+
 const Identicon = ({ address, size = 40 }: IdenticonProps): ReactElement => {
   const style = useMemo<CSSProperties | null>(() => {
-    try {
-      if (!isAddress(address)) {
-        return null
-      }
-      const blockie = blo(address as `0x${string}`)
-      return {
-        backgroundImage: `url(${blockie})`,
-        width: `${size}px`,
-        height: `${size}px`,
-      }
-    } catch (e) {
+    const src = getIdenticonSrc(address)
+    if (!src) {
       return null
+    }
+    return {
+      backgroundImage: `url(${src})`,
+      width: `${size}px`,
+      height: `${size}px`,
     }
   }, [address, size])
 
