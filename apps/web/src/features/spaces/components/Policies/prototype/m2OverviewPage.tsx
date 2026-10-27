@@ -11,10 +11,8 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge, BadgeDot, badgeVariants } from '@safe-global/views/components/ui/badge'
@@ -1354,21 +1352,7 @@ const ActiveFilterChips = ({
   )
 }
 
-/** M1's policies page heading (Policies/index.tsx): title, then the intro line with its help link. */
-const ByPolicyHeading = (): ReactElement => (
-  <PageHeading
-    title="Policies"
-    subtitle={
-      <Typography variant="paragraph-medium">
-        Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-        automatically.{' '}
-        <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
-          Learn more
-        </ExternalLink>
-      </Typography>
-    }
-  />
-)
+const ByPolicyHeading = (): ReactElement => <PageHeading title="Policies" />
 
 export type PoliciesByPolicyPageProps = Pick<
   PoliciesOverviewPageProps,

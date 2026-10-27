@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { CircleAlert, CircleCheck, Info, TriangleAlert, X, type LucideIcon } from 'lucide-react'
+import { CircleCheck, Info, TriangleAlert, X, type LucideIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { cn } from '@safe-global/views/utils/cn'
@@ -19,7 +19,7 @@ const TONE_SURFACE: Record<M2AlertTone, string> = {
 }
 
 const TONE_ICON: Record<M2AlertTone, { Icon: LucideIcon; className: string }> = {
-  error: { Icon: CircleAlert, className: 'text-destructive' },
+  error: { Icon: TriangleAlert, className: 'text-destructive' },
   warning: { Icon: TriangleAlert, className: 'text-warning-accent' },
   success: { Icon: CircleCheck, className: 'text-success-strong' },
   info: { Icon: Info, className: 'text-info-strong' },

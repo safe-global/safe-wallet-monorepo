@@ -1,11 +1,18 @@
-import type { ReactElement } from 'react'
-import { Ban, Check, Clock, ShieldCheck, UsersRound } from 'lucide-react'
+import { useRef, type ReactElement } from 'react'
+import { ArrowRight, Ban, Check, Clock, ShieldCheck, UsersRound } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import Identicon from '@/components/common/Identicon'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Button } from '@safe-global/views/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import PolicyIntroDialog, {
-  type PolicyIntroExplainer,
-} from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
+import type { PolicyIntroExplainer } from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [
   { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },
@@ -61,19 +68,48 @@ export type AllowlistIntroDialogProps = {
   onProceed: () => void
 }
 
-/** The allowlist's intro, in M1's PolicyIntroDialog like SpendingLimitIntroDialog and ProposerIntroDialog. */
-export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => (
-  <PolicyIntroDialog
-    open={open}
-    onOpenChange={onOpenChange}
-    onProceed={onProceed}
-    title="Allowlist"
-    description="Only addresses on your list can receive funds. Everything else is blocked."
-    helpArticle={HelpCenterArticle.POLICIES}
-    helpLabel="Learn more about allowlists"
-    explainers={EXPLAINERS}
-    preview={<AllowlistPreview />}
-    proceedLabel="Set up allowlist"
-    testId="recipient-allowlist-intro-dialog"
-  />
-)
+/** M1's PolicyIntroDialog with the help link moved from the title's ⓘ to "Learn more" after the description. */
+export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => {
+  const proceedRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent size="xs" initialFocus={proceedRef} data-testid="recipient-allowlist-intro-dialog">
+        <DialogHeader>
+          <DialogTitle className="text-xl leading-6 font-semibold">Allowlist</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-5 px-5 pb-5">
+          <DialogDescription className="text-base leading-6 text-secondary-foreground">
+            Only addresses on your list can receive funds. Everything else is blocked.{' '}
+            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
+              Learn more
+            </ExternalLink>
+          </DialogDescription>
+
+          <AllowlistPreview />
+
+          <div className="flex flex-col gap-8">
+            <ul className="flex flex-col gap-8">
+              {EXPLAINERS.map(({ Icon, text }) => (
+                <li key={text} className="flex items-center gap-4">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                    <Icon className="size-4 text-badge-dot-success" aria-hidden />
+                  </div>
+                  <Typography variant="paragraph-small" color="muted">
+                    {text}
+                  </Typography>
+                </li>
+              ))}
+            </ul>
+
+            <Button ref={proceedRef} className="w-full gap-2" onClick={onProceed}>
+              Set up allowlist
+              <ArrowRight className="text-[var(--color-static-text-brand)] dark:text-black" aria-hidden />
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
