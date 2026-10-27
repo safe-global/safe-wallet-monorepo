@@ -296,13 +296,6 @@ export const addressBookData = {
       '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b': 'AD Proposer2',
     },
   }),
-  nestedsafes: aliasedStorage({
-    11155111: {
-      '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': 'Main nested safe',
-      '0x22e5093F4A75c2E99A8EcabfBF8c5c7fDcaDCf9d': 'Nested safe1',
-      '0xE5577b9E75F94C4a900E74F63F79A7968e812208': 'Nested safe2',
-    },
-  }),
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },
@@ -344,19 +337,6 @@ export const addressBookData = {
       '0x9E6DAfe829431e1892EcF8461FDAd02665170c31': 'Added non-owner',
     },
   },
-  multichain: aliasedStorage({
-    137: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': 'Multichain polygon',
-    },
-    11155111: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': 'Multichain Sepolia',
-    },
-  }),
-  undeployed: {
-    11155111: {
-      '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': 'Undeployed Sepolia',
-    },
-  },
   undeployedSet: {
     100: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': 'Safe A',
@@ -373,13 +353,6 @@ export const addressBookData = {
   autofillData: {
     11155111: {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
-    },
-  },
-  safeSchiledAddressBook: {
-    137: {
-      '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0': 'Test Recipient',
-      '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D': 'Test Safe Address',
-      '0x9445deb174C1eCbbfce8d31D33F438B8e7a0F1BA': 'Test Signer (Owner 4)',
     },
   },
   cookies: cookieState,
@@ -607,190 +580,6 @@ export const addedSafes = {
       },
     },
   },
-  set3: {
-    11155111: {
-      '0xF21445699e91aC6F2EeeAF1a19510AC4197e59aB': {
-        owners: [
-          {
-            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-            name: null,
-            logoUri: null,
-          },
-        ],
-        threshold: 2,
-        ethBalance: '0',
-      },
-      '0x9E6DAfe829431e1892EcF8461FDAd02665170c31': {
-        owners: [
-          {
-            value: '0x96D4c6fFC338912322813a77655fCC926b9A5aC5',
-            name: null,
-            logoUri: null,
-          },
-        ],
-        threshold: 2,
-        ethBalance: '0',
-      },
-    },
-  },
-  /** Watchlist safe (safe3short). Includes visited safe SEP_STATIC_SAFE_9 when used with addToAppLocalStorage after visit. */
-  set4: aliasedStorage({
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0x86Cb401afF6A25A335c440C25954A70b3c232C27': {
-        owners: [
-          {
-            value: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
-          },
-          {
-            value: '0x12d0Ad7d21bdbe7E05AB0aDd973C58fB48b52Ae5',
-          },
-        ],
-        threshold: 1,
-      },
-    },
-  }),
-  set5: aliasedStorage({
-    137: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [
-          {
-            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-          },
-        ],
-        threshold: 1,
-      },
-    },
-    11155111: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [
-          {
-            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-          },
-        ],
-        threshold: 1,
-      },
-    },
-  }),
-  /** set5 plus one trusted safe (safe1) on Sepolia - for "Add network" single-safe sidebar test */
-  set5WithSingleSafe: aliasedStorage({
-    137: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [
-          {
-            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-          },
-        ],
-        threshold: 1,
-      },
-    },
-    11155111: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [
-          {
-            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-          },
-        ],
-        threshold: 1,
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
-  /** CF safe + undeployed. Includes visited safe SEP_STATIC_SAFE_9 when used with addToAppLocalStorage after visit. */
-  set6_undeployed_safe: aliasedStorage({
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': {
-        owners: [
-          {
-            value: '0x9445deb174C1eCbbfce8d31D33F438B8e7a0F1BA',
-          },
-        ],
-        threshold: 1,
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
-  /** Sidebar tests: one trusted safe (safe1) on Sepolia. Includes visited safe SEP_STATIC_SAFE_9 so overwrite does not drop it. */
-  sidebarTrustedSafe1: aliasedStorage({
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
-  /** Trusted safes in sidebar-sidebar3.cy.js, sidebar5.cy.js */
-  sidebarTrustedSafe1Safe2: aliasedStorage({
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-    1: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
-  /** Sidebar tests: safe3 on Sepolia + safe3 on Ethereum (chain 1). Includes visited safe SEP_STATIC_SAFE_9 so overwrite does not drop it. */
-  sidebarTrustedSafe3TwoChains: aliasedStorage({
-    11155111: {
-      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-    1: {
-      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
   /** Sidebar tests: safe1 + safe2 + safe3 on Sepolia. Includes chain 1 (Ethereum) visited safe for tests that visit MATIC_STATIC_SAFE_28 on eth. */
   sidebarTrustedSafe1Safe2Safe3: {
     11155111: {
@@ -818,26 +607,6 @@ export const addedSafes = {
       },
     },
   },
-  /** Sidebar tests: pending-actions safe (SEP_STATIC_SAFE_7) on Sepolia */
-  sidebarTrustedPendingSafe1: aliasedStorage({
-    11155111: {
-      '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
-  /** Nested safes: parent safe SEP_STATIC_SAFE_45 on Sepolia */
-  nestedParentSafe45: aliasedStorage({
-    11155111: {
-      '0x5958B92f412408bF12Bbc8638d524ebe5878E795': {
-        owners: [],
-        threshold: 1,
-        ethBalance: '0',
-      },
-    },
-  }),
 }
 
 export const customApps = (url) => ({

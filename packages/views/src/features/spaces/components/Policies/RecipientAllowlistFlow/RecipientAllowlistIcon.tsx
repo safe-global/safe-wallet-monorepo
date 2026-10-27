@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { ShieldCheck } from 'lucide-react'
+import { Users } from 'lucide-react'
 
-const RecipientAllowlistIcon = (): ReactElement => <ShieldCheck aria-hidden />
+const RecipientAllowlistIcon = (): ReactElement => <Users aria-hidden />
 
 export default RecipientAllowlistIcon

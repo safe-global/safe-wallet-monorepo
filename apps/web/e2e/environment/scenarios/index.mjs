@@ -1,4 +1,3 @@
-import * as accounts from './accounts.mjs'
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
 import * as batch from './batch.mjs'
@@ -9,7 +8,6 @@ import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as history from './history.mjs'
 import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
-import * as nested from './nested.mjs'
 import * as notes from './notes.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
@@ -18,12 +16,10 @@ import * as replacement from './replacement.mjs'
 import * as safeApps from './safe-apps.mjs'
 import * as sharing from './sharing.mjs'
 import * as spaces from './spaces.mjs'
-import * as spendingLimits from './spending-limits.mjs'
 import * as transferForm from './transfer-form.mjs'
 import * as zerion from './zerion.mjs'
 
 const modules = [
-  accounts,
   assets,
   basic,
   batch,
@@ -34,7 +30,6 @@ const modules = [
   history,
   historySummary,
   ledger,
-  nested,
   notes,
   proposers,
   recovery,
@@ -43,7 +38,6 @@ const modules = [
   safeApps,
   sharing,
   spaces,
-  spendingLimits,
   transferForm,
   zerion,
 ]

@@ -124,9 +124,13 @@ function ComboboxContent({
   align = 'start',
   alignOffset = 0,
   anchor,
+  collisionAvoidance,
   ...props
 }: ComboboxPrimitive.Popup.Props &
-  Pick<ComboboxPrimitive.Positioner.Props, 'side' | 'align' | 'sideOffset' | 'alignOffset' | 'anchor'>) {
+  Pick<
+    ComboboxPrimitive.Positioner.Props,
+    'side' | 'align' | 'sideOffset' | 'alignOffset' | 'anchor' | 'collisionAvoidance'
+  >) {
   const portalContainer = usePortalContainer()
   return (
     <ComboboxPrimitive.Portal container={portalContainer}>
@@ -136,6 +140,7 @@ function ComboboxContent({
         align={align}
         alignOffset={alignOffset}
         anchor={anchor}
+        collisionAvoidance={collisionAvoidance}
         className="isolate z-[var(--z-overlay)]"
       >
         <ComboboxPrimitive.Popup

@@ -2,12 +2,9 @@ import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as createWallet from '../pages/create_wallet.pages'
 import * as navigation from '../pages/navigation.page'
-import * as addressBook from '../pages/address_book.page'
 
 const tooltipLabel = (label) => `span[aria-label="${label}"]`
 const removeOwnerBtn = 'span[data-track="settings: Remove owner"] > span > button'
-const replaceOwnerBtn = 'span[data-track="settings: Replace owner"] > span > button'
-const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > button'
 const tooltip = 'div[role="tooltip"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const addNewSigner = '[data-testid="add-new-signer"]'
@@ -16,73 +13,27 @@ const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
 const signerNameField = '[data-testid="owner-name"]'
 const signerAddressField = 'input[name="owners.0.address"]'
-const thresholdList = '[data-slot="select-content"]'
 const thresholdDropdown = '[data-testid="threshold-selector"]'
-const thresholdOption = '[data-slot="select-item"]'
 const existingOwnerAddressInput = (index) => `input[name="owners.${index}.address"]`
 const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
-const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
-const signerList = '[data-testid="signer-list"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
 const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
-const removeOwnerStr = 'Remove signer'
-const changeThresholdStr = 'Change threshold'
 
 export const safeAccountNonceStr = 'Safe account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe account'
-
-export function checkExistingSignerCount(count) {
-  cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
-}
-
-export function checkExistingSignerAddress(index, address) {
-  cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
-}
-
-export function typeOwnerAddressCreateSafeStep(index, address) {
-  cy.get(existingOwnerAddressInput(index)).clear().type(address)
-}
 
 export function clickOnThresholdDropdown() {
   cy.get(thresholdDropdown).eq(0).click()
 }
 
-export function getThresholdOptions() {
-  return cy.get(thresholdList).find(thresholdOption)
-}
-
-export function selectThresholdOption(index) {
-  // Base UI select items only commit a click once highlighted; hover first so the
-  // highlight renders before the click lands.
-  getThresholdOptions().eq(index).trigger('mousemove').click()
-}
-
-export function openRemoveOwnerWindow(btn) {
-  const minimumCount = btn === 0 ? 1 : btn
-  main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
-  cy.get(removeOwnerBtn).eq(btn).should('be.enabled').click({ force: true })
-  cy.get('div').contains(removeOwnerStr).should('exist')
-}
-
-export function openReplaceOwnerWindow(index) {
-  const minimumCount = index === 0 ? 1 : index
-  main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
-  cy.get(replaceOwnerBtn).eq(index).should('be.enabled').click({ force: true })
-  cy.get(newOwnerName).should('be.visible')
-  cy.get(newOwnerAddress).should('be.visible')
-}
 export function verifyTooltipLabel(label) {
   cy.get(tooltipLabel(label)).should('be.visible')
-}
-export function verifyManageSignersBtnIsDisabled() {
-  cy.get(manageSignersBtn).should('exist')
-  main.verifyBtnIsDisabled(manageSignersBtn)
 }
 
 export function hoverOverManageSignersBtn() {
@@ -164,21 +115,4 @@ export function verifyConfirmTransactionWindowDisplayed() {
   cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
   cy.get('button').contains(continueBtnStr).should('exist')
   cy.get('button').contains(backbtnStr).should('exist')
-}
-
-export function clickOnChangeThresholdBtn() {
-  cy.get(changeThresholdBtn).click({ force: true })
-  cy.get('div').contains(changeThresholdStr).should('exist')
-}
-
-export function clickOnThresholdNextBtn() {
-  //TODO: Remove extra wait when init sdk is merged
-  cy.wait(3000)
-  cy.get(thresholdNextBtn).click()
-}
-
-export function verifyInconsistentSignersWarning(network) {
-  cy.contains(
-    `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`,
-  ).should('exist')
 }

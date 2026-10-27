@@ -19,7 +19,7 @@ import {
   mockPendingTransactionDto,
 } from '../../mocks/pendingPolicies'
 import { MOCK_SAFES, MOCK_TOKENS, mockActivatingPolicy } from '../../mocks/policies'
-import { ALLOWLIST_POLICY_TYPES, PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
+import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
@@ -27,7 +27,6 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
 const mockPendingQuery = jest.fn()
 const mockUseActivatingPolicies = jest.fn()
-const mockUseIsAllowlistActiveInSpace = jest.fn()
 const mockUseAllowlistTokenResolver = jest.fn()
 let mockIsAuthenticated = true
 
@@ -58,10 +57,6 @@ jest.mock('@/store/api/gateway/spacePolicies', () => ({
   useSpacePoliciesGetPendingPoliciesV1Query: (...args: unknown[]) => mockPendingQuery(...args),
 }))
 
-jest.mock('@/features/policy-guard', () => ({
-  useIsAllowlistActiveInSpace: () => mockUseIsAllowlistActiveInSpace(),
-}))
-
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: mockChains }),
@@ -85,7 +80,6 @@ describe('useSpacePolicies', () => {
     mockPoliciesQuery.mockReturnValue(idle)
     mockPendingQuery.mockReturnValue(idle)
     mockUseActivatingPolicies.mockReturnValue([])
-    mockUseIsAllowlistActiveInSpace.mockReturnValue(false)
     mockUseAllowlistTokenResolver.mockReturnValue(() => undefined)
   })
 
@@ -302,33 +296,13 @@ describe('useSpacePolicies', () => {
   })
 
   describe('allowlists', () => {
-    it('should, when allowlists are on in the workspace, ask for the erc20 and native transfer policies too', () => {
-      mockUseIsAllowlistActiveInSpace.mockReturnValue(true)
-
+    it('should ask for the erc20 and native transfer policies along with the other table types', () => {
       renderHook(() => useSpacePolicies())
 
       expect(mockPoliciesQuery).toHaveBeenCalledWith(
-        { spaceId: SPACE_ID, types: [...TABLE_POLICY_TYPES, ...ALLOWLIST_POLICY_TYPES] },
+        { spaceId: SPACE_ID, types: ['spending-limit', 'proposer', 'erc20-transfer', 'native-transfer'] },
         { skip: false, ...SPACE_REFRESH_OPTIONS },
       )
-    })
-
-    it('should, when allowlists are off in the workspace, not ask for them', () => {
-      renderHook(() => useSpacePolicies())
-
-      expect(mockPoliciesQuery).toHaveBeenCalledWith(
-        { spaceId: SPACE_ID, types: TABLE_POLICY_TYPES },
-        { skip: false, ...SPACE_REFRESH_OPTIONS },
-      )
-    })
-
-    it('should, while it is not yet known whether allowlists are on, wait and report loading', () => {
-      mockUseIsAllowlistActiveInSpace.mockReturnValue(undefined)
-
-      const { result } = renderHook(() => useSpacePolicies())
-
-      expect(mockPoliciesQuery).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
-      expect(result.current.isLoading).toBe(true)
     })
 
     it('should give the ETH entry the coin from the chain config', () => {

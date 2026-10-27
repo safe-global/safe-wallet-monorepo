@@ -4,7 +4,7 @@ import * as relay from '@/utils/relaying'
 import * as remainingRelays from '@/hooks/useRemainingRelays'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-import { fakerChecksummedAddress, render } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, within } from '@/tests/test-utils'
 import ReviewStep, { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep/index'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -34,6 +34,10 @@ jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
 jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: jest.fn(),
 }))
+jest.mock('@/components/common/ChainIndicator', () => {
+  const ChainIndicator = ({ chainId }: { chainId: string }) => <span data-testid={`chain-${chainId}`} />
+  return ChainIndicator
+})
 
 const mockUseIsAdmin = useIsAdmin as jest.Mock
 const mockUseSpaceSafeCount = useSpaceSafeCount as jest.Mock
@@ -261,6 +265,50 @@ describe('ReviewStep', () => {
     expect(getByText('Not available for multiple networks')).toBeInTheDocument()
     expect(getByTestId('pay-now-execution-method').querySelector('input')).toBeDisabled()
     expect(screen.getByRole('radio', { name: /Pay later/i })).toBeChecked()
+  })
+
+  it('summarises the name, signers, threshold and every network of a multichain Safe', async () => {
+    const owners = [fakerChecksummedAddress(), fakerChecksummedAddress()]
+    const data: NewSafeFormData = {
+      ...buildMultiChainData(),
+      owners: owners.map((address) => ({ name: '', address })),
+      threshold: 2,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    expect(screen.getByTestId('review-step-safe-name')).toHaveTextContent('Test')
+    const ownerInfo = screen.getByTestId('review-step-owner-info')
+    expect(ownerInfo).toHaveTextContent(owners[0])
+    expect(ownerInfo).toHaveTextContent(owners[1])
+    expect(screen.getByTestId('review-step-threshold')).toHaveTextContent('2 out of 2 signers')
+    const networkList = within(screen.getByTestId('network-list'))
+    expect(await networkList.findByTestId(`chain-${mockChain.chainId}`)).toBeInTheDocument()
+    expect(networkList.getByTestId('chain-1')).toBeInTheDocument()
+  })
+
+  it('preselects the relay for a single-network Safe that is paid now', () => {
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: [mockChain],
+      threshold: 1,
+      owners: [{ name: '', address: fakerChecksummedAddress() }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+    jest
+      .spyOn(remainingRelays, 'useLeastRemainingRelays')
+      .mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+
+    const relayRadio = screen.getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')
+    expect(relayRadio).toHaveAttribute('data-checked')
   })
 
   it('disables creation for multichain until the user signs in (Pay later writes to the backend)', () => {
