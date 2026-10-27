@@ -22,7 +22,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import ShortAddress from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ShortAddress'
 import type { AllowlistFormRecipient } from '../types'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
 import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import { useAddressBookSearch } from '@/features/spaces'
