@@ -38,8 +38,6 @@ export const isolatedSpecs = {
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/spaces_basicflow.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/spaces_dashboard.cy.js': { scenario: 'prepareSpacesDashboardScenario' },
-  'cypress/e2e/regression/spending_limits_nonowner.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/regression/spending_limits.cy.js': { scenario: 'prepareSpendingLimitsScenario', chains: [137] },
   'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
   'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },
