@@ -1,3 +1,4 @@
+import { NATIVE_TRANSFER_SELECTOR } from '@safe-global/utils/features/policy-guard/constants'
 import type {
   ActivePolicyDto,
   Erc20TransferPolicyDataDto,
@@ -22,8 +23,6 @@ export type NativeTokenResolver = (chainId: string) => PolicyTokenInfo | undefin
 export type Erc20TokenResolver = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
 
 const NO_ERC20_TOKEN: Erc20TokenResolver = () => undefined
-
-const NATIVE_TRANSFER_SELECTOR = '0x00000000'
 
 export const toChainAddressKey = (chainId: string, address: string): string => `${chainId}:${address.toLowerCase()}`
 

@@ -1,7 +1,4 @@
-import {
-  EMPTY_ALLOWLIST_ERROR,
-  GUARD_NOT_SUPPORTED_ERROR,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { GUARD_NOT_SUPPORTED_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
 import {
   createFirstSetupTxs,
@@ -22,11 +19,9 @@ export const createAllowlistSetupTxs = ({
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
 }): AllowlistSetup => {
-  if (configurations.length === 0) throw new Error(EMPTY_ALLOWLIST_ERROR)
-
-  const configureRoot = getConfigurationRoot(configurations)
-  const withTxs = (txs: AllowlistSetup['txs']): AllowlistSetup => ({ txs, configurations, configureRoot })
-  const requestTx = () => createRequestConfigurationTx(guardAddress, configureRoot)
+  const root = getConfigurationRoot(configurations)
+  const withTxs = (txs: AllowlistSetup['txs']): AllowlistSetup => ({ txs, configurations, root })
+  const requestTx = () => createRequestConfigurationTx(guardAddress, root)
 
   switch (guardState.status) {
     case 'none':

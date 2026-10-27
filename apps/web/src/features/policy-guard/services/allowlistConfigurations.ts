@@ -2,20 +2,21 @@ import { AbiCoder } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { ERC20__factory } from '@safe-global/utils/types/contracts'
+import { ERC20_INTERFACE } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
+import { NATIVE_TRANSFER_SELECTOR } from '@safe-global/utils/features/policy-guard/constants'
 import type { AllowlistRule } from '@/features/spaces'
 import {
+  ALLOWLIST_UNAVAILABLE_ERROR,
   EMPTY_ALLOWLIST_ERROR,
-  NATIVE_POLICY_UNAVAILABLE_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
+  ZERO_ADDRESS_RECIPIENT_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration } from '../types'
-import { getPolicyEngineAddress } from './policyEngineDeployments'
+import { getPolicyEngineAddress, type PolicyEngineContract } from './policyEngineDeployments'
 
 export const MAX_POLICY_CONFIGURATIONS = 100
 
-const ERC20_TRANSFER_SELECTOR = ERC20__factory.createInterface().getFunction('transfer').selector
-const NATIVE_TRANSFER_SELECTOR = '0x00000000'
+const ERC20_TRANSFER_SELECTOR = ERC20_INTERFACE.getFunction('transfer').selector
 const PERMISSION_ALWAYS = 2
 
 export const encodeErc20TransferPolicyData = (recipients: string[]): string =>
@@ -24,15 +25,24 @@ export const encodeErc20TransferPolicyData = (recipients: string[]): string =>
     [recipients.map((recipient) => [recipient, PERMISSION_ALWAYS])],
   )
 
+const requirePolicy = (chainId: string, contract: PolicyEngineContract): string => {
+  const policy = getPolicyEngineAddress(chainId, contract)
+  if (!policy) throw new Error(ALLOWLIST_UNAVAILABLE_ERROR)
+  return policy
+}
+
 export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRule[]): PolicyConfiguration[] => {
   if (rules.length === 0 || rules.some(({ recipients }) => recipients.length === 0)) {
     throw new Error(EMPTY_ALLOWLIST_ERROR)
   }
+  // A zero-address target with the native selector is the guard's catch-all access, not a recipient
+  if (rules.some(({ recipients }) => recipients.some((recipient) => sameAddress(recipient, ZERO_ADDRESS)))) {
+    throw new Error(ZERO_ADDRESS_RECIPIENT_ERROR)
+  }
 
   const configurations = rules.flatMap(({ tokenAddress, recipients }): PolicyConfiguration[] => {
     if (sameAddress(tokenAddress, ZERO_ADDRESS)) {
-      const policy = getPolicyEngineAddress(chainId, 'NativeTransferPolicy')
-      if (!policy) throw new Error(NATIVE_POLICY_UNAVAILABLE_ERROR)
+      const policy = requirePolicy(chainId, 'NativeTransferPolicy')
 
       return recipients.map((recipient) => ({
         target: recipient,
@@ -43,15 +53,12 @@ export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRu
       }))
     }
 
-    const policy = getPolicyEngineAddress(chainId, 'ERC20TransferPolicy')
-    if (!policy) throw new Error(`ERC20TransferPolicy is not deployed on chain ${chainId}`)
-
     return [
       {
         target: tokenAddress,
         selector: ERC20_TRANSFER_SELECTOR,
         operation: OperationType.Call,
-        policy,
+        policy: requirePolicy(chainId, 'ERC20TransferPolicy'),
         data: encodeErc20TransferPolicyData(recipients),
       },
     ]

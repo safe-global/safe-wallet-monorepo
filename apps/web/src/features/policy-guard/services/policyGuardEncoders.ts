@@ -1,5 +1,6 @@
 import { AbiCoder, Interface, keccak256 } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
+import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
 import type { PolicyConfiguration, SetupCallDescription } from '../types'
 
 // Hand-written from SafePolicyGuard.sol until the WA-3034 artifact package is published
@@ -11,18 +12,16 @@ const policyGuardInterface = new Interface([
   `function applyConfiguration(${CONFIGURATION_TUPLE}[] configurations)`,
 ])
 
-const safeGuardManagerInterface = new Interface([
-  'function setGuard(address guard)',
-  'function setModuleGuard(address moduleGuard)',
-])
+const safeInterface = Safe__factory.createInterface()
+const SAFE_SETUP_METHODS = ['setGuard', 'setModuleGuard']
 
 export const describeSetupCall = ({ data }: Pick<MetaTransactionData, 'data'>): SetupCallDescription | undefined => {
   const selector = data.slice(0, 10)
   const guardFunction = policyGuardInterface.getFunction(selector)
   if (guardFunction) return { method: guardFunction.name, target: 'guard' }
 
-  const safeCall = safeGuardManagerInterface.parseTransaction({ data })
-  if (!safeCall) return undefined
+  const safeCall = safeInterface.parseTransaction({ data })
+  if (!safeCall || !SAFE_SETUP_METHODS.includes(safeCall.name)) return undefined
   return {
     method: safeCall.name,
     target: 'safe',
@@ -33,13 +32,13 @@ export const describeSetupCall = ({ data }: Pick<MetaTransactionData, 'data'>): 
 export const createSetGuardTx = (safeAddress: string, guardAddress: string): MetaTransactionData => ({
   to: safeAddress,
   value: '0',
-  data: safeGuardManagerInterface.encodeFunctionData('setGuard', [guardAddress]),
+  data: safeInterface.encodeFunctionData('setGuard', [guardAddress]),
 })
 
 export const createSetModuleGuardTx = (safeAddress: string, guardAddress: string): MetaTransactionData => ({
   to: safeAddress,
   value: '0',
-  data: safeGuardManagerInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
+  data: safeInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
 })
 
 // configureImmediately reverts once our guard is in either slot, so it must run before both setters
