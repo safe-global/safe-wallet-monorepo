@@ -13,9 +13,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import TokenIcon from '@/components/common/TokenIcon'
-import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
-import { AccountBalance, toStatChains } from '../../SafeAccountSelector/components/SafeAccountRow'
-import { SafeIdentity } from '../../components/SafeIdentity'
+import { SafeAccountSummary } from '../../SafeAccountSelector/components/SafeAccountRow'
 import RecipientIdentity from '../components/RecipientIdentity'
 import type { AllowlistRecipientDisplay, AllowlistTokenDisplay } from '../utils/allowlistDisplay'
 
@@ -33,20 +31,7 @@ const AllowlistPolicyDetails = ({ safe, tokens, recipients }: AllowlistPolicyDet
     <Card variant="muted" size="none" radius="lg">
       <div className="p-4">
         <SummaryRow label={REVIEW_ACCOUNT_LABEL}>
-          <div className="flex min-h-10 flex-wrap items-center gap-x-8 gap-y-2">
-            <div className="flex min-w-0 items-center gap-3">
-              <SafeIdentity address={safe.address} name={safe.name} />
-            </div>
-            <SafeRowStats
-              threshold={safe.threshold ?? 0}
-              owners={safe.owners ?? 0}
-              chains={toStatChains([safe])}
-              pending={0}
-              showPending={false}
-              fitColumns
-            />
-            <AccountBalance fiatTotal={safe.fiatTotal} fitColumn />
-          </div>
+          <SafeAccountSummary account={safe} fitStats />
         </SummaryRow>
       </div>
     </Card>
