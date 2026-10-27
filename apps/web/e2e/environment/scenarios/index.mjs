@@ -1,6 +1,5 @@
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
-import * as batch from './batch.mjs'
 import * as chains from './chains.mjs'
 import * as cow from './cow.mjs'
 import * as dashboard from './dashboard.mjs'
@@ -22,7 +21,6 @@ import * as zerion from './zerion.mjs'
 const modules = [
   assets,
   basic,
-  batch,
   chains,
   cow,
   dashboard,
