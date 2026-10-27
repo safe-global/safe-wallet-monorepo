@@ -8,23 +8,7 @@ const actionRequiredPanel = '[data-testid="action-required-panel"]'
 const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
 const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
 export const assetsWidget = '[data-testid="assets-widget"]'
-// Case #1 — Outdated official mastercopy (Info) → "Update"
-export const outdatedOfficialTitlePrefix = 'New Safe version is available'
-export const outdatedOfficialContent =
-  'Update now to take advantage of new features and the highest security standards available. You will need to confirm this update just like any other transaction.'
-export const mastercopyActions = {
-  update: '[data-testid="update-mastercopy-btn"]',
-  migrate: '[data-testid="migrate-mastercopy-btn"]',
-  getCli: '[data-testid="get-cli-link"]',
-}
 export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
-
-// Case #2 & #3 — Unsupported mastercopy (Warning)
-export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
-export const unsupportedMigratableContent =
-  'It may miss security fixes and improvements. You should migrate it to a compatible version.'
-
-const migrateSafeSubtitle = 'Update Safe account base contract'
 export const nonPinnedWarningTitle = 'Not in your accounts'
 export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
 const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
@@ -107,10 +91,6 @@ export function clickActionInPanel(actionTestId) {
   cy.get(actionRequiredPanel).within(() => {
     cy.get(actionTestId).click()
   })
-}
-
-export function verifyMigrateSafeFlowOpened() {
-  cy.contains(migrateSafeSubtitle, { timeout: 30000 }).should('be.visible')
 }
 
 export function verifyTrustDialogVisible() {
