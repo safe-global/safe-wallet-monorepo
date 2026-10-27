@@ -1,9 +1,15 @@
 import { faker } from '@faker-js/faker'
+import { AbiCoder } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { PendingDelayedGuardPoliciesDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
-import { encodeErc20TransferPolicyData } from '@/features/policy-guard/services/allowlistConfigurations'
 import { getApplyAllowlistRequest, mapDelayedGuardRequest } from '../mapDelayedGuardRequests'
+
+const encodeErc20TransferPolicyData = (recipients: string[]): string =>
+  AbiCoder.defaultAbiCoder().encode(
+    ['tuple(address recipient, uint8 permission)[]'],
+    [recipients.map((recipient) => [recipient, 2])],
+  )
 
 const resolveToken = (address: string): PolicyTokenInfo => ({ address, symbol: 'TKN', decimals: 18, logoUri: null })
 

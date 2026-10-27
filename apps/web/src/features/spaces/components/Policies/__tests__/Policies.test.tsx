@@ -643,11 +643,12 @@ describe('Policies', () => {
       expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
     })
 
-    it('should, when a pending allowlist row is clicked, open no panel yet', () => {
+    it('should, when a pending allowlist row is clicked, open the panel in its pending state', () => {
+      mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [] })
       render(<Policies policies={[mockPendingAllowlist()]} />)
       fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
 
-      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
+      expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
     })
 
     it('should hold one open panel at a time, so a second row replaces the first', () => {

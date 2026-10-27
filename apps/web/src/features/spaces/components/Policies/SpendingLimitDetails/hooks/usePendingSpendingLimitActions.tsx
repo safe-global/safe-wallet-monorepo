@@ -14,8 +14,8 @@ import type {
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction } from './usePendingPolicyTransaction'
 
-export type PendingPolicyActions<T extends PendingSpendingLimitPolicy | PendingAllowlistPolicy> = {
-  policy: T & { status: 'pending' }
+export type PendingSpendingLimitActions = {
+  policy: QueuedSpendingLimitPolicy
   viewer: Viewer
   /** Undefined until the chain configs have loaded. */
   transactionLink?: string
@@ -24,16 +24,17 @@ export type PendingPolicyActions<T extends PendingSpendingLimitPolicy | PendingA
   outcome?: PendingTxOutcome
 }
 
-export type PendingSpendingLimitActions = PendingPolicyActions<PendingSpendingLimitPolicy> & {
-  policy: QueuedSpendingLimitPolicy
+export type PendingTransactionLinks = Omit<PendingSpendingLimitActions, 'policy'> & {
+  /** Fresher than the row's count, once the transaction has loaded. */
+  confirmationsSubmitted?: number
 }
 
-/** The queued transaction's links and fresh signatures, for any policy drawer that recycles the pending panel. */
-export const usePendingPolicyActions = <T extends PendingSpendingLimitPolicy | PendingAllowlistPolicy>(
-  policy: T,
+/** The queued transaction's links, fresh signatures and outcome, for any drawer that shows a pending policy. */
+export const usePendingTransactionLinks = (
+  policy: Pick<PendingSpendingLimitPolicy | PendingAllowlistPolicy, 'safe' | 'safeTxHash' | 'status'>,
   viewer: Viewer,
   isUnlisted = false,
-): PendingPolicyActions<T> => {
+): PendingTransactionLinks => {
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
   const chain = useChain(chainId)
@@ -53,11 +54,7 @@ export const usePendingPolicyActions = <T extends PendingSpendingLimitPolicy | P
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 
   return {
-    policy: {
-      ...policy,
-      status: 'pending',
-      confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
-    },
+    confirmationsSubmitted,
     viewer: { ...viewer, hasSigned },
     // Shared links leave the Space out on purpose: their recipient may not be a member of it.
     transactionLink: txPath ? `${origin}${txPath}` : undefined,
@@ -71,4 +68,15 @@ export const usePendingSpendingLimitActions = (
   policy: PendingSpendingLimitPolicy,
   viewer: Viewer,
   isUnlisted = false,
-): PendingSpendingLimitActions => usePendingPolicyActions(policy, viewer, isUnlisted)
+): PendingSpendingLimitActions => {
+  const { confirmationsSubmitted, ...links } = usePendingTransactionLinks(policy, viewer, isUnlisted)
+
+  return {
+    ...links,
+    policy: {
+      ...policy,
+      status: 'pending',
+      confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
+    },
+  }
+}

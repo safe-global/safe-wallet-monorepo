@@ -7,12 +7,13 @@ import SpendingLimitImpactRow, { type SpendingLimitImpactRowProps } from './Spen
 import {
   getRestrictedSpendingLimitsTitle,
   getSpendingLimitsGroupTitle,
-  RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
   RESTRICTION_ACKNOWLEDGEMENT_LABEL,
 } from './constants'
 
 export type ExistingPoliciesContentProps = {
   safeName: string
+  /** What changes for the restricted spending limits, under the warning title. */
+  description: string
   rows: (SpendingLimitImpactRowProps & { key: string })[]
   acknowledged: boolean
   onAcknowledgedChange: (acknowledged: boolean) => void
@@ -21,20 +22,17 @@ export type ExistingPoliciesContentProps = {
 /** The Existing policies step's body: which spending limits the allowlist restricts, and the acknowledgement. */
 const ExistingPoliciesContent = ({
   safeName,
+  description,
   rows,
   acknowledged,
   onAcknowledgedChange,
 }: ExistingPoliciesContentProps): ReactElement => {
   const acknowledgementId = useId()
-  const restrictedCount = rows.filter(({ restriction }) => restriction).length
+  const restrictedCount = rows.filter(({ restricted }) => restricted).length
 
   return (
     <>
-      <StatusAlert
-        tone="warning"
-        title={getRestrictedSpendingLimitsTitle(restrictedCount)}
-        description={RESTRICTED_SPENDING_LIMITS_DESCRIPTION}
-      />
+      <StatusAlert tone="warning" title={getRestrictedSpendingLimitsTitle(restrictedCount)} description={description} />
 
       <div className="flex flex-col gap-3 rounded-xl bg-muted p-4">
         <Typography variant="paragraph-small-medium">{getSpendingLimitsGroupTitle(safeName)}</Typography>

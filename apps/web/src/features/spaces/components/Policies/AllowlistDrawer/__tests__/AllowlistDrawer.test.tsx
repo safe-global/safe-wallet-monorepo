@@ -259,6 +259,7 @@ describe('AllowlistDrawer', () => {
   })
 
   it('lets a signer start the apply transaction once the delay is over', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 9, 27, 12))
     const onApply = jest.fn()
     const { user } = renderWithUserEvent(
       <AllowlistDrawer
@@ -274,6 +275,7 @@ describe('AllowlistDrawer', () => {
     await user.click(screen.getByRole('button', { name: 'Review transaction' }))
 
     expect(onApply).toHaveBeenCalledTimes(1)
+    jest.restoreAllMocks()
   })
 
   it('keeps apply disabled for a wallet that is not a signer', () => {

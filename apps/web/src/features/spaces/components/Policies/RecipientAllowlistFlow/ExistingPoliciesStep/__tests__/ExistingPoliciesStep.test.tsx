@@ -1,4 +1,6 @@
 import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { RESTRICTED_SPENDING_LIMITS_DESCRIPTION } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import type { PolicyAllowance } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -58,12 +60,29 @@ describe('ExistingPoliciesStep', () => {
     expect(screen.getByText('1 spending limit will be restricted by this allowlist.')).toBeInTheDocument()
   })
 
-  it('shows a restricted limit with what it can send today and after, and leaves the other unaffected', () => {
+  it('says in the banner what the one restricted spender can send today and after', () => {
+    const restricted = makeImpact('USDC', true)
+    mockImpacts.mockReturnValue([restricted, makeImpact('ETH', false)])
+    renderStep()
+
+    expect(
+      screen.getByText(
+        `${shortenAddress(restricted.spender)} can send USDC to any address today, up to 500/day. Once this allowlist is active, it can only send USDC to the 2 allowed recipients.`,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps the banner general when several spending limits are restricted', () => {
+    mockImpacts.mockReturnValue([makeImpact('USDC', true), makeImpact('USDC', true)])
+    renderStep()
+
+    expect(screen.getByText(RESTRICTED_SPENDING_LIMITS_DESCRIPTION)).toBeInTheDocument()
+  })
+
+  it('marks the restricted limit and leaves the other unaffected', () => {
     renderStep()
 
     expect(screen.getByText('Will be restricted')).toBeInTheDocument()
-    expect(screen.getByText('USDC to any address, up to 500/day')).toBeInTheDocument()
-    expect(screen.getByText('USDC only to the 2 allowed recipients, up to 500/day')).toBeInTheDocument()
     expect(screen.getByText('Not affected')).toBeInTheDocument()
     expect(screen.getByText("500/day · ETH isn't in this allowlist")).toBeInTheDocument()
   })

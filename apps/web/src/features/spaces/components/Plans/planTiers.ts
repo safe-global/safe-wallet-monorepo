@@ -25,6 +25,9 @@ const CYCLES = ['month', 'year'] as const
 export const formatPlanPrice = (price: number, currency: string): string =>
   new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
+const toBillingCycle = (value: string | null | undefined): 'month' | 'year' | null =>
+  value === 'month' || value === 'year' ? value : null
+
 export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (billingCycle === 'year' ? '/yr' : '/mo')
 
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
@@ -73,7 +76,7 @@ export const toCurrentPlan = (
     name: getSubscriptionPlanName(subscription) ?? plan.name,
     price: subscription.plan.currentPrice,
     currency: subscription.plan.currency,
-    billingCycle: subscription.plan.billingCycle ?? null,
+    billingCycle: toBillingCycle(subscription.plan.billingCycle),
     isTrialing,
     hasPaymentMethod: subscription.hasPaymentMethod === true,
     periodEndsAt: plan.periodEndsAt,
@@ -186,7 +189,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
     id: 'current',
     name,
     currency: subscription.plan.currency,
-    billingCycle: subscription.plan.billingCycle ?? null,
+    billingCycle: toBillingCycle(subscription.plan.billingCycle),
     options: [
       {
         paymentLinkId: null,

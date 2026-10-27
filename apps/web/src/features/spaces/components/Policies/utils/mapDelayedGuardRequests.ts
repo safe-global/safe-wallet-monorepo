@@ -76,6 +76,8 @@ export const mapDelayedGuardRequest = (
     enforcement: { via: 'guard', guardAddress: dto.guard },
     enabled: true,
     data: toAllowlistData(dto.configurations, resolveToken),
+    // The wallet's setup sets both guard slots, so the Safe's spending limits follow the allowlist too.
+    spendingLimitsCovered: true,
   } as const
 
   switch (dto.status) {

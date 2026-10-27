@@ -17,10 +17,7 @@ const meta = {
   args: {
     spender: <Typography variant="paragraph-small-medium">Ops bot · Spending limit</Typography>,
     description: '500/day · USDC is in this allowlist',
-    restriction: {
-      today: 'USDC to any address, up to 500/day',
-      after: 'USDC only to the 4 allowed recipients, up to 500/day',
-    },
+    restricted: true,
   },
 } satisfies Meta<typeof SpendingLimitImpactRow>
 
@@ -33,6 +30,6 @@ export const NotAffected: Story = {
   args: {
     spender: <Typography variant="paragraph-small-medium">Payroll bot · Spending limit</Typography>,
     description: "1/week · ETH isn't in this allowlist",
-    restriction: undefined,
+    restricted: false,
   },
 }

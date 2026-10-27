@@ -5,10 +5,10 @@ import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/com
 import { Button } from '@safe-global/views/components/ui/button'
 import ExistingPoliciesContent from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ExistingPoliciesContent'
 import {
-  getImpactAfterText,
-  getImpactTodayText,
+  getRestrictedSpendingLimitDescription,
   getTokenInAllowlistText,
   getTokenNotInAllowlistText,
+  RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { RecipientAllowlistFlowData } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import { formatAllowanceAmount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
@@ -33,27 +33,31 @@ const ExistingPoliciesStep = (): ReactElement => {
   const [acknowledged, setAcknowledged] = useState(false)
 
   const safeName = selectedSafe?.name || (scope?.safeAddress ? shortenAddress(scope.safeAddress) : '')
-  const rows = impacts.map(({ spender, allowance, restricted, recipients }) => {
-    const amount = formatAllowanceAmount(allowance)
-    const { symbol } = allowance.token
-
-    return {
-      key: `${spender}-${allowance.token.address}`,
-      spender: (
-        <AccountIdentity address={spender} name={chainId ? addressBook.get(spender, chainId)?.name : undefined} />
-      ),
-      description: `${amount} · ${restricted ? getTokenInAllowlistText(symbol) : getTokenNotInAllowlistText(symbol)}`,
-      restriction: restricted
-        ? { today: getImpactTodayText(symbol, amount), after: getImpactAfterText(symbol, recipients.length, amount) }
-        : undefined,
-    }
-  })
+  const contactName = (address: string) => (chainId ? addressBook.get(address, chainId)?.name : undefined)
+  const rows = impacts.map(({ spender, allowance, restricted }) => ({
+    key: `${spender}-${allowance.token.address}`,
+    spender: <AccountIdentity address={spender} name={contactName(spender)} />,
+    description: `${formatAllowanceAmount(allowance)} · ${restricted ? getTokenInAllowlistText(allowance.token.symbol) : getTokenNotInAllowlistText(allowance.token.symbol)}`,
+    restricted,
+  }))
+  const restrictedImpacts = impacts.filter(({ restricted }) => restricted)
+  const [onlyRestricted] = restrictedImpacts
+  const description =
+    restrictedImpacts.length === 1
+      ? getRestrictedSpendingLimitDescription(
+          contactName(onlyRestricted.spender) || shortenAddress(onlyRestricted.spender),
+          onlyRestricted.allowance.token.symbol,
+          formatAllowanceAmount(onlyRestricted.allowance),
+          onlyRestricted.recipients.length,
+        )
+      : RESTRICTED_SPENDING_LIMITS_DESCRIPTION
 
   return (
     <TxCard>
       <div className="flex flex-col gap-5" data-testid="recipient-allowlist-existing-policies-step">
         <ExistingPoliciesContent
           safeName={safeName}
+          description={description}
           rows={rows}
           acknowledged={acknowledged}
           onAcknowledgedChange={setAcknowledged}

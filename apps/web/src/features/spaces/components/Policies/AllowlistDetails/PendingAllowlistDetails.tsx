@@ -1,9 +1,13 @@
 import { useContext, useMemo, type ReactElement } from 'react'
-import type { PendingAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
+import type {
+  FailedAllowlistPolicy,
+  PendingAllowlistPolicy,
+  QueuedAllowlistPolicy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { AllowlistDrawer } from '../AllowlistDrawer'
-import { usePendingPolicyActions } from '../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
-import { usePolicyDetailsBase } from '../../hooks/usePolicyDetailsBase'
+import { usePendingTransactionLinks } from '../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
+import { usePolicyDetailsBase } from '../hooks/usePolicyDetailsBase'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 
 const ENFORCED_BY = 'Safe policy contract'
@@ -23,20 +27,24 @@ const PendingAllowlistDetails = ({
 }: PendingAllowlistDetailsProps): ReactElement => {
   const recipients = useMemo(() => getAllowlistRecipients(policy.data), [policy.data])
   const base = usePolicyDetailsBase(policy.safe, recipients)
-  const {
-    policy: queued,
-    viewer,
-    transactionLink,
-    reviewTransactionHref,
-    outcome,
-  } = usePendingPolicyActions(policy, base.viewer, isUnlisted)
+  const { confirmationsSubmitted, viewer, transactionLink, reviewTransactionHref, outcome } =
+    usePendingTransactionLinks(policy, base.viewer, isUnlisted)
   const { txFlow } = useContext(TxModalContext)
+
+  const drawerPolicy: QueuedAllowlistPolicy | FailedAllowlistPolicy =
+    policy.status === 'failed'
+      ? { ...policy, status: 'failed' }
+      : {
+          ...policy,
+          status: 'pending',
+          confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
+        }
 
   return (
     <AllowlistDrawer
       open={!txFlow}
       onClose={onClose}
-      policy={policy.status === 'failed' ? policy : queued}
+      policy={drawerPolicy}
       viewer={viewer}
       safe={base.safe}
       names={base.names}

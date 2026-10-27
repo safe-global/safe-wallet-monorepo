@@ -92,12 +92,13 @@ export const WILL_BE_RESTRICTED_LABEL = 'Will be restricted'
 export const NOT_AFFECTED_LABEL = 'Not affected'
 export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
 export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`
-export const IMPACT_TODAY_LABEL = 'Today'
-export const IMPACT_AFTER_LABEL = 'After'
-export const getImpactTodayText = (symbol: string, amount: string): string =>
-  `${symbol} to any address, up to ${amount}`
-export const getImpactAfterText = (symbol: string, recipientCount: number, amount: string): string =>
-  `${symbol} only to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}, up to ${amount}`
+export const getRestrictedSpendingLimitDescription = (
+  spender: string,
+  symbol: string,
+  amount: string,
+  recipientCount: number,
+): string =>
+  `${spender} can send ${symbol} to any address today, up to ${amount}. Once this allowlist is active, it can only send ${symbol} to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}.`
 export const RESTRICTION_ACKNOWLEDGEMENT_LABEL =
   'I understand these spending limits will only be able to send to the allowed recipients.'
 
