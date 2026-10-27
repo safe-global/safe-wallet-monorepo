@@ -11,6 +11,12 @@ export const PAY_FROM_SAFE_ON_FREE_PLAN = true
 // SMOKE TEST (feat/pay-from-safe): enabled locally to exercise Pay from Safe against staging. Do not merge.
 export const IS_RELAYING_LIVE = true
 
+/**
+ * Phase 1 of Pay from Safe only pays fees in the chain's native token: the selector offers it alone
+ * (locked, "more tokens are coming soon"). Flip to `false` to offer the ERC-20s of `GAS_TOKEN_ALLOWLIST`.
+ */
+export const NATIVE_GAS_TOKEN_ONLY = true
+
 // Defense-in-depth: a compromised CGW could swap in an attacker `refundReceiver` and drain
 // Safes via `handlePayment()`. Validate against this list before signing. Extend as needed.
 export const FEE_COLLECTORS: ReadonlyArray<string> = [

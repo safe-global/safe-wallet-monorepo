@@ -6,6 +6,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getGasTokenAllowlistOrder, isAllowlistedGasToken } from '../constants/gasTokenAllowlist'
+import { NATIVE_GAS_TOKEN_ONLY } from '../constants'
 import type { FeePreviewTx } from './useResolvedGasToken'
 
 export type GasTokenCandidate = {
@@ -30,9 +31,13 @@ export type GasTokenCandidatesResult = {
  * synchronously off the chain config + balances.
  *
  * The native gas token is always included when held, regardless of allowlist membership, so the
- * flow still works on chains not yet in the allowlist (native-only).
+ * flow still works on chains not yet in the allowlist (native-only). While {@link NATIVE_GAS_TOKEN_ONLY}
+ * is on, it is the only candidate.
  */
-export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCandidatesResult => {
+export const useGasTokenCandidates = (
+  tx: FeePreviewTx | undefined,
+  { nativeOnly = NATIVE_GAS_TOKEN_ONLY }: { nativeOnly?: boolean } = {},
+): GasTokenCandidatesResult => {
   const [balances] = useTrustedTokenBalances()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
@@ -46,6 +51,7 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
         // Native always passes — required for chains absent from the allowlist,
         // where POL is returned with a non-ZERO address and would otherwise be filtered out.
         if (b.tokenInfo.type === 'NATIVE_TOKEN' || sameAddress(b.tokenInfo.address, ZERO_ADDRESS)) return true
+        if (nativeOnly) return false
         return isAllowlistedGasToken(chain.chainId, b.tokenInfo.address)
       })
       .map((b) => ({
@@ -70,7 +76,7 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
         if (zOrder === -1) return -1
         return aOrder - zOrder
       })
-  }, [tx, balances, chain?.chainId, chain?.nativeCurrency.logoUri, safe.threshold])
+  }, [tx, balances, chain?.chainId, chain?.nativeCurrency.logoUri, safe.threshold, nativeOnly])
 
   return { candidates, defaultAddress: candidates[0]?.address }
 }
