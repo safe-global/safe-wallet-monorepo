@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants'
-import { accordionActionItem } from '../pages/nfts.pages'
+import { accordionActionItem } from '../pages/batches.pages'
 import * as main from '../pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
 

@@ -5,7 +5,6 @@ import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as assets from '../pages/assets.pages.js'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
