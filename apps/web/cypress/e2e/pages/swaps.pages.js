@@ -38,10 +38,6 @@ export const swapTxs = fixtureGetters('swaps', {
     '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
 })
 
-export function acceptLegalDisclaimer() {
-  cy.get('button').contains('Continue').click()
-}
-
 export function createRegex(pattern, placeholder) {
   const pattern_ = pattern.replace(placeholder, `\\s*\\d*\\.?\\d*\\s*${placeholder}`)
   return new RegExp(pattern_, 'i')
