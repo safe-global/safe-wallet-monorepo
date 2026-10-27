@@ -11,3 +11,19 @@ export const formatTimeToSign = (expiresAt: number, nowMs: number): string => {
 
   return `${left} · until ${until}`
 }
+
+const SECONDS_PER_HOUR = 3_600
+const SECONDS_PER_MINUTE = 60
+
+/** `Apply in 23h 59m`, for the button that stays disabled until the guard's delay is over. Takes unix SECONDS. */
+export const formatApplyIn = (appliesAt: number, nowMs: number): string => {
+  const secondsLeft = Math.max(0, appliesAt - nowMs / 1_000)
+  const hours = Math.floor(secondsLeft / SECONDS_PER_HOUR)
+  const minutes = Math.ceil((secondsLeft % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE)
+
+  return hours === 0 ? `Apply in ${Math.max(1, minutes)}m` : `Apply in ${hours}h ${minutes}m`
+}
+
+/** `6 days left · apply by Oct 20, 2026`. Takes unix SECONDS. */
+export const formatApplyBy = (expiresAt: number, nowMs: number): string =>
+  formatTimeToSign(expiresAt, nowMs).replace('· until', '· apply by')

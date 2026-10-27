@@ -106,7 +106,27 @@ export const mockActivatingAllowlist = (): AllowlistPolicy & { status: 'active' 
   asActivePolicy(
     mockAllowlistPolicy({
       id: '0xallowlist-activating',
-      scheduledChange: { operation: 'create', appliesAt: secondsFromNow(DAY) },
+      scheduledChange: { operation: 'create', appliesAt: secondsFromNow(DAY), expiresAt: secondsFromNow(8 * DAY) },
+    }),
+  )
+
+/** The guard's delay is over: the request can be applied until its window closes. */
+export const mockReadyToApplyAllowlist = (
+  operation: 'create' | 'update' = 'create',
+): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: `0xallowlist-ready-${operation}`,
+      scheduledChange: { operation, appliesAt: secondsFromNow(-DAY), expiresAt: secondsFromNow(6 * DAY) },
+    }),
+  )
+
+/** Nobody applied the request before its window closed. */
+export const mockExpiredRequestAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-expired-request',
+      scheduledChange: { operation: 'create', appliesAt: secondsFromNow(-8 * DAY), expiresAt: secondsFromNow(-DAY) },
     }),
   )
 

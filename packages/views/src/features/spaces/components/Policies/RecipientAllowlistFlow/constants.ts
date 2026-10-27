@@ -81,3 +81,27 @@ export const POLICY_LABELS = {
   native: 'Native transfers',
 } as const
 export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."
+
+export const EXISTING_POLICIES_STEP_TITLE = 'Existing policies'
+export const getRestrictedSpendingLimitsTitle = (count: number): string =>
+  `${count} spending ${count === 1 ? 'limit' : 'limits'} will be restricted by this allowlist.`
+export const RESTRICTED_SPENDING_LIMITS_DESCRIPTION =
+  'Once this allowlist is active, a spender can only send an allowlisted token to the allowed recipients.'
+export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
+export const WILL_BE_RESTRICTED_LABEL = 'Will be restricted'
+export const NOT_AFFECTED_LABEL = 'Not affected'
+export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
+export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`
+export const IMPACT_TODAY_LABEL = 'Today'
+export const IMPACT_AFTER_LABEL = 'After'
+export const getImpactTodayText = (symbol: string, amount: string): string =>
+  `${symbol} to any address, up to ${amount}`
+export const getImpactAfterText = (symbol: string, recipientCount: number, amount: string): string =>
+  `${symbol} only to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}, up to ${amount}`
+export const RESTRICTION_ACKNOWLEDGEMENT_LABEL =
+  'I understand these spending limits will only be able to send to the allowed recipients.'
+
+export const APPLY_REVIEW_STEP_TITLE = 'Apply allowlist'
+export const APPLY_SUMMARY_TITLE = 'Apply the allowlist to turn it on.'
+export const APPLY_SUMMARY_DESCRIPTION =
+  'The 24-hour wait is over. Once this transaction is executed, every transfer of an allowlisted token is checked against it.'

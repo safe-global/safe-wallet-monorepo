@@ -13,6 +13,10 @@ export type AllowlistActionsProps = {
   onEdit?: () => void
   onRemove?: () => void
   onCancelChange?: () => void
+  /** Opens the apply flow once the guard's delay is over; without it the button stays disabled. */
+  onApply?: () => void
+  /** The disabled apply button's label while the delay runs, e.g. `Apply in 23h 59m`. */
+  applyLaterLabel?: string
   transactionLink?: string
   /** Absent until the transaction and chain configs have loaded. */
   reviewTransactionHref?: LinkProps['href']
@@ -24,6 +28,8 @@ const AllowlistActions = ({
   onEdit,
   onRemove,
   onCancelChange,
+  onApply,
+  applyLaterLabel,
   transactionLink,
   reviewTransactionHref,
 }: AllowlistActionsProps): ReactElement | null => {
@@ -57,6 +63,19 @@ const AllowlistActions = ({
           disabled={state.disabled || !onCancelChange}
         />
       )
+
+    case 'apply':
+      return (
+        <PolicyDrawerActions
+          actionLabel="Review transaction"
+          onClick={onApply}
+          hint={state.helper}
+          disabled={state.disabled || !onApply}
+        />
+      )
+
+    case 'apply-later':
+      return <PolicyDrawerActions actionLabel={applyLaterLabel ?? 'Apply'} disabled />
 
     case 'review':
       return (

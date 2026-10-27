@@ -4,6 +4,8 @@ import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
   mockExpiredPendingAllowlist,
+  mockExpiredRequestAllowlist,
+  mockReadyToApplyAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
@@ -124,14 +126,58 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
-  it('should offer no action while a new allowlist waits out the delay', () => {
+  it('should offer a disabled apply while a new allowlist waits out the delay', () => {
     expect(resolveAllowlistDrawerState(mockActivatingAllowlist(), MOCK_VIEWERS.signer, 'Treasury')).toEqual({
       kind: 'scheduled',
       operation: 'create',
+      action: 'apply-later',
+      disabled: true,
+      bannerTitle: 'The allowlist can only be applied in 24 hours.',
+      bannerLine2:
+        "Come back after the wait to apply it with a second transaction. Until then, transactions aren't checked against it.",
+    })
+  })
+
+  it.each([
+    ['signer', MOCK_VIEWERS.signer, { action: 'apply', disabled: false }],
+    ['viewer without a wallet', MOCK_VIEWERS.disconnected, { action: 'connect', disabled: false }],
+    ['wallet that is not a signer', MOCK_VIEWERS.nonSigner, { action: 'apply', disabled: true }],
+  ] as const)('should, for a %s, resolve a request whose delay is over', (_, viewer, expected) => {
+    expect(resolveAllowlistDrawerState(mockReadyToApplyAllowlist(), viewer, 'Treasury')).toMatchObject({
+      kind: 'ready-to-apply',
+      operation: 'create',
+      bannerTitle: 'The 24-hour wait is over. Apply the allowlist to turn it on.',
+      ...expected,
+    })
+  })
+
+  it('should let a signer apply a change to a live allowlist once its delay is over', () => {
+    expect(
+      resolveAllowlistDrawerState(mockReadyToApplyAllowlist('update'), MOCK_VIEWERS.signer, 'Treasury'),
+    ).toMatchObject({
+      kind: 'ready-to-apply',
+      operation: 'update',
+      action: 'apply',
+    })
+  })
+
+  it('should report a request whose apply window closed as expired, with no action', () => {
+    expect(resolveAllowlistDrawerState(mockExpiredRequestAllowlist(), MOCK_VIEWERS.signer, 'Treasury')).toEqual({
+      kind: 'expired-request',
+      operation: 'create',
       action: 'none',
-      disabled: false,
-      bannerTitle: 'Change pending',
-      bannerLine2: "Until then, transactions aren't checked against it.",
+      bannerTitle: 'This request expired. The allowlist was never applied.',
+      bannerLine2:
+        "It wasn't applied within 7 days after the wait ended, so it can no longer be used. Add the allowlist again to retry.",
+    })
+  })
+
+  it('should resolve the waiting state against the time passed in', () => {
+    const policy = mockActivatingAllowlist()
+    const afterDelay = (policy.scheduledChange!.appliesAt + 60) * 1_000
+
+    expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Treasury', undefined, afterDelay)).toMatchObject({
+      kind: 'ready-to-apply',
     })
   })
 

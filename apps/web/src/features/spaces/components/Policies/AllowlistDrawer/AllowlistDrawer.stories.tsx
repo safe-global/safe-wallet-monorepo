@@ -8,7 +8,9 @@ import {
   mockCgwUncoveredAllowlist,
   mockCgwUnenforcedAllowlist,
   mockExpiredPendingAllowlist,
+  mockExpiredRequestAllowlist,
   mockFailedAllowlist,
+  mockReadyToApplyAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
@@ -41,6 +43,7 @@ const meta = {
     onEdit: fn(),
     onRemove: fn(),
     onCancelChange: fn(),
+    onApply: fn(),
     onConnectWallet: fn(),
     policy: mockCgwAllowlist(),
     viewer: MOCK_VIEWERS.signer,
@@ -131,3 +134,15 @@ export const ChangePendingNotASigner: Story = {
 export const FailedSetup: Story = { args: { ...PENDING_ARGS, policy: mockFailedAllowlist() } }
 
 export const UnnamedRecipients: Story = { args: { names: undefined, safe: { address: MOCK_SAFES.treasury.address } } }
+
+/** The delay is over: Review transaction opens the apply flow, the second signing round. */
+export const ReadyToApply: Story = { args: { policy: mockReadyToApplyAllowlist() } }
+
+export const ReadyToApplyNotASigner: Story = {
+  args: { policy: mockReadyToApplyAllowlist(), viewer: MOCK_VIEWERS.nonSigner },
+}
+
+export const ReadyToApplyChange: Story = { args: { policy: mockReadyToApplyAllowlist('update') } }
+
+/** Nobody applied the request before its window closed. */
+export const ExpiredRequest: Story = { args: { policy: mockExpiredRequestAllowlist() } }

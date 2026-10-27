@@ -1,4 +1,4 @@
-import { useContext, useState, type ReactElement } from 'react'
+import { useContext, useMemo, useState, type ReactElement } from 'react'
 import NextLink from 'next/link'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -14,6 +14,8 @@ import { SafeIdentity } from '../../components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
+import { hasRestrictedSpendingLimit } from '../utils/spendingLimitImpacts'
 import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
@@ -44,11 +46,14 @@ const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
 export type CreateRecipientAllowlistPolicyProps = {
   dismissedCallouts: Record<CalloutSection, boolean>
   onDismissCallout: (section: CalloutSection) => void
+  /** Called on Next with whether the allowlist restricts a spending limit, which adds the Existing policies step. */
+  onSpendingLimitImpact?: (restricts: boolean) => void
 }
 
 const CreateRecipientAllowlistPolicy = ({
   dismissedCallouts,
   onDismissCallout,
+  onSpendingLimitImpact,
 }: CreateRecipientAllowlistPolicyProps): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
   const [values, setValues] = useState<RecipientAllowlistFormValues>(() => {
@@ -77,6 +82,9 @@ const CreateRecipientAllowlistPolicy = ({
     setTrackedScopeKey(scopeKey)
     setValues(createDefaultAllowlistValues())
   }
+
+  const rules = useMemo(() => buildAllowlistRules(heldTokens.addresses, values), [heldTokens.addresses, values])
+  const impacts = useSpendingLimitImpacts(rules)
 
   const canContinue = guard !== undefined && READY_GUARD_STATES.includes(guard.status)
   const canGoNext =
@@ -160,7 +168,10 @@ const CreateRecipientAllowlistPolicy = ({
             type="button"
             size="submit"
             disabled={!canGoNext}
-            onClick={() => onNext({ ...values, rules: buildAllowlistRules(heldTokens.addresses, values) })}
+            onClick={() => {
+              onSpendingLimitImpact?.(hasRestrictedSpendingLimit(impacts))
+              onNext({ ...values, rules })
+            }}
             data-testid="next-btn"
           >
             {NEXT_LABEL}

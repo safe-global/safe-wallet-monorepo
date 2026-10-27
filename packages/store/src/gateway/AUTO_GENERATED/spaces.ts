@@ -236,6 +236,7 @@ const injectedRtkApi = api
           params: {
             types: queryArg.types,
             safes: queryArg.safes,
+            include_guard_installation: queryArg.includeGuardInstallation,
           },
         }),
         providesTags: ['spaces'],
@@ -451,14 +452,29 @@ export type SpacePoliciesGetActivePoliciesV1ApiArg = {
   /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
   safes?: string
 }
-export type SpacePoliciesGetPendingPoliciesV1ApiResponse = /** status 200  */ PendingPolicyDto[]
+export type SpacePoliciesGetPendingPoliciesV1ApiResponse = /** status 200  */ (
+  | ({
+      kind: 'queued-transaction'
+    } & PendingPolicyDto)
+  | ({
+      kind: 'guard-installation'
+    } & PendingGuardInstallationDto)
+  | ({
+      kind: 'immediate-guard-policies'
+    } & PendingImmediateGuardPoliciesDto)
+  | ({
+      kind: 'delayed-guard-policies'
+    } & PendingDelayedGuardPoliciesDto)
+)[]
 export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
   /** Space UUID */
   spaceId: string
-  /** The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none. */
+  /** The policy types to report, comma-separated. `spending-limit` returns queued AllowanceModule changes. A guard type (`allow`, `deny`, `cosigner`, `erc20-transfer`, `multisend`, `native-transfer`) returns the delayed `SafePolicyGuard` configurations that may set a policy of that type. `proposer` and `recovery` return none. */
   types: string[]
   /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
   safes?: string[]
+  /** Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items. */
+  includeGuardInstallation?: boolean
 }
 export type SpaceAddressBookItemDto = {
   name: string
@@ -990,9 +1006,89 @@ export type PendingPolicyDto = {
   confirmationsRequired: number
   /** Unix seconds the transaction was proposed at */
   proposedAt: number
+  /** The owner or delegate who proposed the transaction, if known */
+  proposer: string | null
   data: PendingSpendingLimitDataDto
   /** The Safe the change is queued on */
   safe: SafeRefDto
+}
+export type SetGuardChangeDto = {
+  kind: 'set-guard'
+  /** The transaction guard before this call; null for none */
+  from: string | null
+  /** The transaction guard after this call; null removes it */
+  to: string | null
+}
+export type SetModuleGuardChangeDto = {
+  kind: 'set-module-guard'
+  /** The module guard before this call; null for none */
+  from: string | null
+  /** The module guard after this call; null removes it */
+  to: string | null
+}
+export type PendingTransactionDto = {
+  safeTxHash: string
+  nonce: number
+  confirmations: number
+  confirmationsRequired: number
+  /** Unix seconds the transaction was proposed at */
+  proposedAt: number
+  /** The owner or delegate who proposed the transaction, if known */
+  proposer: string | null
+}
+export type PendingGuardInstallationDto = {
+  kind: 'guard-installation'
+  status: 'in-signing' | 'ready'
+  /** The Safe the transaction is queued on */
+  safe: SafeRefDto
+  /** The guard installation calls of the transaction, in calldata order */
+  changes: (
+    | ({
+        kind: 'set-guard'
+      } & SetGuardChangeDto)
+    | ({
+        kind: 'set-module-guard'
+      } & SetModuleGuardChangeDto)
+  )[]
+  transaction: PendingTransactionDto
+}
+export type PendingImmediateGuardPoliciesDto = {
+  kind: 'immediate-guard-policies'
+  status: 'in-signing' | 'ready'
+  /** The Safe the transaction is queued on */
+  safe: SafeRefDto
+  /** The SafePolicyGuard the policies are bound on */
+  guard: string
+  /** The configurations configureImmediately binds */
+  configurations: PolicyConfigurationDto[]
+  transaction: PendingTransactionDto
+}
+export type PendingDelayedGuardPoliciesDto = {
+  kind: 'delayed-guard-policies'
+  /** draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed. */
+  status:
+    | 'draft'
+    | 'configuration-in-signing'
+    | 'pending-application'
+    | 'application-in-signing'
+    | 'application-ready'
+    | 'expired'
+  /** The Safe the configuration belongs to */
+  safe: SafeRefDto
+  /** The SafePolicyGuard of the root; null for a draft */
+  guard: string | null
+  /** keccak256(abi.encode(Configuration[])) */
+  root: string
+  /** The configurations behind the root; null when CGW does not know them */
+  configurations: PolicyConfigurationDto[] | null
+  /** Unix seconds applyConfiguration is valid from; null until the root is requested on-chain */
+  readyAt: number | null
+  /** Unix seconds the application window closes; null until the root is requested on-chain */
+  expiresAt: number | null
+  /** The queued request or apply transaction, if any */
+  transaction: PendingTransactionDto | null
+  /** Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet. */
+  createdAt: number | null
 }
 export const {
   useAddressBooksGetAddressBookItemsV1Query,

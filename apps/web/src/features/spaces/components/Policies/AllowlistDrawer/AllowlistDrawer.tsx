@@ -11,7 +11,11 @@ import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Po
 import { getPolicyTokens } from '../utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
-import { formatTimeToSign } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
+import {
+  formatApplyBy,
+  formatApplyIn,
+  formatTimeToSign,
+} from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import {
   getPolicyStatus,
@@ -35,6 +39,7 @@ import AllowlistTokens from './components/AllowlistTokens'
 import ActivatedBanner from './components/ActivatedBanner'
 import FailedBanner from './components/FailedBanner'
 import ScheduledBanner from './components/ScheduledBanner'
+import ReadyToApplyBanner from './components/ReadyToApplyBanner'
 import UncoveredSpendingLimits from './components/UncoveredSpendingLimits'
 
 type AllowlistDrawerBaseProps = {
@@ -54,6 +59,8 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   onEdit?: () => void
   onRemove?: () => void
   onCancelChange?: () => void
+  /** Opens the apply flow (`applyConfiguration`) once the guard's delay is over. */
+  onApply?: () => void
   /** The first setup just became active: confirms it once at the top of the panel. */
   justActivated?: boolean
   /** The Safe's spending limits that bypass the allowlist because the guard is not in the module slot. */
@@ -94,14 +101,26 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
 
   const now = Date.now()
   const outcome = isPendingDrawer(props) ? (props.outcome ?? inferAllowlistOutcome(props.policy, now)) : undefined
-  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
+  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome, now)
   const Icon = getPolicyIcon(policy.type)
-  const status = outcome ? OUTCOME_STATUS[outcome] : getPolicyStatus(policy)
+  // An expired request can never apply, so it reads Failed like a transaction that can never execute.
+  const status = outcome
+    ? OUTCOME_STATUS[outcome]
+    : state.kind === 'expired-request'
+      ? 'failed'
+      : getPolicyStatus(policy)
+  const scheduledChange = policy.status === 'active' ? policy.scheduledChange : undefined
   const isRemoved = 'operation' in state && state.operation === 'remove'
   const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
-    : { onEdit: props.onEdit, onRemove: props.onRemove, onCancelChange: props.onCancelChange }
+    : {
+        onEdit: props.onEdit,
+        onRemove: props.onRemove,
+        onCancelChange: props.onCancelChange,
+        onApply: props.onApply,
+        applyLaterLabel: scheduledChange ? formatApplyIn(scheduledChange.appliesAt, now) : undefined,
+      }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
@@ -136,6 +155,14 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               appliesAt={formatAppliesAt(policy.scheduledChange.appliesAt, now)}
             />
           )}
+          {state.kind === 'ready-to-apply' && (
+            <ReadyToApplyBanner
+              title={state.bannerTitle}
+              line2={state.bannerLine2}
+              applyBy={scheduledChange?.expiresAt ? formatApplyBy(scheduledChange.expiresAt, now) : undefined}
+            />
+          )}
+          {state.kind === 'expired-request' && <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {state.kind === 'closed' &&
             (status === 'failed' ? (
               <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />

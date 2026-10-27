@@ -112,8 +112,10 @@ export type AllowlistPolicyData = {
 // Placeholder: CGW has no field for this yet, so the shape follows the design until the API defines it.
 export type AllowlistScheduledChange = {
   operation: 'create' | 'update'
-  /** Unix SECONDS. */
+  /** Unix SECONDS `applyConfiguration` is valid from (CGW `readyAt`). */
   appliesAt: number
+  /** Unix SECONDS the apply window closes (CGW `expiresAt`); unset when unknown. */
+  expiresAt?: number
 }
 
 type PolicyBase = {
