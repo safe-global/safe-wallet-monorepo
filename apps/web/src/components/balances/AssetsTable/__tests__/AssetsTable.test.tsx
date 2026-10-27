@@ -433,13 +433,14 @@ describe('AssetsTable', () => {
     const rowOf = (tokenName: string) =>
       screen.getAllByRole('row').find((row) => within(row).queryAllByText(tokenName).length > 0)
 
-    it('shows a Swap button on every asset row when swaps are available', async () => {
+    it('shows a Swap button in the Actions cell of every asset row when swaps are available', async () => {
       mockHasFeature({ [FEATURES.NATIVE_SWAPS]: true })
       renderAssetsTable({ balances: nonZeroBalances() })
 
       await screen.findAllByTestId('swap-btn')
       for (const { name } of tokens) {
-        expect(within(rowOf(name)!).queryAllByTestId('swap-btn').length).toBeGreaterThan(0)
+        const actionsCell = within(rowOf(name)!).getByTestId('table-cell-actions')
+        expect(within(actionsCell).getByTestId('swap-btn')).toBeInTheDocument()
       }
     })
 
