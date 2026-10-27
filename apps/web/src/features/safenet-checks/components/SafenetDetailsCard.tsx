@@ -12,6 +12,7 @@ import DateTime from '@/components/common/DateTime'
 import { cn } from '@safe-global/views/utils/cn'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   CheckStatus,
   type PublicCheckStatus,
@@ -20,7 +21,7 @@ import {
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
 import { CHIP_VARIANT, STATUS_PRESENTATION } from '../statusPresentation'
-import { explainFailure, summariseRejection, type RejectionSummary } from '../summariseRejection'
+import { explainFailure, isWarningRisk, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -44,7 +45,7 @@ export type SafenetDetailsCardViewProps = {
   defaultExpanded?: boolean
 }
 
-// Colour lives in the chip and the blocks; the card itself only turns red on a risk.
+// Colour lives in the chip and the blocks; the card itself only takes a colour on a risk.
 const NEUTRAL_BORDER = 'var(--color-border-main)'
 
 /** Meta lines on white/grey — same token as Receipt grid labels in Transaction details. */
@@ -66,13 +67,20 @@ const RISK_ACCENT = {
   '--accordion-fill-active': 'var(--color-error-background)',
 } as CSSProperties
 
+const WARNING_ACCENT = {
+  '--accordion-border-active': 'var(--color-warning-main)',
+  '--accordion-fill-active': 'var(--color-warning-background)',
+} as CSSProperties
+
 const NEUTRAL_ACCENT = {
   '--accordion-border-active': NEUTRAL_BORDER,
   '--accordion-fill-active': 'transparent',
 } as CSSProperties
 
-const cardAccent = (publicStatus: VerdictStatus): CSSProperties =>
-  publicStatus === CheckStatus.MALICIOUS ? RISK_ACCENT : NEUTRAL_ACCENT
+const cardAccent = (publicStatus: VerdictStatus, isWarning: boolean): CSSProperties => {
+  if (isWarning) return WARNING_ACCENT
+  return publicStatus === CheckStatus.MALICIOUS ? RISK_ACCENT : NEUTRAL_ACCENT
+}
 
 type ProofLink = { href: string; testId: string; label: string }
 
@@ -191,6 +199,7 @@ export const SafenetDetailsCardView = ({
 }: SafenetDetailsCardViewProps): ReactElement => {
   const links = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
   const summary = summariseRejection(snapshot.events)
+  const isWarning = isWarningRisk(publicStatus, summary)
   const isInFlight = isCheckInFlight(publicStatus)
   const proofLink = proofLinkFor(publicStatus, links, isInFlight)
 
@@ -199,18 +208,22 @@ export const SafenetDetailsCardView = ({
       data-testid="safenet-details-card"
       data-status={publicStatus}
       className={cn(accordionCss.item, 'animate-in fade-in duration-300')}
-      style={cardAccent(publicStatus)}
+      style={cardAccent(publicStatus, isWarning)}
     >
       <Accordion defaultValue={defaultExpanded ? ['safenet'] : []}>
         <AccordionItem value="safenet" className="border-0">
           <AccordionTrigger className={cn(accordionCss.trigger, 'items-center px-4')}>
             <div className="flex w-full flex-row items-center justify-between gap-2">
               <SafenetLogo role="img" aria-label="Safenet check" className="h-3 w-auto text-foreground" />
-              <Chip variant={CHIP_VARIANT[publicStatus]}>
+              <Chip variant={isWarning ? 'warning' : CHIP_VARIANT[publicStatus]}>
                 {isInFlight ? (
                   <SafenetPulse size={12} />
                 ) : (
-                  <SeverityIcon severity={STATUS_PRESENTATION[publicStatus].severity} width={12} height={12} />
+                  <SeverityIcon
+                    severity={isWarning ? Severity.WARN : STATUS_PRESENTATION[publicStatus].severity}
+                    width={12}
+                    height={12}
+                  />
                 )}
                 {STATUS_PRESENTATION[publicStatus].label}
               </Chip>
