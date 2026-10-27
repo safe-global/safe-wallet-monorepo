@@ -858,6 +858,17 @@ export type Erc20TransferRecipientDto = {
 export type Erc20TransferPolicyDataDto = {
   /** The ERC20 token the allowlist applies to */
   tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
   /** The recipients of the token transfers the policy permits */
   recipients: Erc20TransferRecipientDto[]
 }

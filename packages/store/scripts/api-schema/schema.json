@@ -7509,7 +7509,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-d9280df",
+    "version": "main-ca7cb1d",
     "contact": {}
   },
   "tags": [],
@@ -7805,17 +7805,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -7825,19 +7818,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "type": "string",
@@ -7993,17 +7977,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -8013,19 +7990,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "$ref": "#/components/schemas/Product"
@@ -12916,6 +12884,25 @@
             "type": "string",
             "description": "The ERC20 token the allowlist applies to"
           },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
+          },
           "recipients": {
             "description": "The recipients of the token transfers the policy permits",
             "type": "array",
@@ -12926,6 +12913,7 @@
         },
         "required": [
           "tokenAddress",
+          "tokenMetadata",
           "recipients"
         ]
       },
@@ -13346,6 +13334,282 @@
           "proposer",
           "data",
           "safe"
+        ]
+      },
+      "SetGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "SetModuleGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-module-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "PendingTransactionDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          }
+        },
+        "required": [
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "proposer"
+        ]
+      },
+      "PendingGuardInstallationDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "guard-installation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetGuardChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "set-guard": "#/components/schemas/SetGuardChangeDto",
+                  "set-module-guard": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              }
+            },
+            "description": "The guard installation calls of the transaction, in calldata order"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "changes",
+          "transaction"
+        ]
+      },
+      "PendingImmediateGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "immediate-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "description": "The SafePolicyGuard the policies are bound on"
+          },
+          "configurations": {
+            "description": "The configurations configureImmediately binds",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "configurations",
+          "transaction"
+        ]
+      },
+      "PendingDelayedGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delayed-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "configuration-in-signing",
+              "pending-application",
+              "application-in-signing",
+              "application-ready",
+              "expired"
+            ],
+            "description": "draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed."
+          },
+          "safe": {
+            "description": "The Safe the configuration belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "nullable": true,
+            "description": "The SafePolicyGuard of the root; null for a draft"
+          },
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[]))"
+          },
+          "configurations": {
+            "nullable": true,
+            "description": "The configurations behind the root; null when CGW does not know them",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "readyAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds applyConfiguration is valid from; null until the root is requested on-chain"
+          },
+          "expiresAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the application window closes; null until the root is requested on-chain"
+          },
+          "transaction": {
+            "nullable": true,
+            "description": "The queued request or apply transaction, if any",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PendingTransactionDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet."
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "root",
+          "configurations",
+          "readyAt",
+          "expiresAt",
+          "transaction",
+          "createdAt"
         ]
       },
       "SurveyOptionDto": {
@@ -18251,282 +18515,6 @@
         },
         "required": [
           "subscriptions"
-        ]
-      },
-      "PendingDelayedGuardPoliciesDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "delayed-guard-policies"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "draft",
-              "configuration-in-signing",
-              "pending-application",
-              "application-in-signing",
-              "application-ready",
-              "expired"
-            ],
-            "description": "draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed."
-          },
-          "safe": {
-            "description": "The Safe the configuration belongs to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeRefDto"
-              }
-            ]
-          },
-          "guard": {
-            "type": "string",
-            "nullable": true,
-            "description": "The SafePolicyGuard of the root; null for a draft"
-          },
-          "root": {
-            "type": "string",
-            "description": "keccak256(abi.encode(Configuration[]))"
-          },
-          "configurations": {
-            "nullable": true,
-            "description": "The configurations behind the root; null when CGW does not know them",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PolicyConfigurationDto"
-            }
-          },
-          "readyAt": {
-            "type": "number",
-            "nullable": true,
-            "description": "Unix seconds applyConfiguration is valid from; null until the root is requested on-chain"
-          },
-          "expiresAt": {
-            "type": "number",
-            "nullable": true,
-            "description": "Unix seconds the application window closes; null until the root is requested on-chain"
-          },
-          "transaction": {
-            "nullable": true,
-            "description": "The queued request or apply transaction, if any",
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PendingTransactionDto"
-              }
-            ]
-          },
-          "createdAt": {
-            "type": "number",
-            "nullable": true,
-            "description": "Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet."
-          }
-        },
-        "required": [
-          "kind",
-          "status",
-          "safe",
-          "guard",
-          "root",
-          "configurations",
-          "readyAt",
-          "expiresAt",
-          "transaction",
-          "createdAt"
-        ]
-      },
-      "PendingGuardInstallationDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "guard-installation"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "in-signing",
-              "ready"
-            ]
-          },
-          "safe": {
-            "description": "The Safe the transaction is queued on",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeRefDto"
-              }
-            ]
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/SetGuardChangeDto"
-                },
-                {
-                  "$ref": "#/components/schemas/SetModuleGuardChangeDto"
-                }
-              ],
-              "discriminator": {
-                "propertyName": "kind",
-                "mapping": {
-                  "set-guard": "#/components/schemas/SetGuardChangeDto",
-                  "set-module-guard": "#/components/schemas/SetModuleGuardChangeDto"
-                }
-              }
-            },
-            "description": "The guard installation calls of the transaction, in calldata order"
-          },
-          "transaction": {
-            "$ref": "#/components/schemas/PendingTransactionDto"
-          }
-        },
-        "required": [
-          "kind",
-          "status",
-          "safe",
-          "changes",
-          "transaction"
-        ]
-      },
-      "PendingImmediateGuardPoliciesDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "immediate-guard-policies"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "in-signing",
-              "ready"
-            ]
-          },
-          "safe": {
-            "description": "The Safe the transaction is queued on",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeRefDto"
-              }
-            ]
-          },
-          "guard": {
-            "type": "string",
-            "description": "The SafePolicyGuard the policies are bound on"
-          },
-          "configurations": {
-            "description": "The configurations configureImmediately binds",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PolicyConfigurationDto"
-            }
-          },
-          "transaction": {
-            "$ref": "#/components/schemas/PendingTransactionDto"
-          }
-        },
-        "required": [
-          "kind",
-          "status",
-          "safe",
-          "guard",
-          "configurations",
-          "transaction"
-        ]
-      },
-      "PendingTransactionDto": {
-        "type": "object",
-        "properties": {
-          "safeTxHash": {
-            "type": "string"
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "confirmations": {
-            "type": "number"
-          },
-          "confirmationsRequired": {
-            "type": "number"
-          },
-          "proposedAt": {
-            "type": "number",
-            "description": "Unix seconds the transaction was proposed at"
-          },
-          "proposer": {
-            "type": "string",
-            "nullable": true,
-            "description": "The owner or delegate who proposed the transaction, if known"
-          }
-        },
-        "required": [
-          "safeTxHash",
-          "nonce",
-          "confirmations",
-          "confirmationsRequired",
-          "proposedAt",
-          "proposer"
-        ]
-      },
-      "SetGuardChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "set-guard"
-            ]
-          },
-          "from": {
-            "type": "string",
-            "nullable": true,
-            "description": "The transaction guard before this call; null for none"
-          },
-          "to": {
-            "type": "string",
-            "nullable": true,
-            "description": "The transaction guard after this call; null removes it"
-          }
-        },
-        "required": [
-          "kind",
-          "from",
-          "to"
-        ]
-      },
-      "SetModuleGuardChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "set-module-guard"
-            ]
-          },
-          "from": {
-            "type": "string",
-            "nullable": true,
-            "description": "The module guard before this call; null for none"
-          },
-          "to": {
-            "type": "string",
-            "nullable": true,
-            "description": "The module guard after this call; null removes it"
-          }
-        },
-        "required": [
-          "kind",
-          "from",
-          "to"
         ]
       }
     }
