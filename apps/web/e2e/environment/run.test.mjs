@@ -150,28 +150,22 @@ test('names the fork start command for every selected spec whose chain is not ru
   assert.deepEqual(missingChainCommands(['cypress/e2e/test/sepolia.cy.js'], {}, '/infra', registry), [])
 })
 
-test('plans a GitHub Actions matrix with short spec names and the forks of each shard', () => {
+test('plans one matrix entry per Playwright shard, each with the forks that any spec needs', () => {
   const registry = {
-    'cypress/e2e/regression/a.cy.js': { scenario: 'a' },
-    'cypress/e2e/regression/b.cy.js': { scenario: 'b', chains: [137] },
-  }
-  assert.deepEqual(planMatrix(undefined, 2, registry, {}), {
-    include: [
-      { shard: 1, runner: 'cypress', specs: 'regression/a', chains: '' },
-      { shard: 2, runner: 'cypress', specs: 'regression/b', chains: 'polygon' },
-      { shard: 3, runner: 'playwright', specs: '', chains: '' },
-    ],
-  })
-})
-
-test('starts the forks that any Playwright spec needs on the Playwright job', () => {
-  const playwrightRegistry = {
     'e2e/sepolia.spec.ts': {},
     'e2e/multichain.spec.ts': { chains: [1, 137] },
     'e2e/mainnet.spec.ts': { chains: [1] },
   }
-  const { include } = planMatrix(undefined, 1, { 'cypress/e2e/regression/a.cy.js': {} }, playwrightRegistry)
-  assert.deepEqual(include.at(-1), { shard: 2, runner: 'playwright', specs: '', chains: 'mainnet polygon' })
+  assert.deepEqual(planMatrix(2, registry), {
+    include: [
+      { shard: 1, chains: 'mainnet polygon' },
+      { shard: 2, chains: 'mainnet polygon' },
+    ],
+  })
+  assert.deepEqual(planMatrix(1, { 'e2e/sepolia.spec.ts': {} }), { include: [{ shard: 1, chains: '' }] })
+  for (const count of [0, -1, 1.5, NaN]) {
+    assert.throws(() => planMatrix(count, registry), /positive integer/)
+  }
 })
 
 test('selects the Playwright specs that SAFE_E2E_SPECS matches, as Playwright does', () => {
@@ -192,6 +186,17 @@ test('runs every isolated Playwright spec unless SAFE_E2E_SPECS names some', () 
   assert.deepEqual(playwrightRunArguments({}), config)
   assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: '' }), config)
   assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: 'dashboard, owners' }), [...config, 'dashboard', 'owners'])
+})
+
+test('runs one Playwright shard when SAFE_E2E_SHARD names it', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SHARD: '2/3' }), [...config, '--shard', '2/3'])
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SHARD: '1/3', SAFE_E2E_SPECS: 'batch' }), [
+    ...config,
+    '--shard',
+    '1/3',
+    'batch',
+  ])
 })
 
 test('gives both runners the local service URLs and the running forks', () => {
