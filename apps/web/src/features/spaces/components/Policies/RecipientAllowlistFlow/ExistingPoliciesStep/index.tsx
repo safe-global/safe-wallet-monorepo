@@ -3,15 +3,21 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
-import ExistingPoliciesContent from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ExistingPoliciesContent'
+import ExistingPoliciesContent, {
+  type ExistingPoliciesContentProps,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ExistingPoliciesContent'
 import {
-  getRestrictedSpendingLimitDescription,
+  BLOCKED_SPENDING_LIMITS_DESCRIPTION,
+  getBlockedSpendingLimitDescription,
+  getBlockedSpendingLimitsTitle,
+  getRestrictedSpendingLimitsTitle,
   getTokenInAllowlistText,
   getTokenNotInAllowlistText,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { RecipientAllowlistFlowData } from '../types'
 import { formatAllowanceAmount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
+import { formatAllowance } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
@@ -20,7 +26,7 @@ import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
 
-/** Shown only when the allowlist restricts a spending limit on the picked Safe: Next waits for the acknowledgement. */
+/** Shown when the picked Safe has an active spending limit, which the allowlist blocks or restricts: Next waits for the acknowledgement. */
 const ExistingPoliciesStep = (): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
   const rules = useMemo(() => data?.rules ?? [], [data?.rules])
@@ -34,30 +40,40 @@ const ExistingPoliciesStep = (): ReactElement => {
 
   const safeName = selectedSafe?.name || (scope?.safeAddress ? shortenAddress(scope.safeAddress) : '')
   const contactName = (address: string) => (chainId ? addressBook.get(address, chainId)?.name : undefined)
-  const rows = impacts.map(({ spender, allowance, restricted }) => ({
+  const rows = impacts.map(({ spender, allowance, impact }) => ({
     key: `${spender}-${allowance.token.address}`,
     spender: <AccountIdentity address={spender} name={contactName(spender)} />,
-    description: `${formatAllowanceAmount(allowance)} · ${restricted ? getTokenInAllowlistText(allowance.token.symbol) : getTokenNotInAllowlistText(allowance.token.symbol)}`,
-    restricted,
+    description: `${formatAllowanceAmount(allowance)} · ${impact === 'restricted' ? getTokenInAllowlistText(allowance.token.symbol) : getTokenNotInAllowlistText(allowance.token.symbol)}`,
+    impact,
   }))
-  const restrictedImpacts = impacts.filter(({ restricted }) => restricted)
-  const [onlyRestricted] = restrictedImpacts
-  const description =
-    restrictedImpacts.length === 1
-      ? getRestrictedSpendingLimitDescription(
-          contactName(onlyRestricted.spender) || shortenAddress(onlyRestricted.spender),
-          onlyRestricted.allowance.token.symbol,
-          formatAllowanceAmount(onlyRestricted.allowance),
-          onlyRestricted.recipients.length,
-        )
-      : RESTRICTED_SPENDING_LIMITS_DESCRIPTION
+  const blocked = impacts.filter(({ impact }) => impact === 'blocked')
+  const [onlyBlocked] = blocked
+  const banner: ExistingPoliciesContentProps['banner'] =
+    blocked.length === 0
+      ? {
+          tone: 'info',
+          title: getRestrictedSpendingLimitsTitle(impacts.length),
+          description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
+        }
+      : {
+          tone: 'warning',
+          title: getBlockedSpendingLimitsTitle(blocked.length),
+          description:
+            blocked.length === 1
+              ? getBlockedSpendingLimitDescription(
+                  contactName(onlyBlocked.spender) || shortenAddress(onlyBlocked.spender),
+                  formatAllowance(onlyBlocked.allowance),
+                  onlyBlocked.allowance.token.symbol,
+                )
+              : BLOCKED_SPENDING_LIMITS_DESCRIPTION,
+        }
 
   return (
     <TxCard>
       <div className="flex flex-col gap-5" data-testid="recipient-allowlist-existing-policies-step">
         <ExistingPoliciesContent
           safeName={safeName}
-          description={description}
+          banner={banner}
           rows={rows}
           acknowledged={acknowledged}
           onAcknowledgedChange={setAcknowledged}

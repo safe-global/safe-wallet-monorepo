@@ -27,7 +27,7 @@ const RecipientAllowlistFlow = (): ReactElement => {
     [],
   )
   // Set by Create on Next, in the same update as the step change, so Review's Back returns to Create when it is skipped.
-  const [restrictsSpendingLimits, setRestrictsSpendingLimits] = useState(false)
+  const [affectsSpendingLimits, setAffectsSpendingLimits] = useState(false)
 
   return (
     <SafeScopeProvider>
@@ -42,10 +42,10 @@ const RecipientAllowlistFlow = (): ReactElement => {
           <CreateRecipientAllowlistPolicy
             dismissedCallouts={dismissedCallouts}
             onDismissCallout={dismissCallout}
-            onSpendingLimitImpact={setRestrictsSpendingLimits}
+            onSpendingLimitImpact={setAffectsSpendingLimits}
           />
         </TxFlowStep>
-        {restrictsSpendingLimits && (
+        {affectsSpendingLimits && (
           <TxFlowStep title={EXISTING_POLICIES_STEP_TITLE} hideNonce>
             <ExistingPoliciesStep />
           </TxFlowStep>

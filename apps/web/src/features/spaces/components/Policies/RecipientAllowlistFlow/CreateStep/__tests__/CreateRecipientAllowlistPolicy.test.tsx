@@ -221,16 +221,22 @@ describe('CreateRecipientAllowlistPolicy', () => {
   })
 
   it.each([
-    [true, 'adds', true],
-    [false, 'skips', false],
+    ['restricted', 'adds', [{ impact: 'restricted' }], true],
+    ['blocked', 'adds', [{ impact: 'blocked' }], true],
+    ['absent', 'skips', [], false],
   ])(
-    'reports on Next whether a spending limit is restricted (%s), so the flow %s Existing policies',
-    (restricted, _, expected) => {
+    'reports on Next whether a spending limit is affected (%s), so the flow %s Existing policies',
+    (_, __, impacts, expected) => {
       accounts([option(SAFE_A)])
       guard({ status: 'none' })
-      ;(useSpendingLimitImpacts as jest.Mock).mockReturnValue([
-        { spender: SAFE_B, allowance: {}, restricted, recipients: restricted ? [RECIPIENT] : [] },
-      ])
+      ;(useSpendingLimitImpacts as jest.Mock).mockReturnValue(
+        impacts.map(({ impact }) => ({
+          spender: SAFE_B,
+          allowance: {},
+          impact,
+          recipients: impact === 'restricted' ? [RECIPIENT] : [],
+        })),
+      )
       const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
       fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))

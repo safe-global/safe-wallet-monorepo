@@ -17,7 +17,7 @@ const meta = {
   args: {
     spender: <Typography variant="paragraph-small-medium">Ops bot · Spending limit</Typography>,
     description: '500/day · USDC is in this allowlist',
-    restricted: true,
+    impact: 'restricted',
   },
 } satisfies Meta<typeof SpendingLimitImpactRow>
 
@@ -26,10 +26,11 @@ type Story = StoryObj<typeof meta>
 
 export const Restricted: Story = {}
 
-export const NotAffected: Story = {
+/** The token is left out of the allowlist, which denies by default. */
+export const Blocked: Story = {
   args: {
     spender: <Typography variant="paragraph-small-medium">Payroll bot · Spending limit</Typography>,
     description: "1/week · ETH isn't in this allowlist",
-    restricted: false,
+    impact: 'blocked',
   },
 }

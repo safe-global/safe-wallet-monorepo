@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { Policy, PolicyAllowance, PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
-import { getSpendingLimitImpacts, hasRestrictedSpendingLimit } from '../spendingLimitImpacts'
+import { getSpendingLimitImpacts } from '../spendingLimitImpacts'
 
 const makeAllowance = (tokenAddress: string): PolicyAllowance => ({
   token: { address: tokenAddress, symbol: faker.finance.currencyCode(), decimals: 6, logoUri: null },
@@ -13,7 +13,7 @@ const makeAllowance = (tokenAddress: string): PolicyAllowance => ({
 
 const makeSpendingLimit = (
   safe: PolicySafe,
-  spenders: { spender: string; allowances: PolicyAllowance[] }[],
+  spenders: { spender: string; isActive?: boolean; allowances: PolicyAllowance[] }[],
 ): Policy => ({
   id: faker.string.uuid(),
   type: 'spending-limit',
@@ -36,18 +36,31 @@ describe('getSpendingLimitImpacts', () => {
 
     const [impact] = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc.toLowerCase(), recipients }])
 
-    expect(impact).toMatchObject({ spender, restricted: true, recipients })
+    expect(impact).toMatchObject({ spender, impact: 'restricted', recipients })
   })
 
-  it('leaves an allowance on a token outside the allowlist unaffected', () => {
+  it('blocks an allowance on a token the allowlist leaves out, since the guard denies by default', () => {
     const policies = [
       makeSpendingLimit(safe, [{ spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(weth)] }]),
     ]
 
     const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
 
-    expect(impacts).toEqual([expect.objectContaining({ restricted: false, recipients: [] })])
-    expect(hasRestrictedSpendingLimit(impacts)).toBe(false)
+    expect(impacts).toEqual([expect.objectContaining({ impact: 'blocked', recipients: [] })])
+  })
+
+  it('leaves out the allowances of a deregistered spender', () => {
+    const active = faker.finance.ethereumAddress()
+    const policies = [
+      makeSpendingLimit(safe, [
+        { spender: active, allowances: [makeAllowance(usdc)] },
+        { spender: faker.finance.ethereumAddress(), isActive: false, allowances: [makeAllowance(usdc)] },
+      ]),
+    ]
+
+    const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
+
+    expect(impacts.map(({ spender }) => spender)).toEqual([active])
   })
 
   it('ignores spending limits on other Safes and other chains', () => {
@@ -73,7 +86,6 @@ describe('getSpendingLimitImpacts', () => {
 
     const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
 
-    expect(impacts.map(({ restricted }) => restricted)).toEqual([true, false, true])
-    expect(hasRestrictedSpendingLimit(impacts)).toBe(true)
+    expect(impacts.map(({ impact }) => impact)).toEqual(['restricted', 'blocked', 'restricted'])
   })
 })

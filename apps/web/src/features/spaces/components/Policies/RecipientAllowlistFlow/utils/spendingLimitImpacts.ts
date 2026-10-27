@@ -7,17 +7,20 @@ import {
   type PolicySafe,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 
+/** `blocked`: its token is left out of the allowlist; `restricted`: it may only send to the allowed recipients. */
+export type SpendingLimitImpactKind = 'blocked' | 'restricted'
+
 export type SpendingLimitImpact = {
   spender: string
   allowance: PolicyAllowance
-  /** The allowlist covers the allowance's token, so the spender may only send it to `recipients`. */
-  restricted: boolean
+  impact: SpendingLimitImpactKind
+  /** The recipients the allowlist allows for the allowance's token; empty when it is blocked. */
   recipients: string[]
 }
 
 /**
- * How the allowlist changes each spending limit on `safe`. With the AllowPolicy fallback, a token the allowlist leaves
- * out stays unrestricted, so only an allowance on an allowlisted token is affected.
+ * How the allowlist changes each active spending limit on `safe`. The guard denies by default (the setup adds no
+ * fallback policy), so an allowance on a token the allowlist leaves out can no longer be spent at all.
  */
 export const getSpendingLimitImpacts = (
   policies: readonly Policy[],
@@ -33,14 +36,15 @@ export const getSpendingLimitImpacts = (
         sameAddress(policy.safe.address, safe.address),
     )
     .flatMap(({ data }) =>
-      data.spenders.flatMap(({ spender, allowances }) =>
-        allowances.map((allowance) => {
-          const rule = rules.find(({ tokenAddress }) => sameAddress(tokenAddress, allowance.token.address))
+      data.spenders
+        .filter(({ isActive }) => isActive !== false)
+        .flatMap(({ spender, allowances }) =>
+          allowances.map((allowance) => {
+            const rule = rules.find(({ tokenAddress }) => sameAddress(tokenAddress, allowance.token.address))
 
-          return { spender, allowance, restricted: !!rule, recipients: rule?.recipients ?? [] }
-        }),
-      ),
+            return rule
+              ? { spender, allowance, impact: 'restricted' as const, recipients: rule.recipients }
+              : { spender, allowance, impact: 'blocked' as const, recipients: [] }
+          }),
+        ),
     )
-
-export const hasRestrictedSpendingLimit = (impacts: readonly SpendingLimitImpact[]): boolean =>
-  impacts.some(({ restricted }) => restricted)

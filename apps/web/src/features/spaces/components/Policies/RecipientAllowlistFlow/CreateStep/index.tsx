@@ -15,7 +15,6 @@ import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlis
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
 import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
-import { hasRestrictedSpendingLimit } from '../utils/spendingLimitImpacts'
 import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
@@ -46,8 +45,8 @@ const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
 export type CreateRecipientAllowlistPolicyProps = {
   dismissedCallouts: Record<CalloutSection, boolean>
   onDismissCallout: (section: CalloutSection) => void
-  /** Called on Next with whether the allowlist restricts a spending limit, which adds the Existing policies step. */
-  onSpendingLimitImpact?: (restricts: boolean) => void
+  /** Called on Next with whether the allowlist affects a spending limit, which adds the Existing policies step. */
+  onSpendingLimitImpact?: (affectsSpendingLimits: boolean) => void
 }
 
 const CreateRecipientAllowlistPolicy = ({
@@ -169,7 +168,7 @@ const CreateRecipientAllowlistPolicy = ({
             size="submit"
             disabled={!canGoNext}
             onClick={() => {
-              onSpendingLimitImpact?.(hasRestrictedSpendingLimit(impacts))
+              onSpendingLimitImpact?.(impacts.length > 0)
               onNext({ ...values, rules })
             }}
             data-testid="next-btn"
