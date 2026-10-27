@@ -35,6 +35,27 @@ describe('dynamic', () => {
     expect(html).toBe('')
   })
 
+  it('should render nothing on the server without calling the loader', () => {
+    const loader = jest.fn(() => Promise.resolve({ default: Greeting }))
+    const LazyGreeting = dynamic(loader)
+
+    const html = renderToString(<LazyGreeting name="Safe" />)
+
+    expect(html).toBe('')
+    expect(loader).not.toHaveBeenCalled()
+  })
+
+  it('should, when the module loaded for an earlier mount, render it on the first render', async () => {
+    const LazyGreeting = dynamic(() => Promise.resolve({ default: Greeting }))
+    const { unmount } = render(<LazyGreeting name="Safe" />)
+    await screen.findByText('Hello Safe')
+    unmount()
+
+    render(<LazyGreeting name="Safe" />)
+
+    expect(screen.getByText('Hello Safe')).toBeInTheDocument()
+  })
+
   it('should, when ssr is false, render the loaded component after mounting in the browser', async () => {
     const LazyGreeting = dynamic(() => Promise.resolve({ default: Greeting }), { ssr: false })
 
