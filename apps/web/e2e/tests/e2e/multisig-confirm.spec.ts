@@ -34,7 +34,8 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     await queue.goto(safe.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('1/2')
     await queue.confirm(0)
-    await review.signAndExecute()
+    await review.continueAndExecute()
+    await review.waitForExecution()
 
     await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))

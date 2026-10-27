@@ -193,17 +193,17 @@ describe('Execute slot', () => {
     })
   }
 
-  it('offers only Sign for the last signer on an m/n Safe', async () => {
+  it('offers Execute next to Sign for the last signer on an m/n Safe', async () => {
     const { result } = renderLastSignerOfTwoSlotIds()
 
     await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
     await waitFor(() => {
       expect(result.current).toContain('sign')
-      expect(result.current).not.toContain('execute')
+      expect(result.current).toContain('execute')
     })
   })
 
-  it('offers only Sign for a smart-account last signer on an m/n Safe', async () => {
+  it('offers Execute next to Sign for a smart-account last signer on an m/n Safe', async () => {
     mockIsSmartContractWallet.mockResolvedValue(true)
 
     const { result } = renderLastSignerOfTwoSlotIds()
@@ -211,7 +211,7 @@ describe('Execute slot', () => {
     await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
     await waitFor(() => {
       expect(result.current).toContain('sign')
-      expect(result.current).not.toContain('execute')
+      expect(result.current).toContain('execute')
     })
   })
 
