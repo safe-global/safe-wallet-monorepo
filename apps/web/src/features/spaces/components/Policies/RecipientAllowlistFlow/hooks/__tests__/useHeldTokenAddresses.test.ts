@@ -56,7 +56,7 @@ describe('useHeldTokenAddresses', () => {
   })
 
   it('drops the native token on a chain without a native transfer policy', () => {
-    ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: '1' })
+    ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: '100' })
     read({ options: [option(ZERO_ADDRESS, 'held'), option(USDC, 'held')] })
 
     const { result } = renderHook(() => useHeldTokenAddresses())
