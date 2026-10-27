@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - dev
+      - ci/yarn-cache-pr-restore-only
     paths:
       - yarn.lock
       - '**/package.json'
