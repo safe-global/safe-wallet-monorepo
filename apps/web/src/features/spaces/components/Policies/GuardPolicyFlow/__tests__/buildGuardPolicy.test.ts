@@ -17,7 +17,7 @@ const contracts = (overrides: Partial<GuardPolicyContracts> = {}): GuardPolicyCo
   safeAddress: SAFE,
   safePolicyGuard: GUARD,
   policyContract: POLICY,
-  allowPolicy: ALLOW,
+  fallbackPolicy: ALLOW,
   currentGuard: undefined,
   currentModuleGuard: undefined,
   isGuardSet: false,

@@ -15,8 +15,8 @@ import type { PolicyConfiguration } from './guardTx'
 /**
  * How the batch configures the guard:
  *  - `immediate`: guard not yet active → `configureImmediately` + `setGuard` + `setModuleGuard`,
- *    applied in one signed batch. With a default fallback policy, and unless the policy sets its own
- *    fallback, AllowPolicy takes the fallback access so the Safe's other calls keep working.
+ *    applied in one signed batch. Unless the policy sets its own fallback, the default fallback
+ *    policy (AllowPolicy unless configured to deny) takes the fallback access.
  *  - `request`: guard already active in either slot → `requestConfiguration(root)` only. `configureImmediately`
  *    reverts in the guard's `checkTransaction` once it is live, so the change takes effect via a
  *    separate `applyConfiguration` once the on-chain DELAY has elapsed.
@@ -32,7 +32,7 @@ export type PolicyBatchContext = {
   currentModuleGuard?: Address
   /** The SafePolicyGuard deployment for this chain. */
   safePolicyGuard: Address
-  /** The AllowPolicy a first setup installs as the fallback; undefined installs none. */
+  /** The policy a first setup installs as the fallback; undefined installs none. */
   fallbackPolicy: Address | undefined
   /**
    * Allow overwriting a DIFFERENT (non-policy) guard already on the Safe, in either slot. Guard-rail:
@@ -60,7 +60,7 @@ const withDefaultFallback = (
 ): PolicyConfiguration[] => {
   if (!fallbackPolicy) return configurations
   if (configurations.some((configuration) => isFallbackAccessId(accessId(configuration)))) return configurations
-  if (!isAddress(fallbackPolicy)) throw new Error('Invalid AllowPolicy address')
+  if (!isAddress(fallbackPolicy)) throw new Error('Invalid default fallback policy address')
 
   return [
     ...configurations,
