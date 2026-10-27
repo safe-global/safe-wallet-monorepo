@@ -9,5 +9,7 @@ export const {
   endpoints: {
     // Proposers are delegates, so adding or removing one refetches the policies.
     spacePoliciesGetActivePoliciesV1: { providesTags: ['spaces', 'delegates'] },
+    // A saved request changes nothing the app shows until its transaction executes.
+    policiesCreateConfigurationRequestV1: { invalidatesTags: [] },
   },
 })
