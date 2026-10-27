@@ -31,6 +31,7 @@ export const playwrightSpecs = {
     chains: [1],
   },
   'e2e/proposer.spec.ts': {},
+  'e2e/recipient-allowlist.spec.ts': {},
   'e2e/proposer-settings.spec.ts': {},
   'e2e/recovery.spec.ts': {},
   'e2e/reject.spec.ts': {},

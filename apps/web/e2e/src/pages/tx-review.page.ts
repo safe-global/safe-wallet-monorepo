@@ -107,9 +107,12 @@ export class TxReviewPage {
     await this.proposeButton.click()
   }
 
-  /** Sign as the only signer that the threshold needs, execute with the connected wallet and wait until it is mined */
-  async signAndExecute(): Promise<void> {
-    await this.sign()
+  /**
+   * Sign as the only signer that the threshold needs, execute with the connected wallet and wait until it is mined.
+   * `confirmRisk` as for `sign`.
+   */
+  async signAndExecute({ confirmRisk = true }: { confirmRisk?: boolean } = {}): Promise<void> {
+    await this.sign({ confirmRisk })
     await this.execute()
     await this.waitForExecution()
   }
