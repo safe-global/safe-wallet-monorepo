@@ -73,10 +73,6 @@
       "DATADOG_API_KEY": "DATADOG_API_KEY"
     },
     "web-nextjs-bundle-analysis.yml": {},
-    "web-e2e-smoke.yml": {
-      "BEAMER_DATA_E2E": "BEAMER_DATA_E2E",
-      "CYPRESS_WALLET_CREDENTIALS": "CYPRESS_WALLET_CREDENTIALS"
-    },
     "web-e2e-full-ondemand.yml": {
       "BEAMER_DATA_E2E": "BEAMER_DATA_E2E",
       "CYPRESS_WALLET_CREDENTIALS": "CYPRESS_WALLET_CREDENTIALS"

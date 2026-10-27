@@ -13,7 +13,7 @@ export default {
   SEP_STATIC_SAFE_0: 'sep:0x926186108f74dB20BFeb2b6c888E523C78cb7E00',
   /** Swaps and swap history testing - Used in: swaps.cy.js, swaps_history.cy.js, swaps_tokens.cy.js, limit_order_history.cy.js, apps_list.cy.js */
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
-  /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, batch_tx.cy.js, tokens.cy.js, nfts.cy.js, assets.cy.js, safe-apps tests */
+  /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, batch_tx.cy.js, safe-apps tests */
   SEP_STATIC_SAFE_2: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
   /** Used in: spending_limits_nonowner.cy.js */
   SEP_STATIC_SAFE_3: 'sep:0x33C4AA5729D91FfB3B87AEf8a324bb6304Fb905c',
@@ -42,7 +42,7 @@ export default {
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
-  /** Balances testing - Used in: balances_endpoints.cy.js */
+  /** Balances testing - Used in: Playwright token-lists.spec.ts */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
   /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Used in: dashboard.cy.js. Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
   ETH_STATIC_SAFE_OUTDATED_MASTERCOPY: 'eth:0x1230B3d59858296A31053C1b8562Ecf89A2f888b',
@@ -100,8 +100,6 @@ export default {
   MATIC_STATIC_SAFE_31: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
   /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
   MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
-  /** Positions static safe - Used in: portfolio.cy.js */
-  MATIC_STATIC_SAFE_33: 'matic:0xc1f4652866ddB3811adcd3418c13eF640e88E1f6',
 
   // Allowance Module address verification safes (same Safe on two networks)
   // New safes were added to be sure they don't have the AllowanceModule enabled by default

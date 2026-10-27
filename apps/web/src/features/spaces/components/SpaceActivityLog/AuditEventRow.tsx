@@ -1,5 +1,5 @@
 import { isAddress } from 'ethers'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { formatDate } from '@/features/spaces/utils'

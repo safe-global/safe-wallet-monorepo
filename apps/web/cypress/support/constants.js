@@ -51,8 +51,6 @@ export const addressBookUrl = '/address-book?safe='
 export const appsUrlGeneral = '/apps?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
-export const balanceNftsUrl = '/balances/nfts?safe='
-export const positionsUrl = '/balances/positions?safe='
 export const transactionQueueUrl = '/transactions/queue?safe='
 export const transactionsHistoryUrl = '/transactions/history?safe='
 export const transactionsMessagesUrl = '/transactions/messages?safe='
@@ -255,7 +253,6 @@ export const cookiePolicyUrl = '/cookie'
 export const safeLabsTermsUrl = '/safe-labs-terms'
 
 export const chainFeatures = {
-  positions: 'POSITIONS',
   nativeSwaps: 'NATIVE_SWAPS',
   bridge: 'BRIDGE',
   staking: 'STAKING',
@@ -273,7 +270,6 @@ export const localStorageKeys = {
   SAFE_v2__addedSafes: 'SAFE_v2__addedSafes',
   SAFE_v2__safeApps: 'SAFE_v2__safeApps',
   SAFE_v2_cookies: 'SAFE_v2__cookies_terms',
-  SAFE_v2__tokenlist_onboarding: 'SAFE_v2__tokenlist_onboarding',
   SAFE_v2__customSafeApps_11155111: 'SAFE_v2__customSafeApps-11155111',
   SAFE_v2__SafeApps__browserPermissions: 'SAFE_v2__SafeApps__browserPermissions',
   SAFE_v2__SafeApps__infoModal: 'SAFE_v2__SafeApps__infoModal',

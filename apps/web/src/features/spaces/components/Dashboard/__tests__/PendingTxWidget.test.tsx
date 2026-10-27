@@ -29,7 +29,7 @@ jest.mock('@/components/transactions/TxInfo', () => ({
   default: () => <span data-testid="tx-info" />,
 }))
 
-jest.mock('@/components/common/Identicon', () => ({
+jest.mock('@safe-global/views/components/common/Identicon', () => ({
   __esModule: true,
   default: () => <span data-testid="identicon" />,
 }))
