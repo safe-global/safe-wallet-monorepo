@@ -27,6 +27,8 @@ import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hyper
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
+import PolicyGuardCheck from '../PolicyGuardCheck'
+import type { GuardPolicyCheck } from '../../hooks/useGuardPolicyChecks'
 
 export const SafeShieldContent = ({
   recipient,
@@ -34,6 +36,7 @@ export const SafeShieldContent = ({
   threat,
   deadlock,
   safeTx,
+  guardCheck,
   overallStatus,
   hypernativeAuth,
   showHypernativeInfo = true,
@@ -49,6 +52,7 @@ export const SafeShieldContent = ({
   threat: AsyncResult<ThreatAnalysisResults>
   deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
+  guardCheck?: GuardPolicyCheck
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
@@ -80,7 +84,8 @@ export const SafeShieldContent = ({
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
   const deadlockEmpty = isEmpty(deadlockResults)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
-  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
+  const hasGuardVerdict = !!guardCheck?.blocked || !!guardCheck?.isAllowed
+  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx && !hasGuardVerdict
 
   const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
@@ -117,6 +122,8 @@ export const SafeShieldContent = ({
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
+        {guardCheck && <PolicyGuardCheck {...guardCheck} />}
+
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}

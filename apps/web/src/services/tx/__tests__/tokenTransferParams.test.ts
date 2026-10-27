@@ -1,4 +1,8 @@
-import { createTokenTransferParams, createNftTransferParams } from '../tokenTransferParams'
+import {
+  createTokenTransferParams,
+  createNftTransferParams,
+  createMultiTokenTransferParams,
+} from '../tokenTransferParams'
 
 describe('Token transfer encoder', () => {
   describe('createTokenTransferParams', () => {
@@ -57,6 +61,26 @@ describe('Token transfer encoder', () => {
       expect(txParams.data).toBe(
         '0xa9059cbb0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000007b',
       )
+    })
+  })
+
+  describe('createMultiTokenTransferParams', () => {
+    const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+    const RECIPIENT = '0x8b0aB586dF1Ca1f360cb26b34eEC2C3AF969E821'
+    const tokens = [{ tokenInfo: { address: USDC.toLowerCase(), decimals: 6 } }]
+
+    it('encodes each recipient with its token decimals', () => {
+      expect(
+        createMultiTokenTransferParams([{ recipient: RECIPIENT, amount: '1.5', tokenAddress: USDC }], tokens),
+      ).toEqual([createTokenTransferParams(RECIPIENT, '1.5', 6, USDC)])
+    })
+
+    it('skips a recipient whose token is unknown', () => {
+      const unknownToken = '0x1111111111111111111111111111111111111111'
+
+      expect(
+        createMultiTokenTransferParams([{ recipient: RECIPIENT, amount: '1', tokenAddress: unknownToken }], tokens),
+      ).toEqual([])
     })
   })
 })
