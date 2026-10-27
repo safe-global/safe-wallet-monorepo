@@ -23,6 +23,7 @@ jest.mock('@/components/common/AddressInput', () => {
   }) => {
     const {
       register,
+      setValue,
       formState: { errors },
     } = useFormContext()
     const error = errors[name] as { message?: string } | undefined
@@ -33,6 +34,11 @@ jest.mock('@/components/common/AddressInput', () => {
           {...register(name, {
             required: true,
             validate: (value: string) => (isAddress(value) ? validate?.(value) : 'Invalid address'),
+            // Like the real input, a resolved ENS name is replaced by its address.
+            onChange: (event: { target: { value: string } }) => {
+              const resolved = mockEnsNames[event.target.value]
+              if (resolved) setValue(name, resolved, { shouldValidate: true })
+            },
           })}
         />
         {error?.message && <span>{error.message}</span>}
@@ -43,6 +49,8 @@ jest.mock('@/components/common/AddressInput', () => {
 })
 
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
+const aliceAddress = faker.finance.ethereumAddress().toLowerCase()
+const mockEnsNames: Record<string, string> = { 'alice.eth': aliceAddress, 'safe.eth': safeAddress }
 
 const renderRow = (existing: AllowlistFormRecipient[] = [], autoFocus?: boolean) => {
   const onAdd = jest.fn()
@@ -128,6 +136,46 @@ describe('RecipientDraftRow', () => {
     await goToAddressStep(user)
     await user.type(screen.getByLabelText('Address or ENS'), '0x123')
 
+    expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
+  })
+
+  it('adds the address an ENS name resolves to, checksummed', async () => {
+    const { user, onAdd } = renderRow()
+
+    await goToAddressStep(user, 'Alice')
+    await user.type(screen.getByLabelText('Address or ENS'), 'alice.eth')
+    await user.click(await screen.findByRole('button', { name: 'Add recipient' }))
+
+    expect(onAdd).toHaveBeenCalledWith({ name: 'Alice', address: checksumAddress(aliceAddress), selected: true })
+  })
+
+  it('keeps add disabled for an ENS name that does not resolve', async () => {
+    const { user } = renderRow()
+
+    await goToAddressStep(user)
+    await user.type(screen.getByLabelText('Address or ENS'), 'unknown.eth')
+
+    expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
+  })
+
+  it('rejects an ENS name that resolves to an existing recipient', async () => {
+    const { user, onAdd } = renderRow([{ address: checksumAddress(aliceAddress), selected: true }])
+
+    await goToAddressStep(user)
+    await user.type(screen.getByLabelText('Address or ENS'), 'alice.eth')
+
+    expect(await screen.findByText(RECIPIENT_DUPLICATE_ERROR)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
+    expect(onAdd).not.toHaveBeenCalled()
+  })
+
+  it('rejects an ENS name that resolves to the Safe account itself', async () => {
+    const { user } = renderRow()
+
+    await goToAddressStep(user)
+    await user.type(screen.getByLabelText('Address or ENS'), 'safe.eth')
+
+    expect(await screen.findByText(RECIPIENT_IS_SAFE_ERROR)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add recipient' })).toBeDisabled()
   })
 
