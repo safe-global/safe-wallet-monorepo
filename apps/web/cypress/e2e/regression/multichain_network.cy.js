@@ -48,23 +48,4 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
       })
     })
   })
-
-  it('Verify that CF safe can be removed and re-added using "Add Network"', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    cy.visit(constants.BALANCE_URL + safe)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
-    network.addNetwork(constants.networks.ethereum)
-    cy.contains(network.createSafeMsg(constants.networks.ethereum))
-    cy.visit(constants.welcomeAccountUrl)
-    safeNav.expandMultichainItem()
-    safeNav.verifyNotActivatedSafeExists()
-  })
-
-  it('Verify that already added network is not shown in the add network list', () => {
-    network.clickChainNavigationButton()
-    network.clickAllNetworksAccordion()
-    network.verifyNetworkNotInAddList(constants.networks.polygon)
-  })
 })

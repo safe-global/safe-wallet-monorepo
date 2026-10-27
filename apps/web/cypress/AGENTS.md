@@ -10,7 +10,6 @@ Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cyp
 cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.page*.js)
-│   ├── smoke/          # Functional smoke tests (CI on every PR)
 │   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
 │   └── safe-apps/      # Safe Apps tests
@@ -23,11 +22,10 @@ cypress/
 
 | Category   | Folder            | CI trigger                           | Naming                    |
 | ---------- | ----------------- | ------------------------------------ | ------------------------- |
-| Smoke      | `e2e/smoke/`      | Every PR                             | `[SMOKE] Verify ...`      |
 | Visual     | `e2e/visual/`     | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
 | Regression | `e2e/regression/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+The PR smoke gate is Playwright `@smoke` (`web-pw-smoke.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)); on PRs, Cypress specs run only through the isolated job (`web-isolated-e2e-backend.yml`, registry in `e2e/environment/specs.mjs`). The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
 
 CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
@@ -156,5 +154,3 @@ Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `ge
 Per-spec scenario `files` replace JSON data at existing fixture paths in a temporary fixtures directory. Preserve the original fixture shape and expected values, supplying generated IDs for seeded backend records. Source fixture files remain unchanged; the temporary directory is removed after each spec.
 
 When a spec hard-codes staging data (a Safe address outside `getSafes`, a short address, a transaction ID or a date), move the value into a fixture under `fixtures/` built with `fixtureGetters(namespace, { name: stagingDefault })`, and read it in the spec; the scenario returns the local value as `fixtures['<namespace>.<name>']`. Wrap localStorage payloads keyed by static Safes in `aliasedStorage`. Rebuild static Safes from `scenarios/staging-safes.mjs` snapshots of their real staging state instead of inventing data.
-
-Cases that need a service the local stack cannot provide are listed with a reason in the spec's `skips` (`e2e/environment/specs.mjs`); isolated runs skip them and staging runs keep them. Do not skip cases that also fail on staging.
