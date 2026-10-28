@@ -1,9 +1,16 @@
-import type {
-  AllowlistPolicy,
-  AllowlistRecipient,
-  FailedAllowlistPolicy,
-  QueuedAllowlistPolicy,
+import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import {
+  isAllowlistPolicy,
+  type AllowlistPolicy,
+  type AllowlistRecipient,
+  type FailedAllowlistPolicy,
+  type PolicyTokenInfo,
+  type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
+import { mapActivePolicies } from '../utils/mapActivePolicies'
+import { MODULE_GUARD_ONLY, TRANSACTION_GUARD_ONLY, mockTreasuryAllowlistDtos } from './activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, asActivePolicy } from './policies'
 
 const POLICY_GUARD = '0x1a4F7b8C9d0E1f2A3b4C5d6E7f8091A2b3C4c802'
@@ -24,6 +31,7 @@ export const mockAllowlistPolicy = (overrides: Partial<AllowlistPolicy> = {}): A
   safe: MOCK_SAFES.treasury,
   enforcement: { via: 'guard', guardAddress: POLICY_GUARD },
   enabled: true,
+  spendingLimitsCovered: true,
   data: {
     entries: [
       { token: MOCK_TOKENS.usdc, recipients: RECIPIENTS },
@@ -34,6 +42,36 @@ export const mockAllowlistPolicy = (overrides: Partial<AllowlistPolicy> = {}): A
 })
 
 export const mockActiveAllowlist = (): AllowlistPolicy & { status: 'active' } => asActivePolicy(mockAllowlistPolicy())
+
+const MOCK_ETH: PolicyTokenInfo = {
+  address: ZERO_ADDRESS,
+  symbol: 'ETH',
+  decimals: 18,
+  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+}
+
+const resolveMockToken = (_chainId: string, address: string): PolicyTokenInfo | undefined =>
+  Object.values(MOCK_TOKENS).find((token) => sameAddress(token.address, address))
+
+/** The treasury's allowlist as CGW sends it: ERC20 tokens named by the tokens endpoint, ETH by the chain config. */
+export const mockCgwAllowlist = (
+  dtos: ActivePolicyDto[] = mockTreasuryAllowlistDtos(),
+): AllowlistPolicy & { status: 'active' } => {
+  const policy = mapActivePolicies(dtos, () => MOCK_ETH, resolveMockToken).find(isAllowlistPolicy)
+  if (policy?.status !== 'active') throw new Error('The DTOs map to no active allowlist')
+
+  return policy
+}
+
+export const mockCgwUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  mockCgwAllowlist(mockTreasuryAllowlistDtos(MODULE_GUARD_ONLY))
+
+export const mockCgwUncoveredAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  mockCgwAllowlist(mockTreasuryAllowlistDtos(TRANSACTION_GUARD_ONLY))
+
+/** The transaction slot is empty, so the row reads "Not enforced". */
+export const mockUnenforcedAllowlist = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(mockAllowlistPolicy({ id: '0xallowlist-unenforced', enabled: false }))
 
 /** Queued and short of its threshold. */
 export const mockPendingAllowlist = (overrides: Partial<QueuedAllowlistPolicy> = {}): QueuedAllowlistPolicy => ({

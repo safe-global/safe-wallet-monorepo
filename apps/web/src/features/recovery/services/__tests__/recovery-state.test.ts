@@ -12,7 +12,11 @@ import {
   _addedTransactionsCache,
 } from '../recovery-state'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
-import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
+import {
+  getMultiSendCallOnlyDeployment,
+  getMultiSendCallOnlyDeployments,
+  getSafeSingletonDeployment,
+} from '@safe-global/safe-deployments'
 import { Interface } from 'ethers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
@@ -41,7 +45,6 @@ describe('recovery-state', () => {
   describe('isMaliciousRecovery', () => {
     describe('non-MultiSend', () => {
       it('should return true if the transaction is not calling the Safe itself', () => {
-        const version = latestSafeVersion
         const safeAddress = faker.finance.ethereumAddress()
 
         const transaction = {
@@ -49,11 +52,10 @@ describe('recovery-state', () => {
           data: '0x',
         }
 
-        expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(true)
+        expect(_isMaliciousRecovery({ chainId, safeAddress, transaction })).toBe(true)
       })
 
       it('should return false if the transaction is calling the Safe itself', () => {
-        const version = latestSafeVersion
         const safeAddress = faker.finance.ethereumAddress()
 
         const transaction = {
@@ -61,7 +63,7 @@ describe('recovery-state', () => {
           data: '0x',
         }
 
-        expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(false)
+        expect(_isMaliciousRecovery({ chainId, safeAddress, transaction })).toBe(false)
       })
     })
 
@@ -98,7 +100,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(true)
+          expect(_isMaliciousRecovery({ chainId, safeAddress, transaction })).toBe(true)
         })
       })
       ;[...PRE_MULTI_SEND_CALL_ONLY_VERSIONS, ...SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS].forEach((version) => {
@@ -134,7 +136,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(true)
+          expect(_isMaliciousRecovery({ chainId, safeAddress, transaction })).toBe(true)
         })
       })
 
@@ -168,7 +170,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(false)
+          expect(_isMaliciousRecovery({ chainId, safeAddress, transaction })).toBe(false)
         })
       })
 
@@ -196,8 +198,26 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(false)
+          expect(_isMaliciousRecovery({ chainId, safeAddress, transaction })).toBe(false)
         })
+      })
+
+      const { eip155, canonical } = getMultiSendCallOnlyDeployments({ version: '1.3.0' })!.deployments
+      it.each([
+        ['the eip155 MultiSend, all calls to the Safe', eip155!.address, false, false],
+        ['the canonical MultiSend, all calls to the Safe', canonical!.address, false, false],
+        ['an unknown address', faker.finance.ethereumAddress(), false, true],
+        ['the eip155 MultiSend, one call not to the Safe', eip155!.address, true, true],
+      ])('on Sepolia, a batch to %s', (_, to, hasForeignCall, expected) => {
+        const safeAddress = faker.finance.ethereumAddress()
+        const multiSendInterface = new Interface(getMultiSendCallOnlyDeployment({ version: '1.3.0' })!.abi)
+        const multiSendData = encodeMultiSendData([
+          { to: safeAddress, value: '0', data: '0x', operation: 0 },
+          { to: hasForeignCall ? faker.finance.ethereumAddress() : safeAddress, value: '0', data: '0x', operation: 0 },
+        ])
+        const transaction = { to, data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]) }
+
+        expect(_isMaliciousRecovery({ chainId: '11155111', safeAddress, transaction })).toBe(expected)
       })
     })
   })
@@ -316,7 +336,6 @@ describe('recovery-state', () => {
           safeAddress,
           provider: mockProvider,
           chainId,
-          version: '1.3.0',
         })
 
       return { run, getBlock }
@@ -567,7 +586,6 @@ describe('recovery-state', () => {
   describe('getRecoveryState', () => {
     it('should return the recovery state from the Safe creation block', async () => {
       const safeAddress = faker.finance.ethereumAddress()
-      const version = '1.3.0'
       const latestBlock = 5_000
       const transactionAddedReceipt = {
         from: faker.finance.ethereumAddress(),
@@ -667,7 +685,6 @@ describe('recovery-state', () => {
         safeAddress,
         provider: mockProvider,
         chainId,
-        version,
       })
 
       expect({
@@ -709,7 +726,6 @@ describe('recovery-state', () => {
 
     it('should not query data if the queueNonce equals the txNonce', async () => {
       const safeAddress = faker.finance.ethereumAddress()
-      const version = '1.3.0'
 
       const recoverers = [faker.finance.ethereumAddress()]
       const expiry = 0n
@@ -774,7 +790,6 @@ describe('recovery-state', () => {
         safeAddress,
         provider: mockProvider,
         chainId,
-        version,
       })
 
       expect({

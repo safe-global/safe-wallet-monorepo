@@ -136,6 +136,17 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
+    const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
+      assertProvider(signer?.provider)
+
+      safeTx = await withGtfFeeParams(safeTx)
+
+      if (await isSmartContractWallet(signer.chainId, signer.address)) {
+        throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
+      }
+      return await dispatchTxSigning(safeTx, signer.provider, txId, scope)
+    }
+
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
@@ -221,13 +232,15 @@ export const useTxActions = (): TxActions => {
       await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
       if (isRelayed) {
-        if (safeTx.signatures.size < safe.threshold) {
-          throw new Error('Cannot relay a transaction that is not fully signed')
+        // The relayer has no implicit approval, so the last signer of an m/n Safe signs before relaying
+        const needsSignature = safeTx.signatures.size < safe.threshold
+        if (needsSignature) {
+          safeTx = await signRelayedTx(safeTx, txId)
         }
 
         // Relayed txs must be known to the service
-        if (!txId) {
-          txId = (await _propose(signer.address, safeTx, origin)).txId
+        if (!txId || needsSignature) {
+          txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
         }
         await dispatchTxRelay(
           safeTx,
