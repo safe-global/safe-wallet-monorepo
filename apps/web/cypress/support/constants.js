@@ -1,5 +1,4 @@
 import { LS_NAMESPACE } from '../../src/config/constants'
-import safes from '../fixtures/safes/static.js'
 
 // Visual regression (Argos) test settings
 export const VISUAL_VIEWPORT = { viewportWidth: 1920, viewportHeight: 1080 }
@@ -18,18 +17,12 @@ export const EOA = '0x03042B890b99552b60A073F808100517fb148F60'
 export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
 export { defaultOwnerAddress } from './credentials.js'
-// AllowanceModule contract addresses — keyed by contract version, not by network
-export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
-export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
 export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
-export const SEPOLIA_OWNER_2_SHORT = '0x96D4...5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
 export const SIDEBAR_ADDRESS = '0x04f8...1a91'
 //ENS_TEST_SEPOLIA resolves to 0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F
 export const ENS_TEST_SEPOLIA = 'e2etestsafe.eth'
 export const ENS_TEST_GOERLI = 'goerli-safe-test.eth'
-export const ENS_TEST_SEPOLIA_INVALID = 'ivladitestenssepolia.eth'
-export const ENS_TEST_SEPOLIA_VALID = 'testenssepolia.eth'
 export const WRONGLY_CHECKSUMMED_ADDRESS = '0X6D0B6F96F665BB4490F9DDB2E450DA2F7E546DC1'
 
 export const BROWSER_PERMISSIONS_KEY = `${LS_NAMESPACE}SafeApps__browserPermissions`
@@ -41,31 +34,13 @@ export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
 export const spaceDashboardUrl = '/spaces?spaceId='
-export const spaceMembersUrl = '/spaces/members?spaceId='
-export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
-export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
-export const spaceSettingsGeneralUrl = '/spaces/settings/general?spaceId='
-export const spaceSettingsAccountUrl = '/spaces/settings/account?spaceId='
-export const spaceSettingsAboutUrl = '/spaces/settings/about?spaceId='
-export const spaceSecurityUrl = '/spaces/security?spaceId='
-export const spaceActivityUrl = '/spaces/activity?spaceId='
-export const prodbaseUrl = 'https://app.safe.global'
-export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
-export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = Cypress.expose('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
-export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
-export const appsUrlGeneral = '/apps?safe='
-export const stakingUrl = '/stake?safe='
-export const earnUrl = '/earn?safe='
-export const bridgeUrl = '/bridge?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
-export const balanceNftsUrl = '/balances/nfts?safe='
-export const positionsUrl = '/balances/positions?safe='
 export const transactionQueueUrl = '/transactions/queue?safe='
 export const transactionsHistoryUrl = '/transactions/history?safe='
 export const transactionsMessagesUrl = '/transactions/messages?safe='
@@ -76,25 +51,17 @@ export const homeUrl = '/home?safe='
 export const spacesUrl = '/welcome/spaces'
 export const welcomeUrl = '/welcome'
 export const welcomeAccountUrl = 'welcome/accounts'
-export const welcomeAccountsSepoliaUrl = 'welcome/accounts?chain=sep'
 export const welcomeSepoliaUrl = '/welcome?chain=sep'
 export const chainMaticUrl = '/welcome?chain=matic'
-export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
-export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
 export const loadNewSafeUrl = '/new-safe/load'
 export const advancedCreateSafeSepoliaUrl = '/new-safe/advanced-create?chain=sep'
 export const appsUrl = '/apps'
 export const requestPermissionsUrl = '/request-permissions'
 export const getPermissionsUrl = '/get-permissions'
 export const appSettingsUrl = '/settings/safe-apps'
-export const safeAppsSettingsUrl = '/settings/safe-apps?safe='
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
-export const securityUrl = '/settings/security?safe='
-export const cookiesUrl = '/settings/cookies?safe='
 export const modulesUrl = '/settings/modules?safe='
-export const notificationsUrl = '/settings/notifications?safe='
-export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = (
@@ -102,36 +69,23 @@ export const stagingTxServiceUrl = (
 ).replace(/\/$/, '')
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
-export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl =
   (Cypress.expose('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
-export const stagingCGWUrlv2 = `${stagingCGWUrl}v2`
 export const stagingCGWChains = '/chains/'
 export const stagingCGWSafes = '/safes/'
-export const stagingCGWNone = '/nonces/'
-export const stagingCGWCollectibles = '/collectibles/'
 export const stagingCGWDelegatesUrl = '/delegates?safe='
-export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
-export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
 export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
-export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
-export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
-export const messagesEndpoint = '**/v1/chains/**/safes/**/messages*'
-// Must stay scoped to the API path: a bare '**/collectibles*' also matches the Vite dev-server
-// module URL for store/gateway/AUTO_GENERATED/collectibles.ts, and fulfilling that with JSON
-// kills the whole app on load (module MIME type error).
-export const collectiblesEndpoint = '**/v2/**/safes/**/collectibles*'
 export const chainsEndpoint = '**/v2/chains'
 export const chainConfigEndpoint = '**/v2/chains/*'
 export const safeInfoEndpoint = '**/v1/chains/*/safes/*'
@@ -140,7 +94,6 @@ export const portfolioEndpoint = '**/v1/portfolio/**'
 export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
 export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
 export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
-export const delegatesEndpoint = /\/v[23]\/chains\/\d+\/delegates\?/
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -151,10 +104,6 @@ export const safeContractVersions = {
   v1_4_1_L2: '1.4.1+L2',
 }
 
-export const commonThresholds = {
-  oneOfOne: '1 out of 1 signer',
-}
-
 export const networkKeys = {
   sepolia: '11155111',
   polygon: '137',
@@ -162,16 +111,6 @@ export const networkKeys = {
 export const mainSideMenuOptions = {
   home: 'Home',
 }
-export const SEPOLIA_CSV_ENTRY = {
-  name: 'test-sepolia-3',
-  address: safes.SEP_STATIC_SAFE_5,
-}
-
-export const GNO_CSV_ENTRY = {
-  name: 'gno user 1',
-  address: '0x61a0c717d18232711bC788F19C9Cd56a43cc8872',
-}
-
 export const networks = {
   ethereum: 'Ethereum',
   goerli: /^G(ö|oe)rli$/,
@@ -225,11 +164,6 @@ export const enabledStates = {
   disabled: 'be.disabled',
 }
 
-export const elementExistanceStates = {
-  exist: 'exist',
-  not_exist: 'not.exist',
-}
-
 export const transactionStatus = {
   received: 'Receive',
   sent: 'Send',
@@ -243,32 +177,18 @@ export const transactionStatus = {
 export const tokenNames = {
   wrappedEther: 'Wrapped Ether',
   sepoliaEther: 'Sepolia Ether',
-  qaToken: 'QAtest10',
   cow: 'CoW Protocol Token',
 }
 
 export const addressBookErrrMsg = {
-  invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
-  exceedChars: 'Maximum 50 symbols',
   ownSafeManage: 'Cannot use Safe account itself as signer',
   ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'This address is already a signer of this Safe Account',
-  ownerAdded: 'This address is already a signer of this Safe Account',
-  failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
-  safeAlreadyAdded: 'Safe account is already added',
-  prefixMismatch: "doesn't match the current chain",
-  ownSafeGuardian: 'The Safe account cannot be a Recoverer of itself',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
   },
-}
-
-export const amountErrorMsg = {
-  negativeValue: 'The value must be greater than 0',
-  randomString: 'The value must be a number',
-  largerThanCurrentBalance: /Maximum value is \d+(\.\d+)?/,
 }
 
 export const nonceTooltipMsg = {
@@ -293,11 +213,8 @@ export const licensesUrl = '/licenses'
 export const imprintUrl = '/imprint'
 export const cookiePolicyUrl = '/cookie'
 export const safeLabsTermsUrl = '/safe-labs-terms'
-export const error403Url = '/403'
-export const error404Url = '/404'
 
 export const chainFeatures = {
-  positions: 'POSITIONS',
   nativeSwaps: 'NATIVE_SWAPS',
   bridge: 'BRIDGE',
   staking: 'STAKING',
@@ -315,22 +232,17 @@ export const localStorageKeys = {
   SAFE_v2__addedSafes: 'SAFE_v2__addedSafes',
   SAFE_v2__safeApps: 'SAFE_v2__safeApps',
   SAFE_v2_cookies: 'SAFE_v2__cookies_terms',
-  SAFE_v2__tokenlist_onboarding: 'SAFE_v2__tokenlist_onboarding',
   SAFE_v2__customSafeApps_11155111: 'SAFE_v2__customSafeApps-11155111',
   SAFE_v2__SafeApps__browserPermissions: 'SAFE_v2__SafeApps__browserPermissions',
   SAFE_v2__SafeApps__infoModal: 'SAFE_v2__SafeApps__infoModal',
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
-  SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
-  SAFE_v2__auth: 'SAFE_v2__auth',
   SAFE_v2__lastWallet: 'SAFE_v2__lastWallet',
   SAFE_v2__safeProAnnouncementSeen: 'SAFE_v2__safeProAnnouncementSeen',
 }
 
 export const sessionStorageKeys = {
-  SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
   SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
 }
 
 // Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
-export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'

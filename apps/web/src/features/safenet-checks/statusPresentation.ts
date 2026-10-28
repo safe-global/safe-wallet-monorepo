@@ -1,4 +1,5 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { SEVERITY_TO_TITLE } from '@safe-global/utils/features/safe-shield/constants'
 import {
   CheckStatus,
   SAFENET_EXPLORER_URL,
@@ -43,6 +44,11 @@ export const STATUS_PRESENTATION: Record<
     label: 'Risk detected',
     copy: 'Safenet flagged this address/transaction as malicious',
   },
+  [CheckStatus.DISPUTED]: {
+    severity: Severity.WARN,
+    label: 'Under review',
+    copy: 'A sentinel flagged this transaction, and the dispute is open. Safenet will publish a final ruling.',
+  },
   [CheckStatus.TIMED_OUT]: {
     severity: Severity.ERROR,
     label: 'Check failed',
@@ -86,12 +92,16 @@ export const CHIP_VARIANT = {
   [CheckStatus.IN_PROGRESS]: 'info',
   [CheckStatus.BENIGN]: 'positive',
   [CheckStatus.MALICIOUS]: 'negative',
+  [CheckStatus.DISPUTED]: 'warning',
   [CheckStatus.TIMED_OUT]: 'warning',
 } as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
 
 export const STALE_NOTE = 'Status may be out of date.'
 
 export const MULTIPLE_RULES_TITLE = 'Risks detected'
+
+/** A risk that cites only warning rules takes Safe Shield's warning title, as its header does. */
+export const WARNING_RISK_LABEL = SEVERITY_TO_TITLE[Severity.WARN]
 
 export const SAFENET_DOCS_URL = 'https://docs.safefoundation.org/safenet'
 

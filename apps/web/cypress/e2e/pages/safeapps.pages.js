@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
-import { accordionActionItem } from '../pages/nfts.pages'
+import { accordionActionItem } from '../pages/batches.pages'
 import * as main from '../pages/main.page'
-import * as ls from '../../support/localstorage_data.js'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
@@ -73,7 +72,6 @@ export const pinWalletConnectStr = /pin walletconnect/i
 export const transactionBuilderStr = 'Transaction Builder'
 export const cowswapStr = 'CowSwap'
 export const basicTypesTestContractStr = 'BasicTypesTestContract'
-export const testAddressValueStr = 'testAddressValue'
 
 export function checkActions(count, action) {
   cy.get(accordionActionItem).filter(`:contains("${action}")`).should('have.length', count)
@@ -113,20 +111,12 @@ export const permissionCheckboxNames = {
 
 export const cowFallbackHandler = 'sep:0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
 
-export function verifyUntrustedHandllerWarningVisible() {
-  cy.get(txBuilderUntrustedFallbackWarning).should('be.visible')
-}
-
 export function verifyUntrustedHandllerWarningDoesNotExist() {
   cy.get(txBuilderUntrustedFallbackWarning).should('not.exist')
 }
 
 export function clickOnAdvancedDetails() {
   cy.get(decodedTxSummary).click({ force: true })
-}
-
-export function triggetOffChainTx() {
-  cy.contains(dummyTxStr).click()
 }
 
 // The warning shows in both states: blocking while the setting is off, a caution once it is on
@@ -326,14 +316,4 @@ export function getSafeAppIframeSelector(appUrl) {
 
 export function verifySafeAppIframeVisible(appUrl) {
   cy.get(getSafeAppIframeSelector(appUrl), { timeout: 30000 }).should('be.visible')
-}
-
-/**
- * Opens a Safe App with the address book permission already granted, so the host's consent prompt
- * never appears and blocks the iframe. Specs that test the prompt itself should not use this.
- */
-export function openSafeAppWithAddressBookPermission(safeAddress, appUrl) {
-  main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
-  cy.visit(`/apps/open?safe=${safeAddress}&appUrl=${encodeURIComponent(appUrl)}`)
-  verifySafeAppIframeVisible(appUrl)
 }

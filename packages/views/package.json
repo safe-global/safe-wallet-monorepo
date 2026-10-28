@@ -12,10 +12,11 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@hello-pangea/dnd": "^18.0.1",
-    "@safe-global/protocol-kit": "^8.0.7",
+    "@safe-global/protocol-kit": "^8.0.10",
     "@safe-global/store": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
     "@safe-global/utils": "workspace:^",
+    "blo": "^1.1.1",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

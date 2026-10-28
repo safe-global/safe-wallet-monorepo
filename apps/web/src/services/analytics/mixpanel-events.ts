@@ -36,6 +36,8 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
+  TRANSACTION_SAFENET_SUBMITTED = 'Transaction Safenet Submitted',
+  TRANSACTION_SAFENET_CHECKED = 'Transaction Safenet Checked',
   TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
@@ -116,6 +118,9 @@ export enum MixpanelEvent {
   FREE_ACCESS_REMINDER_VIEWED = 'Free Access Reminder Viewed',
   WORKSPACE_LOCKED_VIEWED = 'Workspace Locked Viewed',
   UPGRADE_PROMPT_VIEWED = 'Upgrade Prompt Viewed',
+  LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
+  LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
+  LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -146,6 +151,13 @@ export enum UpgradeFeature {
   SAFE_ACCOUNTS_LIMIT = 'safe_accounts_limit',
 }
 
+/** Where a look-alike address warning was shown. */
+export enum LookalikeWarningLocation {
+  ADDRESS_BOOK_ENTRY = 'address_book_entry',
+  ADDRESS_BOOK_IMPORT = 'address_book_import',
+  ADD_SAFE = 'add_safe',
+}
+
 export enum UpgradeLocation {
   POLICIES_PAGE = 'policies_page',
   SETTINGS_SETUP = 'settings_setup',
@@ -163,6 +175,8 @@ export enum PlanLocation {
 
 export enum DismissAction {
   GO_TO_MY_ACCOUNTS = 'go_to_my_accounts',
+  CANCEL = 'cancel',
+  SKIP = 'skip',
 }
 
 export enum PlanCtaKind {
@@ -179,6 +193,19 @@ export enum BillingPeriod {
 export enum CheckoutOutcome {
   SUCCESS = 'success',
   CANCELLED = 'cancelled',
+}
+
+export enum SafenetCheckResult {
+  NO_ISSUES = 'no_issues',
+  RISK_DETECTED = 'risk_detected',
+  UNAVAILABLE = 'unavailable',
+  NO_RULING = 'no_ruling',
+}
+
+export enum SafenetSignerRole {
+  FIRST_SIGNER = 'first_signer',
+  CO_SIGNER = 'co_signer',
+  EXECUTOR = 'executor',
 }
 
 export enum WorkspaceCreateStep {
@@ -291,6 +318,10 @@ export enum MixpanelEventParams {
   SPONSORED_QUOTA = 'Sponsored Quota',
   DEFAULT_SEATS = 'Default Seats',
   DEFAULT_BILLING_PERIOD = 'Default Billing Period',
+  RULES_FLAGGED = 'Rules Flagged',
+  SENTINELS_FLAGGED = 'Sentinels Flagged',
+  SIGNER_ROLE = 'Signer Role',
+  SAFE_TX_HASH = 'Safe Tx Hash',
 }
 
 export enum AuthLoginMethod {

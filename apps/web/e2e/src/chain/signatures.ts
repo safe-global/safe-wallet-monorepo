@@ -1,5 +1,6 @@
 import { Contract } from 'ethers'
 import { localProvider } from '../../environment/scenarios/provider.mjs'
+import { readChain } from './local-provider'
 import type { JourneyEnvironment } from '../fixtures/journey.fixture'
 
 // EIP-1271: the value that a contract returns when the signature is valid for the hash.
@@ -21,4 +22,20 @@ export async function isValidSafeSignature(
   } finally {
     provider.destroy()
   }
+}
+
+const APPROVED_HASHES_ABI = ['function approvedHashes(address owner, bytes32 hash) view returns (uint256)']
+
+/** Whether `owner` approved `hash` on the Safe through `approveHash`, on the local fork. */
+export function isApprovedHash(
+  env: JourneyEnvironment,
+  { safeAddress, owner, hash }: { safeAddress: string; owner: string; hash: string },
+): Promise<boolean> {
+  return readChain(env, async (provider) => {
+    const approval: unknown = await new Contract(safeAddress, APPROVED_HASHES_ABI, provider).getFunction(
+      'approvedHashes',
+    )(owner, hash)
+    if (typeof approval !== 'bigint') throw new Error(`approvedHashes(${owner}, ${hash}) did not return a uint256`)
+    return approval === 1n
+  })
 }

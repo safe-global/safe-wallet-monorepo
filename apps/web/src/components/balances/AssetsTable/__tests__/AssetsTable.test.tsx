@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChainIdModule from '@/hooks/useChainId'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { toBeHex } from 'ethers'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
@@ -10,7 +12,17 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import { balancesFixtures } from '@safe-global/test/msw/fixtures'
 import { balancesBuilder, balanceBuilder, erc20TokenBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
 import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { mockHasFeature } from '@/tests/mocks/hooks'
 import AssetsTable from '../index'
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ configs: [] })),
+  useChain: jest.fn(),
+  useCurrentChain: jest.fn(),
+  useHasFeature: jest.fn(),
+}))
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
@@ -69,6 +81,8 @@ describe('AssetsTable', () => {
     jest.spyOn(useChainIdModule, 'default').mockReturnValue('5')
     mockUseIsMobile.mockReturnValue(false)
     mockUseSafeTokenEnabled.mockReturnValue(false)
+    mockHasFeature(false)
+    jest.mocked(useChains.useCurrentChain).mockReturnValue(undefined)
   })
 
   describe('empty state', () => {
@@ -145,6 +159,115 @@ describe('AssetsTable', () => {
         expect(screen.getAllByText('$ 9,876')[0]).toBeInTheDocument()
         expect(screen.getAllByText('.54')[0]).toBeInTheDocument()
       })
+    })
+
+    it('links each ERC-20 token name to the block explorer and leaves the native token unlinked', async () => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({
+            features: [],
+            blockExplorerUriTemplate: {
+              address: 'https://explorer.test/address/{{address}}',
+              txHash: 'https://explorer.test/tx/{{txHash}}',
+              api: 'https://explorer.test/api',
+            },
+          })
+          .build(),
+      )
+      const native = nativeTokenBuilder().build()
+      const erc20 = erc20TokenBuilder().build()
+      renderAssetsTable({
+        balances: balancesBuilder()
+          .with({
+            items: [
+              balanceBuilder().with({ tokenInfo: native }).build(),
+              balanceBuilder().with({ tokenInfo: erc20 }).build(),
+            ],
+          })
+          .build(),
+      })
+
+      expect(await screen.findByRole('link', { name: erc20.name })).toHaveAttribute(
+        'href',
+        `https://explorer.test/address/${erc20.address}`,
+      )
+      expect(screen.queryByRole('link', { name: native.name })).not.toBeInTheDocument()
+      expect(screen.getByText(native.name)).toBeInTheDocument()
+    })
+
+    it('shows token values in the selected currency', async () => {
+      jest.spyOn(useBalancesModule, 'default').mockReturnValue({
+        balances: balancesBuilder()
+          .with({ items: [balanceBuilder().with({ fiatBalance: '100' }).build()] })
+          .build(),
+        loading: false,
+        loaded: true,
+        error: undefined,
+      })
+
+      render(<TestWrapper />, { initialReduxState: { settings: { ...DEFAULT_SETTINGS, currency: 'eur' } } as never })
+
+      const value = await screen.findByTestId('table-cell-value')
+      expect(value).toHaveTextContent('€')
+      expect(value).not.toHaveTextContent('$')
+    })
+
+    it('shows -- as the value of a token without a price', async () => {
+      jest.spyOn(useBalancesModule, 'default').mockReturnValue({
+        balances: balancesBuilder()
+          .with({
+            items: [
+              balanceBuilder()
+                .with({
+                  balance: safeParseUnits('5', 18)!.toString(),
+                  fiatConversion: '0',
+                  fiatBalance: '0',
+                  tokenInfo: erc20TokenBuilder().with({ decimals: 18 }).build(),
+                })
+                .build(),
+            ],
+          })
+          .build(),
+        loading: false,
+        loaded: true,
+        error: undefined,
+      })
+
+      render(<TestWrapper />, { initialReduxState: { settings: { ...DEFAULT_SETTINGS, hideDust: false } } as never })
+
+      expect(await screen.findByTestId('table-cell-value')).toHaveTextContent('--')
+    })
+
+    it('sorts tokens by balance amount across different decimals', async () => {
+      const fiveOfSixDecimals = balanceBuilder()
+        .with({
+          balance: '5000000',
+          tokenInfo: erc20TokenBuilder()
+            .with({ address: toBeHex('0x20', 20), name: 'TokenA', decimals: 6 })
+            .build(),
+        })
+        .build()
+      const twoOfEighteenDecimals = balanceBuilder()
+        .with({
+          balance: '2000000000000000000',
+          tokenInfo: erc20TokenBuilder()
+            .with({ address: toBeHex('0x21', 20), name: 'TokenB', decimals: 18 })
+            .build(),
+        })
+        .build()
+      renderAssetsTable({
+        balances: balancesBuilder()
+          .with({ items: [fiveOfSixDecimals, twoOfEighteenDecimals] })
+          .build(),
+      })
+      const shownNames = () => screen.getAllByTestId('token-name').map((name) => name.textContent)
+      await screen.findAllByTestId('token-name')
+
+      fireEvent.click(screen.getByRole('button', { name: /^Balance/ }))
+      expect(shownNames()).toEqual(['TokenB', 'TokenA'])
+
+      fireEvent.click(screen.getByRole('button', { name: /^Balance/ }))
+      expect(shownNames()).toEqual(['TokenA', 'TokenB'])
     })
   })
 
@@ -298,6 +421,39 @@ describe('AssetsTable', () => {
       })
       expect(screen.queryByTestId('safenet-stake-btn')).not.toBeInTheDocument()
       expect(screen.queryByTestId('stake-btn')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('swap entry point', () => {
+    const tokens = [nativeTokenBuilder().build(), erc20TokenBuilder().build(), erc20TokenBuilder().build()]
+
+    const nonZeroBalances = () =>
+      balancesBuilder()
+        .with({ items: tokens.map((tokenInfo) => balanceBuilder().with({ tokenInfo }).build()) })
+        .build()
+
+    const rowOf = (tokenName: string) =>
+      screen.getAllByRole('row').find((row) => within(row).queryAllByText(tokenName).length > 0)
+
+    it('shows a Swap button in the Actions cell of every asset row when swaps are available', async () => {
+      mockHasFeature({ [FEATURES.NATIVE_SWAPS]: true })
+      renderAssetsTable({ balances: nonZeroBalances() })
+
+      await screen.findAllByTestId('swap-btn')
+      for (const { name } of tokens) {
+        const actionsCell = within(rowOf(name)!).getByTestId('table-cell-actions')
+        expect(within(actionsCell).getByTestId('swap-btn')).toBeInTheDocument()
+      }
+    })
+
+    it('shows no Swap button when swaps are unavailable on the chain', async () => {
+      mockHasFeature(false)
+      renderAssetsTable({ balances: nonZeroBalances() })
+
+      for (const { name } of tokens) {
+        expect((await screen.findAllByText(name)).length).toBeGreaterThan(0)
+      }
+      expect(screen.queryByTestId('swap-btn')).not.toBeInTheDocument()
     })
   })
 })

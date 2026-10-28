@@ -1,35 +1,30 @@
 import type { ReactElement } from 'react'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { TriangleAlert, Info, Copy, Check } from 'lucide-react'
+import { TriangleAlert, Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import useCopyToClipboard from '@/hooks/useCopyToClipboard'
-import type { SimilarWarning } from '@/features/address-poisoning'
-
-/**
- * Full address + inline copy for the warning tooltip. A bare button, not CopyAddressButton — its
- * hover tint and nested Tooltip are both wrong inside this dark hover popup.
- */
-const PeerAddress = ({ address }: { address: string }) => {
-  const { copied, copy } = useCopyToClipboard()
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="whitespace-nowrap font-mono text-xs">{address}</span>
-      <button
-        type="button"
-        aria-label="Copy address"
-        className="inline-flex shrink-0 cursor-pointer rounded p-0.5 transition-colors hover:bg-background/15"
-        onClick={() => copy(address)}
-      >
-        {copied ? <Check className="size-3 text-green-500" /> : <Copy className="size-3" />}
-      </button>
-    </div>
-  )
-}
+import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
+import PeerAddress from '@/components/common/PeerAddress'
+import PeerAddressPopover from '@/components/common/PeerAddress/PeerAddressPopover'
+import useChains from '@/hooks/useChains'
+import type { SimilarPeer, SimilarWarning } from '@/features/address-poisoning'
 
 /** Inline ⚠️ after a name, listing cross-list look-alike peers in its tooltip (same-list = band only). */
-export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) => {
+export const SimilarityWarningIcon = ({
+  address,
+  warning,
+}: {
+  /** The row's own address — each peer bolds the ends it shares with it. */
+  address: string
+  warning: SimilarWarning
+}) => {
+  const { configs } = useChains()
+  // A peer on several chains has no single explorer to link to.
+  const explorerLinkOf = ({ address: peer, chainIds }: SimilarPeer) => {
+    const chain = chainIds.length === 1 ? configs.find((config) => config.chainId === chainIds[0]) : undefined
+    return chain ? getBlockExplorerLink(chain, peer) : undefined
+  }
   const sections = (
     [
       ['Similar accounts from trusted safes:', warning.trusted],
@@ -40,25 +35,25 @@ export const SimilarityWarningIcon = ({ warning }: { warning: SimilarWarning }) 
   return (
     // Swallow the click — the icon sits inside a selectable/navigable row.
     <span className="inline-flex" onClick={(event) => event.stopPropagation()}>
-      <Tooltip>
-        <TooltipTrigger render={<span className="inline-flex" />}>
-          <TriangleAlert
-            size={14}
-            className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]"
-            aria-label="Possible address poisoning"
-          />
-        </TooltipTrigger>
-        <TooltipContent className="max-w-none">
-          {sections.map(([label, peers]) => (
-            <div key={label} className="mb-1 last:mb-0">
-              <div className="font-semibold">{label}</div>
-              {peers.map((address) => (
-                <PeerAddress key={address} address={address} />
-              ))}
-            </div>
-          ))}
-        </TooltipContent>
-      </Tooltip>
+      <PeerAddressPopover
+        trigger={<TriangleAlert size={14} className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]" />}
+        triggerLabel="Possible address poisoning"
+        triggerClassName="inline-flex"
+      >
+        {sections.map(([label, peers]) => (
+          <div key={label} className="mb-1 last:mb-0">
+            <div className="font-semibold">{label}</div>
+            {peers.map((peer) => (
+              <PeerAddress
+                key={peer.address}
+                address={peer.address}
+                {...getCommonAffixLengths(peer.address, address)}
+                explorerLink={explorerLinkOf(peer)}
+              />
+            ))}
+          </div>
+        ))}
+      </PeerAddressPopover>
     </span>
   )
 }

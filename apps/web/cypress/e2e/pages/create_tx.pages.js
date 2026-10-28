@@ -1,29 +1,13 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
-import * as modal from '../pages/modals.page'
-import * as navigation from './navigation.page'
-import * as walletUtils from '../../support/utils/wallet.js'
-import * as owner from './owners.pages'
-import { ethers } from 'ethers'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const tokenSelector = '[data-testid="token-selector"]'
-const newTransactionBtnStr = 'New transaction'
-const recepientInput = 'input[name="recipients.0.recipient"]'
-const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
 const amountInput = 'input[name="recipients.0.amount"]'
-const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
-const nonceInput = 'input[name="nonce"]'
-const walletNonceInput = '[name="userNonce"]'
-const gasLimitInput = '[name="gasLimit"]'
-const maxPriorityFee = '[name="maxPriorityFeePerGas"]'
-const maxFee = '[name="maxFeePerGas"]'
-const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
-export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
@@ -38,30 +22,16 @@ const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
 export const txDate = '[data-testid="tx-date"]'
 export const txType = '[data-testid="tx-type"]'
-export const proposalStatus = '[data-testid="proposal-status"]'
-const spamTokenWarningIcon = '[data-testid="warning"]'
 const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
-const sendTokensBtn = '[data-testid="send-tokens-btn"]'
 export const replacementNewSigner = '[data-testid="new-owner"]'
-export const messageItem = '[data-testid="message-item"]'
-const filterStartDateInput = '[data-testid="start-date"]'
-const filterEndDateInput = '[data-testid="end-date"]'
-const filterAmountInput = '[data-testid="amount-input"]'
-const filterTokenInput = '[data-testid="token-input"]'
-const filterNonceInput = '[data-testid="nonce-input"]'
-const filterApplyBtn = '[data-testid="apply-btn"]'
 const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
-const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
-const signBtn = '[data-testid="combo-submit-sign"]'
-const signedNotice = '[data-testid="signed-notice"]'
-const executeLaterBtn = '[data-testid="execute-later-btn"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -72,11 +42,6 @@ export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareLinkBtn = '[data-testid="share-tx-link-btn"]'
-export const noteTextField = '[data-testid="tx-note-textfield"]'
-const noteAlert = "[data-testid='tx-note-alert']"
-const recoredTxNote = '[data-testid="tx-note"]'
-const txNoteTooltip = '[data-testid="tx-note-tooltip"]'
-const noteCreator = '[data-testid="note-creator"]'
 const tableViewBtn = '[data-testid="table-view-btn"]'
 const gridViewBtn = '[data-testid="grid-view-btn"]'
 const txHexData = '[data-testid="tx-hex-data"]'
@@ -84,55 +49,22 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
 const addrecipientBtn = '[data-testid="add-recipient-btn"]'
-const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
-const maxRecipientsReachedMsg = '[data-testid="max-recipients-reached"]'
-const recipientsCount = '[data-testid="recipients-count"]'
-const maxBtn = '[data-testid="max-btn"]'
-const tokenAmountSection = '[data-testid="token-amount-section"]'
-const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
-const proposeTransactionBtn = '[data-testid="sign-btn"]'
 
-const insufficientFundsErrorStr = 'Insufficient funds'
-const viewTransactionBtn = 'View transaction'
-const transactionDetailsTitle = 'Transaction details'
-const QueueLabel = 'needs to be executed first'
-const transactionsPerHrStr = 'free transactions left today'
-const maxAmountBtnStr = 'Max'
-const nativeTokenTransferStr = 'ETH'
-const estimatedFeeStr = 'Estimated fee'
 // Re-export for backward compatibility
 export const executeStr = 'Execute'
-const editBtnStr = 'Edit'
-const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 const noTxFoundStr = (type) => `0 ${type} transactions found`
-const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
-const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
-const bulkConfirmationText = (tx) =>
-  `This transaction batches a total of ${tx} transactions from your queue into a single Ethereum transaction`
 
-const disabledBultExecuteBtnTooltip =
-  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce'
-const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be included in the batch execution'
-
-const bulkExecuteBtnStr = 'Bulk execute'
-
-const batchModalTitle = 'Batch'
-const gasLimit21000 = 'Gas limit must be at least 21000'
-export const swapOrder = 'Swap order settlement'
-export const bulkTxs = 'Bulk transactions'
 export const txStr = 'Transactions'
 export const txDetailsStr = 'Transaction details'
 export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
-export const txNoteWarningMessage = 'Notes are publicly visible. Do not share any private or sensitive details.'
-export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
@@ -142,36 +74,8 @@ export const comboButtonOptions = {
   addToBatch: 'Add to batch',
 }
 
-const advancedParametersValues = {
-  walletNonce: '5500',
-  maxPriorityFee: '0.1234',
-  maxFee: '0.5678',
-  gasLimit: '300001',
-}
-const advancedParametersInputNames = {
-  walletNonce: 'Wallet nonce',
-  maxPriorityFee: 'Max priority fee (Gwei)',
-  maxFee: 'Max fee (Gwei)',
-  gasLimit: 'Gas limit',
-}
-
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-
-//Arrays for the Transaction Details on Tx creation for different type of txs
-export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
-export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', constants.safeProxyFactoryLabel]
-
-export const tx_status = {
-  execution_needed: 'Execution needed',
-  execute: 'Execute',
-  proposal: 'Proposal',
-}
-export const filterTypes = {
-  incoming: 'Incoming',
-  outgoing: 'Outgoing',
-  module: 'Module-based',
-}
 
 export const txActions = {
   setFallbackHandler: 'setFallbackHandler',
@@ -208,48 +112,12 @@ export function clickOnRejectBtn() {
   getRejectButton().click()
 }
 
-export function verifyPayNowOptionIsDisabled() {
-  // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
-  cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
-}
-
 export function verifyTxRejectModalVisible() {
   main.verifyMinimumElementsCount(wallet.choiceBtn, 2)
 }
 
 export function clickOnRejectionChoiceBtn(choice) {
   cy.get(wallet.choiceBtn).eq(choice).click()
-}
-
-export function typeNoteText(text) {
-  const input = cy.get(noteTextField).find('input')
-  input.clear()
-  input.type(text)
-}
-
-export function checkMaxNoteLength() {
-  typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).should('exist')
-  cy.get(noteTextField).contains('60/60').should('be.visible')
-}
-
-export function checkNoteWarningMsg() {
-  cy.get(noteAlert).invoke('text').should('include', txNoteWarningMessage)
-}
-
-export function checkNoteRecordedNote(note) {
-  cy.get(recoredTxNote).should('be.visible').invoke('text').should('include', note)
-}
-
-export function checkNoteCreator(creator) {
-  main.hoverUntilTooltipOpen(() => cy.get(txNoteTooltip))
-  cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
-}
-
-export function checkNoteRecordedNoteReadOnly() {
-  cy.get(recoredTxNote).then(($p) => {
-    expect($p.prop('tagName')).to.equal('P')
-  })
 }
 
 export function clickOnShareLinkBtn() {
@@ -268,44 +136,12 @@ export function verifyCopiedURL() {
   })
 }
 
-export function verifyBulkExecuteBtnIsEnabled(txs) {
-  return cy.get('button').contains(bulkExecuteBtn(txs)).should('be.enabled')
-}
-
-export function verifyEnabledBulkExecuteBtnTooltip() {
-  // Base UI tooltips open on a native mouseenter on the trigger (mouseover/mousemove don't open them)
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseenter', { force: true })
-  cy.contains(enabledBulkExecuteBtnTooltip).should('exist')
-}
-
 export function deleteTx() {
   clickOnRejectBtn()
   // The delete choice stays disabled until the recommended nonce loads (deletability check),
   // so wait for it to become enabled — a click on the disabled button is silently ignored.
   cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).closest(wallet.choiceBtn).should('be.enabled').click()
   cy.get(deleteTxModalBtn).click()
-}
-
-/** Deletes every queued transaction; call it on the queue page. */
-export function deleteAllTx() {
-  cy.get('body', { timeout: 30000 }).should(($body) => {
-    const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
-    expect(loaded, 'transaction queue loaded').to.be.true
-  })
-  cy.get('body').then(($body) => {
-    if ($body.find(transactionItem).length > 0) {
-      cy.get(transactionItem).then(($items) => {
-        for (let i = $items.length - 1; i >= 0; i--) {
-          cy.wrap($items[i]).click({ force: true })
-          deleteTx()
-        }
-      })
-    }
-  })
-}
-
-export function setTxType(type) {
-  cy.get(radioSelector).find('label').contains(type).click()
 }
 
 export function verifyNoTxDisplayed(type) {
@@ -318,61 +154,10 @@ export function verifyNoTxDisplayed(type) {
   cy.contains(noTxFoundStr(type)).should('be.visible')
 }
 
-export function clickOnApplyBtn() {
-  cy.get(filterApplyBtn).click()
-}
-
-export function checkApplyBtnEnabled() {
-  cy.get(filterApplyBtn).should('not.be', 'disabled')
-}
-
 export function clickOnClearBtn() {
   cy.get(filterClearBtn).click()
 }
 
-export function fillFilterForm({ address, startDate, endDate, amount, token, nonce, recipient } = {}) {
-  checkApplyBtnEnabled()
-  cy.wait(2000)
-  const inputMap = {
-    address: { selector: addressItem, findInput: true },
-    startDate: { selector: filterStartDateInput, findInput: true },
-    endDate: { selector: filterEndDateInput, findInput: true },
-    amount: { selector: filterAmountInput, findInput: true },
-    token: { selector: filterTokenInput, findInput: true },
-    nonce: { selector: filterNonceInput, findInput: true },
-    recipient: { selector: addressItem, findInput: true },
-  }
-
-  Object.entries({ address, startDate, endDate, amount, token, nonce, recipient }).forEach(([key, value]) => {
-    if (value !== undefined) {
-      const { selector, findInput } = inputMap[key]
-      const element = findInput ? cy.get(selector).find('input') : cy.get(selector)
-      element.invoke('removeAttr', 'readonly').clear().type(value, { force: true })
-    }
-  })
-}
-
-export function clickOnFilterBtn() {
-  cy.get('button').then((buttons) => {
-    const filterButton = [...buttons].find((button) => {
-      return ['Filter', 'Incoming', 'Outgoing', 'Module-based'].includes(button.innerText)
-    })
-
-    if (filterButton) {
-      cy.wrap(filterButton).click()
-    } else {
-      throw new Error('No filter button found')
-    }
-  })
-}
-
-export function checkTxItemDate(index, date) {
-  cy.get(txDate).eq(index).should('contain', date)
-}
-
-export function clickOnSendTokensBtn() {
-  cy.get(sendTokensBtn).click()
-}
 export function verifyNumberOfTransactions(count) {
   cy.get(txDate).should('have.length.at.least', count)
   cy.get(transactionItem).should('have.length.at.least', count)
@@ -472,11 +257,6 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-//Search in the element with the scroll
-export function verifytxAccordionDetailsScroll(data) {
-  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
-}
-
 export function switchView(view) {
   if (view === advancedDetailsViewOptions.table) {
     cy.get(tableViewBtn).click()
@@ -533,17 +313,6 @@ export function collapseAllActions(data) {
 
 export function verifyActionListExists(data) {
   main.checkTextsExistWithinElement(transactionSideList, data)
-}
-
-export function verifySpamIconIsDisplayed(name, token) {
-  cy.get(transactionItem)
-    .filter(':contains("' + name + '")')
-    .filter(':contains("' + token + '")')
-    .then(($elements) => {
-      cy.wrap($elements.first()).then(($element) => {
-        cy.wrap($element).find(spamTokenWarningIcon).should('be.visible')
-      })
-    })
 }
 
 /**
@@ -642,75 +411,9 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
     }
   })
 }
-export function clickOnTransactionItem(item) {
-  cy.get(transactionItem).eq(item).scrollIntoView().click({ force: true })
-}
 
 export function verifyTransactionActionsVisibility(option) {
   cy.get(transactionSideList).should(option)
-}
-
-export function clickOnNewtransactionBtn() {
-  // Assert that "New transaction" button is visible
-  cy.contains(newTransactionBtnStr, {
-    timeout: 60_000, // `lastWallet` takes a while initialize in CI
-  })
-    .should('be.visible')
-    .and('not.be.disabled')
-
-  // Open the new transaction modal
-  cy.contains(newTransactionBtnStr).click()
-  cy.contains('h1', newTransactionBtnStr).should('be.visible')
-}
-
-export function typeRecipientAddress(address) {
-  cy.get(recepientInput).clear().type(address).should('have.value', address)
-}
-
-export function typeRecipientAddress_(index, address) {
-  cy.get(recepientInput_(index)).clear().type(address).should('have.value', address)
-}
-
-export function verifyENSResolves(fullAddress) {
-  let split = fullAddress.split(':')
-  let noPrefixAddress = split[1]
-  cy.get(recepientInput).should('have.value', noPrefixAddress)
-}
-
-export function verifyRandomStringAddress(randomAddressString) {
-  typeRecipientAddress(randomAddressString)
-  cy.contains(constants.addressBookErrrMsg.invalidFormat).should('be.visible')
-}
-
-export function verifyWrongChecksum(wronglyChecksummedAddress) {
-  typeRecipientAddress(wronglyChecksummedAddress)
-  cy.contains(constants.addressBookErrrMsg.invalidChecksum).should('be.visible')
-}
-
-export function verifyAmountLargerThanCurrentBalance() {
-  setSendValue(9999)
-  cy.contains(constants.amountErrorMsg.largerThanCurrentBalance).should('be.visible')
-}
-
-export function verifyTooltipMessage(message) {
-  cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
-}
-
-export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('exist')
-}
-
-export function clickOnTokenselectorAndSelectSepoliaEth() {
-  clickOnTokenselectorAndSelectToken(constants.tokenNames.sepoliaEther)
-}
-
-export function clickOnTokenselectorAndSelectToken(tokenName) {
-  cy.get(tokenSelector).click()
-  cy.get('[data-slot="select-content"]').contains(tokenName).click()
-}
-
-export function setMaxAmount() {
-  cy.contains(maxAmountBtnStr).click()
 }
 
 export function verifyMaxAmount(token, tokenAbbreviation) {
@@ -728,129 +431,16 @@ export function verifyMaxAmount(token, tokenAbbreviation) {
     })
 }
 
-export function setSendValue(value) {
-  cy.get(amountInput).clear().type(value)
-}
-
-export function setSendValue_(index, value) {
-  cy.get(amountInput_(index)).clear().type(value)
-}
-
 export function clickOnNextBtn() {
   cy.contains(main.nextBtnStr).click()
-}
-
-export function verifySubmitBtnIsEnabled() {
-  cy.get('button[type="submit"]').should('not.be.disabled')
-}
-
-export function verifyContinueSignBtnIsEnabled() {
-  cy.get(continueSignBtn).should('not.be.disabled')
 }
 
 export function verifyAddToBatchBtnIsEnabled() {
   return cy.get(addToBatchBtn).should('not.be.disabled')
 }
 
-export function verifyNativeTokenTransfer() {
-  cy.get(modal.cardContent).within(() => {
-    cy.contains('Send').should('be.visible')
-    cy.contains(nativeTokenTransferStr).should('be.visible')
-  })
-}
-
-export function changeNonce(value) {
-  cy.get(nonceInput).clear().type(value, { force: true })
-}
-
-export function hasNonce() {
-  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
-}
-
-export function displayAdvancedDetails() {
-  cy.contains(estimatedFeeStr).click()
-}
-
-export function openExecutionParamsModal() {
-  displayAdvancedDetails()
-  // The Edit link stays a skeleton until gas estimation and gas price settle; estimation
-  // retries on the safe-info polling cycle, so allow it extra time under RPC load.
-  cy.contains(editBtnStr, { timeout: 60000 }).click()
-}
-
-export function verifyAndSubmitExecutionParams() {
-  cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  const arrayNames = [
-    advancedParametersInputNames.walletNonce,
-    advancedParametersInputNames.maxPriorityFee,
-    advancedParametersInputNames.maxFee,
-    advancedParametersInputNames.gasLimit,
-  ]
-  arrayNames.forEach((element) => {
-    cy.get('@Paramsform')
-      .find('label')
-      .contains(`${element}`)
-      .closest('[data-slot="field"]')
-      .find('input')
-      .should('not.be.disabled')
-  })
-
-  cy.get('@Paramsform').find(gasLimitInput).clear().type('100').invoke('prop', 'value').should('equal', '100')
-  cy.contains(gasLimit21000).should('be.visible')
-  cy.get('@Paramsform').find(gasLimitInput).clear().type('300000').invoke('prop', 'value').should('equal', '300000')
-  // The reset adornment only renders once the recommended gas limit estimation is available,
-  // which can lag behind the modal opening under RPC load.
-  cy.get('@Paramsform')
-    .find(gasLimitInput)
-    .closest('[data-slot="field"]')
-    .find(gasLimitResetBtn, { timeout: 60000 })
-    .click()
-  cy.get('@Paramsform').submit()
-}
-
-export function setAdvancedExecutionParams() {
-  cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  // Fields are disabled while relay is the execution method; the 60s is only a ceiling for slow renders.
-  const typeWhenEnabled = (selector, value) =>
-    cy.get('@Paramsform').find(selector, { timeout: 60000 }).should('not.be.disabled').clear().type(value)
-
-  typeWhenEnabled(gasLimitInput, advancedParametersValues.gasLimit)
-  typeWhenEnabled(maxPriorityFee, advancedParametersValues.maxPriorityFee)
-  typeWhenEnabled(maxFee, advancedParametersValues.maxFee)
-  typeWhenEnabled(walletNonceInput, advancedParametersValues.walletNonce)
-  cy.get('@Paramsform').submit()
-}
-
-export function verifyEditedExcutionParams() {
-  cy.contains(advancedParametersInputNames.walletNonce).next().should('contain', advancedParametersValues.walletNonce)
-  cy.contains(advancedParametersInputNames.gasLimit).next().should('contain', advancedParametersValues.gasLimit)
-  cy.contains(advancedParametersInputNames.maxPriorityFee)
-    .next()
-    .should('contain', advancedParametersValues.maxPriorityFee)
-  cy.contains(advancedParametersInputNames.maxFee).next().should('contain', advancedParametersValues.maxFee)
-}
-
 export function clickOnNoLaterOption() {
   cy.contains(noLaterStr).click()
-}
-
-export function clickOnSignTransactionBtn() {
-  cy.get(signBtn).click()
-}
-
-// A 1/n Safe offers Execute only after the signature, on a step that reloads the tx from the gateway
-export function signAndOpenExecuteStep() {
-  cy.get(signBtn).click()
-  cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
-}
-
-export function clickOnExecuteLaterBtn() {
-  cy.get(executeLaterBtn).click()
-  cy.get(transactionItem, { timeout: 30000 }).should('be.visible')
-}
-
-export function clickOnProposeTransactionBtn() {
-  cy.get(proposeTransactionBtn).click()
 }
 
 export function clickOnContinueSignTransactionBtn() {
@@ -865,58 +455,8 @@ export function verifyConfirmTransactionBtnIsVisible() {
   cy.get('button').contains(confirmBtnStr).should('be.visible')
 }
 
-export function clickOnConfirmBtn(index) {
-  cy.wait(2000)
-  cy.get(transactionItem)
-    .eq(index)
-    .within(() => {
-      cy.get('button')
-        .contains(confirmBtnStr)
-        .then((elements) => {
-          cy.wrap(elements[0]).click()
-        })
-    })
-}
-
 export function clickOnExecuteBtn(index) {
   cy.get(transactionItem, { timeout: 30000 }).eq(index).find(executeTxBtn).should('be.enabled').click()
-}
-
-const submitTxErrorMsg = 'Could not submit the transaction. Try again.'
-
-export function clickViewTransaction(retriesLeft = 2) {
-  // Wait for the submitted-tx success screen. Transient RPC/CGW throttling (429) surfaces a
-  // retryable submission error with the sign button re-enabled instead — retry like a user would.
-  cy.get('body', { timeout: 60000 }).should(($body) => {
-    const hasSuccess = $body.text().includes(viewTransactionBtn)
-    const hasSubmitError = $body.text().includes(submitTxErrorMsg)
-    expect(hasSuccess || hasSubmitError, 'success screen or retryable submission error shown').to.be.true
-  })
-  cy.get('body').then(($body) => {
-    const needsRetry = !$body.text().includes(viewTransactionBtn) && $body.text().includes(submitTxErrorMsg)
-    if (!needsRetry) {
-      cy.contains(viewTransactionBtn).click()
-      return
-    }
-    if (retriesLeft === 0 || !$body.find(signBtn).length) {
-      throw new Error('Transaction kept failing to submit — likely RPC rate limiting (429)')
-    }
-    cy.wait(5000)
-    cy.get(signBtn).should('be.enabled').click()
-    clickViewTransaction(retriesLeft - 1)
-  })
-}
-
-export function verifySingleTxPage() {
-  cy.get('h3').contains(transactionDetailsTitle).should('be.visible')
-}
-
-export function verifyQueueLabel() {
-  cy.contains(QueueLabel).should('be.visible')
-}
-
-export function verifyTransactionSummary(sendValue) {
-  cy.get('[data-testid="tx-info"]').contains(`${sendValue} ${constants.tokenAbbreviation.sep}`).should('exist')
 }
 
 export function verifyDateExists(date) {
@@ -953,38 +493,6 @@ export function verifyReplacedSigner(newSignerName) {
   cy.get(replacementNewSigner).should('exist').contains(newSignerName)
 }
 
-function verifyBulkActions(actions) {
-  actions.forEach((action) => {
-    cy.contains(action).should('exist')
-  })
-}
-
-export function verifyBulkConfirmationScreen(tx, actions) {
-  cy.contains(bulkConfirmationText(tx))
-  verifyBulkActions(actions)
-  cy.get(modal.modalHeader).within(() => {
-    cy.contains(batchModalTitle).should('exist')
-    cy.get('svg').should('exist')
-  })
-}
-
-export function verifyBulkTxHistoryBlock(order, tx, actions) {
-  cy.contains(order)
-    .parent('div')
-    .parent()
-    .eq(0)
-    .within(() => {
-      cy.contains(tx)
-      verifyBulkActions(actions)
-    })
-}
-
-export function verifyBulkExecuteBtnIsDisabled() {
-  cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
-  cy.contains(disabledBultExecuteBtnTooltip).should('exist')
-}
-
 export function toggleUntrustedTxs() {
   cy.get(toggleUntrustedBtn).click()
 }
@@ -997,64 +505,8 @@ export function verifySuccessfulSimulation() {
   cy.get(simulateSuccess).should('exist')
 }
 
-export function insufficientBalanceErrorExists() {
-  cy.get(insufficientBalanceError).should('exist')
-}
-
-export function insufficientFundsErrorExists(index) {
-  cy.get(tokenAmountSection)
-    .eq(index)
-    .within(() => {
-      cy.get('label').should('contain.text', insufficientFundsErrorStr)
-    })
-}
-
-export function checkTokenValue(index, value) {
-  cy.get(amountInput_(index)).should('have.value', value)
-}
-export function clickOnMaxBtn(index) {
-  cy.get(maxBtn).eq(index).click()
-}
-
-export function verifyAddRecipientBtnIsVisible() {
-  cy.get(addrecipientBtn).should('be.visible')
-}
-
-export function verifyAddRecipientBtnDoesNotExist() {
-  main.verifyElementsCount(addrecipientBtn, 0)
-}
-
 export function clickOnAddRecipientBtn() {
   cy.get(addrecipientBtn).click()
-}
-
-export function clickOnRemoveRecipientBtn(index) {
-  cy.get(removeRecipientBtn).eq(index).click()
-}
-
-export function checkNumberOfRecipients(count) {
-  cy.get(recipientsCount).should('have.text', `${count}`)
-}
-
-export function checkMaxRecipientReached(attempt = 0) {
-  const maxAttempts = 4
-
-  cy.get('body').then(($body) => {
-    if ($body.find(maxRecipientsReachedMsg).length > 0) {
-      cy.get(maxRecipientsReachedMsg).should('exist')
-      cy.get(addrecipientBtn).should('be.disabled')
-      checkNumberOfRecipients('5/5')
-      return
-    }
-
-    if (attempt >= maxAttempts) {
-      throw new Error('Max attempts reached but message did not appear')
-    }
-
-    clickOnAddRecipientBtn()
-    checkNumberOfRecipients(`${attempt + 2}/5`)
-    checkMaxRecipientReached(attempt + 1)
-  })
 }
 
 export function selectComboButtonOption(option) {
@@ -1077,89 +529,3 @@ export function checkThatComboButtonOptionIsNotPresent(option) {
   })
 }
 //Functions for the happy path flow
-const deleteRequestDomainNames = ['Safe Queue Service', 'Safe Transaction Service']
-
-function getQueuedSafeTxHashes(url, safeTxHashes = []) {
-  return cy.request(url).then(({ body }) => {
-    const pageHashes = body.results
-      .filter((item) => item.type === 'TRANSACTION')
-      .map((item) => item.transaction.id.split('_').pop())
-    const allHashes = [...safeTxHashes, ...pageHashes]
-    if (!body.next) return allHashes
-    const { pathname, search } = new URL(body.next)
-    return getQueuedSafeTxHashes(`${constants.stagingCGWUrl}${pathname.slice(1)}${search}`, allHashes)
-  })
-}
-
-function deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer, domainNames = deleteRequestDomainNames) {
-  const [name, ...fallbackNames] = domainNames
-  const domain = { name, version: '1.0', chainId: Number(chainId), verifyingContract: safeAddress }
-  const types = {
-    DeleteRequest: [
-      { name: 'safeTxHash', type: 'bytes32' },
-      { name: 'totp', type: 'uint256' },
-    ],
-  }
-  const message = { safeTxHash, totp: Math.floor(Date.now() / 3600e3) }
-
-  cy.wrap(null)
-    .then(() => proposer.signTypedData(domain, types, message))
-    .then((signature) =>
-      cy.request({
-        method: 'DELETE',
-        url: `${constants.stagingCGWUrlv1}/chains/${chainId}/transactions/${safeTxHash}`,
-        body: { signature },
-        failOnStatusCode: false,
-      }),
-    )
-    .then(({ status }) => {
-      if (status < 300) return
-      expect(fallbackNames, `delete ${safeTxHash} (HTTP ${status})`).not.to.be.empty
-      deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer, fallbackNames)
-    })
-}
-
-/** Deletes every queued transaction of a Sepolia Safe through the API, signed by their proposer. */
-export function cleanTransactionQueue(prefixedSafeAddress, proposerPrivateKey) {
-  const chainId = constants.networkKeys.sepolia
-  const safeAddress = ethers.getAddress(prefixedSafeAddress.split(':').pop())
-  const proposer = new ethers.Wallet(proposerPrivateKey)
-
-  getQueuedSafeTxHashes(`${constants.stagingCGWUrlv1}/chains/${chainId}/safes/${safeAddress}/transactions/queued`).then(
-    (safeTxHashes) => {
-      safeTxHashes.reverse().forEach((safeTxHash) => deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer))
-    },
-  )
-}
-
-export function switchToSignerAndConfirm(signer) {
-  navigation.clickOnWalletExpandMoreIcon()
-  navigation.clickOnDisconnectBtn()
-  walletUtils.connectSigner(signer)
-  clickOnConfirmTransactionBtn()
-  clickOnContinueSignTransactionBtn()
-  signAndOpenExecuteStep()
-  clickOnExecuteLaterBtn()
-}
-
-export function deleteTransactionAndSwitchToSigner(signer) {
-  navigation.clickOnWalletExpandMoreIcon()
-  navigation.clickOnDisconnectBtn()
-  walletUtils.connectSigner(signer)
-  deleteTx()
-}
-
-export function createAddOwnerTransaction(safeAddress, signer, ownerAddress, ownerIndex = 2) {
-  // Create add owner transaction
-  walletUtils.connectSignerViaStorage(signer, constants.setupUrl + safeAddress)
-  owner.waitForConnectionStatus()
-  owner.openManageSignersWindow()
-  owner.clickOnAddSignerBtn()
-  owner.typeOwnerAddressManage(ownerIndex, ownerAddress)
-  owner.clickOnNextBtnManage()
-  owner.verifyConfirmTransactionWindowDisplayed()
-  clickOnContinueSignTransactionBtn()
-  selectComboButtonOption('sign')
-  clickOnSignTransactionBtn()
-  clickViewTransaction()
-}

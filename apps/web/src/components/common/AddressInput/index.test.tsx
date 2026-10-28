@@ -2,7 +2,7 @@ import * as addressBook from '@/hooks/useAddressBook'
 import * as allAddressBooks from '@/hooks/useAllAddressBooks'
 import * as urlChainId from '@/hooks/useChainId'
 import { act, fireEvent, waitFor } from '@testing-library/react'
-import { render } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render } from '@/tests/test-utils'
 import { useForm, FormProvider } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '.'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -192,6 +192,28 @@ describe('AddressInput tests', () => {
     })
 
     await waitFor(() => expect(utils.getByLabelText(`Invalid address format`, { exact: false })).toBeDefined())
+  })
+
+  it('flags an address with a wrong checksum', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: '0X6D0B6F96F665BB4490F9DDB2E450DA2F7E546DC1' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() => expect(utils.getByLabelText('Invalid address checksum', { exact: false })).toBeDefined())
+  })
+
+  it('shows the checksummed address for a lowercase address', async () => {
+    const { input } = setup('')
+    const address = fakerChecksummedAddress()
+
+    act(() => {
+      fireEvent.change(input, { target: { value: address.toLowerCase() } })
+    })
+
+    await waitFor(() => expect(input.value).toBe(address))
   })
 
   it('should accept a custom validate function', async () => {

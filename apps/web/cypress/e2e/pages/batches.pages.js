@@ -1,10 +1,8 @@
 import * as main from './main.page'
 
 export const addToBatchBtn = 'Add to batch'
-const confirmBatchBtn = 'Confirm batch'
 
 export const closeModalBtnBtn = '[data-testid="CloseIcon"]'
-export const batchTxCounter = '[data-track="batching: Batch sidebar open"] button'
 export const addNewStransactionStr = 'Add new transaction'
 export const allActionsSection = '[data-testid="all-actions"]'
 export const accordionActionItem = '[data-testid="action-item"]'
@@ -18,18 +16,6 @@ function executeTransaction() {
       cy.contains(addToBatchBtn).should('not.exist')
     })
   })
-}
-
-export function clickOnConfirmBatchBtn() {
-  cy.get('button').contains(confirmBatchBtn).should('be.visible').should('be.enabled').click()
-}
-
-export function verifyBatchTransactionsCount(count) {
-  cy.contains(`This batch contains ${count} transactions`).should('be.visible')
-}
-
-export function clickOnBatchCounter() {
-  cy.get(batchTxCounter).click()
 }
 
 export function verifyCountOfActions(count) {

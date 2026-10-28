@@ -134,7 +134,7 @@ describe('SpendingLimitDrawer', () => {
     expect(
       screen.getByText('The spending limit is not active as the transaction is not yet executed.'),
     ).toBeInTheDocument()
-    expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
+    expect(screen.getByText('1 of 2 signatures')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })

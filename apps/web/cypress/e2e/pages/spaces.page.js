@@ -60,38 +60,20 @@ const safeSelectorBalance = '[data-testid="safe-selector-balance"]'
 // The header threshold is the shared ThresholdBadge (account-threshold), no longer a dedicated
 // safe-selector-threshold testid.
 const safeSelectorThreshold = '[data-testid="account-threshold"]'
-const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
-const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
-const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
 
 // Back-to-space control now lives in the sidebar, not the safe-level navigation panel
 export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
 
 // -- Space sidebar items --
-export const sidebarItemDashboard = '[data-testid="sidebar-item-dashboard"]'
-export const sidebarItemAccounts = '[data-testid="sidebar-item-safe-accounts"]'
-export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
-export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
-export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
+const sidebarItemAccounts = '[data-testid="sidebar-item-safe-accounts"]'
+const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
+const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
 // -- Safe accounts page --
 const safeAccountsPageTitle = 'Safe accounts'
-const safeAccountsPageHeading = 'h2'
 // The Safe accounts page now renders the shared SafeAccountsTable; count only top-level rows
 // (multichain children render only when a group is expanded).
 const safeAccountsTableRow = '[data-testid="account-table-row"]:not([data-variant="child"])'
-
-// -- Add account --
-const openAddAccountsChooserBtn = '[data-testid="open-add-accounts-chooser-button"]'
-const addSpaceAccountToWorkspaceBtn = '[data-testid="add-safe-accounts-to-workspace-button"]'
-const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-button"]'
-const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
-const addAccountsBtn = '[data-testid="add-accounts-button"]'
-const addAddressInput = '[data-testid="add-address-input"]'
-const nameAccountsRegion = '[data-testid="name-accounts-region"]'
-const nameAccountInput = '[data-testid="account-name-input"]'
-const networkSelector = '[data-testid="network-selector"]'
-const networkItem = '[data-testid="network-item"]'
 
 // -- Add member --
 const addMemberBtn = '[data-testid="add-member-button"]'
@@ -100,11 +82,6 @@ const memberAddressInput = '[data-testid="member-invitee-identifier-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
 const pendingMembersTab = '[data-testid="pending-members-tab"]'
 const membersTab = '[data-testid="members-tab"]'
-
-// -- Address book page --
-const addressBookTabRole = '[role="tab"]'
-export const addressBookTabLocal = 'Local contacts'
-export const addressBookTabPending = 'Pending'
 
 // -- Invites --
 const inviteBanner = '[data-testid="space-invite-banner"]'
@@ -228,18 +205,6 @@ export function clickOnUseOldUiBtn() {
   cy.get(classicViewLink, { timeout: 30000 }).should('be.visible').click()
 }
 
-// Seeds the same sessionStorage opt-in that "Use the old UI" sets, so the
-// /welcome/spaces sign-in gate is bypassed without clicking through it. Pass to
-// cy.visit as onBeforeLoad so the flag is present before the app boots, and
-// re-seed on every visit — sessionStorage is per-visit in the test runner.
-export function bypassSpacesLogin(win) {
-  win.sessionStorage.setItem(constants.sessionStorageKeys.SAFE_v2__classicViewEnabled, JSON.stringify(true))
-}
-
-export function visitClassicView(url) {
-  cy.visit(url, { onBeforeLoad: bypassSpacesLogin })
-}
-
 export function visitSpacesView() {
   cy.visit(constants.spacesUrl, {
     onBeforeLoad: (win) => {
@@ -318,14 +283,6 @@ export function disconnectFromSpaceLevel() {
   navigation.clickOnDisconnectBtn()
 }
 
-export function clickOnSpaceDashboardSendBtn() {
-  cy.contains('button', 'Send', { timeout: 30000 }).should('be.visible').click()
-}
-
-export function verifySendFromModalOpen() {
-  cy.contains('[role="dialog"]', 'Send from', { timeout: 30000 }).should('be.visible')
-}
-
 // Navigate to a space section through the sidebar (client-side) rather than a full cy.visit reload.
 // Dismiss any open popover first (e.g. the space selector left open by clickOnSpaceSelector) so it
 // can't cover the nav item.
@@ -345,11 +302,6 @@ export function goToSpaceSettings() {
 export function goToSpaceMembers() {
   openSpaceSection(sidebarItemTeam, '/spaces/members')
   cy.get(membersTab, { timeout: 30000 }).should('be.visible')
-}
-
-export function goToSpaceSafeAccounts() {
-  openSpaceSection(sidebarItemAccounts, '/spaces/safe-accounts')
-  cy.contains(safeAccountsPageHeading, safeAccountsPageTitle, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================
@@ -372,12 +324,6 @@ export function clickViewAllAccounts() {
   // The loading placeholder shares the widget testid and its View all button is replaced once the feature loads.
   cy.get(spaceDashboardAccountsWidget).find(spaceDashboardAccountsRowSelector).should('exist')
   cy.get(spaceDashboardAccountsWidget).find(widgetViewAllBtn).should('be.visible').click()
-}
-
-export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
-  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible').and('have.attr', 'href').and('include', 'spaceId=')
-  cy.get(sidebarSelector).click()
-  cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
 }
 
 // ===========================================
@@ -498,19 +444,9 @@ export function verifyUrlIncludesPath(path) {
 // Sidebar verify functions
 // ===========================================
 
-export function verifySpaceSidebarItemsVisible() {
-  cy.get(sidebarItemAccounts).should('be.visible')
-  cy.get(sidebarItemTeam).should('be.visible')
-}
-
 export function verifySpaceSidebarItemsNotVisible() {
   cy.get(sidebarItemAccounts).should('not.exist')
   cy.get(sidebarItemTeam).should('not.exist')
-}
-
-export function verifySafeLevelNavigationElements() {
-  cy.get(safeLevelNavigation).find(spaceSafesNavigationBlock).should('be.visible')
-  cy.get(safeLevelNavigation).find(spaceChainNavigationButton).should('be.visible')
 }
 
 export function verifyBackToSpaceButtonVisible() {
@@ -539,16 +475,6 @@ export function verifyViewAllAccountsPageOpened(expectedAccountsCount) {
 
 export function spaceExists(name) {
   cy.get(spaceSelectorMenu).contains(name).should('be.visible')
-}
-
-export function verifySpaceSelectorMenuVisible() {
-  cy.get(spaceSelectorMenu).should('be.visible')
-}
-
-export function verifySpaceSelectorContainsSpaces(names) {
-  names.forEach((name) => {
-    cy.get(spaceSelectorMenu).contains(name).should('be.visible')
-  })
 }
 
 // ===========================================
@@ -630,86 +556,12 @@ export function ensureReadyToCreateSpace() {
 }
 
 // ===========================================
-// Add account flow
-// ===========================================
-
-export function selectNetwork(network) {
-  cy.get(networkSelector).click()
-  main.selectDropdownOption(networkItem, network)
-}
-
-export function openAddAccountsToWorkspace() {
-  cy.get(openAddAccountsChooserBtn, { timeout: 30000 }).should('be.visible').and('be.enabled')
-  cy.get(openAddAccountsChooserBtn).click({ force: true })
-  cy.contains('[role="dialog"]', 'Add Safe accounts', { timeout: 30000 })
-    .should('be.visible')
-    .within(() => {
-      cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 }).should('be.visible')
-      cy.get(addSpaceAccountToWorkspaceBtn).should('not.have.attr', 'aria-disabled')
-      cy.get(addSpaceAccountToWorkspaceBtn).click({ force: true })
-    })
-}
-
-export function stubAddingSafeToSpace(address, chainId, name) {
-  let isAdded = false
-  cy.intercept('POST', constants.spacesSafesEndpoint, (req) => {
-    isAdded = true
-    req.reply({ statusCode: 201, body: {} })
-  })
-  cy.intercept('GET', constants.spacesSafesEndpoint, (req) => {
-    if (isAdded) req.reply({ body: { safes: { [chainId]: [address] } } })
-  })
-  cy.intercept('GET', constants.spacesAddressBookEndpoint, (req) => {
-    if (!isAdded) return
-    const now = new Date().toISOString()
-    req.reply({
-      body: {
-        spaceUuid: req.url.split('/spaces/')[1].split('/')[0],
-        data: [
-          {
-            name,
-            address,
-            chainIds: [chainId],
-            createdBy: '',
-            createdByUserId: 0,
-            lastUpdatedBy: '',
-            lastUpdatedByUserId: 0,
-            createdAt: now,
-            updatedAt: now,
-          },
-        ],
-      },
-    })
-  })
-}
-
-export function addAccountManually(address, network, name = 'E2E account') {
-  openAddAccountsToWorkspace()
-  cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
-  selectNetwork(network)
-  cy.get(addAddressInput).find('input').clear().type(address)
-  cy.get(addAddressInput).find('input').should('have.value', address)
-  cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
-  cy.get(addAccountsBtn).should('be.enabled').click()
-  cy.get(nameAccountsRegion).should('be.visible')
-  cy.get(nameAccountInput).first().clear().type(name)
-  cy.get(addAccountsBtn).should('be.enabled').click()
-  cy.contains(accountAddress, address, { timeout: 30000 }).should('be.visible')
-  cy.contains(name, { timeout: 30000 }).should('be.visible')
-}
-
-// ===========================================
 // Members & Address book tab actions
 // ===========================================
 
 export function clickMembersPendingTab() {
   cy.get(pendingMembersTab).should('be.visible').click()
   cy.get(`${pendingMembersTab}[aria-selected="true"]`).should('exist')
-}
-
-export function clickAddressBookTab(label) {
-  cy.contains(addressBookTabRole, label).should('be.visible').click()
-  cy.contains(addressBookTabRole, label).should('have.attr', 'aria-selected', 'true')
 }
 
 // ===========================================

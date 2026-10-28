@@ -1,4 +1,4 @@
-import { blo } from 'blo'
+import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
@@ -43,7 +43,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
     <div className="flex items-center gap-2 w-full" data-testid="safe-header-info">
       <div className="relative shrink-0">
         <Avatar size="sm" data-testid="safe-icon">
-          <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
+          <AvatarImage src={getIdenticonSrc(selectedItem.address)} alt={displayName} />
           <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
         </Avatar>
       </div>
