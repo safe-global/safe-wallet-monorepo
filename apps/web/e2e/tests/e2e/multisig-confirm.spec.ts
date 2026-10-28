@@ -9,6 +9,7 @@ import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 
 const AMOUNT = '0.001'
+const NOTE = 'Monthly payroll, batch 2'
 
 test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () => {
   test('should execute a transfer when a second owner confirms the signature of the first', async ({
@@ -26,9 +27,23 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     await sendTokens.open()
     await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
     await sendTokens.nextButton.click()
+    await review.addNote(NOTE)
     await review.sign()
 
+    await expect(review.viewTransactionLink).toHaveAttribute(
+      'href',
+      new RegExp(`id=multisig_${safe.address}_0x[0-9a-f]{64}`, 'i'),
+    )
+    const transactionPage = (await review.viewTransactionLink.getAttribute('href'))!
     await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
+
+    // The Transaction Service copies the note from the Queue Service; a transaction it indexes as executed has none
+    const [queued] = await safeApiClient.getQueued(safe.address)
+    await expect.poll(async () => (await safeApiClient.findTransaction(queued.id))?.note).toBe(NOTE)
+
+    await safePage.goto(transactionPage)
+    await expect(safePage.getByText(NOTE)).toBeVisible()
+    await expect(queue.transactions).toContainText(AMOUNT)
 
     await journey.connectAs('owner1')
     await queue.goto(safe.prefixedAddress)

@@ -4,8 +4,8 @@ run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('
 # Manual runs can be narrowed down; leave both inputs untouched for the full regression.
 #   suite  = full-regression (default) | regression | safe-apps
 #   spec   = spec file name(s) without path or .cy.js, comma-separated, e.g.
-#              create_tx_2                 -> cypress/e2e/<suite>/create_tx_2.cy.js
-#              create_tx_2, portfolio      -> both, inside <suite>
+#              address_book_2              -> cypress/e2e/<suite>/address_book_2.cy.js
+#              address_book_2, portfolio   -> both, inside <suite>
 #            with suite=full-regression a name is looked up in every full-regression directory
 #            (visual/ is never included).
 # Partial runs skip the TestRail upload and use one container per named spec (max 8; whole
@@ -25,7 +25,7 @@ on:
           - regression
           - safe-apps
       spec:
-        description: 'Spec names (optional), comma-separated, e.g. create_tx_2, portfolio (no path, no .cy.js).'
+        description: 'Spec names (optional), comma-separated, e.g. address_book_2, portfolio (no path, no .cy.js).'
         type: string
         required: false
         default: ''

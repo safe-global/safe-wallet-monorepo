@@ -7,7 +7,6 @@ import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as history from './history.mjs'
 import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
-import * as notes from './notes.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
 import * as rejection from './rejection.mjs'
@@ -28,7 +27,6 @@ const modules = [
   history,
   historySummary,
   ledger,
-  notes,
   proposers,
   recovery,
   rejection,
