@@ -69,7 +69,12 @@ export type FeesPreviewData = {
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-export const useFeesPreview = (): FeesPreviewData => {
+/**
+ * @param options.isExecution - the payload is about to be executed: the executor is known, so a Signer-pays
+ *   payload is estimated even with one signature missing (the last signer of an m/n Safe executes without
+ *   signing first and approves by executing).
+ */
+export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean } = {}): FeesPreviewData => {
   const { safeTx, feePaymentMode, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
@@ -272,10 +277,10 @@ export const useFeesPreview = (): FeesPreviewData => {
   }
 
   // Signed payload without Pay from Safe fee setup. Locked confirmer-style UI: no selectors, gas fee
-  // shown as "Calculated at execution" while signatures are missing (executor unknown), or a local
-  // estimate once the payload is fully signed (1/1, or the Execute step of a multi-sig).
+  // shown as "Calculated at execution" while the executor is unknown, or a local estimate once it is
+  // (fully signed, or the Execute step).
   if (isLegacySigned && safeTx) {
-    if (safeTx.signatures.size < safe.threshold) {
+    if (!isExecution && safeTx.signatures.size < safe.threshold) {
       return {
         ...base,
         isConfirmation: true,

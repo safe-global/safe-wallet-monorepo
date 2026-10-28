@@ -139,7 +139,7 @@ export const useTxActions = (): TxActions => {
     const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
       assertProvider(signer?.provider)
 
-      safeTx = await withGtfFeeParams(safeTx)
+      safeTx = await withPayFromSafeFeeParams(safeTx)
 
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')

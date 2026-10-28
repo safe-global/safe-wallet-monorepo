@@ -669,6 +669,21 @@ describe('useFeesPreview', () => {
       expect(result.current.gasFee.amount).toBeDefined()
     })
 
+    it('estimates the gas fee at execution for the last signer of an m/n Safe, one signature short', () => {
+      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+      const oneShortSignerPaysTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+        new Map([['0xSigner1', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview({ isExecution: true }), {
+        wrapper: withSafeTx(oneShortSignerPaysTx),
+      })
+
+      expect(result.current.gasFee.note).toBeUndefined()
+      expect(result.current.gasFee.amount).toBeDefined()
+    })
+
     it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx', () => {
       jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
       const lockedRejectWeth = buildSafeTx(

@@ -66,7 +66,7 @@ export const useGasPayerSelection = ({
 }): GasPayerSelection => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
-  const fees = useFeesPreview()
+  const fees = useFeesPreview({ isExecution: step === 'execute' })
   const { feePaymentMode, setFeePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()

@@ -1464,7 +1464,7 @@ describe('SignOrExecute hooks', () => {
             safeCreationSponsored: false,
             safeTransactionSponsored: false,
             enableTenderlySimulationBeforeRelay: false,
-            gasPaymentOptions: ['SUBSCRIPTION'],
+            gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
           },
         })
         .build()

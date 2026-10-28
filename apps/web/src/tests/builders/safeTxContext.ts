@@ -12,7 +12,7 @@ export const safeTxContextBuilder = (): IBuilder<SafeTxContextParams> =>
     setSafeTxGas: jest.fn(),
     setTxOrigin: jest.fn(),
     isReadOnly: false,
-    gtfPaymentMode: 'safe',
-    setGtfPaymentMode: jest.fn(),
-    setGtfSelectedGasToken: jest.fn(),
+    feePaymentMode: 'signer',
+    setFeePaymentMode: jest.fn(),
+    setFeeGasToken: jest.fn(),
   })
