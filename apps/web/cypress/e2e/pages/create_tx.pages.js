@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
-import * as modal from '../pages/modals.page'
 import * as navigation from './navigation.page'
 import * as walletUtils from '../../support/utils/wallet.js'
 import * as owner from './owners.pages'
@@ -38,7 +37,6 @@ export const txType = '[data-testid="tx-type"]'
 const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
 const sendTokensBtn = '[data-testid="send-tokens-btn"]'
 export const replacementNewSigner = '[data-testid="new-owner"]'
-export const messageItem = '[data-testid="message-item"]'
 const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
@@ -60,7 +58,6 @@ export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareLinkBtn = '[data-testid="share-tx-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
-const noteAlert = "[data-testid='tx-note-alert']"
 const recoredTxNote = '[data-testid="tx-note"]'
 const txNoteTooltip = '[data-testid="tx-note-tooltip"]'
 const noteCreator = '[data-testid="note-creator"]'
@@ -75,8 +72,6 @@ const addrecipientBtn = '[data-testid="add-recipient-btn"]'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
-const transactionsPerHrStr = 'free transactions left today'
-const nativeTokenTransferStr = 'ETH'
 const estimatedFeeStr = 'Estimated fee'
 // Re-export for backward compatibility
 export const executeStr = 'Execute'
@@ -96,7 +91,6 @@ export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
-export const txNoteWarningMessage = 'Notes are publicly visible. Do not share any private or sensitive details.'
 export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'
@@ -166,22 +160,6 @@ export function clickOnRejectionChoiceBtn(choice) {
   cy.get(wallet.choiceBtn).eq(choice).click()
 }
 
-export function typeNoteText(text) {
-  const input = cy.get(noteTextField).find('input')
-  input.clear()
-  input.type(text)
-}
-
-export function checkMaxNoteLength() {
-  typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).should('exist')
-  cy.get(noteTextField).contains('60/60').should('be.visible')
-}
-
-export function checkNoteWarningMsg() {
-  cy.get(noteAlert).invoke('text').should('include', txNoteWarningMessage)
-}
-
 export function checkNoteRecordedNote(note) {
   cy.get(recoredTxNote).should('be.visible').invoke('text').should('include', note)
 }
@@ -189,12 +167,6 @@ export function checkNoteRecordedNote(note) {
 export function checkNoteCreator(creator) {
   main.hoverUntilTooltipOpen(() => cy.get(txNoteTooltip))
   cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
-}
-
-export function checkNoteRecordedNoteReadOnly() {
-  cy.get(recoredTxNote).then(($p) => {
-    expect($p.prop('tagName')).to.equal('P')
-  })
 }
 
 export function clickOnShareLinkBtn() {
@@ -513,10 +485,6 @@ export function typeRecipientAddress(address) {
   cy.get(recepientInput).clear().type(address).should('have.value', address)
 }
 
-export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('exist')
-}
-
 export function clickOnTokenselectorAndSelectSepoliaEth() {
   clickOnTokenselectorAndSelectToken(constants.tokenNames.sepoliaEther)
 }
@@ -559,13 +527,6 @@ export function verifyContinueSignBtnIsEnabled() {
 
 export function verifyAddToBatchBtnIsEnabled() {
   return cy.get(addToBatchBtn).should('not.be.disabled')
-}
-
-export function verifyNativeTokenTransfer() {
-  cy.get(modal.cardContent).within(() => {
-    cy.contains('Send').should('be.visible')
-    cy.contains(nativeTokenTransferStr).should('be.visible')
-  })
 }
 
 export function changeNonce(value) {

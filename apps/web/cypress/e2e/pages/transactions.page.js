@@ -13,7 +13,6 @@ const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handle
 
 const txCompletedStr = 'Transaction was successful'
 const EXECUTION_METHOD_SETTLE_MS = 10000
-export const relayRemainingAttemptsStr = 'free transactions left today'
 const relaysRemainingEndpoint = '**/v1/chains/*/relay/*'
 const chainsListEndpoint = /\/v[12]\/chains(\?|$)/
 const freeDailyRelayOption = 'FREE_DAILY_LIMIT'
