@@ -7,6 +7,7 @@ import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/comp
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import { mockStarterPlan } from './mocks/plan'
 import { mockPolicies } from './mocks/policies'
+import { mockCgwAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from './mocks/allowlistPolicies'
 import Policies from './index'
 
 const meta = {
@@ -60,6 +61,12 @@ export const ProposerIntro: Story = {
 /** With policies the page becomes the list of what is set up. */
 export const Populated: Story = {
   args: { policies: mockPolicies() },
+}
+
+export const PopulatedWithAllowlists: Story = {
+  args: {
+    policies: [...mockPolicies(), mockCgwAllowlist(), mockPendingAllowlist(), mockFullySignedPendingAllowlist()],
+  },
 }
 
 /** Only the heading stays while CGW answers. */

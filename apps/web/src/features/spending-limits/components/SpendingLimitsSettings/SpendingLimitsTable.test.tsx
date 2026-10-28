@@ -17,8 +17,8 @@ jest.mock('@/features/spending-limits', () => ({
   useIsOnlySpendingLimitBeneficiary: jest.fn(),
 }))
 
-const renderTable = () =>
-  render(<SpendingLimitsTable spendingLimits={[spendingLimitStateBuilder().build()]} isLoading={false} />)
+const renderTable = (spendingLimits = [spendingLimitStateBuilder().build()]) =>
+  render(<SpendingLimitsTable spendingLimits={spendingLimits} isLoading={false} />)
 
 describe('SpendingLimitsTable', () => {
   beforeEach(() => {
@@ -44,4 +44,10 @@ describe('SpendingLimitsTable', () => {
       expect(screen.getByTestId('delete-btn')).toBeDisabled()
     },
   )
+
+  it('shows One-time for a spending limit without a reset period', () => {
+    renderTable([spendingLimitStateBuilder().with({ resetTimeMin: '0' }).build()])
+
+    expect(screen.getByTestId('reset-time')).toHaveTextContent('One-time')
+  })
 })

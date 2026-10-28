@@ -1,5 +1,6 @@
 import { type JsonRpcProvider, toBeHex } from 'ethers'
 import { EMPTY_DATA } from '@safe-global/utils/utils/constants'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import {
@@ -122,6 +123,10 @@ describe('wallets', () => {
     it('detects an EIP-1193 rejection that a provider throws as a plain object', () => {
       expect(isWalletRejection({ code: 4001, message: 'User rejected transaction' })).toBe(true)
       expect(isWalletRejection({ code: 4001 })).toBe(true)
+    })
+
+    it('detects a plain-object rejection after asError converts it', () => {
+      expect(isWalletRejection(asError({ code: 4001, message: 'User rejected transaction' }))).toBe(true)
     })
 
     it('detects an EIP-1193 rejection code on an Error', () => {

@@ -25,6 +25,9 @@ const CYCLES = ['month', 'year'] as const
 export const formatPlanPrice = (price: number, currency: string): string =>
   new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
 
+const toBillingCycle = (value: string | null | undefined): 'month' | 'year' | null =>
+  value === 'month' || value === 'year' ? value : null
+
 export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (billingCycle === 'year' ? '/yr' : '/mo')
 
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
@@ -73,7 +76,7 @@ export const toCurrentPlan = (
     name: getSubscriptionPlanName(subscription) ?? plan.name,
     price: subscription.plan.currentPrice,
     currency: subscription.plan.currency,
-    billingCycle: subscription.plan.billingCycle ?? null,
+    billingCycle: toBillingCycle(subscription.plan.billingCycle),
     isTrialing,
     hasPaymentMethod: subscription.hasPaymentMethod === true,
     periodEndsAt: plan.periodEndsAt,
@@ -99,9 +102,12 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
 
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
-    if (pick.tier.name === ENTERPRISE_TIER.name) return { kind: 'account-team', label: 'Change via your account team' }
+    const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
+    if (pick.tier.name === ENTERPRISE_TIER.name && !isAwaitingPaymentMethod) {
+      return { kind: 'account-team', label: 'Change via your account team' }
+    }
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
-      return current?.isTrialing && !current.hasPaymentMethod
+      return isAwaitingPaymentMethod
         ? { kind: 'billing', label: 'Add payment method' }
         : { kind: 'current', label: 'Current plan' }
     }
@@ -186,7 +192,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
     id: 'current',
     name,
     currency: subscription.plan.currency,
-    billingCycle: subscription.plan.billingCycle ?? null,
+    billingCycle: toBillingCycle(subscription.plan.billingCycle),
     options: [
       {
         paymentLinkId: null,

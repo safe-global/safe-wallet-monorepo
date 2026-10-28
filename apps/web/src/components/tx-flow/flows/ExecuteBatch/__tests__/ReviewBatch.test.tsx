@@ -1,9 +1,12 @@
 import type { ReactElement } from 'react'
 import { faker } from '@faker-js/faker'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { render, screen, waitFor, fireEvent } from '@/tests/test-utils'
 import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
 import { getMockTx } from '@/tests/mocks/transactions'
-import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
+import { transactionDataBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -13,6 +16,7 @@ import type { GasPaymentOptions } from '@/hooks/useGasPaymentOptions'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import * as transactionUtils from '@/utils/transactions'
 import { ReviewBatch } from '../ReviewBatch'
+import type DecodedTxs from '../DecodedTxs'
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
 jest.mock('@/hooks/useGasPaymentOptions', () => ({
@@ -32,13 +36,17 @@ jest.mock('@/services/tx/tx-sender', () => ({
   createMultiSendCallOnlyTx: jest.fn(),
 }))
 
-const mockTxDetails = [transactionDetailsBuilder().build(), transactionDetailsBuilder().build()]
+type DetailsQueryArgs = { chainId: string; txIds: string[] }
+type DetailsQueryResult = { data: TransactionDetails[]; error: undefined; isLoading: boolean }
+let mockTxDetails: TransactionDetails[] = []
+const mockGetMultipleTransactionDetails = jest.fn<DetailsQueryResult, [DetailsQueryArgs]>(() => ({
+  data: mockTxDetails,
+  error: undefined,
+  isLoading: false,
+}))
 jest.mock('@safe-global/store/gateway/transactions', () => ({
-  useTransactionsGetMultipleTransactionDetailsQuery: () => ({
-    data: mockTxDetails,
-    error: undefined,
-    isLoading: false,
-  }),
+  useTransactionsGetMultipleTransactionDetailsQuery: (args: DetailsQueryArgs) =>
+    mockGetMultipleTransactionDetails(args),
 }))
 
 const MULTI_SEND = { multiSendContract: {}, multiSendContractAddress: '0x0000000000000000000000000000000000000003' }
@@ -50,7 +58,11 @@ jest.mock('../useMultiSendContract', () => ({ useMultiSendContract: () => mockUs
 const mockUseSafeSDK = jest.fn<object | undefined, []>(() => ({}))
 jest.mock('@/hooks/coreSDK/safeCoreSDK', () => ({ getSafeSDK: jest.fn(), useSafeSDK: () => mockUseSafeSDK() }))
 
-jest.mock('../DecodedTxs', () => ({ __esModule: true, default: () => null }))
+const mockDecodedTxs = jest.fn<ReactElement | null, [{ txs: TransactionDetails[] | undefined }]>()
+jest.mock('../DecodedTxs', () => ({
+  __esModule: true,
+  default: (props: { txs: TransactionDetails[] | undefined }) => mockDecodedTxs(props),
+}))
 
 jest.mock('@/hooks/useGasPrice', () => ({
   __esModule: true,
@@ -138,9 +150,46 @@ const submit = async () => {
   fireEvent.click(button)
 }
 
+const ONE_ETH = '1000000000000000000'
+
+const queuedTx = (txId: string, nonce: number) => {
+  const tx = getMockTx({ nonce })
+  return { ...tx, transaction: { ...tx.transaction, id: txId } }
+}
+
+const nativeTransfer = (txId: string): TransactionDetails =>
+  transactionDetailsBuilder()
+    .with({
+      txId,
+      txData: transactionDataBuilder()
+        .with({ to: { value: checksumAddress(faker.finance.ethereumAddress()) }, value: ONE_ETH })
+        .build(),
+    })
+    .build()
+
+const removeOwnerTx = (txId: string): TransactionDetails =>
+  transactionDetailsBuilder()
+    .with({
+      txId,
+      txInfo: {
+        type: TransactionInfoType.CUSTOM,
+        to: { value: checksumAddress(faker.finance.ethereumAddress()) },
+        dataSize: '100',
+        value: '0',
+        isCancellation: false,
+        methodName: 'removeOwner',
+      },
+      txData: transactionDataBuilder()
+        .with({ hexData: '0xf8dc5dd9', dataDecoded: { method: 'removeOwner', parameters: [] } })
+        .build(),
+    })
+    .build()
+
 describe('ReviewBatch', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockTxDetails = [transactionDetailsBuilder().build(), transactionDetailsBuilder().build()]
+    mockDecodedTxs.mockReturnValue(null)
     mockUseUserNonce.mockReturnValue(1)
     mockUseSafeSDK.mockReturnValue({})
     mockUseMultiSendContract.mockReturnValue(MULTI_SEND)
@@ -156,6 +205,48 @@ describe('ReviewBatch', () => {
     ])
     mockDispatchBatchExecution.mockResolvedValue(faker.string.hexadecimal({ length: 64 }))
     mockDispatchBatchExecutionRelay.mockResolvedValue(undefined)
+  })
+
+  describe('batched transactions', () => {
+    const transferId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const removeOwnerId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+
+    const renderQueuedBatch = () =>
+      render(<ReviewBatch params={{ txs: [queuedTx(transferId, 1), queuedTx(removeOwnerId, 2)] }} />)
+
+    beforeEach(() => {
+      const { default: RealDecodedTxs } = jest.requireActual<{ default: typeof DecodedTxs }>('../DecodedTxs')
+      mockDecodedTxs.mockImplementation((props) => <RealDecodedTxs {...props} />)
+      mockTxDetails = [nativeTransfer(transferId), removeOwnerTx(removeOwnerId)]
+    })
+
+    it('requests the details of the queued transactions in queue order', async () => {
+      renderQueuedBatch()
+
+      await screen.findAllByTestId('action-item')
+
+      expect(mockGetMultipleTransactionDetails).toHaveBeenLastCalledWith(
+        expect.objectContaining({ txIds: [transferId, removeOwnerId] }),
+      )
+    })
+
+    it('tells the user how many queued transactions the batch executes', async () => {
+      renderQueuedBatch()
+
+      expect(
+        await screen.findByText(/This transaction batches a total of 2 transactions from your queue/),
+      ).toBeInTheDocument()
+    })
+
+    it('lists one numbered action for each queued transaction', async () => {
+      renderQueuedBatch()
+
+      const rows = await screen.findAllByTestId('action-item')
+
+      expect(rows).toHaveLength(2)
+      expect(rows[0]).toHaveTextContent(/^1Send1 /)
+      expect(rows[1]).toHaveTextContent('2removeOwner')
+    })
   })
 
   describe('when Safe Shield needs a risk confirmation', () => {

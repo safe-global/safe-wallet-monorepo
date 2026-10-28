@@ -6,6 +6,8 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || (isCI ? 'http://localhost:808
 
 export default defineConfig({
   testDir: './tests',
+  // The journeys seed their own Safes and the auth0 specs need the local Auth0, so both run only on the isolated stack
+  testIgnore: ['**/tests/e2e/**', '**/tests/regression/auth0/**'],
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: isCI,

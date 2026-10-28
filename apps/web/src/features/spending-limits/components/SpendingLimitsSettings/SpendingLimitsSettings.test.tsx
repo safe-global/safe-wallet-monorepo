@@ -49,6 +49,7 @@ describe('SpendingLimitsSettings', () => {
     render(<SpendingLimitsSettings />)
 
     expect(screen.queryByTestId('new-spending-limit')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safe-pro-lock')).toHaveTextContent('Adding spending limits requires Safe Pro')
     expect(screen.getByTestId('safe-pro-lock')).toHaveTextContent('Existing ones stay active.')
     expect(screen.getByRole('link', { name: 'Explore Safe Pro' })).toHaveAttribute('href', '/spaces/plans')
   })

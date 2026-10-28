@@ -5,6 +5,7 @@ import AddPolicyDialog from '../index'
 import {
   ADD_POLICY_OPTIONS,
   RECOVERY_POLICY_OPTION,
+  RECIPIENT_ALLOWLIST_POLICY_OPTION,
   type AddPolicyOption,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 
@@ -41,14 +42,18 @@ describe('AddPolicyDialog', () => {
     expect(onSelect).toHaveBeenCalledWith('proposer')
   })
 
-  it('lays out three or fewer policies in a single column', () => {
-    renderDialog({ options: ADD_POLICY_OPTIONS })
+  it('lays out four or fewer policies in a single column', () => {
+    renderDialog({ options: [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] })
 
     expect(screen.getByTestId('add-policy-options')).not.toHaveClass('sm:grid-cols-2')
   })
 
-  it('splits more than three policies into two columns', () => {
-    const options: AddPolicyOption[] = [...ADD_POLICY_OPTIONS, RECOVERY_POLICY_OPTION]
+  it('splits more than four policies into two columns', () => {
+    const options: AddPolicyOption[] = [
+      RECIPIENT_ALLOWLIST_POLICY_OPTION,
+      ...ADD_POLICY_OPTIONS,
+      RECOVERY_POLICY_OPTION,
+    ]
 
     renderDialog({ options })
 

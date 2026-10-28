@@ -1,13 +1,11 @@
 import { createRequire } from 'node:module'
 import { registerContract } from './contracts.mjs'
-import { createSafe, createSafeAddress, executeTransaction, proposeTransaction } from './safe.mjs'
-import { rebuildStagingSafes } from './staging-safes.mjs'
+import { executeTransaction, proposeTransaction } from './safe.mjs'
 import { waitUntil } from './indexing.mjs'
-import { short } from './chain.mjs'
 
 const { deployAndSetUpModule, getModuleInstance, KnownContracts } = createRequire(import.meta.url)('@gnosis.pm/zodiac')
 
-// SEP_RECOVERY_SAFE_4 on staging: a Delay modifier with a 56-day cooldown, no expiry and OWNER_2 as recoverer.
+// The longest review window the app offers.
 const COOLDOWN = 56 * 24 * 60 * 60
 
 /** Deploys a Delay modifier with `recoverer` on the Safe of `context` and returns the modifier's address. */
@@ -49,27 +47,4 @@ export async function enableRecovery(env, context, recoverer, { cooldown = COOLD
     abi: JSON.parse(delayModifier.interface.formatJson()),
   })
   return expectedModuleAddress
-}
-
-export async function prepareRecoveryScenario(env, owners) {
-  const recovery = await createSafe(env, owners, {
-    ownerAddresses: [owners.owner3.address, owners.owner4.address],
-    threshold: 1,
-  })
-  try {
-    await enableRecovery(env, recovery, owners.owner2.address)
-  } finally {
-    recovery.provider.destroy()
-  }
-  const plain = await createSafeAddress(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
-  return {
-    safes: {
-      recovery: {
-        SEP_RECOVERY_SAFE_1: `sep:${plain}`,
-        SEP_RECOVERY_SAFE_4: `sep:${recovery.safeAddress}`,
-      },
-      static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_13']),
-    },
-    fixtures: { 'recovery.recoverer': short(owners.owner2.address) },
-  }
 }

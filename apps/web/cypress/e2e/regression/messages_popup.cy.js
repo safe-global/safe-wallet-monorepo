@@ -4,7 +4,6 @@ import * as modal from '../pages/modals.page.js'
 import * as apps from '../pages/safeapps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as ls from '../../support/localstorage_data.js'
-import * as messages from '../pages/messages.pages.js'
 import * as msg_confirmation_modal from '../pages/modals/message_confirmation.pages.js'
 
 let staticSafes = []
@@ -33,22 +32,11 @@ describe('Messages popup window tests', () => {
     iframeSelector = `iframe[id="iframe-${encodeURIComponent(constants.safeTestAppurl)}"]`
   })
 
-  it('Verify off-chain message popup window can be triggered', () => {
-    apps.clickOnApp(safeApp)
-    apps.clickOnOpenSafeAppBtn()
-    main.getIframeBody(iframeSelector).within(() => {
-      apps.triggetOffChainTx()
-    })
-    msg_confirmation_modal.verifyConfirmationWindowTitle(modal.modalTitiles.confirmTx)
-    msg_confirmation_modal.verifySafeAppInPopupWindow(safeApp)
-  })
-
   it('Verify on-chain message popup window can be triggered', () => {
     apps.clickOnApp(safeApp)
     apps.clickOnOpenSafeAppBtn()
     main.getIframeBody(iframeSelector).within(() => {
       apps.enterMessage(onchainMessage)
-      //messages.enterOnchainMessage(onchainMessage)
       apps.triggetOnChainTx()
     })
     msg_confirmation_modal.verifyConfirmationWindowTitle(modal.modalTitiles.confirmMsg)

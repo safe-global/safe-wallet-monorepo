@@ -19,7 +19,7 @@ import * as payFromSafeHooks from '@/features/pay-from-safe'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { act, fireEvent, waitFor } from '@testing-library/react'
+import { act, fireEvent, waitFor, within } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -600,6 +600,59 @@ describe('CreateTokenTransfer', () => {
       expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-foreground')
       expect(maxReached).not.toHaveClass('bg-card')
     })
+
+    const addRecipients = (getByTestId: (id: string) => HTMLElement, count: number) => {
+      for (let i = 0; i < count; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+    }
+
+    it('recommends CSV Airdrop for more than 5 recipients once a second recipient is added', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      addRecipients(getByTestId, 1)
+
+      expect(getByTestId('csv-airdrop-hint')).toHaveTextContent(
+        'If you want to add more than 5 recipients, use CSV Airdrop',
+      )
+    })
+
+    it('recommends CSV Airdrop when no more recipients can be added', () => {
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      addRecipients(getByTestId, 4)
+
+      expect(getByTestId('max-recipients-reached')).toHaveTextContent(
+        /No more recipients can be added\.\s*Please use CSV Airdrop/,
+      )
+    })
+
+    it.each([
+      ['the hint', 1, 'csv-airdrop-hint'],
+      ['the max recipients alert', 4, 'max-recipients-reached'],
+    ])('opens the CSV Airdrop app from %s', (_, added, alertTestId) => {
+      const { getByTestId } = renderCreateTokenTransfer()
+      addRecipients(getByTestId, added)
+
+      fireEvent.click(within(getByTestId(alertTestId)).getByRole('button', { name: 'CSV Airdrop' }))
+
+      expect(getByTestId('csvairdrop-dialog')).toHaveTextContent('Use CSV Airdrop')
+      expect(getByTestId('open-app-btn')).toHaveAttribute(
+        'href',
+        expect.stringContaining(encodeURIComponent(csvApp.url)),
+      )
+    })
+
+    it('does not recommend CSV Airdrop when the chain has no CSV Airdrop app', () => {
+      useRemoteSafeAppsSpy.mockReturnValue([[], undefined, false])
+      const { getByTestId, queryByTestId, queryByText } = renderCreateTokenTransfer()
+
+      addRecipients(getByTestId, 4)
+
+      expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
+      expect(getByTestId('max-recipients-reached')).toHaveTextContent('No more recipients can be added.')
+      expect(queryByText('CSV Airdrop')).not.toBeInTheDocument()
+    })
   })
 
   describe('Insufficient balance alert', () => {
@@ -699,6 +752,191 @@ describe('CreateTokenTransfer', () => {
       const alert = getByTestId('insufficient-balance-error')
       expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-foreground')
       expect(alert).not.toHaveClass('bg-card')
+    })
+  })
+
+  describe('Max with a spending limit', () => {
+    const TEN_USDC = '10000000'
+
+    const givenSpendingLimitLeft = (amount: bigint) => {
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: TEN_USDC,
+            tokenInfo: {
+              address: USDC_ADDRESS,
+              decimals: 6,
+              logoUri: '',
+              name: 'USD Coin',
+              symbol: 'USDC',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({ balances, loaded: true, loading: false, error: undefined })
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: amount,
+      }))
+    }
+
+    const clickMax = (type: TokenTransferType) => {
+      const data = { recipients: [{ recipient: '', tokenAddress: USDC_ADDRESS, amount: '' }], type }
+      const { getByTestId } = render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={data} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      fireEvent.click(getByTestId('max-btn'))
+      return getByTestId('token-amount-field')
+    }
+
+    it('fills in the amount left on the spending limit for a spending limit transaction', async () => {
+      givenSpendingLimitLeft(2_500_000n)
+
+      const amountField = clickMax(TokenTransferType.spendingLimit)
+
+      await waitFor(() => expect(amountField).toHaveValue('2.5'))
+    })
+
+    it('fills in the whole balance for a standard transaction', async () => {
+      givenSpendingLimitLeft(2_500_000n)
+
+      const amountField = clickMax(TokenTransferType.multiSig)
+
+      await waitFor(() => expect(amountField).toHaveValue('10'))
+    })
+
+    it('fills in the balance when the spending limit is larger than the balance', async () => {
+      givenSpendingLimitLeft(50_000_000n)
+
+      const amountField = clickMax(TokenTransferType.spendingLimit)
+
+      await waitFor(() => expect(amountField).toHaveValue('10'))
+    })
+  })
+
+  describe('Mass payout recipients', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const ONE_ETH = '1000000000000000000'
+
+    const givenMassPayouts = (enabled: boolean) => {
+      useHasFeatureSpy.mockImplementation((feature) => enabled && feature === FEATURES.MASS_PAYOUTS)
+    }
+
+    const renderForm = (type = TokenTransferType.multiSig) => {
+      const data = { recipients: [{ recipient: '', tokenAddress: ZERO_ADDRESS, amount: '' }], type }
+      return render(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={data} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+    }
+
+    beforeEach(() => {
+      givenMassPayouts(true)
+
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: ONE_ETH,
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: '',
+              name: 'Ether',
+              symbol: 'ETH',
+              type: TokenType.NATIVE_TOKEN,
+            },
+            fiatBalance: '1000',
+            fiatConversion: '1000',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({ balances, loaded: true, loading: false, error: undefined })
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: 0n,
+      }))
+    })
+
+    it('offers to add a recipient when mass payouts are enabled', () => {
+      const { getByTestId } = renderForm()
+
+      expect(getByTestId('add-recipient-btn')).toBeEnabled()
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+    })
+
+    it('does not offer to add a recipient when mass payouts are disabled', () => {
+      givenMassPayouts(false)
+
+      const { queryByTestId } = renderForm()
+
+      expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
+    })
+
+    it('does not offer to add a recipient for a spending limit transaction', () => {
+      const { queryByTestId } = renderForm(TokenTransferType.spendingLimit)
+
+      expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
+    })
+
+    it('stops at 5 recipients', () => {
+      const { getByTestId, getAllByTestId } = renderForm()
+
+      for (let i = 0; i < 4; i++) {
+        fireEvent.click(getByTestId('add-recipient-btn'))
+      }
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(5)
+      expect(getByTestId('recipients-count')).toHaveTextContent('5/5')
+      expect(getByTestId('add-recipient-btn')).toBeDisabled()
+    })
+
+    it('removes a recipient', () => {
+      const { getByTestId, getAllByTestId } = renderForm()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      expect(getByTestId('recipients-count')).toHaveTextContent('2/5')
+
+      fireEvent.click(getAllByTestId('remove-recipient-btn')[0])
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(1)
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+    })
+
+    it('fills in the whole balance when Max is clicked for the second recipient', async () => {
+      const { getByTestId, getAllByTestId } = renderForm()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      fireEvent.click(getAllByTestId('max-btn')[1])
+
+      await waitFor(() => expect(getAllByTestId('token-amount-field')[1]).toHaveValue('1'))
+    })
+
+    it('marks every recipient and the form as insufficient when two recipients send the whole balance', async () => {
+      const { getByTestId, getAllByTestId, getAllByText } = renderForm()
+
+      fireEvent.click(getByTestId('add-recipient-btn'))
+      fireEvent.click(getAllByTestId('max-btn')[0])
+      fireEvent.click(getAllByTestId('max-btn')[1])
+
+      await waitFor(() => expect(getByTestId('insufficient-balance-error')).toBeInTheDocument())
+      await waitFor(() => expect(getAllByText('Insufficient funds')).toHaveLength(2))
     })
   })
 })

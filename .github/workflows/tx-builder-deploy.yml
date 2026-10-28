@@ -227,7 +227,7 @@ jobs:
       - name: Generate production promotion token
         id: promotions_token
         continue-on-error: true
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@v3.3.0
         with:
           app-id: ${{ secrets.PROMOTIONS_APP_ID }}
           private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}

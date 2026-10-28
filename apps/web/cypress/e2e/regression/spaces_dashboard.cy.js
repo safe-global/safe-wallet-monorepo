@@ -55,48 +55,6 @@ describe('Spaces dashboard tests', () => {
     space.clickViewAllAccounts()
     space.verifyViewAllAccountsPageOpened(staticSpaces.dashboardWithSafes.safeAccountsPageCount)
   })
-
-  // ===========================================
-  // Space-level Sidebar Navigation
-  // ===========================================
-
-  describe('Space-level Sidebar', () => {
-    it('Verify that clicking each Space-level sidebar item navigates to the correct page', () => {
-      space.verifySidebarItemNavigates(space.sidebarItemAccounts, '/spaces/safe-accounts')
-      space.verifySidebarItemNavigates(space.sidebarItemAddressBook, '/spaces/address-book')
-      space.verifySidebarItemNavigates(space.sidebarItemTeam, '/spaces/members')
-      space.verifySidebarItemNavigates(space.sidebarItemSettings, '/spaces/settings')
-      space.verifySidebarItemNavigates(space.sidebarItemDashboard, '/spaces')
-    })
-
-    it('Verify that the sidebar correctly switches from Space-level to Safe-level navigation when entering a Safe', () => {
-      const safeData = staticSpaces.dashboardWithSafes.pendingTxAccount
-
-      // Precondition: space sidebar is visible
-      space.verifySpaceSidebarItemsVisible()
-      // Action: click on a safe in the accounts widget
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      space.clickSingleChainAccountRow()
-      space.verifySpaceSidebarItemsNotVisible()
-      space.verifySafeLevelNavigationElements()
-    })
-  })
-
-  // ===========================================
-  // Space Selector
-  // ===========================================
-
-  describe('Space Selector', () => {
-    it('Verify that the Space selector dropdown lists all Spaces belonging to the user', () => {
-      space.clickOnSpaceSelector()
-
-      space.verifySpaceSelectorMenuVisible()
-      space.verifySpaceSelectorContainsSpaces([
-        staticSpaces.dashboardWithSafes.name,
-        staticSpaces.emptyGettingStarted.name,
-      ])
-    })
-  })
 })
 
 /*

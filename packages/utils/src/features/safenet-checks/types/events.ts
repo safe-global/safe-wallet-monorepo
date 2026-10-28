@@ -117,6 +117,16 @@ export enum DisputeOutcome {
   RESOLVED_DENIED = 4,
 }
 
+/** `SentinelOracleRequest.State`, as the oracle's `getRequest` reports it. */
+export enum OracleRequestState {
+  NONE = 0,
+  PENDING = 1,
+  FROZEN = 2,
+  RESOLVED_APPROVED = 3,
+  RESOLVED_DENIED = 4,
+  TIMED_OUT = 5,
+}
+
 export type DisputeTriggeredEvent = CheckEventBase & {
   type: CheckEventType.DISPUTE_TRIGGERED
   requestId: Hex
