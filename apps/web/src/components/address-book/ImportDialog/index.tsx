@@ -15,6 +15,7 @@ import {
   trackEvent,
   ADDRESS_BOOK_EVENTS,
   ADDRESS_POISONING_EVENTS,
+  DismissAction,
   LookalikeWarningLocation,
   MixpanelEventParams,
 } from '@/services/analytics'
@@ -111,6 +112,23 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
   const onImportLookalikes = () => {
     trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     importEntries(entries)
+  }
+
+  const trackDismissLookalikes = (action: DismissAction) =>
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+      ...lookalikeTracking,
+      [MixpanelEventParams.DISMISS_ACTION]: action,
+    })
+
+  const onSkipLookalikes = () => {
+    trackDismissLookalikes(DismissAction.SKIP)
+    importEntries(entries.filter((entry) => !isFlagged(entry)))
+  }
+
+  const onCancelLookalikes = () => {
+    if (!isConfirmOpen) return
+    trackDismissLookalikes(DismissAction.CANCEL)
+    setIsConfirmOpen(false)
   }
 
   return (
@@ -233,8 +251,8 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
         question="Do you want to import these addresses?"
         confirmLabel="Yes, import them anyway"
         onConfirm={onImportLookalikes}
-        onSkip={() => importEntries(entries.filter((entry) => !isFlagged(entry)))}
-        onCancel={() => setIsConfirmOpen(false)}
+        onSkip={onSkipLookalikes}
+        onCancel={onCancelLookalikes}
       />
     </ModalDialog>
   )

@@ -17,6 +17,7 @@ import { useAddressPoisoningCheck } from '@/features/address-poisoning'
 import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice'
 import {
   ADDRESS_POISONING_EVENTS,
+  DismissAction,
   LookalikeWarningLocation,
   MixpanelEventParams,
   trackEvent,
@@ -115,6 +116,15 @@ function EntryDialog({
     save(pendingEntry).catch(onSaveError)
   }
 
+  const onCancelLookalike = () => {
+    if (!pendingEntry) return
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+      ...lookalikeTracking,
+      [MixpanelEventParams.DISMISS_ACTION]: DismissAction.CANCEL,
+    })
+    setPendingEntry(undefined)
+  }
+
   return (
     <ModalDialog
       data-testid="entry-dialog"
@@ -194,7 +204,7 @@ function EntryDialog({
         addressLabel="Address"
         hint="Verify the full address carefully. Continue only if you recognize this address."
         onConfirm={onConfirmLookalike}
-        onCancel={() => setPendingEntry(undefined)}
+        onCancel={onCancelLookalike}
         className={className}
         overlayClassName={overlayClassName}
       />

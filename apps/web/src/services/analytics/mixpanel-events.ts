@@ -114,6 +114,7 @@ export enum MixpanelEvent {
   UPGRADE_PROMPT_VIEWED = 'Upgrade Prompt Viewed',
   LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
   LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
+  LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -168,6 +169,8 @@ export enum PlanLocation {
 
 export enum DismissAction {
   GO_TO_MY_ACCOUNTS = 'go_to_my_accounts',
+  CANCEL = 'cancel',
+  SKIP = 'skip',
 }
 
 export enum PlanCtaKind {

@@ -21,6 +21,7 @@ import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
 import {
   ADDRESS_POISONING_EVENTS,
+  DismissAction,
   LOAD_SAFE_EVENTS,
   LookalikeWarningLocation,
   MixpanelEventParams,
@@ -111,6 +112,15 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
     trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     setPendingData(undefined)
     goToNextStep(pendingData)
+  }
+
+  const onCancelLookalike = () => {
+    if (!pendingData) return
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+      ...lookalikeTracking,
+      [MixpanelEventParams.DISMISS_ACTION]: DismissAction.CANCEL,
+    })
+    setPendingData(undefined)
   }
 
   const handleBack = () => {
@@ -207,7 +217,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
         addressLabel="Safe account"
         description={`This Safe account is similar to ${similar?.source === 'accounts' ? 'a Safe in your accounts' : 'an address in your address book'}. This could indicate an address poisoning attack.`}
         onConfirm={onConfirmLookalike}
-        onCancel={() => setPendingData(undefined)}
+        onCancel={onCancelLookalike}
       />
     </FormProvider>
   )

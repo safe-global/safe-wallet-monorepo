@@ -121,5 +121,21 @@ describe('SetAddressStep look-alike check', () => {
     fireEvent.click(within(await confirmDialog()).getByText(/I understand, continue anyway/))
 
     await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
+
+  it('tracks the decision to cancel the confirmation', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderStep(lookalike)
+
+    await clickNext()
+    fireEvent.click(within(await confirmDialog()).getByText('Cancel'))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'add_safe',
+        [MixpanelEventParams.DISMISS_ACTION]: 'cancel',
+      }),
+    )
   })
 })

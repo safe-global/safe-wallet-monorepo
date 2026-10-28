@@ -182,5 +182,35 @@ describe('ImportDialog look-alike check', () => {
     await userEvent.setup().click(within(await confirmDialog()).getByText('Yes, import them anyway'))
 
     await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
+
+  it('tracks the decision to skip the look-alikes', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_import',
+        [MixpanelEventParams.DISMISS_ACTION]: 'skip',
+      }),
+    )
+  })
+
+  it('tracks the decision to close the confirmation', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByRole('button', { name: 'Close' }))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_import',
+        [MixpanelEventParams.DISMISS_ACTION]: 'cancel',
+      }),
+    )
+    expect(savedAddresses()).toEqual([contact])
   })
 })

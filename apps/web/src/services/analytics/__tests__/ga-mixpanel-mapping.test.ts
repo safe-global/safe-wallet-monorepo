@@ -14,6 +14,7 @@ describe('GA to Mixpanel Mapping', () => {
     it.each([
       [ADDRESS_POISONING_EVENTS.WARNING_SHOWN.action, 'Look-alike Address Warning Shown'],
       [ADDRESS_POISONING_EVENTS.WARNING_CONTINUED.action, 'Look-alike Address Warning Continued'],
+      [ADDRESS_POISONING_EVENTS.WARNING_DISMISSED.action, 'Look-alike Address Warning Dismissed'],
     ])('forwards the look-alike warning event "%s" to Mixpanel as "%s"', (action, mixpanelEvent) => {
       expect(GA_TO_MIXPANEL_MAPPING[action]).toBe(mixpanelEvent)
     })

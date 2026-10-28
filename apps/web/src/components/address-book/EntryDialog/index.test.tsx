@@ -318,4 +318,44 @@ describe('EntryDialog look-alike warning', () => {
 
     await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
   })
+
+  it('tracks the decision to cancel the confirmation', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText('Cancel'))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_entry',
+        [MixpanelEventParams.DISMISS_ACTION]: 'cancel',
+      }),
+    )
+  })
+
+  it('does not track a cancel when the user continues', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText(/I understand, continue anyway/))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, expect.anything()),
+    )
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
+
+  it('does not track a cancel when the entry dialog itself is closed', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderDialog({ name: '', address: lookalike })
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, expect.anything()),
+    )
+    fireEvent.click(screen.getByTestId('cancel-btn'))
+
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
 })
