@@ -1,3 +1,4 @@
+import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { swapOrderFixtures, type RecordedTransaction } from '@safe-global/test/msw/fixtures'
 import {
   createBalanceHandlersFromFixture,
@@ -145,6 +146,14 @@ describe('ExpandableTransactionItem with recorded swap orders', () => {
 
     const details = await findOrderDetails()
     expanded.forEach((text) => expect(details).toHaveTextContent(text))
+  })
+
+  it('links the order ID to the order on the CoW explorer', async () => {
+    const { explorerUrl } = sell1Action.details.txInfo as SwapOrderTransactionInfo
+    renderOrder(sell1Action, { expanded: true })
+
+    const details = await findOrderDetails()
+    expect(within(getFieldValue(details, 'Order ID')).getByRole('link')).toHaveAttribute('href', explorerUrl)
   })
 
   it('shows the price of a filled order as the execution price, one buy token in sell tokens', async () => {
