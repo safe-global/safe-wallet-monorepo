@@ -30,6 +30,11 @@ const REGISTERED_CHAIN_ID = '11155111'
 // Not a real chain: deployment bumps keep registering new networks, so any real id picked as
 // "unregistered" eventually becomes registered (Optimism and Arbitrum did, in v3.0.9).
 const UNREGISTERED_CHAIN_ID = '999999999999'
+const POLYGON_CHAIN_ID = '137'
+
+// Hard-coded on purpose: the tests must fail if the module picked for these chains changes.
+const SEPOLIA_ALLOWANCE_MODULE = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
+const POLYGON_ALLOWANCE_MODULE = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
 
 const SAFE_ADDRESS = getAddress('0x1000000000000000000000000000000000000001')
 const ALICE = getAddress('0x00000000000000000000000000000000000000a1')
@@ -120,10 +125,19 @@ describe('createSpendingLimitsTx', () => {
       'setAllowance',
     ])
     expect(mockSDK.createEnableModuleTx).toHaveBeenCalledTimes(1)
-    expect(mockSDK.createEnableModuleTx).toHaveBeenCalledWith(requireModuleAddress())
+    expect(mockSDK.createEnableModuleTx).toHaveBeenCalledWith(SEPOLIA_ALLOWANCE_MODULE)
     const [aliceAdd, bobAdd] = decodeBatch().filter((call) => call.name === 'addDelegate')
     expect(aliceAdd.args[0]).toBe(ALICE)
     expect(bobAdd.args[0]).toBe(BOB)
+  })
+
+  it('enables the v0.1.1 module on Polygon and sends every allowance call to it', async () => {
+    await createSpendingLimitsTx([allowance()], [], POLYGON_CHAIN_ID, mockChain, [], true)
+
+    expect(mockSDK.createEnableModuleTx).toHaveBeenCalledWith(POLYGON_ALLOWANCE_MODULE)
+    const allowanceCalls = decodeBatch().filter((call) => call.name !== 'enableModule')
+    expect(allowanceCalls.map((call) => call.name)).toEqual(['addDelegate', 'setAllowance'])
+    expect(allowanceCalls.every((call) => call.to === POLYGON_ALLOWANCE_MODULE)).toBe(true)
   })
 
   it('does not enable a module the Safe already has, and sends every call to it', async () => {
