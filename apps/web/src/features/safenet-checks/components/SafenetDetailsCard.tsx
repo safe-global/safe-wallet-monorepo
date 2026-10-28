@@ -20,7 +20,7 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
-import { CHIP_VARIANT, STATUS_PRESENTATION } from '../statusPresentation'
+import { CHIP_VARIANT, STATUS_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
 import { explainFailure, isWarningRisk, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
@@ -225,7 +225,7 @@ export const SafenetDetailsCardView = ({
                     height={12}
                   />
                 )}
-                {STATUS_PRESENTATION[publicStatus].label}
+                {isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label}
               </Chip>
             </div>
           </AccordionTrigger>
