@@ -214,6 +214,15 @@ describe('ActionsTray geoblocking', () => {
     })
   })
 
+  describe('Receive button (safe / dashboard variant)', () => {
+    it('stays enabled when the Safe has no assets and the user is geoblocked', () => {
+      renderTray({ isBlockedCountry: true, variant: 'safe', noAssets: true })
+
+      const receiveButton = screen.getByRole('button', { name: /receive/i })
+      expect(receiveButton).toBeEnabled()
+    })
+  })
+
   describe('Transaction Builder button (safe / dashboard variant)', () => {
     it('shows a descriptive tooltip on hover when the wallet check passes', async () => {
       const user = userEvent.setup()

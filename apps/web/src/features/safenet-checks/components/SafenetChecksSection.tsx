@@ -23,6 +23,8 @@ import {
 } from '../statusPresentation'
 import { formatFlaggedCount, rejectionSeverity, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
+import { flowSignerRole } from '../safenetSignerRole'
+import { useTrackSafenetChecked } from '../useTrackSafenetChecked'
 import {
   SAFENET_ATTESTATION_LINK_LABEL,
   SAFENET_EXPLORER_LINK_LABEL,
@@ -362,12 +364,22 @@ const resolvePreCheck = (
 
 /** Reads once a proposed transaction's submission time is known; a new transaction gets the pre-check note. */
 export const SafenetChecksSection = ({ locked = false }: { locked?: boolean }): ReactElement | null => {
-  const { txId, isCreation, isProposing, willExecute, txLayoutProps } = useContext(TxFlowContext)
-  const { safe } = useSafeInfo()
+  const { txId, isCreation, isProposing, willExecute, onlyExecute, txLayoutProps } = useContext(TxFlowContext)
+  const { safe, safeAddress } = useSafeInfo()
   const { safeTxHash, submittedAt, check } = useFlowSafenetCheck(!locked)
 
   const isNewTransaction = !txId && !!isCreation && !isProposing && !txLayoutProps?.isMessage
   const preCheck = resolvePreCheck(isNewTransaction, willExecute, safe.threshold)
+  const { publicStatus, unavailableReason, snapshot } = check
+  useTrackSafenetChecked({
+    identity: { chainId: safe.chainId, safeAddress, safeTxHash },
+    publicStatus,
+    unavailableReason,
+    events: snapshot?.events,
+    snapshotTxHash: snapshot?.safeTxHash,
+    signerRole: flowSignerRole({ willExecute, onlyExecute, isCreation }),
+    isShown: !!resolvePresentation(publicStatus, unavailableReason, !!snapshot),
+  })
 
   return (
     <SafenetChecksSectionView

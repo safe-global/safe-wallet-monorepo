@@ -52,7 +52,7 @@ jest.mock('../../../utils/addressBookCsv', () => ({
   ...jest.requireActual('../../../utils/addressBookCsv'),
   downloadCsv: jest.fn(),
 }))
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })

@@ -3,6 +3,7 @@ import { MixpanelEvent } from '../mixpanel-events'
 import { SWAP_EVENTS } from '../events/swaps'
 import { SPACE_EVENTS } from '../events/spaces'
 import { ADDRESS_POISONING_EVENTS } from '../events/addressPoisoning'
+import { SAFENET_EVENTS } from '../events/safenet'
 
 describe('GA to Mixpanel Mapping', () => {
   describe('GA_TO_MIXPANEL_MAPPING', () => {
@@ -43,6 +44,8 @@ describe('GA to Mixpanel Mapping', () => {
       [SPACE_EVENTS.ADDRESS_REQUEST_APPROVED.action, MixpanelEvent.WORKSPACE_ADDRESS_REQUEST_APPROVED],
       [SPACE_EVENTS.ADDRESS_REQUEST_REJECTED.action, MixpanelEvent.WORKSPACE_ADDRESS_REQUEST_REJECTED],
       [SPACE_EVENTS.LOCAL_CONTACT_ADDED.action, MixpanelEvent.WORKSPACE_LOCAL_CONTACT_ADDED],
+      [SAFENET_EVENTS.SUBMITTED.action, MixpanelEvent.TRANSACTION_SAFENET_SUBMITTED],
+      [SAFENET_EVENTS.CHECKED.action, MixpanelEvent.TRANSACTION_SAFENET_CHECKED],
     ])('should map "%s" to "%s"', (action, mixpanelEvent) => {
       expect(GA_TO_MIXPANEL_MAPPING[action]).toBe(mixpanelEvent)
     })

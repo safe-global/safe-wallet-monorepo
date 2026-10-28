@@ -12,6 +12,7 @@ import { SWAP_EVENTS } from './events/swaps'
 import { EXPLORE_POSSIBLE_EVENTS, OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
 import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
+import { SAFENET_EVENTS } from './events/safenet'
 import { HYPERNATIVE_EVENTS } from './events/hypernative'
 import { TX_EVENTS } from './events/transactions'
 import { SPACE_EVENTS } from './events/spaces'
@@ -62,6 +63,8 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SAFE_SHIELD_EVENTS.CONTRACT_DECODED.action]: MixpanelEvent.TRANSACTION_CONTRACT_DECODED,
   [SAFE_SHIELD_EVENTS.THREAT_ANALYZED.action]: MixpanelEvent.TRANSACTION_THREAT_ANALYZED,
   [SAFE_SHIELD_EVENTS.SIMULATED.action]: MixpanelEvent.TRANSACTION_SIMULATED,
+  [SAFENET_EVENTS.SUBMITTED.action]: MixpanelEvent.TRANSACTION_SAFENET_SUBMITTED,
+  [SAFENET_EVENTS.CHECKED.action]: MixpanelEvent.TRANSACTION_SAFENET_CHECKED,
   [TX_EVENTS.EXECUTE.action]: MixpanelEvent.TRANSACTION_EXECUTED,
   [TX_EVENTS.EXECUTE_VIA_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_VIA_PARENT,
   [TX_EVENTS.EXECUTE_IN_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_IN_PARENT,

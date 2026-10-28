@@ -1,6 +1,14 @@
-import { parseEther } from 'ethers'
+import { Interface, parseEther } from 'ethers'
+import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
+import { DELEGATE_CALL } from '../../environment/scenarios/chain.mjs'
 import { waitForQueued, waitUntil } from '../../environment/scenarios/indexing.mjs'
-import { createSafeAddress, openSafe, proposeTransaction } from '../../environment/scenarios/safe.mjs'
+import {
+  createSafeAddress,
+  executeTransaction,
+  openSafe,
+  proposeTransaction,
+} from '../../environment/scenarios/safe.mjs'
+import { readChain } from '../chain/local-provider'
 import type { OwnedSafes } from '@safe-global/store/gateway/types'
 import { NETWORK_PREFIXES } from '../data/constants'
 import type { Journey, OwnerName } from '../fixtures/journey.fixture'
@@ -24,15 +32,20 @@ export type SafeSetup = {
   owners: Array<OwnerName | SeededSafe>
   threshold: number
   safeVersion?: '1.4.1' | '1.5.0'
+  /** Deploys it as the wallet creates a Safe for several networks: on the L1 singleton, with SafeToL2Setup */
+  multichain?: boolean
 }
 
 /** Deploys a Safe with 1 ETH, waits until CGW serves it, and names it in the test report. */
-export async function seedSafe(journey: Journey, { owners, threshold, safeVersion }: SafeSetup): Promise<SeededSafe> {
+export async function seedSafe(
+  journey: Journey,
+  { owners, threshold, safeVersion, multichain }: SafeSetup,
+): Promise<SeededSafe> {
   const { env } = journey
   const ownerAddresses = owners.map((owner) =>
     typeof owner === 'string' ? journey.owners[owner].address : owner.address,
   )
-  const address = await createSafeAddress(env, journey.owners, { threshold, ownerAddresses, safeVersion })
+  const address = await createSafeAddress(env, journey.owners, { threshold, ownerAddresses, safeVersion, multichain })
   const signer = owners.find((owner): owner is OwnerName => typeof owner === 'string') ?? 'owner4'
   const safe = {
     address,
@@ -56,6 +69,39 @@ export async function seedQueuedTransfer(
   const { hash } = await proposeTransaction(context, transfer)
   await waitForQueued(context.env, context, [hash])
   return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
+}
+
+/** Executes an ETH transfer signed by the Safe's context signer, and waits until the CGW history lists it. */
+export async function seedExecutedTransfer(
+  safe: SeededSafe,
+  { recipient, amount }: { recipient: string; amount: string },
+): Promise<void> {
+  const { context } = safe
+  const transfer = await context.safe.createTransaction({
+    transactions: [{ to: recipient, value: parseEther(amount).toString(), data: '0x' }],
+  })
+  await readChain(context.env, (provider) => executeTransaction({ ...context, provider }, transfer))
+}
+
+const safeMigration = new Interface(['function migrateL2WithFallbackHandler()'])
+
+/** Upgrades a Safe L2 to 1.5.0 as the wallet does, with SafeMigration, and waits until CGW reports the new version. */
+export async function upgradeToSafe150(safe: SeededSafe): Promise<void> {
+  const { context } = safe
+  const migration = getSafeMigrationDeployment({ version: '1.5.0' })?.deployments.canonical?.address
+  if (!migration) throw new Error('No canonical SafeMigration 1.5.0 deployment')
+  const upgrade = await context.safe.createTransaction({
+    transactions: [
+      {
+        to: migration,
+        value: '0',
+        data: safeMigration.encodeFunctionData('migrateL2WithFallbackHandler'),
+        operation: DELEGATE_CALL,
+      },
+    ],
+  })
+  await readChain(context.env, (provider) => executeTransaction({ ...context, provider }, upgrade))
+  await waitUntil(context.env, context.path, (info: { version?: string }) => info.version?.startsWith('1.5.0'))
 }
 
 type NestedSafeSetup = {

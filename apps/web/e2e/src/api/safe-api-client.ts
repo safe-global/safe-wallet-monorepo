@@ -9,6 +9,7 @@ import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type {
   QueuedItemPage,
   Transaction,
@@ -71,9 +72,25 @@ export class SafeApiClient {
     return (await this.getSafeInfo(safeAddress)).nonce
   }
 
-  /** Get token balances for a Safe */
-  async getBalances(safeAddress: string, currency = 'usd'): Promise<BalancesResponse> {
-    return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}`)
+  /** Get the addresses of the Safes that `owner` (an account or a Safe) owns */
+  async getOwnedSafes(owner: string): Promise<string[]> {
+    return (await this.get<{ safes: string[] }>(`/v1/chains/${this.chainId}/owners/${owner}/safes`)).safes
+  }
+
+  /** Get token balances for a Safe; `trusted` limits them to the tokens the Transaction Service trusts */
+  async getBalances(
+    safeAddress: string,
+    currency = 'usd',
+    { trusted }: { trusted?: boolean } = {},
+  ): Promise<BalancesResponse> {
+    const query = trusted === undefined ? '' : `?trusted=${trusted}`
+    return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}${query}`)
+  }
+
+  /** Get the portfolio (Zerion) of an address on this client's chain, as the wallet asks for its default token list */
+  async getPortfolio(address: string, fiatCode = 'USD'): Promise<Portfolio> {
+    const query = new URLSearchParams({ chainIds: this.chainId, fiatCode, trusted: 'true' })
+    return this.get<Portfolio>(`/v1/portfolio/${address}?${query}`)
   }
 
   /** Get queued transactions */
@@ -117,15 +134,5 @@ export class SafeApiClient {
   /** Get supported chains */
   async getChains(): Promise<unknown> {
     return this.get('/v1/chains')
-  }
-
-  /** Health check — is the CGW reachable? */
-  async isHealthy(): Promise<boolean> {
-    try {
-      await this.get('/health/ready', 0) // No retry on health check
-      return true
-    } catch {
-      return false
-    }
   }
 }

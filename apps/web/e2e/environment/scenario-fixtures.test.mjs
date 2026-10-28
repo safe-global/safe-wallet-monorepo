@@ -10,7 +10,7 @@ const scenarioCredentials = (index) => ({
 
 async function fixtureRunner(t, spec, isolated = true) {
   const env = { SAFE_E2E_ISOLATED: isolated }
-  const hooks = { before: [], beforeEach: [] }
+  const hooks = { before: [] }
   const calls = []
   let prepare = async () => ({
     safes: { static: { SEP_STATIC_SAFE_2: `safe-${calls.length}` }, nfts: { NFT_SAFE: `nft-${calls.length}` } },
@@ -31,7 +31,6 @@ async function fixtureRunner(t, spec, isolated = true) {
       fixture: async (path) => ({ source: path }),
     },
     before: (hook) => hooks.before.push(hook),
-    beforeEach: (hook) => hooks.beforeEach.push(hook),
   }
   for (const [key, value] of Object.entries(globals)) {
     const previous = Object.getOwnPropertyDescriptor(globalThis, key)
@@ -43,17 +42,7 @@ async function fixtureRunner(t, spec, isolated = true) {
   }
   setSafeScenario({ safes: {} })
   await import(`../../cypress/support/safes/isolated.js?case=${encodeURIComponent(t.name)}`)
-  // Mocha calls hooks with the current test as `this`; `skip` throws like Mocha's pending marker.
-  const runBeforeEach = async (title = 'a test') => {
-    const context = {
-      currentTest: { title },
-      skip: () => {
-        throw new Error(`skipped ${title}`)
-      },
-    }
-    return Promise.all(hooks.beforeEach.map((hook) => hook.call(context)))
-  }
-  return { env, hooks, calls, runBeforeEach, setPrepare: (callback) => (prepare = callback) }
+  return { env, hooks, calls, setPrepare: (callback) => (prepare = callback) }
 }
 
 test('shares the scenario owners with a separately bundled spec copy of the credentials', async (t) => {
@@ -79,8 +68,6 @@ test('prepares once before spec hooks and reads multiple fixture categories with
   assert.deepEqual(runner.calls, [
     { name: 'prepareSafeScenario', path: 'cypress/e2e/regression/assets.cy.js', options: { log: false } },
   ])
-  await runner.runBeforeEach()
-  await runner.runBeforeEach()
   assert.equal(runner.calls.length, 1)
 })
 
@@ -104,13 +91,6 @@ test('removes stale Safe keys and categories on reset', async (t) => {
   assert.throws(() => getSafes(CATEGORIES.nfts), /No prepared isolated Safes/)
 })
 
-test('skips only the listed cases of a spec and keeps its other tests', async (t) => {
-  const runner = await fixtureRunner(t, 'cypress/e2e/regression/recovery.cy.js')
-  const skipped = 'Verify that the Security section contains Account recovery block on supported netwroks'
-  await assert.rejects(runner.runBeforeEach(skipped), /skipped/)
-  await runner.runBeforeEach('Verify that the recovery setup flow starts')
-})
-
 test('waits for setup and propagates backend failures instead of loading hosted fixtures', async (t) => {
   const runner = await fixtureRunner(t, 'cypress/e2e/regression/assets.cy.js')
   let finish
@@ -128,7 +108,7 @@ test('waits for setup and propagates backend failures instead of loading hosted 
 
 test('keeps ordinary Cypress fixture loading and registers no isolated setup hooks', async (t) => {
   const runner = await fixtureRunner(t, 'cypress/e2e/regression/assets.cy.js', false)
-  assert.deepEqual(runner.hooks, { before: [], beforeEach: [] })
+  assert.deepEqual(runner.hooks, { before: [] })
   const statics = await import('../../cypress/fixtures/safes/static.js')
   assert.strictEqual(await getSafes(CATEGORIES.static), statics.default)
   assert.deepEqual(await getSafes(CATEGORIES.safeapps), { source: 'safes/safeapps.json' })

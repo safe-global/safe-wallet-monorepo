@@ -8,7 +8,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import useChains from '@/hooks/useChains'
 import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import {
   Autocomplete,

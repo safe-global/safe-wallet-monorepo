@@ -126,12 +126,12 @@ x-cfg-job: &cfg-job
   volumes:
     - ./scripts/cfg_management:/app/src/chains/management:ro
     - nginx-shared-cfg:/nginx
+    # Its own volume: cfg-web clears nginx-shared-cfg when it starts
+    - cfg-media:/app/src/media
   command:
     - bash
     - -c
-    - |
-      python src/manage.py setup_test_chain &&
-      cp -r src/media /nginx/
+    - python src/manage.py setup_test_chain
 x-decoder-env: &decoder-env
   DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/decoder
   REDIS_URL: redis://redis:6379/2
@@ -160,6 +160,7 @@ volumes:
   ledger-apps:
   nginx-shared-txs:
   nginx-shared-cfg:
+  cfg-media:
   postgres-data:
   mock-keys:
 services:
@@ -305,6 +306,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  # Zerion for the gateway: the positions a scenario registers for a wallet; a 503 for any other wallet.
+  zerion-api:
+    <<: *mock
+    command:
+      - /mocks/zerion-api.ts
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8095'
+      interval: 5s
+      timeout: 5s
+      retries: 5
   # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
   ledger-emulator:
     image: ${SPECULOS_IMAGE:?Load test-images.env}
@@ -403,6 +418,7 @@ services:
       - ./docker/nginx/cors.conf:/etc/nginx/cors.conf:ro
       - nginx-shared-txs:/nginx-txs
       - nginx-shared-cfg:/nginx-cfg
+      - cfg-media:/nginx-cfg-media:ro
     depends_on:
       - txs-web
       - cfg-web
@@ -509,15 +525,17 @@ services:
         python src/manage.py collectstatic --noinput &&
         cp -r staticfiles/* /nginx/ &&
         python src/manage.py migrate --noinput &&
-        python src/manage.py setup_test_chain &&
-        cp -r src/media /nginx/
+        python src/manage.py setup_test_chain
   cfg-web:
     image: ${CFG_IMAGE:?Load test-images.env}
     tty: true
     volumes:
       - nginx-shared-cfg:/nginx
+      - cfg-media:/app/src/media
     env_file:
       - container_env_files/cfg.env
+    environment:
+      MEDIA_URL: http://localhost:${REVERSE_PROXY_PORT:-8000}/cfg/media/
     depends_on:
       cfg-init:
         condition: service_completed_successfully
@@ -637,6 +655,12 @@ services:
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
       POLICY_INDEXER_BASE_URI: http://policy-indexer:8094
+      # The portfolio, the positions and the Safe overviews come from Zerion, as on staging. Testnets keep the
+      # Transaction Service. Without a rate limit, a fast run does not push the overviews onto their fallback.
+      FF_ZERION_ENABLED: 'true'
+      ZERION_BASE_URI: http://zerion-api:8095
+      ZERION_API_KEY: local-test-only-zerion-key
+      ZERION_RATE_LIMIT_CALLS_BY_PERIOD: '0'
       BILLING_WEBHOOK_JWT_ISSUER: safe-e2e-local
       BILLING_WEBHOOK_JWT_PUBLIC_KEY: |
         -----BEGIN PUBLIC KEY-----
@@ -660,6 +684,8 @@ services:
       billing-api:
         condition: service_healthy
       policy-indexer:
+        condition: service_healthy
+      zerion-api:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -800,8 +826,9 @@ services:
       TEST_CHAIN_EXPLORER: https://etherscan.io
       TEST_CHAIN_EXPLORER_API: https://api.etherscan.io/api
       TEST_CHAIN_IS_TESTNET: 'false'
-      # As on staging: default tokens come from the portfolio, falling back to trusted Transaction Service tokens.
-      TEST_CHAIN_EXTRA_FEATURES: PORTFOLIO_ENDPOINT
+      # As on staging: default tokens and positions come from the portfolio (Zerion); without registered positions
+      # the wallet falls back to trusted Transaction Service tokens.
+      TEST_CHAIN_EXTRA_FEATURES: PORTFOLIO_ENDPOINT,POSITIONS
     depends_on:
       cfg-init:
         condition: service_completed_successfully
