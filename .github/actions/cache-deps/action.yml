@@ -26,7 +26,9 @@ runs:
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
-        key: ${{ runner.os }}-${{ runner.arch }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-nextjs-${{ hashFiles('yarn.lock', 'apps/web/package.json') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
+        # When only the source changed, webpack rebuilds just the changed modules from an older cache.
+        restore-keys: ${{ runner.os }}-${{ runner.arch }}-nextjs-${{ hashFiles('yarn.lock', 'apps/web/package.json') }}-
 
     - name: Set composite outputs nc
       if: ${{ inputs.mode == 'restore-nc' }}
