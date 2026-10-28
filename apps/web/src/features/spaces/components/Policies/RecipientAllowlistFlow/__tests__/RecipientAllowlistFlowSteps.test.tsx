@@ -121,33 +121,43 @@ describe('RecipientAllowlistFlow steps', () => {
     await waitFor(() => expect(stepTitle()).toHaveTextContent('Confirm policy'))
   })
 
-  it('warns that a spending limit on a token left out of the allowlist will be blocked, naming its spender', async () => {
-    const spender = fakerChecksummedAddress()
-    const spenderName = faker.person.firstName()
+  it('should list the restricted limit before the unaffected one, when only one token is in the allowlist', async () => {
     const leftOut = erc20TokenBuilder().with({ decimals: 6, symbol: 'DAI' }).build()
     serveAllowlistWorkspace(workspace, {
       balances: heldBalances(token),
-      active: [spendingLimitOn(workspace, leftOut, spender)],
-      contacts: { [spender]: spenderName },
+      active: [
+        spendingLimitOn(workspace, leftOut, fakerChecksummedAddress()),
+        spendingLimitOn(workspace, token, fakerChecksummedAddress()),
+      ],
     })
     const view = renderFlow(workspace)
 
     await fillCreateStep(view)
 
     expect(await screen.findByTestId('recipient-allowlist-existing-policies-step')).toBeInTheDocument()
-    expect(await screen.findByText('Will be blocked')).toBeInTheDocument()
-    expect(screen.getByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
     expect(
-      screen.getByText(
-        `${spenderName} can send up to 500 DAI / day to any address today. Once this allowlist is active, it can't send DAI anymore.`,
-      ),
+      await screen.findByText("1 of your 2 spending limits will follow this allowlist's rules."),
     ).toBeInTheDocument()
-    expect(screen.queryByText('Will be restricted')).not.toBeInTheDocument()
-    const next = screen.getByTestId('next-btn')
-    expect(next).toBeDisabled()
+    const [first, second] = screen.getAllByTestId('spending-limit-impact')
+    expect(first).toHaveTextContent('USDC is in this allowlist')
+    expect(first).toHaveTextContent('Will be restricted')
+    expect(second).toHaveTextContent("DAI isn't in this allowlist")
+    expect(second).not.toHaveTextContent('Will be restricted')
+    expect(screen.queryByText('Will be blocked')).not.toBeInTheDocument()
+  })
 
-    await view.user.click(screen.getByText('I understand how this allowlist changes these spending limits.'))
-    expect(next).toBeEnabled()
+  it('should go straight to the review, when the Safe only has limits on tokens left out of the allowlist', async () => {
+    const leftOut = erc20TokenBuilder().with({ decimals: 6, symbol: 'DAI' }).build()
+    serveAllowlistWorkspace(workspace, {
+      balances: heldBalances(token),
+      active: [spendingLimitOn(workspace, leftOut, fakerChecksummedAddress())],
+    })
+    const view = renderFlow(workspace)
+
+    await fillCreateStep(view)
+
+    await waitFor(() => expect(stepTitle()).toHaveTextContent('Confirm policy'))
+    expect(screen.queryByTestId('recipient-allowlist-existing-policies-step')).not.toBeInTheDocument()
   })
 
   it('goes straight to the review when the Safe has no spending limit, and Back returns to the form', async () => {
