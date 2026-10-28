@@ -1,4 +1,3 @@
-import { isolatedSpecs } from '../../../e2e/environment/specs.mjs'
 import { setDefaultOwnerAddress, setWalletCredentials } from '../credentials.js'
 import { setSafeScenario } from './safesHandler.js'
 
@@ -10,10 +9,5 @@ function applyScenario(scenario) {
 }
 
 if (Cypress.expose('SAFE_E2E_ISOLATED')) {
-  const spec = isolatedSpecs[Cypress.spec.relative] ?? {}
   before(() => cy.task('prepareSafeScenario', Cypress.spec.relative, { log: false }).then(applyScenario))
-
-  beforeEach(function () {
-    if (spec.skips && Object.hasOwn(spec.skips, this.currentTest.title)) this.skip()
-  })
 }

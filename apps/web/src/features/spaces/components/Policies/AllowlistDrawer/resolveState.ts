@@ -27,6 +27,8 @@ import {
   PENDING_BANNER_TITLE,
   SCHEDULED_BANNER_LINE,
   SCHEDULED_BANNER_TITLE,
+  UNENFORCED_BANNER_LINE,
+  UNENFORCED_BANNER_TITLE,
   outcomeLine,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
@@ -42,7 +44,17 @@ export type ScheduledDrawerState = {
   helper?: string
 }
 
-export type AllowlistDrawerState = ActiveDrawerState | PendingDrawerState | ClosedDrawerState | ScheduledDrawerState
+/** The guard is not in both slots. No flow can put it back yet, so there is nothing to offer. */
+// TODO(WA-3964): add a partly enforced state, with its own copy and a "Turn on guard" action.
+export type UnenforcedAllowlistDrawerState = {
+  kind: 'unenforced'
+  action: 'none'
+  bannerTitle: string
+  bannerLine2: string
+}
+
+export type AllowlistDrawerState =
+  ActiveDrawerState | PendingDrawerState | ClosedDrawerState | ScheduledDrawerState | UnenforcedAllowlistDrawerState
 
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
 
@@ -63,6 +75,13 @@ const resolveActive = (viewer: Viewer): ActiveDrawerState => {
   if (!viewer.isSigner) return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
 
   return { kind: 'active', action: 'manage', disabled: false }
+}
+
+const UNENFORCED_STATE: UnenforcedAllowlistDrawerState = {
+  kind: 'unenforced',
+  action: 'none',
+  bannerTitle: UNENFORCED_BANNER_TITLE,
+  bannerLine2: UNENFORCED_BANNER_LINE,
 }
 
 const resolveScheduled = ({ operation }: AllowlistScheduledChange, viewer: Viewer): ScheduledDrawerState => {
@@ -130,5 +149,7 @@ export const resolveAllowlistDrawerState = (
     return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
   }
 
-  return policy.scheduledChange ? resolveScheduled(policy.scheduledChange, viewer) : resolveActive(viewer)
+  if (policy.scheduledChange) return resolveScheduled(policy.scheduledChange, viewer)
+
+  return policy.enabled ? resolveActive(viewer) : UNENFORCED_STATE
 }

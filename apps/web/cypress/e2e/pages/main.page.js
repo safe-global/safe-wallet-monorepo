@@ -252,17 +252,6 @@ export function checkTextsExistWithinElement(element, texts) {
       })
   })
 }
-export function checkTextsExistWithinElementScroll(element, texts) {
-  texts.forEach((text) => {
-    cy.get(element)
-      .scrollIntoView()
-      .should('be.visible')
-      .within(() => {
-        cy.get('div').contains(text).scrollIntoView().should('be.visible')
-      })
-  })
-}
-
 export function verifyCheckboxeState(element, index, state) {
   cy.get(element).eq(index).should(state)
 }
@@ -392,22 +381,6 @@ export function getIframeBody(iframe) {
 
 export const checkButtonByTextExists = (buttonText) => {
   cy.get('button').contains(buttonText).should('exist')
-}
-
-/**
- * Read a key from the AUT's localStorage (after cy.visit) and assert its parsed
- * value deep-equals `expectedValue`. Uses `.should()` so Cypress retries until
- * the value matches or the default command timeout elapses — needed for keys
- * the app writes asynchronously after sync completes.
- */
-export function verifyAppLocalStorageItemEquals(key, expectedValue) {
-  cy.window()
-    .its('localStorage')
-    .invoke('getItem', key)
-    .should((stored) => {
-      const parsed = stored ? JSON.parse(stored) : null
-      expect(parsed).to.deep.equal(expectedValue)
-    })
 }
 
 export function changeSafeChainName(originalChain, newChain) {

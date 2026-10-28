@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement, ReactNode } from 'react'
+import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +23,10 @@ import { CHIP_VARIANT, STATUS_PRESENTATION } from '../statusPresentation'
 import { explainFailure, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useWallet from '@/hooks/wallets/useWallet'
+import { detailsSignerRole } from '../safenetSignerRole'
+import { useTrackSafenetChecked } from '../useTrackSafenetChecked'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
 import { SafenetDetailsPanel, SafenetDetailsPanelStack, SafenetPulse } from './SafenetBlocks'
@@ -242,6 +247,7 @@ export type SafenetDetailsCardProps = {
   chainId: string
   timestampMs?: number
   isQueued?: boolean
+  executionInfo?: MultisigExecutionDetails
 }
 
 /** Renders nothing until a check has been observed for this transaction. Starts collapsed. */
@@ -250,8 +256,20 @@ const SafenetDetailsCard = ({
   chainId,
   timestampMs,
   isQueued,
+  executionInfo,
 }: SafenetDetailsCardProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
+  const { safeAddress } = useSafeInfo()
+  const wallet = useWallet()
+  useTrackSafenetChecked({
+    identity: { chainId, safeAddress, safeTxHash },
+    publicStatus: display?.publicStatus,
+    events: display?.snapshot.events,
+    snapshotTxHash: display?.snapshot.safeTxHash,
+    signerRole: detailsSignerRole(executionInfo, wallet?.address, isQueued),
+    isShown: !!display,
+  })
+
   if (!safeTxHash || !display) return null
 
   return (

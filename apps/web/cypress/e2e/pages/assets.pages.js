@@ -9,11 +9,6 @@ const manageTokensButton = '[data-testid="manage-tokens-button"]'
 const manageTokensMenu = '[data-testid="manage-tokens-menu"]'
 const showAllTokensSwitch = '[data-testid="show-all-tokens-switch"]'
 const hideSmallBalancesSwitch = '[data-testid="hide-small-balances-switch"]'
-const currencySelector = '[data-testid="currency-selector"]'
-const currencyItem = '[data-testid="currency-item"]'
-
-export const currency$ = '$'
-export const currencyCAD = 'CAD'
 
 // The switch is a Base UI control: the test id sits on the `role="switch"` element itself and the
 // state lives in `aria-checked`. It renders a native `input[type="checkbox"]` only when given a
@@ -54,9 +49,4 @@ export function toggleHideDust(shouldHide) {
 
   cy.get('body').click(0, 0)
   cy.get(manageTokensMenu).should('not.exist')
-}
-
-export function changeCurrency(currency) {
-  cy.get(currencySelector).click()
-  main.selectDropdownOption(currencyItem, currency)
 }

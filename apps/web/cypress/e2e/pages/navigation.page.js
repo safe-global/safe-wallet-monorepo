@@ -10,9 +10,6 @@ export const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
 
-export function verifyTxBtnStatus(status) {
-  cy.get(newTxBtn).should(status)
-}
 export function clickOnSideNavigation(option) {
   cy.get(option).should('exist').click()
 }

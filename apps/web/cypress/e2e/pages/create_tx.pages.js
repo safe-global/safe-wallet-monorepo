@@ -21,7 +21,6 @@ const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
-export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
@@ -77,7 +76,6 @@ const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 const transactionsPerHrStr = 'free transactions left today'
-const maxAmountBtnStr = 'Max'
 const nativeTokenTransferStr = 'ETH'
 const estimatedFeeStr = 'Estimated fee'
 // Re-export for backward compatibility
@@ -125,9 +123,6 @@ const advancedParametersInputNames = {
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 
-//Arrays for the Transaction Details on Tx creation for different type of txs
-export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
-
 export const txActions = {
   setFallbackHandler: 'setFallbackHandler',
 }
@@ -161,11 +156,6 @@ export function getRejectButton() {
 
 export function clickOnRejectBtn() {
   getRejectButton().click()
-}
-
-export function verifyPayNowOptionIsDisabled() {
-  // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
-  cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
 }
 
 export function verifyTxRejectModalVisible() {
@@ -347,11 +337,6 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-//Search in the element with the scroll
-export function verifytxAccordionDetailsScroll(data) {
-  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
-}
-
 export function switchView(view) {
   if (view === advancedDetailsViewOptions.table) {
     cy.get(tableViewBtn).click()
@@ -541,10 +526,6 @@ export function clickOnTokenselectorAndSelectToken(tokenName) {
   cy.get('[data-slot="select-content"]').contains(tokenName).click()
 }
 
-export function setMaxAmount() {
-  cy.contains(maxAmountBtnStr).click()
-}
-
 export function verifyMaxAmount(token, tokenAbbreviation) {
   cy.get(tokenSelector)
     .find('[data-testid="token-item"]')
@@ -588,7 +569,8 @@ export function verifyNativeTokenTransfer() {
 }
 
 export function changeNonce(value) {
-  cy.get(nonceInput).clear().type(value, { force: true })
+  cy.get(nonceInput).type(`{selectall}${value}`, { force: true })
+  cy.get(nonceInput).should('have.value', String(value))
 }
 
 export function displayAdvancedDetails() {

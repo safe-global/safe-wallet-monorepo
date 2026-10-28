@@ -1,7 +1,38 @@
-import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { fakerChecksummedAddress, fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import EntryDialog from './index'
 import { useUpsertWorkspaceSafeName } from '@/features/spaces'
 import * as addressBookSlice from '@/store/addressBookSlice'
+import { getStoreInstance } from '@/store'
+import { chainBuilder } from '@/tests/builders/chains'
+import { mockChainId } from '@/tests/mocks/hooks'
+import { FEATURES } from '@safe-global/store/gateway/types'
+
+const SEPOLIA = '11155111'
+const mockSepolia = chainBuilder()
+  .with({ chainId: SEPOLIA, isTestnet: true, features: [FEATURES.DOMAIN_LOOKUP] })
+  .build()
+const mockEnsAddress = fakerChecksummedAddress()
+
+jest.mock('@/hooks/useChainId')
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [mockSepolia], loading: false, error: undefined }),
+  useChain: () => mockSepolia,
+  useCurrentChain: () => mockSepolia,
+  useHasFeature: () => false,
+}))
+
+jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
+  __esModule: true,
+  getEnsNotAvailableError: () => 'ENS name not available',
+  default: (value: string) => ({
+    address: value === 'treasury.eth' ? mockEnsAddress : undefined,
+    name: value === 'treasury.eth' ? value : undefined,
+    resolving: false,
+  }),
+}))
 
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
@@ -14,6 +45,22 @@ jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
+
+const typeName = (name: string) => {
+  const field = screen.getByTestId('name-input')
+  const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
+  fireEvent.change(input, { target: { value: name } })
+}
+
+const save = async (name = 'Treasury') => {
+  typeName(name)
+  await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
+  fireEvent.click(screen.getByTestId('save-btn'))
+}
+
+beforeEach(() => {
+  mockChainId(SEPOLIA)
+})
 
 describe('EntryDialog', () => {
   it('renders a create-entry dialog', () => {
@@ -41,6 +88,16 @@ describe('EntryDialog', () => {
     expect(overlay).toHaveClass('overlay-marker')
     expect(overlay).not.toHaveClass('popup-marker')
   })
+
+  it('saves the address an ENS name resolves to', async () => {
+    const name = faker.person.firstName()
+    render(<EntryDialog handleClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByRole('textbox', { name: /address/i }), { target: { value: 'treasury.eth' } })
+    await save(name)
+
+    await waitFor(() => expect(getStoreInstance().getState().addressBook[SEPOLIA]?.[mockEnsAddress]).toBe(name))
+  })
 })
 
 describe('EntryDialog scope', () => {
@@ -53,28 +110,16 @@ describe('EntryDialog scope', () => {
     ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(upsertWorkspaceName)
   })
 
-  const renderDialog = (scope?: 'local' | 'workspace') =>
+  const renderDialog = (scope?: 'local' | 'workspace', chainIds = ['1']) =>
     render(
       <EntryDialog
         handleClose={jest.fn()}
         scope={scope}
-        chainIds={['1']}
+        chainIds={chainIds}
         defaultValues={{ name: 'Old name', address: ADDRESS }}
         disableAddressInput
       />,
     )
-
-  const typeName = (name: string) => {
-    const field = screen.getByTestId('name-input')
-    const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
-    fireEvent.change(input, { target: { value: name } })
-  }
-
-  const save = async (name = 'Treasury') => {
-    typeName(name)
-    await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
-    fireEvent.click(screen.getByTestId('save-btn'))
-  }
 
   it('blocks Save and marks the name invalid when the name is cleared', async () => {
     renderDialog()
@@ -100,6 +145,16 @@ describe('EntryDialog scope', () => {
 
     await waitFor(() => expect(spy).toHaveBeenCalled())
     expect(upsertWorkspaceName).not.toHaveBeenCalled()
+  })
+
+  it('names the Safe on every given network in the local address book', async () => {
+    renderDialog(undefined, ['1', '137'])
+    await save('Treasury')
+
+    await waitFor(() => {
+      const { addressBook } = getStoreInstance().getState()
+      expect([addressBook['1']?.[ADDRESS], addressBook['137']?.[ADDRESS]]).toEqual(['Treasury', 'Treasury'])
+    })
   })
 
   it('names the workspace it is about to write to, and stays silent for a local write', () => {
