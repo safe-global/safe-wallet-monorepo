@@ -86,11 +86,15 @@ const CreateRecipientAllowlistPolicy = ({
   }
 
   const rules = useMemo(() => buildAllowlistRules(heldTokens.addresses, values), [heldTokens.addresses, values])
-  const impacts = useSpendingLimitImpacts(rules)
+  const spendingLimits = useSpendingLimitImpacts(rules)
 
   const canContinue = guard !== undefined && READY_GUARD_STATES.includes(guard.status)
   const canGoNext =
-    canContinue && !heldTokens.isLoading && !heldTokens.isError && isAllowlistComplete(heldTokens.addresses, values)
+    canContinue &&
+    !heldTokens.isLoading &&
+    !heldTokens.isError &&
+    !spendingLimits.isLoading &&
+    isAllowlistComplete(heldTokens.addresses, values)
 
   const isSettled = !isLoading && !isError
   const settingsHref = selectedSafe?.chain
@@ -178,7 +182,10 @@ const CreateRecipientAllowlistPolicy = ({
             size="submit"
             disabled={!canGoNext}
             onClick={() => {
-              onSpendingLimitImpact?.(impacts.some(({ impact }) => impact === 'restricted'))
+              // A failed load shows the step with its error rather than skipping the warning.
+              onSpendingLimitImpact?.(
+                spendingLimits.isError || spendingLimits.impacts.some(({ impact }) => impact === 'restricted'),
+              )
               onNext({ ...values, rules })
             }}
             data-testid="next-btn"

@@ -18,7 +18,8 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import { useRecipientAllowlistSafeAccounts } from '../../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
-import { useSpendingLimitImpacts } from '../../hooks/useSpendingLimitImpacts'
+import { useSpendingLimitImpacts, type SpendingLimitImpactsResult } from '../../hooks/useSpendingLimitImpacts'
+import type { SpendingLimitImpact, SpendingLimitImpactKind } from '../../utils/spendingLimitImpacts'
 import CreateRecipientAllowlistPolicy from '..'
 
 const SEPOLIA = '11155111'
@@ -34,7 +35,7 @@ jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
-jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn(() => []) }))
+jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: () => ({ has: () => false }),
@@ -69,6 +70,30 @@ const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction
 const mockUseGuardStatus = useGuardStatus as jest.MockedFunction<typeof useGuardStatus>
 const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
 const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<typeof useSafeShieldForAddressPoisoning>
+const mockSpendingLimits = useSpendingLimitImpacts as jest.MockedFunction<typeof useSpendingLimitImpacts>
+
+const spendingLimitImpact = (impact: SpendingLimitImpactKind): SpendingLimitImpact => ({
+  spender: SAFE_B,
+  allowance: {
+    token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null },
+    amount: '1',
+    spent: '0',
+    remaining: '1',
+    resetPeriodMinutes: 1_440,
+    resetsAtMinute: null,
+  },
+  impact,
+  recipients: impact === 'restricted' ? [RECIPIENT] : [],
+})
+
+const spendingLimits = (overrides: Partial<SpendingLimitImpactsResult> = {}) =>
+  mockSpendingLimits.mockReturnValue({
+    impacts: [],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    ...overrides,
+  })
 
 const holdNative = (overrides: Partial<ReturnType<typeof useHeldTokenAddresses>> = {}) =>
   mockHeld.mockReturnValue({
@@ -162,7 +187,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     jest.clearAllMocks()
     guard(undefined)
     holdNative()
-    ;(useSpendingLimitImpacts as jest.Mock).mockReturnValue([])
+    spendingLimits()
   })
 
   it('scopes the flow to the picked Safe', () => {
@@ -228,33 +253,70 @@ describe('CreateRecipientAllowlistPolicy', () => {
     })
   })
 
-  it.each([
-    ['restricted', 'adds', [{ impact: 'restricted' }], true],
-    ['partly restricted', 'adds', [{ impact: 'restricted' }, { impact: 'unaffected' }], true],
-    ['only unaffected', 'skips', [{ impact: 'unaffected' }], false],
-    ['absent', 'skips', [], false],
-  ])(
-    'reports on Next whether a spending limit is affected (%s), so the flow %s Existing policies',
-    (_, __, impacts, expected) => {
-      accounts([option(SAFE_A)])
-      guard({ status: 'none' })
-      ;(useSpendingLimitImpacts as jest.Mock).mockReturnValue(
-        impacts.map(({ impact }) => ({
-          spender: SAFE_B,
-          allowance: {},
-          impact,
-          recipients: impact === 'restricted' ? [RECIPIENT] : [],
-        })),
-      )
-      const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+  it('should add Existing policies on Next, when the allowlist restricts a spending limit', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ impacts: [spendingLimitImpact('restricted')] })
+    const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-      fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
-      fireEvent.click(screen.getByTestId('next-btn'))
+    fireEvent.click(screen.getByTestId('next-btn'))
 
-      expect(onSpendingLimitImpact).toHaveBeenCalledWith(expected)
-      expect(onNext).toHaveBeenCalled()
-    },
-  )
+    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
+    expect(onNext).toHaveBeenCalled()
+  })
+
+  it('should add Existing policies on Next, when the allowlist restricts only some spending limits', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ impacts: [spendingLimitImpact('restricted'), spendingLimitImpact('unaffected')] })
+    const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    fireEvent.click(screen.getByTestId('next-btn'))
+
+    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
+  })
+
+  it('should skip Existing policies on Next, when every spending limit is unaffected', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ impacts: [spendingLimitImpact('unaffected')] })
+    const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    fireEvent.click(screen.getByTestId('next-btn'))
+
+    expect(onSpendingLimitImpact).toHaveBeenCalledWith(false)
+  })
+
+  it('should skip Existing policies on Next, when the Safe has no spending limits', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    fireEvent.click(screen.getByTestId('next-btn'))
+
+    expect(onSpendingLimitImpact).toHaveBeenCalledWith(false)
+  })
+
+  it('should add Existing policies on Next, when the spending limits failed to load', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ isError: true })
+    const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    fireEvent.click(screen.getByTestId('next-btn'))
+
+    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
+    expect(onNext).toHaveBeenCalled()
+  })
+
+  it('should keep Next disabled, when the spending limits are still loading', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ isLoading: true })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
 
   it('runs the address-poisoning check on every recipient', () => {
     accounts([option(SAFE_A)])
