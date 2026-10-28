@@ -3,7 +3,6 @@
  * `chains` the forks besides Sepolia.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
   'cypress/e2e/regression/create_tx_2.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/create_tx.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },

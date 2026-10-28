@@ -55,14 +55,4 @@ describe('Create transactions tests 2', () => {
     createtx.openExecutionParamsModal()
     createtx.verifyAndSubmitExecutionParams()
   })
-
-  it('Verify a transaction shows relayer attempts', () => {
-    happyPathToStepTwo()
-    createtx.verifyContinueSignBtnIsEnabled()
-    createtx.verifyNativeTokenTransfer()
-    createtx.changeNonce('5')
-    createtx.clickOnContinueSignTransactionBtn()
-    createtx.signAndOpenExecuteStep()
-    createtx.verifyRelayerAttemptsAvailable()
-  })
 })

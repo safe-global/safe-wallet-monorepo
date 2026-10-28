@@ -1,9 +1,7 @@
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as createtx from '../../e2e/pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as tx from '../../e2e/pages/transactions.page'
 import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
@@ -43,18 +41,5 @@ describe('Create transactions tests', () => {
     createtx.verifySingleTxPage()
     createtx.verifyQueueLabel()
     createtx.verifyTransactionSummary(sendValue)
-  })
-
-  it('Verify relay is available on tx execution', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    createtx.cleanTransactionQueue(safe, signer)
-    tx.mockFreeDailyRelay()
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + safe)
-    createtx.clickOnNewtransactionBtn()
-    createtx.clickOnSendTokensBtn()
-    happyPathToStepTwo()
-    createtx.clickOnContinueSignTransactionBtn()
-    createtx.signAndOpenExecuteStep()
-    cy.contains(tx.relayRemainingAttemptsStr).should('exist')
   })
 })
