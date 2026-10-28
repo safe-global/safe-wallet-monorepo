@@ -1105,16 +1105,15 @@ describe('SignOrExecute hooks', () => {
         .spyOn(txSender, 'dispatchTxConfirmation')
         .mockImplementation((() =>
           Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxConfirmation)
-      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
-        tx.addSignature({
-          signer: '0x12345',
-          data: '0x0001',
-          staticPart: () => '',
-          dynamicPart: () => '',
-          isContractSignature: false,
-        })
-        return Promise.resolve(tx)
+      const signedTx = createSafeTx()
+      signedTx.addSignature({
+        signer: '0x12345',
+        data: '0x0001',
+        staticPart: () => '',
+        dynamicPart: () => '',
+        isContractSignature: false,
       })
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(signedTx)
       const relaySpy = jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
 
       const { result } = renderHook(() => useTxActions())
@@ -1123,8 +1122,8 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
       expect(signSpy).toHaveBeenCalled()
       expect(proposeSpy).not.toHaveBeenCalled()
-      expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: '123', safeTx: tx }))
-      expect(relaySpy).toHaveBeenCalled()
+      expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: '123', safeTx: signedTx }))
+      expect(relaySpy.mock.calls[0][0]).toBe(signedTx)
       expect(id.txId).toEqual('123')
     })
 

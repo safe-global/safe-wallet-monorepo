@@ -1,5 +1,5 @@
 import { type PropsWithChildren, type ReactElement } from 'react'
-import { renderHook, waitFor } from '@/tests/test-utils'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
@@ -209,10 +209,9 @@ describe('Execute slot', () => {
     const { result } = renderLastSignerOfTwoSlotIds()
 
     await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
-    await waitFor(() => {
-      expect(result.current).toContain('sign')
-      expect(result.current).toContain('execute')
-    })
+    await act(async () => {})
+    expect(result.current).toContain('sign')
+    expect(result.current).toContain('execute')
   })
 
   it('offers Execute for a fully signed transaction on an m/n Safe', async () => {
