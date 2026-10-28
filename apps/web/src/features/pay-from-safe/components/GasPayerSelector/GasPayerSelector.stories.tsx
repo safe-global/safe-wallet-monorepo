@@ -48,7 +48,7 @@ const safeTokens = {
   lockedReason: 'Fees are paid in ETH for now. More tokens are coming soon.',
 }
 const nativeLocked = { tokens: [ETH], selected: ZERO, locked: true }
-const base = { executionFee: {}, sponsored: false }
+const base = { executionFee: {}, sponsored: false, sponsorKind: 'plan' as const }
 
 const Harness = ({ view }: { view: FeePayerView }) => {
   const [choice, setChoice] = useState<GasPayerChoice>(view.payer.value)
@@ -256,6 +256,22 @@ export const ExecuteProSponsoredLeft: Story = {
       sponsored: true,
       totalOutgoing: outgoing(false),
       footer: pro(49),
+    },
+  },
+}
+
+export const ExecuteFreeDailyLimit: Story = {
+  name: 'Execute · Free, daily free transactions (Free transaction / Signer wallet)',
+  args: {
+    view: {
+      ...base,
+      payer: choice('SPONSORED', ['SPONSORED', 'WALLET']),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      sponsored: true,
+      sponsorKind: 'free',
+      totalOutgoing: outgoing(false),
+      footer: { kind: 'counter', left: 1, quota: 5, resetsAt: null, isSubscription: false },
     },
   },
 }

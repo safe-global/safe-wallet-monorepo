@@ -259,6 +259,8 @@ export const useGasPayerSelection = ({
       executionFee,
       gasFee,
       sponsored,
+      // Only an execution offer can be the chain's free relays; at signing the plan is the only sponsor.
+      sponsorKind: offer && offer.option !== 'SUBSCRIPTION' ? 'free' : 'plan',
       totalOutgoing,
       footer,
       safeHasEnoughGas: paysFromSafe && !isLocked ? fees.safeHasEnoughGas : undefined,
@@ -274,6 +276,7 @@ export const useGasPayerSelection = ({
     choice,
     safeFee,
     hasSponsoredOffer,
+    offer,
     left,
     meter,
     chain,

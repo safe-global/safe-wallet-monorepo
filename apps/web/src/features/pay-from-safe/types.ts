@@ -53,8 +53,10 @@ export type FeePayerView = {
   gasToken: { tokens: GasTokenOption[]; selected: string; locked: boolean; lockedReason?: string }
   executionFee: NetworkFee
   gasFee: NetworkFee
-  /** The gas fee is covered by sponsoring: struck through, with the Pro chip. */
+  /** The gas fee is covered by sponsoring: struck through, with the Pro chip when the plan covers it. */
   sponsored: boolean
+  /** Who sponsors: the Workspace's plan (Pro plan), or the chain's free relays (Free transaction). */
+  sponsorKind: 'plan' | 'free'
   /** What leaves the Safe: the transfer, plus the fee when the Safe pays it. */
   totalOutgoing?: { primary: OutgoingLine[]; fees?: OutgoingLine; fiatTotal: string }
   footer: FeePayerFooter

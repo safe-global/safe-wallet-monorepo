@@ -37,6 +37,12 @@ const PAYER_LABEL: Record<GasPayerChoice, string> = {
   SPONSORED: 'Pro plan',
 }
 
+type SponsorKind = FeePayerView['sponsorKind']
+
+/** A sponsored payer is the plan on a Pro Workspace, or the chain's free relays otherwise. */
+const payerLabel = (choice: GasPayerChoice, sponsorKind: SponsorKind): string =>
+  choice === 'SPONSORED' && sponsorKind === 'free' ? 'Free transaction' : PAYER_LABEL[choice]
+
 /** Why the locked pill cannot be changed, per payer. */
 const LOCKED_TOOLTIP: Record<GasPayerChoice, string> = {
   PAY_FROM_SAFE: "Set at signing and can't be changed.",
@@ -65,10 +71,12 @@ const PillLabel = ({ children }: { children: ReactNode }): ReactElement => (
 const PayerChoice = ({
   value,
   options,
+  sponsorKind,
   onChange,
 }: {
   value: GasPayerChoice
   options: GasPayerChoice[]
+  sponsorKind: SponsorKind
   onChange: (choice: GasPayerChoice) => void
 }): ReactElement => (
   <DropdownMenu>
@@ -84,7 +92,7 @@ const PayerChoice = ({
         />
       }
     >
-      <PillLabel>{PAYER_LABEL[value]}</PillLabel>
+      <PillLabel>{payerLabel(value, sponsorKind)}</PillLabel>
       <ChevronDown className={feesCss.selectorCaret} />
     </DropdownMenuTrigger>
 
@@ -96,7 +104,7 @@ const PayerChoice = ({
           className={feesCss.selectorMenuItem}
           data-testid={PAYER_TEST_ID[option]}
         >
-          <Typography variant="paragraph-small-bold">{PAYER_LABEL[option]}</Typography>
+          <Typography variant="paragraph-small-bold">{payerLabel(option, sponsorKind)}</Typography>
         </DropdownMenuItem>
       ))}
     </DropdownMenuContent>
@@ -124,16 +132,18 @@ const LockedPill = ({ children, tooltip }: { children: ReactNode; tooltip: strin
 
 const PayerControl = ({
   control,
+  sponsorKind,
   onChange,
 }: {
   control: FeePayerControl
+  sponsorKind: SponsorKind
   onChange: (choice: GasPayerChoice) => void
 }): ReactElement =>
   control.kind === 'choice' ? (
-    <PayerChoice value={control.value} options={control.options} onChange={onChange} />
+    <PayerChoice value={control.value} options={control.options} sponsorKind={sponsorKind} onChange={onChange} />
   ) : (
     <LockedPill tooltip={LOCKED_TOOLTIP[control.value]}>
-      <PillLabel>{PAYER_LABEL[control.value]}</PillLabel>
+      <PillLabel>{payerLabel(control.value, sponsorKind)}</PillLabel>
     </LockedPill>
   )
 
@@ -164,7 +174,15 @@ const ProBadge = (): ReactElement => (
   </span>
 )
 
-const FeeValue = ({ fee, sponsored }: { fee: NetworkFee; sponsored?: boolean }): ReactElement => {
+const FeeValue = ({
+  fee,
+  sponsored,
+  sponsorKind = 'plan',
+}: {
+  fee: NetworkFee
+  sponsored?: boolean
+  sponsorKind?: SponsorKind
+}): ReactElement => {
   if (fee.loading) return <Skeleton className="h-4 min-w-[7em]" />
   if (fee.error)
     return (
@@ -178,14 +196,14 @@ const FeeValue = ({ fee, sponsored }: { fee: NetworkFee; sponsored?: boolean }):
         {fee.note}
       </Typography>
     )
-  // Sponsored: the fee somebody else pays, struck through next to the Pro chip.
+  // Sponsored: the fee somebody else pays, struck through; the Pro chip only when the plan pays it.
   if (sponsored)
     return (
       <span className={css.feeAmount}>
         <Typography variant="paragraph-small" color="muted" className="line-through">
           {fee.amount} {fee.currency}
         </Typography>
-        <ProBadge />
+        {sponsorKind === 'plan' && <ProBadge />}
       </span>
     )
   return (
@@ -249,7 +267,8 @@ const GasPayerSelector = ({
   onChoiceChange: (choice: GasPayerChoice) => void
   onGasTokenChange?: (address: string) => void
 }): ReactElement => {
-  const { payer, gasToken, executionFee, gasFee, sponsored, totalOutgoing, footer, safeHasEnoughGas } = view
+  const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, footer, safeHasEnoughGas } =
+    view
   const singleToken = gasToken.tokens.length <= 1
   const displayedToken = gasToken.tokens.find((t) => t.address.toLowerCase() === gasToken.selected.toLowerCase())
 
@@ -262,7 +281,7 @@ const GasPayerSelector = ({
       <div className={css.card}>
         <div className={cn(feesCss.paymentRow, css.payerRow)}>
           <LabelledControl label="Pay fees from:">
-            <PayerControl control={payer} onChange={onChoiceChange} />
+            <PayerControl control={payer} sponsorKind={sponsorKind} onChange={onChoiceChange} />
           </LabelledControl>
           <LabelledControl label="Fees token:">
             <GasTokenSelector
@@ -292,7 +311,7 @@ const GasPayerSelector = ({
 
           <FeeRow testId="gas-fee-row">
             <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
-            <FeeValue fee={gasFee} sponsored={sponsored} />
+            <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
           </FeeRow>
 
           {totalOutgoing && (

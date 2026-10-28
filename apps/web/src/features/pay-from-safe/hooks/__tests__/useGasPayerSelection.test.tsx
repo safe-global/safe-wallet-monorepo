@@ -270,4 +270,27 @@ describe('useGasPayerSelection', () => {
     expect(currentMode).toBe('safe')
     expect(mockUsePayFromSafeFeePreview.mock.calls.every(([args]) => args.enabled)).toBe(true)
   })
+  describe('sponsor at execution', () => {
+    const signedTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
+    signedTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)
+
+    const renderExecution = (offer: Parameters<typeof useGasPayerSelection>[0]['offer']) =>
+      renderHook(() => useGasPayerSelection({ safeTx: signedTx, offer, step: 'execute' }), { wrapper: ModeProvider })
+
+    it('is the plan for a Pro Workspace', () => {
+      mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 49, meter: { quota: 50, resetsAt: null } })
+      const { result } = renderExecution({ option: 'SUBSCRIPTION', left: 49, spaceId: '1' } as never)
+
+      expect(result.current.choice).toBe('SPONSORED')
+      expect(result.current.view?.sponsorKind).toBe('plan')
+    })
+
+    it("is the chain's free transactions for a Safe outside a Workspace", () => {
+      const { result } = renderExecution({ option: 'FREE_DAILY_LIMIT', relays: { remaining: 1, limit: 5 } } as never)
+
+      expect(result.current.choice).toBe('SPONSORED')
+      expect(result.current.view?.sponsorKind).toBe('free')
+      expect(result.current.view?.footer).toEqual(expect.objectContaining({ kind: 'counter', isSubscription: false }))
+    })
+  })
 })
