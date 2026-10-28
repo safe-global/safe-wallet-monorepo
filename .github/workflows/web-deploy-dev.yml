@@ -232,12 +232,14 @@ jobs:
         env:
           DD_API_KEY: ${{ secrets.DD_API_KEY_DORA }}
           GH_TOKEN: ${{ github.token }}
+          # main deploys to staging, dev to dev (see the S3 steps in the deploy job).
           DEPLOY_ENV: ${{ github.ref_name == 'main' && 'staging' || 'dev' }}
           JOBS_API: repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs
           REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
           COMMIT_SHA: ${{ github.sha }}
         run: |
-          set -uo pipefail
+          # GitHub runs steps with bash -e; turn it off so no failure here fails the run.
+          set +e -uo pipefail
           [ -n "$DD_API_KEY" ] || { echo "::warning::DD_API_KEY_DORA is not available, DORA event not sent"; exit 0; }
           FINISHED_AT=$(date +%s)
           # The deploy started when the first job of this run attempt started.
