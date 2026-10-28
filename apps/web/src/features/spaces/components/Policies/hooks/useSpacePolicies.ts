@@ -106,7 +106,13 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
 
   const dtos = active.currentData ?? NO_POLICIES
   // Queued changes are extra information: without them the table still shows what is enforced.
-  const pendingDtos = pending.currentData ?? NO_PENDING
+  const pendingDtos = useMemo(
+    () =>
+      pending.currentData?.filter(
+        (dto): dto is PendingPolicyDto & { kind: 'queued-transaction' } => dto.kind === 'queued-transaction',
+      ) ?? NO_PENDING,
+    [pending.currentData],
+  )
 
   useEffect(() => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
