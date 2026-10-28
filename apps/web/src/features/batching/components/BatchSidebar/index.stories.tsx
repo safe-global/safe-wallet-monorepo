@@ -97,3 +97,18 @@ export const WithTransactions: Story = {
     }).decorator,
   ],
 }
+
+export const ManyTransactions: Story = {
+  decorators: [
+    createMockStory({
+      scenario: 'efSafe',
+      wallet: 'owner',
+      shadcn: true,
+      store: {
+        batch: batchState(
+          ...Array.from({ length: 20 }, () => tx('0x1234567890123456789012345678901234567890', '1000000000000000000')),
+        ),
+      },
+    }).decorator,
+  ],
+}

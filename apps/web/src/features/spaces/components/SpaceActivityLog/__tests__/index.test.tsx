@@ -31,7 +31,7 @@ jest.mock('../ActivityLogFilters', () => ({
   ),
   EMPTY_FILTERS: {},
 }))
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })

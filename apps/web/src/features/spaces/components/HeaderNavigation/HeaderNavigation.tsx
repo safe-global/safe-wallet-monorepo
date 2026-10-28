@@ -1,12 +1,12 @@
 import type { MouseEvent, ReactNode } from 'react'
 import { useMemo } from 'react'
 import { Search, Bell, Wallet, Layers } from 'lucide-react'
-import { blo } from 'blo'
 import { isAddress } from 'ethers'
 import { Button } from '@safe-global/views/components/ui/button'
 import IconAction from '@safe-global/views/components/common/IconAction'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { cn } from '@safe-global/views/utils/cn'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
 import { BatchTooltip } from '@/features/batching'
@@ -87,17 +87,6 @@ export function HeaderNavigation({
 
   const walletDisplayName = walletEns || truncatedAddress
 
-  const identiconUrl = useMemo(() => {
-    try {
-      if (walletAddress && isAddress(walletAddress)) {
-        return blo(walletAddress as `0x${string}`)
-      }
-    } catch {
-      // ignore
-    }
-    return null
-  }, [walletAddress])
-
   const providerIconSrc = useMemo(() => {
     if (!walletIcon) return null
     return walletIcon.startsWith('data:') ? walletIcon : `data:image/svg+xml;utf8,${encodeURIComponent(walletIcon)}`
@@ -162,9 +151,9 @@ export function HeaderNavigation({
             aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
             data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
           >
-            {isConnected && identiconUrl ? (
+            {isConnected && isAddress(walletAddress) ? (
               <div className="relative shrink-0">
-                <img src={identiconUrl} alt="Wallet identicon" className="size-6 rounded-full" />
+                <Identicon address={walletAddress} size={24} />
                 {providerIconSrc && (
                   <img
                     src={providerIconSrc}

@@ -421,6 +421,75 @@ describe('AssetsTable', () => {
     })
   })
 
+  test('counts the tokens selected for hiding', () => {
+    const mockBalances: Balances = {
+      fiatTotal: '300',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
+          },
+        },
+        {
+          balance: safeParseUnits('200', 18)!.toString(),
+          fiatBalance: '200',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x3', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'SPAM',
+            symbol: 'SPM',
+            type: TokenType.ERC20,
+          },
+        },
+      ],
+    }
+
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
+    const result = render(<TestComponent />, {
+      initialReduxState: {
+        settings: {
+          currency: 'usd',
+          hiddenTokens: { '5': [] },
+          tokenList: TOKEN_LISTS.ALL,
+          shortName: { qr: true },
+          theme: { darkMode: true },
+          env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+          signing: { onChainSigning: false, blindSigning: false },
+          transactionExecution: true,
+          curatedNestedSafes: {},
+        },
+      },
+    })
+    const toggleToken = (text: string) =>
+      fireEvent.click(getByRole(getParentRow(result.getAllByText(text)[0])!, 'checkbox'))
+    const counter = () => result.getByTestId('hidden-token-count')
+
+    fireEvent.click(result.getByTestId('showHidden'))
+    expect(counter()).toHaveTextContent('0 tokens selected')
+
+    toggleToken('100 DAI')
+    expect(counter()).toHaveTextContent('1 token selected')
+
+    toggleToken('200 SPM')
+    expect(counter()).toHaveTextContent('2 tokens selected')
+
+    toggleToken('100 DAI')
+    expect(counter()).toHaveTextContent('1 token selected')
+  })
+
   test('renders elements in both mobile and desktop views', async () => {
     const mockBalances: Balances = {
       fiatTotal: '100',

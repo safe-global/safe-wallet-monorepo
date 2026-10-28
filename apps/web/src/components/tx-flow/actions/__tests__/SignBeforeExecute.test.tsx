@@ -129,17 +129,24 @@ type SignerCase = {
   name: string
   signer: Omit<SignerWallet, 'address' | 'provider'>
   isSmartContract: boolean
+  executesAsLastSigner: boolean
 }
 
 const signerCases: SignerCase[] = [
-  { name: 'an EOA', signer: { chainId: '1' }, isSmartContract: false },
-  { name: 'a parent Safe connected in-app', signer: { chainId: '1', isSafe: true }, isSmartContract: true },
+  { name: 'an EOA', signer: { chainId: '1' }, isSmartContract: false, executesAsLastSigner: true },
+  {
+    name: 'a parent Safe connected in-app',
+    signer: { chainId: '1', isSafe: true },
+    isSmartContract: true,
+    executesAsLastSigner: false,
+  },
   {
     name: 'a parent Safe connected over WalletConnect',
     signer: { chainId: '1', isConnectedSafe: true, threshold: 1 },
     isSmartContract: true,
+    executesAsLastSigner: false,
   },
-  { name: 'a smart-contract wallet', signer: { chainId: '1' }, isSmartContract: true },
+  { name: 'a smart-contract wallet', signer: { chainId: '1' }, isSmartContract: true, executesAsLastSigner: true },
 ]
 
 type FlowCase = {
@@ -155,13 +162,6 @@ const unsignedFlowCases: FlowCase[] = [
   { name: 'a queued unsigned tx on a 1/n Safe', threshold: 1, signatureCount: 0, isQueued: true, isExecutable: true },
   { name: 'a new tx on an m/n Safe', threshold: 2, signatureCount: 0, isQueued: false, isExecutable: false },
   {
-    name: 'the last missing signature of an m/n Safe',
-    threshold: 2,
-    signatureCount: 1,
-    isQueued: true,
-    isExecutable: true,
-  },
-  {
     name: 'an m/n tx still missing other signatures',
     threshold: 3,
     signatureCount: 1,
@@ -169,6 +169,14 @@ const unsignedFlowCases: FlowCase[] = [
     isExecutable: false,
   },
 ]
+
+const lastSignerFlow: FlowCase = {
+  name: 'the last missing signature of an m/n Safe',
+  threshold: 2,
+  signatureCount: 1,
+  isQueued: true,
+  isExecutable: true,
+}
 
 const renderSubmit = ({ threshold, signatureCount, isQueued, isExecutable }: FlowCase) => {
   mockSafe(threshold)
@@ -220,4 +228,39 @@ describe.each(signerCases)('Sign before execute with $name', ({ signer, isSmartC
     expect(await screen.findByTestId('combo-submit-execute')).toHaveTextContent('Execute')
     expect(screen.queryByTestId('combo-submit-sign')).not.toBeInTheDocument()
   })
+})
+
+describe('The last missing signature of an m/n Safe', () => {
+  const mockSignerCase = ({ signer, isSmartContract }: SignerCase) => {
+    mockUseSigner.mockReturnValue({ ...signer, address: faker.finance.ethereumAddress(), provider: null })
+    mockIsSmartContractWallet.mockResolvedValue(isSmartContract)
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it.each(signerCases.filter(({ executesAsLastSigner }) => executesAsLastSigner))(
+    'offers Execute next to Sign to $name',
+    async (signerCase) => {
+      mockSignerCase(signerCase)
+      renderSubmit(lastSignerFlow)
+      await settleSignerCheck()
+
+      expect(await screen.findByTestId('combo-submit-execute')).toHaveTextContent('Execute')
+      expect(screen.getByTestId('combo-submit-dropdown')).toBeInTheDocument()
+    },
+  )
+
+  it.each(signerCases.filter(({ executesAsLastSigner }) => !executesAsLastSigner))(
+    'offers only Sign to $name',
+    async (signerCase) => {
+      mockSignerCase(signerCase)
+      renderSubmit(lastSignerFlow)
+      await settleSignerCheck()
+
+      expect(screen.getByTestId('combo-submit-sign')).toHaveTextContent('Sign')
+      expect(screen.queryByTestId('combo-submit-execute')).not.toBeInTheDocument()
+    },
+  )
 })

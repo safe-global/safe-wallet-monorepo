@@ -59,6 +59,10 @@ export function addMessageToQueue(context, message, signature) {
   })
 }
 
+export function confirmMessageInQueue(context, messageHash, signature) {
+  return post(context.env, `/v1/chains/${context.chainId}/messages/${messageHash}/signatures`, { signature })
+}
+
 /**
  * Registers `delegate` for the context's Safe, signed by the `delegator` wallet. The domain's `safe` field is not
  * standard EIP-712, so the digest is computed like the wallet's `hashDelegateTypedData`.

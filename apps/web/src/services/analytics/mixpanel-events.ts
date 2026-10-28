@@ -36,6 +36,8 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
+  TRANSACTION_SAFENET_SUBMITTED = 'Transaction Safenet Submitted',
+  TRANSACTION_SAFENET_CHECKED = 'Transaction Safenet Checked',
   TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
@@ -175,6 +177,19 @@ export enum CheckoutOutcome {
   CANCELLED = 'cancelled',
 }
 
+export enum SafenetCheckResult {
+  NO_ISSUES = 'no_issues',
+  RISK_DETECTED = 'risk_detected',
+  UNAVAILABLE = 'unavailable',
+  NO_RULING = 'no_ruling',
+}
+
+export enum SafenetSignerRole {
+  FIRST_SIGNER = 'first_signer',
+  CO_SIGNER = 'co_signer',
+  EXECUTOR = 'executor',
+}
+
 export enum WorkspaceCreateStep {
   CREATE_WORKSPACE = 'create_workspace',
   SELECT_SAFES = 'select_safes',
@@ -280,6 +295,10 @@ export enum MixpanelEventParams {
   SPONSORED_QUOTA = 'Sponsored Quota',
   DEFAULT_SEATS = 'Default Seats',
   DEFAULT_BILLING_PERIOD = 'Default Billing Period',
+  RULES_FLAGGED = 'Rules Flagged',
+  SENTINELS_FLAGGED = 'Sentinels Flagged',
+  SIGNER_ROLE = 'Signer Role',
+  SAFE_TX_HASH = 'Safe Tx Hash',
 }
 
 export enum AuthLoginMethod {

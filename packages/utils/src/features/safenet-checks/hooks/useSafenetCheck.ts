@@ -87,7 +87,8 @@ export const useSafenetCheck = (
     safeTxHash && !skip ? selectPinnedVerdict(state, { safeTxHash, ...target }) : undefined,
   )
 
-  const snapshot = query.data
+  // `data` outlives an argument change and still holds the previous check's snapshot.
+  const snapshot = query.currentData
   const hasData = snapshot !== undefined
   // Keyed on the retained error, not `isError`: RTK Query flips `isError` off
   // during each retry's pending phase while `error` and `data` persist.
@@ -155,7 +156,7 @@ export const useSafenetCheck = (
     status,
     publicStatus,
     unavailableReason,
-    isLoading: query.isLoading,
+    isLoading: query.isFetching && !hasData,
     isFetching: query.isFetching,
     isStale,
     refetch,
