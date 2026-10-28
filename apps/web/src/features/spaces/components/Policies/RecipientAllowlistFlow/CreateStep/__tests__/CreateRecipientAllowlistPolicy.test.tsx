@@ -18,6 +18,7 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import { useRecipientAllowlistSafeAccounts } from '../../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
+import { useSpendingLimitImpacts } from '../../hooks/useSpendingLimitImpacts'
 import CreateRecipientAllowlistPolicy from '..'
 
 const SEPOLIA = '11155111'
@@ -33,6 +34,7 @@ jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
+jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn(() => []) }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: () => ({ has: () => false }),
@@ -117,6 +119,7 @@ const guard = (status?: GuardStatus, retry = jest.fn()) => mockUseGuardStatus.mo
 const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
   const setScope = jest.fn()
   const onNext = jest.fn()
+  const onSpendingLimitImpact = jest.fn()
   const tree = (key?: string) => (
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() }}>
       <TxFlowContext.Provider value={{ ...initialContext, data: data && { ...data, rules: [] }, onNext }}>
@@ -138,13 +141,20 @@ const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
           <CreateRecipientAllowlistPolicy
             dismissedCallouts={{ tokens: false, recipients: false }}
             onDismissCallout={jest.fn()}
+            onSpendingLimitImpact={onSpendingLimitImpact}
           />
         </SafeScopeContext.Provider>
       </TxFlowContext.Provider>
     </TxModalContext.Provider>
   )
   const { rerender } = render(tree(scopeKey), { routerProps: { push: mockPush } })
-  return { setScope, onNext, switchTo: (key?: string) => rerender(tree(key)), rerender: () => rerender(tree(scopeKey)) }
+  return {
+    setScope,
+    onNext,
+    onSpendingLimitImpact,
+    switchTo: (key?: string) => rerender(tree(key)),
+    rerender: () => rerender(tree(scopeKey)),
+  }
 }
 
 describe('CreateRecipientAllowlistPolicy', () => {
@@ -152,6 +162,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     jest.clearAllMocks()
     guard(undefined)
     holdNative()
+    ;(useSpendingLimitImpacts as jest.Mock).mockReturnValue([])
   })
 
   it('scopes the flow to the picked Safe', () => {
@@ -216,6 +227,33 @@ describe('CreateRecipientAllowlistPolicy', () => {
       rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }],
     })
   })
+
+  it.each([
+    ['restricted', 'adds', [{ impact: 'restricted' }], true],
+    ['blocked', 'adds', [{ impact: 'blocked' }], true],
+    ['absent', 'skips', [], false],
+  ])(
+    'reports on Next whether a spending limit is affected (%s), so the flow %s Existing policies',
+    (_, __, impacts, expected) => {
+      accounts([option(SAFE_A)])
+      guard({ status: 'none' })
+      ;(useSpendingLimitImpacts as jest.Mock).mockReturnValue(
+        impacts.map(({ impact }) => ({
+          spender: SAFE_B,
+          allowance: {},
+          impact,
+          recipients: impact === 'restricted' ? [RECIPIENT] : [],
+        })),
+      )
+      const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+      fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
+      fireEvent.click(screen.getByTestId('next-btn'))
+
+      expect(onSpendingLimitImpact).toHaveBeenCalledWith(expected)
+      expect(onNext).toHaveBeenCalled()
+    },
+  )
 
   it('runs the address-poisoning check on every recipient', () => {
     accounts([option(SAFE_A)])
