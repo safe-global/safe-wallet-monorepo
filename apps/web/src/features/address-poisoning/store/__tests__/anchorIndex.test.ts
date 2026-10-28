@@ -1,4 +1,4 @@
-import { selectAnchorAddresses, selectAnchorIndex } from '../anchorIndex'
+import { selectAccountAnchorAddresses, selectAnchorAddresses, selectAnchorIndex } from '../anchorIndex'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { RootState } from '@/store'
 
@@ -44,6 +44,14 @@ describe('selectAnchorAddresses', () => {
 
   it('returns an empty array when no source has any address', () => {
     expect(selectAnchorAddresses(makeState())).toEqual([])
+  })
+})
+
+describe('selectAccountAnchorAddresses', () => {
+  it('collects the Safes in my accounts but not address book contacts (lowercased)', () => {
+    expect(selectAccountAnchorAddresses(fullState())).toEqual(
+      new Set([ADDED.toLowerCase(), NESTED.toLowerCase(), UNDEPLOYED.toLowerCase()]),
+    )
   })
 })
 
