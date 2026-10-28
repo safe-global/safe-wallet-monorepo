@@ -228,7 +228,7 @@ describe('SafenetAuditRow', () => {
     expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
   })
 
-  it('keeps the short label when several rules were cited', () => {
+  it('names a risk that cites only warning rules "Issues found", like Safe Shield', () => {
     const snapshot = buildSnapshot({
       safeTxHash: HASH as `0x${string}`,
       status: CheckStatus.MALICIOUS,
@@ -243,6 +243,7 @@ describe('SafenetAuditRow', () => {
 
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
-    expect(screen.getByText('Risk detected')).toBeInTheDocument()
+    expect(screen.getByText('Issues found')).toBeInTheDocument()
+    expect(screen.queryByText('Risk detected')).not.toBeInTheDocument()
   })
 })

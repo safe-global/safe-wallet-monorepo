@@ -77,6 +77,22 @@ describe('SafenetDetailsCardView', () => {
     expect(screen.getByText('Flagged by 1 sentinel')).toBeInTheDocument()
   })
 
+  it.each([
+    ['R-4.2', 'var(--color-warning-main)', 'Issues found'],
+    ['R-4.6', 'var(--color-error-main)', 'Risk detected'],
+  ])('colors a risk citing %s with %s and names it %s', (reason, color, label) => {
+    const events = [sentinelRevealedEvent({ approved: false, reason })]
+
+    renderView({
+      publicStatus: CheckStatus.MALICIOUS,
+      snapshot: buildSnapshot({ safeTxHash, status: CheckStatus.MALICIOUS, events }),
+    })
+
+    const card = screen.getByTestId('safenet-details-card')
+    expect(card.style.getPropertyValue('--accordion-border-active')).toBe(color)
+    expect(screen.getByText(label)).toBeInTheDocument()
+  })
+
   it('links the attestation for a verified no-issues result', () => {
     const attested = attestedEvent({ safeTxHash })
     const attestation = {
