@@ -1,3 +1,4 @@
+import { NATIVE_TRANSFER_SELECTOR } from '@safe-global/utils/features/policy-guard/constants'
 import type {
   ActivePolicyDto,
   Erc20TransferPolicyDataDto,
@@ -17,8 +18,6 @@ import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import { toPolicyToken } from './toPolicyToken'
 
 export type NativeTokenResolver = (chainId: string) => PolicyTokenInfo | undefined
-
-const NATIVE_TRANSFER_SELECTOR = '0x00000000'
 
 const toChainAddressKey = (chainId: string, address: string): string => `${chainId}:${address.toLowerCase()}`
 
