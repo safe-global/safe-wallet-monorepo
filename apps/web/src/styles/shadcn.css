@@ -84,6 +84,8 @@
   --badge-warning-strong: var(--warning-strong);
   --badge-dot-success: #22c55e; /* green-500, both themes */
   --badge-dot-warning: #eab308; /* yellow-500 */
+  --icon-brand: oklch(79.2% 0.209 151.711); /* green-400, both themes */
+  --icon-hover: oklch(72.3% 0.219 149.579); /* green-500, both themes */
   --z-sidebar: 1300;
   --z-overlay: 1400;
   /* A dialog opened from inside another overlay (e.g. Rename from a modal or an open dropdown). Both
@@ -213,6 +215,8 @@
   --color-badge-warning-strong: var(--badge-warning-strong);
   --color-badge-dot-success: var(--badge-dot-success);
   --color-badge-dot-warning: var(--badge-dot-warning);
+  --color-icon-brand: var(--icon-brand);
+  --color-icon-hover: var(--icon-hover);
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);

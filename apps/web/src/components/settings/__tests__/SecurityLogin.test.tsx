@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import SecurityLogin from '../SecurityLogin'
 import * as useIsRecoverySupportedHook from '@/features/recovery'
@@ -54,6 +55,11 @@ const mockUseLoadFeature = featureCore.useLoadFeature as jest.Mock
 jest.mock('../SecuritySettings', () => ({
   __esModule: true,
   default: () => <div data-testid="security-settings">SecuritySettings</div>,
+}))
+
+jest.mock('@/features/recovery/components/RecoverySettings', () => ({
+  __esModule: true,
+  default: () => <div data-testid="recovery-settings">RecoverySettings</div>,
 }))
 
 // Component that simulates HOC behavior (withHnFeature -> withGuardCheck -> withOwnerCheck)
@@ -220,6 +226,29 @@ describe('SecurityLogin', () => {
 
       expect(screen.queryByTestId('hn-activated-banner-for-settings')).not.toBeInTheDocument()
       expect(screen.queryByTestId('hn-banner-for-settings')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Account recovery', () => {
+    const safeQuery = { query: { safe: `sep:${faker.finance.ethereumAddress()}` } }
+
+    beforeEach(() => {
+      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+    })
+
+    it('shows the recovery settings on a chain that supports recovery', async () => {
+      jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(true)
+
+      render(<SecurityLogin />, { routerProps: safeQuery })
+
+      expect(await screen.findByTestId('recovery-settings')).toBeInTheDocument()
+    })
+
+    it('hides the recovery settings on a chain without recovery', async () => {
+      render(<SecurityLogin />, { routerProps: safeQuery })
+
+      expect(await screen.findByTestId('security-settings')).toBeInTheDocument()
+      expect(screen.queryByTestId('recovery-settings')).not.toBeInTheDocument()
     })
   })
 

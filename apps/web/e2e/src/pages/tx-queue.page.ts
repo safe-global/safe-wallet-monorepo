@@ -38,6 +38,11 @@ export class TxQueuePage {
     return this.transactions.filter({ has: this.page.getByTestId('nonce').getByText(String(nonce), { exact: true }) })
   }
 
+  /** Open the execution of the fully signed transaction with `nonce`; its review opens */
+  async execute(nonce: number): Promise<void> {
+    await this.transactionWithNonce(nonce).getByTestId('execute-tx-btn').click()
+  }
+
   /** Start a replacement with the same nonce; the send-tokens form opens */
   async replace(): Promise<void> {
     await this.rejectButton.click()

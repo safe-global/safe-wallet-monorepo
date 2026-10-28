@@ -1,6 +1,6 @@
 # Cypress E2E (legacy — maintenance only)
 
-**No new Cypress tests.** All new E2E tests are Playwright — see [../e2e/AGENTS.md](../e2e/AGENTS.md). This file governs maintaining the existing suite (still active, mostly visual/Argos work). To migrate a spec: [../e2e/docs/CYPRESS_MIGRATION_GUIDE.md](../e2e/docs/CYPRESS_MIGRATION_GUIDE.md).
+**No new Cypress tests.** All new E2E tests are Playwright — see [../e2e/AGENTS.md](../e2e/AGENTS.md). This file governs maintaining the existing suite (still active, mostly visual/Argos work). Delete a Cypress test only when a Jest or Playwright test covers it, and list each deleted test with its replacement in the PR description.
 
 Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cypress:run` (headless).
 
@@ -10,11 +10,8 @@ Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cyp
 cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.page*.js)
-│   ├── smoke/          # Functional smoke tests (CI on every PR)
 │   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
-│   ├── happypath/      # User journey tests
-│   ├── happypath_2/    # User journey tests (run by the full on-demand CI suite)
 │   └── safe-apps/      # Safe Apps tests
 ├── fixtures/           # Static test data (JSON, safes/)
 ├── support/            # Shared config, commands, constants, localstorage_data
@@ -23,19 +20,18 @@ cypress/
 
 ## Test categories
 
-| Category     | Folder             | CI trigger                           | Naming                    |
-| ------------ | ------------------ | ------------------------------------ | ------------------------- |
-| Smoke        | `e2e/smoke/`       | Every PR                             | `[SMOKE] Verify ...`      |
-| Visual       | `e2e/visual/`      | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
-| Regression   | `e2e/regression/`  | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
-| Happy path   | `e2e/happypath/`   | On-demand + Wed cron (04:00 UTC)     | `Verify ...`              |
-| Happy path 2 | `e2e/happypath_2/` | Runs with the full on-demand suite   | `Verify ...`              |
+| Category   | Folder            | CI trigger                           | Naming                    |
+| ---------- | ----------------- | ------------------------------------ | ------------------------- |
+| Visual     | `e2e/visual/`     | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
+| Regression | `e2e/regression/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + happypath_2 + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+The PR smoke gate is Playwright `@smoke` (`web-pw-smoke.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)); on PRs, Cypress specs run only through the isolated job (`web-isolated-e2e-backend.yml`, registry in `e2e/environment/specs.mjs`). The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+
+CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
 ## Visual regression tests (Argos E2E)
 
-All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
+All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`. Only states that no Storybook story renders yet stay here (`COVERAGE.md`); new visual coverage is a story — see [../docs/storybook-guide.md](../docs/storybook-guide.md). When a story renders a test's state, delete the test.
 
 ### Structure
 
@@ -79,7 +75,7 @@ Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds s
 
 ### API mocking for visual tests
 
-Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data — except the `spaces_*.cy.js` specs, which sign in via `signInToSpaces()` and run unmocked against the live spaces backend. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
+Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions
@@ -153,10 +149,8 @@ The isolated CI workflow runs registered specs against local Anvil, CGW, TXS and
 
 Use `yarn workspace @safe-global/web e2e:env cypress` after starting the backend and wallet. `SAFE_E2E_SPECS` selects registered specs, `SAFE_E2E_WEB_URL` overrides the wallet URL, and `SAFE_E2E_BROWSER` selects a Chromium executable (default: Chrome). The runner clears `e2e/environment/artifacts/cypress` once per invocation and retains per-spec videos, screenshots and JUnit reports. Backend cleanup belongs to the calling CI workflow and must run after failures. See [local setup](../e2e/docs/ISOLATED_ENVIRONMENT.md).
 
-Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `getSafes()` only reads prepared fixtures. Mutable scenarios reset before each test when their entry in `e2e/environment/specs.mjs` sets `perTest`. Specs must not branch on `SAFE_E2E_ISOLATED`: seed their expected data and expose generated identifiers through fixture getters. Preserve existing mocks and assertions.
+Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `getSafes()` only reads prepared fixtures. Specs must not branch on `SAFE_E2E_ISOLATED`: seed their expected data and expose generated identifiers through fixture getters. Preserve existing mocks and assertions.
 
 Per-spec scenario `files` replace JSON data at existing fixture paths in a temporary fixtures directory. Preserve the original fixture shape and expected values, supplying generated IDs for seeded backend records. Source fixture files remain unchanged; the temporary directory is removed after each spec.
 
 When a spec hard-codes staging data (a Safe address outside `getSafes`, a short address, a transaction ID or a date), move the value into a fixture under `fixtures/` built with `fixtureGetters(namespace, { name: stagingDefault })`, and read it in the spec; the scenario returns the local value as `fixtures['<namespace>.<name>']`. Wrap localStorage payloads keyed by static Safes in `aliasedStorage`. Rebuild static Safes from `scenarios/staging-safes.mjs` snapshots of their real staging state instead of inventing data.
-
-Cases that need a service the local stack cannot provide are listed with a reason in the spec's `skips` (`e2e/environment/specs.mjs`); isolated runs skip them and staging runs keep them. Do not skip cases that also fail on staging.

@@ -13,6 +13,15 @@ import {
   mockRecoveryPolicy,
   mockUnenforcedPolicy,
 } from './mocks/policies'
+import {
+  mockActivatingAllowlist,
+  mockAllowlistChangePending,
+  mockCgwAllowlist,
+  mockCgwUnenforcedAllowlist,
+  mockFailedAllowlist,
+  mockFullySignedPendingAllowlist,
+  mockPendingAllowlist,
+} from './mocks/allowlistPolicies'
 import PoliciesList from './PoliciesList'
 
 const meta = {
@@ -59,6 +68,48 @@ export const ProposerGrant: Story = {
 
 export const Recovery: Story = {
   args: { policies: [asActivePolicy(mockRecoveryPolicy())] },
+}
+
+export const ActiveAllowlist: Story = {
+  args: { policies: [mockCgwAllowlist()] },
+}
+
+export const UnenforcedAllowlist: Story = {
+  args: { policies: [mockCgwUnenforcedAllowlist()] },
+}
+
+export const PendingAllowlist: Story = {
+  args: { policies: [mockPendingAllowlist()] },
+}
+
+export const AllowlistReadyToExecute: Story = {
+  args: { policies: [mockFullySignedPendingAllowlist()] },
+}
+
+export const AllowlistActivating: Story = {
+  args: { policies: [mockActivatingAllowlist()] },
+}
+
+export const AllowlistChangePending: Story = {
+  args: { policies: [mockAllowlistChangePending()] },
+}
+
+export const AllowlistFailed: Story = {
+  args: { policies: [mockFailedAllowlist()] },
+}
+
+export const WithAllowlists: Story = {
+  args: {
+    policies: [
+      ...mockPolicies(),
+      mockCgwAllowlist(),
+      mockPendingAllowlist(),
+      mockFullySignedPendingAllowlist(),
+      mockActivatingAllowlist(),
+      mockAllowlistChangePending(),
+      mockFailedAllowlist(),
+    ],
+  },
 }
 
 /** Exercises pagination and the sort control. */

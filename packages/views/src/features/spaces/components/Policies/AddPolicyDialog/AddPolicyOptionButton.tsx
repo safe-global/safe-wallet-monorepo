@@ -30,7 +30,7 @@ const AddPolicyOptionButton = ({
         '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
         disabled
           ? 'cursor-not-allowed opacity-50'
-          : 'cursor-pointer hover:bg-secondary-hover hover:[&_svg]:text-green-500',
+          : 'cursor-pointer hover:bg-secondary-hover hover:[&_svg]:text-icon-hover',
         'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
         className,
       )}

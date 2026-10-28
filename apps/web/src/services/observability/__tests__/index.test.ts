@@ -98,6 +98,34 @@ describe('Observability Module', () => {
     })
   })
 
+  describe('captureRenderError', () => {
+    it('reports a render error as user facing with its component stack', () => {
+      const mockProvider = {
+        name: 'Mock',
+        init: jest.fn(),
+        getLogger: jest.fn(() => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() })),
+        captureError: jest.fn(),
+      }
+
+      jest.isolateModules(() => {
+        jest.doMock('../factory', () => ({
+          createObservabilityProvider: jest.fn(() => mockProvider),
+        }))
+
+        const { captureRenderError } = require('../index')
+        const error = new Error('render error')
+
+        captureRenderError(error, 'Component Stack')
+
+        expect(mockProvider.captureError).toHaveBeenCalledWith({
+          error,
+          isUserFacing: true,
+          tags: { componentStack: 'Component Stack' },
+        })
+      })
+    })
+  })
+
   describe('provider injection', () => {
     const makeMockProvider = (name: string) => ({
       name,

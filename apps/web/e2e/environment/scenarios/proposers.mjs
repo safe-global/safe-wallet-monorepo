@@ -1,6 +1,5 @@
-import Safe from '@safe-global/protocol-kit'
 import { createSafe, executeTransaction } from './safe.mjs'
-import { addDelegateToQueue, proposeToQueue } from './gateway.mjs'
+import { addDelegateToQueue } from './gateway.mjs'
 import { waitUntil } from './indexing.mjs'
 import { SEPOLIA, short } from './chain.mjs'
 
@@ -30,75 +29,25 @@ async function executeOnce(context, owners) {
   await executeTransaction(context, await context.safe.signTransaction(transaction))
 }
 
-async function proposeAsDelegate(env, context, delegate) {
-  const delegateSafe = await Safe.init({
-    provider: env.SAFE_RPC_URL,
-    signer: delegate.privateKey,
-    safeAddress: context.safeAddress,
-  })
-  const transaction = await context.safe.createTransaction({
-    transactions: [{ to: delegate.address, value: '1', data: '0x' }],
-  })
-  const hash = await context.safe.getTransactionHash(transaction)
-  await proposeToQueue(context, {
-    data: transaction.data,
-    hash,
-    sender: delegate.address,
-    signature: (await delegateSafe.signHash(hash)).data,
-  })
-  const id = `multisig_${context.safeAddress}_${hash}`
-  await waitUntil(
-    env,
-    `${env.SAFE_CGW_BASE_URL}/v1/chains/${context.chainId}/transactions/${id}`,
-    (detail) => detail.txStatus === 'AWAITING_CONFIRMATIONS',
-  )
-  return `&id=${id}`
-}
-
-// Rebuilds the staging proposer Safes: OWNER_3 co-owns S31/S33, OWNER_1 is the delegate.
+// Rebuilds staging SEP_STATIC_SAFE_31: OWNER_3 and OWNER_4 own it, OWNER_1 and OWNER_4 are its proposers.
 export async function prepareProposersScenario(env, owners) {
-  const contexts = []
+  const proposals = await createSafe(env, owners, {
+    ownerAddresses: [owners.owner3.address, owners.owner4.address],
+    threshold: 1,
+  })
   try {
-    const shared = { ownerAddresses: [owners.owner3.address, owners.owner4.address], threshold: 1 }
-    const proposals = await createSafe(env, owners, shared)
-    contexts.push(proposals)
     await executeOnce(proposals, owners)
     await addDelegates(env, proposals, stagingProposers(owners))
-    const proposedTx = await proposeAsDelegate(env, proposals, owners.owner1)
-    const nested = await createSafe(env, owners, shared)
-    contexts.push(nested)
-    await executeOnce(nested, owners)
-    await addDelegates(env, nested, [
-      { delegate: owners.owner1.address, delegator: owners.owner4, label: 'Proposer 1' },
-      { delegate: proposals.safeAddress, delegator: owners.owner4, label: 'Safe proposer' },
-    ])
-    const single = { ownerAddresses: [owners.owner4.address], threshold: 1 }
-    const empty = await createSafe(env, owners, single)
-    contexts.push(empty)
-    const payouts = await createSafe(env, owners, single)
-    contexts.push(payouts)
-    await addDelegates(env, payouts, [
-      { delegate: owners.owner1.address, delegator: owners.owner4, label: 'Test proposer' },
-    ])
     return {
-      safes: {
-        static: {
-          SEP_STATIC_SAFE_31: `sep:${proposals.safeAddress}`,
-          SEP_STATIC_SAFE_32: `sep:${empty.safeAddress}`,
-          SEP_STATIC_SAFE_33: `sep:${nested.safeAddress}`,
-          SEP_STATIC_SAFE_42: `sep:${payouts.safeAddress}`,
-        },
-      },
+      safes: { static: { SEP_STATIC_SAFE_31: `sep:${proposals.safeAddress}` } },
       fixtures: {
         'proposers.creator': `sep:${short(owners.owner4.address)}`,
-        'proposers.delegate': short(owners.owner1.address),
-        'proposers.proposedTx': proposedTx,
         'proposers.addressBook': {
           [SEPOLIA]: { [owners.owner4.address]: 'AD Proposer1', [owners.owner1.address]: 'AD Proposer2' },
         },
       },
     }
   } finally {
-    for (const context of contexts) context.provider.destroy()
+    proposals.provider.destroy()
   }
 }

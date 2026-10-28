@@ -21,8 +21,7 @@
     "verify": "node ../../scripts/verify.mjs --workspace=web-tanstack",
     "verify:changed": "node ../../scripts/verify.mjs --changed --workspace=web-tanstack",
     "cypress:open": "cross-env TZ=UTC cypress open --e2e",
-    "cypress:run": "cross-env TZ=UTC cypress run",
-    "cypress:ci": "cross-env TZ=UTC yarn cypress:run --config baseUrl=http://localhost:3001 --spec cypress/e2e/smoke/*.cy.js"
+    "cypress:run": "cross-env TZ=UTC cypress run"
   },
   "dependencies": {
     "@safe-global/store": "workspace:*",
@@ -61,7 +60,7 @@
     "tailwindcss": "^4.1.18",
     "ts-jest": "^29.4.6",
     "typescript": "~5.9.2",
-    "vite": "8.3.0",
+    "vite": "8.3.3",
     "vite-plugin-pwa": "^1.3.0",
     "vite-plugin-svgr": "^5.2.0",
     "workbox-cacheable-response": "^7.3.0",

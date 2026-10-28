@@ -1,13 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { getStoreInstance } from '@/store'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnSpecificChain } from './index'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { predictAddressBasedOnReplayData } from '../../utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { NextRouter } from 'next/router'
 
 jest.mock('@/features/counterfactual/services', () => ({
   persistCounterfactualSafe: jest.fn(),
@@ -61,11 +64,7 @@ const mockCreateProvider = createWeb3ReadOnly as jest.MockedFunction<typeof crea
 
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000001234'
 
-const chain = {
-  chainId: '100',
-  chainName: 'Gnosis Chain',
-  shortName: 'gno',
-} as Chain
+const chain = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain', shortName: 'gno' }).build()
 
 const safeCreationData = {
   safeAccountConfig: { owners: ['0xabc'], threshold: 1 },
@@ -74,9 +73,17 @@ const safeCreationData = {
 type RenderOptions = {
   initialReduxState?: typeof signedInState
   urlSpaceId?: string
+  routerProps?: Partial<NextRouter>
 }
 
-const renderDialog = (onClose: () => void, { initialReduxState, urlSpaceId }: RenderOptions = {}) =>
+const renderDialog = (
+  onClose: () => void,
+  {
+    initialReduxState,
+    urlSpaceId,
+    routerProps = urlSpaceId ? { query: { spaceId: urlSpaceId } } : {},
+  }: RenderOptions = {},
+) =>
   render(
     <CreateSafeOnSpecificChain
       safeAddress={SAFE_ADDRESS}
@@ -86,7 +93,7 @@ const renderDialog = (onClose: () => void, { initialReduxState, urlSpaceId }: Re
       onClose={onClose}
       safeCreationResult={[safeCreationData, undefined, false]}
     />,
-    { initialReduxState, routerProps: urlSpaceId ? { query: { spaceId: urlSpaceId } } : {} },
+    { initialReduxState, routerProps },
   )
 
 const renderInSpace = () => renderDialog(jest.fn(), { initialReduxState: signedInState, urlSpaceId: MOCK_SPACE_UUID })
@@ -94,6 +101,8 @@ const renderInSpace = () => renderDialog(jest.fn(), { initialReduxState: signedI
 describe('CreateSafeOnSpecificChain', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: [chain] })
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chain)
     mockCreateProvider.mockReturnValue({} as ReturnType<typeof createWeb3ReadOnly>)
     mockPredict.mockResolvedValue(SAFE_ADDRESS)
     mockUseIsAdmin.mockReturnValue(false)
@@ -144,6 +153,33 @@ describe('CreateSafeOnSpecificChain', () => {
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
     await waitFor(() => expect(onClose).toHaveBeenCalled())
+  })
+
+  it('shows the chosen network as fixed instead of a network picker', () => {
+    renderDialog(jest.fn())
+
+    expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
+    expect(screen.queryByLabelText('Network')).not.toBeInTheDocument()
+  })
+
+  it('opens the Safe on the new network and gives it the same name there', async () => {
+    const push = jest.fn(() => Promise.resolve(true))
+    mockPersist.mockResolvedValue({ ok: true })
+
+    renderDialog(jest.fn(), { routerProps: { pathname: '/home', push } })
+
+    fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith(
+        expect.objectContaining({ query: expect.objectContaining({ safe: `gno:${SAFE_ADDRESS}` }) }),
+      ),
+    )
+    const state = getStoreInstance().getState()
+    expect(state.addressBook['100'][SAFE_ADDRESS]).toBe('My Safe')
+    expect(Object.values(state.notifications).map((notification) => notification.message)).toContain(
+      'Successfully added your account on Gnosis Chain',
+    )
   })
 
   it('keeps the dialog open and shows an inline error when the predicted address mismatches', async () => {

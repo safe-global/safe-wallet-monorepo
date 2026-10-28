@@ -3,19 +3,26 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { usePolicyIntro } from './hooks/usePolicyIntro'
+import { useNewAllowlistIds } from './hooks/useNewAllowlistIds'
 import AddPolicyDialog from './AddPolicyDialog'
 import {
   ADD_POLICY_OPTIONS,
+  RECIPIENT_ALLOWLIST_POLICY_OPTION,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
+import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
+import RecipientAllowlistFlow from './RecipientAllowlistFlow'
+import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
+import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import AllowlistDetails from './AllowlistDetails'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -30,6 +37,7 @@ import {
   REQUEST_POLICY_FORM_WIDTH,
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
+  isActiveAllowlistPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -78,23 +86,26 @@ const Policies = ({
   onSelectPolicy,
   locked,
 }: PoliciesProps): ReactElement => {
-  const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
-    useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
-  const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
   const { setTxFlow } = useContext(TxModalContext)
-
-  const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
-  const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
+  // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
+  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
   const isSettled = !isLoading && !isError
+  const { newIds: newAllowlistIds, dismiss: dismissNewAllowlist } = useNewAllowlistIds(policies, isSettled)
 
   const selectPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
+    // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isActiveAllowlistPolicy(policy)) {
+      setOpenPolicy(policy)
+    }
   }, [])
 
-  const closeDetails = useCallback(() => setOpenPolicy(null), [])
+  const closeDetails = useCallback(() => {
+    if (openPolicy) dismissNewAllowlist(openPolicy.id)
+    setOpenPolicy(null)
+  }, [openPolicy, dismissNewAllowlist])
 
   // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
   // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
@@ -131,29 +142,29 @@ const Policies = ({
     setTxFlow(<ProposerRoleFlow />)
   }, [setTxFlow])
 
+  const startAllowlistFlow = useCallback(() => setTxFlow(<RecipientAllowlistFlow />), [setTxFlow])
+
+  const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
+  const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
+  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow)
+
   const handleSelect = useCallback(
     (id: AddPolicyId) => {
       switch (id) {
         case 'spending-limit':
-          if (hasSeenSpendingLimitIntro) {
-            startSpendingLimitFlow()
-            return
-          }
-
-          setIsSpendingLimitIntroOpen(true)
+          spendingLimitIntro.request()
           return
 
         case 'proposer':
-          if (hasSeenProposerIntro) {
-            startProposerFlow()
-            return
-          }
-
-          setIsProposerIntroOpen(true)
+          proposerIntro.request()
           return
 
         case 'suggestion':
           openRequestPolicyForm()
+          return
+
+        case 'recipient-allowlist':
+          if (canCreateAllowlist) allowlistIntro.request()
           return
 
         // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
@@ -167,19 +178,8 @@ const Policies = ({
         }
       }
     },
-    [hasSeenSpendingLimitIntro, startSpendingLimitFlow, hasSeenProposerIntro, startProposerFlow],
+    [spendingLimitIntro, proposerIntro, allowlistIntro, canCreateAllowlist],
   )
-
-  // Any dismissal counts as shown: an explainer that returns after you closed it reads as a bug.
-  const closeSpendingLimitIntro = useCallback(() => {
-    setIsSpendingLimitIntroOpen(false)
-    setHasSeenSpendingLimitIntro(true)
-  }, [setHasSeenSpendingLimitIntro])
-
-  const proceedToSpendingLimitFlow = useCallback(() => {
-    closeSpendingLimitIntro()
-    startSpendingLimitFlow()
-  }, [closeSpendingLimitIntro, startSpendingLimitFlow])
 
   const selectFromAddPolicyDialog = useCallback(
     (id: AddPolicyId) => {
@@ -191,23 +191,14 @@ const Policies = ({
 
   const addPolicyOptions = useMemo(
     () =>
-      ADD_POLICY_OPTIONS.map((option) =>
-        locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
-          ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
-          : option,
+      (canCreateAllowlist ? [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] : ADD_POLICY_OPTIONS).map(
+        (option) =>
+          locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
+            ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
+            : option,
       ),
-    [locked],
+    [locked, canCreateAllowlist],
   )
-
-  const closeProposerIntro = useCallback(() => {
-    setIsProposerIntroOpen(false)
-    setHasSeenProposerIntro(true)
-  }, [setHasSeenProposerIntro])
-
-  const proceedToProposerFlow = useCallback(() => {
-    closeProposerIntro()
-    startProposerFlow()
-  }, [closeProposerIntro, startProposerFlow])
 
   return (
     <div data-testid="policies">
@@ -246,7 +237,7 @@ const Policies = ({
               onSelectPolicy={onSelectPolicy ?? selectPolicy}
             />
           ) : (
-            <PolicyCatalogue onSelect={handleSelect} locked={locked} />
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={canCreateAllowlist} />
           )}
         </>
       )}
@@ -259,23 +250,34 @@ const Policies = ({
       />
 
       <SpendingLimitIntroDialog
-        open={isSpendingLimitIntroOpen}
-        onOpenChange={(open) => {
-          if (!open) closeSpendingLimitIntro()
-        }}
-        onProceed={proceedToSpendingLimitFlow}
+        open={spendingLimitIntro.isOpen}
+        onOpenChange={spendingLimitIntro.onOpenChange}
+        onProceed={spendingLimitIntro.proceed}
       />
 
       <ProposerIntroDialog
-        open={isProposerIntroOpen}
-        onOpenChange={(open) => {
-          if (!open) closeProposerIntro()
-        }}
-        onProceed={proceedToProposerFlow}
+        open={proposerIntro.isOpen}
+        onOpenChange={proposerIntro.onOpenChange}
+        onProceed={proposerIntro.proceed}
+      />
+
+      <RecipientAllowlistIntroDialog
+        open={allowlistIntro.isOpen}
+        onOpenChange={allowlistIntro.onOpenChange}
+        onProceed={allowlistIntro.proceed}
       />
 
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
+      )}
+
+      {openedPolicy && isActiveAllowlistPolicy(openedPolicy) && (
+        <AllowlistDetails
+          policy={openedPolicy}
+          policies={policies}
+          onClose={closeDetails}
+          justActivated={newAllowlistIds.has(openedPolicy.id)}
+        />
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
