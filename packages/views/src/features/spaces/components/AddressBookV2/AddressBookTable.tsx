@@ -62,7 +62,8 @@ const AddressBookTable = ({
   const chainsColumn: DataTableColumn<AddressBookContact> = {
     id: 'chains',
     header: 'Chains',
-    width: book === 'workspace' ? '15%' : '20%',
+    // The workspace book's Tags column takes the spare width; the local book has no Tags
+    width: book === 'workspace' ? 'fit' : undefined,
     priority: 'secondary',
     minWidth: 90,
     sortValue: (contact) => contact.chains.length,
@@ -72,7 +73,6 @@ const AddressBookTable = ({
   const tagsColumn: DataTableColumn<AddressBookContact> = {
     id: 'tags',
     header: 'Tags',
-    width: '30%',
     priority: 'secondary',
     minWidth: 140,
     sortValue: (contact) => contact.tags?.map((tag) => tag.name.toLowerCase()).sort()[0] ?? null,
@@ -82,9 +82,9 @@ const AddressBookTable = ({
   const addedByColumn: DataTableColumn<AddressBookContact> = {
     id: 'added-by',
     header: 'Added by',
-    width: '15%',
+    width: 'fit',
     priority: 'secondary',
-    minWidth: 120,
+    minWidth: 130,
     sortValue: (contact) => contact.addedBy?.toLowerCase() ?? null,
     cell: (contact) => <AddedBy name={contact.addedBy} />,
   }
@@ -96,10 +96,10 @@ const AddressBookTable = ({
       id: 'contact',
       header: 'Contact',
       cellTestId: 'table-cell-contact',
-      width: '40%',
+      width: 'fit',
       sticky: true,
-      // The full address in monospace needs this much; below it the table goes compact.
-      minWidth: 360,
+      // Avatar, full address in monospace, copy and explorer buttons; below the summed widths the table goes compact
+      minWidth: 445,
       sortValue: (contact) => contact.name.toLowerCase(),
       cell: (contact, { isCompact }) => (
         <ContactCell
