@@ -292,7 +292,12 @@ const Policies = ({
       )}
 
       {openedPolicy && isAllowlistPolicy(openedPolicy) && isPendingPolicy(openedPolicy) && (
-        <PendingAllowlistDetails policy={openedPolicy} isUnlisted={!listedPolicy} onClose={closeDetails} />
+        <PendingAllowlistDetails
+          policy={openedPolicy}
+          isUnlisted={!listedPolicy}
+          requestedConfigurations={allowlistApplyRequests?.get(openedPolicy.id)?.configurations}
+          onClose={closeDetails}
+        />
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (

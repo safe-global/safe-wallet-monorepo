@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import type { LinkProps } from 'next/link'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@safe-global/views/components/ui/button'
 import { DISCARD_LABEL } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
@@ -20,8 +19,8 @@ export type AllowlistActionsProps = {
   /** The disabled apply button's label while the delay runs, e.g. `Apply in 23 hours 59 minutes`. */
   applyLaterLabel?: string
   transactionLink?: string
-  /** Absent until the transaction and chain configs have loaded. */
-  reviewTransactionHref?: LinkProps['href']
+  /** Opens the queued transaction's review; absent until the transaction has loaded. */
+  onReviewTransaction?: () => void
 }
 
 const AllowlistActions = ({
@@ -33,7 +32,7 @@ const AllowlistActions = ({
   onDiscard,
   applyLaterLabel,
   transactionLink,
-  reviewTransactionHref,
+  onReviewTransaction,
 }: AllowlistActionsProps): ReactElement | null => {
   switch (state.action) {
     case 'connect':
@@ -82,8 +81,8 @@ const AllowlistActions = ({
       return (
         <PolicyDrawerActions
           actionLabel="Review transaction"
-          href={reviewTransactionHref}
-          disabled={!reviewTransactionHref}
+          onClick={onReviewTransaction}
+          disabled={!onReviewTransaction}
         />
       )
 

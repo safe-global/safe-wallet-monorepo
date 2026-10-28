@@ -1,4 +1,5 @@
 import type { LinkProps } from 'next/link'
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
@@ -27,6 +28,8 @@ export type PendingSpendingLimitActions = {
 export type PendingTransactionLinks = Omit<PendingSpendingLimitActions, 'policy'> & {
   /** Fresher than the row's count, once the transaction has loaded. */
   confirmationsSubmitted?: number
+  /** The queued transaction once loaded, for a drawer that opens its review in place. */
+  txSummary?: Transaction
 }
 
 /** The queued transaction's links, fresh signatures and outcome, for any drawer that shows a pending policy. */
@@ -61,6 +64,7 @@ export const usePendingTransactionLinks = (
     reviewTransactionHref,
     onRetry,
     outcome: resolvedOutcome,
+    txSummary,
   }
 }
 
