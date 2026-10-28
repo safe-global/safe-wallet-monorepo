@@ -1,5 +1,6 @@
 # Build half of a two-workflow pair. This half runs with `permissions: {}`,
-# does not reference secrets, and does not write any caches. It runs after
+# does not reference secrets, does not write any caches, and runs no code
+# from the PR checkout in `pr/`. It runs after
 # the deploy completes so the Storybook preview URL is available.
 # Companion publish workflow: web-storybook-screenshots-publish.yml.
 name: Web Storybook Screenshots Build
@@ -23,11 +24,16 @@ jobs:
       github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      # Pin to the commit SHA the deploy ran against so the checked-out tree
-      # matches the deployed preview even if the PR head has moved since.
+      # The scripts come from dev; workflow_run shares the dev cache scope, so no PR code may run here.
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: dev
+          persist-credentials: false
+      # The PR at the deployed commit, read as data only. The PR head may have moved since the deploy.
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+          path: pr
           fetch-depth: 0
           persist-credentials: false
 
@@ -58,6 +64,7 @@ jobs:
 
       - name: Get changed story files
         id: changed-stories
+        working-directory: pr
         run: |
           BASE_SHA="${{ github.event.workflow_run.pull_requests[0].base.sha }}"
           HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
@@ -128,13 +135,15 @@ jobs:
         env:
           CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
           STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
-        run: node ./.github/scripts/generate-web-story-urls.js
+        working-directory: pr
+        run: node "$GITHUB_WORKSPACE/.github/scripts/generate-web-story-urls.js"
 
       - name: Take screenshots
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
         env:
           STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
-        run: node ./.github/scripts/capture-web-storybook-screenshots.js
+        working-directory: pr
+        run: node "$GITHUB_WORKSPACE/.github/scripts/capture-web-storybook-screenshots.js"
 
       - name: Upload screenshots
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
@@ -144,6 +153,6 @@ jobs:
           # `generate-web-story-urls.js` writes `story-urls.json` into the
           # same directory; the artifact deliberately uploads PNGs only,
           # which is all the publish workflow consumes.
-          path: web-storybook-screenshots/*.png
+          path: pr/web-storybook-screenshots/*.png
           if-no-files-found: ignore
           retention-days: 5
