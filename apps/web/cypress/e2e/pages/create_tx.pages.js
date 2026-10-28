@@ -848,7 +848,8 @@ export function verifyNativeTokenTransfer() {
 }
 
 export function changeNonce(value) {
-  cy.get(nonceInput).clear().type(value, { force: true })
+  cy.get(nonceInput).type(`{selectall}${value}`, { force: true })
+  cy.get(nonceInput).should('have.value', String(value))
 }
 
 export function hasNonce() {
