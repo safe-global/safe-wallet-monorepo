@@ -39,7 +39,7 @@ async function signTransfer(page: Page, safe: SeededSafe, recipient: string, spa
   await sendTokens.open()
   await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
   await sendTokens.nextButton.click()
-  await review.sign({ confirmRisk: !spaceId })
+  await review.sign()
   return review
 }
 

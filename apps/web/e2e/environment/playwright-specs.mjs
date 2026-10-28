@@ -37,6 +37,7 @@ export const playwrightSpecs = {
   'e2e/relay.spec.ts': {},
   'e2e/replace.spec.ts': {},
   'e2e/safe-shield-recipient.spec.ts': {},
+  'e2e/safe-shield-untrusted-safe.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'e2e/tx-history-filter.spec.ts': {},

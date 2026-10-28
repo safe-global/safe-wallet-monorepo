@@ -7,9 +7,13 @@ const ANALYSIS_TIMEOUT_MS = 60_000
 export class SafeShieldPage {
   /** The Safe Pro recipient card; its header shows the most severe finding, the findings show when it is expanded */
   readonly recipientCard: Locator
+  /** The critical finding for a Safe that is not in the user's accounts */
+  readonly untrustedSafeFinding: Locator
 
   constructor(page: Page) {
-    this.recipientCard = page.getByTestId('safe-shield-widget').getByTestId('recipient-analysis-group-card')
+    const widget = page.getByTestId('safe-shield-widget')
+    this.recipientCard = widget.getByTestId('recipient-analysis-group-card')
+    this.untrustedSafeFinding = widget.getByText('Not in your accounts', { exact: true })
   }
 
   /** Expand the recipient card to list one finding per check */

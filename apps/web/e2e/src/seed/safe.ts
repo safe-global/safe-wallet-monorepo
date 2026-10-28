@@ -34,12 +34,14 @@ export type SafeSetup = {
   safeVersion?: '1.4.1' | '1.5.0'
   /** Deploys it as the wallet creates a Safe for several networks: on the L1 singleton, with SafeToL2Setup */
   multichain?: boolean
+  /** `false` keeps it out of the user's accounts, so Safe Shield asks to confirm the risk of an unknown Safe */
+  inAccounts?: boolean
 }
 
-/** Deploys a Safe with 1 ETH, waits until CGW serves it, and names it in the test report. */
+/** Deploys a Safe with 1 ETH, waits until CGW serves it, puts it in the user's accounts and names it in the report. */
 export async function seedSafe(
   journey: Journey,
-  { owners, threshold, safeVersion, multichain }: SafeSetup,
+  { owners, threshold, safeVersion, multichain, inAccounts = true }: SafeSetup,
 ): Promise<SeededSafe> {
   const { env } = journey
   const ownerAddresses = owners.map((owner) =>
@@ -53,6 +55,7 @@ export async function seedSafe(
     context: await openSafe(env, journey.owners[signer], address),
   }
   journey.recordSafe(safe)
+  if (inAccounts) await journey.addToAccounts(safe)
   return safe
 }
 
