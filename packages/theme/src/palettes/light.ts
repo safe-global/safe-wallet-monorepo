@@ -64,6 +64,19 @@ const lightPalette: ColorPalette = {
     main: '#D6A100',
     background: '#FFF8CC',
   },
+  // Tag colours (Figma Mint Refresh, Tag node 5-118). Categories only: never status colours.
+  tag: {
+    default: { background: '#F4F4F4', text: '#121312' },
+    slate: { background: '#F0F4F7', text: '#4F5C6B' },
+    clay: { background: '#FBF1EB', text: '#775136' },
+    rose: { background: '#FFEEF5', text: '#8E3665' },
+    orchid: { background: '#FEECFD', text: '#80357F' },
+    lilac: { background: '#F7F2FE', text: '#6F4198' },
+    iris: { background: '#EBEEFE', text: '#403CAA' },
+    cobalt: { background: '#E9F1FE', text: '#184DA3' },
+    sky: { background: '#EDF8FE', text: '#086990' },
+    lagoon: { background: '#DFFBF6', text: '#05665D' },
+  },
   background: {
     default: '#FFFFFF',
     main: '#F4F4F4',
