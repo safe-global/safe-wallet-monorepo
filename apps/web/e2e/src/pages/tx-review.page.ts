@@ -71,7 +71,10 @@ export class TxReviewPage {
     this.batchedTransactions = page.getByRole('listitem').getByTestId('action-item')
     this.transactionDetails = page.getByRole('button', { name: /^Transaction details/ })
     this.noteInput = page.getByLabel('Note')
-    this.viewTransactionLink = page.getByRole('alert').getByRole('link', { name: 'View transaction' })
+    this.viewTransactionLink = page
+      .getByRole('alert')
+      .filter({ hasText: 'Successfully added to queue' })
+      .getByRole('link', { name: 'View transaction' })
   }
 
   async addNote(note: string): Promise<void> {

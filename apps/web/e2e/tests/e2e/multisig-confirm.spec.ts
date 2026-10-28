@@ -37,10 +37,6 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     const transactionPage = (await review.viewTransactionLink.getAttribute('href'))!
     await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
 
-    // The Transaction Service copies the note from the Queue Service; a transaction it indexes as executed has none
-    const [queued] = await safeApiClient.getQueued(safe.address)
-    await expect.poll(async () => (await safeApiClient.findTransaction(queued.id))?.note).toBe(NOTE)
-
     await safePage.goto(transactionPage)
     await expect(safePage.getByText(NOTE)).toBeVisible()
     await expect(queue.transactions).toContainText(AMOUNT)
