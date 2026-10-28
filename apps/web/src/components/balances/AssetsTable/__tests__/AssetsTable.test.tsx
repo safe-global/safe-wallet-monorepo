@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChainIdModule from '@/hooks/useChainId'
@@ -12,7 +12,17 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import { balancesFixtures } from '@safe-global/test/msw/fixtures'
 import { balancesBuilder, balanceBuilder, erc20TokenBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
 import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { mockHasFeature } from '@/tests/mocks/hooks'
 import AssetsTable from '../index'
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ configs: [] })),
+  useChain: jest.fn(),
+  useCurrentChain: jest.fn(),
+  useHasFeature: jest.fn(),
+}))
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
@@ -71,6 +81,8 @@ describe('AssetsTable', () => {
     jest.spyOn(useChainIdModule, 'default').mockReturnValue('5')
     mockUseIsMobile.mockReturnValue(false)
     mockUseSafeTokenEnabled.mockReturnValue(false)
+    mockHasFeature(false)
+    jest.mocked(useChains.useCurrentChain).mockReturnValue(undefined)
   })
 
   describe('empty state', () => {
@@ -153,6 +165,7 @@ describe('AssetsTable', () => {
       jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
         chainBuilder()
           .with({
+            features: [],
             blockExplorerUriTemplate: {
               address: 'https://explorer.test/address/{{address}}',
               txHash: 'https://explorer.test/tx/{{txHash}}',
@@ -408,6 +421,39 @@ describe('AssetsTable', () => {
       })
       expect(screen.queryByTestId('safenet-stake-btn')).not.toBeInTheDocument()
       expect(screen.queryByTestId('stake-btn')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('swap entry point', () => {
+    const tokens = [nativeTokenBuilder().build(), erc20TokenBuilder().build(), erc20TokenBuilder().build()]
+
+    const nonZeroBalances = () =>
+      balancesBuilder()
+        .with({ items: tokens.map((tokenInfo) => balanceBuilder().with({ tokenInfo }).build()) })
+        .build()
+
+    const rowOf = (tokenName: string) =>
+      screen.getAllByRole('row').find((row) => within(row).queryAllByText(tokenName).length > 0)
+
+    it('shows a Swap button in the Actions cell of every asset row when swaps are available', async () => {
+      mockHasFeature({ [FEATURES.NATIVE_SWAPS]: true })
+      renderAssetsTable({ balances: nonZeroBalances() })
+
+      await screen.findAllByTestId('swap-btn')
+      for (const { name } of tokens) {
+        const actionsCell = within(rowOf(name)!).getByTestId('table-cell-actions')
+        expect(within(actionsCell).getByTestId('swap-btn')).toBeInTheDocument()
+      }
+    })
+
+    it('shows no Swap button when swaps are unavailable on the chain', async () => {
+      mockHasFeature(false)
+      renderAssetsTable({ balances: nonZeroBalances() })
+
+      for (const { name } of tokens) {
+        expect((await screen.findAllByText(name)).length).toBeGreaterThan(0)
+      }
+      expect(screen.queryByTestId('swap-btn')).not.toBeInTheDocument()
     })
   })
 })

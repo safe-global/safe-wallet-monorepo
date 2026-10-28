@@ -67,11 +67,6 @@ async function prepareFallbackHandlerScenario(env, owners, safeName) {
   return { safes: { static: await rebuildStagingSafes(env, owners, [safeName]) } }
 }
 
-/** A staging Safe that sets its own fallback handler through Transaction Builder. */
-export function prepareTransactionDetailsScenario(env, owners) {
-  return prepareFallbackHandlerScenario(env, owners, 'SEP_STATIC_SAFE_36')
-}
-
 export function prepareCowFallbackScenario(env, owners) {
   return prepareFallbackHandlerScenario(env, owners, 'SEP_STATIC_SAFE_43')
 }

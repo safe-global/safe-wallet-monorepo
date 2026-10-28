@@ -152,7 +152,7 @@ const crossListItems: AllSafeItems = [
   { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
 ]
 const crossSimilarityGroups = new Map<string, string>([[IMPOSTOR_2, 'x1']])
-const crossWarnings = new Map([[IMPOSTOR_2, { trusted: [REAL], owned: [] }]])
+const crossWarnings = new Map([[IMPOSTOR_2, { trusted: [{ address: REAL, chainIds: ['1'] }], owned: [] }]])
 
 /** Cross-list warning: `IMPOSTOR_2` is a lone banded card with an inline ⚠️ (hover for the peer). */
 export const SimilarityCrossList: Story = {

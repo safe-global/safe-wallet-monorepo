@@ -11,24 +11,24 @@ export default {
   // Sepolia Safes
   /** Create Safe CF and multichain testing - Used in: notifications.cy.js */
   SEP_STATIC_SAFE_0: 'sep:0x926186108f74dB20BFeb2b6c888E523C78cb7E00',
-  /** Swaps and swap history testing - Used in: swaps.cy.js, swaps_history.cy.js, swaps_tokens.cy.js, limit_order_history.cy.js, apps_list.cy.js */
+  /** Swaps and swap history testing - Used in: swaps_history.cy.js, limit_order_history.cy.js, apps_list.cy.js */
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
-  /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, batch_tx.cy.js, safe-apps tests */
+  /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, safe-apps tests */
   SEP_STATIC_SAFE_2: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
   /** Used in: spending_limits_nonowner.cy.js */
   SEP_STATIC_SAFE_3: 'sep:0x33C4AA5729D91FfB3B87AEf8a324bb6304Fb905c',
   SEP_STATIC_SAFE_4: 'sep:0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
-  /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, spending_limits.cy.js */
+  /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_6: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
   /** Used in: address_book_2.cy.js, safe_selector.cy.js, tx_history.cy.js, tx_history_2.cy.js, tx_history_5.cy.js */
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
-  /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js */
+  /** Spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
   /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
-  /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js, create_tx.cy.js */
+  /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Available for general testing */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
@@ -45,13 +45,11 @@ export default {
   // More Sepolia Safes
   /** Transaction history, messages, and spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
-  /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
-  SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
   /** TWAP history testing - Used in: twaps_history.cy.js */
   SEP_STATIC_SAFE_27: 'sep:0xC97FCf0B8890a5a7b1a1490d44Dc9EbE3cE04884',
 
   // More Polygon (Matic) Safes
-  /** Multichain testing (primary CF safe) - Used in: multichain_*.cy.js, sidebar_*.cy.js, create_tx.cy.js
+  /** Multichain testing (primary CF safe) - Used in: multichain_*.cy.js, sidebar_*.cy.js
    * ⚠️ Heavily used for multichain testing - avoid modifying its state */
   MATIC_STATIC_SAFE_28: 'matic:0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B',
 
@@ -68,8 +66,6 @@ export default {
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
   /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
-  /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
-  SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */
   SEP_STATIC_SAFE_39: 'sep:0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD',
   /** Nested safes testing - Used in: nested_safes.cy.js */

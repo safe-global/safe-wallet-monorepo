@@ -3,7 +3,6 @@ import * as safeapps from './safeapps.pages.js'
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
-export const assetsWidget = '[data-testid="assets-widget"]'
 
 export function pinAppByIndex(index) {
   return cy

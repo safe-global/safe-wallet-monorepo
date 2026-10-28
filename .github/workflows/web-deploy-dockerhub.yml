@@ -67,8 +67,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
       - name: Deploy Develop
         if: github.ref == 'refs/heads/dev'
         uses: docker/build-push-action@v7.4.0
@@ -80,8 +78,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
       - name: Resolve Docker tag
         if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
         id: docker_tag
@@ -102,5 +98,3 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max

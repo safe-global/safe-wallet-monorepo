@@ -196,6 +196,15 @@ describe('SignMessage', () => {
 
       expect(await findByTestId('modal-title')).toHaveTextContent('Confirm message')
     })
+
+    it('leaves out the transaction note field', async () => {
+      const { findByText, queryByLabelText } = render(
+        <SignMessageFlow logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
+      )
+
+      expect(await findByText(EXAMPLE_MESSAGE)).toBeInTheDocument()
+      expect(queryByLabelText('Note')).not.toBeInTheDocument()
+    })
   })
 
   describe('EIP-712 messages', () => {
