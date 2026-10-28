@@ -96,14 +96,22 @@ describe('TabsList', () => {
 
     const list = screen.getByTestId('list')
     expect(list).toHaveAttribute('data-variant', 'nav-lg')
-    expect(list).toHaveClass('gap-8', 'w-auto', 'group-data-horizontal/tabs:h-11', 'overflow-x-auto')
-    expect(list.className).not.toMatch(/(^|\s)(w-fit|w-full|group-data-horizontal\/tabs:h-9)(\s|$)/)
+    expect(list).toHaveClass(
+      'gap-8',
+      'w-auto',
+      'min-w-0',
+      'justify-start',
+      'group-data-horizontal/tabs:h-11',
+      'overflow-x-auto',
+    )
+    expect(list.className).not.toMatch(/(^|\s)(w-fit|w-full|justify-center|group-data-horizontal\/tabs:h-9)(\s|$)/)
     expect(screen.getByRole('tab', { name: 'Queue' })).toHaveClass(
       'group-data-[variant=nav-lg]/tabs-list:h-11',
+      'group-data-[variant=nav-lg]/tabs-list:flex-none',
       'group-data-[variant=nav-lg]/tabs-list:items-end',
       'group-data-[variant=nav-lg]/tabs-list:px-0',
       'group-data-[variant=nav-lg]/tabs-list:pb-2.5',
-      'font-medium',
+      'group-data-[variant=nav-lg]/tabs-list:focus-visible:-outline-offset-1',
     )
     expect(screen.getByRole('tab', { name: 'Queue' }).className).not.toMatch(/nav-lg\]\/tabs-list:font-bold/)
   })
@@ -111,7 +119,7 @@ describe('TabsList', () => {
   it('keeps underline brand on the bold nav look when no size is set', () => {
     render(
       <Tabs defaultValue="assets">
-        <TabsList data-testid="list" variant="underline" tone="brand" size="default">
+        <TabsList data-testid="list" variant="underline" tone="brand">
           <TabsTrigger value="assets">Assets</TabsTrigger>
         </TabsList>
         <TabsContent value="assets">Assets panel</TabsContent>
