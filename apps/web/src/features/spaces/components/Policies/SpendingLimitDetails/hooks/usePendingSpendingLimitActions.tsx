@@ -7,6 +7,7 @@ import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type {
+  PendingAllowlistPolicy,
   PendingSpendingLimitPolicy,
   QueuedSpendingLimitPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -23,11 +24,17 @@ export type PendingSpendingLimitActions = {
   outcome?: PendingTxOutcome
 }
 
-export const usePendingSpendingLimitActions = (
-  policy: PendingSpendingLimitPolicy,
+export type PendingTransactionLinks = Omit<PendingSpendingLimitActions, 'policy'> & {
+  /** Fresher than the row's count, once the transaction has loaded. */
+  confirmationsSubmitted?: number
+}
+
+/** The queued transaction's links, fresh signatures and outcome, for any drawer that shows a pending policy. */
+export const usePendingTransactionLinks = (
+  policy: Pick<PendingSpendingLimitPolicy | PendingAllowlistPolicy, 'safe' | 'safeTxHash' | 'status'>,
   viewer: Viewer,
   isUnlisted = false,
-): PendingSpendingLimitActions => {
+): PendingTransactionLinks => {
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
   const chain = useChain(chainId)
@@ -47,16 +54,29 @@ export const usePendingSpendingLimitActions = (
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 
   return {
-    policy: {
-      ...policy,
-      status: 'pending',
-      confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
-    },
+    confirmationsSubmitted,
     viewer: { ...viewer, hasSigned },
     // Shared links leave the Space out on purpose: their recipient may not be a member of it.
     transactionLink: txPath ? `${origin}${txPath}` : undefined,
     reviewTransactionHref,
     onRetry,
     outcome: resolvedOutcome,
+  }
+}
+
+export const usePendingSpendingLimitActions = (
+  policy: PendingSpendingLimitPolicy,
+  viewer: Viewer,
+  isUnlisted = false,
+): PendingSpendingLimitActions => {
+  const { confirmationsSubmitted, ...links } = usePendingTransactionLinks(policy, viewer, isUnlisted)
+
+  return {
+    ...links,
+    policy: {
+      ...policy,
+      status: 'pending',
+      confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
+    },
   }
 }
