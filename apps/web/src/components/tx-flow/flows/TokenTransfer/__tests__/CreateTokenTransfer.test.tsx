@@ -389,6 +389,8 @@ describe('CreateTokenTransfer', () => {
 
   describe('Pay from Safe fee banner', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    // Pay from Safe follows the chain's relayer, not a feature flag
+    const isPayFromSafeEnabledSpy = jest.spyOn(payFromSafeHooks, 'useIsPayFromSafeEnabled')
     const useResolvedGasTokenSpy = jest.spyOn(payFromSafeHooks, 'useResolvedGasToken')
 
     const mockResolvedToSentToken = () =>
@@ -427,6 +429,7 @@ describe('CreateTokenTransfer', () => {
 
     it('shows fee banner after MAX click when resolved gas token equals sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
@@ -443,6 +446,7 @@ describe('CreateTokenTransfer', () => {
 
     it('does not show fee banner when Pay from Safe is disabled', () => {
       useHasFeatureSpy.mockImplementation(() => false)
+      isPayFromSafeEnabledSpy.mockReturnValue(false)
       mockBalancesForPayFromSafe()
 
       const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
@@ -454,6 +458,7 @@ describe('CreateTokenTransfer', () => {
 
     it('does not show fee banner when resolved gas token differs from sent token', () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
       useResolvedGasTokenSpy.mockReturnValue({
@@ -470,6 +475,7 @@ describe('CreateTokenTransfer', () => {
 
     it('dismisses fee banner on close button click', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
@@ -489,6 +495,7 @@ describe('CreateTokenTransfer', () => {
     // The fee banner renders as an info alert, not the plain default
     it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
@@ -509,6 +516,7 @@ describe('CreateTokenTransfer', () => {
 
     it('renders the standard info icon inside the fee banner', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 

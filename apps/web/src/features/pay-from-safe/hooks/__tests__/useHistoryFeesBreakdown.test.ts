@@ -21,8 +21,22 @@ const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const TX_HASH = '0x257151cef22c9f9f7b8e1931dda6fe03c8f9dbc0dca3465cb4f4c354b484f1e5'
 
+const relayer = (gasPaymentOptions: string[]) =>
+  ({
+    type: 'RELAY_FEE',
+    safeCreationSponsored: false,
+    safeTransactionSponsored: false,
+    enableTenderlySimulationBeforeRelay: false,
+    gasPaymentOptions,
+  }) as never
+
+const nativeCurrency = { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' }
 const mockChain = chainBuilder()
-  .with({ chainId: '1', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' } })
+  .with({ chainId: '1', nativeCurrency, relayer: relayer(['PAY_FROM_SAFE']) })
+  .build()
+// A chain whose relayer no longer offers Pay from Safe
+const mockChainWithoutPayFromSafe = chainBuilder()
+  .with({ chainId: '1', nativeCurrency, relayer: relayer(['SUBSCRIPTION']) })
   .build()
 
 const buildBalances = (items: unknown[] = []): ReturnType<typeof useBalancesModule.default> => ({
@@ -105,7 +119,6 @@ const buildFailingProvider = (error: unknown) =>
 describe('useHistoryFeesBreakdown', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([nativeBalance, wethBalance]))
     jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildProvider(null))
@@ -210,12 +223,23 @@ describe('useHistoryFeesBreakdown', () => {
     expect(provider.getTransactionReceipt).not.toHaveBeenCalled()
   })
 
-  it('returns null when Pay from Safe feature is disabled', async () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+  it('still shows a Safe-paid breakdown where the relayer no longer offers Pay from Safe', async () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChainWithoutPayFromSafe)
 
     const { result } = renderHook(() => useHistoryFeesBreakdown(mockSafePaysTx))
 
+    await waitFor(() => expect(result.current?.paidFrom).toBe('safe'))
+  })
+
+  it('shows no signer-paid breakdown where the relayer does not offer Pay from Safe', async () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChainWithoutPayFromSafe)
+    const provider = { getTransactionReceipt: jest.fn() } as unknown as ReturnType<typeof web3Module.useWeb3ReadOnly>
+    jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
+
+    const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+
     await waitFor(() => expect(result.current).toBeNull())
+    expect(provider!.getTransactionReceipt).not.toHaveBeenCalled()
   })
 
   it('returns null for module-executed transactions', async () => {

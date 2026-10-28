@@ -79,9 +79,10 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
   // Safe-pays: use the `payment` field — the actual amount transferred to the refundReceiver,
   // denominated in `gasToken` base units. Falls back to native chain metadata when the gas
-  // token is the zero address.
+  // token is the zero address. Shown on any chain: the payload itself says the Safe paid, even
+  // where the relayer no longer offers Pay from Safe.
   const safePaidData = useMemo<HistoryFeesData | null>(() => {
-    if (!isPayFromSafeEnabled || !executedAt || !exec || !isSafePaid) return null
+    if (!executedAt || !exec || !isSafePaid) return null
     if (!payment) return null
 
     const isNative = sameAddress(gasToken, ZERO_ADDRESS)
@@ -93,7 +94,6 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
     return buildFees(amount, symbol, fiatAmount, 'safe')
   }, [
-    isPayFromSafeEnabled,
     executedAt,
     isSafePaid,
     payment,

@@ -9,7 +9,7 @@ const GAS_TOKEN = ZERO
 const NATIVE_LOGO = 'https://example.com/pol.png'
 const ERC20_GAS_TOKEN = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 
-let mockRelayer: { type: string } | null = null
+let mockRelayer: { type: string; gasPaymentOptions: string[] } | null = null
 let mockBalanceItems: Array<{ tokenInfo: { address: string; logoUri: string; symbol: string } }> = []
 
 jest.mock('@/hooks/useChains', () => ({
@@ -97,10 +97,11 @@ describe('Receipt Pay from Safe fee preview', () => {
     jest.clearAllMocks()
     mockRelayer = {
       type: 'RELAY_FEE',
+      gasPaymentOptions: ['PAY_FROM_SAFE'],
     }
   })
 
-  it('ignores the preview on chains without a RELAY_FEE relayer', () => {
+  it('ignores the preview on chains without a relayer', () => {
     mockRelayer = null
     mockUsePayFromSafeFeePreview.mockReturnValue({
       data: {
@@ -162,7 +163,7 @@ describe('Receipt Pay from Safe fee preview', () => {
 describe('Receipt GasToken identity', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRelayer = { type: 'RELAY_FEE' }
+    mockRelayer = { type: 'RELAY_FEE', gasPaymentOptions: ['PAY_FROM_SAFE'] }
     mockBalanceItems = []
     mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
@@ -200,7 +201,7 @@ describe('Receipt GasToken identity', () => {
 describe('Receipt To row', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRelayer = { type: 'RELAY_FEE' }
+    mockRelayer = { type: 'RELAY_FEE', gasPaymentOptions: ['PAY_FROM_SAFE'] }
     mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
 

@@ -1,35 +1,10 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import {
-  PayFromSafeFeature,
-  isPayFromSafeAvailable,
-  useFeesPreview,
-  useGasPayerSelection,
-  useIsPayFromSafeSlotVisible,
-} from '@/features/pay-from-safe'
+import { PayFromSafeFeature, useGasPayerSelection, useIsPayFromSafeSlotVisible } from '@/features/pay-from-safe'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
-import { useCurrentChain } from '@/hooks/useChains'
 import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
-
-/** Legacy Pay from Safe fee card: chains with the Pay from Safe flag that do not list PAY_FROM_SAFE. */
-const LegacyFeesPreview = (): ReactElement => {
-  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(PayFromSafeFeature)
-  const feesData = useFeesPreview()
-  const { setIsSubmitDisabled } = useContext(TxFlowContext)
-
-  // Block submit while the CGW fee preview is resolving. Otherwise a fast click on Continue/Execute
-  // signs before `feeGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
-  useEffect(() => {
-    setIsSubmitDisabled(!!feesData.loading)
-    return () => setIsSubmitDisabled(false)
-  }, [feesData.loading, setIsSubmitDisabled])
-
-  useSafeShieldForTxData(feesData.previewedSafeTx)
-
-  return <FeesPreviewComponent {...feesData} />
-}
 
 /**
  * Sign step of the fee payment spec: the first signer picks who pays the network fee (Pay from Safe is
@@ -61,13 +36,9 @@ const FeePayerSignStep = (): ReactElement | null => {
   )
 }
 
-const FeesPreview = (): ReactElement | null => {
-  const chain = useCurrentChain()
-  return isPayFromSafeAvailable(chain) ? <FeePayerSignStep /> : <LegacyFeesPreview />
-}
-
+// Shown only where the chain's relayer offers Pay from Safe (`useIsPayFromSafeSlotVisible`).
 const FeesPreviewSlot = withSlot({
-  Component: FeesPreview,
+  Component: FeePayerSignStep,
   slotName: SlotName.Main,
   id: 'feesPreview',
   useSlotCondition: useIsPayFromSafeSlotVisible,

@@ -1,9 +1,5 @@
 export const PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY = 'gtfFeesBannerDismissed' // storage key kept so dismissed banners stay dismissed
 
-// flip to `true` to restore the Safe-pays UI and signing once relaying ships.
-// SMOKE TEST (feat/pay-from-safe): enabled locally to exercise Pay from Safe against staging. Do not merge.
-export const IS_RELAYING_LIVE = true
-
 /**
  * Phase 1 of Pay from Safe only pays fees in the chain's native token: the selector offers it alone
  * (locked, "more tokens are coming soon"). Flip to `false` to offer the ERC-20s of `GAS_TOKEN_ALLOWLIST`.

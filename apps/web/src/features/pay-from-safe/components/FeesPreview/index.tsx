@@ -28,7 +28,6 @@ import type { FeesPreviewData, TotalOutgoing } from '../../hooks/useFeesPreview'
 import { withoutFees } from '../../services/totalOutgoing'
 import { FeeBreakdownRow } from '@safe-global/views/features/pay-from-safe/components/shared/FeeBreakdownRow'
 import { GAS_FEE_TOOLTIP } from '@safe-global/views/features/pay-from-safe/components/shared/tooltips'
-import { IS_RELAYING_LIVE } from '../../constants'
 import css from './styles.module.css'
 
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
@@ -248,10 +247,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
   const noEligibleGasToken =
     !isConfirmation && !isLegacySigned && (availableGasTokens?.length ?? 0) === 0 && canCoverFees
 
-  // Relaying hidden: only a payload signed before the switch still pays from the Safe.
-  const isSafeWallet =
-    (IS_RELAYING_LIVE ? feePaymentMode === 'safe' : !!isConfirmation && !isLegacySigned && canCoverFees) &&
-    !noEligibleGasToken
+  const isSafeWallet = feePaymentMode === 'safe' && !noEligibleGasToken
   const displayedOutgoing = isSafeWallet ? totalOutgoing : withoutFees(totalOutgoing)
 
   const handlePaymentSourceChange = (source: FeePaymentMode) => {
@@ -267,71 +263,63 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     <div className={css.container}>
       <div className={css.header}>
         <Typography variant="paragraph-small-bold">Fees</Typography>
-        {IS_RELAYING_LIVE && (
-          <a href={HOW_FEES_WORK_URL} target="_blank" rel="noreferrer noopener" className={css.howFeesWork}>
-            How fees work
-            <ArrowUpRightIcon className="size-4" />
-          </a>
-        )}
+        <a href={HOW_FEES_WORK_URL} target="_blank" rel="noreferrer noopener" className={css.howFeesWork}>
+          How fees work
+          <ArrowUpRightIcon className="size-4" />
+        </a>
       </div>
 
       <div className={css.feeCard}>
-        {IS_RELAYING_LIVE && (
+        {/* Confirmer on a Safe-pays signed payload — fees already locked in */}
+        {isConfirmation && canCoverFees && !isLegacySigned && (
           <>
-            {/* Confirmer on a Safe-pays signed payload — fees already locked in */}
-            {isConfirmation && canCoverFees && !isLegacySigned && (
-              <>
-                <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
-                <Separator bleed="4" />
-              </>
-            )}
+            <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
+            <Separator bleed="4" />
+          </>
+        )}
 
-            {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked. Same lock
-                when the Safe holds no eligible gas token. */}
-            {(isLegacySigned || noEligibleGasToken) && (
-              <>
-                <SignerFeeNotice isLocked />
-                <Separator bleed="4" />
-              </>
-            )}
+        {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked. Same lock
+            when the Safe holds no eligible gas token. */}
+        {(isLegacySigned || noEligibleGasToken) && (
+          <>
+            <SignerFeeNotice isLocked />
+            <Separator bleed="4" />
+          </>
+        )}
 
-            {/* First signer, Safe can cover fees */}
-            {!isConfirmation && canCoverFees && !noEligibleGasToken && (
-              <>
-                <div className={css.paymentRow}>
-                  <div className={css.paymentRowGroup}>
-                    <Typography variant="paragraph-small" color="muted">
-                      Pay fees from:
-                    </Typography>
-                    <PaymentSourceSelector value={feePaymentMode} onChange={handlePaymentSourceChange} />
-                  </div>
-                  <div className={css.paymentRowGroup}>
-                    <Typography variant="paragraph-small" color="muted">
-                      Fees token:
-                    </Typography>
-                    <GasTokenSelector
-                      availableGasTokens={availableGasTokens}
-                      selectedGasToken={
-                        isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.address ?? '')
-                      }
-                      onGasTokenChange={props.onGasTokenChange}
-                      locked={!isSafeWallet}
-                      forcedDisplay={!isSafeWallet ? nativeDisplay : undefined}
-                    />
-                  </div>
-                </div>
+        {/* First signer, Safe can cover fees */}
+        {!isConfirmation && canCoverFees && !noEligibleGasToken && (
+          <>
+            <div className={css.paymentRow}>
+              <div className={css.paymentRowGroup}>
+                <Typography variant="paragraph-small" color="muted">
+                  Pay fees from:
+                </Typography>
+                <PaymentSourceSelector value={feePaymentMode} onChange={handlePaymentSourceChange} />
+              </div>
+              <div className={css.paymentRowGroup}>
+                <Typography variant="paragraph-small" color="muted">
+                  Fees token:
+                </Typography>
+                <GasTokenSelector
+                  availableGasTokens={availableGasTokens}
+                  selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.address ?? '')}
+                  onGasTokenChange={props.onGasTokenChange}
+                  locked={!isSafeWallet}
+                  forcedDisplay={!isSafeWallet ? nativeDisplay : undefined}
+                />
+              </div>
+            </div>
 
-                <Separator bleed="4" />
-              </>
-            )}
+            <Separator bleed="4" />
+          </>
+        )}
 
-            {/* Safe can't cover fees — fall back to signer */}
-            {!canCoverFees && (
-              <>
-                <SignerFeeNotice />
-                <Separator bleed="4" />
-              </>
-            )}
+        {/* Safe can't cover fees — fall back to signer */}
+        {!canCoverFees && (
+          <>
+            <SignerFeeNotice />
+            <Separator bleed="4" />
           </>
         )}
 

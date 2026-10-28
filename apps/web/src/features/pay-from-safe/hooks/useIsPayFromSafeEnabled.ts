@@ -1,19 +1,17 @@
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useCurrentChain } from '@/hooks/useChains'
+import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 
 /**
- * Whether the current chain enables Pay from Safe (the fee card, the history fee breakdown, the
- * gas-aware Max in token transfers, the GTF gas path in the tx flow and speed-up).
+ * Whether the current chain offers Pay from Safe: its relayer lists `PAY_FROM_SAFE` in
+ * `gasPaymentOptions`. That option alone switches the UI on (the fee card, the info banner, the
+ * gas-aware Max in token transfers, the signer-paid history breakdown and the gas payment source in
+ * analytics); there is no separate feature flag. It is also what the CGW requires to relay a
+ * transaction that refunds the relayer from the Safe.
  *
- * `PAY_FROM_SAFE` is the flag's new name; `GTF` is the name production chains carry today. Both are
- * accepted so the web can ship before the Config Service is updated. Drop `GTF` once every chain
- * lists `PAY_FROM_SAFE`.
- *
- * @returns `true` when enabled, `false` when not, `undefined` while the chain is unknown.
+ * @returns `true` when offered, `false` when not, `undefined` while the chain is unknown.
  */
 export const useIsPayFromSafeEnabled = (): boolean | undefined => {
-  const hasPayFromSafe = useHasFeature(FEATURES.PAY_FROM_SAFE)
-  const hasLegacyGtf = useHasFeature(FEATURES.GTF)
-  if (hasPayFromSafe === undefined && hasLegacyGtf === undefined) return undefined
-  return !!hasPayFromSafe || !!hasLegacyGtf
+  const chain = useCurrentChain()
+  if (!chain) return undefined
+  return isPayFromSafeAvailable(chain)
 }

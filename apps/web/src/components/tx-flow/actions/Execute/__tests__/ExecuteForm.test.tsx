@@ -27,6 +27,12 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
+// The fee card feeds Safe Shield the payload it simulates; the form is tested without the provider.
+jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+  ...jest.requireActual('@/features/safe-shield/SafeShieldContext'),
+  useSafeShieldForTxData: jest.fn(),
+}))
+
 jest.mock('@/hooks/useGasPaymentOptions', () => ({
   useGasPaymentOptions: () => mockUseGasPaymentOptions(),
 }))

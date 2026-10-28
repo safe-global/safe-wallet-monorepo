@@ -1,38 +1,41 @@
 import type { Relayer } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
 import { chainBuilder } from '@/tests/builders/chains'
 import { isPayFromSafeAvailable } from '../isPayFromSafeAvailable'
 
-const relayer = (type: Relayer['type']): Relayer => ({
+const relayer = (gasPaymentOptions: Relayer['gasPaymentOptions'], type: Relayer['type'] = 'DAILY_LIMIT'): Relayer => ({
   type,
   safeCreationSponsored: false,
   safeTransactionSponsored: false,
   enableTenderlySimulationBeforeRelay: false,
-  gasPaymentOptions: ['SUBSCRIPTION'],
+  gasPaymentOptions,
 })
 
-const buildChain = (features: FEATURES[], chainRelayer: Relayer | null) =>
-  chainBuilder().with({ features, relayer: chainRelayer }).build()
+const buildChain = (chainRelayer: Relayer | null, features: string[] = []) =>
+  chainBuilder()
+    .with({ features: features as never, relayer: chainRelayer })
+    .build()
 
 describe('isPayFromSafeAvailable', () => {
-  it('is available with the Pay from Safe flag and a RELAY_FEE or GTF relayer', () => {
-    expect(isPayFromSafeAvailable(buildChain([FEATURES.GTF], relayer('RELAY_FEE')))).toBe(true)
-    expect(isPayFromSafeAvailable(buildChain([FEATURES.GTF], relayer('GTF')))).toBe(true)
+  it('is available when the relayer lists PAY_FROM_SAFE, with no feature flag', () => {
+    expect(isPayFromSafeAvailable(buildChain(relayer(['PAY_FROM_SAFE'])))).toBe(true)
+    expect(isPayFromSafeAvailable(buildChain(relayer(['FREE_DAILY_LIMIT', 'SUBSCRIPTION', 'PAY_FROM_SAFE'])))).toBe(
+      true,
+    )
   })
 
-  it('is unavailable when the Pay from Safe flag is on but the relayer is not set', () => {
-    expect(isPayFromSafeAvailable(buildChain([FEATURES.GTF], null))).toBe(false)
+  it('ignores the relayer type', () => {
+    expect(isPayFromSafeAvailable(buildChain(relayer(['PAY_FROM_SAFE'], 'RELAY_FEE')))).toBe(true)
+    expect(isPayFromSafeAvailable(buildChain(relayer(['PAY_FROM_SAFE'], 'NO_FEE_CAMPAIGN')))).toBe(true)
   })
 
-  it('is unavailable with a relayer type that cannot quote fees', () => {
-    expect(isPayFromSafeAvailable(buildChain([FEATURES.GTF], relayer('DAILY_LIMIT')))).toBe(false)
-    expect(isPayFromSafeAvailable(buildChain([FEATURES.GTF], relayer('NO_FEE_CAMPAIGN')))).toBe(false)
-    expect(isPayFromSafeAvailable(buildChain([FEATURES.GTF], relayer(null)))).toBe(false)
+  it('is unavailable when the relayer does not list PAY_FROM_SAFE, whatever the flags', () => {
+    expect(isPayFromSafeAvailable(buildChain(relayer(['SUBSCRIPTION']), ['GTF', 'PAY_FROM_SAFE']))).toBe(false)
+    expect(isPayFromSafeAvailable(buildChain(relayer([]), ['GTF']))).toBe(false)
   })
 
-  it('is unavailable without the Pay from Safe flag, even with a RELAY_FEE relayer', () => {
-    expect(isPayFromSafeAvailable(buildChain([], relayer('RELAY_FEE')))).toBe(false)
+  it('is unavailable without a relayer', () => {
+    expect(isPayFromSafeAvailable(buildChain(null, ['GTF']))).toBe(false)
   })
 
   it('is unavailable without a chain', () => {
