@@ -272,9 +272,10 @@ export const useFeesPreview = (): FeesPreviewData => {
   }
 
   // Signed payload without Pay from Safe fee setup. Locked confirmer-style UI: no selectors, gas fee
-  // shown as "Calculated at execution" (multi-sig — executor unknown) or local EOA estimate (1/1).
+  // shown as "Calculated at execution" while signatures are missing (executor unknown), or a local
+  // estimate once the payload is fully signed (1/1, or the Execute step of a multi-sig).
   if (isLegacySigned && safeTx) {
-    if (safe.threshold > 1) {
+    if (safeTx.signatures.size < safe.threshold) {
       return {
         ...base,
         isConfirmation: true,

@@ -652,6 +652,23 @@ describe('useFeesPreview', () => {
       expect(result.current.gasFee.amount).toBeUndefined()
     })
 
+    it('estimates the gas fee for a fully signed Signer-pays tx (Execute step of a multi-sig)', () => {
+      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+      const fullySignedSignerPaysTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+        new Map([
+          ['0xSigner1', {}],
+          ['0xSigner2', {}],
+        ]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(fullySignedSignerPaysTx) })
+
+      expect(result.current.isLegacySigned).toBe(true)
+      expect(result.current.gasFee.note).toBeUndefined()
+      expect(result.current.gasFee.amount).toBeDefined()
+    })
+
     it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx', () => {
       jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
       const lockedRejectWeth = buildSafeTx(

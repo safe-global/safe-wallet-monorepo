@@ -215,6 +215,7 @@ export const ExecuteForm = ({
     !safeTx ||
     isSubmitDisabled ||
     selection.isQuoteLoading ||
+    selection.hasQuoteError ||
     isSubmitLoading ||
     disableSubmit ||
     isExecutionLoop ||

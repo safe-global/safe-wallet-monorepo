@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -8,6 +8,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useSafeSponsoredTxs } from '@/features/spaces'
+import { useAppDispatch, useAppSelector } from '@/store'
+import useWallet from '@/hooks/wallets/useWallet'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import type {
   FeePayerControl,
@@ -20,6 +22,7 @@ import type {
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { usePayFromSafeFeePreview } from './usePayFromSafeFeePreview'
+import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '../store'
 
 export type GasPayerSelection = {
   /** The fee card to render, or null before the payload exists or where the chain does not list PAY_FROM_SAFE. */
@@ -33,6 +36,8 @@ export type GasPayerSelection = {
   isPayFromSafe: boolean
   /** The quote the signature depends on is still resolving. */
   isQuoteLoading: boolean
+  /** Safe account is chosen but could not be quoted: signing would silently fall back to signer-pays. */
+  hasQuoteError: boolean
   planState: FeePayerPlanState
   fees: FeesPreviewData
   onGasTokenChange?: (address: string) => void
@@ -43,6 +48,9 @@ export type GasPayerSelection = {
  * transaction, so it is the one choice made at signing (first signer, or the signer who executes on
  * a 1/n Safe); sponsoring and the connected wallet are decided at execution. The choice is mirrored
  * into `feePaymentMode`, which is what merges the fee params into the payload right before signing.
+ *
+ * Signer wallet is the default. A Safe account / Signer wallet pick is remembered per signer and becomes
+ * the default of the next flow while the Safe can still pay; nothing else is persisted.
  *
  * Paying from the Safe is open to every plan (the free plan pays a premium on top of the network
  * fee); only sponsoring depends on the Workspace's plan.
@@ -62,6 +70,9 @@ export const useGasPayerSelection = ({
   const { feePaymentMode, setFeePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()
+  const dispatch = useAppDispatch()
+  const signerAddress = useWallet()?.address
+  const preferredMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress))
 
   const signatures = safeTx?.signatures.size ?? 0
   const isUnsigned = !!safeTx && signatures === 0
@@ -72,18 +83,51 @@ export const useGasPayerSelection = ({
   const planState: FeePayerPlanState = !isPro ? 'FREE' : left === 0 ? 'PRO_NO_SPONSORED' : 'PRO_SPONSORED_LEFT'
 
   // The Safe can be asked to pay only on an unsigned payload with a gas token to pay from.
+  // `fees.canCoverFees` is left out on purpose: it turns false when the quote fails, which would drop
+  // Safe account, stop the query and bring it back, refetching the failed quote in a loop. A failed
+  // quote is surfaced as `hasQuoteError` instead.
   const canPayFromSafe =
-    !isLocked &&
-    isChainReady &&
-    isUnsigned &&
-    !fees.isLegacySigned &&
-    fees.canCoverFees &&
-    (fees.availableGasTokens?.length ?? 0) > 0
+    !isLocked && isChainReady && isUnsigned && !fees.isLegacySigned && (fees.availableGasTokens?.length ?? 0) > 0
 
-  // The quote is shown next to "Pay from Safe" before it is picked, so it is fetched independently of
-  // the payment mode; RTK Query dedupes it with the one `useFeesPreview` runs once the mode is `safe`.
+  // `useFeesPreview` prices whichever mode is active: the signer estimate while `signer`, the quote while `safe`.
+  const currentFee: NetworkFee = {
+    amount: fees.gasFee.amount,
+    currency: fees.gasFee.currency,
+    fiatAmount: fees.gasFee.fiatAmount,
+    note: fees.gasFee.note,
+    loading: fees.loading,
+    error: fees.error,
+  }
+  const signerFee: NetworkFee =
+    feePaymentMode === 'safe' && !isLocked ? { note: 'Calculated at execution' } : currentFee
+
+  // Spec: a Pro Workspace with sponsored transactions left decides at execution, so Pay from Safe is not
+  // offered to it at the sign step; the executor gets the sponsored toggle instead.
+  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT'
+  // At execution a sponsored offer replaces the Safe toggle (Pro plan / Signer wallet).
+  const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
+
+  const isChoiceAvailable = (candidate: GasPayerChoice | undefined): candidate is GasPayerChoice =>
+    candidate === 'WALLET' ||
+    (candidate === 'SPONSORED' && hasSponsoredOffer && step === 'execute') ||
+    (candidate === 'PAY_FROM_SAFE' && isSafeOptionShown)
+
+  const preferredChoice: GasPayerChoice | undefined = preferredMode === 'safe' ? 'PAY_FROM_SAFE' : undefined
+
+  const choice: GasPayerChoice = isLocked
+    ? 'PAY_FROM_SAFE'
+    : isChoiceAvailable(explicitChoice)
+      ? explicitChoice
+      : hasSponsoredOffer && step === 'execute'
+        ? 'SPONSORED'
+        : isChoiceAvailable(preferredChoice)
+          ? preferredChoice
+          : 'WALLET'
+
+  // The quote is only requested once Safe account is the choice: nothing is quoted while the signer pays.
+  // RTK Query dedupes it with the one `useFeesPreview` runs once the mode is `safe`.
   const quote = usePayFromSafeFeePreview({
-    enabled: canPayFromSafe,
+    enabled: choice === 'PAY_FROM_SAFE' && canPayFromSafe,
     safeTx,
     chain,
     safeAddress,
@@ -102,35 +146,6 @@ export const useGasPayerSelection = ({
       fiatAmount: formatCurrencyMinimal(Number(relayCost.fiatValue), relayCost.fiatCode),
     }
   }, [quote.isLoading, quote.isFetching, quote.data, quote.error, fees.availableGasTokens, chain])
-
-  // `useFeesPreview` prices whichever mode is active: the signer estimate while `signer`, the quote while `safe`.
-  const currentFee: NetworkFee = {
-    amount: fees.gasFee.amount,
-    currency: fees.gasFee.currency,
-    fiatAmount: fees.gasFee.fiatAmount,
-    note: fees.gasFee.note,
-    loading: fees.loading,
-    error: fees.error,
-  }
-  const signerFee: NetworkFee =
-    feePaymentMode === 'safe' && !isLocked ? { note: 'Calculated at execution' } : currentFee
-
-  const isChoiceAvailable = (candidate: GasPayerChoice | undefined): candidate is GasPayerChoice =>
-    candidate === 'WALLET' ||
-    (candidate === 'SPONSORED' && hasSponsoredOffer && step === 'execute') ||
-    (candidate === 'PAY_FROM_SAFE' && canPayFromSafe)
-
-  // Spec: a Pro Workspace with sponsored transactions left decides at execution, so Pay from Safe is not
-  // offered to it at the sign step; the executor gets the sponsored toggle instead.
-  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT'
-
-  const choice: GasPayerChoice = isLocked
-    ? 'PAY_FROM_SAFE'
-    : isChoiceAvailable(explicitChoice)
-      ? explicitChoice
-      : hasSponsoredOffer && step === 'execute'
-        ? 'SPONSORED'
-        : 'WALLET'
 
   // Keep the signing path in step with the selector: `safe` makes `withPayFromSafeFeeParams` merge the quote
   // into the payload before the signature, `signer` leaves it untouched.
@@ -187,7 +202,13 @@ export const useGasPayerSelection = ({
             ? "Set at signing and can't be changed."
             : `Fees are paid in ${nativeToken?.symbol ?? chain?.nativeCurrency.symbol} for now. More tokens are coming soon.`,
         }
-      : { tokens: nativeToken ? [nativeToken] : [], selected: nativeToken?.address ?? ZERO_ADDRESS, locked: true }
+      : {
+          tokens: nativeToken ? [nativeToken] : [],
+          selected: nativeToken?.address ?? ZERO_ADDRESS,
+          locked: true,
+          // Without a reason the selector explains the signer-pays case, which is wrong when Pro plan pays.
+          lockedReason: sponsored ? 'Covered by your sponsored transactions.' : undefined,
+        }
 
     const gasFee: NetworkFee = isLocked ? currentFee : paysFromSafe ? safeFee : signerFee
     const executionFee: NetworkFee = fees.executionFee.isFree
@@ -267,15 +288,28 @@ export const useGasPayerSelection = ({
     feePaymentMode,
   ])
 
+  // Only a pick between Safe account and Signer wallet is remembered; the sync above never persists,
+  // so a fallback while the quote loads cannot overwrite it.
+  const setChoice = useCallback(
+    (next: GasPayerChoice) => {
+      setExplicitChoice(next)
+      if (!signerAddress || !isSafeOptionShown || next === 'SPONSORED') return
+      const source = next === 'PAY_FROM_SAFE' ? 'safe' : 'signer'
+      dispatch(setFeePaymentSourcePreference({ signerAddress, source }))
+    },
+    [dispatch, signerAddress, isSafeOptionShown],
+  )
+
   const isPayFromSafe = isLocked || choice === 'PAY_FROM_SAFE'
 
   return {
     view,
     choice,
-    setChoice: setExplicitChoice,
+    setChoice,
     isLocked,
     isPayFromSafe,
-    isQuoteLoading: isPayFromSafe && !isLocked && !!fees.loading,
+    isQuoteLoading: isPayFromSafe && !isLocked && (!!fees.loading || !!safeFee.loading),
+    hasQuoteError: isPayFromSafe && !isLocked && !!safeFee.error,
     planState,
     fees,
     onGasTokenChange: fees.onGasTokenChange,

@@ -18,10 +18,12 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import TokenIcon from '@/components/common/TokenIcon'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
+import useWallet from '@/hooks/wallets/useWallet'
 import { selectCurrency } from '@/store/settingsSlice'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { FeePaymentMode } from '@/features/pay-from-safe/types'
+import { setFeePaymentSourcePreference } from '../../store'
 import type { FeesPreviewData, TotalOutgoing } from '../../hooks/useFeesPreview'
 import { FeeBreakdownRow } from '@safe-global/views/features/pay-from-safe/components/shared/FeeBreakdownRow'
 import { GAS_FEE_TOOLTIP } from '@safe-global/views/features/pay-from-safe/components/shared/tooltips'
@@ -230,6 +232,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     safeHasEnoughGas,
   } = props
   const { feePaymentMode, setFeePaymentMode } = useContext(SafeTxContext)
+  const dispatch = useAppDispatch()
+  const signerAddress = useWallet()?.address
   const chain = useCurrentChain()
   const nativeDisplay = {
     symbol: chain?.nativeCurrency.symbol ?? '',
@@ -251,6 +255,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
 
   const handlePaymentSourceChange = (source: FeePaymentMode) => {
     setFeePaymentMode(source)
+    if (signerAddress) dispatch(setFeePaymentSourcePreference({ signerAddress, source }))
     if (source === 'signer') {
       const nativeAddress = availableGasTokens?.[0]?.address
       if (nativeAddress) props.onGasTokenChange?.(nativeAddress)
