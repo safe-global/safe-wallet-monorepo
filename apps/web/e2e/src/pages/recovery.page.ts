@@ -87,6 +87,8 @@ export class RecoveryPage {
 
   /** Expand the "Action required" panel, which keeps its cards mounted while closed; Enter avoids toasts on top */
   async openActionRequiredPanel(): Promise<void> {
+    // The panel stays hidden until it has a warning, and a key press on the hidden toggle does nothing
+    await this.actionRequiredToggle.waitFor()
     if ((await this.actionRequiredToggle.getAttribute('aria-expanded')) !== 'true') {
       await this.actionRequiredToggle.press('Enter')
     }
