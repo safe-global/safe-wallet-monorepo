@@ -30,6 +30,16 @@ concurrency:
 permissions: {}
 
 jobs:
+  # Isolated E2E only runs on PRs, so this keeps an ARM dependency cache on dev for them to restore
+  warm-arm-cache:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+
   lint:
     permissions:
       contents: read
