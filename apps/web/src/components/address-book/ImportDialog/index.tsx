@@ -238,7 +238,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
         className="p-6 pt-2"
         onCancel={handleClose}
         cancelTestId="cancel-btn"
-        confirmLabel="Import"
+        confirmLabel={flaggedEntries.length > 0 ? 'Verify' : 'Import'}
         onConfirm={handleImport}
         confirmDisabled={!csvData || !!error}
         confirmTestId="import-btn"

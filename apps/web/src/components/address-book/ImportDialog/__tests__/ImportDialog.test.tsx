@@ -125,6 +125,23 @@ describe('ImportDialog look-alike check', () => {
     )
   })
 
+  it('asks the user to verify instead of import when look-alikes are found', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(lookalike, clean)))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toHaveTextContent('Verify'))
+  })
+
+  it('keeps the Import label when no address looks like another', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(clean)))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+    expect(screen.getByTestId('import-btn')).toHaveTextContent('Import')
+  })
+
   it('skips the look-alike rows when the user chooses to skip them', async () => {
     const { input } = renderDialog({ initialReduxState })
 
