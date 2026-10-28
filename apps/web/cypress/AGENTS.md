@@ -154,5 +154,3 @@ Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `ge
 Per-spec scenario `files` replace JSON data at existing fixture paths in a temporary fixtures directory. Preserve the original fixture shape and expected values, supplying generated IDs for seeded backend records. Source fixture files remain unchanged; the temporary directory is removed after each spec.
 
 When a spec hard-codes staging data (a Safe address outside `getSafes`, a short address, a transaction ID or a date), move the value into a fixture under `fixtures/` built with `fixtureGetters(namespace, { name: stagingDefault })`, and read it in the spec; the scenario returns the local value as `fixtures['<namespace>.<name>']`. Wrap localStorage payloads keyed by static Safes in `aliasedStorage`. Rebuild static Safes from `scenarios/staging-safes.mjs` snapshots of their real staging state instead of inventing data.
-
-Cases that need a service the local stack cannot provide are listed with a reason in the spec's `skips` (`e2e/environment/specs.mjs`); isolated runs skip them and staging runs keep them. Do not skip cases that also fail on staging.

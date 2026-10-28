@@ -93,6 +93,31 @@ describe('SetUpNestedSafe', () => {
     })
   })
 
+  it('fills the balance of the token chosen in that row when Max is clicked', async () => {
+    renderSetup([
+      { tokenAddress: ZERO_ADDRESS, amount: '' },
+      { tokenAddress: USDC_ADDRESS, amount: '' },
+    ])
+
+    await userEvent.click(screen.getAllByTestId('max-btn')[1])
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('token-amount-field')[1]).toHaveValue('1000')
+    })
+  })
+
+  it('does not offer a token that another row already uses', async () => {
+    renderSetup([
+      { tokenAddress: ZERO_ADDRESS, amount: '' },
+      { tokenAddress: USDC_ADDRESS, amount: '' },
+    ])
+
+    await userEvent.click(within(screen.getAllByTestId('token-selector')[1]).getByRole('combobox'))
+
+    expect(await screen.findByRole('option', { name: /USD Coin/ })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Ether/ })).not.toBeInTheDocument()
+  })
+
   it('rejects an amount above the token balance', async () => {
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '' }])
 

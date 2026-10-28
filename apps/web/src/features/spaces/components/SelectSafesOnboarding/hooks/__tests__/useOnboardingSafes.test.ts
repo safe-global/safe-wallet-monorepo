@@ -250,8 +250,14 @@ describe('useOnboardingSafes', () => {
       expect(result.current.ownedSimilarityGroups.get(owned.toLowerCase())).toBeDefined()
 
       const { similarWarnings } = result.current
-      expect(similarWarnings.get(trusted.toLowerCase())).toEqual({ trusted: [], owned: [owned.toLowerCase()] })
-      expect(similarWarnings.get(owned.toLowerCase())).toEqual({ trusted: [trusted.toLowerCase()], owned: [] })
+      expect(similarWarnings.get(trusted.toLowerCase())).toEqual({
+        trusted: [],
+        owned: [{ address: owned.toLowerCase(), chainIds: ['1'] }],
+      })
+      expect(similarWarnings.get(owned.toLowerCase())).toEqual({
+        trusted: [{ address: trusted.toLowerCase(), chainIds: ['1'] }],
+        owned: [],
+      })
     })
 
     it('leaves same-list clusters out of similarWarnings (no cross-list ⚠️)', () => {

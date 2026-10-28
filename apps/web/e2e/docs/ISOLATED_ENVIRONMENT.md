@@ -78,14 +78,13 @@ The local Sepolia chain enables the features that staging serves to `WALLET_WEB`
 - `scenarios/staging-safes.mjs` holds the on-chain state of staging static Safes at the fork block: owners, threshold, nonce, balances, tokens and spending limits. `rebuildStagingSafes` deploys them, executing as impersonated owners where no key exists. Staging wallets that sign in tests map to the generated owners.
 - `aliasedStorage` in `cypress/support/fixture.js` serializes localStorage fixtures with staging static Safe addresses replaced by the Safes prepared under the same keys. `storageFixture` replaces the whole value with a scenario fixture.
 - History that predates the fork cannot be indexed. Scenarios replay it after the fork block instead.
-- A spec's `skips` in `specs.mjs` lists the cases that need hosted providers or the production app, with a reason each; isolated runs skip them.
 
 ## Adding a spec
 
-1. Add the spec path to `isolatedSpecs` in `e2e/environment/specs.mjs` with the name of its scenario function, and `chains` or `skips` if it needs them.
+1. Add the spec path to `isolatedSpecs` in `e2e/environment/specs.mjs` with the name of its scenario function, and `chains` if it needs extra forks.
 2. Write the scenario as `export async function prepare<Name>Scenario(env, owners)` in a module under `e2e/environment/scenarios/` and import that module in `scenarios/index.mjs`. It returns `{ safes, fixtures, files }`: `safes` by category and key as `getSafes()` returns them, `fixtures` for fixture getters, `files` for JSON fixtures to replace.
 3. Build data with the shared modules: `safe.mjs` (`createSafe`, `openSafe`, `proposeTransaction`, `executeTransaction`), `gateway.mjs` for confirmations, messages and delegates (queued data goes through CGW to the Queue Service, never to the Transaction Service, which copies it from the Queue Service events within a few seconds), `staging.mjs` and `staging-safes.mjs` for staging snapshots, `chain.mjs` for fork primitives, and `indexing.mjs` (`waitUntil`, `waitForQueued`) to wait until CGW serves the data before the spec runs.
-4. Run `yarn workspace @safe-global/web e2e:env:test`; it checks that every registered spec exists, names a scenario function, and that its skipped titles exist.
+4. Run `yarn workspace @safe-global/web e2e:env:test`; it checks that every registered spec exists and names a scenario function.
 
 ## Extra services and chains
 

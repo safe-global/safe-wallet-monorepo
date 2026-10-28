@@ -6,7 +6,7 @@ import { createSafe, proposeTransaction } from './safe.mjs'
 import { execute, localAddress, stagingOwners } from './staging.mjs'
 import { COMPOSABLE_COW, COW, DAI, SETTLEMENT, VAULT_RELAYER } from './cow-protocol.mjs'
 import { dealToken, send, SEPOLIA } from './chain.mjs'
-import { rebuildStagingSafes, stagingSafes } from './staging-safes.mjs'
+import { stagingSafes } from './staging-safes.mjs'
 import { trustToken } from './tokens.mjs'
 import { waitUntil } from './indexing.mjs'
 
@@ -265,15 +265,6 @@ const limitOrderSafe = '0x8f4A19C85b39032A37f7a6dCc65234f966F72551'
 
 function swapTxFixtures(ids) {
   return Object.fromEntries(Object.entries(ids).map(([name, value]) => [`swaps.${name}`, value]))
-}
-
-export async function prepareSwapWidgetScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_1']) } }
-}
-
-export async function prepareTwapWidgetScenario(env, owners) {
-  await registerCowContracts(env)
-  return { safes: { static: { SEP_STATIC_SAFE_27: `sep:${await buildTwapSafe(env, owners)}` } } }
 }
 
 export async function prepareTwapHistoryScenario(env, owners) {

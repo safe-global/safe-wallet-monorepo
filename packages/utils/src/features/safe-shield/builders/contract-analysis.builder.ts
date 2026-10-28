@@ -22,7 +22,7 @@ export class ContractAnalysisBuilder {
 
   addAddress(address: string): ContractAddressBuilder {
     if (!this.contract[address]) {
-      this.contract[address] = DEFAULT_INFO
+      this.contract[address] = { ...DEFAULT_INFO }
     }
     return new ContractAddressBuilder(this, address)
   }

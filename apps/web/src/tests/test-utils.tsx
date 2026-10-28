@@ -99,6 +99,12 @@ function customRenderHook<Result, Props>(
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
 
+/** Checksummed address with the first and last 4 hex characters of `address` and a random middle. */
+export const fakerLookalikeAddress = (address: string) =>
+  checksumAddress(
+    `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '' })}${address.slice(-4)}`.toLowerCase(),
+  )
+
 /**
  * Stub `navigator.clipboard.writeText` and return the mock so tests can assert
  * what was copied. Keeps clipboard mocking consistent across test files.

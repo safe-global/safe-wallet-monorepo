@@ -10,6 +10,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import type { ReactNode } from 'react'
 import { getAddress } from 'ethers'
+import { SafeScopeContext, type SafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
 jest.mock('../hooks', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
@@ -142,6 +143,25 @@ describe('SafeShieldContext', () => {
       expect(mockUseRecipientAnalysis).toHaveBeenLastCalledWith(undefined)
       expect(mockUseCounterpartyAnalysis).toHaveBeenLastCalledWith(tx, false)
       expect(mockUseThreatAnalysis).toHaveBeenCalled()
+    })
+
+    it('locks nothing in a Workspace-level flow until it picks a Safe, then gates on Safe Pro', () => {
+      mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+      mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
+      const scopeWrapper = (scope: SafeScope | undefined) =>
+        function ScopeWrapper({ children }: { children: ReactNode }) {
+          return (
+            <SafeScopeContext.Provider value={{ scope, setScope: jest.fn(), clearScope: jest.fn() }}>
+              {wrapper({ children })}
+            </SafeScopeContext.Provider>
+          )
+        }
+
+      const beforePick = renderHook(() => useSafeShield(), { wrapper: scopeWrapper(undefined) })
+      expect(beforePick.result.current.hasProFeatures).toBe(true)
+
+      const afterPick = renderHook(() => useSafeShield(), { wrapper: scopeWrapper({} as SafeScope) })
+      expect(afterPick.result.current.hasProFeatures).toBe(false)
     })
   })
 

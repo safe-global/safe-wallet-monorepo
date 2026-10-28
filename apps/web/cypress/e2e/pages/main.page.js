@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as ls from '../../support/localstorage_data.js'
 
 // Common button text strings
 export const nextBtnStr = 'Next'
@@ -8,7 +7,6 @@ export const acceptSelectionStr = 'Save settings'
 
 // Common table selectors
 export const tableRow = '[data-testid="table-row"]'
-export const tableContainer = '[data-testid="table-container"]'
 export const nextPageBtn = '[data-testid="next-page-btn"]'
 export const previousPageBtn = '[data-testid="prev-page-btn"]'
 
@@ -63,7 +61,7 @@ export function awaitVisualStability() {
  *
  * @param {object} options
  * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
- * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.nativeSwaps)
  * @param {string} [options.removeFlag]  - Feature flag to remove (before adding `addFlag`, if any)
  * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
  * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
@@ -103,22 +101,6 @@ export function selectDropdownOption(itemSelector, text) {
   cy.get('@dropdownOption').trigger('mousemove', { scrollBehavior: 'center' })
   cy.get('@dropdownOption').should('have.attr', 'tabindex', '0')
   cy.get('@dropdownOption').click({ scrollBehavior: 'center' })
-}
-
-// Base UI attaches tooltip hover listeners in an effect after mount, so an early mouseenter
-// can be lost: re-trigger until this trigger reports its popup open (data-popup-open).
-export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
-  const attempt = (left) => {
-    getTrigger().trigger('mouseenter', { force: true })
-    getTrigger().then(($trigger) =>
-      pollUntil(() => $trigger.attr('data-popup-open') !== undefined, 2000).then((opened) => {
-        if (opened) return
-        if (left <= 0) throw new Error('Tooltip never opened')
-        attempt(left - 1)
-      }),
-    )
-  }
-  attempt(retries)
 }
 
 export function clickOnExecuteBtn() {
@@ -253,17 +235,6 @@ export function checkTextsExistWithinElement(element, texts) {
       })
   })
 }
-export function checkTextsExistWithinElementScroll(element, texts) {
-  texts.forEach((text) => {
-    cy.get(element)
-      .scrollIntoView()
-      .should('be.visible')
-      .within(() => {
-        cy.get('div').contains(text).scrollIntoView().should('be.visible')
-      })
-  })
-}
-
 export function verifyCheckboxeState(element, index, state) {
   cy.get(element).eq(index).should(state)
 }
@@ -321,22 +292,6 @@ export function verifyElementsIsVisible(elements) {
   })
 }
 
-export function getTextToArray(selector, textArray) {
-  cy.get(selector).each(($element) => {
-    textArray.push($element.text())
-  })
-}
-
-export function extractDigitsToArray(selector, digitsArray) {
-  cy.get(selector).each(($element) => {
-    const text = $element.text()
-    const digits = text.match(/\d+\.\d+|\d+\b/g)
-    if (digits) {
-      digitsArray.push(...digits)
-    }
-  })
-}
-
 export function isItemInLocalstorage(key, expectedValue, maxAttempts = 10, delay = 100) {
   return new Promise((resolve, reject) => {
     let attempts = 0
@@ -378,21 +333,6 @@ export function addToAppLocalStorage(key, jsonValue) {
   })
 }
 
-/**
- * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
- * This function sets up the settings and verifies they are stored correctly before proceeding
- * @returns {Promise} A promise that resolves when settings are set and verified
- */
-export function setupSafeSettingsWithAllTokens() {
-  const settings = {
-    ...ls.safeSettings.slimitSettings,
-  }
-  return cy
-    .wrap(null)
-    .then(() => addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, settings))
-    .then(() => isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, settings))
-}
-
 export function checkTextOrder(selector, expectedTextArray) {
   cy.get(selector).each((element, index) => {
     const text = Cypress.$(element).text().trim()
@@ -424,22 +364,6 @@ export function getIframeBody(iframe) {
 
 export const checkButtonByTextExists = (buttonText) => {
   cy.get('button').contains(buttonText).should('exist')
-}
-
-/**
- * Read a key from the AUT's localStorage (after cy.visit) and assert its parsed
- * value deep-equals `expectedValue`. Uses `.should()` so Cypress retries until
- * the value matches or the default command timeout elapses — needed for keys
- * the app writes asynchronously after sync completes.
- */
-export function verifyAppLocalStorageItemEquals(key, expectedValue) {
-  cy.window()
-    .its('localStorage')
-    .invoke('getItem', key)
-    .should((stored) => {
-      const parsed = stored ? JSON.parse(stored) : null
-      expect(parsed).to.deep.equal(expectedValue)
-    })
 }
 
 export function changeSafeChainName(originalChain, newChain) {

@@ -11,7 +11,6 @@ const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
 const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
-export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 // Case #1 — Outdated official mastercopy (Info) → "Update"
 export const outdatedOfficialTitlePrefix = 'New Safe version is available'
@@ -22,7 +21,6 @@ export const mastercopyActions = {
   migrate: '[data-testid="migrate-mastercopy-btn"]',
   getCli: '[data-testid="get-cli-link"]',
 }
-export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
 
 // Case #2 & #3 — Unsupported mastercopy (Warning)
 export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
@@ -32,9 +30,6 @@ export const unsupportedCliContent =
   'It may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
 const migrateSafeSubtitle = 'Update Safe account base contract'
-export const nonPinnedWarningTitle = 'Not in your accounts'
-export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
-const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
 
 export function clickOnTxByIndex(index) {
   // Wait for hydration to set the correct safe query param in the link href
@@ -179,25 +174,4 @@ export function verifyGetCliLinkInPanel() {
   cy.get(actionRequiredPanel).within(() => {
     cy.get(mastercopyActions.getCli, { timeout: 10000 }).should('be.visible')
   })
-}
-
-export function verifyTrustDialogVisible() {
-  cy.get(trustDialogTestId, { timeout: 15000 }).should('be.visible')
-}
-
-/** Message in action-required-panel when signers differ across chains (dashboard) */
-const differentSignersAcrossChainsMsg = 'different signers across different networks'
-
-/** Verifies the "You have different signers across different networks" warning is displayed in action-required-panel. */
-export function checkInconsistentSignersMsgDisplayed() {
-  cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
-}
-
-/**
- * Verifies the Safe is present in the current URL, i.e. the router query has hydrated.
- * Use as a precondition before clicking actions that navigate using the `safe` query param.
- * @param {string} safe - Prefixed safe address expected in the URL
- */
-export function verifySafeInUrl(safe) {
-  cy.url().should('include', safe)
 }

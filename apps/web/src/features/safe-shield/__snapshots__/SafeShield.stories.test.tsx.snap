@@ -26,15 +26,15 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
-                style="background-color: var(--color-warning-background);"
+                style="background-color: var(--color-info-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
-                  style="color: var(--color-warning-main);"
+                  style="color: var(--color-info-main);"
                 >
-                  Issues found
+                  Review details
                 </span>
               </div>
             </div>
@@ -190,7 +190,7 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-border-main);"
+                            style="color: var(--color-info-main);"
                             width="16"
                           />
                           <span
@@ -237,7 +237,7 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
+                                style="border-left-color: var(--color-info-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -274,7 +274,7 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-warning-main);"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -282,7 +282,7 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -321,98 +321,6 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
                                 style="border-left-color: var(--color-border-main);"
                               >
                                 <div
@@ -424,26 +332,6 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -769,7 +657,7 @@ exports[`./SafeShield.stories BridgeIncompatibleSafe 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -808,98 +696,6 @@ exports[`./SafeShield.stories BridgeIncompatibleSafe 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
                                 style="border-left-color: var(--color-border-main);"
                               >
                                 <div
@@ -911,26 +707,6 @@ exports[`./SafeShield.stories BridgeIncompatibleSafe 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -1248,7 +1024,7 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-warning-main);"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -1256,7 +1032,7 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -1295,98 +1071,6 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
                                 style="border-left-color: var(--color-border-main);"
                               >
                                 <div
@@ -1398,26 +1082,6 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -1735,7 +1399,7 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-warning-main);"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -1743,7 +1407,7 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -1782,98 +1446,6 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
                                 style="border-left-color: var(--color-border-main);"
                               >
                                 <div
@@ -1885,26 +1457,6 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -6719,7 +6271,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -6753,416 +6305,6 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                           <div
                             class="flex flex-col gap-2"
                           >
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                  <div
-                                    class="-mt-3"
-                                    data-closed=""
-                                    data-slot="collapsible"
-                                  >
-                                    <div
-                                      aria-expanded="false"
-                                      aria-label="Show all"
-                                      class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
-                                      data-slot="collapsible-trigger"
-                                      role="button"
-                                      tabindex="0"
-                                    >
-                                      <span
-                                        class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
-                                        data-slot="typography"
-                                        data-variant="paragraph-mini"
-                                      >
-                                        Show all
-                                      </span>
-                                      <div
-                                        class="absolute bottom-0 left-0 h-px w-0 -translate-x-4 bg-[rgba(0,0,0,0.1)] transition-all group-hover:w-full group-hover:translate-x-full"
-                                      />
-                                      <svg
-                                        aria-hidden="true"
-                                        class="lucide lucide-chevron-down size-5 transition-transform"
-                                        data-testid="ExpandMoreIcon"
-                                        fill="none"
-                                        height="24"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        style="transform: rotate(0deg);"
-                                        viewBox="0 0 24 24"
-                                        width="24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <path
-                                          d="m6 9 6 6 6-6"
-                                        />
-                                      </svg>
-                                    </div>
-                                    <div
-                                      data-closed=""
-                                      data-slot="collapsible-content"
-                                      hidden=""
-                                      id="base-ui-_r_2s_"
-                                      style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
-                                    >
-                                      <div
-                                        class="flex flex-col gap-2"
-                                      >
-                                        <div
-                                          class="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-                                        >
-                                          <img
-                                            alt=""
-                                            src="/images/transactions/custom.svg"
-                                            style="border-radius: 50%; padding-top: 2px; width: 16px; height: 16px;"
-                                          />
-                                          <div
-                                            class="flex flex-col gap-1"
-                                          >
-                                            <div
-                                              class="leading-5"
-                                            >
-                                              <span
-                                                class="inline-flex"
-                                                data-slot="tooltip-trigger"
-                                                id="base-ui-_r_2u_"
-                                              >
-                                                <span
-                                                  class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                                                  data-slot="typography"
-                                                  data-variant="paragraph-mini"
-                                                >
-                                                  0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6
-                                                </span>
-                                              </span>
-                                              <span
-                                                class="text-[var(--color-text-secondary)]"
-                                              >
-                                                <a
-                                                  aria-label=""
-                                                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                                                  data-slot="tooltip-trigger"
-                                                  data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
-                                                  id="base-ui-_r_30_"
-                                                  rel="noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  <mock-icon
-                                                    class="size-4"
-                                                  />
-                                                </a>
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          class="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-                                        >
-                                          <img
-                                            alt=""
-                                            src="/images/transactions/custom.svg"
-                                            style="border-radius: 50%; padding-top: 2px; width: 16px; height: 16px;"
-                                          />
-                                          <div
-                                            class="flex flex-col gap-1"
-                                          >
-                                            <div
-                                              class="leading-5"
-                                            >
-                                              <span
-                                                class="inline-flex"
-                                                data-slot="tooltip-trigger"
-                                                id="base-ui-_r_32_"
-                                              >
-                                                <span
-                                                  class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                                                  data-slot="typography"
-                                                  data-variant="paragraph-mini"
-                                                >
-                                                  0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6
-                                                </span>
-                                              </span>
-                                              <span
-                                                class="text-[var(--color-text-secondary)]"
-                                              >
-                                                <a
-                                                  aria-label=""
-                                                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                                                  data-slot="tooltip-trigger"
-                                                  data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
-                                                  id="base-ui-_r_34_"
-                                                  rel="noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  <mock-icon
-                                                    class="size-4"
-                                                  />
-                                                </a>
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                  <div
-                                    class="-mt-3"
-                                    data-closed=""
-                                    data-slot="collapsible"
-                                  >
-                                    <div
-                                      aria-expanded="false"
-                                      aria-label="Show all"
-                                      class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
-                                      data-slot="collapsible-trigger"
-                                      role="button"
-                                      tabindex="0"
-                                    >
-                                      <span
-                                        class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
-                                        data-slot="typography"
-                                        data-variant="paragraph-mini"
-                                      >
-                                        Show all
-                                      </span>
-                                      <div
-                                        class="absolute bottom-0 left-0 h-px w-0 -translate-x-4 bg-[rgba(0,0,0,0.1)] transition-all group-hover:w-full group-hover:translate-x-full"
-                                      />
-                                      <svg
-                                        aria-hidden="true"
-                                        class="lucide lucide-chevron-down size-5 transition-transform"
-                                        data-testid="ExpandMoreIcon"
-                                        fill="none"
-                                        height="24"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        style="transform: rotate(0deg);"
-                                        viewBox="0 0 24 24"
-                                        width="24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <path
-                                          d="m6 9 6 6 6-6"
-                                        />
-                                      </svg>
-                                    </div>
-                                    <div
-                                      data-closed=""
-                                      data-slot="collapsible-content"
-                                      hidden=""
-                                      id="base-ui-_r_35_"
-                                      style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
-                                    >
-                                      <div
-                                        class="flex flex-col gap-2"
-                                      >
-                                        <div
-                                          class="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-                                        >
-                                          <img
-                                            alt=""
-                                            src="https://placehold.co/160"
-                                            style="border-radius: 50%; padding-top: 2px; width: 16px; height: 16px;"
-                                          />
-                                          <div
-                                            class="flex flex-col gap-1"
-                                          >
-                                            <span
-                                              class="m-0 text-xs leading-4 font-normal block mb-1 text-[var(--color-text-primary)]"
-                                              data-slot="typography"
-                                              data-variant="paragraph-mini"
-                                            >
-                                              Balancer
-                                            </span>
-                                            <div
-                                              class="leading-5"
-                                            >
-                                              <span
-                                                class="inline-flex"
-                                                data-slot="tooltip-trigger"
-                                                id="base-ui-_r_37_"
-                                              >
-                                                <span
-                                                  class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                                                  data-slot="typography"
-                                                  data-variant="paragraph-mini"
-                                                >
-                                                  0x53bbddda3398c3facefe325073bc424fcb946d7a
-                                                </span>
-                                              </span>
-                                              <span
-                                                class="text-[var(--color-text-secondary)]"
-                                              >
-                                                <a
-                                                  aria-label=""
-                                                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                                                  data-slot="tooltip-trigger"
-                                                  data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
-                                                  id="base-ui-_r_39_"
-                                                  rel="noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  <mock-icon
-                                                    class="size-4"
-                                                  />
-                                                </a>
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          class="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-                                        >
-                                          <img
-                                            alt=""
-                                            src="https://placehold.co/160"
-                                            style="border-radius: 50%; padding-top: 2px; width: 16px; height: 16px;"
-                                          />
-                                          <div
-                                            class="flex flex-col gap-1"
-                                          >
-                                            <span
-                                              class="m-0 text-xs leading-4 font-normal block mb-1 text-[var(--color-text-primary)]"
-                                              data-slot="typography"
-                                              data-variant="paragraph-mini"
-                                            >
-                                              Balancer
-                                            </span>
-                                            <div
-                                              class="leading-5"
-                                            >
-                                              <span
-                                                class="inline-flex"
-                                                data-slot="tooltip-trigger"
-                                                id="base-ui-_r_3b_"
-                                              >
-                                                <span
-                                                  class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                                                  data-slot="typography"
-                                                  data-variant="paragraph-mini"
-                                                >
-                                                  0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2
-                                                </span>
-                                              </span>
-                                              <span
-                                                class="text-[var(--color-text-secondary)]"
-                                              >
-                                                <a
-                                                  aria-label=""
-                                                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                                                  data-slot="tooltip-trigger"
-                                                  data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
-                                                  id="base-ui-_r_3d_"
-                                                  rel="noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  <mock-icon
-                                                    class="size-4"
-                                                  />
-                                                </a>
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
                             <div
                               class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
                             >
@@ -7227,7 +6369,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                       data-closed=""
                                       data-slot="collapsible-content"
                                       hidden=""
-                                      id="base-ui-_r_3e_"
+                                      id="base-ui-_r_2s_"
                                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                                     >
                                       <div
@@ -7257,7 +6399,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               <span
                                                 class="inline-flex"
                                                 data-slot="tooltip-trigger"
-                                                id="base-ui-_r_3g_"
+                                                id="base-ui-_r_2u_"
                                               >
                                                 <span
                                                   class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
@@ -7276,7 +6418,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
                                                   href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
-                                                  id="base-ui-_r_3i_"
+                                                  id="base-ui-_r_30_"
                                                   rel="noreferrer"
                                                   target="_blank"
                                                 >
@@ -7312,7 +6454,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                               <span
                                                 class="inline-flex"
                                                 data-slot="tooltip-trigger"
-                                                id="base-ui-_r_3k_"
+                                                id="base-ui-_r_32_"
                                               >
                                                 <span
                                                   class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
@@ -7331,193 +6473,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
                                                   href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
-                                                  id="base-ui-_r_3m_"
-                                                  rel="noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  <mock-icon
-                                                    class="size-4"
-                                                  />
-                                                </a>
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with all these contracts before.
-                                  </span>
-                                  <div
-                                    class="-mt-3"
-                                    data-closed=""
-                                    data-slot="collapsible"
-                                  >
-                                    <div
-                                      aria-expanded="false"
-                                      aria-label="Show all"
-                                      class="group relative inline-flex w-fit cursor-pointer items-center overflow-hidden text-[var(--color-text-secondary)] "
-                                      data-slot="collapsible-trigger"
-                                      role="button"
-                                      tabindex="0"
-                                    >
-                                      <span
-                                        class="m-0 text-xs leading-4 font-normal text-[var(--color-text-secondary)]"
-                                        data-slot="typography"
-                                        data-variant="paragraph-mini"
-                                      >
-                                        Show all
-                                      </span>
-                                      <div
-                                        class="absolute bottom-0 left-0 h-px w-0 -translate-x-4 bg-[rgba(0,0,0,0.1)] transition-all group-hover:w-full group-hover:translate-x-full"
-                                      />
-                                      <svg
-                                        aria-hidden="true"
-                                        class="lucide lucide-chevron-down size-5 transition-transform"
-                                        data-testid="ExpandMoreIcon"
-                                        fill="none"
-                                        height="24"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        style="transform: rotate(0deg);"
-                                        viewBox="0 0 24 24"
-                                        width="24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <path
-                                          d="m6 9 6 6 6-6"
-                                        />
-                                      </svg>
-                                    </div>
-                                    <div
-                                      data-closed=""
-                                      data-slot="collapsible-content"
-                                      hidden=""
-                                      id="base-ui-_r_3n_"
-                                      style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
-                                    >
-                                      <div
-                                        class="flex flex-col gap-2"
-                                      >
-                                        <div
-                                          class="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-                                        >
-                                          <img
-                                            alt=""
-                                            src="https://placehold.co/160"
-                                            style="border-radius: 50%; padding-top: 2px; width: 16px; height: 16px;"
-                                          />
-                                          <div
-                                            class="flex flex-col gap-1"
-                                          >
-                                            <span
-                                              class="m-0 text-xs leading-4 font-normal block mb-1 text-[var(--color-text-primary)]"
-                                              data-slot="typography"
-                                              data-variant="paragraph-mini"
-                                            >
-                                              Balancer
-                                            </span>
-                                            <div
-                                              class="leading-5"
-                                            >
-                                              <span
-                                                class="inline-flex"
-                                                data-slot="tooltip-trigger"
-                                                id="base-ui-_r_3p_"
-                                              >
-                                                <span
-                                                  class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                                                  data-slot="typography"
-                                                  data-variant="paragraph-mini"
-                                                >
-                                                  0x53bbddda3398c3facefe325073bc424fcb946d7a
-                                                </span>
-                                              </span>
-                                              <span
-                                                class="text-[var(--color-text-secondary)]"
-                                              >
-                                                <a
-                                                  aria-label=""
-                                                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                                                  data-slot="tooltip-trigger"
-                                                  data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
-                                                  id="base-ui-_r_3r_"
-                                                  rel="noreferrer"
-                                                  target="_blank"
-                                                >
-                                                  <mock-icon
-                                                    class="size-4"
-                                                  />
-                                                </a>
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div
-                                          class="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-                                        >
-                                          <img
-                                            alt=""
-                                            src="https://placehold.co/160"
-                                            style="border-radius: 50%; padding-top: 2px; width: 16px; height: 16px;"
-                                          />
-                                          <div
-                                            class="flex flex-col gap-1"
-                                          >
-                                            <span
-                                              class="m-0 text-xs leading-4 font-normal block mb-1 text-[var(--color-text-primary)]"
-                                              data-slot="typography"
-                                              data-variant="paragraph-mini"
-                                            >
-                                              Balancer
-                                            </span>
-                                            <div
-                                              class="leading-5"
-                                            >
-                                              <span
-                                                class="inline-flex"
-                                                data-slot="tooltip-trigger"
-                                                id="base-ui-_r_3t_"
-                                              >
-                                                <span
-                                                  class="m-0 text-xs font-normal flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                                                  data-slot="typography"
-                                                  data-variant="paragraph-mini"
-                                                >
-                                                  0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2
-                                                </span>
-                                              </span>
-                                              <span
-                                                class="text-[var(--color-text-secondary)]"
-                                              >
-                                                <a
-                                                  aria-label=""
-                                                  class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                                                  data-slot="tooltip-trigger"
-                                                  data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
-                                                  id="base-ui-_r_3v_"
+                                                  id="base-ui-_r_34_"
                                                   rel="noreferrer"
                                                   target="_blank"
                                                 >
@@ -7672,7 +6628,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_40_"
+                      id="base-ui-_r_35_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -7777,7 +6733,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_41_"
+                        id="base-ui-_r_36_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -7896,7 +6852,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Unexpected delegateCall
                           </span>
                         </div>
                         <svg
@@ -7921,7 +6877,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_42_"
+                        id="base-ui-_r_37_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -7936,64 +6892,6 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                               <div
                                 class="border-l-4 p-3"
                                 style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -8127,15 +7025,15 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
-                style="background-color: var(--color-warning-background);"
+                style="background-color: var(--color-info-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
-                  style="color: var(--color-warning-main);"
+                  style="color: var(--color-info-main);"
                 >
-                  Issues found
+                  Review details
                 </span>
               </div>
             </div>
@@ -8199,7 +7097,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_43_"
+                      id="base-ui-_r_38_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -8291,7 +7189,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-border-main);"
+                            style="color: var(--color-info-main);"
                             width="16"
                           />
                           <span
@@ -8324,7 +7222,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_44_"
+                        id="base-ui-_r_39_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -8338,7 +7236,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
+                                style="border-left-color: var(--color-info-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -8375,7 +7273,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-warning-main);"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -8383,7 +7281,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -8408,7 +7306,7 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_45_"
+                        id="base-ui-_r_3a_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -8417,98 +7315,6 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                           <div
                             class="flex flex-col gap-2"
                           >
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
                             <div
                               class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
                             >
@@ -8525,26 +7331,6 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -8686,7 +7472,7 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_46_"
+                      id="base-ui-_r_3b_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -8951,7 +7737,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_47_"
+                      id="base-ui-_r_3c_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -9056,7 +7842,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_48_"
+                        id="base-ui-_r_3d_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -9140,7 +7926,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_49_"
+                        id="base-ui-_r_3e_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -9234,15 +8020,15 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
               <div
                 class="flex flex-row rounded-md px-4 py-2"
                 data-testid="safe-shield-status"
-                style="background-color: var(--color-warning-background);"
+                style="background-color: var(--color-success-background);"
               >
                 <span
                   class="m-0 text-xs leading-4 font-semibold uppercase"
                   data-slot="typography"
                   data-variant="paragraph-mini-bold"
-                  style="color: var(--color-warning-main);"
+                  style="color: var(--color-success-main);"
                 >
-                  Issues found
+                  3 of 4 checks passed
                 </span>
               </div>
             </div>
@@ -9273,7 +8059,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                       >
                         <mock-icon
                           height="16"
-                          style="color: var(--color-border-main);"
+                          style="color: var(--color-success-main);"
                           width="16"
                         />
                         <span
@@ -9306,7 +8092,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_4a_"
+                      id="base-ui-_r_3f_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -9320,7 +8106,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                           >
                             <div
                               class="border-l-4 p-3"
-                              style="border-left-color: var(--color-border-main);"
+                              style="border-left-color: var(--color-success-main);"
                             >
                               <div
                                 class="flex flex-col gap-4"
@@ -9398,7 +8184,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-border-main);"
+                            style="color: var(--color-success-main);"
                             width="16"
                           />
                           <span
@@ -9431,7 +8217,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4b_"
+                        id="base-ui-_r_3g_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -9445,7 +8231,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
+                                style="border-left-color: var(--color-success-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -9482,7 +8268,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-warning-main);"
+                            style="color: var(--color-success-main);"
                             width="16"
                           />
                           <span
@@ -9490,7 +8276,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -9515,7 +8301,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4c_"
+                        id="base-ui-_r_3h_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -9529,99 +8315,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                             >
                               <div
                                 class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
+                                style="border-left-color: var(--color-success-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -9632,26 +8326,6 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -9793,7 +8467,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_4d_"
+                      id="base-ui-_r_3i_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -9866,7 +8540,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                     data-closed=""
                                     data-slot="collapsible-content"
                                     hidden=""
-                                    id="base-ui-_r_4e_"
+                                    id="base-ui-_r_3j_"
                                     style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                                   >
                                     <div
@@ -9961,7 +8635,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4f_"
+                        id="base-ui-_r_3k_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -10012,7 +8686,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                         >
                           <mock-icon
                             height="16"
-                            style="color: var(--color-warning-main);"
+                            style="color: var(--color-border-main);"
                             width="16"
                           />
                           <span
@@ -10020,7 +8694,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unofficial fallback handler
+                            Verified contract
                           </span>
                         </div>
                         <svg
@@ -10045,7 +8719,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4g_"
+                        id="base-ui-_r_3l_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -10054,98 +8728,6 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                           <div
                             class="flex flex-col gap-2"
                           >
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Verify the 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current text-inherit [&>span]:underline"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        fallback handler
-                                        <svg
-                                          aria-hidden="true"
-                                          class="lucide lucide-external-link external-link-icon size-4"
-                                          fill="none"
-                                          height="24"
-                                          stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          viewBox="0 0 24 24"
-                                          width="24"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M15 3h6v6"
-                                          />
-                                          <path
-                                            d="M10 14 21 3"
-                                          />
-                                          <path
-                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                          />
-                                        </svg>
-                                      </span>
-                                    </a>
-                                     is trusted and secure before proceeding.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    This transaction calls a smart contract that will be able to modify your Safe account. 
-                                    <a
-                                      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
-                                      data-slot="link"
-                                      data-variant="default"
-                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-                                      rel="noreferrer noopener"
-                                      target="_blank"
-                                    >
-                                      <span
-                                        class="inline-flex cursor-pointer items-center gap-0.5"
-                                      >
-                                        Learn more
-                                      </span>
-                                    </a>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
                             <div
                               class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
                             >
@@ -10162,26 +8744,6 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                     data-variant="paragraph-small"
                                   >
                                     This contract is verified as "Lido staking v2".
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    You have interacted with this contract 43 times.
                                   </span>
                                 </div>
                               </div>
@@ -10323,7 +8885,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_4h_"
+                      id="base-ui-_r_3m_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -10448,7 +9010,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4i_"
+                        id="base-ui-_r_3n_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -10532,7 +9094,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4j_"
+                        id="base-ui-_r_3o_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -10698,7 +9260,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       data-closed=""
                       data-slot="collapsible-content"
                       hidden=""
-                      id="base-ui-_r_4k_"
+                      id="base-ui-_r_3p_"
                       style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                     >
                       <div
@@ -10798,7 +9360,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                             data-slot="typography"
                             data-variant="paragraph-small"
                           >
-                            Unable to verify contract
+                            Unofficial fallback handler
                           </span>
                         </div>
                         <svg
@@ -10823,7 +9385,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4l_"
+                        id="base-ui-_r_3q_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -10838,26 +9400,6 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                               <div
                                 class="border-l-4 p-3"
                                 style="border-left-color: var(--color-warning-main);"
-                              >
-                                <div
-                                  class="flex flex-col gap-4"
-                                >
-                                  <span
-                                    class="m-0 text-sm leading-5 font-normal break-words text-[var(--color-primary-light)]"
-                                    data-slot="typography"
-                                    data-variant="paragraph-small"
-                                  >
-                                    Contract verification is currently unavailable.
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              class="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]"
-                            >
-                              <div
-                                class="border-l-4 p-3"
-                                style="border-left-color: var(--color-border-main);"
                               >
                                 <div
                                   class="flex flex-col gap-4"
@@ -11067,7 +9609,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4m_"
+                        id="base-ui-_r_3r_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div
@@ -11151,7 +9693,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                         data-closed=""
                         data-slot="collapsible-content"
                         hidden=""
-                        id="base-ui-_r_4n_"
+                        id="base-ui-_r_3s_"
                         style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                       >
                         <div

@@ -41,31 +41,23 @@ test('blocks remote backend hosts without treating the static asset CDN as a tra
   }
 })
 
-test('lets the hosted CoW widget read the chain through its own RPC while the wallet must stay local', () => {
-  const rpc = 'https://eth-sepolia.g.alchemy.com/v2/key'
-  assert.equal(isRemoteBackendRequest(rpc, { origin: 'https://swap.cow.fi' }), false)
-  assert.equal(isRemoteBackendRequest(rpc, { origin: 'https://staging.swap.cow.fi' }), false)
-  assert.equal(isRemoteBackendRequest(rpc, { referer: 'https://swap.cow.fi/' }), false)
-  assert.equal(isRemoteBackendRequest(rpc, { origin: 'http://localhost:8080' }), true)
-  assert.equal(isRemoteBackendRequest(rpc, { referer: 'http://localhost:8080/swap' }), true)
-  assert.equal(isRemoteBackendRequest(rpc), true)
-})
-
-test('blocks a Safe backend request from the hosted CoW widget', () => {
-  const cgw = 'https://safe-client.safe.global/v1/chains'
-  assert.equal(isRemoteBackendRequest(cgw, { referer: 'https://swap.cow.fi/' }), true)
+test('decides by the request URL whether it reaches a remote backend', () => {
+  assert.equal(isRemoteBackendRequest('https://safe-client.safe.global/v1/chains'), true)
+  assert.equal(isRemoteBackendRequest('https://eth-sepolia.g.alchemy.com/v2/key'), true)
+  assert.equal(isRemoteBackendRequest('http://localhost:8000/cgw/v1/chains'), false)
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'
+const batch = 'cypress/e2e/regression/batch_tx.cy.js'
 const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
-  assert.deepEqual(selectCypressSpecs('regression/assets'), [assets])
+  assert.deepEqual(selectCypressSpecs('regression/batch_tx'), [batch])
   assert.deepEqual(selectCypressSpecs('spaces_basicflow'), ['cypress/e2e/regression/spaces_basicflow.cy.js'])
-  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/assets,tx_queue_reject_btn'), [
+  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/batch_tx,tx_queue_reject_btn'), [
     rejection,
-    assets,
+    batch,
   ])
 })
 

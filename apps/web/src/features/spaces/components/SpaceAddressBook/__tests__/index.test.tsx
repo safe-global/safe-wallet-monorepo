@@ -260,6 +260,32 @@ describe('SpaceAddressBook', () => {
     expect(screen.getByTestId('row-0xAAA')).toBeEmptyDOMElement()
   })
 
+  it('offers CSV import and a disabled export on an empty local contacts tab', async () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('tab', { name: /Local contacts/ }))
+
+    expect(screen.getByRole('button', { name: 'Import' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled()
+  })
+
+  it('enables CSV export once there are local contacts', async () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockLocalAddressBooks.mockReturnValue({ '1': { [faker.finance.ethereumAddress()]: faker.person.firstName() } })
+    mockAddressBook({ isError: true })
+    ;(useAddressBookSearch as jest.Mock).mockImplementation((contacts) => contacts)
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    await userEvent.click(screen.getByRole('tab', { name: /Local contacts/ }))
+
+    expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled()
+  })
+
   it('does not render an activity log tab', () => {
     ;(useIsAdmin as jest.Mock).mockReturnValue(false)
     mockUserQuery(
