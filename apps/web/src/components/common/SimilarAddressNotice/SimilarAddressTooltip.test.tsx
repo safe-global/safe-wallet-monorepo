@@ -35,7 +35,7 @@ describe('SimilarAddressTooltip', () => {
   }
 
   it('shows the entered and the saved address on hover', async () => {
-    const tooltip = (await hoverName()).closest('[data-slot="tooltip-content"]') as HTMLElement
+    const tooltip = (await hoverName()).closest('[data-slot="popover-content"]') as HTMLElement
 
     expect(screen.getByText(`Saved address (${name}):`)).toBeInTheDocument()
     expect(tooltip).toHaveTextContent(enteredAddress)
@@ -43,7 +43,7 @@ describe('SimilarAddressTooltip', () => {
   })
 
   it('bolds the ends the two addresses share', async () => {
-    const tooltip = (await hoverName()).closest('[data-slot="tooltip-content"]') as HTMLElement
+    const tooltip = (await hoverName()).closest('[data-slot="popover-content"]') as HTMLElement
     const { prefixLen, suffixLen } = getCommonAffixLengths(enteredAddress, savedAddress)
 
     expect(Array.from(tooltip.querySelectorAll('b')).map((b) => b.textContent)).toEqual([
@@ -78,12 +78,17 @@ describe('SimilarAddressTooltip', () => {
     ])
   })
 
-  it('opens on keyboard focus', async () => {
+  it('lets a keyboard user reach the copy and explorer controls', async () => {
+    const user = userEvent.setup()
     render(<SimilarAddressTooltip name={name} savedAddress={savedAddress} enteredAddress={enteredAddress} />)
 
-    await userEvent.tab()
-
+    await user.tab()
     expect(screen.getByRole('button', { name })).toHaveFocus()
-    expect(await screen.findByText('Address entered:')).toBeInTheDocument()
+    await user.keyboard('{Enter}')
+    await screen.findByText('Address entered:')
+
+    expect(screen.getAllByRole('button', { name: 'Copy address' })[0]).toHaveFocus()
+    await user.tab()
+    expect(screen.getAllByRole('link')[0]).toHaveFocus()
   })
 })
