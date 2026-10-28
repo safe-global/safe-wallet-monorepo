@@ -1,4 +1,5 @@
 import { test, expect } from '../../src/fixtures/journey.fixture'
+import { HomePage } from '../../src/pages/home.page'
 import { WalletPage } from '../../src/pages/wallet.page'
 import { WorkspacePage } from '../../src/pages/workspace.page'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
@@ -44,7 +45,9 @@ test.describe('Workspace', { tag: '@e2e' }, () => {
 
     await workspace.accountRow('Treasury').getByTestId('account-row-link').click()
     await expect(safePage).toHaveURL((url) => searchParam('safe')(url) === treasury.prefixedAddress)
-    await expect(safePage.getByText('Treasury').first()).toBeVisible()
+    const safeHeader = new HomePage(safePage).safeHeaderInfo
+    await expect(safeHeader).toContainText('Treasury')
+    await expect(safeHeader).toContainText('2/2')
 
     await workspace.gotoDashboard(workspaceId)
     await workspace.viewAllAccountsButton.click()
