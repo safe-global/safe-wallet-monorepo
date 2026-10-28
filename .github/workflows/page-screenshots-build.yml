@@ -1,8 +1,7 @@
 # Build half of a two-workflow pair. Keep the following invariants:
 # workflow-level `permissions: {}`, no `secrets.*` references in any step,
-# no cache-write steps (no actions/cache save; no wrapper actions that
-# write the yarn cache), and no code from the PR checkout in `pr/`: run
-# scripts from the dev checkout only. Uses `workflow_run` to run after the deploy
+# and no cache-write steps (no actions/cache save; no wrapper actions that
+# write the yarn cache). Uses `workflow_run` to run after the deploy
 # completes so the preview URL is available.
 # Companion publish workflow: page-screenshots-publish.yml.
 name: Page Screenshots Build
@@ -26,16 +25,12 @@ jobs:
       github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      # The scripts come from dev; workflow_run shares the dev cache scope, so no PR code may run here.
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: dev
-          persist-credentials: false
-      # The PR at the deployed commit, read as data only. The PR head may have moved since the deploy.
+      # Pin to the commit SHA the deploy ran against. If the PR head moves
+      # between the deploy finishing and this workflow starting, head_branch
+      # would resolve to the new tip, mismatching the deployed preview.
       - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-          path: pr
           fetch-depth: 0
           persist-credentials: false
 
@@ -63,7 +58,6 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        working-directory: pr
         run: |
           BASE_SHA="${{ github.event.workflow_run.pull_requests[0].base.sha }}"
           HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
@@ -108,19 +102,17 @@ jobs:
         env:
           CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
           BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
-        working-directory: pr
-        run: node "$GITHUB_WORKSPACE/.github/scripts/map-files-to-routes.js"
+        run: node ./.github/scripts/map-files-to-routes.js
 
       - name: Take screenshots
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
-        working-directory: pr
-        run: node "$GITHUB_WORKSPACE/.github/scripts/capture-page-screenshots.js"
+        run: node ./.github/scripts/capture-page-screenshots.js
 
       - name: Upload screenshots
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
         uses: actions/upload-artifact@v7.0.2
         with:
           name: page-screenshots
-          path: pr/page-screenshots/*.png
+          path: page-screenshots/*.png
           if-no-files-found: ignore
           retention-days: 5
