@@ -2,7 +2,6 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import * as table from '../pages/tables.page.js'
 import { fixtureGetters } from '../../support/fixture.js'
 
-
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
 const buyAmountStr = 'Buy amount'
