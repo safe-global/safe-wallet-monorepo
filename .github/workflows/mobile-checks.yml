@@ -67,6 +67,6 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
         with:
-          after-install: 'false'
+          after-install: 'true'
       - name: Type check
         run: yarn workspace @safe-global/mobile type-check

@@ -11,7 +11,6 @@ const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
 const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
-export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 // Case #1 — Outdated official mastercopy (Info) → "Update"
 export const outdatedOfficialTitlePrefix = 'New Safe version is available'

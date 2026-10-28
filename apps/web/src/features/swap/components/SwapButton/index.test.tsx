@@ -4,8 +4,11 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole, type TestRole } from '@/tests/mocks/roles'
-import { render, screen } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { AppRoutes } from '@/config/routes'
+import type { NextRouter } from 'next/router'
+import userEvent from '@testing-library/user-event'
 import SwapButton from '.'
 
 jest.mock('@/hooks/wallets/useWallet')
@@ -43,9 +46,10 @@ const spendingLimitsOf = (beneficiary: string | undefined, limit: Limit): Spendi
   return [{ ...spendingLimit, beneficiary, token: { ...spendingLimit.token, address: token.address } }]
 }
 
-const renderSwapButton = (spendingLimits: SpendingLimitState[]) =>
+const renderSwapButton = (spendingLimits: SpendingLimitState[], routerProps?: Partial<NextRouter>) =>
   render(<SwapButton tokenInfo={swappedToken} amount="0" trackingLabel={SWAP_LABELS.asset} />, {
     initialReduxState: { spendingLimits: { data: spendingLimits, loading: false, loaded: true } },
+    routerProps,
   })
 
 describe('SwapButton role gating', () => {
@@ -67,5 +71,26 @@ describe('SwapButton role gating', () => {
     renderSwapButton(spendingLimitsOf(wallet?.address, limit))
 
     expect(screen.getByRole('button', { name: 'Swap' })).toHaveProperty('disabled', disabled)
+  })
+})
+
+describe('SwapButton navigation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockSafeInfo({ deployed: true })
+  })
+
+  it('opens the swap page with the token preselected and keeps the Safe in the route', async () => {
+    mockRole('owner')
+    const push = jest.fn()
+    const safe = `eth:${fakerChecksummedAddress()}`
+
+    renderSwapButton([], { push, query: { safe } })
+    await userEvent.click(screen.getByRole('button', { name: 'Swap' }))
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: AppRoutes.swap,
+      query: { safe, token: swappedToken.address, amount: '0' },
+    })
   })
 })

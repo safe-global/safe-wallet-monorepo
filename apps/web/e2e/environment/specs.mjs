@@ -3,25 +3,17 @@
  * `chains` the forks besides Sepolia.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/regression/batch_tx.cy.js': { scenario: 'prepareBatchScenario' },
-  'cypress/e2e/regression/create_tx_2.cy.js': { scenario: 'prepareTransactionCreationScenario' },
-  'cypress/e2e/regression/create_tx.cy.js': { scenario: 'prepareTransactionCreationScenario' },
   'cypress/e2e/regression/dashboard.cy.js': { scenario: 'prepareDashboardRegressionScenario' },
   'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
   'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
-  'cypress/e2e/regression/swaps_tokens.cy.js': { scenario: 'prepareSwapWidgetScenario' },
-  // The swap widgets screen recipients against the Chainalysis sanctions oracle on Ethereum.
-  'cypress/e2e/regression/swaps.cy.js': { scenario: 'prepareSwapWidgetScenario', chains: [1] },
   'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
-  'cypress/e2e/regression/tx_details_createtx.cy.js': { scenario: 'prepareTransactionDetailsScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
   'cypress/e2e/regression/tx_history_2.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_history_5.cy.js': { scenario: 'prepareHistorySummaryScenario' },
   'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
-  'cypress/e2e/regression/tx_notes.cy.js': { scenario: 'prepareNotesScenario' },
   'cypress/e2e/regression/tx_queue_reject_btn.cy.js': { scenario: 'prepareRejectionScenario' },
   'cypress/e2e/regression/tx_queue_replace_btn.cy.js': { scenario: 'prepareReplacementScenario' },
   'cypress/e2e/regression/tx_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },

@@ -1,6 +1,5 @@
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
-import * as batch from './batch.mjs'
 import * as chains from './chains.mjs'
 import * as cow from './cow.mjs'
 import * as dashboard from './dashboard.mjs'
@@ -8,7 +7,6 @@ import * as fallbackHandlers from './fallback-handlers.mjs'
 import * as history from './history.mjs'
 import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
-import * as notes from './notes.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
 import * as rejection from './rejection.mjs'
@@ -21,7 +19,6 @@ import * as zerion from './zerion.mjs'
 const modules = [
   assets,
   basic,
-  batch,
   chains,
   cow,
   dashboard,
@@ -29,7 +26,6 @@ const modules = [
   history,
   historySummary,
   ledger,
-  notes,
   proposers,
   recovery,
   rejection,

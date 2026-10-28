@@ -7,7 +7,6 @@ export const acceptSelectionStr = 'Save settings'
 
 // Common table selectors
 export const tableRow = '[data-testid="table-row"]'
-export const tableContainer = '[data-testid="table-container"]'
 export const nextPageBtn = '[data-testid="next-page-btn"]'
 export const previousPageBtn = '[data-testid="prev-page-btn"]'
 
@@ -102,22 +101,6 @@ export function selectDropdownOption(itemSelector, text) {
   cy.get('@dropdownOption').trigger('mousemove', { scrollBehavior: 'center' })
   cy.get('@dropdownOption').should('have.attr', 'tabindex', '0')
   cy.get('@dropdownOption').click({ scrollBehavior: 'center' })
-}
-
-// Base UI attaches tooltip hover listeners in an effect after mount, so an early mouseenter
-// can be lost: re-trigger until this trigger reports its popup open (data-popup-open).
-export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
-  const attempt = (left) => {
-    getTrigger().trigger('mouseenter', { force: true })
-    getTrigger().then(($trigger) =>
-      pollUntil(() => $trigger.attr('data-popup-open') !== undefined, 2000).then((opened) => {
-        if (opened) return
-        if (left <= 0) throw new Error('Tooltip never opened')
-        attempt(left - 1)
-      }),
-    )
-  }
-  attempt(retries)
 }
 
 export function clickOnExecuteBtn() {
