@@ -10,16 +10,28 @@ interface SimilarityConfirmDialogProps {
   safe: { address: string; name?: string }
   onConfirm: () => void
   onCancel: () => void
+  /** Copy defaults to a Safe in the trusted-Safes list; override it for other kinds of address. */
+  description?: string
+  addressLabel?: string
+  hint?: string
 }
 
 /**
  * Confirmation dialog for selecting an address flagged as similar to another address
  * Warns user about potential address poisoning attack
  */
-const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: SimilarityConfirmDialogProps) => {
+const SimilarityConfirmDialog = ({
+  open,
+  safe,
+  onConfirm,
+  onCancel,
+  description = 'This address is similar to another safe in your list. This could indicate an address poisoning attack.',
+  addressLabel = 'Selected safe',
+  hint = 'Verify the full address carefully. Continue only if you recognize this Safe.',
+}: SimilarityConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent>
+      <DialogContent size="sm" forceBackdrop>
         <DialogHeader>
           <DialogTitle>Similar address detected</DialogTitle>
         </DialogHeader>
@@ -27,22 +39,26 @@ const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: Similarity
         <div className="flex flex-col gap-4 px-4">
           <Alert variant="warning" outlined={false}>
             <AlertSeverityIcon variant="warning" />
-            <AlertDescription>
-              This address is similar to another safe in your list. This could indicate an address poisoning attack.
-            </AlertDescription>
+            <AlertDescription>{description}</AlertDescription>
           </Alert>
 
           <div>
-            <p className="mb-1 text-sm text-muted-foreground">Selected safe</p>
+            <p className="mb-1 text-sm text-muted-foreground">{addressLabel}</p>
             <div className="overflow-hidden rounded-md border border-border/50 bg-background p-4">
-              <EthHashInfo address={safe.address} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
+              <EthHashInfo
+                address={safe.address}
+                shortAddress={false}
+                showPrefix={false}
+                showCopyButton
+                highlight4bytes
+                showAvatar
+                avatarSize={32}
+              />
               {safe.name && <p className="mt-2 text-sm text-foreground">Name: {safe.name}</p>}
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground">
-            Verify the full address carefully. Continue only if you recognize this Safe.
-          </p>
+          <p className="text-sm text-muted-foreground">{hint}</p>
         </div>
 
         <DialogActions
