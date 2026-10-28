@@ -40,6 +40,8 @@ export class TxReviewPage {
   readonly hashComparisonDialog: Locator
   /** The rows of a batch review, one per batched transaction, in batch order */
   readonly batchedTransactions: Locator
+  /** The accordion that shows the transaction's method, e.g. `multiSend` */
+  readonly transactionDetails: Locator
 
   constructor(private readonly page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -64,6 +66,12 @@ export class TxReviewPage {
     this.signedMessageContinueButton = page.getByRole('button', { name: 'Continue', exact: true })
     this.hashComparisonDialog = page.getByRole('dialog', { name: 'Compare transaction hash' })
     this.batchedTransactions = page.getByRole('listitem').getByTestId('action-item')
+    this.transactionDetails = page.getByRole('button', { name: /^Transaction details/ })
+  }
+
+  /** The decoded call at `position` (from 1) in the "All actions" list of a multiSend review */
+  multiSendAction(position: number): Locator {
+    return this.page.getByRole('button', { name: new RegExp(`^${position} `) })
   }
 
   /**

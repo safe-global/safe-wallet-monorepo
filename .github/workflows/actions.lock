@@ -174,6 +174,10 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'artiomtr/jest-coverage-report-action@v2.3.1'
         - 'slackapi/slack-github-action@v4.0.0'
+    '.github/workflows/yarn-cache.yml':
+        - 'actions/cache@v5.0.5'
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-node@v6.4.0'
 dependencies:
     'actions/attest@v4.2.2':
         ref: 'v4.2.2'

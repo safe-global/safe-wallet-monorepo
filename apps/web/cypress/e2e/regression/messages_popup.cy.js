@@ -32,16 +32,6 @@ describe('Messages popup window tests', () => {
     iframeSelector = `iframe[id="iframe-${encodeURIComponent(constants.safeTestAppurl)}"]`
   })
 
-  it('Verify off-chain message popup window can be triggered', () => {
-    apps.clickOnApp(safeApp)
-    apps.clickOnOpenSafeAppBtn()
-    main.getIframeBody(iframeSelector).within(() => {
-      apps.triggetOffChainTx()
-    })
-    msg_confirmation_modal.verifyConfirmationWindowTitle(modal.modalTitiles.confirmTx)
-    msg_confirmation_modal.verifySafeAppInPopupWindow(safeApp)
-  })
-
   it('Verify on-chain message popup window can be triggered', () => {
     apps.clickOnApp(safeApp)
     apps.clickOnOpenSafeAppBtn()

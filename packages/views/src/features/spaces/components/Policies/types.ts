@@ -56,6 +56,8 @@ export type PolicyAllowance = {
 
 export type PolicySpender = {
   spender: string
+  /** False when the spender was removed as a delegate and cannot spend, though the allowances still exist. */
+  isActive?: boolean
   allowances: PolicyAllowance[]
 }
 
@@ -132,6 +134,8 @@ export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPoli
 export type AllowlistPolicy = PolicyBase & {
   type: 'allowlist'
   data: AllowlistPolicyData
+  /** Whether the guard also checks module transactions, such as spending limits. */
+  spendingLimitsCovered: boolean
   scheduledChange?: AllowlistScheduledChange
 }
 
@@ -188,6 +192,9 @@ export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { s
 
 export const isAllowlistPolicy = (policy: Policy): policy is Extract<Policy, { type: 'allowlist' }> =>
   policy.type === 'allowlist'
+
+export const isActiveAllowlistPolicy = (policy: Policy): policy is AllowlistPolicy & { status: 'active' } =>
+  isAllowlistPolicy(policy) && policy.status === 'active'
 
 export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { type: 'recovery' }> =>
   policy.type === 'recovery'

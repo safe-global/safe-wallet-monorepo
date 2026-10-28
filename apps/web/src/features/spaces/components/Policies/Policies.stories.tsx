@@ -7,7 +7,7 @@ import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/comp
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import { mockStarterPlan } from './mocks/plan'
 import { mockPolicies } from './mocks/policies'
-import { mockActiveAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from './mocks/allowlistPolicies'
+import { mockCgwAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from './mocks/allowlistPolicies'
 import Policies from './index'
 
 const meta = {
@@ -65,7 +65,7 @@ export const Populated: Story = {
 
 export const PopulatedWithAllowlists: Story = {
   args: {
-    policies: [...mockPolicies(), mockActiveAllowlist(), mockPendingAllowlist(), mockFullySignedPendingAllowlist()],
+    policies: [...mockPolicies(), mockCgwAllowlist(), mockPendingAllowlist(), mockFullySignedPendingAllowlist()],
   },
 }
 

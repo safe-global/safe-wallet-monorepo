@@ -35,6 +35,7 @@ import AllowlistTokens from './components/AllowlistTokens'
 import ActivatedBanner from './components/ActivatedBanner'
 import FailedBanner from './components/FailedBanner'
 import ScheduledBanner from './components/ScheduledBanner'
+import UncoveredSpendingLimits from './components/UncoveredSpendingLimits'
 
 type AllowlistDrawerBaseProps = {
   open: boolean
@@ -55,6 +56,8 @@ type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   onCancelChange?: () => void
   /** The first setup just became active: confirms it once at the top of the panel. */
   justActivated?: boolean
+  /** The Safe's spending limits that bypass the allowlist because the guard is not in the module slot. */
+  uncoveredSpendingLimitCount?: number
 }
 
 type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
@@ -94,7 +97,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
   const status = outcome ? OUTCOME_STATUS[outcome] : getPolicyStatus(policy)
-  const isRemoved = state.kind !== 'active' && state.operation === 'remove'
+  const isRemoved = 'operation' in state && state.operation === 'remove'
   const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
@@ -119,6 +122,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               />
             </>
           )}
+          {state.kind === 'unenforced' && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {state.kind === 'active' && !isPendingDrawer(props) && props.justActivated && (
             <ActivatedBanner
               title={ACTIVATED_BANNER_TITLE}
@@ -140,6 +144,9 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ))}
           <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
           <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
+          {!isPendingDrawer(props) && state.kind !== 'unenforced' && !!props.uncoveredSpendingLimitCount && (
+            <UncoveredSpendingLimits count={props.uncoveredSpendingLimitCount} />
+          )}
           <PolicyOverview
             {...overview}
             appliesTo={{
@@ -147,7 +154,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
             chainId={policy.safe.chainId}
-            enforcedBy={{ label: overview.enforcedBy, href: enforcedByHref }}
+            enforcedBy={state.kind === 'unenforced' ? undefined : { label: overview.enforcedBy, href: enforcedByHref }}
           />
         </div>
       </DrawerBody>

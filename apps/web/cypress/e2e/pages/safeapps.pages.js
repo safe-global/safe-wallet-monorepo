@@ -124,10 +124,6 @@ export function clickOnAdvancedDetails() {
   cy.get(decodedTxSummary).click({ force: true })
 }
 
-export function triggetOffChainTx() {
-  cy.contains(dummyTxStr).click()
-}
-
 // The warning shows in both states: blocking while the setting is off, a caution once it is on
 export function verifyBlindSigningWarning(settingEnabled) {
   cy.contains(blindSigningStr).should('be.visible')

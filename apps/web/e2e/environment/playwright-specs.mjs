@@ -52,6 +52,10 @@ export const playwrightSpecs = {
   },
   'e2e/tx-builder.spec.ts': {},
   'regression/auth0/email-sign-in.spec.ts': {},
+  'regression/address-book.spec.ts': {
+    scenarios: ['prepareTransferFormScenario'],
+    safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
+  },
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
@@ -79,6 +83,10 @@ export const playwrightSpecs = {
   'regression/send-form-keyboard-navigation.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
+  },
+  'regression/wallet-reconnect.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_STATIC_SAFE_2: 'SEP_STATIC_SAFE_0' },
   },
   'regression/auth0/step-up-billing.spec.ts': {
     scenarios: ['prepareBasicScenario'],

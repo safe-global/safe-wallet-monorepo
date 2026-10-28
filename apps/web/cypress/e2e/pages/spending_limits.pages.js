@@ -1,84 +1,8 @@
-import * as constants from '../../support/constants'
-import * as main from './main.page'
-import * as addressBook from '../pages/address_book.page'
-import * as ls from '../../support/localstorage_data.js'
-import { tokenSelector } from './create_tx.pages'
 import { LS_NAMESPACE } from '../../../src/config/constants'
 
-export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
-export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
-export const safeProLock = '[data-testid="safe-pro-lock"]'
-const beneficiarySection = '[data-testid="beneficiary-section"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
-const tokenAmountSection = '[data-testid="token-amount-section"]'
-const modalTitle = '[data-testid="modal-title"]'
-const timePeriodSection = '[data-testid="time-period-section"]'
-const nextBtn = '[data-testid="next-btn"]'
-const deleteBtn = '[data-testid="delete-btn"]'
-const resetTimeInfo = '[data-testid="reset-time"]'
-const spentAmountInfo = '[data-testid="spent-amount"]'
 const spendingLimitTxOption = '[data-testid="spending-limit-tx"]'
 const standardTx = '[data-testid="standard-tx"]'
-const tokenItem = '[data-testid="token-item"]'
-const splimitBeneficiaryIcon = '[data-testid="beneficiary-icon"]'
-const splimitAssetIcon = '[data-testid="asset-icon"]'
-const splimitTimeIcon = '[data-testid="time-icon"]'
-const addressItem = '[data-testid="address-item"]'
-const allActionsSection = '[data-testid="all-actions"]'
-const actionItem = '[data-testid="action-item"]'
-const actionAccordion = '[data-testid="action-accordion"]'
-const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
-const DECODED_TX_TIMEOUT_MS = 30000
-
-export const timePeriodOptions = {
-  oneTime: 'One time',
-  fiveMin: '5 minutes',
-  thirtyMin: '30 minutes',
-  oneHr: '1 hour',
-  oneDay: '1 day',
-  oneWeek: '1 week',
-  oneMonth: '1 month',
-}
-
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
-
-export const actionNames = {
-  enableModule: 'enableModule',
-  resetAllowance: 'resetAllowance',
-  setAllowance: 'setAllowance',
-}
-
-const expectedSpendOptions = ['0.02 of 0.17 ETH', '0.00001 of 0.05 ETH', '0 of 0.01 ETH']
-const expectedResetOptions = new Array(3).fill('One-time')
-
-const newTransactionStr = 'New transaction'
-const confirmTxStr = 'Confirm transaction'
-const invalidCharErrorStr = 'The value must be a number'
-
-export function selectRecipient(recipient) {
-  cy.get(addressItem).contains(recipient).click()
-  main.verifyValuesExist(addressBook.addressBookRecipient, [
-    recipient,
-    ls.addressBookData.sepoliaAddress2[11155111][constants.defaultOwnerAddress()],
-  ])
-}
-
-export function verifySpendingLimitsIcons() {
-  main.verifyElementsIsVisible([splimitBeneficiaryIcon, splimitAssetIcon, splimitTimeIcon])
-}
-
-export function clickOnTokenDropdown() {
-  cy.get(tokenSelector).click()
-}
-export function verifyMandatoryTokensExist() {
-  main.verifyValuesExist(tokenItem, [constants.tokenNames.sepoliaEther, constants.tokenNames.qaToken])
-}
-
-export function selectToken(token) {
-  clickOnTokenDropdown()
-  cy.get(tokenItem).contains(token).click({ force: true })
-  main.verifyValuesExist(tokenSelector, [token])
-}
 
 export function selectSpendingLimitOption() {
   cy.get(spendingLimitTxOption).click()
@@ -90,75 +14,8 @@ export function selectStandardOption() {
   cy.get(standardTx).find('input').should('be.checked')
 }
 
-export function verifyBeneficiaryTable() {
-  main.checkTextOrder(spentAmountInfo, expectedSpendOptions)
-  main.checkTextOrder(resetTimeInfo, expectedResetOptions)
-  main.verifyElementsCount(deleteBtn, 3)
-}
-export function clickOnNextBtn() {
-  cy.get(nextBtn).click()
-  cy.get(modalTitle).should('have.text', confirmTxStr)
-}
-
-export function clickOnTimePeriodDropdown() {
-  cy.get(timePeriodSection).click()
-}
-
-export function visitSpendingLimitsPage(safe) {
-  cy.visit(constants.setupUrl + safe, {
-    onBeforeLoad(win) {
-      Object.entries(safeProOffStorage).forEach(([key, value]) => win.localStorage.setItem(key, JSON.stringify(value)))
-    },
-  })
-  cy.get(spendingLimitsSection, { timeout: 30000 }).should('be.visible')
-}
-
-export function clickOnNewSpendingLimitBtn() {
-  cy.get(newSpendingLimitBtn).click()
-  cy.contains(modalTitle, newTransactionStr).should('be.visible')
-}
-
 export function enterSpendingLimitAmount(amount) {
   cy.get(tokenAmountFld).clear().type(amount)
-}
-
-export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear().type(address)
-}
-
-export function checkBeneficiaryInputValue(value) {
-  getBeneficiaryInput().invoke('val').should('contain', value)
-}
-
-export function verifyCharErrorValidation() {
-  cy.get(tokenAmountSection).find('label').should('contain', invalidCharErrorStr)
-}
-
-export function verifyActionCount(count) {
-  main.verifyElementsCount(actionItem, count)
-}
-
-export function verifyActionNames(names) {
-  cy.get(allActionsSection)
-    .parent()
-    .within(() => {
-      names.forEach((item) => {
-        cy.contains(item)
-      })
-    })
-}
-
-export function verifyDecodedTxSummary(names) {
-  cy.get(decodedTxSummary, { timeout: DECODED_TX_TIMEOUT_MS }).within(() => {
-    names.forEach((item) => {
-      cy.contains(item, { timeout: DECODED_TX_TIMEOUT_MS })
-    })
-  })
-}
-
-export function verifyEnableModuleAddress(moduleAddress) {
-  cy.get(actionItem).first().click()
-  cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
 }
 
 /**

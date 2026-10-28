@@ -1,17 +1,9 @@
 import * as safeapps from './safeapps.pages.js'
-import * as main from './main.page.js'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
-const actionRequiredPanel = '[data-testid="action-required-panel"]'
-const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
-const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
 export const assetsWidget = '[data-testid="assets-widget"]'
-export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
-export const nonPinnedWarningTitle = 'Not in your accounts'
-export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
-const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
 
 export function pinAppByIndex(index) {
   return cy
@@ -53,63 +45,4 @@ export function verifyShareBtnWorks(index, data) {
         })
       }),
     )
-}
-
-export function expandActionRequiredPanel() {
-  cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
-  cy.get(actionRequiredPanelToggle).click()
-  cy.get(actionRequiredPanelContent, { timeout: 10000 }).should('be.visible')
-}
-
-/**
- * Verify a card in the action required panel by message(s) and/or action label.
- * Uses main.verifyValuesExist for message verification (elements inside panel).
- * @param {Object} options
- * @param {boolean} [options.expandFirst=true] - Expand the panel before verifying
- * @param {string[]} [options.messages=[]] - Text(s) that must be visible in the card (title, content)
- * @param {string} [options.actionLabel] - Text on the action button/link to verify visible
- */
-export function verifyActionRequiredCard({ expandFirst = true, messages = [], actionTestId } = {}) {
-  if (expandFirst) {
-    expandActionRequiredPanel()
-  }
-  if (messages.length > 0) {
-    main.verifyValuesExist(actionRequiredPanel, messages)
-  }
-  if (actionTestId) {
-    cy.get(actionRequiredPanel).within(() => {
-      cy.get(actionTestId).should('be.visible')
-    })
-  }
-}
-
-/**
- * Click an action (button or link) in the action required panel by its label text.
- * @param {string} actionLabel - Text on the button/link to click
- */
-export function clickActionInPanel(actionTestId) {
-  cy.get(actionRequiredPanel).within(() => {
-    cy.get(actionTestId).click()
-  })
-}
-
-export function verifyTrustDialogVisible() {
-  cy.get(trustDialogTestId, { timeout: 15000 }).should('be.visible')
-}
-
-/** Message in action-required-panel when signers differ across chains (dashboard) */
-const differentSignersAcrossChainsMsg = 'different signers across different networks'
-
-/** Verifies the "You have different signers across different networks" warning is displayed in action-required-panel. */
-export function checkInconsistentSignersMsgDisplayed() {
-  cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
-}
-
-/**
- * Verifies the Safe is present in the current URL, i.e. the router query has hydrated.
- * Use as a precondition before clicking actions that navigate using the `safe` query param.
- * @param {string} safe - Prefixed safe address expected in the URL
- */
-export function verifySafeInUrl(safe) {
-  cy.url().should('include', safe)
 }
