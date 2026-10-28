@@ -7,7 +7,6 @@ export const acceptSelectionStr = 'Save settings'
 
 // Common table selectors
 export const tableRow = '[data-testid="table-row"]'
-export const tableContainer = '[data-testid="table-container"]'
 export const nextPageBtn = '[data-testid="next-page-btn"]'
 export const previousPageBtn = '[data-testid="prev-page-btn"]'
 

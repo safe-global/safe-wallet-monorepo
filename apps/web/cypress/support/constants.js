@@ -34,12 +34,10 @@ export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
 export const spaceDashboardUrl = '/spaces?spaceId='
-export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = Cypress.expose('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
-export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
