@@ -17,14 +17,14 @@ export class RecipientAllowlistPage {
   readonly safeAccountSelector: Locator
   readonly recipientsSection: Locator
   readonly nextButton: Locator
-  /** One row per call of the setup transaction, in execution order: "<n> <target>: <method>" */
+  /** One row per call of the reviewed transaction, in execution order: "<n> <target>: <method>" */
   readonly setupCalls: Locator
+  /** The rules of the configuring call, listed once its row is expanded */
+  readonly rules: Locator
   /** The panel of an allowlist, opened from its table row */
   readonly panel: Locator
-  /** The panel's main action: the apply flow once the delay is over, or the queued transaction while it is signed */
+  /** The panel's main action: opens the review of the apply, or of the queued transaction while it is signed */
   readonly reviewTransactionButton: Locator
-  /** On the transaction page the panel links to, the connected owner's confirmation */
-  readonly confirmTransactionButton: Locator
   /** The panel's action while a requested change waits out the guard's delay, offered disabled */
   readonly disabledPanelAction: Locator
 
@@ -35,11 +35,9 @@ export class RecipientAllowlistPage {
     this.recipientsSection = page.getByTestId('allowlist-recipients-section')
     this.nextButton = page.getByTestId('recipient-allowlist-create-step').getByTestId('next-btn')
     this.setupCalls = page.getByTestId('allowlist-setup-actions').getByTestId('action-item')
+    this.rules = page.getByTestId('allowlist-setup-actions').getByTestId('allowlist-rule')
     this.panel = page.getByRole('dialog', { name: 'Allowlist' })
-    this.reviewTransactionButton = this.panel
-      .getByRole('button', { name: 'Review transaction' })
-      .or(this.panel.getByRole('link', { name: 'Review transaction' }))
-    this.confirmTransactionButton = page.getByTestId('tx-actions').getByRole('button', { name: 'Confirm' })
+    this.reviewTransactionButton = this.panel.getByRole('button', { name: 'Review transaction' })
     this.disabledPanelAction = this.panel.getByRole('button', { disabled: true })
   }
 
