@@ -42,7 +42,7 @@ describe('SimilarityWarningIcon', () => {
   const icon = () => screen.getByLabelText('Possible address poisoning')
   const rowAddress = fakerChecksummedAddress()
   const tooltipOf = async (label: string) =>
-    (await screen.findByText(label)).closest('[data-slot="tooltip-content"]') as HTMLElement
+    (await screen.findByText(label)).closest('[data-slot="popover-content"]') as HTMLElement
 
   beforeEach(() => {
     mockUseChains.mockReset()
@@ -69,6 +69,23 @@ describe('SimilarityWarningIcon', () => {
     await userEvent.hover(icon())
     expect(await screen.findByText('Similar accounts from trusted safes:')).toBeInTheDocument()
     expect(screen.getByText('Similar accounts from owned safes:')).toBeInTheDocument()
+  })
+
+  it('lets a keyboard user reach the peer controls', async () => {
+    const user = userEvent.setup()
+    render(
+      <SimilarityWarningIcon
+        address={rowAddress}
+        warning={warning({ owned: [peerOf(fakerLookalikeAddress(rowAddress))] })}
+      />,
+    )
+
+    await user.tab()
+    expect(icon()).toHaveFocus()
+    await user.keyboard('{Enter}')
+    await screen.findByText('Similar accounts from owned safes:')
+
+    expect(screen.getByRole('button', { name: 'Copy address' })).toHaveFocus()
   })
 
   it('swallows clicks so the selectable/navigable row underneath does not react', async () => {

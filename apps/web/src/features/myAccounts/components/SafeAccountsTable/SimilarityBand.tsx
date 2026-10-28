@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import PeerAddress from '@/components/common/PeerAddress'
+import PeerAddressPopover from '@/components/common/PeerAddress/PeerAddressPopover'
 import useChains from '@/hooks/useChains'
 import type { SimilarPeer, SimilarWarning } from '@/features/address-poisoning'
 
@@ -34,30 +35,25 @@ export const SimilarityWarningIcon = ({
   return (
     // Swallow the click — the icon sits inside a selectable/navigable row.
     <span className="inline-flex" onClick={(event) => event.stopPropagation()}>
-      <Tooltip>
-        <TooltipTrigger render={<span className="inline-flex" />}>
-          <TriangleAlert
-            size={14}
-            className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]"
-            aria-label="Possible address poisoning"
-          />
-        </TooltipTrigger>
-        <TooltipContent className="max-w-none">
-          {sections.map(([label, peers]) => (
-            <div key={label} className="mb-1 last:mb-0">
-              <div className="font-semibold">{label}</div>
-              {peers.map((peer) => (
-                <PeerAddress
-                  key={peer.address}
-                  address={peer.address}
-                  {...getCommonAffixLengths(peer.address, address)}
-                  explorerLink={explorerLinkOf(peer)}
-                />
-              ))}
-            </div>
-          ))}
-        </TooltipContent>
-      </Tooltip>
+      <PeerAddressPopover
+        trigger={<TriangleAlert size={14} className="shrink-0 text-yellow-800 dark:text-[var(--color-warning-main)]" />}
+        triggerLabel="Possible address poisoning"
+        triggerClassName="inline-flex"
+      >
+        {sections.map(([label, peers]) => (
+          <div key={label} className="mb-1 last:mb-0">
+            <div className="font-semibold">{label}</div>
+            {peers.map((peer) => (
+              <PeerAddress
+                key={peer.address}
+                address={peer.address}
+                {...getCommonAffixLengths(peer.address, address)}
+                explorerLink={explorerLinkOf(peer)}
+              />
+            ))}
+          </div>
+        ))}
+      </PeerAddressPopover>
     </span>
   )
 }

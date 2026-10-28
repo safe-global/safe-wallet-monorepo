@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import PeerAddress from '@/components/common/PeerAddress'
+import PeerAddressPopover from '@/components/common/PeerAddress/PeerAddressPopover'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 
-/** The saved name; hovering it compares the entered address with the saved one, matching ends bolded. */
+/** The saved name; hovering or pressing it compares the entered address with the saved one, matching ends bolded. */
 export const SimilarAddressTooltip = ({
   name,
   savedAddress,
@@ -28,23 +28,18 @@ export const SimilarAddressTooltip = ({
   ] as const
 
   return (
-    <Tooltip>
-      <TooltipTrigger type="button" className="cursor-help font-bold">
-        {name}
-      </TooltipTrigger>
-      <TooltipContent className="max-w-none">
-        {sections.map(([label, address]) => (
-          <div key={label} className="mb-1 last:mb-0">
-            <div className="font-semibold">{label}</div>
-            <PeerAddress
-              address={address}
-              prefixLen={prefixLen}
-              suffixLen={suffixLen}
-              explorerLink={chain ? getBlockExplorerLink(chain, address) : undefined}
-            />
-          </div>
-        ))}
-      </TooltipContent>
-    </Tooltip>
+    <PeerAddressPopover trigger={name} triggerClassName="cursor-help font-bold">
+      {sections.map(([label, address]) => (
+        <div key={label} className="mb-1 last:mb-0">
+          <div className="font-semibold">{label}</div>
+          <PeerAddress
+            address={address}
+            prefixLen={prefixLen}
+            suffixLen={suffixLen}
+            explorerLink={chain ? getBlockExplorerLink(chain, address) : undefined}
+          />
+        </div>
+      ))}
+    </PeerAddressPopover>
   )
 }
