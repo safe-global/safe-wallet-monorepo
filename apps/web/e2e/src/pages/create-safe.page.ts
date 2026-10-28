@@ -6,11 +6,6 @@
  */
 import { type Page, type Locator } from '@playwright/test'
 
-// The success modal opens only once the deployment is mined and indexed
-const DEPLOYMENT_TIMEOUT_MS = 120_000
-// The relay option waits for the owners' relays, which a fork under load can take long to read
-const RELAYS_LOAD_TIMEOUT_MS = 60_000
-
 /** Signers besides the connected wallet and the threshold; without them the wallet is the only owner, threshold 1 */
 type SignerSetup = { owners?: string[]; threshold?: number }
 
@@ -111,8 +106,8 @@ export class CreateSafePage {
         .filter({ hasText: switchWalletTo })
         .click()
     }
-    await this.relayMethod.click({ timeout: RELAYS_LOAD_TIMEOUT_MS })
+    await this.relayMethod.click()
     await this.confirmActivationButton.click()
-    await this.letsGoButton.click({ timeout: DEPLOYMENT_TIMEOUT_MS })
+    await this.letsGoButton.click()
   }
 }

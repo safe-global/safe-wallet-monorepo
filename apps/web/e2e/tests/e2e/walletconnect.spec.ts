@@ -95,7 +95,7 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     const answer = await response
     expect(answer).toEqual({ result: expect.stringMatching(/^0x[0-9a-f]{64}$/) })
     const { result: hash } = answer as { result: string }
-    await expect.poll(async () => (await receiptOf(dapp, hash))?.status, { timeout: 60_000 }).toBe('0x1')
+    await expect.poll(async () => (await receiptOf(dapp, hash))?.status).toBe('0x1')
 
     expect(await balanceOf(journey.env, recipient)).toBe(value)
   })

@@ -8,8 +8,6 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { seedSafe } from '../../src/seed/safe'
 
 const AMOUNT = '0.001'
-// The review loads the transaction, its decoding and the Safe Shield scan before it shows the risk confirmation
-const REVIEW_LOAD_TIMEOUT_MS = 60_000
 
 test.describe('Safe Shield untrusted Safe check', { tag: '@e2e' }, () => {
   test('should ask to confirm the risk before signing when the Safe is not in the accounts', async ({
@@ -27,7 +25,7 @@ test.describe('Safe Shield untrusted Safe check', { tag: '@e2e' }, () => {
     await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
     await sendTokens.nextButton.click()
 
-    await expect(review.riskConfirmation).toBeVisible({ timeout: REVIEW_LOAD_TIMEOUT_MS })
+    await expect(review.riskConfirmation).toBeVisible()
     await expect(safeShield.untrustedSafeFinding).toBeVisible()
     await expect(review.continueButton).toBeDisabled()
 

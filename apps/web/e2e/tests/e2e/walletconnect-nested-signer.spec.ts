@@ -26,11 +26,6 @@ import { balanceOf } from '../../src/chain/balances'
 import { approveHashData, confirmationsOf, safeTxHashOf } from '../../src/api/transaction-items'
 
 const AMOUNT = '0.01'
-// Once the parent executes approveHash, the Transaction Service indexes the event before CGW counts it
-const ON_CHAIN_CONFIRMATION_TIMEOUT_MS = 60_000
-
-// A wallet sees another owner's message signature on its next Safe info poll (POLLING_INTERVAL, 15 s)
-const OTHER_OWNER_SIGNATURE_TIMEOUT_MS = 60_000
 
 type NestedSignerFixtures = {
   /** The owners and thresholds of the seeded Safes; 1/1 over 1/1 by default */
@@ -201,9 +196,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       const approval = { safeAddress: pairing.child.address, owner: pairing.parent.address, hash: queued.safeTxHash }
       expect(await isApprovedHash(journey.env, approval)).toBe(true)
       await expect
-        .poll(async () => (await safeApiClient.getQueued(pairing.child.address)).map(confirmationsOf), {
-          timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
-        })
+        .poll(async () => (await safeApiClient.getQueued(pairing.child.address)).map(confirmationsOf))
         .toEqual([2])
     })
   })
@@ -295,7 +288,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
         await new TxReviewPage(safePage).signMessage()
         // The parent's signature proposes the message at 1/2; OWNER_4 adds the second one
         await confirmPendingMessage(journey.env, pairing.child.address, journey.owners.owner4)
-        await childReview.signedMessageContinueButton.click({ timeout: OTHER_OWNER_SIGNATURE_TIMEOUT_MS })
+        await childReview.signedMessageContinueButton.click()
 
         const { result: signature } = (await response) as { result: string }
         const safeAddress = pairing.child.address
@@ -328,7 +321,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
         await parentReview.signMessageButton.click()
         // OWNER_4 signed the parent's message at 1/2; OWNER_1 adds the second one, then wallet B answers wallet A
         await confirmPendingMessage(journey.env, pairing.parent.address, journey.owners.owner1)
-        await parentReview.signedMessageContinueButton.click({ timeout: OTHER_OWNER_SIGNATURE_TIMEOUT_MS })
+        await parentReview.signedMessageContinueButton.click()
         await childReview.signedMessageContinueButton.click()
 
         const { result: signature } = (await response) as { result: string }
