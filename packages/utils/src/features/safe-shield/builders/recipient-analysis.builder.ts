@@ -52,4 +52,32 @@ export class RecipientAnalysisBuilder {
       .bridgeState([RecipientAnalysisResultBuilder.incompatibleSafe().build()])
       .done()
   }
+
+  static recurringRecipient(address: string = '0x0000000000000000000000000000000000000005'): RecipientAnalysisBuilder {
+    return new RecipientAnalysisBuilder()
+      .addAddress(address)
+      .interactionState([RecipientAnalysisResultBuilder.recurringRecipient().build()])
+      .done()
+  }
+
+  static missingOwnership(address: string = '0x0000000000000000000000000000000000000006'): RecipientAnalysisBuilder {
+    return new RecipientAnalysisBuilder()
+      .addAddress(address)
+      .bridgeState([RecipientAnalysisResultBuilder.missingOwnership().build()])
+      .done()
+  }
+
+  static unsupportedNetwork(address: string = '0x0000000000000000000000000000000000000007'): RecipientAnalysisBuilder {
+    return new RecipientAnalysisBuilder()
+      .addAddress(address)
+      .bridgeState([RecipientAnalysisResultBuilder.unsupportedNetwork().build()])
+      .done()
+  }
+
+  static differentSafeSetup(address: string = '0x0000000000000000000000000000000000000008'): RecipientAnalysisBuilder {
+    return new RecipientAnalysisBuilder()
+      .addAddress(address)
+      .bridgeState([RecipientAnalysisResultBuilder.differentSafeSetup().build()])
+      .done()
+  }
 }
