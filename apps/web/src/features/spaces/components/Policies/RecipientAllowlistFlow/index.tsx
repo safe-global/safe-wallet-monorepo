@@ -38,18 +38,23 @@ const RecipientAllowlistFlow = (): ReactElement => {
         eventCategory={TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST}
         initialData={{ ...createDefaultAllowlistValues(), rules: [] }}
       >
-        <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
-          <CreateRecipientAllowlistPolicy
-            dismissedCallouts={dismissedCallouts}
-            onDismissCallout={dismissCallout}
-            onSpendingLimitImpact={setAffectsSpendingLimits}
-          />
-        </TxFlowStep>
-        {affectsSpendingLimits && (
-          <TxFlowStep title={EXISTING_POLICIES_STEP_TITLE} hideNonce>
-            <ExistingPoliciesStep />
-          </TxFlowStep>
-        )}
+        {/* TxFlow counts a skipped `false` step in its progress, so the step is left out of the list instead. */}
+        {[
+          <TxFlowStep key="create" title={CREATE_STEP_TITLE} hideNonce>
+            <CreateRecipientAllowlistPolicy
+              dismissedCallouts={dismissedCallouts}
+              onDismissCallout={dismissCallout}
+              onSpendingLimitImpact={setAffectsSpendingLimits}
+            />
+          </TxFlowStep>,
+          ...(affectsSpendingLimits
+            ? [
+                <TxFlowStep key="existing-policies" title={EXISTING_POLICIES_STEP_TITLE} hideNonce>
+                  <ExistingPoliciesStep />
+                </TxFlowStep>,
+              ]
+            : []),
+        ]}
       </TxFlow>
     </SafeScopeProvider>
   )

@@ -14,12 +14,13 @@ const makeAllowance = (tokenAddress: string): PolicyAllowance => ({
 const makeSpendingLimit = (
   safe: PolicySafe,
   spenders: { spender: string; isActive?: boolean; allowances: PolicyAllowance[] }[],
+  enabled = true,
 ): Policy => ({
   id: faker.string.uuid(),
   type: 'spending-limit',
   status: 'active',
   safe,
-  enabled: true,
+  enabled,
   enforcement: { via: 'module', moduleAddress: faker.finance.ethereumAddress() },
   data: { spenders },
 })
@@ -61,6 +62,14 @@ describe('getSpendingLimitImpacts', () => {
     const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
 
     expect(impacts.map(({ spender }) => spender)).toEqual([active])
+  })
+
+  it('should leave out a spending limit, when its module is not enabled on the Safe', () => {
+    const policies = [
+      makeSpendingLimit(safe, [{ spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(usdc)] }], false),
+    ]
+
+    expect(getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])).toEqual([])
   })
 
   it('ignores spending limits on other Safes and other chains', () => {
