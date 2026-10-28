@@ -70,6 +70,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   canExecute: boolean
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
+  isLastSignature: boolean
   willSignBeforeExecute: boolean
   continueToExecute: (txId: string) => void
 
@@ -116,6 +117,7 @@ export const initialContext: TxFlowContextType = {
   canExecute: false,
   shouldExecute: false,
   setShouldExecute: () => {},
+  isLastSignature: false,
   willSignBeforeExecute: false,
   continueToExecute: () => {},
 
@@ -223,8 +225,12 @@ const TxFlowProvider = <T extends unknown>({
   )
   const signatureCount = safeTx?.signatures.size ?? 0
 
+  // The last signer of an m/n Safe executes directly, with the implicit executor approval
+  const canApproveByExecuting = safe.threshold > 1 && !viaSafe
+
   // On-chain signatures only count once indexed, so these signers can only execute fully signed txs
-  const isAwaitingOnChainSignatures = (viaSafe || isSmartContractSigner) && signatureCount < safe.threshold
+  const isAwaitingOnChainSignatures =
+    (viaSafe || isSmartContractSigner) && !canApproveByExecuting && signatureCount < safe.threshold
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
   const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isAwaitingOnChainSignatures
@@ -233,8 +239,9 @@ const TxFlowProvider = <T extends unknown>({
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
 
   const hasSigned = useAlreadySigned(safeTx)
-  const willSignBeforeExecute =
+  const isLastSignature =
     canExecute && !isProposing && !hasSigned && isOneSignatureShort(signatureCount, safe.threshold)
+  const willSignBeforeExecute = isLastSignature && !canApproveByExecuting
 
   const continueToExecute = useCallback(
     (txId: string) => {
@@ -323,6 +330,7 @@ const TxFlowProvider = <T extends unknown>({
     willExecute,
     shouldExecute,
     setShouldExecute,
+    isLastSignature,
     willSignBeforeExecute,
     continueToExecute,
 
