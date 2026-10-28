@@ -20,7 +20,8 @@ export const useAddressResolver = (address?: string) => {
   // ENSv2: reverse lookups run on the shared hub provider (Mainnet/Sepolia Universal Resolver)
   const { hubChain, provider: ethersProvider, isDomainLookupEnabled } = useEnsHubProvider(currentChain)
 
-  const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
+  const canResolve = !!address && !addressBookName && isDomainLookupEnabled && !!ethersProvider
+  const shouldResolve = canResolve && !!debouncedValue
   const cacheKey = `${hubChain?.chainId}:${ETH_COIN_TYPE}`
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
@@ -34,7 +35,11 @@ export const useAddressResolver = (address?: string) => {
     return lookupAddress(ethersProvider, debouncedValue, ETH_COIN_TYPE)
   }, [ethersProvider, debouncedValue, shouldResolve, address, cacheKey])
 
-  const resolving = (shouldResolve && isResolving) || false
+  // Clear stale ENS while debounce catches up to the new address
+  const isStale = debouncedValue !== address
+
+  // A pending debounce counts as resolving, or a form gated on it can submit before the lookup starts
+  const resolving = canResolve && (isStale || (shouldResolve && isResolving))
 
   useEffect(() => {
     if (ens && debouncedValue) {
@@ -42,9 +47,6 @@ export const useAddressResolver = (address?: string) => {
       cache[cacheKey][debouncedValue] = ens
     }
   }, [cacheKey, debouncedValue, ens])
-
-  // Clear stale ENS while debounce catches up to the new address
-  const isStale = debouncedValue !== address
 
   return useMemo(
     () => ({
