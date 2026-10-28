@@ -1,4 +1,4 @@
-import { buildAllowlistConfigurations } from './services/allowlistConfigurations'
+import { buildAllowlistConfigurations, decodeErc20TransferPolicyData } from './services/allowlistConfigurations'
 import { createAllowlistSetupTxs } from './services/createAllowlistSetupTxs'
 import {
   createApplyConfigurationTx,
@@ -15,5 +15,6 @@ export default {
   getConfigurationRoot,
   describeSetupCall,
   buildAllowlistConfigurations,
+  decodeErc20TransferPolicyData,
   createAllowlistSetupTxs,
 }

@@ -16,6 +16,7 @@ type AllowlistSummaryProps = {
   tokenSymbols: string[]
   recipientNames: string[]
   isGuardEnabled?: boolean
+  description?: string
 }
 
 const MAX_LISTED_TOKENS = 3
@@ -34,6 +35,7 @@ const AllowlistSummary = ({
   tokenSymbols,
   recipientNames,
   isGuardEnabled = false,
+  description = SUMMARY_DESCRIPTION,
 }: AllowlistSummaryProps): ReactElement => {
   const isComplete = tokenSymbols.length > 0 && recipientNames.length > 0
 
@@ -50,7 +52,7 @@ const AllowlistSummary = ({
       description={
         accountLabel ? (
           <>
-            {SUMMARY_DESCRIPTION}
+            {description}
             <Tooltip>
               <TooltipTrigger
                 render={

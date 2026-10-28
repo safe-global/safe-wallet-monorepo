@@ -11,6 +11,7 @@ import { getPolicyEngineAddress } from '../policyEngineDeployments'
 import {
   MAX_POLICY_CONFIGURATIONS,
   buildAllowlistConfigurations,
+  decodeErc20TransferPolicyData,
   encodeErc20TransferPolicyData,
 } from '../allowlistConfigurations'
 
@@ -121,5 +122,9 @@ describe('allowlistConfigurations', () => {
       [ALICE, 2],
       [BOB, 2],
     ])
+  })
+
+  it('decodes the recipients it encoded, in order', () => {
+    expect(decodeErc20TransferPolicyData(encodeErc20TransferPolicyData([ALICE, BOB]))).toEqual([ALICE, BOB])
   })
 })
