@@ -26,6 +26,7 @@ const {
   safeAppSwapOrder,
   sellLimitOrder,
   wrapSwap,
+  sell3Actions,
   sellCancelled,
   sellLimitOrderFilled,
   partiallyFilledLimit,
@@ -122,6 +123,18 @@ describe('ExpandableTransactionItem with recorded swap orders', () => {
         'Filled',
       ],
     },
+    {
+      name: 'a wrap, approve and swap in one batch',
+      order: sell3Actions,
+      expanded: [
+        'Sell order',
+        /for at least .* DAI/,
+        /1 DAI = .* WETH/,
+        'Wrapped Ether: deposit',
+        'Wrapped Ether: approve',
+        'GPv2Settlement: setPreSignature',
+      ],
+    },
     { name: 'a cancelled order', order: sellCancelled, expanded: ['Sell order', /1 UNI = .*K COW/, 'Cancelled'] },
     { name: 'a partially filled limit order', order: partiallyFilledLimit, expanded: ['Partially filled'] },
     { name: 'an expired limit order', order: sellLimitOrder, expanded: ['Expired', /1 DAI = .* COW/] },
@@ -152,6 +165,7 @@ describe('ExpandableTransactionItem with recorded swap orders', () => {
     { name: 'a sell order', order: sell1Action, advanced: ['GPv2Settlement', 'setPreSignature'] },
     { name: 'a limit order', order: sellLimitOrder, advanced: ['GPv2Settlement', 'setPreSignature'] },
     { name: 'a batched buy order', order: buy2actions, advanced: ['multiSend', 'Safe: MultiSendCallOnly 1.3.0'] },
+    { name: 'a wrap and swap batch', order: sell3Actions, advanced: ['multiSend', 'Safe: MultiSendCallOnly 1.3.0'] },
   ])('shows the contract call of $name in the advanced details', async ({ order, advanced }) => {
     renderOrder(order, { expanded: true })
 

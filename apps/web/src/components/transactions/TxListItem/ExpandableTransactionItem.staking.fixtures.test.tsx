@@ -23,6 +23,7 @@ jest.mock('@/services/analytics', () => ({
 const { stake, withdrawal } = stakingFixtures
 const STAKING_SAFE = withdrawal.details.safeAddress
 const PERCENTAGE = /^\d+(\.\d+)?\s?%$/
+const REWARD = /^\d+(\.\d+)? ETH \(\$\s?\d{1,3}(,\d{3})*\)$/
 
 const mainnet = chainBuilder()
   .with({ chainId: '1', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' } })
@@ -93,8 +94,8 @@ describe('ExpandableTransactionItem with recorded staking transactions', () => {
     expect(getFieldValue(details, 'Deposit')).toHaveTextContent('ETH32')
     expect(getFieldValue(details, 'Net reward rate').textContent).toMatch(PERCENTAGE)
     expect(getFieldValue(details, 'Fee').textContent).toMatch(PERCENTAGE)
-    expect(getFieldValue(details, 'Net annual rewards')).toHaveTextContent('ETH')
-    expect(getFieldValue(details, 'Net monthly rewards')).toHaveTextContent('ETH')
+    expect(getFieldValue(details, 'Net annual rewards').textContent).toMatch(REWARD)
+    expect(getFieldValue(details, 'Net monthly rewards').textContent).toMatch(REWARD)
     expect(getFieldValue(details, 'Validators')).toHaveTextContent(/^1$/)
     expect(getFieldValue(details, 'Activation time').textContent).not.toBe('')
     expect(getFieldValue(details, 'Rewards')).toHaveTextContent('Approx. every 5 days after activation')

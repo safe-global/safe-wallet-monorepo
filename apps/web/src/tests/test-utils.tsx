@@ -143,9 +143,6 @@ export const mockWeb3Provider = (
   return web3Provider
 }
 
-/**
- * Return the value cell of the transaction details row with this title (a `FieldsGrid` or `DataRow`)
- */
 export const getFieldValue = (container: HTMLElement, title: string): HTMLElement => {
   const titleCell = within(container)
     .getAllByTestId('tx-row-title')

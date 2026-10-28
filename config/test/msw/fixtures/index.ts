@@ -75,6 +75,7 @@ import swapBuy2actions from './transactions/swaps/buy2actions.json'
 import swapSafeAppSwapOrder from './transactions/swaps/safeAppSwapOrder.json'
 import swapSellLimitOrder from './transactions/swaps/sellLimitOrder.json'
 import swapWrapSwap from './transactions/swaps/wrapSwap.json'
+import swapSell3Actions from './transactions/swaps/sell3Actions.json'
 import swapSellCancelled from './transactions/swaps/sellCancelled.json'
 import swapSellLimitOrderFilled from './transactions/swaps/sellLimitOrderFilled.json'
 import swapPartiallyFilledLimit from './transactions/swaps/partiallyFilledLimit.json'
@@ -211,6 +212,7 @@ export const swapOrderFixtures = {
   safeAppSwapOrder: swapSafeAppSwapOrder as RecordedTransaction,
   sellLimitOrder: swapSellLimitOrder as RecordedTransaction,
   wrapSwap: swapWrapSwap as RecordedTransaction,
+  sell3Actions: swapSell3Actions as RecordedTransaction,
   sellCancelled: swapSellCancelled as RecordedTransaction,
   sellLimitOrderFilled: swapSellLimitOrderFilled as RecordedTransaction,
   partiallyFilledLimit: swapPartiallyFilledLimit as RecordedTransaction,

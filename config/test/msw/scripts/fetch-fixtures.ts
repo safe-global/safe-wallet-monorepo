@@ -103,6 +103,10 @@ const SWAP_TRANSACTIONS: TransactionSet = {
       '0xF184a243925Bf7fb1D64487339FF4F177Fb75644',
       '0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
     ),
+    sell3Actions: sepolia(
+      '0x140663Cb76e4c4e97621395fc118912fa674150B',
+      '0x9f3d2c9c9879fb7eee7005d57b2b5c9006d7c8b98241aa49a0b9e769411c58ef',
+    ),
     sellCancelled: sepolia(
       '0x2a73e61bd15b25B6958b4DA3bfc759ca4db249b9',
       '0xbe159adaa7fb0f7e80ad4bab33a2bb341043818478c96916cfa3877303d22a3d',
