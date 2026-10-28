@@ -12,7 +12,6 @@ import {
 import { test, expect, type Journey, type OwnerName } from '../../src/fixtures/journey.fixture'
 import { PoliciesPage } from '../../src/pages/policies.page'
 import { RecipientAllowlistPage } from '../../src/pages/recipient-allowlist.page'
-import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import {
   ERC20_TRANSFER_POLICY,
@@ -78,12 +77,10 @@ async function fillAllowlist(allowlist: RecipientAllowlistPage, recipients: Reci
 
 /**
  * Signs the reviewed transaction as the connected owner: on a 1/n Safe it executes at once; on a 2/n Safe the owner
- * only proposes it, and OWNER_1 confirms and executes it from the queue.
+ * only proposes it, and OWNER_1 confirms and executes it from the Policies table.
  */
-async function signAndExecute(
-  page: Page,
-  { journey, safeApiClient, safe, setup, nonce }: SigningContext & { nonce: number },
-): Promise<void> {
+async function signAndExecute(page: Page, context: SigningContext): Promise<void> {
+  const { safeApiClient, safe, setup } = context
   const review = new TxReviewPage(page)
   // Safe Shield trusts a Safe in the user's Workspace, so no review asks to confirm a risk.
   if (setup.threshold === 1) {
@@ -92,20 +89,29 @@ async function signAndExecute(
   }
   await review.sign({ confirmRisk: false })
   await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
-  await confirmAndExecuteAsSecondOwner(page, { journey, safe, nonce })
+  await confirmFromPoliciesAsSecondOwner(page, context)
 }
 
-type SigningContext = { journey: Journey; safeApiClient: SafeApiClient; safe: SeededSafe; setup: OwnerSetup }
+type SigningContext = {
+  journey: Journey
+  safeApiClient: SafeApiClient
+  safe: SeededSafe
+  setup: OwnerSetup
+  workspaceId: string
+}
 
-async function confirmAndExecuteAsSecondOwner(
+/** OWNER_1 finds the queued allowlist transaction in the Policies table, and confirms and executes it from its panel */
+async function confirmFromPoliciesAsSecondOwner(
   page: Page,
-  { journey, safe, nonce }: { journey: Journey; safe: SeededSafe; nonce: number },
+  { journey, safe, workspaceId }: Pick<SigningContext, 'journey' | 'safe' | 'workspaceId'>,
 ): Promise<void> {
-  const queue = new TxQueuePage(page)
+  const allowlist = new RecipientAllowlistPage(page)
   await journey.connectAs('owner1')
-  await queue.goto(safe.prefixedAddress)
-  await expect(queue.transactionWithNonce(nonce)).toContainText('1/2')
-  await queue.confirm(nonce)
+  await new PoliciesPage(page).goto(workspaceId)
+  await allowlist.openPendingPanel(safe.address)
+  await expect(allowlist.panel).toContainText('1 of 2 signatures')
+  await allowlist.reviewTransactionButton.click()
+  await allowlist.confirmTransactionButton.click()
   await new TxReviewPage(page).signAndExecute({ confirmRisk: false })
 }
 
@@ -137,7 +143,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       await fillAllowlist(allowlist, [recipient])
 
       await expect(allowlist.setupCalls).toHaveText([/configureImmediately/, /setGuard/, /setModuleGuard/])
-      await signAndExecute(safePage, { journey, safeApiClient, safe, setup, nonce: 0 })
+      await signAndExecute(safePage, { journey, safeApiClient, safe, setup, workspaceId })
 
       await expect
         .poll(() => readGuardSlots(journey.env, safe.address))
@@ -170,7 +176,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       const added = newRecipient('Exchange')
       const changed = { token: SEPOLIA_USDC.address, recipients: [current.address, added.address] }
       const { safe, workspaceId } = await seedAllowlistSafe(safePage, journey, setup, { allowlisted: [current] })
-      const signing = { journey, safeApiClient, safe, setup }
+      const signing = { journey, safeApiClient, safe, setup, workspaceId }
 
       const policies = new PoliciesPage(safePage)
       const allowlist = new RecipientAllowlistPage(safePage)
@@ -181,7 +187,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       await allowlist.startFromAddPolicy()
       await fillAllowlist(allowlist, [current, added])
       await expect(allowlist.setupCalls).toHaveText([/requestConfiguration/])
-      await signAndExecute(safePage, { ...signing, nonce: 1 })
+      await signAndExecute(safePage, signing)
 
       const request = { guard: POLICY_GUARD, safe: safe.address, root: configurationRootOf(changed) }
       await expect.poll(() => readConfigurationRequest(env, request)).toBeGreaterThan(0)
@@ -213,11 +219,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
         await new TxReviewPage(safePage).sign({ confirmRisk: false })
         await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
         // The queued apply is a row of its own until it executes, with the signatures it still needs.
-        await policies.goto(workspaceId)
-        await allowlist.openPendingPanel(safe.address)
-        await expect(allowlist.panel).toContainText('1 of 2 signatures')
-        await allowlist.closePanel()
-        await confirmAndExecuteAsSecondOwner(safePage, { journey, safe, nonce: 2 })
+        await confirmFromPoliciesAsSecondOwner(safePage, signing)
       }
 
       await expect.poll(() => readConfigurationRequest(env, request)).toBe(0)
