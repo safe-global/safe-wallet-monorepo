@@ -8,14 +8,14 @@ import { getSpendingLimitsGroupTitle, SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL } fr
 
 export type ExistingPoliciesContentProps = {
   safeName: string
-  /** What the allowlist does to the spending limits: a warning when it blocks any of them. */
-  banner: { title: string; description: string; tone: Extract<StatusAlertTone, 'warning' | 'info'> }
+  /** How many of the spending limits will follow the allowlist's rules. */
+  banner: { title: string; description: string; tone: Extract<StatusAlertTone, 'info'> }
   rows: (SpendingLimitImpactRowProps & { key: string })[]
   acknowledged: boolean
   onAcknowledgedChange: (acknowledged: boolean) => void
 }
 
-/** The Existing policies step's body: which spending limits the allowlist blocks or restricts, and the acknowledgement. */
+/** The Existing policies step's body: every spending limit, those the allowlist restricts first, and the acknowledgement. */
 const ExistingPoliciesContent = ({
   safeName,
   banner,

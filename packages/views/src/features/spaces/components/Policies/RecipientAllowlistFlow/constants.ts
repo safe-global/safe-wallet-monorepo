@@ -105,19 +105,14 @@ export const ALLOWLIST_GAP_DELEGATE_CALLS =
 export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."
 
 export const EXISTING_POLICIES_STEP_TITLE = 'Existing policies'
-export const getBlockedSpendingLimitsTitle = (count: number): string =>
-  `${count} spending ${count === 1 ? 'limit' : 'limits'} will be blocked by this allowlist.`
-export const getBlockedSpendingLimitDescription = (spender: string, amount: string, symbol: string): string =>
-  `${spender} can send up to ${amount} to any address today. Once this allowlist is active, it can't send ${symbol} anymore.`
-export const BLOCKED_SPENDING_LIMITS_DESCRIPTION =
-  "They can send their tokens to any address today. Once this allowlist is active, they can't send them anymore."
 export const getRestrictedSpendingLimitsTitle = (count: number): string =>
   count === 1
     ? "Your spending limit will follow this allowlist's rules."
     : `Your ${count} spending limits will follow this allowlist's rules.`
+export const getPartlyRestrictedSpendingLimitsTitle = (restricted: number, total: number): string =>
+  `${restricted} of your ${total} spending limits will follow this allowlist's rules.`
 export const RESTRICTED_SPENDING_LIMITS_DESCRIPTION = 'They can only send allowed tokens to allowed recipients.'
 export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
-export const WILL_BE_BLOCKED_LABEL = 'Will be blocked'
 export const WILL_BE_RESTRICTED_LABEL = 'Will be restricted'
 export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
 export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`

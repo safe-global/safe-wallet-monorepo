@@ -2,8 +2,7 @@ import { useState, type ReactElement } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import {
-  BLOCKED_SPENDING_LIMITS_DESCRIPTION,
-  getBlockedSpendingLimitsTitle,
+  getPartlyRestrictedSpendingLimitsTitle,
   getRestrictedSpendingLimitsTitle,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
 } from './constants'
@@ -18,11 +17,11 @@ const RESTRICTED_ROW: ExistingPoliciesContentProps['rows'][number] = {
   impact: 'restricted',
 }
 
-const BLOCKED_ROW: ExistingPoliciesContentProps['rows'][number] = {
+const UNAFFECTED_ROW: ExistingPoliciesContentProps['rows'][number] = {
   key: 'payroll-bot-eth',
   spender: spender('Payroll bot'),
   description: "1/week · ETH isn't in this allowlist",
-  impact: 'blocked',
+  impact: 'unaffected',
 }
 
 const Stateful = (props: Omit<ExistingPoliciesContentProps, 'acknowledged' | 'onAcknowledgedChange'>): ReactElement => {
@@ -43,29 +42,29 @@ const meta = {
   args: {
     safeName: 'Payments',
     banner: {
-      tone: 'warning',
-      title: getBlockedSpendingLimitsTitle(1),
-      description:
-        "Payroll bot can send up to 1 ETH / week to any address today. Once this allowlist is active, it can't send ETH anymore.",
+      tone: 'info',
+      title: getRestrictedSpendingLimitsTitle(1),
+      description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
     },
-    rows: [RESTRICTED_ROW, BLOCKED_ROW],
+    rows: [RESTRICTED_ROW],
   },
 } satisfies Meta<typeof Stateful>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** One limit's token is left out of the allowlist, so it will be blocked; the other follows its rules. */
-export const OneBlocked: Story = {}
+/** The Safe's only spending limit is on an allowlisted token, so it follows the allowlist's rules. */
+export const OneRestricted: Story = {}
 
-export const SeveralBlocked: Story = {
+/** One limit's token is in the allowlist and comes first; the other's is left out, so that limit is unaffected. */
+export const PartlyRestricted: Story = {
   args: {
     banner: {
-      tone: 'warning',
-      title: getBlockedSpendingLimitsTitle(2),
-      description: BLOCKED_SPENDING_LIMITS_DESCRIPTION,
+      tone: 'info',
+      title: getPartlyRestrictedSpendingLimitsTitle(1, 2),
+      description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
     },
-    rows: [BLOCKED_ROW, { ...BLOCKED_ROW, key: 'treasury-bot-dai', spender: spender('Treasury bot') }],
+    rows: [RESTRICTED_ROW, UNAFFECTED_ROW],
   },
 }
 
