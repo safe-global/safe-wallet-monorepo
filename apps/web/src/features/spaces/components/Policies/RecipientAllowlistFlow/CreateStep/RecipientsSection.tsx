@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -88,7 +88,7 @@ const RecipientsSection = ({
           {recipients.length > 0 && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
               {recipients.map((recipient) => {
-                const label = recipient.name || shortenAddress(recipient.address)
+                const label = spenderDisplayName(recipient)
                 return (
                   <SelectableChip
                     key={recipient.address}

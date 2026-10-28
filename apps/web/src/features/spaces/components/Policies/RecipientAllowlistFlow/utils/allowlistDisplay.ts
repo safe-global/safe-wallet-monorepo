@@ -1,8 +1,8 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { getAllowlistAccountLabel } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { MergedAddressBook } from '@/hooks/useAllAddressBooks'
 import { chainLabel } from '../../SafeAccountSelector/utils'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
 import type { RecipientAllowlistFormValues } from '../types'
 import { getUniqueSelectedRecipients } from './allowlistForm'
@@ -11,7 +11,7 @@ export type AllowlistTokenDisplay = { address: string; symbol: string; logoUri?:
 export type AllowlistRecipientDisplay = { address: string; name?: string; isInAddressBook: boolean }
 
 export const getAllowlistSafeLabel = (safe: SafeAccountOption): string =>
-  getAllowlistAccountLabel(safe.name || shortenAddress(safe.address), chainLabel(safe))
+  getAllowlistAccountLabel(spenderDisplayName(safe), chainLabel(safe))
 
 export const toAllowlistTokens = (
   addresses: readonly string[],
@@ -22,19 +22,15 @@ export const toAllowlistTokens = (
     return { address, symbol: option ? tokenOptionLabel(option) : shortenAddress(address), logoUri: option?.logoUri }
   })
 
+/** `resolveName` returns the address-book name under the user's source setting, or `''`. */
 export const toAllowlistRecipients = (
   values: RecipientAllowlistFormValues,
-  addressBook: Pick<MergedAddressBook, 'get' | 'has'>,
-  chainId: string | undefined,
+  resolveName: (address: string) => string,
 ): AllowlistRecipientDisplay[] =>
-  getUniqueSelectedRecipients(values).map(({ address, name, fromAddressBook }) => ({
-    address,
-    name: name || (chainId ? addressBook.get(address, chainId)?.name : undefined),
-    isInAddressBook: Boolean(fromAddressBook) || (chainId ? addressBook.has(address, chainId) : false),
-  }))
-
-export const getAllowlistRecipientLabel = ({ name, address }: Pick<AllowlistRecipientDisplay, 'name' | 'address'>) =>
-  name || shortenAddress(address)
+  getUniqueSelectedRecipients(values).map(({ address, name, fromAddressBook }) => {
+    const bookName = resolveName(address)
+    return { address, name: name || bookName || undefined, isInAddressBook: Boolean(fromAddressBook || bookName) }
+  })
 
 /** Once the policy guard sits in either slot, a new configuration waits out its delay. */
 export const isAllowlistGuardEnabled = (guard?: { status: string }): boolean =>

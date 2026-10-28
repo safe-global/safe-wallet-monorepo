@@ -6,7 +6,7 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
@@ -92,7 +92,7 @@ const CreateRecipientAllowlistPolicy = ({
         spaceId,
       )
     : undefined
-  const safeName = selectedSafe && (selectedSafe.name || shortenAddress(selectedSafe.address))
+  const safeName = selectedSafe && spenderDisplayName(selectedSafe)
 
   return (
     <TxCard>
@@ -102,7 +102,7 @@ const CreateRecipientAllowlistPolicy = ({
           onChange={setValues}
           heldTokens={heldTokens}
           account={
-            selectedSafe && safeName && target
+            selectedSafe && target
               ? {
                   chainId: selectedSafe.chainId,
                   address: selectedSafe.address,

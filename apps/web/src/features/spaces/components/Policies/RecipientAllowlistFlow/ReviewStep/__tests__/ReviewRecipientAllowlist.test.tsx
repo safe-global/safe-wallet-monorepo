@@ -35,6 +35,7 @@ const USDC = checksumAddress(faker.finance.ethereumAddress())
 const SCOPE_KEY: `${string}:${string}` = `${SEPOLIA}:${SAFE}`
 const WALLET = checksumAddress(faker.finance.ethereumAddress())
 const TOM = checksumAddress(faker.finance.ethereumAddress())
+const mockResolveName = (address: string): string => ({ [RECIPIENT]: 'Alice', [TOM]: 'Tom' })[address] ?? ''
 const PRIYA = checksumAddress(faker.finance.ethereumAddress())
 const {
   buildAllowlistConfigurations,
@@ -103,6 +104,7 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
     has: (address: string) => address === RECIPIENT,
     get: (address: string) => ({ [RECIPIENT]: { name: 'Alice', address }, [TOM]: { name: 'Tom', address } })[address],
   }),
+  useSafeNameResolver: () => mockResolveName,
 }))
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   SafeScopeProvider: ({ children }: { children: ReactNode }) => (

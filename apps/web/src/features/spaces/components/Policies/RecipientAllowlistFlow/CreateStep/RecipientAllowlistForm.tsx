@@ -2,8 +2,9 @@ import { useMemo, type ReactElement, type ReactNode } from 'react'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import type { RecipientAllowlistFormValues } from '../types'
 import { getAllowedTokenAddresses } from '../utils/allowlistForm'
-import { getAllowlistRecipientLabel, toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokensSection from './TokensSection'
 import RecipientsSection from './RecipientsSection'
@@ -38,15 +39,15 @@ const RecipientAllowlistForm = ({
 }: RecipientAllowlistFormProps): ReactElement => {
   const { addresses, options } = heldTokens
   const chainId = account?.chainId
-  const addressBook = useMergedAddressBooks(chainId)
+  const resolveName = useSafeNameResolver()
 
   const tokenSymbols = useMemo(
     () => toAllowlistTokens(getAllowedTokenAddresses(addresses, values), options).map(({ symbol }) => symbol),
     [addresses, options, values],
   )
   const recipientNames = useMemo(
-    () => toAllowlistRecipients(values, addressBook, chainId).map(getAllowlistRecipientLabel),
-    [values, addressBook, chainId],
+    () => toAllowlistRecipients(values, (address) => resolveName(address, chainId)).map(spenderDisplayName),
+    [values, resolveName, chainId],
   )
 
   return (

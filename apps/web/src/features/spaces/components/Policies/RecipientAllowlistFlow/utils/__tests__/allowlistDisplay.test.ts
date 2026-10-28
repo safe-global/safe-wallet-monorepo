@@ -3,10 +3,8 @@ import { getAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { ExtendedContact, MergedAddressBook } from '@/hooks/useAllAddressBooks'
 import { createDefaultAllowlistValues, type AllowlistFormRecipient } from '../../types'
 import {
-  getAllowlistRecipientLabel,
   getAllowlistSafeLabel,
   isAllowlistGuardEnabled,
   toAllowlistRecipients,
@@ -28,10 +26,10 @@ const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFo
   selected: true,
   ...overrides,
 })
-const addressBookWith = (contacts: Record<string, string>): Pick<MergedAddressBook, 'get' | 'has'> => ({
-  get: (contact: string) => (contacts[contact] ? ({ name: contacts[contact] } as ExtendedContact) : undefined),
-  has: (contact: string) => contact in contacts,
-})
+const resolverWith =
+  (contacts: Record<string, string>) =>
+  (contact: string): string =>
+    contacts[contact] ?? ''
 
 describe('allowlistDisplay', () => {
   describe('toAllowlistTokens', () => {
@@ -49,7 +47,7 @@ describe('allowlistDisplay', () => {
   })
 
   describe('toAllowlistRecipients', () => {
-    it('lists each selected recipient once, named from the form or else the address book', () => {
+    it('lists each selected recipient once, named from the form or else the resolved address book name', () => {
       const named = recipient({ name: 'Alice' })
       const contact = recipient()
       const values = {
@@ -62,27 +60,20 @@ describe('allowlistDisplay', () => {
         ],
       }
 
-      expect(toAllowlistRecipients(values, addressBookWith({ [contact.address]: 'Bob' }), CHAIN_ID)).toEqual([
+      expect(toAllowlistRecipients(values, resolverWith({ [contact.address]: 'Bob' }))).toEqual([
         { address: named.address, name: 'Alice', isInAddressBook: false },
         { address: contact.address, name: 'Bob', isInAddressBook: true },
       ])
     })
 
-    it('skips the address book without a chain', () => {
+    it('leaves a recipient the address book does not resolve unnamed and unmarked', () => {
       const contact = recipient()
       const values = { ...createDefaultAllowlistValues(), recipients: [contact] }
 
-      expect(toAllowlistRecipients(values, addressBookWith({ [contact.address]: 'Bob' }), undefined)).toEqual([
+      expect(toAllowlistRecipients(values, resolverWith({}))).toEqual([
         { address: contact.address, name: undefined, isInAddressBook: false },
       ])
     })
-  })
-
-  it('labels a recipient by name, else by short address', () => {
-    const unnamed = address()
-
-    expect(getAllowlistRecipientLabel({ address: address(), name: 'Alice' })).toBe('Alice')
-    expect(getAllowlistRecipientLabel({ address: unnamed })).toBe(shortenAddress(unnamed))
   })
 
   it('labels the Safe by name, else by short address, with its chain', () => {

@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -10,7 +9,6 @@ import {
   REVIEW_SUMMARY_DESCRIPTION,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import {
-  getAllowlistRecipientLabel,
   getAllowlistSafeLabel,
   isAllowlistGuardEnabled,
   toAllowlistRecipients,
@@ -25,11 +23,11 @@ import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/
 import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton'
 import { useLoadFeature } from '@/features/__core__'
 import { PolicyGuardFeature } from '@/features/policy-guard'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
-import { joinNames } from '../../SpendingLimitFlow/Summary/describePolicy'
+import { joinNames, spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useSaveAllowlistConfiguration } from '../hooks/useSaveAllowlistConfiguration'
@@ -45,7 +43,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const chainId = scope?.chainId
   const { accounts } = useRecipientAllowlistSafeAccounts()
   const { options: tokenOptions } = useSpendingLimitTokenOptions()
-  const addressBook = useMergedAddressBooks(chainId)
+  const resolveName = useSafeNameResolver()
   const { safe } = useSafeInfo()
   const wallet = useWallet()
   const { describeSetupCall, decodeErc20TransferPolicyData } = useLoadFeature(PolicyGuardFeature)
@@ -99,17 +97,17 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   )
 
   const recipients = useMemo(
-    () => (data && chainId ? toAllowlistRecipients(data, addressBook, chainId) : []),
-    [data, chainId, addressBook],
+    () => (data && chainId ? toAllowlistRecipients(data, (address) => resolveName(address, chainId)) : []),
+    [data, chainId, resolveName],
   )
 
   const otherSigners = useMemo(() => {
     if (!chainId) return ''
     const names = safe.owners
       .filter(({ value }) => !wallet || !sameAddress(value, wallet.address))
-      .map(({ value }) => addressBook.get(value, chainId)?.name || shortenAddress(value))
+      .map(({ value }) => spenderDisplayName({ address: value, name: resolveName(value, chainId) }))
     return joinNames(names)
-  }, [safe.owners, wallet, addressBook, chainId])
+  }, [safe.owners, wallet, resolveName, chainId])
 
   const getAddressInfo = useCallback(
     (address: string) => {
@@ -118,9 +116,9 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
       if (selected && sameAddress(selected.address, address)) return { name: selected.name }
       const recipient = recipients.find((item) => sameAddress(item.address, address))
       if (recipient) return { name: recipient.name }
-      return { name: chainId ? addressBook.get(address, chainId)?.name : undefined }
+      return { name: resolveName(address, chainId) || undefined }
     },
-    [tokens, selected, recipients, chainId, addressBook],
+    [tokens, selected, recipients, chainId, resolveName],
   )
 
   if (!guardState && !safeTxError) {
@@ -145,7 +143,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
         <AllowlistSummary
           accountLabel={getAllowlistSafeLabel(selected)}
           tokenSymbols={tokens.map(({ symbol }) => symbol)}
-          recipientNames={recipients.map(getAllowlistRecipientLabel)}
+          recipientNames={recipients.map(spenderDisplayName)}
           isGuardEnabled={isAllowlistGuardEnabled(guardState)}
           description={REVIEW_SUMMARY_DESCRIPTION}
         />
