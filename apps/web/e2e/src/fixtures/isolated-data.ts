@@ -17,7 +17,7 @@ type SafeKey = keyof typeof SAFES
 /** Prefixed Safe addresses (`sep:0x…`) by the keys of SAFES. */
 export type Safes = Record<SafeKey, string>
 
-type SpecEntry = { scenarios?: string[]; safes?: Partial<Record<SafeKey, string>> }
+type SpecEntry = { scenarios?: string[]; safes?: Partial<Record<SafeKey, string>>; chains?: number[] }
 type ScenarioFunction = (env: Record<string, unknown>, owners: ReturnType<typeof createOwners>) => Promise<unknown>
 type SpecData = { safes: Safes; credentials: WalletCredentials }
 

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { HardDrive } from 'lucide-react'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'

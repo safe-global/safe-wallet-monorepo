@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { spacesMainNavigation, spacesSetupGroup } from '../index'
+import { safeDefiGroup, safeMainNavigation, spacesMainNavigation, spacesSetupGroup } from '../index'
 
 /**
  * These assertions run against the real config rather than a mock. The rest of the sidebar suite
@@ -31,5 +31,23 @@ describe('spacesMainNavigation', () => {
     const allHrefs = [...hrefs, ...spacesSetupGroup.items.map((item) => item.href)]
 
     gated.forEach((href) => expect(allHrefs).toContain(href))
+  })
+})
+
+describe('safeDefiGroup', () => {
+  it('links Bridge to the bridge page', () => {
+    expect(safeDefiGroup.items.find((item) => item.label === 'Bridge')?.href).toBe(AppRoutes.bridge)
+  })
+})
+
+describe('safeMainNavigation', () => {
+  it('lists the Safe pages in the main navigation', () => {
+    expect(safeMainNavigation.map((item) => item.label)).toEqual([
+      'Overview',
+      'Assets',
+      'Transactions',
+      'Address book',
+      'Apps',
+    ])
   })
 })

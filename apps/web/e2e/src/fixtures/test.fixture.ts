@@ -49,7 +49,7 @@ export async function seedLocalStorage(page: Page): Promise<void> {
 
       // Suppress Beamer (product updates widget).
       // KNOWN GAP: Beamer reads these keys suffixed with its PRODUCT_ID, so these unsuffixed
-      // writes are likely inert. See the Beamer row in docs/CYPRESS_MIGRATION_GUIDE.md.
+      // writes are likely inert; `updates: false` in COOKIE_STATE would keep Beamer from loading.
       const beamerKeys = Object.keys(window.localStorage).filter((k) => k.startsWith('_BEAMER'))
       if (beamerKeys.length === 0) {
         const now = new Date().toISOString()

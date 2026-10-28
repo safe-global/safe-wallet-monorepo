@@ -13,7 +13,7 @@ test.describe('Proposers in the Safe settings', { tag: '@e2e' }, () => {
   }) => {
     const { owner3, owner4 } = journey.owners
     const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
-    const workspaceId = await seedBusinessWorkspace(safePage, { 'Proposer Safe': safe })
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { 'Proposer Safe': safe })
 
     const proposers = new ProposersPage(safePage)
     await proposers.goto(safe.prefixedAddress, workspaceId)

@@ -1,47 +1,49 @@
 import { renderHook } from '@testing-library/react'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
-import { safeItemBuilder } from '@/tests/builders/safeItem'
-import { mockWallet } from '@/tests/mocks/hooks'
-import { useSpaceSafes } from '../../../../../hooks/useSpaceSafes'
-import { mockActiveSpendingLimit, mockPendingPolicy, mockPendingRemoval } from '../../../mocks/policies'
+import { usePolicyDetailsBase } from '../../../hooks/usePolicyDetailsBase'
+import {
+  MOCK_ADDRESSES,
+  asActivePolicy,
+  mockActiveSpendingLimit,
+  mockMultiSpenderPolicy,
+  mockPendingPolicy,
+  mockPendingRemoval,
+} from '../../../mocks/policies'
 import { useSpendingLimitDetails } from '../useSpendingLimitDetails'
 
-jest.mock('@/hooks/wallets/useWallet')
-jest.mock('@/components/common/ConnectWallet/useConnectWallet')
-jest.mock('../../../../../hooks/useSpaceSafes')
-// Stubbed wholesale: this module sits in the spaces barrel import cycle.
-jest.mock('@/hooks/useAllAddressBooks', () => ({
-  __esModule: true,
-  useMergedAddressBooks: jest.fn(),
-}))
+jest.mock('../../../hooks/usePolicyDetailsBase')
 
-const mockUseSpaceSafes = useSpaceSafes as jest.MockedFunction<typeof useSpaceSafes>
-const mockUseMergedAddressBooks = useMergedAddressBooks as jest.MockedFunction<typeof useMergedAddressBooks>
+const mockUsePolicyDetailsBase = usePolicyDetailsBase as jest.MockedFunction<typeof usePolicyDetailsBase>
 
 const active = mockActiveSpendingLimit()
 
+const base = {
+  viewer: { address: MOCK_ADDRESSES.bob, isSigner: true },
+  safe: { address: active.safe.address, name: 'Treasury' },
+  names: { [MOCK_ADDRESSES.alice]: 'Alice' },
+  onConnectWallet: jest.fn(),
+}
+
 describe('useSpendingLimitDetails', () => {
   beforeEach(() => {
-    mockWallet()
-    mockUseMergedAddressBooks.mockReturnValue({
-      list: [],
-      get: () => undefined,
-      getFromSpace: () => undefined,
-      getFromLocal: () => undefined,
-      has: () => false,
-    })
-    mockUseSpaceSafes.mockReturnValue({
-      allSafes: [
-        safeItemBuilder()
-          .with({ ...active.safe, isReadOnly: false })
-          .build(),
-      ],
-      isLoading: false,
-      isError: false,
-      error: undefined,
-      refetch: jest.fn(),
-      isUninitialized: false,
-    })
+    mockUsePolicyDetailsBase.mockReturnValue(base)
+  })
+
+  it('names the spenders of the Safe', () => {
+    const multi = mockMultiSpenderPolicy()
+
+    const { result } = renderHook(() => useSpendingLimitDetails(asActivePolicy(multi)))
+
+    expect(mockUsePolicyDetailsBase).toHaveBeenCalledWith(
+      multi.safe,
+      multi.data.spenders.map(({ spender }) => spender),
+    )
+    expect(result.current).toMatchObject(base)
+  })
+
+  it('says the Safe allowance module enforces it', () => {
+    const { result } = renderHook(() => useSpendingLimitDetails(active))
+
+    expect(result.current.overview.enforcedBy).toBe('Safe allowance module')
   })
 
   it('formats when an active policy was last set', () => {

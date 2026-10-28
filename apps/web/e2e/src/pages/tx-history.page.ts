@@ -9,9 +9,13 @@ import { ROUTES } from '../data/constants'
 
 export class TxHistoryPage {
   readonly transactions: Locator
+  readonly filterButton: Locator
+  readonly applyFilterButton: Locator
 
   constructor(private readonly page: Page) {
     this.transactions = page.getByTestId('transaction-item')
+    this.filterButton = page.getByRole('button', { name: 'Filter' })
+    this.applyFilterButton = page.getByTestId('apply-btn')
   }
 
   /** Open the history of the Safe (`sep:0x…`) and wait until CGW answers the history request */
@@ -22,6 +26,18 @@ export class TxHistoryPage {
     await this.page.goto(`${ROUTES.transactionsHistory}?safe=${safe}`)
     const response = await history
     if (!response.ok()) throw new Error(`The history request answered ${response.status()}: ${response.url()}`)
+  }
+
+  /** Filter the history by the transaction type labelled `type`, e.g. "Incoming" */
+  async filterByType(type: string): Promise<void> {
+    await this.filterButton.click()
+    await this.page.getByRole('radio', { name: type }).click()
+    await this.applyFilterButton.click()
+  }
+
+  /** The rows whose type label is `label`, e.g. "Received" or "Sent" */
+  transactionsLabelled(label: string): Locator {
+    return this.transactions.filter({ hasText: label })
   }
 
   /** The rows that show `status`, e.g. "Success" */

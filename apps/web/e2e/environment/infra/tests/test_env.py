@@ -18,6 +18,7 @@ from scripts.test_env import (
 GATEWAY = "http://localhost:8000/cgw"
 DECODER = "http://localhost:8000/decoder"
 TXS = "http://localhost:8000/txs/api"
+LOGO = "http://localhost:8000/cfg/media/chains/170/chain_logo.png"
 SEPOLIA_PROVIDER = "https://sepolia.example/key"
 MAINNET_PROVIDER = "https://mainnet.example/key"
 
@@ -30,14 +31,14 @@ def manifest():
     }
 
 
-def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE")):
+def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE"), chain_logo=LOGO):
     """Answers readiness reads by RPC method or URL; `failures` lists errors to raise first."""
     responses = {
         "eth_chainId": {"result": "0xaa"},
         "eth_getBlockByNumber": {"result": {"hash": "0xabc"}},
         f"{GATEWAY}/health/ready": {},
         f"{DECODER}/health/ready": {"ready": True},
-        f"{GATEWAY}/v1/chains/170": {"chainId": 170},
+        f"{GATEWAY}/v1/chains/170": {"chainId": 170, "chainLogoUri": chain_logo},
         f"{GATEWAY}/v2/chains?serviceKey=WALLET_WEB": {
             "results": [{"chainId": "170", "features": list(features)}],
         },
@@ -52,6 +53,12 @@ def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE")):
         return responses[key]
 
     return Mock(side_effect=read)
+
+
+def stack_reads(backend, logo_type="image/png"):
+    """Patches the readiness reads: JSON by `backend`, the chain logo by its content type."""
+    logo = Mock(return_value=logo_type)
+    return patch.multiple("scripts.test_env", read_json=backend, read_content_type=logo)
 
 
 class FakeClock:
@@ -71,7 +78,7 @@ class EnvironmentTests(unittest.TestCase):
         backend = fake_backend({"eth_chainId": [socket.timeout("timed out")]})
         clock = FakeClock()
         ready = manifest()
-        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", clock):
+        with stack_reads(backend), patch("scripts.test_env.time", clock):
             wait_ready([], ready, 10)
         backend.assert_any_call(f"{DECODER}/health/ready")
         self.assertEqual(clock.now, 2)
@@ -81,15 +88,39 @@ class EnvironmentTests(unittest.TestCase):
     def test_readiness_timeout_reports_the_last_error(self, _docker):
         refused = [urllib.error.URLError("connection refused")] * 10
         backend = fake_backend({f"{GATEWAY}/health/ready": refused})
-        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", FakeClock()):
+        with stack_reads(backend), patch("scripts.test_env.time", FakeClock()):
             with self.assertRaisesRegex(RuntimeError, "after 6s.*URLError.*connection refused"):
                 wait_ready([], manifest(), 6)
 
     @patch("scripts.test_env.run", return_value="")
     def test_readiness_fails_when_the_chain_lacks_the_queue_service_feature(self, _docker):
         backend = fake_backend(features=("DELETE_TX",))
-        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", FakeClock()):
+        with stack_reads(backend), patch("scripts.test_env.time", FakeClock()):
             with self.assertRaisesRegex(RuntimeError, "QUEUE_SERVICE"):
+                wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_waits_for_the_chain_logo_and_reports_a_missing_one(self, _docker):
+        missing = urllib.error.HTTPError(LOGO, 404, "Not Found", {}, None)
+        logo = Mock(side_effect=[missing] * 10)
+        with patch.multiple("scripts.test_env", read_json=fake_backend(), read_content_type=logo):
+            with patch("scripts.test_env.time", FakeClock()):
+                with self.assertRaisesRegex(RuntimeError, "after 6s.*HTTPError.*404"):
+                    wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_fails_when_the_chain_logo_is_not_an_image(self, _docker):
+        backend = fake_backend()
+        with stack_reads(backend, logo_type="text/html"), patch("scripts.test_env.time", FakeClock()):
+            with self.assertRaisesRegex(RuntimeError, "returned text/html, not an image"):
+                wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_fails_when_the_chain_logo_uses_another_port(self, _docker):
+        backend = fake_backend(chain_logo=LOGO.replace(":8000", ":8300"))
+        with stack_reads(backend), patch("scripts.test_env.time", FakeClock()):
+            message = "not served by the stack at localhost:8000; check MEDIA_URL"
+            with self.assertRaisesRegex(RuntimeError, message):
                 wait_ready([], manifest(), 6)
 
     def test_occupied_port_fails_before_starting_services(self):
