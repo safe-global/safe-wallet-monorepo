@@ -1,3 +1,4 @@
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { PendingPolicyOperation } from '../types'
 import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
@@ -73,7 +74,7 @@ export const REQUESTED_LABEL = 'Requested'
 
 export const SAFE_ACCOUNT_LABEL = 'Safe account'
 
-const formatHours = (hours: number): string => (hours === 1 ? '1 hour' : `${hours} hours`)
+const formatHours = (hours: number): string => `${hours} hour${maybePlural(hours)}`
 
 // A first allowlist reads as one thing ("it"); an edit reads as the changes ("they"), as in the design.
 export const applyBannerTitle = (stage: ApplyStage, operation: ApplyOperation, hoursLeft: number): string => {

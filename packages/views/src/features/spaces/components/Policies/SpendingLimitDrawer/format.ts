@@ -30,6 +30,20 @@ export const formatResetUtc = (resetsAtMinute: number): string => {
 
 const MS_PER_SECOND = 1_000
 
+/** `Jun 24, 2026`. Takes unix SECONDS. */
+export const formatUtcDate = (at: number): string => {
+  const part = utcParts(at * MS_PER_SECOND)
+
+  return `${part('month')} ${part('day')}, ${part('year')}`
+}
+
+/** `Jun 24, 2026 · 03:35 UTC`. Takes unix SECONDS. */
+export const formatUtcDateTime = (at: number): string => {
+  const part = utcParts(at * MS_PER_SECOND)
+
+  return `${formatUtcDate(at)} · ${part('hour')}:${part('minute')} UTC`
+}
+
 /** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
 export const formatLastUpdated = (
   spenders: { allowances: Pick<PolicyAllowance, 'createdAt'>[] }[],
@@ -39,9 +53,7 @@ export const formatLastUpdated = (
   )
   if (createdAts.length === 0) return undefined
 
-  const part = utcParts(Math.max(...createdAts) * MS_PER_SECOND)
-
-  return `${part('month')} ${part('day')}, ${part('year')} · ${part('hour')}:${part('minute')} UTC`
+  return formatUtcDateTime(Math.max(...createdAts))
 }
 
 const PERCENT_SCALE = 10_000n
