@@ -41,7 +41,7 @@ type AllowlistSetupActionsProps = {
   getAddressInfo: (address: string) => AddressInfo
 }
 
-const CONFIGURING_METHODS = ['configureImmediately', 'requestConfiguration']
+const CONFIGURING_METHODS = ['configureImmediately', 'requestConfiguration', 'applyConfiguration']
 
 const RuleAddress = ({ address, info }: { address: string; info: AddressInfo }): ReactElement | null =>
   generateDataRowValue(address, 'address', true, { value: address, name: info.name, logoUri: info.logoUri })
