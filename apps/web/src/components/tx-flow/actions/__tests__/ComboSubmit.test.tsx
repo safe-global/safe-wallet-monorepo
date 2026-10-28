@@ -82,7 +82,22 @@ describe('ComboSubmit', () => {
 
     const { getByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
-      { canExecute: true, willSignBeforeExecute: true },
+      { canExecute: true, isLastSignature: true },
+      { safeTx: safeTransaction },
+    )
+
+    expect(getByText(/You're providing the last signature/)).toBeInTheDocument()
+  })
+
+  it('shows the last signature notice when the last signer of an m/n Safe picks Sign over Execute', () => {
+    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+
+    const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
+    mockUseLocalStorage.mockReturnValue(['sign', jest.fn()])
+
+    const { getByText } = render(
+      <ComboSubmit onSubmit={jest.fn()} slotId="" />,
+      { canExecute: true, isLastSignature: true, willSignBeforeExecute: false },
       { safeTx: safeTransaction },
     )
 
@@ -97,7 +112,7 @@ describe('ComboSubmit', () => {
 
     const { queryByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
-      { canExecute: true, willSignBeforeExecute: false },
+      { canExecute: true, isLastSignature: false },
       { safeTx: safeTransaction },
     )
 
@@ -112,7 +127,7 @@ describe('ComboSubmit', () => {
 
     const { queryByText } = render(
       <ComboSubmit onSubmit={jest.fn()} slotId="" />,
-      { canExecute: true, willSignBeforeExecute: true },
+      { canExecute: true, isLastSignature: true },
       { safeTx: safeTransaction },
     )
 
