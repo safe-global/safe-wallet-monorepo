@@ -262,9 +262,10 @@ describe('FirstSteps', () => {
     const qrCode = await screen.findByRole('img', { name: 'QR code' })
     expect(qrCode).toHaveAttribute('data-value', SAFE_ADDRESS)
 
-    await userEvent.click(screen.getByTestId('qr-code-switch'))
+    const prefixSwitch = screen.getByRole('switch', { name: /^QR code with chain prefix/ })
+    await userEvent.click(prefixSwitch)
 
     expect(qrCode).toHaveAttribute('data-value', `${CHAIN.shortName}:${SAFE_ADDRESS}`)
-    expect(screen.getByTestId('qr-code-switch')).toBeChecked()
+    expect(prefixSwitch).toBeChecked()
   })
 })
