@@ -82,6 +82,7 @@ describe('AssetsTable', () => {
     mockUseIsMobile.mockReturnValue(false)
     mockUseSafeTokenEnabled.mockReturnValue(false)
     mockHasFeature(false)
+    jest.mocked(useChains.useCurrentChain).mockReturnValue(undefined)
   })
 
   describe('empty state', () => {
@@ -164,6 +165,7 @@ describe('AssetsTable', () => {
       jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
         chainBuilder()
           .with({
+            features: [],
             blockExplorerUriTemplate: {
               address: 'https://explorer.test/address/{{address}}',
               txHash: 'https://explorer.test/tx/{{txHash}}',
