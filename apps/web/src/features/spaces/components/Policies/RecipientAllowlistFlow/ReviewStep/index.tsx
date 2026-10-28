@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, type ReactElement } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -61,8 +61,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   }, [isSaving, setIsSubmitLoading])
 
   useEffect(() => {
-    setIsSubmitDisabled(!configurations)
-  }, [configurations, setIsSubmitDisabled])
+    setIsSubmitDisabled(!configurations || isSaving)
+  }, [configurations, isSaving, setIsSubmitDisabled])
 
   useEffect(
     () => () => {
@@ -72,10 +72,17 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
     [setIsSubmitLoading, setIsSubmitDisabled],
   )
 
+  // The disabled state lands a render late, so a fast double click would otherwise save twice.
+  const isSubmittingRef = useRef(false)
   const handleSubmit = useCallback<SubmitCallback>(
     async (args) => {
-      if (!configurations || !root) return
-      if (await save({ configurations, root })) onSubmit(args)
+      if (!configurations || !root || isSubmittingRef.current) return
+      isSubmittingRef.current = true
+      try {
+        if (await save({ configurations, root })) onSubmit(args)
+      } finally {
+        isSubmittingRef.current = false
+      }
     },
     [configurations, root, save, onSubmit],
   )

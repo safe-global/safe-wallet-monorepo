@@ -13,6 +13,7 @@ import {
   usePolicyGuard,
   type AllowlistSetup,
   type PolicyGuardState,
+  type PolicyGuardTarget,
 } from '@/features/policy-guard'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
@@ -29,7 +30,14 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
   const chainId = scope?.chainId
   const safeAddress = scope?.safeAddress
   const target = useMemo(() => (chainId && safeAddress ? { chainId, safeAddress } : undefined), [chainId, safeAddress])
-  const { state, error } = usePolicyGuard(target)
+  const { state: readState, error } = usePolicyGuard(target)
+
+  // Each new Safe transaction re-reads the guard and clears `state` meanwhile, so the last settled one is kept per Safe.
+  const readKey = readState ? JSON.stringify(readState) : undefined
+  const [settled, setSettled] = useState<{ target?: PolicyGuardTarget; key: string }>()
+  if (readKey && (settled?.key !== readKey || settled?.target !== target)) setSettled({ target, key: readKey })
+  const stateKey = settled && settled.target === target && (readState || !error) ? settled.key : undefined
+  const state = useMemo(() => (stateKey ? (JSON.parse(stateKey) as PolicyGuardState) : undefined), [stateKey])
 
   const sdk = scope?.sdk
   const rulesKey = JSON.stringify(rules)

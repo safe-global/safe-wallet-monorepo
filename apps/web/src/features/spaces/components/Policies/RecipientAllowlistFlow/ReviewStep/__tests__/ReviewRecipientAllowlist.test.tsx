@@ -509,6 +509,28 @@ describe('ReviewRecipientAllowlist', () => {
     expect(setIsSubmitLoading).toHaveBeenLastCalledWith(false)
   })
 
+  it('saves once when Continue is clicked again while the save runs', async () => {
+    built({ status: 'none' })
+    let finishSave: (saved: boolean) => void = () => {}
+    mockSave.mockReturnValue(new Promise<boolean>((resolve) => (finishSave = resolve)))
+    renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+    finishSave(true)
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  it('disables the submit while the save runs', () => {
+    built({ status: 'none' })
+    mockUseSave.mockReturnValue({ save: mockSave, isSaving: true })
+    renderReview()
+
+    expect(setIsSubmitDisabled).toHaveBeenLastCalledWith(true)
+  })
+
   it('disables the submit without configurations and enables it with them', () => {
     built()
     renderReview()

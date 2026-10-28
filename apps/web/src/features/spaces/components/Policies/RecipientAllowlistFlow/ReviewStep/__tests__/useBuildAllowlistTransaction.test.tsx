@@ -114,6 +114,21 @@ describe('useBuildAllowlistTransaction', () => {
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledTimes(1)
   })
 
+  it('keeps the transaction while the guard is re-read after a new Safe transaction', async () => {
+    mockGuard({ state: { status: 'known' } })
+    const { result, rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+    await waitFor(() => expect(txSetCount()).toBe(1))
+    setSafeTx.mockClear()
+
+    mockGuard({ isLoading: true })
+    rerender()
+    mockGuard({ state: { status: 'known' } })
+    rerender()
+
+    expect(setSafeTx).not.toHaveBeenCalled()
+    expect(result.current.txs).toHaveLength(1)
+  })
+
   it('sets the error and no transaction when the guard read failed', () => {
     mockGuard({ error: new Error('rpc down') })
     const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
@@ -189,21 +204,6 @@ describe('useBuildAllowlistTransaction', () => {
 
     expect(setSafeTx).toHaveBeenNthCalledWith(1, undefined)
     await waitFor(() => expect(setSafeTx).toHaveBeenLastCalledWith(knownTx))
-  })
-
-  it('clears the transaction when the guard goes back to loading', async () => {
-    mockGuard({ state: { status: 'known' } })
-    const { rerender, result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
-    await waitFor(() => expect(result.current.configurations).toBeDefined())
-    setSafeTx.mockClear()
-
-    mockGuard({ isLoading: true })
-    rerender()
-
-    expect(setSafeTx).toHaveBeenCalledWith(undefined)
-    expect(setSafeTx).not.toHaveBeenCalledWith(builtTx)
-    expect(result.current.configurations).toBeUndefined()
-    expect(result.current.txs).toBeUndefined()
   })
 
   it('clears the transaction when the guard read then fails', async () => {
