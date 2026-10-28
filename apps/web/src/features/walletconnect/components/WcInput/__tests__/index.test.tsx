@@ -24,10 +24,12 @@ const Harness = ({ walletConnect }: { walletConnect: WalletConnectWallet }) => {
   const context = useContext(WalletConnectContext)
   const [loading, setLoading] = useState<WCLoadingState | null>(null)
   const [error, setError] = useState<Error | null>(null)
+  const [isOpen, setIsOpen] = useState(true)
 
   return (
     <WalletConnectContext.Provider value={{ ...context, walletConnect, loading, setLoading, error, setError }}>
-      <WcInput uri={PAIRING_URI} />
+      {isOpen && <WcInput uri={PAIRING_URI} />}
+      <button onClick={() => setIsOpen(false)}>Close popup</button>
       <button onClick={() => setLoading(null)}>Receive proposal</button>
       <button onClick={() => setLoading(WCLoadingState.APPROVE)}>Start approving</button>
       {error && <p>{error.message}</p>}
@@ -101,6 +103,19 @@ describe('WcInput', () => {
 
     act(() => jest.advanceTimersByTime(PROPOSAL_TIMEOUT / 2))
     expect(screen.getByText(TIMEOUT_MESSAGE)).toBeInTheDocument()
+  })
+
+  it('does not time out when the popup closed while connecting', async () => {
+    let finishConnecting: (value: PairingTypes.Struct) => void = () => {}
+    jest.spyOn(walletConnect, 'connect').mockReturnValue(new Promise((resolve) => (finishConnecting = resolve)))
+    await renderInput()
+
+    fireEvent.click(screen.getByText('Close popup'))
+    await act(async () => finishConnecting(pairing))
+    fireEvent.click(screen.getByText('Receive proposal'))
+    act(() => jest.advanceTimersByTime(PROPOSAL_TIMEOUT))
+
+    expect(screen.queryByText(TIMEOUT_MESSAGE)).not.toBeInTheDocument()
   })
 
   it('shows the pairing error instead of a timeout when connecting fails', async () => {

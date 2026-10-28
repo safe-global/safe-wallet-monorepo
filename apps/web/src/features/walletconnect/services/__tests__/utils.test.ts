@@ -27,8 +27,11 @@ describe('WalletConnect utils', () => {
     )
 
     // Built by the SDK, so an upgrade that rewords the error fails here instead of in production
-    it('detects the SDK error for a missing proposal', () => {
-      const { message } = getInternalError('NO_MATCHING_KEY', 'proposal: 1234')
+    it.each([
+      ['EXPIRED', 'proposal id: 1234'],
+      ['NO_MATCHING_KEY', "proposal id doesn't exist: 1234"],
+    ] as const)('detects the SDK %s error for a proposal', (key, context) => {
+      const { message } = getInternalError(key, context)
       expect(isExpiredProposalError(new Error(message))).toBe(true)
     })
 

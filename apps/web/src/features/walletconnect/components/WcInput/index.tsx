@@ -44,7 +44,14 @@ const WcInput = ({ uri }: { uri: string }) => {
   }, [loading])
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(timeoutRef.current), [])
+  const isMountedRef = useRef(false)
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   const onInput = useCallback(
     async (val: string) => {
@@ -70,6 +77,9 @@ const WcInput = ({ uri }: { uri: string }) => {
         setLoading(null)
         return
       }
+
+      // Closing the popup unmounts the input while connect is pending; its timer would never be cleared
+      if (!isMountedRef.current) return
 
       clearTimeout(timeoutRef.current)
       timeoutRef.current = setTimeout(() => {

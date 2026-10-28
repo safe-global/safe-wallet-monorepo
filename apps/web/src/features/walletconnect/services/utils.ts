@@ -59,7 +59,9 @@ export const splitError = (message: string): string[] => {
 }
 
 // WalletConnect deletes a proposal when it expires and reports it only through these messages
+const EXPIRED_PROPOSAL_MESSAGES = ['expired. proposal id', 'record was recently deleted', 'no matching key']
+
 export const isExpiredProposalError = (error: Error): boolean => {
   const message = error.message.toLowerCase()
-  return message.includes('record was recently deleted') || message.includes('no matching key')
+  return EXPIRED_PROPOSAL_MESSAGES.some((expiredMessage) => message.includes(expiredMessage))
 }
