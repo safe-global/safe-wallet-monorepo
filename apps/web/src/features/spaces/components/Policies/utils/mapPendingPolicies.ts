@@ -15,7 +15,7 @@ import { toPolicyToken } from './toPolicyToken'
 type PendingChange = PendingPolicyDto['data']['changes'][number]
 type ActiveSpendingLimit = SpendingLimitPolicy & { status: 'active' }
 
-const isActiveSpendingLimit = (policy: Policy): policy is ActiveSpendingLimit =>
+export const isActiveSpendingLimit = (policy: Policy): policy is ActiveSpendingLimit =>
   policy.status === 'active' && policy.type === 'spending-limit'
 
 const findActive = (safe: PolicySafe, moduleAddress: string, active: Policy[]): ActiveSpendingLimit | undefined =>

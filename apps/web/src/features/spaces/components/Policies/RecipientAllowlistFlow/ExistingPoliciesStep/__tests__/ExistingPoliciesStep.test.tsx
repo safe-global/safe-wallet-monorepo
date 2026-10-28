@@ -14,7 +14,7 @@ jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({
 }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
-  useMergedAddressBooks: () => ({ get: () => undefined }),
+  useSafeNameResolver: () => () => '',
 }))
 
 const mockImpacts = useSpendingLimitImpacts as jest.MockedFunction<typeof useSpendingLimitImpacts>

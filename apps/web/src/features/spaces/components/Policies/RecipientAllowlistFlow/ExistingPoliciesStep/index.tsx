@@ -1,5 +1,4 @@
 import { useContext, useMemo, useState, type ReactElement } from 'react'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -17,9 +16,10 @@ import type { RecipientAllowlistFlowData } from '../types'
 import { formatAllowanceAmount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { AccountIdentity } from '../../components/AccountIdentity'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
 
@@ -30,13 +30,15 @@ const ExistingPoliciesStep = (): ReactElement => {
   const impacts = useSpendingLimitImpacts(rules)
   const scope = useSafeScope()
   const chainId = scope?.chainId
-  const addressBook = useMergedAddressBooks(chainId)
+  const resolveName = useSafeNameResolver()
   const { accounts } = useRecipientAllowlistSafeAccounts()
   const selectedSafe = findSafeAccount(accounts, scope?.scopeKey)
   const [acknowledged, setAcknowledged] = useState(false)
 
-  const safeName = selectedSafe?.name || (scope?.safeAddress ? shortenAddress(scope.safeAddress) : '')
-  const contactName = (address: string) => (chainId ? addressBook.get(address, chainId)?.name : undefined)
+  const safeName = scope?.safeAddress
+    ? spenderDisplayName({ address: scope.safeAddress, name: selectedSafe?.name })
+    : ''
+  const contactName = (address: string) => resolveName(address, chainId) || undefined
   const rows = impacts.map(({ spender, allowance, impact }) => ({
     key: `${spender}-${allowance.token.address}`,
     spender: <AccountIdentity address={spender} name={contactName(spender)} />,

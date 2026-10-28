@@ -1,11 +1,7 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { AllowlistRule } from '../types'
-import {
-  isSpendingLimitPolicy,
-  type Policy,
-  type PolicyAllowance,
-  type PolicySafe,
-} from '@safe-global/views/features/spaces/components/Policies/types'
+import type { Policy, PolicyAllowance, PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
+import { isActiveSpendingLimit } from '../../utils/mapPendingPolicies'
 
 /** `restricted`: it may only send to the allowed recipients; `unaffected`: its token is left out of the allowlist. */
 export type SpendingLimitImpactKind = 'restricted' | 'unaffected'
@@ -28,13 +24,8 @@ export const getSpendingLimitImpacts = (
   rules: readonly AllowlistRule[],
 ): SpendingLimitImpact[] =>
   policies
-    .filter(isSpendingLimitPolicy)
-    .filter(
-      (policy) =>
-        policy.status === 'active' &&
-        policy.safe.chainId === safe.chainId &&
-        sameAddress(policy.safe.address, safe.address),
-    )
+    .filter(isActiveSpendingLimit)
+    .filter((policy) => policy.safe.chainId === safe.chainId && sameAddress(policy.safe.address, safe.address))
     .flatMap(({ data }) =>
       data.spenders
         .filter(({ isActive }) => isActive !== false)
