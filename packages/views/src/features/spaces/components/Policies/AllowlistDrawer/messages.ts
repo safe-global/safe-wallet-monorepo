@@ -2,6 +2,7 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { PendingPolicyOperation } from '../types'
 import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
+import { POLICY_CHANGE_DELAY } from '../RecipientAllowlistFlow/constants'
 
 /** `expired`: the signing window closed before the transaction executed. */
 export type AllowlistTxOutcome = PendingTxOutcome | 'expired'
@@ -37,7 +38,7 @@ export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolic
 export const ACTIVATED_BANNER_TITLE = 'Your allowlist is now active'
 
 export const activatedBannerLine = (safeName: string, recipientCount: number): string =>
-  `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take 24 hours to apply.`
+  `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
 
 export const UNENFORCED_BANNER_TITLE = 'Safe policy guard removed'
 

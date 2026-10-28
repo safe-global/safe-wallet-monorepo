@@ -1,5 +1,6 @@
 import { useId, type ReactElement } from 'react'
 import StatusAlert, { type StatusAlertTone } from '@safe-global/views/components/common/StatusAlert'
+import { Card } from '@safe-global/views/components/ui/card'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -29,12 +30,14 @@ const ExistingPoliciesContent = ({
     <>
       <StatusAlert {...banner} />
 
-      <div className="flex flex-col gap-3 rounded-xl bg-muted p-4">
-        <Typography variant="paragraph-small-medium">{getSpendingLimitsGroupTitle(safeName)}</Typography>
-        {rows.map(({ key, ...row }) => (
-          <SpendingLimitImpactRow key={key} {...row} />
-        ))}
-      </div>
+      <Card variant="muted" size="none" radius="xl">
+        <div className="flex flex-col gap-3 p-4">
+          <Typography variant="paragraph-small-medium">{getSpendingLimitsGroupTitle(safeName)}</Typography>
+          {rows.map(({ key, ...row }) => (
+            <SpendingLimitImpactRow key={key} {...row} />
+          ))}
+        </div>
+      </Card>
 
       <div className="flex items-start gap-3">
         <Checkbox
