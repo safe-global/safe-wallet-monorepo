@@ -3,6 +3,7 @@ import { getAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { ExtendedContact, MergedAddressBook } from '@/hooks/useAllAddressBooks'
 import { createDefaultAllowlistValues, type AllowlistFormRecipient } from '../../types'
 import {
   getAllowlistRecipientLabel,
@@ -27,8 +28,8 @@ const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFo
   selected: true,
   ...overrides,
 })
-const addressBookWith = (contacts: Record<string, string>) => ({
-  get: (contact: string) => (contacts[contact] ? { name: contacts[contact] } : undefined),
+const addressBookWith = (contacts: Record<string, string>): Pick<MergedAddressBook, 'get' | 'has'> => ({
+  get: (contact: string) => (contacts[contact] ? ({ name: contacts[contact] } as ExtendedContact) : undefined),
   has: (contact: string) => contact in contacts,
 })
 
