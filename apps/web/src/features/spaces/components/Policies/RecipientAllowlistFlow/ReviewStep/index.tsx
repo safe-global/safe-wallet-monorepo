@@ -50,8 +50,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const wallet = useWallet()
   const { describeSetupCall, decodeErc20TransferPolicyData } = useLoadFeature(PolicyGuardFeature)
 
-  const rules = useMemo(() => data?.rules ?? [], [data?.rules])
-  const { guardState, configurations, root, calls } = useBuildAllowlistTransaction(rules)
+  const rules = data?.rules
+  const { guardState, configurations, root, txs } = useBuildAllowlistTransaction(rules ?? [])
 
   const { save, isSaving } = useSaveAllowlistConfiguration()
   const { setIsSubmitLoading, setIsSubmitDisabled } = useContext(TxFlowContext)
@@ -85,7 +85,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const tokens = useMemo(
     () =>
       toAllowlistTokens(
-        rules.map(({ tokenAddress }) => tokenAddress),
+        (rules ?? []).map(({ tokenAddress }) => tokenAddress),
         tokenOptions,
       ),
     [rules, tokenOptions],
@@ -154,9 +154,9 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
       {children}
 
-      {calls && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
+      {txs && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
         <AllowlistSetupActions
-          calls={calls}
+          calls={txs}
           configurations={configurations}
           describeCall={describeSetupCall}
           decodeRecipients={decodeErc20TransferPolicyData}

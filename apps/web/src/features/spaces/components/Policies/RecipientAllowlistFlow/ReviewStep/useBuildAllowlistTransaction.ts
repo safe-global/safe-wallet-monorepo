@@ -12,20 +12,14 @@ import {
   PolicyGuardFeature,
   usePolicyGuard,
   type AllowlistSetup,
-  type PolicyConfiguration,
   type PolicyGuardState,
 } from '@/features/policy-guard'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 
-type BuiltAllowlist = {
-  guardState: PolicyGuardState
-  configurations: PolicyConfiguration[]
-  root: string
-  calls: AllowlistSetup['txs']
-}
+type BuiltAllowlist = AllowlistSetup & { guardState: PolicyGuardState }
 
-/** Returns `configurations`, `root` and `calls` only once their tx is set, so the review and the CGW save always match it. */
+/** Returns the setup only once its tx is set, so the review and the CGW save always match it. */
 export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<BuiltAllowlist> => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
@@ -38,8 +32,9 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
   const { state, error } = usePolicyGuard(target)
 
   const sdk = scope?.sdk
-  // Keyed by value so a re-created but equal rules array does not rebuild the transaction.
   const rulesKey = JSON.stringify(rules)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by value so an equal rules array doesn't rebuild
+  const stableRules = useMemo(() => rules, [rulesKey])
 
   useEffect(() => {
     // The transaction only describes the inputs it was built from, so any change drops it and any old error.
@@ -59,7 +54,7 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
 
     let setup: AllowlistSetup
     try {
-      const configurations = buildAllowlistConfigurations(chainId, JSON.parse(rulesKey))
+      const configurations = buildAllowlistConfigurations(chainId, stableRules)
       setup = createAllowlistSetupTxs({ safeAddress, guardAddress, guardState: state, configurations })
     } catch (e) {
       setSafeTxError(asError(e))
@@ -72,12 +67,7 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
       .then((tx) => {
         if (isStale) return
         setSafeTx(tx)
-        setBuilt({
-          guardState: state,
-          configurations: setup.configurations,
-          root: setup.root,
-          calls: setup.txs,
-        })
+        setBuilt({ ...setup, guardState: state })
       })
       .catch((e) => {
         if (!isStale) setSafeTxError(asError(e))
@@ -89,7 +79,7 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
   }, [
     state,
     error,
-    rulesKey,
+    stableRules,
     sdk,
     chainId,
     safeAddress,

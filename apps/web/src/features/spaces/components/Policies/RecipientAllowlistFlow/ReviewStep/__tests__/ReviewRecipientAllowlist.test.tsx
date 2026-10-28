@@ -230,7 +230,7 @@ const built = (guardState?: PolicyGuardState) => {
     guardState,
     configurations,
   })
-  return mockBuild.mockReturnValue({ guardState, configurations, root, calls: txs })
+  return mockBuild.mockReturnValue({ guardState, configurations, root, txs })
 }
 
 const mockOwners = (owners: string[], threshold = 2) =>
@@ -425,7 +425,7 @@ describe('ReviewRecipientAllowlist', () => {
     mockBuild.mockReturnValue({
       guardState: { status: 'none' },
       configurations: [native, encodedOnlyOther],
-      calls: createAllowlistSetupTxs({
+      txs: createAllowlistSetupTxs({
         safeAddress: SAFE,
         guardAddress,
         guardState: { status: 'none' },

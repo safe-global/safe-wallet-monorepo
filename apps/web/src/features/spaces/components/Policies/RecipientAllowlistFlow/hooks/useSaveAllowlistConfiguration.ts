@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { SAVE_CONFIGURATION_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { AllowlistSetup } from '@/features/policy-guard'
+import type { CreatePolicyConfigurationRequestDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { Errors, logError } from '@/services/exceptions'
 import { useAppDispatch } from '@/store'
@@ -10,7 +10,7 @@ import { showNotification } from '@/store/notificationsSlice'
 
 /** Saves the configuration request in CGW, which needs it stored before it can activate the policy later. */
 export const useSaveAllowlistConfiguration = (): {
-  save: (request: Pick<AllowlistSetup, 'configurations' | 'root'>) => Promise<boolean>
+  save: (request: CreatePolicyConfigurationRequestDto) => Promise<boolean>
   isSaving: boolean
 } => {
   const dispatch = useAppDispatch()
@@ -22,7 +22,7 @@ export const useSaveAllowlistConfiguration = (): {
   const safeAddress = scope?.safeAddress
 
   const save = useCallback(
-    async ({ configurations, root }: Pick<AllowlistSetup, 'configurations' | 'root'>): Promise<boolean> => {
+    async ({ configurations, root }: CreatePolicyConfigurationRequestDto): Promise<boolean> => {
       try {
         if (!spaceId || !chainId || !safeAddress) throw new Error('Missing save context')
         await createRequest({

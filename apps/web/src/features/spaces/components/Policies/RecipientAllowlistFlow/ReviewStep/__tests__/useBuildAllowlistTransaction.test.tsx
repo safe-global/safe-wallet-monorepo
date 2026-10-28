@@ -80,7 +80,7 @@ describe('useBuildAllowlistTransaction', () => {
     expect(result.current.guardState).toEqual({ status: 'none' })
     expect(result.current.configurations).toHaveLength(1)
     expect(result.current.root).toMatch(/^0x[0-9a-f]{64}$/)
-    expect(result.current.calls).toEqual(sentBatch())
+    expect(result.current.txs).toEqual(sentBatch())
   })
 
   it('sets a single call to the guard when it is already known', async () => {
@@ -203,7 +203,7 @@ describe('useBuildAllowlistTransaction', () => {
     expect(setSafeTx).toHaveBeenCalledWith(undefined)
     expect(setSafeTx).not.toHaveBeenCalledWith(builtTx)
     expect(result.current.configurations).toBeUndefined()
-    expect(result.current.calls).toBeUndefined()
+    expect(result.current.txs).toBeUndefined()
   })
 
   it('clears the transaction when the guard read then fails', async () => {
