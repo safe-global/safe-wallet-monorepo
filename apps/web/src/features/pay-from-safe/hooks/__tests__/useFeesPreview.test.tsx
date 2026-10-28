@@ -309,10 +309,10 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(rejectTx) })
 
     expect(result.current.totalOutgoing).toBeDefined()
-    expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
+    expect(result.current.totalOutgoing?.primary).toEqual([])
+    expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
     // gasWei = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
-    expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00005/)
-    expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    expect(result.current.totalOutgoing?.fees?.amount).toMatch(/^0\.00005/)
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
   })
 
@@ -629,9 +629,9 @@ describe('useFeesPreview', () => {
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedReject) })
 
       expect(result.current.totalOutgoing).toBeDefined()
-      expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
-      expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00005/)
-      expect(result.current.totalOutgoing?.fees).toBeUndefined()
+      expect(result.current.totalOutgoing?.primary).toEqual([])
+      expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
+      expect(result.current.totalOutgoing?.fees?.amount).toMatch(/^0\.00005/)
     })
 
     it('locks the UI as legacy-signed for a signed Signer-pays tx (gasToken=0x0, baseGas=0)', () => {
@@ -700,8 +700,8 @@ describe('useFeesPreview', () => {
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedRejectWeth) })
 
       expect(result.current.totalOutgoing).toBeDefined()
-      expect(result.current.totalOutgoing?.primary[0].currency).toBe('WETH')
-      expect(result.current.totalOutgoing?.fees).toBeUndefined()
+      expect(result.current.totalOutgoing?.primary).toEqual([])
+      expect(result.current.totalOutgoing?.fees?.currency).toBe('WETH')
     })
   })
 

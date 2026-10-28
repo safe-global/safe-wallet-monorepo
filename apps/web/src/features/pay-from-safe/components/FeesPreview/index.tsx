@@ -25,6 +25,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { FeePaymentMode } from '@/features/pay-from-safe/types'
 import { setFeePaymentSourcePreference } from '../../store'
 import type { FeesPreviewData, TotalOutgoing } from '../../hooks/useFeesPreview'
+import { withoutFees } from '../../services/totalOutgoing'
 import { FeeBreakdownRow } from '@safe-global/views/features/pay-from-safe/components/shared/FeeBreakdownRow'
 import { GAS_FEE_TOOLTIP } from '@safe-global/views/features/pay-from-safe/components/shared/tooltips'
 import { IS_RELAYING_LIVE } from '../../constants'
@@ -251,7 +252,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
   const isSafeWallet =
     (IS_RELAYING_LIVE ? feePaymentMode === 'safe' : !!isConfirmation && !isLegacySigned && canCoverFees) &&
     !noEligibleGasToken
-  const displayedOutgoing = totalOutgoing && !isSafeWallet ? { ...totalOutgoing, fees: undefined } : totalOutgoing
+  const displayedOutgoing = isSafeWallet ? totalOutgoing : withoutFees(totalOutgoing)
 
   const handlePaymentSourceChange = (source: FeePaymentMode) => {
     setFeePaymentMode(source)

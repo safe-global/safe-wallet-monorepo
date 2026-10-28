@@ -22,6 +22,7 @@ import type {
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { usePayFromSafeFeePreview } from './usePayFromSafeFeePreview'
+import { withoutFees } from '../services/totalOutgoing'
 import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '../store'
 
 export type GasPayerSelection = {
@@ -219,10 +220,7 @@ export const useGasPayerSelection = ({
           fiatAmount: fees.executionFee.fiatAmount,
         }
     // The fee leaves the Safe only when the Safe pays it.
-    const totalOutgoing =
-      fees.totalOutgoing && (isLocked || paysFromSafe)
-        ? fees.totalOutgoing
-        : fees.totalOutgoing && { ...fees.totalOutgoing, fees: undefined }
+    const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : withoutFees(fees.totalOutgoing)
 
     // At execution the offer is the truth (it already accounts for a quota used up since signing);
     // at signing there is none, so the Workspace's meter stands in.
