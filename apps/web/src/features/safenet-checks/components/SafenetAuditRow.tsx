@@ -8,7 +8,8 @@ import {
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { STATUS_PRESENTATION } from '../statusPresentation'
+import { STATUS_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
+import { isWarningRisk, summariseRejection } from '../summariseRejection'
 import { useSafenetLinks } from '../useSafenetLinks'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
 
@@ -35,6 +36,8 @@ const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
   [CheckStatus.DISPUTED]: 'var(--color-warning-main)',
   [CheckStatus.TIMED_OUT]: 'var(--color-warning-main)',
 }
+
+const DARK_WARNING_RISK_COLOR = 'var(--color-warning-main)'
 
 export type SafenetAuditRowProps = {
   safeTxHash: string | undefined
@@ -63,7 +66,9 @@ export const SafenetAuditRowView = ({
   isLast,
 }: SafenetAuditRowViewProps): ReactElement => {
   const isDarkMode = useDarkMode()
-  const label = STATUS_PRESENTATION[publicStatus].label
+  const isWarning = isWarningRisk(publicStatus, summariseRejection(snapshot.events))
+  const label = isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label
+  const darkColor = isWarning ? DARK_WARNING_RISK_COLOR : DARK_STEP_COLOR[publicStatus]
   const { attestationHref, explorerHref } = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
 
   const actor = attestationHref ? (
@@ -95,7 +100,7 @@ export const SafenetAuditRowView = ({
       <AuditRow
         label={label}
         actionType={STEP_ICON[publicStatus]}
-        iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
+        iconColor={isDarkMode ? darkColor : undefined}
         actor={actor}
         isLast={isLast}
         // Null while running or when the header read failed — column stays empty.

@@ -36,7 +36,7 @@ jobs:
 
       - uses: $/.github/actions/yarn
         with:
-          after-install: 'false'
+          after-install: 'true'
 
       # Run tests with coverage
       - name: Run Jest tests with coverage

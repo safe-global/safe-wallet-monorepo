@@ -2,12 +2,21 @@ import { GA_TO_MIXPANEL_MAPPING, GA_LABEL_TO_MIXPANEL_PROPERTY } from '../ga-mix
 import { MixpanelEvent } from '../mixpanel-events'
 import { SWAP_EVENTS } from '../events/swaps'
 import { SPACE_EVENTS } from '../events/spaces'
+import { ADDRESS_POISONING_EVENTS } from '../events/addressPoisoning'
 import { SAFENET_EVENTS } from '../events/safenet'
 
 describe('GA to Mixpanel Mapping', () => {
   describe('GA_TO_MIXPANEL_MAPPING', () => {
     it('should map swap events correctly', () => {
       expect(GA_TO_MIXPANEL_MAPPING[SWAP_EVENTS.OPEN_SWAPS.action]).toBe(MixpanelEvent.NATIVE_SWAP_VIEWED)
+    })
+
+    it.each([
+      [ADDRESS_POISONING_EVENTS.WARNING_SHOWN.action, 'Look-alike Address Warning Shown'],
+      [ADDRESS_POISONING_EVENTS.WARNING_CONTINUED.action, 'Look-alike Address Warning Continued'],
+      [ADDRESS_POISONING_EVENTS.WARNING_DISMISSED.action, 'Look-alike Address Warning Dismissed'],
+    ])('forwards the look-alike warning event "%s" to Mixpanel as "%s"', (action, mixpanelEvent) => {
+      expect(GA_TO_MIXPANEL_MAPPING[action]).toBe(mixpanelEvent)
     })
 
     it('should contain all expected swap mappings', () => {

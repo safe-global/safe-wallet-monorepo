@@ -31,6 +31,7 @@ import {
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
+import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { useSafeProAccess } from '@/features/spaces'
 
 type SafeShieldContextType = {
@@ -87,7 +88,11 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
 
-  const { hasProFeatures, isSafePro } = useSafeProAccess()
+  const { hasProFeatures: hasProAccess, isSafePro } = useSafeProAccess()
+  const scopeContext = useSafeScopeContext()
+  // A Workspace-level flow picks its Safe in step 1; until then nothing can be checked, so nothing is locked.
+  const isPickingSafe = scopeContext !== undefined && scopeContext.scope === undefined
+  const hasProFeatures = hasProAccess || isPickingSafe
   const recipientOnlyAnalysis = useRecipientAnalysis(hasProFeatures ? recipientAddresses : undefined)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx, hasProFeatures)
   const [{ token: hypernativeAuthToken }] = useAuthToken()

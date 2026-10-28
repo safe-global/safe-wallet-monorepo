@@ -1,8 +1,35 @@
+import { faker } from '@faker-js/faker'
+import { getCompatibilityFallbackHandlerDeployment } from '@safe-global/safe-deployments'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData/index'
 import { render } from '@/tests/test-utils'
+import { mockSafeInfo } from '@/tests/mocks/hooks'
+import { basicTypesActions, multiSendTxDataBuilder, setFallbackHandlerAction } from '@/tests/builders/dataDecoded'
 import type { Operation } from '@safe-global/store/gateway/types'
 
+jest.mock('@/hooks/useSafeInfo')
+
+const OFFICIAL_HANDLER = getCompatibilityFallbackHandlerDeployment({ network: '1', version: '1.4.1' })?.defaultAddress!
+
+const batchSetting = (handler: string) =>
+  multiSendTxDataBuilder([...basicTypesActions(), setFallbackHandlerAction(handler)]).build()
+
 describe('DecodedData', () => {
+  beforeEach(() => {
+    mockSafeInfo({ chainId: '1' })
+  })
+
+  it('shows the untrusted fallback handler warning when a batch sets an unofficial handler', () => {
+    const { getByTestId } = render(<DecodedData txData={batchSetting(faker.finance.ethereumAddress())} />)
+
+    expect(getByTestId('untrusted-fallback-handler-warning')).toHaveTextContent('Unofficial fallback handler')
+  })
+
+  it('shows no fallback handler warning when a batch sets the official 1.4.1 handler', () => {
+    const { queryByTestId } = render(<DecodedData txData={batchSetting(OFFICIAL_HANDLER)} />)
+
+    expect(queryByTestId('untrusted-fallback-handler-warning')).not.toBeInTheDocument()
+  })
+
   it('returns null if txData and toInfo are missing', () => {
     const { container } = render(<DecodedData txData={undefined} toInfo={undefined} />)
 

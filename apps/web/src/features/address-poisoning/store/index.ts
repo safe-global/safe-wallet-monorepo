@@ -1,1 +1,1 @@
-export { selectAnchorAddresses, selectAnchorIndex } from './anchorIndex'
+export { selectAccountAnchorAddresses, selectAnchorAddresses, selectAnchorIndex } from './anchorIndex'

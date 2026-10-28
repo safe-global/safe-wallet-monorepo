@@ -7,7 +7,6 @@ const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
 const actionRequiredPanel = '[data-testid="action-required-panel"]'
 const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
 const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
-export const assetsWidget = '[data-testid="assets-widget"]'
 // Case #1 — Outdated official mastercopy (Info) → "Update"
 export const outdatedOfficialTitlePrefix = 'New Safe version is available'
 export const outdatedOfficialContent =
