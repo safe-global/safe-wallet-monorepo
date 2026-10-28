@@ -1,11 +1,12 @@
 import semverSatisfies from 'semver/functions/satisfies'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 
-export type PolicyEngineContract = 'SafePolicyGuard' | 'ERC20ApprovePolicy' | 'ERC20TransferPolicy'
+export type PolicyEngineContract =
+  'SafePolicyGuard' | 'ERC20ApprovePolicy' | 'ERC20TransferPolicy' | 'NativeTransferPolicy'
 
 type Deployment = { networkAddresses: Record<string, string> }
 
-// Source: https://github.com/safe-global/policy-indexer/blob/main/config.yaml
+// Source: https://github.com/safe-global/policy-indexer (config.yaml and src/policies/registry.ts)
 // One guard per root-activation delay, all with a 604800s expiry
 const POLICY_GUARD_BY_DELAY = {
   '0s': '0x55c241591E12CE3c58491D02b737F12D3199ae95',
@@ -28,6 +29,7 @@ const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
   SafePolicyGuard: onIndexedChains(SAFE_POLICY_GUARD),
   ERC20ApprovePolicy: onIndexedChains('0xfF86DD4caf79672E55e0C3e3A5410746600d60F4'),
   ERC20TransferPolicy: onIndexedChains('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187'),
+  NativeTransferPolicy: onIndexedChains('0x2868C263EBF3672211E4C32e0B21689FF0584ca3'),
 }
 
 export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineContract): string | undefined =>

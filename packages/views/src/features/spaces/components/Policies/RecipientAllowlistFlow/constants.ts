@@ -58,3 +58,9 @@ export const FALLBACK_SPACE_NAME = 'your Workspace'
 
 export const IDENTICON_SIZE = 24
 export const getAllowlistAccountLabel = (name: string, chainName: string): string => `${name} on ${chainName}`
+
+export const ALLOWLIST_UNAVAILABLE_ERROR = 'Allowlists are not available on this chain.'
+export const ZERO_ADDRESS_RECIPIENT_ERROR = "The zero address can't be an allowlist recipient."
+export const TOO_MANY_CONFIGURATIONS_ERROR = 'This allowlist is too large. Remove some tokens or recipients.'
+export const EMPTY_ALLOWLIST_ERROR = 'Select at least one token and one recipient.'
+export const GUARD_NOT_SUPPORTED_ERROR = "This Safe account's guard setup doesn't support allowlists."
