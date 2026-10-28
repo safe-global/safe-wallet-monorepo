@@ -178,7 +178,7 @@ const CreateRecipientAllowlistPolicy = ({
             size="submit"
             disabled={!canGoNext}
             onClick={() => {
-              onSpendingLimitImpact?.(impacts.length > 0)
+              onSpendingLimitImpact?.(impacts.some(({ impact }) => impact === 'restricted'))
               onNext({ ...values, rules })
             }}
             data-testid="next-btn"

@@ -230,7 +230,8 @@ describe('CreateRecipientAllowlistPolicy', () => {
 
   it.each([
     ['restricted', 'adds', [{ impact: 'restricted' }], true],
-    ['blocked', 'adds', [{ impact: 'blocked' }], true],
+    ['partly restricted', 'adds', [{ impact: 'restricted' }, { impact: 'unaffected' }], true],
+    ['only unaffected', 'skips', [{ impact: 'unaffected' }], false],
     ['absent', 'skips', [], false],
   ])(
     'reports on Next whether a spending limit is affected (%s), so the flow %s Existing policies',

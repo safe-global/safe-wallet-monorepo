@@ -39,14 +39,14 @@ describe('getSpendingLimitImpacts', () => {
     expect(impact).toMatchObject({ spender, impact: 'restricted', recipients })
   })
 
-  it('blocks an allowance on a token the allowlist leaves out, since the guard denies by default', () => {
+  it('should mark an allowance as unaffected, when the allowlist leaves its token out', () => {
     const policies = [
       makeSpendingLimit(safe, [{ spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(weth)] }]),
     ]
 
     const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
 
-    expect(impacts).toEqual([expect.objectContaining({ impact: 'blocked', recipients: [] })])
+    expect(impacts).toEqual([expect.objectContaining({ impact: 'unaffected', recipients: [] })])
   })
 
   it('leaves out the allowances of a deregistered spender', () => {
@@ -76,16 +76,21 @@ describe('getSpendingLimitImpacts', () => {
     expect(getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])).toEqual([])
   })
 
-  it('returns one impact per allowance across spenders', () => {
+  it('should return one impact per allowance with the restricted ones first, when spenders mix both kinds', () => {
+    const unaffectedSpender = faker.finance.ethereumAddress()
+    const restrictedSpender = faker.finance.ethereumAddress()
     const policies = [
       makeSpendingLimit(safe, [
-        { spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(usdc), makeAllowance(weth)] },
-        { spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(usdc)] },
+        { spender: unaffectedSpender, allowances: [makeAllowance(weth)] },
+        { spender: restrictedSpender, allowances: [makeAllowance(usdc)] },
       ]),
     ]
 
     const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
 
-    expect(impacts.map(({ impact }) => impact)).toEqual(['restricted', 'blocked', 'restricted'])
+    expect(impacts.map(({ spender, impact }) => [spender, impact])).toEqual([
+      [restrictedSpender, 'restricted'],
+      [unaffectedSpender, 'unaffected'],
+    ])
   })
 })
