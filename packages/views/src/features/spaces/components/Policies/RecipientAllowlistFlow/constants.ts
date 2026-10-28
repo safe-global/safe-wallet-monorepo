@@ -103,3 +103,27 @@ export const ALLOWLIST_GAP_DELEGATE_CALLS =
   'Delegate calls are not restricted, except Safe batches, whose transactions are each checked against the allowlist.'
 
 export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."
+
+export const EXISTING_POLICIES_STEP_TITLE = 'Existing policies'
+export const getBlockedSpendingLimitsTitle = (count: number): string =>
+  `${count} spending ${count === 1 ? 'limit' : 'limits'} will be blocked by this allowlist.`
+export const getBlockedSpendingLimitDescription = (spender: string, amount: string, symbol: string): string =>
+  `${spender} can send up to ${amount} to any address today. Once this allowlist is active, it can't send ${symbol} anymore.`
+export const BLOCKED_SPENDING_LIMITS_DESCRIPTION =
+  "They can send their tokens to any address today. Once this allowlist is active, they can't send them anymore."
+export const getRestrictedSpendingLimitsTitle = (count: number): string =>
+  count === 1
+    ? "Your spending limit will follow this allowlist's rules."
+    : `Your ${count} spending limits will follow this allowlist's rules.`
+export const RESTRICTED_SPENDING_LIMITS_DESCRIPTION = 'They can only send allowed tokens to allowed recipients.'
+export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
+export const WILL_BE_BLOCKED_LABEL = 'Will be blocked'
+export const WILL_BE_RESTRICTED_LABEL = 'Will be restricted'
+export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
+export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`
+export const SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL = 'I understand how this allowlist changes these spending limits.'
+
+export const APPLY_REVIEW_STEP_TITLE = 'Apply allowlist'
+export const APPLY_SUMMARY_TITLE = 'Apply the allowlist to turn it on.'
+export const APPLY_SUMMARY_DESCRIPTION =
+  'The 24-hour wait is over. Once this transaction is executed, every transfer of an allowlisted token is checked against it.'
