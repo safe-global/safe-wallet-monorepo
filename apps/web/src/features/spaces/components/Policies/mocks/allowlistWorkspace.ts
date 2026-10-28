@@ -231,7 +231,7 @@ export const decodeApplyConfiguration = (data: string): PolicyConfiguration[] =>
     ([target, selector, operation, policy, configurationData]) => ({
       target,
       selector,
-      operation: Number(operation),
+      operation: operation === 1n ? OperationType.DelegateCall : OperationType.Call,
       policy,
       data: configurationData,
     }),
