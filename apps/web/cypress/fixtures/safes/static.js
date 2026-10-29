@@ -11,47 +11,43 @@ export default {
   // Sepolia Safes
   /** Create Safe CF and multichain testing - Used in: notifications.cy.js */
   SEP_STATIC_SAFE_0: 'sep:0x926186108f74dB20BFeb2b6c888E523C78cb7E00',
-  /** Swaps and swap history testing - Used in: swaps_history.cy.js, limit_order_history.cy.js, apps_list.cy.js */
+  /** Swaps and swap history testing - Used in: apps_list.cy.js */
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
-  /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, batch_tx.cy.js, safe-apps tests */
+  /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, safe-apps tests */
   SEP_STATIC_SAFE_2: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
   /** Used in: spending_limits_nonowner.cy.js */
   SEP_STATIC_SAFE_3: 'sep:0x33C4AA5729D91FfB3B87AEf8a324bb6304Fb905c',
   SEP_STATIC_SAFE_4: 'sep:0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
-  /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: create_tx.cy.js, tx_notes.cy.js, spending_limits.cy.js */
+  /** Create transaction and ENS testing (e2etestsafe.eth) - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_6: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
-  /** Queue replace testing - Used in: tx_queue_replace_btn.cy.js */
+  /** Used in: address_book_2.cy.js, safe_selector.cy.js, tx_history.cy.js, tx_history_2.cy.js, tx_history_5.cy.js */
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
-  /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js */
+  /** Spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
   /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
-  /** Messages (onchain/offchain) testing - Used in: messages_popup.cy.js, create_tx.cy.js */
+  /** Messages (onchain/offchain) testing */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Dashboard testing - Used in: dashboard.cy.js */
+  /** Available for general testing */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
-  /** Dashboard testing - Used in: dashboard.cy.js */
+  /** Available for general testing */
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
   /** Balances testing - Used in: Playwright token-lists.spec.ts */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
-  /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Used in: dashboard.cy.js. Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
+  /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
   ETH_STATIC_SAFE_OUTDATED_MASTERCOPY: 'eth:0x1230B3d59858296A31053C1b8562Ecf89A2f888b',
 
   // More Sepolia Safes
   /** Transaction history, messages, and spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
-  /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
-  SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
-  /** TWAP history testing - Used in: twaps_history.cy.js */
-  SEP_STATIC_SAFE_27: 'sep:0xC97FCf0B8890a5a7b1a1490d44Dc9EbE3cE04884',
 
   // More Polygon (Matic) Safes
-  /** Multichain testing (primary CF safe) - Used in: multichain_*.cy.js, sidebar_*.cy.js, create_tx.cy.js
+  /** Multichain testing (primary CF safe) - Used in: multichain_*.cy.js, sidebar_*.cy.js
    * ⚠️ Heavily used for multichain testing - avoid modifying its state */
   MATIC_STATIC_SAFE_28: 'matic:0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B',
 
@@ -62,14 +58,12 @@ export default {
   // More Sepolia Safes
   /** Available for general testing */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
-  /** Proposers testing - Used in: proposers.cy.js, tx_share_block.cy.js */
+  /** Available for general testing */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js */
+  /** Queue transaction testing - Used in: tx_queue.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
-  /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
+  /** Transaction details queue testing - Used in: tx_details_queue.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
-  /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
-  SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */
   SEP_STATIC_SAFE_39: 'sep:0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD',
   /** Nested safes testing - Used in: nested_safes.cy.js */
@@ -91,9 +85,9 @@ export default {
   // More Polygon (Matic) Safes
   /** Available for general testing - Currently unused */
   MATIC_STATIC_SAFE_29: 'matic:0x5E9242FD52c4c4A60d874E8ff4Ba25657dd6e551',
-  /** Case #2 – Unsupported but migratable in-app (Warning, "Migrate" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0x0b26... */
+  /** Case #2 – Unsupported but migratable in-app (Warning, "Migrate" CTA). Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0x0b26... */
   MATIC_STATIC_SAFE_31: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
-  /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
+  /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
   MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
 
   // Allowance Module address verification safes (same Safe on two networks)

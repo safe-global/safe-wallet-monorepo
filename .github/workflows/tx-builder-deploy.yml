@@ -55,6 +55,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
 
       - name: Build
         run: yarn workspace @safe-global/tx-builder build
@@ -107,6 +110,9 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
 
       - name: Build
         run: yarn workspace @safe-global/tx-builder build
@@ -143,6 +149,9 @@ jobs:
           fetch-depth: 0
 
       - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
 
       - name: Extract version
         id: version

@@ -1,0 +1,293 @@
+{
+  "item": {
+    "type": "TRANSACTION",
+    "transaction": {
+      "txInfo": {
+        "type": "SwapOrder",
+        "humanDescription": null,
+        "uid": "0x18088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b4",
+        "status": "expired",
+        "kind": "sell",
+        "orderClass": "limit",
+        "validUntil": 1719408820,
+        "sellAmount": "200000000000000000",
+        "buyAmount": "339205875414529473305",
+        "executedSellAmount": "0",
+        "executedBuyAmount": "0",
+        "sellToken": {
+          "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png",
+          "name": "Wrapped Ether",
+          "symbol": "WETH",
+          "trusted": false
+        },
+        "buyToken": {
+          "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D.png",
+          "name": "DAI (test)",
+          "symbol": "DAI",
+          "trusted": false
+        },
+        "explorerUrl": "https://explorer.cow.fi/orders/0x18088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b4",
+        "executedFee": "0",
+        "executedFeeToken": {
+          "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png",
+          "name": "Wrapped Ether",
+          "symbol": "WETH",
+          "trusted": false
+        },
+        "receiver": "0x140663Cb76e4c4e97621395fc118912fa674150B",
+        "owner": "0x140663Cb76e4c4e97621395fc118912fa674150B",
+        "fullAppData": {
+          "appCode": "Safe Wallet Swaps",
+          "metadata": {
+            "orderClass": {
+              "orderClass": "market"
+            },
+            "quote": {
+              "slippageBips": 100
+            },
+            "widget": {
+              "appCode": "CoW Swap-SafeApp",
+              "environment": "production"
+            }
+          },
+          "version": "1.1.0"
+        }
+      },
+      "id": "multisig_0x140663Cb76e4c4e97621395fc118912fa674150B_0x9f3d2c9c9879fb7eee7005d57b2b5c9006d7c8b98241aa49a0b9e769411c58ef",
+      "txHash": "0x2e35c0116055484705dd26c8eed03017f7e9cdceabbf218ade05f28ff3bd34d5",
+      "timestamp": 1719408756000,
+      "txStatus": "SUCCESS",
+      "executionInfo": {
+        "type": "MULTISIG",
+        "nonce": 0,
+        "confirmationsRequired": 1,
+        "confirmationsSubmitted": 1,
+        "missingSigners": null
+      },
+      "safeAppInfo": null,
+      "note": null
+    },
+    "conflictType": "None"
+  },
+  "details": {
+    "safeAddress": "0x140663Cb76e4c4e97621395fc118912fa674150B",
+    "txId": "multisig_0x140663Cb76e4c4e97621395fc118912fa674150B_0x9f3d2c9c9879fb7eee7005d57b2b5c9006d7c8b98241aa49a0b9e769411c58ef",
+    "executedAt": 1719408756000,
+    "txStatus": "SUCCESS",
+    "txInfo": {
+      "type": "SwapOrder",
+      "humanDescription": null,
+      "uid": "0x18088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b4",
+      "status": "expired",
+      "kind": "sell",
+      "orderClass": "limit",
+      "validUntil": 1719408820,
+      "sellAmount": "200000000000000000",
+      "buyAmount": "339205875414529473305",
+      "executedSellAmount": "0",
+      "executedBuyAmount": "0",
+      "sellToken": {
+        "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png",
+        "name": "Wrapped Ether",
+        "symbol": "WETH",
+        "trusted": false
+      },
+      "buyToken": {
+        "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D.png",
+        "name": "DAI (test)",
+        "symbol": "DAI",
+        "trusted": false
+      },
+      "explorerUrl": "https://explorer.cow.fi/orders/0x18088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b4",
+      "executedFee": "0",
+      "executedFeeToken": {
+        "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png",
+        "name": "Wrapped Ether",
+        "symbol": "WETH",
+        "trusted": false
+      },
+      "receiver": "0x140663Cb76e4c4e97621395fc118912fa674150B",
+      "owner": "0x140663Cb76e4c4e97621395fc118912fa674150B",
+      "fullAppData": {
+        "appCode": "Safe Wallet Swaps",
+        "metadata": {
+          "orderClass": {
+            "orderClass": "market"
+          },
+          "quote": {
+            "slippageBips": 100
+          },
+          "widget": {
+            "appCode": "CoW Swap-SafeApp",
+            "environment": "production"
+          }
+        },
+        "version": "1.1.0"
+      }
+    },
+    "txData": {
+      "hexData": "0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001eb00fff9976782d46cc05630d1f6ebab18b2324d6b1400000000000000000000000000000000000000000000000002c68af0bb1400000000000000000000000000000000000000000000000000000000000000000004d0e30db000fff9976782d46cc05630d1f6ebab18b2324d6b1400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe01100000000000000000000000000000000000000000000000000429d069189e0000009008d19f58aabd9ed0d60971565aa8510560ab41000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4ec6cb13f00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000003818088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b40000000000000000000000000000000000000000000000000000000000",
+      "dataDecoded": {
+        "method": "multiSend",
+        "parameters": [
+          {
+            "name": "transactions",
+            "type": "bytes",
+            "value": "0x00fff9976782d46cc05630d1f6ebab18b2324d6b1400000000000000000000000000000000000000000000000002c68af0bb1400000000000000000000000000000000000000000000000000000000000000000004d0e30db000fff9976782d46cc05630d1f6ebab18b2324d6b1400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe01100000000000000000000000000000000000000000000000000429d069189e0000009008d19f58aabd9ed0d60971565aa8510560ab41000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4ec6cb13f00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000003818088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b40000000000000000",
+            "valueDecoded": [
+              {
+                "to": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+                "value": "200000000000000000",
+                "data": "0xd0e30db0",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "deposit",
+                  "parameters": []
+                }
+              },
+              {
+                "to": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+                "value": "0",
+                "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe01100000000000000000000000000000000000000000000000000429d069189e0000",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "approve",
+                  "parameters": [
+                    {
+                      "name": "guy",
+                      "type": "address",
+                      "value": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "wad",
+                      "type": "uint256",
+                      "value": "300000000000000000",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              },
+              {
+                "to": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+                "value": "0",
+                "data": "0xec6cb13f00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000003818088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b40000000000000000",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "setPreSignature",
+                  "parameters": [
+                    {
+                      "name": "orderUid",
+                      "type": "bytes",
+                      "value": "0x18088dae374f70e61a36da97a4e271505cdb516d46ebc480573d50315ecb4eb2140663cb76e4c4e97621395fc118912fa674150b667c18b4",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "signed",
+                      "type": "bool",
+                      "value": "True",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "accuracy": "FULL_MATCH"
+      },
+      "to": {
+        "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+        "name": "Safe: MultiSendCallOnly 1.3.0",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+      },
+      "value": "0",
+      "operation": 1,
+      "trustedDelegateCallTarget": true,
+      "addressInfoIndex": {
+        "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14": {
+          "value": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+          "name": "Wrapped Ether",
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png"
+        },
+        "0x9008D19f58AAbD9eD0D60971565AA8510560ab41": {
+          "value": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+          "name": "GPv2Settlement",
+          "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x9008D19f58AAbD9eD0D60971565AA8510560ab41.png"
+        }
+      },
+      "tokenInfoIndex": {
+        "0x0000000000000000000000000000000000000000": {
+          "type": "NATIVE_TOKEN",
+          "address": "0x0000000000000000000000000000000000000000",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/11155111/currency_logo.png",
+          "name": "Sepolia Ether",
+          "symbol": "ETH",
+          "trusted": true
+        }
+      }
+    },
+    "txHash": "0x2e35c0116055484705dd26c8eed03017f7e9cdceabbf218ade05f28ff3bd34d5",
+    "detailedExecutionInfo": {
+      "type": "MULTISIG",
+      "submittedAt": 1719408756000,
+      "nonce": 0,
+      "safeTxGas": "0",
+      "baseGas": "0",
+      "gasPrice": "0",
+      "gasToken": "0x0000000000000000000000000000000000000000",
+      "fee": "1656096140108740",
+      "payment": "0",
+      "refundReceiver": {
+        "value": "0x0000000000000000000000000000000000000000",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      },
+      "safeTxHash": "0x9f3d2c9c9879fb7eee7005d57b2b5c9006d7c8b98241aa49a0b9e769411c58ef",
+      "executor": {
+        "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8.png"
+      },
+      "signers": [
+        {
+          "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+          "name": null,
+          "logoUri": null
+        }
+      ],
+      "confirmationsRequired": 1,
+      "confirmations": [
+        {
+          "signer": {
+            "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0x0000000000000000000000008aef2f5c3f17261f6f1c4da058d022be92776af8000000000000000000000000000000000000000000000000000000000000000001",
+          "submittedAt": 1719408756000
+        }
+      ],
+      "rejectors": [],
+      "gasTokenInfo": null,
+      "trusted": true,
+      "proposer": null,
+      "proposedByDelegate": null
+    },
+    "safeAppInfo": null,
+    "note": null
+  }
+}

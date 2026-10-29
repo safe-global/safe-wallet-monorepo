@@ -33,13 +33,11 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
-export const spaceDashboardUrl = '/spaces?spaceId='
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = Cypress.expose('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const addressBookUrl = '/address-book?safe='
-export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const transactionQueueUrl = '/transactions/queue?safe='
 export const transactionsHistoryUrl = '/transactions/history?safe='
@@ -78,7 +76,6 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
-export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const appsEndpoint = '**/v1/**/safe-apps*'

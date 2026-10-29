@@ -46,6 +46,9 @@ export class TxReviewPage {
   readonly batchedTransactions: Locator
   /** The accordion that shows the transaction's method, e.g. `multiSend` */
   readonly transactionDetails: Locator
+  readonly noteInput: Locator
+  /** In the toast after a proposal, which hides itself after 5 s */
+  readonly viewTransactionLink: Locator
 
   constructor(private readonly page: Page) {
     this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
@@ -73,6 +76,15 @@ export class TxReviewPage {
     this.hashComparisonDialog = page.getByRole('dialog', { name: 'Compare transaction hash' })
     this.batchedTransactions = page.getByRole('listitem').getByTestId('action-item')
     this.transactionDetails = page.getByRole('button', { name: /^Transaction details/ })
+    this.noteInput = page.getByLabel('Note')
+    this.viewTransactionLink = page
+      .getByRole('alert')
+      .filter({ hasText: 'Successfully added to queue' })
+      .getByRole('link', { name: 'View transaction' })
+  }
+
+  async addNote(note: string): Promise<void> {
+    await this.noteInput.fill(note)
   }
 
   /** The decoded call at `position` (from 1) in the "All actions" list of a multiSend review */

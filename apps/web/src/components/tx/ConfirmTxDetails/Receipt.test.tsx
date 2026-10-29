@@ -217,3 +217,21 @@ describe('Receipt To row', () => {
     expect(address).toHaveClass('w-full', 'text-right', '[&>*]:justify-end')
   })
 })
+
+describe('Receipt Operation row', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRelayer = { type: 'RELAY_FEE' }
+    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+  })
+
+  it.each([
+    { operation: 0, label: '0 (call)' },
+    { operation: 1, label: '1 (delegate call)' },
+  ])('labels operation $operation as "$label" among the gas parameters', ({ operation, label }) => {
+    const { getByText } = renderReceipt({}, { ...baseSafeTxData, operation })
+
+    expect(getByText(label)).toBeInTheDocument()
+    expect(getByText('BaseGas')).toBeInTheDocument()
+  })
+})

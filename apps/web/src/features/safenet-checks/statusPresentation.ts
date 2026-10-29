@@ -1,4 +1,5 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { SEVERITY_TO_TITLE } from '@safe-global/utils/features/safe-shield/constants'
 import {
   CheckStatus,
   SAFENET_EXPLORER_URL,
@@ -98,6 +99,9 @@ export const CHIP_VARIANT = {
 export const STALE_NOTE = 'Status may be out of date.'
 
 export const MULTIPLE_RULES_TITLE = 'Risks detected'
+
+/** A risk that cites only warning rules takes Safe Shield's warning title, as its header does. */
+export const WARNING_RISK_LABEL = SEVERITY_TO_TITLE[Severity.WARN]
 
 export const SAFENET_DOCS_URL = 'https://docs.safefoundation.org/safenet'
 

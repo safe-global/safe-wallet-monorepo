@@ -63,7 +63,6 @@ export const stagingSafes = {
     ether: parseEther('0.0002'),
     allowances: [{ delegate: owner4, amount: parseEther('0.0001') }],
   },
-  SEP_STATIC_SAFE_26: { owners: [owner1, owner4], threshold: 2, nonce: 1 },
   SEP_STATIC_SAFE_34: {
     owners: [owner4, sepoliaOwner2],
     threshold: 2,
@@ -79,7 +78,6 @@ export const stagingSafes = {
     tokens: [{ address: COW, amount: parseEther('500') }],
   },
   SEP_STATIC_SAFE_31: { owners: [owner3, owner4], threshold: 1, nonce: 1, ether: parseEther('0.000001') },
-  SEP_STATIC_SAFE_36: { owners: [owner4], threshold: 1, ether: parseEther('0.0004') },
   SEP_STATIC_SAFE_43: {
     owners: [automationOwner, owner4, sharedOwner],
     threshold: 1,
