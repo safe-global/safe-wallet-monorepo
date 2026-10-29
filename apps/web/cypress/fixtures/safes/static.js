@@ -11,7 +11,7 @@ export default {
   // Sepolia Safes
   /** Create Safe CF and multichain testing - Used in: notifications.cy.js */
   SEP_STATIC_SAFE_0: 'sep:0x926186108f74dB20BFeb2b6c888E523C78cb7E00',
-  /** Swaps and swap history testing - Used in: apps_list.cy.js */
+  /** Swaps and swap history testing */
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
   /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, safe-apps tests */
   SEP_STATIC_SAFE_2: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
