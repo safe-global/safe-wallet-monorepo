@@ -86,6 +86,6 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
     const deviceHash = deviceTransactionHash(review).toLowerCase()
     expect(deviceHash).toMatch(/^0x[0-9a-f]{64}$/)
     expect(appHash).toContain(deviceHash)
-    await expect(transactionReview.status).toHaveText('Transaction was successful', { timeout: 120_000 })
+    await expect(transactionReview.status).toHaveText('Transaction was successful')
   })
 })
