@@ -3,7 +3,6 @@ import { IN_UTC, formatTimeUntil, formatUtcDate } from '@safe-global/utils/utils
 import type { AllowlistScheduledChange, PendingPolicyOperation } from '../types'
 import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
-import { POLICY_CHANGE_DELAY } from '../RecipientAllowlistFlow/constants'
 
 /** `expired`: the signing window closed before the transaction executed. */
 export type AllowlistTxOutcome = PendingTxOutcome | 'expired'
@@ -19,10 +18,10 @@ export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can remove
 export const CONNECT_TO_REMOVE_HELPER = 'Connect a signer wallet to remove this allowlist.'
 
 // Every change to the allowlist waits out the guard's delay after execution.
-const EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
-  create: `The allowlist becomes active after a delay of ${POLICY_CHANGE_DELAY}.`,
-  update: `The new rules apply after a delay of ${POLICY_CHANGE_DELAY}.`,
-  remove: `The allowlist is removed after a delay of ${POLICY_CHANGE_DELAY}.`,
+const EXECUTED_LINE: Record<PendingPolicyOperation, (changeDelay: string) => string> = {
+  create: (changeDelay) => `The allowlist becomes active after a delay of ${changeDelay}.`,
+  update: (changeDelay) => `The new rules apply after a delay of ${changeDelay}.`,
+  remove: (changeDelay) => `The allowlist is removed after a delay of ${changeDelay}.`,
 }
 
 export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
@@ -32,16 +31,20 @@ export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
 
 const EXPIRED_LINE = 'It can no longer be signed. Set up the allowlist again to retry.'
 
-export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string => {
-  if (outcome === 'executed') return EXECUTED_LINE[operation]
+export const outcomeLine = (
+  outcome: AllowlistTxOutcome,
+  operation: PendingPolicyOperation,
+  changeDelay: string,
+): string => {
+  if (outcome === 'executed') return EXECUTED_LINE[operation](changeDelay)
 
   return outcome === 'expired' ? EXPIRED_LINE : 'Close this panel to see the current policies.'
 }
 
 export const ACTIVATED_BANNER_TITLE = 'Your allowlist is now active'
 
-export const activatedBannerLine = (safeName: string, recipientCount: number): string =>
-  `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
+export const activatedBannerLine = (safeName: string, recipientCount: number, changeDelay: string): string =>
+  `${safeName} can only send the allowed tokens to the ${recipientCount} allowed ${recipientCount === 1 ? 'recipient' : 'recipients'}. Further changes will take ${changeDelay} to apply.`
 
 export const UNENFORCED_BANNER_TITLE = 'Safe policy guard removed'
 

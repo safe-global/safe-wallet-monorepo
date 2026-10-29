@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { useChain } from '@/hooks/useChains'
+import { usePolicyGuardDelay } from '@/features/policy-guard'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
@@ -26,6 +27,7 @@ import {
   type ApplyBannerDetails,
   type ApplyStage,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
+import { formatPolicyChangeDelay } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
 import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
@@ -107,14 +109,13 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const { open, onClose, policy, viewer, safe, overview, names, onConnectWallet } = props
   const chain = useChain(policy.safe.chainId)
   const spaceId = useUrlSpaceId()
-  const enforcedByHref =
-    chain && policy.enforcement.via === 'guard'
-      ? getBlockExplorerLink(chain, policy.enforcement.guardAddress)?.href
-      : undefined
+  const guardAddress = policy.enforcement.via === 'guard' ? policy.enforcement.guardAddress : undefined
+  const enforcedByHref = chain && guardAddress ? getBlockExplorerLink(chain, guardAddress)?.href : undefined
+  const changeDelay = formatPolicyChangeDelay(usePolicyGuardDelay(policy.safe.chainId, guardAddress))
 
   const now = Date.now()
   const outcome = isPendingDrawer(props) ? (props.outcome ?? inferAllowlistOutcome(props.policy, now)) : undefined
-  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome, now)
+  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome, now, changeDelay)
   const Icon = getPolicyIcon(policy.type)
   const status = outcome
     ? OUTCOME_STATUS[outcome]
@@ -160,7 +161,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
           {state.kind === 'active' && !isPendingDrawer(props) && props.justActivated && (
             <ActivatedBanner
               title={ACTIVATED_BANNER_TITLE}
-              line2={activatedBannerLine(safe.name ?? 'This Safe account', recipients.length)}
+              line2={activatedBannerLine(safe.name ?? 'This Safe account', recipients.length, changeDelay)}
             />
           )}
           {applyStage && scheduledChange && (

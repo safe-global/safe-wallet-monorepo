@@ -5,11 +5,11 @@ import {
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 
 /** How long a policy change waits before it applies, e.g. `3 minutes`. */
-export const POLICY_CHANGE_DELAY = formatDurationFromMilliseconds(POLICY_GUARD_DELAY_SECONDS * 1_000, [
-  'days',
-  'hours',
-  'minutes',
-])
+export const formatPolicyChangeDelay = (delaySeconds: number): string =>
+  formatDurationFromMilliseconds(delaySeconds * 1_000, ['days', 'hours', 'minutes'])
+
+/** The delay of the guard the setup installs */
+export const POLICY_CHANGE_DELAY = formatPolicyChangeDelay(POLICY_GUARD_DELAY_SECONDS)
 
 export const FLOW_SUBTITLE = 'Allowlist'
 
@@ -144,7 +144,8 @@ export const RETRY_LABEL = 'Retry'
 
 export const REMOVE_REVIEW_STEP_TITLE = 'Remove allowlist'
 export const REMOVE_SUMMARY_TITLE = 'Request to remove the allowlist.'
-export const REMOVE_SUMMARY_DESCRIPTION = `After ${POLICY_CHANGE_DELAY}, a second transaction deletes its rules, and a third one takes the guard off. Until the second one, the allowlist stays active.`
+export const removeSummaryDescription = (changeDelay: string): string =>
+  `After ${changeDelay}, a second transaction deletes its rules, and a third one takes the guard off. Until the second one, the allowlist stays active.`
 export const APPLY_REMOVAL_REVIEW_STEP_TITLE = 'Apply removal'
 export const APPLY_REMOVAL_SUMMARY_TITLE = 'Apply the removal to delete the allowlist.'
 export const APPLY_REMOVAL_SUMMARY_DESCRIPTION =

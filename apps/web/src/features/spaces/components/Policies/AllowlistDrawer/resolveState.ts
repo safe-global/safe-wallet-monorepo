@@ -36,6 +36,7 @@ import {
   outcomeLine,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
+import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
 /** The request executed and waits out the guard's delay: the apply button stays disabled until then. */
 export type ScheduledDrawerState = {
@@ -190,12 +191,16 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
-const resolveClosed = (policy: PendingAllowlistPolicy, outcome: AllowlistTxOutcome): ClosedDrawerState => ({
+const resolveClosed = (
+  policy: PendingAllowlistPolicy,
+  outcome: AllowlistTxOutcome,
+  changeDelay: string,
+): ClosedDrawerState => ({
   kind: 'closed',
   operation: policy.operation,
   action: 'none',
   bannerTitle: OUTCOME_TITLE[outcome],
-  bannerLine2: outcomeLine(outcome, policy.operation),
+  bannerLine2: outcomeLine(outcome, policy.operation, changeDelay),
 })
 
 export const resolveAllowlistDrawerState = (
@@ -204,10 +209,11 @@ export const resolveAllowlistDrawerState = (
   safeName: string,
   outcome: AllowlistTxOutcome | undefined = inferAllowlistOutcome(policy, Date.now()),
   nowMs: number = Date.now(),
+  changeDelay: string = POLICY_CHANGE_DELAY,
 ): AllowlistDrawerState => {
-  if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed')
+  if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed', changeDelay)
   if (policy.status === 'pending') {
-    return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
+    return outcome ? resolveClosed(policy, outcome, changeDelay) : resolvePending(policy, viewer, safeName)
   }
 
   if (policy.awaitingGuardRemoval) return resolveRemoveGuard(viewer)

@@ -20,6 +20,7 @@ export type {
   SetupCallDescription,
 } from './types'
 export { usePolicyGuard } from './hooks/usePolicyGuard'
+export { usePolicyGuardDelay } from './hooks/usePolicyGuardDelay'
 export type { UsePolicyGuardResult } from './hooks/usePolicyGuard'
 export { useIsAllowlistEnabled, useIsAllowlistAvailableInSpace } from './hooks/useAllowlistAvailability'
 export { useIsAllowlistActiveInSpace } from './hooks/useIsAllowlistActiveInSpace'
