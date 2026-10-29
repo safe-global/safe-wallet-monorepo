@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import type { RecoveryQueueItem } from '@/features/recovery'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -17,7 +18,7 @@ export function getTxStatus(tx: TransactionQueuedItem): string {
 }
 
 export function formatTxDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return format(timestamp, 'MMM d')
 }
 
 export function getActionableTransactions(

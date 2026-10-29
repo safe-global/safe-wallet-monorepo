@@ -16,6 +16,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@hello-pangea/dnd": "^18.0.1",
@@ -29,6 +30,7 @@
     "@safe-global/safe-gateway-typescript-sdk": "^3.22.9",
     "@safe-global/utils": "workspace:^",
     "axios": "^1.18.1",
+    "date-fns": "^4.1.0",
     "ethereum-blockies-base64": "^1.0.2",
     "ethers": "6.17.0",
     "evm-proxy-detection": "^1.0.0",

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
+import { tz } from '@date-fns/tz'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 
@@ -23,7 +25,7 @@ import { ClearPendingTxs } from '../ClearPendingTxs'
 import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 const getExportFileName = () => {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = format(Date.now(), 'yyyy-MM-dd', { in: tz('UTC') })
   return `safe-${today}.json`
 }
 

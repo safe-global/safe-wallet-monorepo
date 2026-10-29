@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight, Info } from 'lucide-react'
+import { format } from 'date-fns'
+import { tz } from '@date-fns/tz'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -22,15 +24,7 @@ export const _formatResetsAt = (iso: string | null): string | null => {
   if (!iso) return null
   const timestamp = Date.parse(iso)
   if (Number.isNaN(timestamp)) return null
-  const formatted = new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-    timeZone: 'UTC',
-  }).format(timestamp)
-  return `${formatted} UTC`
+  return `${format(timestamp, 'MMM d, HH:mm', { in: tz('UTC') })} UTC`
 }
 
 const SponsoredTxsCounter = ({
