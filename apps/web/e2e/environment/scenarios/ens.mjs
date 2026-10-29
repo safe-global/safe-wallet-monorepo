@@ -1,12 +1,10 @@
-import { readFile } from 'node:fs/promises'
-import { Contract, getAddress, isAddress, namehash, zeroPadValue } from 'ethers'
+import { Contract, getAddress, isAddress, namehash } from 'ethers'
 import { localProvider } from './provider.mjs'
 import { send } from './chain.mjs'
 
 const registryAddress = '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e'
 const nameWrapperAddress = '0x0635513f179D50A207757E05759CbD106d7dFcE8'
 const reverseRegistrarAddress = '0xA0a1AbcDAe1a2a4A2EF8e9113Ff0e02DD81DC0C6'
-const mockedResolver = '0x8fade66b79cc9f707ab26799354482eb93a5b7dd'
 
 const sendAs = (provider, from, contract, method, args) =>
   send(provider, from, { to: contract.target, data: contract.interface.encodeFunctionData(method, args) })
@@ -40,14 +38,4 @@ export async function setEnsName(env, name, address) {
   } finally {
     provider.destroy()
   }
-}
-
-// Existing specs mock the ENS RPC responses; the mocked resolver answer becomes the scenario's address.
-export async function ensFixtureFiles(address) {
-  if (!isAddress(address)) throw new Error('The ENS fixture requires an address')
-  const name = 'ens_e2etestsafe.json'
-  const fixture = JSON.parse(await readFile(new URL(`../../../cypress/fixtures/${name}`, import.meta.url), 'utf8'))
-  if (!fixture[mockedResolver]) throw new Error(`${name} no longer mocks the resolver ${mockedResolver}`)
-  fixture[mockedResolver] = zeroPadValue(address.toLowerCase(), 32)
-  return { [name]: fixture }
 }

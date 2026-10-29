@@ -2,7 +2,6 @@ import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
 
-export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const tokenSelector = '[data-testid="token-selector"]'
 const amountInput = 'input[name="recipients.0.amount"]'
 export const transactionItem = '[data-testid="transaction-item"]'
@@ -10,7 +9,6 @@ export const connectedWalletExecMethod = '[data-testid="connected-wallet-executi
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
-const accordionDetails = '[data-testid="accordion-details"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 export const transactionSideList = '[data-testid="transaction-actions-list"]'
@@ -26,8 +24,6 @@ const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
-export const altImgDai = 'iframe[title="DAI"]'
-export const altImgCow = 'iframe[title="COW"]'
 const tableViewBtn = '[data-testid="table-view-btn"]'
 const gridViewBtn = '[data-testid="grid-view-btn"]'
 const txHexData = '[data-testid="tx-hex-data"]'
@@ -62,10 +58,6 @@ export const comboButtonOptions = {
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-
-export const txActions = {
-  setFallbackHandler: 'setFallbackHandler',
-}
 
 export const advancedDetailsViewOptions = {
   table: 'table',
@@ -163,19 +155,6 @@ export function clickOnTransactionItemByName(name, token) {
     matches = matches.filter(':contains("' + token + '")')
   }
   matches.first().scrollIntoView().click({ force: true })
-}
-
-export function verifyExpandedDetails(data, warning) {
-  main.checkTextsExistWithinElement(accordionDetails, data)
-  if (warning) cy.get(warning).should('be.visible')
-}
-
-export function verifyTxHeaderDetails(data) {
-  main.checkTextsExistWithinElement(transactionItem, data)
-}
-
-export function verifyAdvancedDetails(data) {
-  main.checkTextsExistWithinElement(accordionDetails, data)
 }
 
 export function clickOnAdvancedDetails() {
