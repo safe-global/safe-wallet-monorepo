@@ -6,6 +6,9 @@
  */
 import { type Page, type Locator } from '@playwright/test'
 
+// "Let's go" waits for the Safe to be created or deployed, which took up to 15 s on a local stack
+const LETS_GO_TIMEOUT_MS = 45_000
+
 /** Signers besides the connected wallet and the threshold; without them the wallet is the only owner, threshold 1 */
 type SignerSetup = { owners?: string[]; threshold?: number }
 
@@ -57,7 +60,7 @@ export class CreateSafePage {
     await this.signInToWorkspaceButton.click()
     await this.signInToWorkspaceButton.waitFor({ state: 'hidden' })
     await this.reviewNextButton.click()
-    await this.letsGoButton.click()
+    await this.letsGoButton.click({ timeout: LETS_GO_TIMEOUT_MS })
     await this.page.waitForURL(/[?&]safe=sep:0x[0-9a-fA-F]{40}/)
     return new URL(this.page.url()).searchParams.get('safe')!.split(':')[1]
   }
@@ -108,6 +111,6 @@ export class CreateSafePage {
     }
     await this.relayMethod.click()
     await this.confirmActivationButton.click()
-    await this.letsGoButton.click()
+    await this.letsGoButton.click({ timeout: LETS_GO_TIMEOUT_MS })
   }
 }
