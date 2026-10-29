@@ -1,14 +1,12 @@
 import { type PropsWithChildren, useContext, useEffect, useMemo } from 'react'
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
-import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
+import { createMultiTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import type { MultiTokenTransferParams } from '.'
 import { SafeTxContext } from '../../SafeTxProvider'
-import type { MetaTransactionData } from '@safe-global/types-kit'
 import { Fragment } from 'react'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import ReviewRecipientRow from './ReviewRecipientRow'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 const ReviewTokenTransfer = ({
@@ -33,22 +31,9 @@ const ReviewTokenTransfer = ({
 
     if (!balances) return
 
-    const calls = recipients
-      .map((recipient) => {
-        const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, recipient.tokenAddress))
-
-        if (!token) return
-
-        return createTokenTransferParams(
-          recipient.recipient,
-          recipient.amount,
-          token?.tokenInfo.decimals,
-          recipient.tokenAddress,
-        )
-      })
-      .filter((transfer): transfer is MetaTransactionData => !!transfer)
-
-    createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
+    createMultiSendCallOnlyTx(createMultiTokenTransferParams(recipients, balances.items))
+      .then(setSafeTx)
+      .catch(setSafeTxError)
   }, [recipients, txNonce, setNonce, balances, setSafeTx, setSafeTxError])
 
   return (
