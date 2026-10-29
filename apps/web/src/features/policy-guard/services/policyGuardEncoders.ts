@@ -94,11 +94,14 @@ export const getCallConfigurations = (
   const fragment = policyGuardInterface.getFunction(data.slice(0, 10))
   if (!fragment) return undefined
 
+  let decoded: Result
   try {
-    const [arg] = policyGuardInterface.decodeFunctionData(fragment, data)
-    if (fragment.name !== 'requestConfiguration') return Array.from(arg, toPolicyConfiguration)
-    return requested && getConfigurationRoot(requested) === String(arg).toLowerCase() ? requested : undefined
+    decoded = policyGuardInterface.decodeFunctionData(fragment, data)
   } catch {
     return undefined
   }
+
+  const [arg] = decoded
+  if (fragment.name !== 'requestConfiguration') return Array.from(arg, toPolicyConfiguration)
+  return requested && getConfigurationRoot(requested) === String(arg).toLowerCase() ? requested : undefined
 }
