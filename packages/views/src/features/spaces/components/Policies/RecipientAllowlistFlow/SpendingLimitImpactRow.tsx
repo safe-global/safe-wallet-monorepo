@@ -3,7 +3,7 @@ import { Check } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { WILL_BE_RESTRICTED_LABEL } from './constants'
+import { FOLLOWS_ALLOWLIST_LABEL } from './constants'
 
 export type SpendingLimitImpactRowProps = {
   /** The spender's identity, e.g. an avatar with its address book name. */
@@ -27,7 +27,7 @@ const SpendingLimitImpactRow = ({ spender, description, impact }: SpendingLimitI
       {impact === 'restricted' && (
         <Badge variant="success" size="status" shape="status">
           <Check className="size-3" aria-hidden />
-          {WILL_BE_RESTRICTED_LABEL}
+          {FOLLOWS_ALLOWLIST_LABEL}
         </Badge>
       )}
     </div>

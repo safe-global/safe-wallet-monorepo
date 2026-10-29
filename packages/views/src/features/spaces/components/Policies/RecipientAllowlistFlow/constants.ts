@@ -113,7 +113,7 @@ export const getPartlyRestrictedSpendingLimitsTitle = (restricted: number, total
   `${restricted} of your ${total} spending limits will follow this allowlist's rules.`
 export const RESTRICTED_SPENDING_LIMITS_DESCRIPTION = 'They can only send allowed tokens to allowed recipients.'
 export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
-export const WILL_BE_RESTRICTED_LABEL = 'Will be restricted'
+export const FOLLOWS_ALLOWLIST_LABEL = 'Follows the allowlist'
 export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
 export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`
 export const SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL = 'I understand how this allowlist changes these spending limits.'
