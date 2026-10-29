@@ -101,7 +101,7 @@ describe('resolveAllowlistDrawerState', () => {
   })
 
   it.each([
-    ['executed', 'The transaction was executed.', 'The allowlist becomes active after a delay of 10 minutes.'],
+    ['executed', 'The transaction was executed.', 'The allowlist becomes active after a delay of 3 minutes.'],
     [
       'failed',
       'The transaction failed and can no longer be executed.',

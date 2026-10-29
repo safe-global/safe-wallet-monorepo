@@ -298,11 +298,11 @@ describe('mapActivePolicies', () => {
     })
 
     it('takes the guard address from the deployment when no slot holds the guard', () => {
-      const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), {})])
+      const [policy] = toAllowlists([withGuards(mockErc20TransferDto({ safe: MOCK_SAFES.grants }), {})])
 
       expect(policy.enforcement).toEqual({
         via: 'guard',
-        guardAddress: getPolicyGuardAddress(MOCK_SAFES.treasury.chainId),
+        guardAddress: getPolicyGuardAddress(MOCK_SAFES.grants.chainId),
       })
     })
 

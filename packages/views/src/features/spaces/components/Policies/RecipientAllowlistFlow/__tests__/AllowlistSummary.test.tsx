@@ -82,11 +82,11 @@ describe('AllowlistSummary', () => {
     )
   })
 
-  it('should say the changes wait 10 minutes and need activation, when the policy guard is already enabled', () => {
+  it('should say the changes wait 3 minutes and need activation, when the policy guard is already enabled', () => {
     render(<AllowlistSummary accountLabel="Payments" tokenSymbols={['A']} recipientNames={['Alice']} isGuardEnabled />)
 
     expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
-      'The Safe policy guard is already enabled, so these changes wait 10 minutes after execution, then need an activation step before they apply.',
+      'The Safe policy guard is already enabled, so these changes wait 3 minutes after execution, then need an activation step before they apply.',
     )
   })
 

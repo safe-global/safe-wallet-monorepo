@@ -4,7 +4,7 @@ import {
 } from '@safe-global/utils/features/policy-guard/constants'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 
-/** How long a policy change waits before it applies, e.g. `10 minutes`. */
+/** How long a policy change waits before it applies, e.g. `3 minutes`. */
 export const POLICY_CHANGE_DELAY = formatDurationFromMilliseconds(POLICY_GUARD_DELAY_SECONDS * 1_000, [
   'days',
   'hours',

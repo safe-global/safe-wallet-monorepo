@@ -401,11 +401,11 @@ describe('ReviewRecipientAllowlist', () => {
     expect(actionLabels()).toEqual(labels.map((label, index) => `${index + 1}${label}`))
   })
 
-  it('should say the changes wait 10 minutes, when the guard is already enabled', () => {
+  it('should say the changes wait 3 minutes, when the guard is already enabled', () => {
     built({ status: 'known' })
     renderReview()
 
-    expect(screen.getByText(/wait 10 minutes after execution/)).toBeInTheDocument()
+    expect(screen.getByText(/wait 3 minutes after execution/)).toBeInTheDocument()
   })
 
   it('says the changes apply on execution when no guard is set yet', () => {
