@@ -9,27 +9,45 @@ import { type UseSimulationReturn } from '@safe-global/utils/components/tx/secur
 import {
   getSimulation,
   getSimulationLink,
+  shareSimulation,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { Errors, logError } from '@/services/exceptions'
+import type { EnvState } from '@safe-global/store/settingsSlice'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
+
+const tryShareSimulation = async (simulationId: string, tenderly: EnvState['tenderly']): Promise<boolean> => {
+  if (!tenderly.publicSharing || !tenderly.accessToken) {
+    return false
+  }
+
+  try {
+    await shareSimulation(simulationId, tenderly)
+    return true
+  } catch (error) {
+    logError(Errors._202, error)
+    return false
+  }
+}
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
   const [simulationRequestStatus, setSimulationRequestStatus] = useState<FETCH_STATUS>(FETCH_STATUS.NOT_ASKED)
   const [requestError, setRequestError] = useState<string | undefined>(undefined)
+  const [isShared, setIsShared] = useState(false)
   const tenderly = useAppSelector(selectTenderly)
   const scope = useSafeScope()
 
   const simulationLink = useMemo(
-    () => getSimulationLink(simulation?.simulation.id || '', tenderly),
-    [simulation, tenderly],
+    () => getSimulationLink(simulation?.simulation.id || '', tenderly, isShared),
+    [simulation, tenderly, isShared],
   )
 
   const resetSimulation = useCallback(() => {
     setSimulationRequestStatus(FETCH_STATUS.NOT_ASKED)
     setRequestError(undefined)
     setSimulation(undefined)
+    setIsShared(false)
   }, [])
 
   const simulateTransaction = useCallback(
@@ -41,8 +59,10 @@ export const useSimulation = (): UseSimulationReturn => {
         const simulationPayload = await getSimulationPayload(params, scope)
 
         const data = await getSimulation(simulationPayload, tenderly)
+        const isShared = await tryShareSimulation(data.simulation.id, tenderly)
 
         setSimulation(data)
+        setIsShared(isShared)
         setSimulationRequestStatus(FETCH_STATUS.SUCCESS)
       } catch (error) {
         logError(Errors._200, error)

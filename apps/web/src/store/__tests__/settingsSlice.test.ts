@@ -91,6 +91,15 @@ describe('settingsSlice', () => {
       })
     })
 
+    it('should set the Tenderly public sharing flag', () => {
+      const state = settingsSlice.reducer(
+        undefined,
+        settingsSlice.actions.setTenderly({ url: 'https://example.com', accessToken: 'test123', publicSharing: true }),
+      )
+
+      expect(state.env.tenderly.publicSharing).toBe(true)
+    })
+
     it('should delete the Tenderly URL and access token', () => {
       const initialState = {
         env: {
@@ -143,6 +152,32 @@ describe('settingsSlice', () => {
           env: {
             rpc: { ['5']: 'https://other-example.com' },
             tenderly: { url: '', accessToken: '' },
+          },
+        },
+      } as unknown as RootState
+
+      expect(isEnvInitialState(state, '5')).toEqual(false)
+    })
+
+    it('should return true after the form was saved with public sharing disabled', () => {
+      const state = {
+        settings: {
+          env: {
+            rpc: {},
+            tenderly: { url: '', accessToken: '', publicSharing: false },
+          },
+        },
+      } as unknown as RootState
+
+      expect(isEnvInitialState(state, '5')).toEqual(true)
+    })
+
+    it('should return false if public sharing is enabled', () => {
+      const state = {
+        settings: {
+          env: {
+            rpc: {},
+            tenderly: { url: '', accessToken: '', publicSharing: true },
           },
         },
       } as unknown as RootState

@@ -61,7 +61,15 @@ const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project
   }
 }
 
-export const getSimulationLink = (simulationId: string, customTenderly?: EnvState['tenderly']): string => {
+export const getSimulationLink = (
+  simulationId: string,
+  customTenderly?: EnvState['tenderly'],
+  isShared = false,
+): string => {
+  if (isShared) {
+    return `${TENDERLY_DASHBOARD_URL}/shared/simulation/${simulationId}`
+  }
+
   const parsedTenderly = getTenderlyProjectFromUrl(customTenderly?.url)
 
   if (parsedTenderly) {
@@ -72,6 +80,35 @@ export const getSimulationLink = (simulationId: string, customTenderly?: EnvStat
   }
 
   return `${TENDERLY_DASHBOARD_URL}/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
+}
+
+const SHARE_SIMULATION_TIMEOUT_MS = 10_000
+
+export const shareSimulation = async (simulationId: string, customTenderly: EnvState['tenderly']): Promise<void> => {
+  const parsedTenderly = getTenderlyProjectFromUrl(customTenderly.url)
+
+  if (!parsedTenderly) {
+    throw new Error('Invalid Tenderly URL')
+  }
+
+  const { origin } = new URL(customTenderly.url)
+  const { org, project } = parsedTenderly
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), SHARE_SIMULATION_TIMEOUT_MS)
+
+  try {
+    const res = await fetch(`${origin}/api/v1/account/${org}/project/${project}/simulations/${simulationId}/share`, {
+      method: 'POST',
+      headers: { 'X-Access-Key': customTenderly.accessToken },
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      throw new Error(`${res.status} - ${res.statusText}`)
+    }
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 export type SingleTransactionSimulationParams = {
