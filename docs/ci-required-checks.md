@@ -37,6 +37,7 @@ jobs:
 
   result:
     name: Web lint result
+    permissions: {}
     if: always()
     needs: [changes, lint]
     runs-on: ubuntu-latest
@@ -48,3 +49,20 @@ jobs:
 ```
 
 List in `needs` of the result job only the jobs that must pass; leave out jobs that skip on purpose, such as push-only steps. [`web-isolated-e2e-backend.yml`](../.github/workflows/web-isolated-e2e-backend.yml) uses this pattern and also fails fork pull requests, which get no secrets for its backend.
+
+## Checks to require
+
+Set these job names as required status checks in branch protection for `dev`:
+
+| Check                        | Workflow                                                           | Runs when the pull request changes                                  |
+| ---------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `Web checks result`          | `web-checks.yml` (lint, prettier, type-check, unused exports)      | `apps/web`, `apps/web-tanstack`, `packages`, `config`, dependencies |
+| `Web unit tests result`      | `web-unit-tests.yml`                                               | `apps/web`, `packages`, `config`, dependencies                      |
+| `Web TanStack checks result` | `web-tanstack-checks.yml` (build, verify)                          | `apps/web-tanstack`, `apps/web`, `packages`, `config`, dependencies |
+| `Mobile checks result`       | `mobile-checks.yml` (lint, prettier, type-check)                   | `apps/mobile`, `packages`, `expo-plugins`, `config`, dependencies   |
+| `Mobile unit tests result`   | `mobile-unit-tests.yml`                                            | `apps/mobile`, `packages`, `expo-plugins`, `config`, dependencies   |
+| `tx-builder checks result`   | `tx-builder-checks.yml` (lint, prettier, type-check, tests, build) | `apps/tx-builder`, `packages`, `config`, dependencies               |
+| `Utils unit tests result`    | `package-utils-unit-tests.yml`                                     | `packages/utils`, `packages/store`, `config`, dependencies          |
+| `Isolated E2E result`        | `web-isolated-e2e-backend.yml`                                     | `apps/web`, `apps/tx-builder`, `packages`, `config`, dependencies   |
+
+"Dependencies" means `yarn.lock`, `package.json`, `.yarnrc.yml`, `yarn.config.cjs` and `.yarn/patches`. Workflows that run prettier, turbo, knip or `scripts/verify.mjs` also list their config files. Each workflow also runs when its own file or the shared actions it uses change. The `pr-changes` step of each workflow holds the exact list.

@@ -1,13 +1,7 @@
 name: Package @safe-global/utils unit tests
 on:
+  # No paths filter: the required result job must report on every pull request.
   pull_request:
-    paths:
-      - packages/utils/**
-      - packages/store/**
-      - yarn.lock
-      - package.json
-      - .yarnrc.yml
-      - .yarn/patches/**
   push:
     branches:
       - main
@@ -22,7 +16,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  eslint:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            packages/utils/**
+            packages/store/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            .github/workflows/package-utils-unit-tests.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
+  test:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       pull-requests: read
@@ -60,3 +82,16 @@ jobs:
           coverage-path: packages/utils/coverage
           base-path: packages/utils
           flag: workspace:utils
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: Utils unit tests result
+    permissions: {}
+    if: always()
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}
