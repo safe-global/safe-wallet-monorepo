@@ -15,6 +15,8 @@ import {
   chainFixtures,
   safeAppsFixtures,
   transactionFixtures,
+  swapOrderFixtures,
+  stakingFixtures,
   type FixtureScenario,
 } from '../fixtures'
 
@@ -182,7 +184,12 @@ export const createSafeAppsHandlersFromFixture = (GATEWAY_URL: string, empty = f
  * Details of a transaction without a fixture return 404.
  */
 export const createTransactionHandlersFromFixture = (GATEWAY_URL: string) => {
-  const detailsById = new Map(Object.values(transactionFixtures.details).map((details) => [details.txId, details]))
+  const recordedDetails = [...Object.values(swapOrderFixtures), ...Object.values(stakingFixtures)].map(
+    ({ details }) => details,
+  )
+  const detailsById = new Map(
+    [...Object.values(transactionFixtures.details), ...recordedDetails].map((details) => [details.txId, details]),
+  )
 
   return [
     http.get<{ chainId: string; safeAddress: string }, never, TransactionItemPage>(

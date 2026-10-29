@@ -58,6 +58,8 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
       subtitle="Send tokens"
       eventCategory={TxFlowType.TOKEN_TRANSFER}
       ReviewTransactionComponent={ReviewTokenTx}
+      // A batch item drops the nonce, so a replacement of a queued transaction cannot be batched
+      isBatchable={txNonce === undefined}
     >
       <TxFlowStep title="New transaction">
         <CreateTokenTransfer txNonce={txNonce} />

@@ -1,7 +1,5 @@
 import { LS_NAMESPACE } from '../../../src/config/constants'
 
-export const spendingLimitTxOption = '[data-testid="spending-limit-tx"]'
-
 /**
  * Local storage that turns SAFE_PRO off through the feature flag override (dev builds only), so
  * the Safe Pro gate does not replace the spending limit actions with its upsell.
