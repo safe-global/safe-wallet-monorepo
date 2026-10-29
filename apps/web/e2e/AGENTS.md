@@ -2,7 +2,7 @@
 
 All new web E2E tests are written here. A Playwright test is only for behaviour that needs a real browser or several real services together; everything else goes in Jest ([Choose the test level](../AGENTS.md#choose-the-test-level)). Write it by the [Clean tests](../../../docs/ai/testing-conventions.md#clean-tests) rules.
 
-**Before writing any test, follow the 12-step AI Test Output Format in [docs/AI_TEST_OUTPUT_FORMAT.md](docs/AI_TEST_OUTPUT_FORMAT.md) — code is step 11 of 12.** How to write a journey, page objects, waits and debugging: [docs/README.md](docs/README.md).
+**Before writing any test, answer the 4 questions in [docs/AI_TEST_OUTPUT_FORMAT.md](docs/AI_TEST_OUTPUT_FORMAT.md).** How to write a journey, page objects, waits and debugging: [docs/README.md](docs/README.md).
 
 Cypress → Playwright migration: move each Cypress test to the lowest level that covers it (unit or component test first, a Playwright journey only for a user flow), and delete what nothing needs. The specs still in `../cypress/e2e/` are the remaining work. In the PR description, list each migrated or deleted Cypress test with its replacement or the reason it goes.
 
