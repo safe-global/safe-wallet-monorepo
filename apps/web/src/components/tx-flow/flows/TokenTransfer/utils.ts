@@ -9,6 +9,8 @@ import { useMemo } from 'react'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import { TokenType } from '@safe-global/store/gateway/types'
 
+export const MAX_RECIPIENTS = 10
+
 export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) => {
   const spendingLimit = useSpendingLimit(selectedToken?.tokenInfo)
 
