@@ -21,6 +21,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useWalletContext: () => null,
 }))
 
+const TEN_MINUTES = 600
 const HOUR = 3_600
 const DAY = 24 * HOUR
 const nowSeconds = () => Math.floor(Date.now() / 1000)
@@ -53,15 +54,17 @@ describe('Policies page with delayed allowlist requests', () => {
 
   it('says a first allowlist can be applied once the waiting period is over, with apply disabled', async () => {
     serveAllowlistWorkspace(workspace, {
-      pending: [delayedGuardRequest(workspace, { readyAt: nowSeconds() + DAY, expiresAt: nowSeconds() + 8 * DAY })],
+      pending: [
+        delayedGuardRequest(workspace, { readyAt: nowSeconds() + TEN_MINUTES, expiresAt: nowSeconds() + 7 * DAY }),
+      ],
     })
     const view = renderPage(workspace)
 
     const drawer = await openOnlyRow(view)
 
-    expect(within(drawer).getByText('Your allowlist can be applied in 24 hours')).toBeInTheDocument()
+    expect(within(drawer).getByText(/^Your allowlist can be applied in (9|10) minutes$/)).toBeInTheDocument()
     expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
-    expect(within(drawer).getByRole('button', { name: /^Apply in \d+ hours?( \d+ minutes?)?$/ })).toBeDisabled()
+    expect(within(drawer).getByRole('button', { name: /^Apply in (9|10) minutes$/ })).toBeDisabled()
   })
 
   it('lets a signer open the apply flow once the delay is over', async () => {
@@ -141,14 +144,16 @@ describe('Policies page with delayed allowlist requests', () => {
           },
         }),
       ],
-      pending: [delayedGuardRequest(workspace, { readyAt: nowSeconds() + DAY, expiresAt: nowSeconds() + 8 * DAY })],
+      pending: [
+        delayedGuardRequest(workspace, { readyAt: nowSeconds() + TEN_MINUTES, expiresAt: nowSeconds() + 7 * DAY }),
+      ],
     })
     const view = renderPage(workspace)
 
     const drawer = await openOnlyRow(view)
 
-    expect(within(drawer).getByText('Your changes can be applied in 24 hours')).toBeInTheDocument()
+    expect(within(drawer).getByText(/^Your changes can be applied in (9|10) minutes$/)).toBeInTheDocument()
     expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
-    expect(within(drawer).getByRole('button', { name: /^Apply in \d+ hours?( \d+ minutes?)?$/ })).toBeDisabled()
+    expect(within(drawer).getByRole('button', { name: /^Apply in (9|10) minutes$/ })).toBeDisabled()
   })
 })
