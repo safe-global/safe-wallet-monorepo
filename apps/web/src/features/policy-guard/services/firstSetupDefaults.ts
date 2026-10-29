@@ -1,7 +1,8 @@
-import { FunctionFragment, getAddress } from 'ethers'
+import { getAddress } from 'ethers'
 import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
 import { OperationType } from '@safe-global/types-kit'
-import { TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
+import { getDeploymentAddresses, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
+import { Multi_send_call_only__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { POLICY_DEFAULT_FALLBACK } from '@/config/constants'
@@ -9,7 +10,7 @@ import type { PolicyConfiguration } from '../types'
 import { FALLBACK_SELECTOR, isFallbackAccess } from './fallbackAccess'
 import { requirePolicy } from './allowlistConfigurations'
 
-export const MULTI_SEND_SELECTOR = FunctionFragment.from('function multiSend(bytes transactions)').selector
+export const MULTI_SEND_SELECTOR = Multi_send_call_only__factory.createInterface().getFunction('multiSend').selector
 const MULTI_SEND_POLICY_DATA = '0x'
 
 type Access = Pick<PolicyConfiguration, 'target' | 'selector' | 'operation'>
@@ -20,13 +21,13 @@ const isSameAccess = (a: Access, b: Access): boolean =>
   a.operation === b.operation
 
 /** Every official MultiSendCallOnly of the trusted Safe versions on the chain, canonical and eip155 alike. */
-export const getOfficialMultiSendCallOnlyAddresses = (chainId: string): string[] => {
-  const addresses = TRUSTED_DEPLOYMENT_VERSIONS.flatMap((version) => {
-    const address = getMultiSendCallOnlyDeployments({ network: chainId, version })?.networkAddresses[chainId]
-    return address === undefined ? [] : [address].flat()
-  })
-  return [...new Set(addresses.map((address) => getAddress(address)))]
-}
+export const getOfficialMultiSendCallOnlyAddresses = (chainId: string): string[] => [
+  ...new Set(
+    getDeploymentAddresses(getMultiSendCallOnlyDeployments, chainId, TRUSTED_DEPLOYMENT_VERSIONS).map((address) =>
+      getAddress(address),
+    ),
+  ),
+]
 
 const withMultiSendBindings = (chainId: string, configurations: PolicyConfiguration[]): PolicyConfiguration[] => {
   const policy = requirePolicy(chainId, 'MultiSendPolicy')
