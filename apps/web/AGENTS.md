@@ -124,7 +124,7 @@ Before writing or changing any test, read the cross-cutting conventions in [docs
 
 ### E2E tests
 
-**All new E2E tests are Playwright** — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md), 12-step output format mandatory before writing any test).
+**All new E2E tests are Playwright** — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md); answer the 4 questions in [e2e/docs/AI_TEST_OUTPUT_FORMAT.md](e2e/docs/AI_TEST_OUTPUT_FORMAT.md) before writing any test).
 
 **Cypress is legacy — no new tests.** Maintenance conventions for the existing suite: [cypress/AGENTS.md](cypress/AGENTS.md).
 
