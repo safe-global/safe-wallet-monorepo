@@ -61,7 +61,7 @@ describe('Policies page with delayed allowlist requests', () => {
 
     expect(within(drawer).getByText('Your allowlist can be applied in 24 hours')).toBeInTheDocument()
     expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
-    expect(within(drawer).getByRole('button', { name: /^Apply in \d+h \d+m$/ })).toBeDisabled()
+    expect(within(drawer).getByRole('button', { name: /^Apply in \d+ hours?( \d+ minutes?)?$/ })).toBeDisabled()
   })
 
   it('lets a signer open the apply flow once the delay is over', async () => {
@@ -149,6 +149,6 @@ describe('Policies page with delayed allowlist requests', () => {
 
     expect(within(drawer).getByText('Your changes can be applied in 24 hours')).toBeInTheDocument()
     expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
-    expect(within(drawer).getByRole('button', { name: /^Apply in \d+h \d+m$/ })).toBeDisabled()
+    expect(within(drawer).getByRole('button', { name: /^Apply in \d+ hours?( \d+ minutes?)?$/ })).toBeDisabled()
   })
 })
