@@ -26,11 +26,11 @@ type Story = StoryObj<typeof meta>
 
 export const Restricted: Story = {}
 
-/** The token is left out of the allowlist, so the limit keeps working as it does today. */
-export const Unaffected: Story = {
+/** The token is left out of the allowlist, so the guard blocks the limit. */
+export const Blocked: Story = {
   args: {
     spender: <Typography variant="paragraph-small-medium">Payroll bot · Spending limit</Typography>,
     description: "1/week · ETH isn't in this allowlist",
-    impact: 'unaffected',
+    impact: 'blocked',
   },
 }

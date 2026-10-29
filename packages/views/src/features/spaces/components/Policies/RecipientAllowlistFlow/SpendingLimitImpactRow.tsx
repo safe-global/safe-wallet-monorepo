@@ -1,17 +1,17 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Check } from 'lucide-react'
+import { Check, TriangleAlert } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { FOLLOWS_ALLOWLIST_LABEL } from './constants'
+import { FOLLOWS_ALLOWLIST_LABEL, WILL_BE_BLOCKED_LABEL } from './constants'
 
 export type SpendingLimitImpactRowProps = {
   /** The spender's identity, e.g. an avatar with its address book name. */
   spender: ReactNode
   /** e.g. `500/day · USDC is in this allowlist`. */
   description: string
-  /** `restricted`: it can only go to the allowed recipients; `unaffected`: its token is left out of the allowlist. */
-  impact: 'restricted' | 'unaffected'
+  /** `restricted`: it can only go to the allowed recipients; `blocked`: its token is left out of the allowlist. */
+  impact: 'restricted' | 'blocked'
 }
 
 /** One spending limit on the Existing policies step, and how the allowlist changes it. */
@@ -24,7 +24,12 @@ const SpendingLimitImpactRow = ({ spender, description, impact }: SpendingLimitI
           {description}
         </Typography>
       </div>
-      {impact === 'restricted' && (
+      {impact === 'blocked' ? (
+        <Badge variant="warning" size="status" shape="status">
+          <TriangleAlert className="size-3" aria-hidden />
+          {WILL_BE_BLOCKED_LABEL}
+        </Badge>
+      ) : (
         <Badge variant="success" size="status" shape="status">
           <Check className="size-3" aria-hidden />
           {FOLLOWS_ALLOWLIST_LABEL}

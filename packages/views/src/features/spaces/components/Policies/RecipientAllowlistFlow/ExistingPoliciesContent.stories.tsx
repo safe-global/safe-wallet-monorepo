@@ -2,7 +2,8 @@ import { useState, type ReactElement } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import {
-  getPartlyRestrictedSpendingLimitsTitle,
+  getBlockedSpendingLimitDescription,
+  getBlockedSpendingLimitsTitle,
   getRestrictedSpendingLimitsTitle,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
 } from './constants'
@@ -17,11 +18,11 @@ const RESTRICTED_ROW: ExistingPoliciesContentProps['rows'][number] = {
   impact: 'restricted',
 }
 
-const UNAFFECTED_ROW: ExistingPoliciesContentProps['rows'][number] = {
+const BLOCKED_ROW: ExistingPoliciesContentProps['rows'][number] = {
   key: 'payroll-bot-eth',
   spender: spender('Payroll bot'),
   description: "1/week · ETH isn't in this allowlist",
-  impact: 'unaffected',
+  impact: 'blocked',
 }
 
 const Stateful = (props: Omit<ExistingPoliciesContentProps, 'acknowledged' | 'onAcknowledgedChange'>): ReactElement => {
@@ -56,15 +57,15 @@ type Story = StoryObj<typeof meta>
 /** The Safe's only spending limit is on an allowlisted token, so it follows the allowlist's rules. */
 export const OneRestricted: Story = {}
 
-/** One limit's token is in the allowlist and comes first; the other's is left out, so that limit is unaffected. */
-export const PartlyRestricted: Story = {
+/** One limit's token is in the allowlist and comes first; the other's is left out, so the guard blocks that limit. */
+export const PartlyBlocked: Story = {
   args: {
     banner: {
-      tone: 'info',
-      title: getPartlyRestrictedSpendingLimitsTitle(1, 2),
-      description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
+      tone: 'warning',
+      title: getBlockedSpendingLimitsTitle(1),
+      description: getBlockedSpendingLimitDescription('Payroll bot', '1 ETH / week', 'ETH'),
     },
-    rows: [RESTRICTED_ROW, UNAFFECTED_ROW],
+    rows: [RESTRICTED_ROW, BLOCKED_ROW],
   },
 }
 
