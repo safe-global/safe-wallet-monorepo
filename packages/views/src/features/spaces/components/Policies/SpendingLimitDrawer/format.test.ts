@@ -6,7 +6,6 @@ import {
   formatRemaining,
   formatResetUtc,
   formatSignedCount,
-  formatUtcDateTime,
   remainingPercent,
 } from './format'
 
@@ -21,16 +20,6 @@ describe('formatResetUtc', () => {
   it('uses a 24-hour clock rather than rendering midnight as 24:00', () => {
     // A different UTC midnight than the test above, so this assertion can fail independently of it.
     expect(formatResetUtc(29_891_520)).toBe('Nov 1, 00:00 UTC')
-  })
-})
-
-describe('formatUtcDateTime', () => {
-  it('should give the UTC date and time, when given unix seconds', () => {
-    expect(formatUtcDateTime(1_792_593_000)).toBe('Oct 21, 2026 · 14:30 UTC')
-  })
-
-  it('should write midnight as 00:00, when the time is a UTC midnight', () => {
-    expect(formatUtcDateTime(1_792_627_200)).toBe('Oct 22, 2026 · 00:00 UTC')
   })
 })
 

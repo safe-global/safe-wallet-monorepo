@@ -1,9 +1,8 @@
-import { tz } from '@date-fns/tz'
 import { differenceInDays, formatDistanceStrict, formatDuration, intervalToDuration } from 'date-fns'
+import { IN_UTC, formatUtcDate } from '@safe-global/utils/utils/date'
 import type { PendingPolicyOperation } from '../types'
 import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
-import { formatUtcDate } from '../SpendingLimitDrawer/format'
 import { POLICY_CHANGE_DELAY } from '../RecipientAllowlistFlow/constants'
 
 /** `expired`: the signing window closed before the transaction executed. */
@@ -153,18 +152,15 @@ export const CANCEL_CONNECT_HELPER = 'Connect a signer wallet to cancel the chan
 
 export const CANCEL_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can cancel this change.'
 
-// Chain time, so whole days are counted in UTC rather than the viewer's zone.
-const UTC = { in: tz('UTC') }
-
 const MS_PER_SECOND = 1_000
 
-const isLastDay = (until: number, nowMs: number): boolean => differenceInDays(until * MS_PER_SECOND, nowMs, UTC) < 1
+const isLastDay = (until: number, nowMs: number): boolean => differenceInDays(until * MS_PER_SECOND, nowMs, IN_UTC) < 1
 
 const daysLeft = (until: number, nowMs: number): string =>
-  formatDistanceStrict(until * MS_PER_SECOND, nowMs, { ...UTC, unit: 'day', roundingMethod: 'floor' })
+  formatDistanceStrict(until * MS_PER_SECOND, nowMs, { ...IN_UTC, unit: 'day', roundingMethod: 'floor' })
 
 const durationLeft = (until: number, nowMs: number): string =>
-  formatDuration(intervalToDuration({ start: nowMs, end: Math.max(nowMs, until * MS_PER_SECOND) }, UTC), {
+  formatDuration(intervalToDuration({ start: nowMs, end: Math.max(nowMs, until * MS_PER_SECOND) }, IN_UTC), {
     format: ['days', 'hours', 'minutes'],
   }) || 'less than a minute'
 

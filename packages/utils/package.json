@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@cowprotocol/sdk-app-data": "5.3.2",
+    "@date-fns/tz": "^1.4.1",
     "@noble/curves": "1.9.7",
     "@noble/hashes": "1.8.0",
     "@testing-library/react": "^16.3.0",

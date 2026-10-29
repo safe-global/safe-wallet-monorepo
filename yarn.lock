@@ -14153,6 +14153,7 @@ __metadata:
   resolution: "@safe-global/utils@workspace:packages/utils"
   dependencies:
     "@cowprotocol/sdk-app-data": "npm:5.3.2"
+    "@date-fns/tz": "npm:^1.4.1"
     "@eslint/js": "npm:^9.18.0"
     "@faker-js/faker": "npm:^9.0.3"
     "@noble/curves": "npm:1.9.7"
@@ -14182,7 +14183,6 @@ __metadata:
   resolution: "@safe-global/views@workspace:packages/views"
   dependencies:
     "@base-ui/react": "npm:^1.1.0"
-    "@date-fns/tz": "npm:^1.4.1"
     "@eslint/js": "npm:^9.18.0"
     "@hello-pangea/dnd": "npm:^18.0.1"
     "@safe-global/protocol-kit": "npm:^8.0.10"

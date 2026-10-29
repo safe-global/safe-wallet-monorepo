@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
-    "@date-fns/tz": "^1.4.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@safe-global/protocol-kit": "^8.0.10",
     "@safe-global/store": "workspace:^",

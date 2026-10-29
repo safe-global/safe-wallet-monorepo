@@ -1,4 +1,5 @@
-import { format, formatDistanceToNow, formatRelative } from 'date-fns'
+import { tz } from '@date-fns/tz'
+import { differenceInHours, format, formatDistanceToNow, formatRelative } from 'date-fns'
 import { maybePlural } from './formatters'
 
 export const currentMinutes = (): number => Math.floor(Date.now() / (1000 * 60))
@@ -30,6 +31,26 @@ export const formatTime = (timestamp: number): string => formatWithSchema(timest
 export const formatDateTime = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy - h:mm:ss a')
 
 export const formatTimeInWords = (timestamp: number): string => formatDistanceToNow(timestamp, { addSuffix: true })
+
+// Chain time is UTC; the viewer's zone would misstate it.
+export const IN_UTC = { in: tz('UTC') }
+
+const MS_PER_SECOND = 1_000
+
+/** `Jun 24, 2026`, in UTC. Takes unix SECONDS. */
+export const formatUtcDate = (seconds: number): string => format(seconds * MS_PER_SECOND, 'MMM d, yyyy', IN_UTC)
+
+/** `Jun 24, 03:35 UTC`. Takes unix SECONDS. */
+export const formatUtcDayTime = (seconds: number): string =>
+  `${format(seconds * MS_PER_SECOND, 'MMM d, HH:mm', IN_UTC)} UTC`
+
+/** `Jun 24, 2026 · 03:35 UTC`. Takes unix SECONDS. */
+export const formatUtcDateTime = (seconds: number): string =>
+  `${format(seconds * MS_PER_SECOND, 'MMM d, yyyy · HH:mm', IN_UTC)} UTC`
+
+/** Whole hours left, rounded up and at least 1, so a wait that just started reads `24`. Takes unix SECONDS. */
+export const hoursUntil = (at: number, nowMs: number): number =>
+  Math.max(1, differenceInHours(at * MS_PER_SECOND, nowMs, { roundingMethod: 'ceil' }))
 
 export function getCountdown(seconds: number): { days: number; hours: number; minutes: number } {
   const MINUTE_IN_SECONDS = 60

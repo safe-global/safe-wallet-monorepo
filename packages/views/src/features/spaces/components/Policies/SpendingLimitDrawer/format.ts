@@ -1,24 +1,12 @@
-import { tz } from '@date-fns/tz'
-import { format } from 'date-fns'
 import type { PolicyAllowance } from '../types'
 import { formatTokenAmount, getResetPeriodLabel } from '../utils/policyLabel'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { formatUtcDateTime, formatUtcDayTime } from '@safe-global/utils/utils/date'
 
-const formatUtc = (ms: number, pattern: string): string => format(ms, pattern, { in: tz('UTC') })
+const SECONDS_PER_MINUTE = 60
 
-const MS_PER_MINUTE = 60_000
-
-/** Takes unix MINUTES, as CGW returns. The reset instant is chain time; the viewer's zone would misstate it. */
-export const formatResetUtc = (resetsAtMinute: number): string =>
-  `${formatUtc(resetsAtMinute * MS_PER_MINUTE, 'MMM d, HH:mm')} UTC`
-
-const MS_PER_SECOND = 1_000
-
-/** `Jun 24, 2026`. Takes unix SECONDS. */
-export const formatUtcDate = (at: number): string => formatUtc(at * MS_PER_SECOND, 'MMM d, yyyy')
-
-/** `Jun 24, 2026 · 03:35 UTC`. Takes unix SECONDS. */
-export const formatUtcDateTime = (at: number): string => `${formatUtc(at * MS_PER_SECOND, 'MMM d, yyyy · HH:mm')} UTC`
+/** Takes unix MINUTES, as CGW returns. */
+export const formatResetUtc = (resetsAtMinute: number): string => formatUtcDayTime(resetsAtMinute * SECONDS_PER_MINUTE)
 
 /** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
 export const formatLastUpdated = (
