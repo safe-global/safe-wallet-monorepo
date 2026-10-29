@@ -27,9 +27,17 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
   const { activationGuard } = useGuard()
   const isCheckingAccess = useIsCheckingAccess()
   const allowedPathnameRef = useRef<string | undefined>(undefined)
+  // The router object changes on every route render, so the check reads it from a ref instead of depending on it
+  const routerRef = useRef(router)
+  const { pathname } = router
 
   useEffect(() => {
-    const { pathname } = router
+    routerRef.current = router
+  })
+
+  useEffect(() => {
+    // Runs can overlap and settle out of order, so a superseded one must not record or redirect
+    let cancelled = false
 
     const checkAccess = async () => {
       // A re-check of an allowed page runs in the background: disabling the page again drops a click in progress
@@ -38,6 +46,7 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
       }
 
       const { success, redirectTo } = await activationGuard()
+      if (cancelled) return
 
       if (success) {
         allowedPathnameRef.current = pathname
@@ -46,12 +55,16 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
         // we do not want to set isCheckingAccess to false here because we want
         // the checking access to be reseted only after the redirect is done
         allowedPathnameRef.current = undefined
-        router.replace(redirectTo ?? getWelcomeRoute())
+        routerRef.current.replace(redirectTo ?? getWelcomeRoute())
       }
     }
 
     checkAccess()
-  }, [activationGuard, router])
+
+    return () => {
+      cancelled = true
+    }
+  }, [activationGuard, pathname])
 
   return { isCheckingAccess }
 }

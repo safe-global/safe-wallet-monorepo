@@ -593,4 +593,42 @@ describe('useFlowActivationGuard', () => {
       expect(mockFetchSpaces).toHaveBeenCalledWith(undefined)
     })
   })
+
+  // -----------------------------------------------------------------------
+  // Guard identity
+  // -----------------------------------------------------------------------
+
+  describe('guard identity', () => {
+    const mockRouterOnEachRender = (query: () => Record<string, string>) => {
+      ;(router.useRouter as jest.Mock).mockImplementation(() => ({
+        pathname: AppRoutes.welcome.createSpace,
+        query: query(),
+        isReady: true,
+      }))
+    }
+
+    it('should keep the same guard when the router re-renders with an equal query', () => {
+      setupMocks()
+      mockRouterOnEachRender(() => ({ safe: '1:0xdeadbeef' }))
+
+      const { result, rerender } = renderHook(() => useFlowActivationGuard())
+      const firstGuard = result.current.activationGuard
+      rerender()
+
+      expect(result.current.activationGuard).toBe(firstGuard)
+    })
+
+    it('should return a new guard when the spaceId in the query changes', () => {
+      setupMocks()
+      let spaceId = MOCK_SPACE_UUID
+      mockRouterOnEachRender(() => ({ spaceId }))
+
+      const { result, rerender } = renderHook(() => useFlowActivationGuard())
+      const firstGuard = result.current.activationGuard
+      spaceId = MOCK_SPACE_UUID_ALT
+      rerender()
+
+      expect(result.current.activationGuard).not.toBe(firstGuard)
+    })
+  })
 })
