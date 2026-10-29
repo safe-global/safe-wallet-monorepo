@@ -2330,7 +2330,7 @@
     },
     "/v1/spaces/{spaceId}/address-book": {
       "get": {
-        "description": "Retrieves all address book entries for a specific space. Address books help organize and label frequently used addresses.",
+        "description": "Retrieves all address book entries for a specific space, with the tags of each entry and every tag of the space. Address books help organize and label frequently used addresses.",
         "operationId": "addressBooksGetAddressBookItemsV1",
         "parameters": [
           {
@@ -2374,7 +2374,7 @@
         ]
       },
       "put": {
-        "description": "Creates or updates address book entries for a space. This allows adding labels and organizing frequently used addresses.",
+        "description": "Creates or updates address book entries for a space. This allows adding labels and organizing frequently used addresses. An entry that carries tags gets exactly those tags; an entry without tags keeps its current tags.",
         "operationId": "addressBooksUpsertAddressBookItemsV1",
         "parameters": [
           {
@@ -2411,7 +2411,7 @@
             }
           },
           "400": {
-            "description": "Address book items limit exceeded or invalid data provided"
+            "description": "Invalid space identifier, address book items limit exceeded, or space tag limit reached"
           },
           "401": {
             "description": "Authentication required - valid JWT token must be provided"
@@ -2421,9 +2421,260 @@
           },
           "404": {
             "description": "Space not found"
+          },
+          "422": {
+            "description": "Invalid body - an invalid address, name or chain ID, an invalid tag name, or more tags on an entry than allowed"
           }
         },
         "summary": "Update space address book",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/tags": {
+      "put": {
+        "description": "Replaces the tags of one or more address book entries. Any active member of the space may set tags. A tag name the space does not have yet creates the tag. The request is all or nothing: if one entry cannot be tagged, no entry changes.",
+        "operationId": "addressBooksSetContactTagsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The entries to tag, each with its full set of tag names",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetContactTagsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tags set successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, the space tag limit is reached, or more entries than the address book can hold"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found, or an address is not in the address book"
+          },
+          "422": {
+            "description": "Invalid body - no entries, an address listed twice, an invalid address or tag name, or more tags on an entry than allowed"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Set address book entry tags",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "post": {
+        "description": "Creates a tag of the space with no contacts, in a random unused colour. Any active member of the space may create tags.",
+        "operationId": "addressBooksCreateTagV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The tag name",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tag created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, or the space already has 8 tags"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found"
+          },
+          "409": {
+            "description": "The space has a tag with this name, ignoring case"
+          },
+          "422": {
+            "description": "Invalid tag name"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Create address book tag",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/tags/{tagId}": {
+      "patch": {
+        "description": "Renames a tag of the space; the tag keeps its colour. Renaming to the name of another tag of the space merges the two: the entries of the renamed tag move to the existing tag, which keeps its name and colour. Any active member of the space may rename tags.",
+        "operationId": "addressBooksRenameTagV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "required": true,
+            "in": "path",
+            "description": "ID of the tag to rename",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new tag name",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag renamed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space or tag identifier"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found, or the tag is not a tag of this space"
+          },
+          "422": {
+            "description": "Invalid tag name, or a tag identifier beyond the safe integer range"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Rename address book tag",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "delete": {
+        "description": "Deletes a tag of the space and removes it from every address book entry. Any active member of the space may delete tags.",
+        "operationId": "addressBooksDeleteTagV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "required": true,
+            "in": "path",
+            "description": "ID of the tag to delete",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tag deleted successfully"
+          },
+          "400": {
+            "description": "Invalid space or tag identifier"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found, or the tag is not a tag of this space"
+          },
+          "422": {
+            "description": "A tag identifier beyond the safe integer range"
+          }
+        },
+        "summary": "Delete address book tag",
         "tags": [
           "spaces"
         ]
@@ -7509,7 +7760,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-97f5b80",
+    "version": "main-8c82b42",
     "contact": {}
   },
   "tags": [],
@@ -10806,6 +11057,13 @@
               "type": "string"
             }
           },
+          "tagIds": {
+            "description": "IDs of the workspace tags assigned to the contact",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
           "createdBy": {
             "type": "string",
             "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
@@ -10835,12 +11093,47 @@
           "name",
           "address",
           "chainIds",
+          "tagIds",
           "createdBy",
           "createdByUserId",
           "lastUpdatedBy",
           "lastUpdatedByUserId",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "SpaceAddressBookTagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "slate",
+              "clay",
+              "rose",
+              "lilac",
+              "iris",
+              "cobalt",
+              "sky",
+              "lagoon"
+            ]
+          },
+          "contactCount": {
+            "type": "number",
+            "description": "Number of contacts that have this tag"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "contactCount"
         ]
       },
       "SpaceAddressBookDto": {
@@ -10855,14 +11148,22 @@
             "items": {
               "$ref": "#/components/schemas/SpaceAddressBookItemDto"
             }
+          },
+          "tags": {
+            "description": "All tags defined in the workspace address book",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceAddressBookTagDto"
+            }
           }
         },
         "required": [
           "spaceUuid",
-          "data"
+          "data",
+          "tags"
         ]
       },
-      "AddressBookItem": {
+      "UpsertAddressBookItem": {
         "type": "object",
         "properties": {
           "name": {
@@ -10872,6 +11173,14 @@
             "type": "string"
           },
           "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "maxItems": 3,
+            "description": "Tag names of the contact (replaces the current tags when provided; omit to leave them unchanged)",
             "type": "array",
             "items": {
               "type": "string"
@@ -10890,12 +11199,74 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AddressBookItem"
+              "$ref": "#/components/schemas/UpsertAddressBookItem"
             }
           }
         },
         "required": [
           "items"
+        ]
+      },
+      "SetContactTagsItem": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "tags": {
+            "maxItems": 3,
+            "description": "The full set of tag names for the contact. 'Workspace Safe' and 'Signer' aren't allowed, in any case",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "address",
+          "tags"
+        ]
+      },
+      "SetContactTagsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetContactTagsItem"
+            },
+            "minItems": 1,
+            "description": "At most as many entries as the address book can hold, each address at most once"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "'Workspace Safe' and 'Signer' aren't allowed, in any case"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "RenameTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "'Workspace Safe' and 'Signer' aren't allowed, in any case"
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "AddressBookRequestItemDto": {
@@ -11203,7 +11574,11 @@
               "ADDRESS_BOOK_UPSERTED",
               "ADDRESS_BOOK_DELETED",
               "ADDRESS_BOOK_REQUEST_CREATED",
-              "ADDRESS_BOOK_REQUEST_REJECTED"
+              "ADDRESS_BOOK_REQUEST_REJECTED",
+              "ADDRESS_BOOK_TAGS_UPDATED",
+              "ADDRESS_BOOK_TAG_CREATED",
+              "ADDRESS_BOOK_TAG_RENAMED",
+              "ADDRESS_BOOK_TAG_DELETED"
             ]
           },
           "actorUserId": {
@@ -11292,6 +11667,28 @@
         "required": [
           "chainId",
           "address"
+        ]
+      },
+      "AddressBookItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "chainIds"
         ]
       },
       "CreateSpaceSafesDto": {
