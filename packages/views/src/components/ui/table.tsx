@@ -96,12 +96,16 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
  * fades in on hover or keyboard focus. The hint holds its space either way, so a header never
  * reflows as it appears. Put `group/sort` on the control that wraps the label and this icon.
  */
-function TableSortIcon({ direction }: { direction?: 'asc' | 'desc' }) {
+/** `alwaysVisible` keeps a faint unsorted icon at rest, so every sortable header reads as sortable. */
+function TableSortIcon({ direction, alwaysVisible = false }: { direction?: 'asc' | 'desc'; alwaysVisible?: boolean }) {
   if (direction === 'asc') return <ArrowUp className="size-3.5" aria-hidden />
   if (direction === 'desc') return <ArrowDown className="size-3.5" aria-hidden />
   return (
     <ArrowUpDown
-      className="size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+      className={cn(
+        'size-3.5 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50',
+        alwaysVisible ? 'opacity-30' : 'opacity-0',
+      )}
       aria-hidden
     />
   )

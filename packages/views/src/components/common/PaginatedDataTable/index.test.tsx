@@ -375,4 +375,136 @@ describe('PaginatedDataTable', () => {
       expect(onRowClick).not.toHaveBeenCalled()
     })
   })
+
+  describe('row selection', () => {
+    const selectableColumns: DataTableColumn<string>[] = [{ id: 'value', header: 'Value', cell: (row) => row }]
+
+    it('renders no checkbox column unless selectable', () => {
+      render(tableElement(['a', 'b']))
+
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    })
+
+    it('renders a checkbox per row and reports the next selection', () => {
+      const onSelectionChange = jest.fn()
+      render(
+        <PaginatedDataTable
+          columns={selectableColumns}
+          rows={['a', 'b']}
+          getRowKey={(row) => row}
+          selectable
+          selectedKeys={new Set(['a'])}
+          onSelectionChange={onSelectionChange}
+        />,
+      )
+
+      expect(screen.getByRole('checkbox', { name: 'Select a' })).toHaveAttribute('aria-checked', 'true')
+      expect(screen.getByRole('checkbox', { name: 'Select b' })).toHaveAttribute('aria-checked', 'false')
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select b' }))
+      expect(onSelectionChange).toHaveBeenLastCalledWith(new Set(['a', 'b']))
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select a' }))
+      expect(onSelectionChange).toHaveBeenLastCalledWith(new Set())
+    })
+
+    it('toggles only the selectable rows of the current page from the header checkbox', () => {
+      const onSelectionChange = jest.fn()
+      render(
+        <PaginatedDataTable
+          columns={selectableColumns}
+          rows={['a', 'b', 'c', 'd']}
+          pageSize={3}
+          getRowKey={(row) => row}
+          selectable
+          selectedKeys={new Set()}
+          onSelectionChange={onSelectionChange}
+          isRowSelectable={(row) => row !== 'b'}
+        />,
+      )
+
+      expect(screen.getByRole('checkbox', { name: 'Select b' })).toHaveAttribute('aria-disabled', 'true')
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select all rows on this page' }))
+      // 'b' is not selectable and 'd' is on the next page
+      expect(onSelectionChange).toHaveBeenLastCalledWith(new Set(['a', 'c']))
+    })
+
+    it('shows the header checkbox as indeterminate when only some page rows are selected', () => {
+      render(
+        <PaginatedDataTable
+          columns={selectableColumns}
+          rows={['a', 'b']}
+          getRowKey={(row) => row}
+          selectable
+          selectedKeys={new Set(['a'])}
+          onSelectionChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('checkbox', { name: 'Select all rows on this page' })).toHaveAttribute(
+        'aria-checked',
+        'mixed',
+      )
+    })
+
+    it('deselects the whole page when every selectable row is selected', () => {
+      const onSelectionChange = jest.fn()
+      render(
+        <PaginatedDataTable
+          columns={selectableColumns}
+          rows={['a', 'b']}
+          getRowKey={(row) => row}
+          selectable
+          selectedKeys={new Set(['a', 'b', 'z'])}
+          onSelectionChange={onSelectionChange}
+        />,
+      )
+
+      const header = screen.getByRole('checkbox', { name: 'Deselect all rows on this page' })
+      expect(header).toHaveAttribute('aria-checked', 'true')
+
+      fireEvent.click(header)
+      // Keys outside the page are kept
+      expect(onSelectionChange).toHaveBeenLastCalledWith(new Set(['z']))
+    })
+
+    it('does not fire the row click when the checkbox is clicked', () => {
+      const onRowClick = jest.fn()
+      render(
+        <PaginatedDataTable
+          columns={selectableColumns}
+          rows={['a']}
+          getRowKey={(row) => row}
+          selectable
+          selectedKeys={new Set()}
+          onSelectionChange={jest.fn()}
+          onRowClick={onRowClick}
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select a' }))
+      expect(onRowClick).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('sort icons', () => {
+    const sortable: DataTableColumn<string>[] = [
+      { id: 'value', header: 'Value', sortValue: (row) => row, cell: (row) => row },
+    ]
+
+    it('hides the unsorted icon at rest by default', () => {
+      const { container } = render(<PaginatedDataTable columns={sortable} rows={['a']} getRowKey={(row) => row} />)
+
+      expect(container.querySelector('th svg')).toHaveClass('opacity-0')
+    })
+
+    it('keeps a faint unsorted icon at rest with showSortIcons', () => {
+      const { container } = render(
+        <PaginatedDataTable columns={sortable} rows={['a']} getRowKey={(row) => row} showSortIcons />,
+      )
+
+      expect(container.querySelector('th svg')).toHaveClass('opacity-30')
+    })
+  })
 })
