@@ -119,7 +119,7 @@ export const PendingExpired: Story = {
   args: { ...PENDING_ARGS, policy: mockExpiredPendingAllowlist(), viewer: MOCK_VIEWERS.signer },
 }
 
-/** A first allowlist waits out the 24-hour delay; its apply button stays disabled until then. */
+/** A first allowlist waits out the guard's delay; its apply button stays disabled until then. */
 export const Activating: Story = { args: { policy: mockActivatingAllowlist() } }
 
 export const Unenforced: Story = { args: { policy: mockCgwUnenforcedAllowlist() } }

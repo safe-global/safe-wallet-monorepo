@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { DrawerList, DrawerSection, type DrawerListItem } from '@/components/common/Drawer'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import type { AllowlistScheduledChange } from '@safe-global/views/features/spaces/components/Policies/types'
-import { formatUtcDateTime, hoursUntil } from '@safe-global/utils/utils/date'
+import { formatTimeUntil, formatUtcDateTime } from '@safe-global/utils/utils/date'
 import {
   APPLY_END_LABEL,
   APPLY_READY_LABEL,
@@ -44,7 +44,7 @@ const ApplyStatus = ({ stage, change, safe, signatures, nowMs }: ApplyStatusProp
     <>
       <Alert variant={variant} outlined={false}>
         <AlertSeverityIcon variant={variant} />
-        <AlertTitle>{applyBannerTitle(stage, operation, hoursUntil(appliesAt, nowMs))}</AlertTitle>
+        <AlertTitle>{applyBannerTitle(stage, operation, formatTimeUntil(appliesAt, nowMs))}</AlertTitle>
         <AlertDescription>{applyBannerLine(stage, operation, { readyAt, endAt, signatures })}</AlertDescription>
       </Alert>
 

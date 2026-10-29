@@ -274,7 +274,7 @@ describe('AllowlistDrawer', () => {
     it('counts down the waiting period, with the apply button disabled', () => {
       render(<AllowlistDrawer {...SHARED} policy={change('update', 24 - 1 / 60, 192)} viewer={MOCK_VIEWERS.signer} />)
 
-      expect(screen.getByText('Your changes can be applied in 24 hours')).toBeInTheDocument()
+      expect(screen.getByText('Your changes can be applied in 23 hours 59 minutes')).toBeInTheDocument()
       expect(
         screen.getByText(
           'From Oct 28, 2026 · 11:59 UTC, a second transaction will need to be executed to apply them. Until then, the current rules apply.',
@@ -292,9 +292,9 @@ describe('AllowlistDrawer', () => {
     })
 
     it('words the waiting period for a first allowlist', () => {
-      render(<AllowlistDrawer {...SHARED} policy={change('create', 5, 173)} viewer={MOCK_VIEWERS.signer} />)
+      render(<AllowlistDrawer {...SHARED} policy={change('create', 1 / 6, 168)} viewer={MOCK_VIEWERS.signer} />)
 
-      expect(screen.getByText('Your allowlist can be applied in 5 hours')).toBeInTheDocument()
+      expect(screen.getByText('Your allowlist can be applied in 10 minutes')).toBeInTheDocument()
       expect(screen.getByText(/Until then, transactions aren't checked against it\.$/)).toBeInTheDocument()
     })
 
