@@ -1,5 +1,4 @@
 import { useId } from 'react'
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
@@ -17,7 +16,7 @@ import {
   useHnQueueAssessment,
 } from '@/features/hypernative'
 
-const Queue: NextPage = () => {
+const Queue = () => {
   const { RecoveryList } = useLoadFeature(RecoveryFeature)
   const showPending = useShowUnsignedQueue()
   const hn = useLoadFeature(HypernativeFeature)

@@ -117,6 +117,7 @@ export default [
       'no-restricted-imports': [
         'error',
         {
+          paths: [{ name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' }],
           patterns: [
             // Block deep imports into feature components (defeats lazy loading)
             {
