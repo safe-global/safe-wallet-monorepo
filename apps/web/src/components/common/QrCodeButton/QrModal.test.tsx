@@ -23,6 +23,8 @@ const renderQrModal = () => {
 }
 
 describe('QrModal', () => {
+  // The prefix setting is persisted, so a test that turns it on would leak into the next one
+  beforeEach(() => window.localStorage.clear())
   afterEach(() => jest.restoreAllMocks())
 
   it('shows the Safe address in a QR code and warns that only this network is supported', async () => {

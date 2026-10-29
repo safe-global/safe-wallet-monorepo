@@ -47,6 +47,8 @@ const CHAIN = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build
 describe('FirstSteps', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // The QR prefix setting is persisted, so the switch test would leak into later tests
+    window.localStorage.clear()
 
     mockUseLoadFeature.mockReturnValue({})
 
