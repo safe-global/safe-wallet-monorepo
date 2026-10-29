@@ -316,4 +316,4 @@ This is a Phase 2 integration. The framework foundation must be stable first. Cu
 
 ## Relationship to Cypress
 
-Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging. In isolated mode, both use the same scenario functions in `environment/scenarios/`.
+Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging. Only Playwright runs in isolated mode.
