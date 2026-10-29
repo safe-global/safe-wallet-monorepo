@@ -112,12 +112,10 @@ describe('CreateTokenTransfer', () => {
     }
   })
 
-  it('should display a type selection if a spending limit token is selected', () => {
+  const mockSpendingLimitToken = () => {
     jest
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
-
-    const tokenAddress = ZERO_ADDRESS
 
     jest.spyOn(useBalances, 'default').mockReturnValue({
       balances: {
@@ -126,7 +124,7 @@ describe('CreateTokenTransfer', () => {
           {
             balance: '10',
             tokenInfo: {
-              address: tokenAddress,
+              address: ZERO_ADDRESS,
               decimals: 18,
               logoUri: 'someurl',
               name: 'Test token',
@@ -142,6 +140,10 @@ describe('CreateTokenTransfer', () => {
       loading: false,
       error: undefined,
     })
+  }
+
+  it('should display a type selection if a spending limit token is selected', () => {
+    mockSpendingLimitToken()
 
     const { getByText } = renderCreateTokenTransfer()
 
@@ -159,6 +161,8 @@ describe('CreateTokenTransfer', () => {
   })
 
   it('should not display a type selection if there is a txNonce', () => {
+    mockSpendingLimitToken()
+
     const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
 
     expect(queryByText('Send as')).not.toBeInTheDocument()

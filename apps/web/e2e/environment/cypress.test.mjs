@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { basename } from 'node:path'
 import { test } from 'node:test'
 import {
   cypressEnvironment,
@@ -48,21 +49,26 @@ test('decides by the request URL whether it reaches a remote backend', () => {
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'
-const batch = 'cypress/e2e/regression/batch_tx.cy.js'
-const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
+const specName = (spec) => basename(spec, '.cy.js')
+// Samples come from the registry, so a deleted Cypress spec cannot break these tests
+const [first, second] = Object.keys(isolatedSpecs).filter(
+  (path, _, all) =>
+    path.startsWith('cypress/e2e/regression/') &&
+    all.filter((other) => specName(other) === specName(path)).length === 1,
+)
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
-  assert.deepEqual(selectCypressSpecs('regression/batch_tx'), [batch])
-  assert.deepEqual(selectCypressSpecs('tx_details_queue'), ['cypress/e2e/regression/tx_details_queue.cy.js'])
-  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/batch_tx,tx_queue_reject_btn'), [
-    rejection,
-    batch,
+  assert.deepEqual(selectCypressSpecs(specName(first)), [first])
+  assert.deepEqual(selectCypressSpecs(`regression/${specName(second)}`), [second])
+  assert.deepEqual(selectCypressSpecs(`${specName(first)}, regression/${specName(second)},${specName(first)}`), [
+    first,
+    second,
   ])
 })
 
 test('rejects unknown or empty spec selection instead of running staging-dependent specs', () => {
-  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_replace_btn', 'tx_queue_replace_btn,']) {
+  for (const selection of ['', '*', 'not_registered_spec', `../${specName(first)}`, `${specName(first)},`]) {
     assert.throws(() => selectCypressSpecs(selection), /No isolated scenario/)
   }
 })

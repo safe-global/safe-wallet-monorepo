@@ -53,6 +53,10 @@ export const SAFES = {
   SEP_QUEUE_SAFE: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
   /** Mainnet Safe that holds trusted and untrusted tokens — for the token lists (mirrors Cypress ETH_STATIC_SAFE_15) */
   ETH_TOKEN_LIST_SAFE: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
+  /** Polygon Safe on an unsupported but known singleton, which can migrate in the app (mirrors Cypress MATIC_STATIC_SAFE_31) */
+  MATIC_MIGRATABLE_SAFE: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
+  /** Polygon Safe on an unofficial singleton, which only the CLI can migrate (mirrors Cypress MATIC_STATIC_SAFE_32) */
+  MATIC_UNOFFICIAL_SINGLETON_SAFE: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
   /** Isolated stack only (no staging Safe): mainnet Safe whose tokens and positions the local Zerion lists */
   ETH_ZERION_SAFE: 'eth:0x0000000000000000000000000000000000000000',
   /** Isolated stack only (no staging Safe): mainnet Safe with the DeFi positions that the local Zerion lists */

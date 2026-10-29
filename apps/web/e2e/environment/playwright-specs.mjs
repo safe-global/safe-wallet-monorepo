@@ -61,6 +61,10 @@ export const playwrightSpecs = {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
   },
+  'regression/dashboard-mastercopy-warning.spec.ts': {
+    scenarios: ['prepareMastercopyScenario'],
+    safes: { MATIC_MIGRATABLE_SAFE: 'MATIC_STATIC_SAFE_31', MATIC_UNOFFICIAL_SINGLETON_SAFE: 'MATIC_STATIC_SAFE_32' },
+  },
   'regression/recipient-dropdown-caret-toggle.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
