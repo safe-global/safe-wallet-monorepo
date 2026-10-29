@@ -26,7 +26,7 @@ CI=true yarn pw:ci        # Smoke tests with retries, JUnit output
 
 ### Isolated mode (local backend)
 
-The same specs also run against the local Docker stack (CGW, Transaction Service, Config Service and an Anvil Sepolia fork) with generated Safes and wallets: `yarn e2e:env playwright`. Read Safes from the `safes` fixture and wallets from the `credentials` fixture, never from `SAFES` directly, so both modes work. Setup, scenarios and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#playwright).
+The same specs also run against the local Docker stack (CGW, Transaction Service, Config Service and an Anvil Sepolia fork) with generated Safes and wallets: `yarn e2e:env playwright`. Read Safes from the `safes` fixture and wallets from the `credentials` fixture, never from `SAFES` directly, so both modes work. Setup, scenarios and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#specs).
 
 ## Project Structure
 
