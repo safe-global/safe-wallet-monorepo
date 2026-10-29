@@ -15,6 +15,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
+import ProTrialBanner from '../ProTrialBanner'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const router = useRouter()
@@ -62,6 +63,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   // A Workspace without a live plan keeps its pages underneath a blocking modal instead of bouncing elsewhere.
   return (
     <>
+      <ProTrialBanner spaceId={spaceId} />
       {children}
       <WorkspaceLockModal spaceId={spaceId} />
       <TrialEndingModal spaceId={spaceId} />
