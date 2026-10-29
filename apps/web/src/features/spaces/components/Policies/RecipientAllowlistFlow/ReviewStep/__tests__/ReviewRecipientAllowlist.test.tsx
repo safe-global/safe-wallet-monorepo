@@ -262,6 +262,7 @@ const mockOwners = (owners: string[], threshold = 2) =>
 const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
 
 beforeEach(() => {
+  mockDefaultFallback = 'allow'
   jest.clearAllMocks()
   mockSave.mockResolvedValue(true)
   mockOwners([WALLET, TOM, PRIYA])
@@ -422,7 +423,7 @@ describe('ReviewRecipientAllowlist', () => {
 
     const rules = screen.getAllByTestId('allowlist-rule')
     const count = setupFor({ status: 'none' }).configurations.length
-    expect(rules.map((rule) => within(rule).getByText(/^Rule \d of \d$/).textContent)).toEqual(
+    expect(rules.map((rule) => within(rule).getByText(/^Rule \d+ of \d+$/).textContent)).toEqual(
       Array.from({ length: count }, (_, index) => `Rule ${index + 1} of ${count}`),
     )
     const [native, token, ...defaults] = rules
@@ -480,7 +481,6 @@ describe('ReviewRecipientAllowlist', () => {
   it('says everything else is blocked when the first setup installs the deny fallback', () => {
     mockDefaultFallback = 'deny'
     built({ status: 'none' })
-    mockDefaultFallback = 'allow'
     renderReview()
 
     expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent(
