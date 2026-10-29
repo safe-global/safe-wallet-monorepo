@@ -84,6 +84,7 @@ jobs:
   result:
     # The one check that branch protection requires for this workflow.
     name: Utils unit tests result
+    permissions: {}
     if: always()
     needs: [changes, eslint]
     runs-on: ubuntu-latest

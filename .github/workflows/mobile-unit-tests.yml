@@ -86,6 +86,7 @@ jobs:
   result:
     # The one check that branch protection requires for this workflow.
     name: Mobile unit tests result
+    permissions: {}
     if: always()
     needs: [changes, test-and-coverage]
     runs-on: ubuntu-latest

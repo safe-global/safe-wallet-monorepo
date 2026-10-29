@@ -167,6 +167,7 @@ jobs:
   result:
     # The one check that branch protection requires for this workflow.
     name: Web unit tests result
+    permissions: {}
     if: always()
     needs: [changes, test]
     runs-on: ubuntu-latest
