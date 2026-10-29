@@ -20,6 +20,6 @@ Hold a test to the same standard as production code: a reader understands it wit
 6. **Assertions stay in the test.** Helpers and page objects build, find and act; they do not assert. Check the outcome the user or the system cares about, not each step on the way.
 7. **No comments.** The name carries the intent, even for regression tests. A test that needs a comment to explain its setup has the setup in the wrong place.
 8. **Extract a copy on the second or third time,** into a shared helper — not before. Do not split a long flow only to shorten it: the order of the steps is what the test checks.
-9. **Independent and repeatable.** A test sets up all it needs and passes alone, in any order and in parallel. A Playwright test that writes seeds its own Safe.
+9. **Independent and repeatable.** A test sets up all it needs and passes alone, in any order and in parallel. A Playwright test that changes a Safe uses a Safe that no other test reads: one it seeds or creates.
 
 Examples: [UntrustedFallbackHandlerTxAlert.test.ts](../../apps/web/src/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert.test.ts) (unit), [TxShareLink.test.tsx](../../apps/web/src/components/transactions/TxShareLink/TxShareLink.test.tsx) (component), [multisig-confirm.spec.ts](../../apps/web/e2e/tests/e2e/multisig-confirm.spec.ts) (Playwright journey).
