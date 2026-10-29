@@ -26,31 +26,24 @@ export const createAllowlistSetupTxs = ({
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
 }): AllowlistSetup => {
-  const request = (txs: AllowlistSetup['txs'] = []): AllowlistSetup => {
-    const root = getConfigurationRoot(configurations)
-    return { txs: [createRequestConfigurationTx(guardAddress, root), ...txs], configurations, root }
+  if (guardState.status === 'unknown' || guardState.status === 'unsupported') {
+    throw new Error(GUARD_NOT_SUPPORTED_ERROR)
   }
 
-  switch (guardState.status) {
-    case 'none': {
-      const installed = withFirstSetupDefaults(chainId, configurations)
-      if (installed.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
-      return {
-        txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed }),
-        configurations: installed,
-        root: getConfigurationRoot(installed),
-      }
-    }
-    case 'known':
-      return request()
-    case 'partial':
-      return request([
-        guardState.missingSlot === 'transaction'
-          ? createSetGuardTx(safeAddress, guardAddress)
-          : createSetModuleGuardTx(safeAddress, guardAddress),
-      ])
-    case 'unknown':
-    case 'unsupported':
-      throw new Error(GUARD_NOT_SUPPORTED_ERROR)
+  const installed = guardState.status === 'none' ? withFirstSetupDefaults(chainId, configurations) : configurations
+  if (installed.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
+  const setup = { configurations: installed, root: getConfigurationRoot(installed) }
+
+  if (guardState.status === 'none') {
+    return { ...setup, txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed }) }
   }
+
+  const request = createRequestConfigurationTx(guardAddress, setup.root)
+  if (guardState.status === 'known') return { ...setup, txs: [request] }
+
+  const setMissingGuard =
+    guardState.missingSlot === 'transaction'
+      ? createSetGuardTx(safeAddress, guardAddress)
+      : createSetModuleGuardTx(safeAddress, guardAddress)
+  return { ...setup, txs: [request, setMissingGuard] }
 }
