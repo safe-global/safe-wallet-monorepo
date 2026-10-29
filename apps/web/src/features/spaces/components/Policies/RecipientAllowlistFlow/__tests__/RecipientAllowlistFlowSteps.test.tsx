@@ -121,7 +121,7 @@ describe('RecipientAllowlistFlow steps', () => {
     await waitFor(() => expect(stepTitle()).toHaveTextContent('Confirm policy'))
   })
 
-  it('should list the restricted limit before the unaffected one, when only one token is in the allowlist', async () => {
+  it('should list the restricted limit before the blocked one, when only one token is in the allowlist', async () => {
     const leftOut = erc20TokenBuilder().with({ decimals: 6, symbol: 'DAI' }).build()
     serveAllowlistWorkspace(workspace, {
       balances: heldBalances(token),
@@ -135,18 +135,15 @@ describe('RecipientAllowlistFlow steps', () => {
     await fillCreateStep(view)
 
     expect(await screen.findByTestId('recipient-allowlist-existing-policies-step')).toBeInTheDocument()
-    expect(
-      await screen.findByText("1 of your 2 spending limits will follow this allowlist's rules."),
-    ).toBeInTheDocument()
+    expect(await screen.findByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
     const [first, second] = screen.getAllByTestId('spending-limit-impact')
     expect(first).toHaveTextContent('USDC is in this allowlist')
     expect(first).toHaveTextContent('Follows the allowlist')
     expect(second).toHaveTextContent("DAI isn't in this allowlist")
-    expect(second).not.toHaveTextContent('Follows the allowlist')
-    expect(screen.queryByText('Will be blocked')).not.toBeInTheDocument()
+    expect(second).toHaveTextContent('Will be blocked')
   })
 
-  it('should go straight to the review, when the Safe only has limits on tokens left out of the allowlist', async () => {
+  it('should warn on Existing policies, when the Safe only has limits on tokens left out of the allowlist', async () => {
     const leftOut = erc20TokenBuilder().with({ decimals: 6, symbol: 'DAI' }).build()
     serveAllowlistWorkspace(workspace, {
       balances: heldBalances(token),
@@ -156,8 +153,9 @@ describe('RecipientAllowlistFlow steps', () => {
 
     await fillCreateStep(view)
 
-    await waitFor(() => expect(stepTitle()).toHaveTextContent('Confirm policy'))
-    expect(screen.queryByTestId('recipient-allowlist-existing-policies-step')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('recipient-allowlist-existing-policies-step')).toBeInTheDocument()
+    expect(await screen.findByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
+    expect(screen.getByText('Will be blocked')).toBeInTheDocument()
   })
 
   it('goes straight to the review when the Safe has no spending limit, and Back returns to the form', async () => {
