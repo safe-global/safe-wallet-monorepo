@@ -6,7 +6,7 @@
  * journeys register the bindings and configuration roots that the real indexer would read from the guard's events.
  */
 import { readFileSync } from 'node:fs'
-import { AbiCoder, Interface, getAddress, keccak256 } from 'ethers'
+import { AbiCoder, Interface, ZeroAddress, getAddress, keccak256 } from 'ethers'
 import { registerGuardPolicies } from '../../environment/scenarios/policy-indexer.mjs'
 import { executeTransaction, openSafe } from '../../environment/scenarios/safe.mjs'
 import { readChain } from '../chain/local-provider'
@@ -36,6 +36,8 @@ export const ERC20_TRANSFER_POLICY = addressOf('ERC20TransferPolicy')
 export const ROOT_EXPIRY_SECONDS = 604_800
 
 const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
+const SET_GUARD_SELECTOR = '0xe19a9dd9'
+const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
 const CALL = 0
 const PERMISSION_ALWAYS = 2
 const CONFIGURATION = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -63,9 +65,25 @@ function configurationOf({ token, recipients }: TokenAllowlist): Configuration {
   }
 }
 
-/** The root that `requestConfiguration` takes for the allowlist: the hash `applyConfiguration` checks. */
-export function configurationRootOf(allowlist: TokenAllowlist): string {
-  return keccak256(AbiCoder.defaultAbiCoder().encode([`${CONFIGURATION}[]`], [[configurationOf(allowlist)]]))
+/** The unbinding of the guard setters a removal allows, which the wallet puts before every allowlist */
+function clearedGuardExitOf(safe: string): Configuration[] {
+  return [SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR].map((selector) => ({
+    target: getAddress(safe),
+    selector,
+    operation: CALL,
+    policy: ZeroAddress,
+    data: '0x',
+  }))
+}
+
+/** The root that `requestConfiguration` takes for the allowlist on `safe`: the hash `applyConfiguration` checks. */
+export function configurationRootOf(allowlist: TokenAllowlist, safe: string): string {
+  return keccak256(
+    AbiCoder.defaultAbiCoder().encode(
+      [`${CONFIGURATION}[]`],
+      [[...clearedGuardExitOf(safe), configurationOf(allowlist)]],
+    ),
+  )
 }
 
 /** Writes the guard and policy code on the fork where it is missing; parallel workers write the same code. */
