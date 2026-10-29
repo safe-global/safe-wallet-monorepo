@@ -1,4 +1,9 @@
-import { getPolicyEngineAddress, getPolicyGuardAddress, isSafeVersionSupported } from '../policyEngineDeployments'
+import {
+  getPolicyEngineAddress,
+  getPolicyGuardAddress,
+  isPolicyGuard,
+  isSafeVersionSupported,
+} from '../policyEngineDeployments'
 
 describe('policyEngineDeployments', () => {
   it.each(['1', '137', '11155111'])('returns the 60s-delay policy guard on chain %s', (chainId) => {
@@ -21,6 +26,20 @@ describe('policyEngineDeployments', () => {
   it('returns undefined for a chain without a deployment', () => {
     expect(getPolicyGuardAddress('999999')).toBeUndefined()
     expect(getPolicyEngineAddress('999999', 'ERC20TransferPolicy')).toBeUndefined()
+  })
+})
+
+describe('isPolicyGuard', () => {
+  it.each([
+    ['0x55c241591E12CE3c58491D02b737F12D3199ae95', true],
+    ['0xc83bc185770ac0da8a970f35695064eee62e236c', true],
+    ['0x2d4527fD0E79ca1e533E3C7BBEF7e0668b700aED', true],
+    ['0x1111111111111111111111111111111111111111', false],
+    ['', false],
+    [null, false],
+    [undefined, false],
+  ])('%s → %s', (address, expected) => {
+    expect(isPolicyGuard(address)).toBe(expected)
   })
 })
 
