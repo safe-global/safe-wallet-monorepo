@@ -11,6 +11,8 @@ import { getPolicyEngineAddress } from '../policyEngineDeployments'
 import {
   MAX_POLICY_CONFIGURATIONS,
   buildAllowlistConfigurations,
+  buildAllowlistRemovalConfigurations,
+  clearGuardExitConfigurations,
   decodeErc20TransferPolicyData,
   encodeErc20TransferPolicyData,
 } from '../allowlistConfigurations'
@@ -20,6 +22,8 @@ const TOKEN = '0x1111111111111111111111111111111111111111'
 const TOKEN_2 = '0x2222222222222222222222222222222222222222'
 const ALICE = '0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa'
 const BOB = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+const SAFE = '0x5afe5afE5afE5afE5afE5aFe5afe5Afe5afE5AFe'
+const PERMISSION_NONE = 0
 
 describe('allowlistConfigurations', () => {
   const erc20Policy = getPolicyEngineAddress(CHAIN_ID, 'ERC20TransferPolicy')
@@ -126,5 +130,67 @@ describe('allowlistConfigurations', () => {
 
   it('decodes the recipients it encoded, in order', () => {
     expect(decodeErc20TransferPolicyData(encodeErc20TransferPolicyData([ALICE, BOB]))).toEqual([ALICE, BOB])
+  })
+})
+
+describe('buildAllowlistRemovalConfigurations', () => {
+  const erc20Policy = getPolicyEngineAddress(CHAIN_ID, 'ERC20TransferPolicy')
+  const allowPolicy = getPolicyEngineAddress(CHAIN_ID, 'AllowPolicy')
+  const guardExit = [
+    { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: allowPolicy, data: '0x' },
+    { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: allowPolicy, data: '0x' },
+  ]
+
+  it('should revoke the recipients, then unbind the token rule, then allow the guard setters, when a token is allowlisted', () => {
+    expect(
+      buildAllowlistRemovalConfigurations({
+        chainId: CHAIN_ID,
+        safeAddress: SAFE,
+        rules: [{ tokenAddress: TOKEN, recipients: [ALICE, BOB] }],
+      }),
+    ).toEqual([
+      {
+        target: TOKEN,
+        selector: '0xa9059cbb',
+        operation: OperationType.Call,
+        policy: erc20Policy,
+        data: encodeErc20TransferPolicyData([ALICE, BOB], PERMISSION_NONE),
+      },
+      { target: TOKEN, selector: '0xa9059cbb', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
+      ...guardExit,
+    ])
+  })
+
+  it('should unbind one native rule per recipient, when ETH is allowlisted', () => {
+    expect(
+      buildAllowlistRemovalConfigurations({
+        chainId: CHAIN_ID,
+        safeAddress: SAFE,
+        rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [ALICE, BOB] }],
+      }),
+    ).toEqual([
+      { target: ALICE, selector: '0x00000000', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
+      { target: BOB, selector: '0x00000000', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
+      ...guardExit,
+    ])
+  })
+
+  it('should throw that the allowlist is unavailable, when the chain has no policy deployments', () => {
+    expect(() =>
+      buildAllowlistRemovalConfigurations({
+        chainId: '999999',
+        safeAddress: SAFE,
+        rules: [{ tokenAddress: TOKEN, recipients: [ALICE] }],
+      }),
+    ).toThrow(ALLOWLIST_UNAVAILABLE_ERROR)
+  })
+})
+
+describe('clearGuardExitConfigurations', () => {
+  it('should unbind both guard setters, when a setup clears what a removal left', () => {
+    expect(clearGuardExitConfigurations(SAFE)).toEqual([
+      { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
+      { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
+    ])
   })
 })

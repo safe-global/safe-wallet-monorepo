@@ -317,11 +317,11 @@ describe('useSpacePolicies', () => {
   })
 
   describe('allowlists', () => {
-    it('should ask for the erc20 and native transfer policies along with the other table types', () => {
+    it('should ask for the transfer policies and the allow rule that marks a removal, along with the other table types', () => {
       renderHook(() => useSpacePolicies())
 
       expect(mockPoliciesQuery).toHaveBeenCalledWith(
-        { spaceId: SPACE_ID, types: ['spending-limit', 'proposer', 'erc20-transfer', 'native-transfer'] },
+        { spaceId: SPACE_ID, types: ['spending-limit', 'proposer', 'erc20-transfer', 'native-transfer', 'allow'] },
         { skip: false, ...SPACE_REFRESH_OPTIONS },
       )
     })

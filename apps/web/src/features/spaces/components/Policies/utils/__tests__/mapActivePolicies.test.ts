@@ -8,6 +8,7 @@ import {
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import {
   mockErc20TransferDto,
+  mockGuardExitDto,
   mockNativeTransferDto,
   mockProposerDto,
   mockSpendingLimitDto,
@@ -333,6 +334,33 @@ describe('mapActivePolicies', () => {
       ])
 
       expect(policy.enabled).toBe(false)
+    })
+
+    it('should keep a row waiting for the guard to come off, when an applied removal left only the setGuard rule', () => {
+      const [policy, ...rest] = toAllowlists([mockGuardExitDto()])
+
+      expect(rest).toEqual([])
+      expect(policy).toMatchObject({
+        safe: MOCK_SAFES.treasury,
+        enabled: true,
+        awaitingGuardRemoval: true,
+        data: { entries: [] },
+        enforcement: { via: 'guard', guardAddress: GUARD },
+      })
+    })
+
+    it('should leave no row, when the guard came off after the removal', () => {
+      expect(toAllowlists([withGuards(mockGuardExitDto(), {})])).toEqual([])
+    })
+
+    it('should leave no row, when an allow rule is on something other than the Safe setGuard', () => {
+      expect(toAllowlists([withAccess(mockGuardExitDto(), { selector: '0xe068df37' })])).toEqual([])
+    })
+
+    it('should not mark an allowlist as waiting for guard removal, when no setGuard rule is bound', () => {
+      const [policy] = toAllowlists([mockErc20TransferDto()])
+
+      expect(policy).not.toHaveProperty('awaitingGuardRemoval')
     })
 
     it('marks the whole row not covering spending limits when one of its policies lacks the module slot', () => {

@@ -87,12 +87,16 @@ export const RULE_POLICY_LABEL = 'Policy'
 export const RULE_TARGET_LABEL = 'Applies to'
 export const RULE_RECIPIENTS_LABEL = 'Allowed recipients'
 export const RULE_DELEGATE_CALL_LABEL = 'Delegate call'
+export const RULE_REVOKED_RECIPIENTS_LABEL = 'Removed recipients'
 export const POLICY_LABELS = {
   erc20: 'Token withdraw allowlist',
+  erc20Revoke: 'Token withdraw allowlist',
   native: 'Native transfers',
   allow: 'Allow everything else',
+  allowCall: 'Always allowed',
   deny: 'Block everything else',
   multiSend: 'Batched transactions',
+  removal: 'None, the rule is deleted',
   unknown: 'Other policy',
 } as const
 export const FALLBACK_TARGET_NAME = 'Any address'
@@ -137,6 +141,18 @@ export const SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION =
 export const SPENDING_LIMITS_LOADING_TITLE = 'Loading the spending limits'
 export const NO_SPENDING_LIMITS_TITLE = 'This Safe account has no spending limits.'
 export const RETRY_LABEL = 'Retry'
+
+export const REMOVE_REVIEW_STEP_TITLE = 'Remove allowlist'
+export const REMOVE_SUMMARY_TITLE = 'Request to remove the allowlist.'
+export const REMOVE_SUMMARY_DESCRIPTION = `After ${POLICY_CHANGE_DELAY}, a second transaction deletes its rules, and a third one takes the guard off. Until the second one, the allowlist stays active.`
+export const APPLY_REMOVAL_REVIEW_STEP_TITLE = 'Apply removal'
+export const APPLY_REMOVAL_SUMMARY_TITLE = 'Apply the removal to delete the allowlist.'
+export const APPLY_REMOVAL_SUMMARY_DESCRIPTION =
+  "The waiting period is over. Once this transaction is executed, the allowlist's rules are deleted and the guard can be removed. Until it is, this Safe account can't send anything."
+export const REMOVE_GUARD_REVIEW_STEP_TITLE = 'Remove guard'
+export const REMOVE_GUARD_SUMMARY_TITLE = 'Take the Safe policy guard off.'
+export const REMOVE_GUARD_SUMMARY_DESCRIPTION =
+  'Once this transaction is executed, transactions are no longer checked against a policy. You can set up a new allowlist at any time.'
 
 export const APPLY_REVIEW_STEP_TITLE = 'Apply allowlist'
 export const APPLY_SUMMARY_TITLE = 'Apply the allowlist to turn it on.'

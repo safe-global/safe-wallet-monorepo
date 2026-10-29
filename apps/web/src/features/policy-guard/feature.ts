@@ -1,8 +1,14 @@
-import { buildAllowlistConfigurations, decodeErc20TransferPolicyData } from './services/allowlistConfigurations'
+import {
+  buildAllowlistConfigurations,
+  buildAllowlistRemovalConfigurations,
+  clearGuardExitConfigurations,
+  decodeErc20TransferPolicyData,
+} from './services/allowlistConfigurations'
 import { createAllowlistSetupTxs } from './services/createAllowlistSetupTxs'
 import {
   createApplyConfigurationTx,
   createFirstSetupTxs,
+  createRemoveGuardTxs,
   createRequestConfigurationTx,
   describeSetupCall,
   getCallConfigurations,
@@ -18,5 +24,8 @@ export default {
   describeSetupCall,
   buildAllowlistConfigurations,
   decodeErc20TransferPolicyData,
+  buildAllowlistRemovalConfigurations,
+  clearGuardExitConfigurations,
+  createRemoveGuardTxs,
   createAllowlistSetupTxs,
 }

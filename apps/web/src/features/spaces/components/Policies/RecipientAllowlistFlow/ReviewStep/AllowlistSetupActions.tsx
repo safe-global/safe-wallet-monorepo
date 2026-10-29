@@ -3,6 +3,8 @@ import classnames from 'classnames'
 import { Code } from 'lucide-react'
 import { OperationType, type MetaTransactionData } from '@safe-global/types-kit'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   Accordion,
   AccordionContent,
@@ -19,6 +21,7 @@ import {
   RULE_DELEGATE_CALL_LABEL,
   RULE_POLICY_LABEL,
   RULE_RECIPIENTS_LABEL,
+  RULE_REVOKED_RECIPIENTS_LABEL,
   RULE_TARGET_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
@@ -116,7 +119,7 @@ const PolicyRuleRows = ({
     <TxDataRow title={RULE_POLICY_LABEL}>
       <Typography variant="paragraph-small" as="div" className="flex flex-wrap items-center gap-2">
         {POLICY_LABELS[kind]}
-        <span className="text-muted-foreground">{shortenAddress(configuration.policy)}</span>
+        {kind !== 'removal' && <span className="text-muted-foreground">{shortenAddress(configuration.policy)}</span>}
       </Typography>
     </TxDataRow>
 
@@ -134,8 +137,8 @@ const PolicyRuleRows = ({
       </div>
     </TxDataRow>
 
-    {kind === 'erc20' && (
-      <TxDataRow title={RULE_RECIPIENTS_LABEL}>
+    {(kind === 'erc20' || kind === 'erc20Revoke') && (
+      <TxDataRow title={kind === 'erc20Revoke' ? RULE_REVOKED_RECIPIENTS_LABEL : RULE_RECIPIENTS_LABEL}>
         <div className="flex flex-col gap-1">
           {decodeRecipients(configuration.data).map((address) => (
             <RuleAddress key={address} address={address} info={getAddressInfo(address)} />
@@ -186,7 +189,7 @@ const AllowlistSetupActions = ({
                       {CONFIGURING_METHODS.includes(method) &&
                         configurations.map((configuration, ruleIndex) => (
                           <PolicyRuleRows
-                            key={`${configuration.target}-${configuration.selector}-${configuration.operation}`}
+                            key={`${ruleIndex}-${configuration.target}-${configuration.selector}-${configuration.operation}`}
                             configuration={configuration}
                             index={ruleIndex}
                             count={configurations.length}
@@ -198,7 +201,13 @@ const AllowlistSetupActions = ({
 
                       {description?.param && (
                         <TxDataRow title={description.param.name}>
-                          <RuleAddress address={description.param.value} info={{ name: POLICY_GUARD_NAME }} />
+                          <RuleAddress
+                            address={description.param.value}
+                            info={{
+                              // Removing the guard sets the slot to the zero address, which isn't the guard
+                              name: sameAddress(description.param.value, ZERO_ADDRESS) ? undefined : POLICY_GUARD_NAME,
+                            }}
+                          />
                         </TxDataRow>
                       )}
                     </div>

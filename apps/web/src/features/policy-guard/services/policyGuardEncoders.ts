@@ -1,5 +1,6 @@
 import { AbiCoder, Interface, keccak256, type Result } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
 import type { PolicyConfiguration, SetupCallDescription } from '../types'
 
@@ -40,6 +41,12 @@ export const createSetModuleGuardTx = (safeAddress: string, guardAddress: string
   value: '0',
   data: safeInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
 })
+
+/** Takes the guard off both slots, once an applied removal lets the two setters and their batch through. */
+export const createRemoveGuardTxs = (safeAddress: string): MetaTransactionData[] => [
+  createSetGuardTx(safeAddress, ZERO_ADDRESS),
+  createSetModuleGuardTx(safeAddress, ZERO_ADDRESS),
+]
 
 // configureImmediately reverts once our guard is in either slot, so it must run before both setters
 export const createFirstSetupTxs = ({

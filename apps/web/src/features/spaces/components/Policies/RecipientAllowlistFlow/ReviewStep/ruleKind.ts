@@ -1,5 +1,7 @@
+import { AbiCoder } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { POLICY_LABELS } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration } from '@/features/policy-guard'
 import { getPolicyEngineAddress, isFallbackAccess, type PolicyEngineContract } from '@/features/policy-guard/services'
@@ -14,8 +16,30 @@ const RULE_POLICIES: [RuleKind, PolicyEngineContract][] = [
   ['multiSend', 'MultiSendPolicy'],
 ]
 
-export const getRuleKind = (chainId: string, { policy }: PolicyConfiguration): RuleKind =>
-  RULE_POLICIES.find(([, contract]) => sameAddress(getPolicyEngineAddress(chainId, contract), policy))?.[0] ?? 'unknown'
+const PERMISSION_NONE = 0n
+
+/** Whether ERC-20 transfer policy data revokes every recipient it names, as a removal does before unbinding the rule. */
+const revokesEveryRecipient = (data: string): boolean => {
+  let entries: Array<[string, bigint]>
+  try {
+    entries = AbiCoder.defaultAbiCoder().decode(['tuple(address recipient, uint8 permission)[]'], data)[0]
+  } catch {
+    return false
+  }
+  return entries.length > 0 && entries.every(([, permission]) => permission === PERMISSION_NONE)
+}
+
+export const getRuleKind = (chainId: string, configuration: PolicyConfiguration): RuleKind => {
+  if (sameAddress(configuration.policy, ZERO_ADDRESS)) return 'removal'
+
+  const kind =
+    RULE_POLICIES.find(([, contract]) =>
+      sameAddress(getPolicyEngineAddress(chainId, contract), configuration.policy),
+    )?.[0] ?? 'unknown'
+  if (kind === 'allow' && !isFallbackAccess(configuration)) return 'allowCall'
+  if (kind === 'erc20' && revokesEveryRecipient(configuration.data)) return 'erc20Revoke'
+  return kind
+}
 
 export type InstalledFallback = 'allow' | 'deny'
 

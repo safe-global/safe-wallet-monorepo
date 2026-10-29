@@ -32,12 +32,13 @@ import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
-/** The types the table renders. Asking for the rest would only return rows it cannot show. */
+/** The types the table renders, plus `allow`, whose rule on `setGuard` marks an allowlist waiting for its guard to come off. */
 export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
   'spending-limit',
   'proposer',
   'erc20-transfer',
   'native-transfer',
+  'allow',
 ]
 
 /** Proposer grants take effect off chain at once, so only spending limits and allowlists can be pending. */

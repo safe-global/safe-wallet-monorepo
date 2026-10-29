@@ -2,6 +2,7 @@ import { MOCK_VIEWERS } from '../../mocks/policies'
 import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
+  mockAllowlistAwaitingGuardRemoval,
   mockAllowlistChangePending,
   mockExpiredPendingAllowlist,
   mockExpiredRequestAllowlist,
@@ -25,15 +26,43 @@ describe('resolveAllowlistDrawerState', () => {
   it('should ask a viewer without a wallet to connect one', () => {
     expect(resolveAllowlistDrawerState(mockActiveAllowlist(), MOCK_VIEWERS.disconnected, 'Treasury')).toMatchObject({
       action: 'connect',
-      helper: 'Connect a signer wallet to edit.',
+      helper: 'Connect a signer wallet to remove this allowlist.',
     })
   })
 
-  it('should disable editing for a wallet that is not a signer', () => {
+  it('should disable removing, when the wallet is not a signer', () => {
     expect(resolveAllowlistDrawerState(mockActiveAllowlist(), MOCK_VIEWERS.nonSigner, 'Treasury')).toMatchObject({
       action: 'manage',
       disabled: true,
-      helper: 'Only signers of this Safe account can edit this allowlist.',
+      helper: 'Only signers of this Safe account can remove this allowlist.',
+    })
+  })
+
+  it('should let a signer remove the guard, when an applied removal waits for it', () => {
+    expect(resolveAllowlistDrawerState(mockAllowlistAwaitingGuardRemoval(), MOCK_VIEWERS.signer, 'Treasury')).toEqual({
+      kind: 'remove-guard',
+      action: 'remove-guard',
+      disabled: false,
+      helper: 'Any signer can start this transaction.',
+      bannerTitle: 'Your allowlist is removed',
+      bannerLine2: "Remove the guard to finish. Until then, this Safe account can't send anything.",
+    })
+  })
+
+  it('should ask to connect a signer wallet, when the guard waits to be removed and no wallet is connected', () => {
+    expect(
+      resolveAllowlistDrawerState(mockAllowlistAwaitingGuardRemoval(), MOCK_VIEWERS.disconnected, 'Treasury'),
+    ).toMatchObject({ kind: 'remove-guard', action: 'connect', helper: 'Connect a signer wallet to remove the guard.' })
+  })
+
+  it('should disable removing the guard, when the wallet is not a signer', () => {
+    expect(
+      resolveAllowlistDrawerState(mockAllowlistAwaitingGuardRemoval(), MOCK_VIEWERS.nonSigner, 'Treasury'),
+    ).toMatchObject({
+      kind: 'remove-guard',
+      action: 'remove-guard',
+      disabled: true,
+      helper: 'Only signers of this Safe account can remove the guard.',
     })
   })
 

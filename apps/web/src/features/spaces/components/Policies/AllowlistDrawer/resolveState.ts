@@ -12,7 +12,6 @@ import type {
   Viewer,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
-  ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
   connectHelper,
   executeLine,
@@ -20,6 +19,7 @@ import {
   signAndExecuteLine,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import {
+  CONNECT_TO_REMOVE_HELPER,
   NOT_A_SIGNER_HELPER,
   OUTCOME_TITLE,
   PENDING_BANNER_TITLE,
@@ -27,6 +27,10 @@ import {
   APPLY_NOT_A_SIGNER_HELPER,
   APPLY_SIGNER_HELPER,
   EXPIRED_HELPER,
+  GUARD_REMOVAL_BANNER_LINE,
+  GUARD_REMOVAL_BANNER_TITLE,
+  REMOVE_GUARD_CONNECT_HELPER,
+  REMOVE_GUARD_NOT_A_SIGNER_HELPER,
   UNENFORCED_BANNER_LINE,
   UNENFORCED_BANNER_TITLE,
   outcomeLine,
@@ -58,6 +62,16 @@ export type ExpiredRequestDrawerState = {
   helper: string
 }
 
+/** An applied removal left no rule: the guard only lets the transaction through that takes it off. */
+export type RemoveGuardDrawerState = {
+  kind: 'remove-guard'
+  action: 'remove-guard' | 'connect'
+  disabled: boolean
+  helper: string
+  bannerTitle: string
+  bannerLine2: string
+}
+
 /** The guard is not in both slots. No flow can put it back yet, so there is nothing to offer. */
 // TODO(WA-3964): add a partly enforced state, with its own copy and a "Turn on guard" action.
 export type UnenforcedAllowlistDrawerState = {
@@ -74,6 +88,7 @@ export type AllowlistDrawerState =
   | ScheduledDrawerState
   | ReadyToApplyDrawerState
   | ExpiredRequestDrawerState
+  | RemoveGuardDrawerState
   | UnenforcedAllowlistDrawerState
 
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
@@ -91,7 +106,7 @@ export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: numb
 }
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
-  if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
+  if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: CONNECT_TO_REMOVE_HELPER }
   if (!viewer.isSigner) return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
 
   return { kind: 'active', action: 'manage', disabled: false }
@@ -102,6 +117,21 @@ const UNENFORCED_STATE: UnenforcedAllowlistDrawerState = {
   action: 'none',
   bannerTitle: UNENFORCED_BANNER_TITLE,
   bannerLine2: UNENFORCED_BANNER_LINE,
+}
+
+const resolveRemoveGuard = (viewer: Viewer): RemoveGuardDrawerState => {
+  const base = {
+    kind: 'remove-guard',
+    bannerTitle: GUARD_REMOVAL_BANNER_TITLE,
+    bannerLine2: GUARD_REMOVAL_BANNER_LINE,
+  } as const
+
+  if (!viewer.address) return { ...base, action: 'connect', disabled: false, helper: REMOVE_GUARD_CONNECT_HELPER }
+  if (!viewer.isSigner) {
+    return { ...base, action: 'remove-guard', disabled: true, helper: REMOVE_GUARD_NOT_A_SIGNER_HELPER }
+  }
+
+  return { ...base, action: 'remove-guard', disabled: false, helper: APPLY_SIGNER_HELPER }
 }
 
 const resolveReadyToApply = (
@@ -180,6 +210,7 @@ export const resolveAllowlistDrawerState = (
     return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
   }
 
+  if (policy.awaitingGuardRemoval) return resolveRemoveGuard(viewer)
   if (policy.scheduledChange) return resolveScheduled(policy.scheduledChange, viewer, nowMs)
 
   return policy.enabled ? resolveActive(viewer) : UNENFORCED_STATE
