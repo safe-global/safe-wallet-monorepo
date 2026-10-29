@@ -11,12 +11,10 @@ export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyTxHashBtn = '[data-testid="copy-tx-hash-btn"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 export const transactionSideList = '[data-testid="transaction-actions-list"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
-const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
@@ -185,10 +183,6 @@ export function clickOnTransactionItemByName(name, token) {
   matches.first().scrollIntoView().click({ force: true })
 }
 
-export function scrollToBottom() {
-  cy.scrollTo('bottom').wait(500)
-}
-
 export function verifyExpandedDetails(data, warning) {
   main.checkTextsExistWithinElement(accordionDetails, data)
   if (warning) cy.get(warning).should('be.visible')
@@ -200,16 +194,6 @@ export function verifyTxHeaderDetails(data) {
 
 export function verifyAdvancedDetails(data) {
   main.checkTextsExistWithinElement(accordionDetails, data)
-}
-
-export function verifyActions(data) {
-  main.checkTextsExistWithinElement(accordionDetails, data)
-}
-
-export function clickOnExpandableAction(data) {
-  cy.get(accordionDetails).within(() => {
-    cy.get('div').contains(data).click()
-  })
 }
 
 export function clickOnAdvancedDetails() {
@@ -246,15 +230,6 @@ export function clickOnCopyDataBtn(expectedData) {
   cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
 }
 
-export function verifyTxHashCopied(expectedHash) {
-  cy.window().then((win) => {
-    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
-  })
-
-  cy.get(copyTxHashBtn).click()
-  cy.get('@clipboardWrite').should('have.been.calledWith', expectedHash)
-}
-
 export function switchToGridView() {
   cy.get(gridViewBtn).click()
 }
@@ -264,25 +239,8 @@ export function collapseAdvancedDetails() {
   cy.get(baseGas).should('not.exist')
 }
 
-export function expandAllActions(actions) {
-  cy.get(expandAllBtn).click()
-  main.checkTextsExistWithinElement(accordionDetails, actions)
-}
-
 export function clickOnExpandAllActionsBtn() {
   cy.get(expandAllBtn).click()
-}
-
-export function collapseAllActions(data) {
-  cy.get(collapseAllBtn).click()
-  // Collapsed accordion panels are unmounted, so the rows are removed from the DOM entirely
-  data.forEach((action) => {
-    cy.contains(txRowTitle, action).should('not.exist')
-  })
-}
-
-export function verifyActionListExists(data) {
-  main.checkTextsExistWithinElement(transactionSideList, data)
 }
 
 /**
