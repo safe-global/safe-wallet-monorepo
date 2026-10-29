@@ -1,7 +1,7 @@
 import type { BigNumberish } from 'ethers'
 import { formatUnits, isAddress, parseUnits } from 'ethers'
 import { formatAmount, formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
-import { formatDuration, intervalToDuration } from 'date-fns'
+import { formatDuration, intervalToDuration, intlFormat } from 'date-fns'
 
 const GWEI = 'gwei'
 
@@ -75,17 +75,15 @@ export const shortenText = (text: string, length = 10, separator = '…'): strin
   return `${text.slice(0, length)}${separator}`
 }
 
-export const dateString = (date: number) => {
-  const formatterOptions: Intl.DateTimeFormatOptions = {
+export const dateString = (date: number) =>
+  intlFormat(date, {
     month: 'numeric',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
-  }
-  return new Intl.DateTimeFormat(undefined, formatterOptions).format(new Date(date))
-}
+  })
 
 export const camelCaseToSpaces = (str: string): string => {
   return str.replace(/[a-z0-9](?=[A-Z])/g, (str) => str + ' ')

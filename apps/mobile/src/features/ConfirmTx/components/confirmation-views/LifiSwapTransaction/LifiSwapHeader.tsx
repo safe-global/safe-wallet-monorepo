@@ -1,6 +1,6 @@
 import React from 'react'
 import { SwapTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { formatWithSchema } from '@/src/utils/date'
+import { formatWithSchema } from '@safe-global/utils/utils/date'
 import { formatValue } from '@/src/utils/formatters'
 import { SwapHeader } from '@/src/components/SwapHeader'
 

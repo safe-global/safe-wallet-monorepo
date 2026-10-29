@@ -1,4 +1,14 @@
-import { formatDate, getCountdown, getDetailedPeriod, getPeriod, parseTimestamp, relativeTime } from '../date'
+import {
+  currentMinutes,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  getCountdown,
+  getDetailedPeriod,
+  getPeriod,
+  parseTimestamp,
+  relativeTime,
+} from '../date'
 
 describe('formatDate', () => {
   it('formats a timestamp as an abbreviated date', () => {
@@ -112,5 +122,29 @@ describe('relativeTime', () => {
     const lastResetMin = lastReset / 60_000
 
     expect(relativeTime(`${lastResetMin}`, `${21 * 24 * 60}`)).toBe('04/22/2026')
+  })
+})
+
+describe('currentMinutes', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('should, when called, return the whole minutes since the epoch', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1729506116962)
+
+    expect(currentMinutes()).toBe(28825101)
+  })
+})
+
+describe('formatTime', () => {
+  it('should, when given a timestamp, return the local time with AM or PM', () => {
+    expect(formatTime(new Date(2024, 9, 21, 12, 21, 56).getTime())).toBe('12:21 PM')
+  })
+})
+
+describe('formatDateTime', () => {
+  it('should, when given a timestamp, return the local date and time with seconds', () => {
+    expect(formatDateTime(new Date(2024, 9, 21, 12, 21, 56).getTime())).toBe('Oct 21, 2024 - 12:21:56 PM')
   })
 })

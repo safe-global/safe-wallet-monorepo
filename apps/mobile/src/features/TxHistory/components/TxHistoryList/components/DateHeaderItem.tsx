@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text } from 'tamagui'
-import { formatWithSchema } from '@/src/utils/date'
+import { formatWithSchema } from '@safe-global/utils/utils/date'
 
 interface DateHeaderItemProps {
   timestamp: number
