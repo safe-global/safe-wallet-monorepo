@@ -111,22 +111,12 @@ test('preserves path prefixes and excludes remote credentials in isolated browse
 
 test('exposes only the public values to the browser', () => {
   const isolated = exposedValues(cypressEnvironment(local))
-  assert.deepEqual(Object.keys(isolated).sort(), [
-    'SAFE_CGW_BASE_URL',
-    'SAFE_E2E_ISOLATED',
-    'SAFE_TXS_BASE_URL',
-    'TX_BUILDER_URL',
-  ])
+  assert.deepEqual(Object.keys(isolated).sort(), ['SAFE_CGW_BASE_URL', 'SAFE_E2E_ISOLATED', 'SAFE_TXS_BASE_URL'])
   const staging = exposedValues(
     cypressEnvironment({ CYPRESS_WALLET_CREDENTIALS: 'secret', INFURA_API_KEY: 'secret', BEAMER_DATA_E2E: '{}' }),
   )
   assert.deepEqual(staging, { BEAMER_DATA_E2E: '{}' })
   assert.deepEqual(exposedValues({}), {})
-})
-
-test('points isolated Safe App specs at the locally served Transaction Builder', () => {
-  assert.equal(cypressEnvironment(local).TX_BUILDER_URL, 'http://localhost:4000')
-  assert.equal(cypressEnvironment({}).TX_BUILDER_URL, undefined)
 })
 
 test('rejects partial or remote configuration before starting isolated tests', () => {

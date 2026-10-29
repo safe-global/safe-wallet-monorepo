@@ -31,13 +31,7 @@ export function requiredChains(selected, specs = isolatedSpecs) {
   return [...new Set(selected.flatMap((spec) => specs[spec]?.chains ?? []))]
 }
 
-const EXPOSED_KEYS = [
-  'SAFE_E2E_ISOLATED',
-  'SAFE_CGW_BASE_URL',
-  'SAFE_TXS_BASE_URL',
-  'TX_BUILDER_URL',
-  'BEAMER_DATA_E2E',
-]
+const EXPOSED_KEYS = ['SAFE_E2E_ISOLATED', 'SAFE_CGW_BASE_URL', 'SAFE_TXS_BASE_URL', 'BEAMER_DATA_E2E']
 
 /** The public part of the Cypress environment, which specs read synchronously with Cypress.expose(). */
 export function exposedValues(environment) {
@@ -55,8 +49,6 @@ export function cypressEnvironment(env) {
   for (const key of ['SAFE_CGW_BASE_URL', 'SAFE_TXS_BASE_URL', 'SAFE_RPC_URL']) {
     result[key] = localUrl(env[key], key)
   }
-  // The monorepo Transaction Builder, served at the URL the local config service lists.
-  result.TX_BUILDER_URL = 'http://localhost:4000'
   result.SAFE_E2E_CHAINS = Object.fromEntries(
     Object.entries(JSON.parse(env.SAFE_E2E_CHAINS || '{}')).map(([chainId, chain]) => [
       chainId,
