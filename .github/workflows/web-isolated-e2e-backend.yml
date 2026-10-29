@@ -4,30 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       specs:
-        description: Comma-separated registered specs (suite/name); empty runs every registered spec
+        description: Comma-separated Playwright spec filters (file name patterns); empty runs every registered spec
         required: false
         default: ''
       shards:
-        description: Number of parallel jobs, each with its own backend
+        description: Number of parallel Playwright jobs, each with its own backend
         required: false
-        default: '6'
+        default: '3'
+  # No paths filter: the required result check must report on every pull request, so the plan job detects changes.
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - '.github/workflows/web-isolated-e2e-backend.yml'
-      - '.github/actions/isolated-e2e-backend/**'
-      - '.github/actions/build/**'
-      - '.github/actions/yarn/**'
-      - '.github/actions/corepack/**'
-      - '.github/actions/cache-deps/**'
-      - 'apps/web/**'
-      - 'apps/tx-builder/**'
-      - 'packages/**'
-      - 'config/**'
-      - 'package.json'
-      - 'yarn.lock'
-      - '.yarnrc.yml'
-      - '.yarn/patches/**'
 
 permissions:
   contents: read
@@ -38,27 +24,59 @@ concurrency:
 
 jobs:
   plan:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
+      run: ${{ steps.changes.outputs.relevant }}
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
+      - name: Detect changes that the isolated E2E covers
+        id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            .github/workflows/web-isolated-e2e-backend.yml
+            .github/actions/isolated-e2e-backend/**
+            .github/actions/build/**
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/cache-deps/**
+            apps/web/**
+            apps/tx-builder/**
+            packages/**
+            config/**
+            package.json
+            yarn.lock
+            .yarnrc.yml
+            .yarn/patches/**
+
+      # Fork pull requests get no secrets for the backend, so they cannot pass the check.
+      - name: Block fork pull requests
+        if: >-
+          github.event_name == 'pull_request' && steps.changes.outputs.relevant == 'true' &&
+          github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo '::error::Isolated E2E cannot run on a fork pull request; push the branch to this repository'
+          exit 1
+
       - uses: actions/checkout@v7.0.1
+        if: steps.changes.outputs.relevant == 'true'
         with:
           persist-credentials: false
       - name: Plan shards
         id: plan
+        if: steps.changes.outputs.relevant == 'true'
         env:
           SAFE_E2E_SPECS: ${{ inputs.specs }}
-          SAFE_E2E_SHARDS: ${{ inputs.shards || '6' }}
-        # Pull requests have no inputs, so they run every registered spec.
-        run: |
-          [ -n "$SAFE_E2E_SPECS" ] || unset SAFE_E2E_SPECS
-          echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
+          SAFE_E2E_SHARDS: ${{ inputs.shards || '3' }}
+        run: echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: plan
+    if: needs.plan.outputs.run == 'true'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
     steps:
@@ -106,7 +124,8 @@ jobs:
   e2e:
     # Starts next to the build job: setting up the backend takes about as long as the build.
     needs: plan
-    name: ${{ matrix.runner }} ${{ matrix.shard }}
+    if: needs.plan.outputs.run == 'true'
+    name: playwright ${{ matrix.shard }}
     runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
@@ -120,7 +139,9 @@ jobs:
       SAFE_E2E_PROJECT: safe-e2e-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
       SAFE_E2E_WEB_PORT: '8080'
       SAFE_E2E_WEB_URL: http://localhost:8080
-      SAFE_E2E_SPECS: ${{ matrix.specs }}
+      # Pull requests have no inputs, so every shard runs its part of all registered specs.
+      SAFE_E2E_SPECS: ${{ inputs.specs }}
+      SAFE_E2E_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -128,18 +149,8 @@ jobs:
       - uses: $/.github/actions/yarn
 
       - name: Install browser dependencies
-        id: browser
         working-directory: apps/web
-        env:
-          RUNNER: ${{ matrix.runner }}
-        run: |
-          yarn exec playwright install --with-deps --no-shell chromium
-          if [ "$RUNNER" = cypress ]; then
-            sudo apt-get install -y libgtk-3-0t64 libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb
-            yarn exec cypress install
-            yarn exec cypress verify
-          fi
-          node -e 'console.log("path=" + require("@playwright/test").chromium.executablePath())' >> "$GITHUB_OUTPUT"
+        run: yarn exec playwright install --with-deps --no-shell chromium
 
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry
@@ -195,22 +206,7 @@ jobs:
           timeout 60 bash -c 'until curl -sf http://localhost:4000 > /dev/null; do sleep 2; done'
           timeout 30 bash -c 'until curl -sf -X OPTIONS http://localhost:4003/simulate > /dev/null; do sleep 1; done'
 
-      - name: Run isolated Cypress shard
-        if: matrix.runner == 'cypress'
-        uses: cypress-io/github-action@v7.4.6
-        with:
-          install: false
-          working-directory: apps/web
-          start: yarn serve
-          wait-on: http://localhost:8080
-          wait-on-timeout: 120
-          command: yarn e2e:env cypress
-        env:
-          SAFE_E2E_BROWSER: ${{ steps.browser.outputs.path }}
-          REVERSE_PROXY_UI_PORT: '8080'
-
-      - name: Run isolated Playwright specs
-        if: matrix.runner == 'playwright'
+      - name: Run isolated Playwright shard
         working-directory: apps/web
         env:
           REVERSE_PROXY_UI_PORT: '8080'
@@ -251,9 +247,6 @@ jobs:
           # The fork cache lives in .anvil-cache, which the action skips as hidden by default.
           include-hidden-files: true
           path: |
-            apps/web/cypress/snapshots/actual/**/*.png
-            apps/web/e2e/environment/artifacts/cypress/videos/**/*.mp4
-            apps/web/e2e/environment/artifacts/cypress/reports/*.xml
             apps/web/e2e/environment/artifacts/playwright/**
             ${{ runner.temp }}/wallet.log
             ${{ runner.temp }}/isolated-e2e-backend/manifest.json
@@ -265,3 +258,16 @@ jobs:
             ${{ runner.temp }}/simulation.log
           retention-days: 7
           if-no-files-found: ignore
+
+  result:
+    # The one stable check name for branch protection; the shard names change with the shard count.
+    name: Isolated E2E result
+    if: always()
+    needs: [plan, build, e2e]
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.plan.outputs.run }}
