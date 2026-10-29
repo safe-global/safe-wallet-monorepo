@@ -13,9 +13,9 @@ Cypress → Playwright migration: move each Cypress test to the lowest level tha
 
 ## Commands
 
-The `pw:*` scripts live in the web workspace — run as `yarn workspace @safe-global/web <script>`: `pw:test` (all), `pw:test:smoke` / `pw:test:api` / `pw:test:ui` / `pw:test:regression` (by tag), `pw:report` (HTML report), `pw:ci` (CI mode — `@smoke|@api` with retries).
+The `pw:*` scripts live in the web workspace — run as `yarn workspace @safe-global/web <script>`: `pw:test` (all), `pw:test:smoke` / `pw:test:ui` / `pw:test:regression` (by tag), `pw:report` (HTML report). These run against staging, locally only.
 
-CI: smoke + api run on **every PR** touching `apps/web/**` or `packages/**` (`web-pw-smoke.yml`); the full suite runs on demand and on a weekday cron (`web-pw-full-ondemand.yml`).
+CI: every registered spec runs on **every PR** on the isolated stack (`web-isolated-e2e-backend.yml`, see below). No CI job runs Playwright against staging.
 
 ## Isolated backend
 
