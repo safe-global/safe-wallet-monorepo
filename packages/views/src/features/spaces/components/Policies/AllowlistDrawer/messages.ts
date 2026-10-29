@@ -1,7 +1,9 @@
-import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { tz } from '@date-fns/tz'
+import { differenceInDays, formatDistanceStrict, formatDuration, intervalToDuration } from 'date-fns'
 import type { PendingPolicyOperation } from '../types'
 import type { PendingTxOutcome } from '../SpendingLimitDrawer/resolveState'
 import { PENDING_OUTCOME_TITLE } from '../SpendingLimitDrawer/messages'
+import { formatUtcDate } from '../SpendingLimitDrawer/format'
 import { POLICY_CHANGE_DELAY } from '../RecipientAllowlistFlow/constants'
 
 /** `expired`: the signing window closed before the transaction executed. */
@@ -75,15 +77,13 @@ export const REQUESTED_LABEL = 'Requested'
 
 export const SAFE_ACCOUNT_LABEL = 'Safe account'
 
-const formatHours = (hours: number): string => `${hours} hour${maybePlural(hours)}`
-
 // A first allowlist reads as one thing ("it"); an edit reads as the changes ("they"), as in the design.
 export const applyBannerTitle = (stage: ApplyStage, operation: ApplyOperation, hoursLeft: number): string => {
   const isCreate = operation === 'create'
 
   switch (stage) {
     case 'waiting':
-      return `${isCreate ? 'Your allowlist' : 'Your changes'} can be applied in ${formatHours(hoursLeft)}`
+      return `${isCreate ? 'Your allowlist' : 'Your changes'} can be applied in ${formatDuration({ hours: hoursLeft })}`
     case 'ready':
       return isCreate ? 'Your allowlist is ready to apply' : 'Your changes are ready to apply'
     case 'expired':
@@ -152,3 +152,29 @@ export const SCHEDULED_BANNER_LINE: Record<'create' | 'update', string> = {
 export const CANCEL_CONNECT_HELPER = 'Connect a signer wallet to cancel the change.'
 
 export const CANCEL_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can cancel this change.'
+
+// Chain time, so whole days are counted in UTC rather than the viewer's zone.
+const UTC = { in: tz('UTC') }
+
+const MS_PER_SECOND = 1_000
+
+const isLastDay = (until: number, nowMs: number): boolean => differenceInDays(until * MS_PER_SECOND, nowMs, UTC) < 1
+
+const daysLeft = (until: number, nowMs: number): string =>
+  formatDistanceStrict(until * MS_PER_SECOND, nowMs, { ...UTC, unit: 'day', roundingMethod: 'floor' })
+
+const durationLeft = (until: number, nowMs: number): string =>
+  formatDuration(intervalToDuration({ start: nowMs, end: Math.max(nowMs, until * MS_PER_SECOND) }, UTC), {
+    format: ['days', 'hours', 'minutes'],
+  }) || 'less than a minute'
+
+/** `6 days left · until Oct 21, 2026`. Takes unix SECONDS; an expiry in the past is a closed state, not shown. */
+export const timeToSignLine = (expiresAt: number, nowMs: number): string =>
+  `${isLastDay(expiresAt, nowMs) ? 'Less than a day left' : `${daysLeft(expiresAt, nowMs)} left`} · until ${formatUtcDate(expiresAt)}`
+
+/** `Apply in 23 hours 59 minutes`, for the button that stays disabled until the guard's delay is over. Takes unix SECONDS. */
+export const applyInLabel = (appliesAt: number, nowMs: number): string => `Apply in ${durationLeft(appliesAt, nowMs)}`
+
+/** `23 hours 59 minutes left` within the last day, else `6 days left`. Takes unix SECONDS. */
+export const timeLeftLabel = (until: number, nowMs: number): string =>
+  `${isLastDay(until, nowMs) ? durationLeft(until, nowMs) : daysLeft(until, nowMs)} left`
