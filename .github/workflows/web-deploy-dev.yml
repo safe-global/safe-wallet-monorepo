@@ -42,6 +42,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - uses: $/.github/actions/yarn
+        # Pushes build what goes to dev/staging, so only pull request previews use the caches.
+        with:
+          cache: ${{ github.event_name == 'pull_request' }}
 
       - uses: $/.github/actions/build
         env:
@@ -97,6 +100,8 @@ jobs:
           NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING }}
           NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
+        with:
+          cache: ${{ github.event_name == 'pull_request' }}
 
       - name: Upload app build
         uses: actions/upload-artifact@v7.0.2
@@ -117,6 +122,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - uses: $/.github/actions/yarn
+        # Pushes build what goes to dev/staging, so only pull request previews use the caches.
+        with:
+          cache: ${{ github.event_name == 'pull_request' }}
 
       - uses: $/.github/actions/build-storybook
         env:

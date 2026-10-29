@@ -32,8 +32,10 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/yarn
+        # This job holds EXPO_TOKEN, so it must not run files from a cache.
         with:
           after-install: 'false'
+          cache: 'false'
 
       - name: Build expo plugins
         run: yarn workspace @safe-global/notification-service-ios build
