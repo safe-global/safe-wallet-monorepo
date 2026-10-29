@@ -1,4 +1,4 @@
-import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
+import { MAX_RECIPIENTS, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -63,8 +63,6 @@ export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balanc
     </div>
   </div>
 )
-
-const MAX_RECIPIENTS = 5
 
 export type CreateTokenTransferProps = {
   txNonce?: number

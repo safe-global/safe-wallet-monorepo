@@ -6,6 +6,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import Link from 'next/link'
 import type { ReactElement } from 'react'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { MAX_RECIPIENTS } from '../utils'
 
 const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?: string }): ReactElement => {
   const safeLinkQuery = useSafeLinkQuery()
@@ -27,8 +28,8 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
             Use CSV Airdrop
           </Typography>
           <Typography variant="paragraph-small" className="block">
-            You&apos;ve reached the limit of 5 recipients. To add more use CSV Airdrop, where you can simply upload you
-            CSV file and send to endless number of recipients.
+            You&apos;ve reached the limit of {MAX_RECIPIENTS} recipients. To add more use CSV Airdrop, where you can
+            simply upload your CSV file and send to endless number of recipients.
           </Typography>
         </div>
       </div>

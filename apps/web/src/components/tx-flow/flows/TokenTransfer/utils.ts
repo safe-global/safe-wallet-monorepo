@@ -12,6 +12,8 @@ import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
+export const MAX_RECIPIENTS = 10
+
 export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) => {
   const spendingLimit = useSpendingLimit(selectedToken?.tokenInfo)
 
