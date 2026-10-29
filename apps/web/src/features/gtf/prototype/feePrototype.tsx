@@ -1,6 +1,6 @@
 import { useContext, useState, type ReactElement, type ReactNode } from 'react'
 import classnames from 'classnames'
-import { getAddress } from 'ethers'
+import { getAddress, parseUnits } from 'ethers'
 import { ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, Lock } from 'lucide-react'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -26,6 +26,9 @@ import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/com
 import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '@safe-global/views/features/gtf/components/shared/tooltips'
 import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
 import TokenIcon from '@/components/common/TokenIcon'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
+import { PaperViewToggle } from '@safe-global/views/components/common/PaperViewToggle'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -41,7 +44,7 @@ import { Chip } from '@safe-global/views/components/ui/chip'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import FeeInfoBanner from '../components/FeeInfoBanner'
+import bannerCss from '../components/FeeInfoBanner/styles.module.css'
 import feesCss from '../components/FeesPreview/styles.module.css'
 
 export type FeePlan = 'free' | 'pro' | 'pro-none-left'
@@ -326,7 +329,7 @@ const getFeeCard = ({
     payer: lockedPayer,
   })
 
-  if (step === 'sign') {
+  if (step === 'review') {
     if (sponsoredAtSigning) return locked('sponsored')
     if (role !== 'first') return locked(lockedSource)
 
@@ -363,12 +366,13 @@ const FeeSection = ({ card, screen }: { card: FeeCard; screen: ScreenProps }): R
   const isSponsored = card.payer === 'sponsored'
   // Gas counts whoever pays it; only a sponsored transaction leaves it out.
   const total = SEND_ETH + (isSponsored ? 0 : GAS_FEE)
-  const left = plan === 'pro-none-left' ? 0 : step === 'sign' ? SPONSORED_QUOTA - 1 : sponsoredLeftAtExecution
+  const left = plan === 'pro-none-left' ? 0 : step !== 'execute' ? SPONSORED_QUOTA - 1 : sponsoredLeftAtExecution
 
   return (
     <div className={feesCss.container}>
       <div className={feesCss.header}>
         <Typography variant="paragraph-small-bold">Fees</Typography>
+        <span className={bannerCss.newTag}>New</span>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-[var(--color-border-light)]">
@@ -450,6 +454,92 @@ const StepRail = ({ confirmations, threshold }: { confirmations: number; thresho
   )
 }
 
+/** ConfirmTxReceipt's three checks, copy verbatim. */
+const SIGN_CHECKS: { label: string; description: ReactNode }[] = [
+  {
+    label: 'Review what you will sign',
+    description: (
+      <>
+        Signing is an irreversible action so make sure you know what you are signing.{' '}
+        <ExternalLink href="https://help.safe.global/articles/2485383995-How-to-perform-basic-transactions-checks-on-Safe{Wallet}">
+          Read more
+        </ExternalLink>
+        .
+      </>
+    ),
+  },
+  {
+    label: 'Compare with your wallet',
+    description: (
+      <>
+        Once you click <b>Sign</b>, the transaction will appear in your signing wallet. Make sure that all the details
+        match.
+      </>
+    ),
+  },
+  {
+    label: 'Verify with external tools',
+    description: (
+      <>
+        You can additionally cross-verify your transaction data in a third-party tool like{' '}
+        <ExternalLink href="https://safeutils.openzeppelin.com/">Safe Utils</ExternalLink>.
+      </>
+    ),
+  },
+]
+
+const shortAddress = (address: string): string => `${address.slice(0, 6)}…${address.slice(-4)}`
+
+/** Receipt's Data tab with fixed values: the real Receipt hashes the transaction and needs a live Safe and wallet. */
+const StaticReceipt = (): ReactElement => (
+  <PaperViewToggle activeView={0}>
+    {[
+      {
+        title: 'Data',
+        content: (
+          <div className="flex flex-col divide-y divide-[var(--color-border-light)] px-4 pt-2 [&>*]:py-2 [&>*:first-child]:pt-0">
+            <TxDetailsRow label="To">{shortAddress(RECIPIENT)}</TxDetailsRow>
+            <TxDetailsRow label="Value">{parseUnits(String(SEND_ETH), 18).toString()}</TxDetailsRow>
+            <TxDetailsRow label="Data">0x</TxDetailsRow>
+            <TxDetailsRow label="Operation">
+              <Typography variant="paragraph-small" className="flex items-center gap-1">
+                0 (call)
+                <Check className="size-[1em] text-[var(--color-success-main)]" />
+              </Typography>
+            </TxDetailsRow>
+            <TxDetailsRow label="SafeTxGas">0</TxDetailsRow>
+            <TxDetailsRow label="BaseGas">0</TxDetailsRow>
+            <TxDetailsRow label="GasPrice">0</TxDetailsRow>
+            <TxDetailsRow label="GasToken">{shortAddress(ETH.address)}</TxDetailsRow>
+            <TxDetailsRow label="RefundReceiver">{shortAddress(ETH.address)}</TxDetailsRow>
+            <TxDetailsRow label="Nonce">{NONCE}</TxDetailsRow>
+          </div>
+        ),
+      },
+    ]}
+  </PaperViewToggle>
+)
+
+/** ConfirmTxReceipt's layout ("Review details"): the checks on the left, the receipt on the right. */
+const SignReceipt = (): ReactElement => (
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="flex flex-col gap-6 px-1">
+      {SIGN_CHECKS.map(({ label, description }, index) => (
+        <div key={label} className="flex flex-row gap-4">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+            {index + 1}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Typography className="font-bold">{label}</Typography>
+            <Typography>{description}</Typography>
+          </div>
+        </div>
+      ))}
+    </div>
+    <StaticReceipt />
+  </div>
+)
+
 /** What a click on the screen's main button means for the flow: the next screen, or the end of it. */
 type FlowAction = 'next' | 'finish'
 
@@ -471,7 +561,7 @@ const PrimaryAction = ({
       </Button>
     )
   }
-  if (role === 'first') {
+  if (step === 'review') {
     return (
       <Button size="submit" onClick={() => onAction('next')}>
         Continue
@@ -504,8 +594,9 @@ const PrimaryAction = ({
 export type ScreenProps = {
   /** The plan when the first signer signs: Free, Pro with sponsored transactions left, or Pro with none left. */
   plan: FeePlan
-  step: 'sign' | 'execute'
-  /** On the sign step: the first signer picks the fee, later signers see it, the last one can sign and execute. */
+  /** Review shows the fee, Sign is the app's "Review details" step with the sign buttons, Execute is the executor's. */
+  step: 'review' | 'sign' | 'execute'
+  /** The first signer picks the fee, later signers see it locked, the last one can sign and execute. */
   role?: SignerRole
   /** What the first signer picked. */
   lockedSource?: FeeSource
@@ -516,7 +607,8 @@ export type ScreenProps = {
 }
 
 const TITLE: Record<ScreenProps['step'], string> = {
-  sign: 'Confirm transaction',
+  review: 'Confirm transaction',
+  sign: 'Review details',
   execute: 'Execute transaction',
 }
 
@@ -559,8 +651,8 @@ export const FeeScreen = ({
   }
 
   const card = getFeeCard({ screen, source, onSourceChange: changeSource, payer, onPayerChange: setPayer })
-  const confirmations = step === 'sign' ? CONFIRMATIONS_BEFORE[role](threshold) : threshold
-  const isFirstSigner = step === 'sign' && role === 'first'
+  const confirmations = step === 'execute' ? threshold : CONFIRMATIONS_BEFORE[role](threshold)
+  const isFirstSigner = step === 'review' && role === 'first'
 
   return (
     <SafeTxContext.Provider value={{ ...defaults, nonce: NONCE, recommendedNonce: NONCE, nonceNeeded: true }}>
@@ -583,15 +675,20 @@ export const FeeScreen = ({
                   </div>
 
                   <div className={classnames('overflow-hidden rounded-t-xl bg-card', layoutCss.header)}>
-                    <ProgressBar value={step === 'execute' ? 90 : 75} color="secondary" />
+                    <ProgressBar value={step === 'execute' ? 95 : step === 'sign' ? 85 : 75} color="secondary" />
                     <TxLayoutHeader subtitle="Send tokens" icon={AssetsIcon} fixedNonce />
                   </div>
 
                   <div className={layoutCss.step}>
                     <TxCard>
-                      <TxSummary />
-
-                      <FeeSection card={card} screen={screen} />
+                      {step === 'sign' ? (
+                        <SignReceipt />
+                      ) : (
+                        <>
+                          <TxSummary />
+                          <FeeSection card={card} screen={screen} />
+                        </>
+                      )}
 
                       {isFirstSigner && (
                         <div className="flex flex-col gap-2">
@@ -614,9 +711,9 @@ export const FeeScreen = ({
                       </TxCardActions>
                     </TxCard>
 
-                    {(isFirstSigner || step === 'execute') && (
+                    {(isFirstSigner || step !== 'review') && (
                       <Button variant="outline" className={layoutCss.backButton} onClick={onBack}>
-                        {isFirstSigner ? 'Back' : 'Execute later'}
+                        {step === 'execute' ? 'Execute later' : 'Back'}
                       </Button>
                     )}
                   </div>
@@ -630,9 +727,6 @@ export const FeeScreen = ({
                 >
                   <div className={layoutCss.sticky}>
                     <SafeShieldDisplay {...SHIELD} showHypernativeInfo={false} hasProFeatures isSafePro />
-                    <div className={layoutCss.sidebarSlot}>
-                      <FeeInfoBanner />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -651,9 +745,12 @@ export type Flow = { id: string; label: string; source?: FeeSource; steps: FlowS
 const signThenExecute = (plan: FeePlan, source: FeeSource | undefined, execute: Partial<ScreenProps> = {}) => {
   const lockedSource = source ?? 'signer'
   return [
-    { label: 'First signer', props: { plan, step: 'sign', role: 'first', initialSource: source } },
-    { label: 'Second signer', props: { plan, step: 'sign', role: 'later', lockedSource } },
-    { label: 'Last signer', props: { plan, step: 'sign', role: 'last', lockedSource, initialSource: source } },
+    { label: 'First signer · Review', props: { plan, step: 'review', role: 'first', initialSource: source } },
+    { label: 'First signer · Sign', props: { plan, step: 'sign', role: 'first', lockedSource } },
+    { label: 'Second signer · Review', props: { plan, step: 'review', role: 'later', lockedSource } },
+    { label: 'Second signer · Sign', props: { plan, step: 'sign', role: 'later', lockedSource } },
+    { label: 'Last signer · Review', props: { plan, step: 'review', role: 'last', lockedSource } },
+    { label: 'Last signer · Sign', props: { plan, step: 'sign', role: 'last', lockedSource } },
     { label: 'Executor', props: { plan, step: 'execute', lockedSource, ...execute } },
   ] satisfies FlowStep[]
 }
