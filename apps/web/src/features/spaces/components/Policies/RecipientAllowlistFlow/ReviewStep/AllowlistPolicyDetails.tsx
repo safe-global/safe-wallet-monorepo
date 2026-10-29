@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
+import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -97,17 +97,18 @@ const AllowlistPolicyDetails = ({
     </Card>
 
     {fallback === 'allow' && (
-      <Alert variant="warning" outlined={false} data-testid="allowlist-gaps">
-        <AlertSeverityIcon variant="warning" />
-        <AlertTitle>{ALLOWLIST_GAPS_TITLE}</AlertTitle>
-        <AlertDescription>
+      <StatusAlert
+        tone="warning"
+        title={ALLOWLIST_GAPS_TITLE}
+        description={
           <ul className="list-disc pl-4">
             <li>{ALLOWLIST_GAP_APPROVALS}</li>
             {hasNativeRule && <li>{ALLOWLIST_GAP_NATIVE}</li>}
             <li>{ALLOWLIST_GAP_DELEGATE_CALLS}</li>
           </ul>
-        </AlertDescription>
-      </Alert>
+        }
+        data-testid="allowlist-gaps"
+      />
     )}
   </div>
 )
