@@ -88,7 +88,7 @@ describe('ExistingPoliciesStep', () => {
     renderStep()
 
     expect(screen.getAllByTestId('spending-limit-impact')).toHaveLength(2)
-    expect(screen.getByText('Will be restricted')).toBeInTheDocument()
+    expect(screen.getByText('Follows the allowlist')).toBeInTheDocument()
     expect(screen.queryByText('Will be blocked')).not.toBeInTheDocument()
     expect(screen.getByText('500/day · USDC is in this allowlist')).toBeInTheDocument()
     expect(screen.getByText("500/day · ETH isn't in this allowlist")).toBeInTheDocument()
