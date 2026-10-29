@@ -28,9 +28,8 @@ import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxDa
 import singleTxCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
 import type { PolicyConfiguration, SetupCallDescription } from '@/features/policy-guard'
 import { isFallbackAccess } from '@/features/policy-guard/services'
+import type { AllowlistAddressInfo } from '../hooks/useAllowlistAddressInfo'
 import { getRuleKind, type RuleKind } from './ruleKind'
-
-type AddressInfo = { name?: string; logoUri?: string }
 
 type AllowlistSetupActionsProps = {
   chainId: string
@@ -38,12 +37,12 @@ type AllowlistSetupActionsProps = {
   configurations: PolicyConfiguration[]
   describeCall: (call: MetaTransactionData) => SetupCallDescription | undefined
   decodeRecipients: (data: string) => string[]
-  getAddressInfo: (address: string) => AddressInfo
+  getAddressInfo: (address: string) => AllowlistAddressInfo
 }
 
 const CONFIGURING_METHODS = ['configureImmediately', 'requestConfiguration', 'applyConfiguration']
 
-const RuleAddress = ({ address, info }: { address: string; info: AddressInfo }): ReactElement | null =>
+const RuleAddress = ({ address, info }: { address: string; info: AllowlistAddressInfo }): ReactElement | null =>
   generateDataRowValue(address, 'address', true, { value: address, name: info.name, logoUri: info.logoUri })
 
 const ActionRow = ({
@@ -107,7 +106,7 @@ const PolicyRuleRows = ({
   count: number
   kind: RuleKind
   decodeRecipients: (data: string) => string[]
-  getAddressInfo: (address: string) => AddressInfo
+  getAddressInfo: (address: string) => AllowlistAddressInfo
 }): ReactElement => (
   <div className="flex flex-col gap-1.5" data-testid="allowlist-rule">
     <Typography variant="paragraph-small-bold" as="div">
