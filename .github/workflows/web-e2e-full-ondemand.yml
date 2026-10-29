@@ -1,13 +1,10 @@
 name: Web Full Regression on demand tests
-run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('E2E regression — **/{0}', inputs.spec) || inputs.spec != '' && format('E2E regression — {0}/{1}', inputs.suite, inputs.spec) || (inputs.suite != '' && inputs.suite != 'full-regression') && format('E2E regression — {0}/*', inputs.suite) || 'Web Full Regression on demand tests' }}
+run-name: ${{ inputs.spec != '' && format('E2E regression — safe-apps/{0}', inputs.spec) || 'Web Full Regression on demand tests' }}
 
-# Manual runs can be narrowed down; leave both inputs untouched for the full regression.
-#   suite  = full-regression (default) | regression | safe-apps
-#   spec   = spec file name(s) without path or .cy.js, comma-separated, e.g.
-#              address_book_2              -> cypress/e2e/<suite>/address_book_2.cy.js
-#              address_book_2, portfolio   -> both, inside <suite>
-#            with suite=full-regression a name is looked up in every full-regression directory
-#            (visual/ is never included).
+# Runs cypress/e2e/safe-apps/ against staging. A manual run can name specs to run only those:
+#   spec = spec file name(s) without path or .cy.js, comma-separated, e.g.
+#            apps_list               -> cypress/e2e/safe-apps/apps_list.cy.js
+#            apps_list, info_modal   -> both
 # Partial runs skip the TestRail upload and use one container per named spec (max 8; whole
 # directories keep 8).
 # A spec name that matches no file fails the small "plan" job in seconds; no e2e container is started.
@@ -16,16 +13,8 @@ run-name: ${{ inputs.spec != '' && inputs.suite == 'full-regression' && format('
 on:
   workflow_dispatch:
     inputs:
-      suite:
-        description: 'Directory to run. Default = the full regression (both directories).'
-        type: choice
-        default: full-regression
-        options:
-          - full-regression
-          - regression
-          - safe-apps
       spec:
-        description: 'Spec names (optional), comma-separated, e.g. address_book_2, portfolio (no path, no .cy.js).'
+        description: 'Spec names (optional), comma-separated, e.g. apps_list, info_modal (no path, no .cy.js).'
         type: string
         required: false
         default: ''
@@ -57,22 +46,19 @@ jobs:
         id: specs
         shell: bash
         env:
-          SUITE: ${{ inputs.suite || 'full-regression' }}
           SPEC: ${{ inputs.spec || '' }}
         run: |
           set -euo pipefail
-          # The full regression covers these; visual/ has its own workflow.
-          FULL_DIRS=(regression safe-apps)
-          suite="${SUITE:-full-regression}"
-          if [ "$suite" = 'full-regression' ]; then dirs=("${FULL_DIRS[@]}"); else dirs=("$suite"); fi
+          # visual/ has its own workflow.
+          dir=safe-apps
 
           specs=""
           partial=true
           if [ -z "${SPEC//[[:space:]]/}" ]; then
-            for d in "${dirs[@]}"; do specs+="cypress/e2e/${d}/*.cy.js"$'\n'; done
-            [ "$suite" = 'full-regression' ] && partial=false
+            specs="cypress/e2e/${dir}/*.cy.js"$'\n'
+            partial=false
             n=8
-            if [ "$partial" = false ]; then title="Cypress Full Regression on demand tests"; else title="Cypress ${suite}/*"; fi
+            title="Cypress Full Regression on demand tests"
           else
             missing=""
             n=0
@@ -81,24 +67,22 @@ jobs:
               name="${name%"${name##*[![:space:]]}"}"
               [ -z "$name" ] && continue
               name="${name%.cy.js}"
-              found=0
-              for d in "${dirs[@]}"; do
-                if [ -f "apps/web/cypress/e2e/${d}/${name}.cy.js" ]; then
-                  specs+="cypress/e2e/${d}/${name}.cy.js"$'\n'
-                  found=1; n=$((n + 1))
-                fi
-              done
-              [ "$found" -eq 0 ] && missing+="  $name"$'\n'
+              if [ -f "apps/web/cypress/e2e/${dir}/${name}.cy.js" ]; then
+                specs+="cypress/e2e/${dir}/${name}.cy.js"$'\n'
+                n=$((n + 1))
+              else
+                missing+="  $name"$'\n'
+              fi
             done <<< "$(printf '%s' "$SPEC" | tr ',' '\n')"
 
             if [ -n "$missing" ] || [ "$n" -eq 0 ]; then
               echo "::error::No spec file matches:"$'\n'"${missing:-  (the 'spec' input contained no names)}"
-              echo "Check the spec names (file name only, no path, no .cy.js) and the selected suite."
+              echo "Check the spec names (file name only, no path, no .cy.js)."
               exit 1
             fi
             [ "$n" -gt 8 ] && n=8
             names="$(printf '%s' "$SPEC" | tr '\n' ',' | sed 's/[[:space:]]*,[[:space:]]*/, /g; s/^[[:space:]]*//; s/[[:space:]]*$//; s/, $//')"
-            if [ "$suite" = 'full-regression' ]; then title="Cypress **/${names}"; else title="Cypress ${suite}/${names}"; fi
+            title="Cypress ${dir}/${names}"
           fi
 
           list=""; for ((i = 1; i <= n; i++)); do list+="$i,"; done
