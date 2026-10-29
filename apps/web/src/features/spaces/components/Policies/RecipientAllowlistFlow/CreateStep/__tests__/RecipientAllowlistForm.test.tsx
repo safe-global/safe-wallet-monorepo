@@ -103,7 +103,7 @@ describe('RecipientAllowlistForm', () => {
     await userEvent.click(screen.getByText('select recipient'))
 
     expect(
-      screen.getByText(`Treasury will only be able to send ETH and ${shortenAddress(UNKNOWN_TOKEN)} to Carol.`),
+      screen.getByText(`Treasury will be able to send ETH and ${shortenAddress(UNKNOWN_TOKEN)} only to Carol.`),
     ).toBeInTheDocument()
   })
 

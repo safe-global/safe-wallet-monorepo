@@ -326,10 +326,10 @@ describe('ReviewRecipientAllowlist', () => {
 
     expect(screen.getByTestId('review-transaction')).toHaveAttribute('data-title', 'Confirm policy')
     expect(
-      screen.getByText('Treasury on Sepolia will only be able to send ETH and USDC to 2 recipients.'),
+      screen.getByText('Treasury on Sepolia will be able to send ETH and USDC only to 2 recipients.'),
     ).toBeInTheDocument()
     expect(screen.getByText('Check the details below before you sign.')).toBeInTheDocument()
-    expect(screen.queryByText('Anything you leave out will be blocked.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Transfers of these tokens to anyone else will be blocked.')).not.toBeInTheDocument()
   })
 
   it('shows the account, the tokens and the recipients', () => {

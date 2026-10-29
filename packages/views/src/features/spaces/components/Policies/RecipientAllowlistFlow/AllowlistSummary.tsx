@@ -42,7 +42,7 @@ const AllowlistSummary = ({
   const title = !accountLabel
     ? SUMMARY_NO_ACCOUNT_TITLE
     : isComplete
-      ? `${accountLabel} will only be able to send ${describeTokens(tokenSymbols)} to ${describeRecipients(recipientNames)}.`
+      ? `${accountLabel} will be able to send ${describeTokens(tokenSymbols)} only to ${describeRecipients(recipientNames)}.`
       : `To create an allowlist policy on ${accountLabel}, select at least one token and one recipient.`
 
   return (
