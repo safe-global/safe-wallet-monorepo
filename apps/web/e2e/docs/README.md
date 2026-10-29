@@ -1,311 +1,153 @@
 # Safe Wallet — Playwright E2E Tests
 
-## Philosophy
+## When to write a Playwright test
 
-This framework follows three principles in strict order:
+Only when the behaviour needs a real browser or several real services together. Everything else goes in Jest. The rule, with an example for each level: [Choose the test level](../../AGENTS.md#choose-the-test-level). How to write a readable test, in Jest and Playwright: [Clean tests](../../../../docs/ai/testing-conventions.md#clean-tests).
 
-1. **Simple before clever** — no abstractions until you need them twice
-2. **API-first, not UI-heavy** — use the CGW API for setup/verification; reserve Playwright for what only a browser can test
-3. **Stable in CI** — every test must pass 10 consecutive runs before merge
+## Where the specs run
 
-## Quick Start
+Every spec runs on the isolated stack: the wallet, CGW, the Transaction Service, the Config Service and mocks of third-party services, against an Anvil fork of Sepolia. CI runs every registered spec on every pull request (`web-isolated-e2e-backend.yml`).
 
-```bash
-# From apps/web/
-yarn pw:test              # Run all tests
-yarn pw:test:smoke        # Run @smoke tagged tests only
-yarn pw:report            # Open last HTML report
+```sh
+yarn workspace @safe-global/web e2e:env up
+yarn workspace @safe-global/web e2e:env build
+REVERSE_PROXY_UI_PORT=3080 yarn workspace @safe-global/web serve
+# in another terminal
+SAFE_E2E_SPECS=multisig-confirm yarn workspace @safe-global/web e2e:env playwright
 ```
 
-### Isolated mode (local backend)
+Setup, the spec registry, scenarios, mocks and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md).
 
-The same specs also run against the local Docker stack (CGW, Transaction Service, Config Service and an Anvil Sepolia fork) with generated Safes and wallets: `yarn e2e:env playwright`. Read Safes from the `safes` fixture and wallets from the `credentials` fixture, never from `SAFES` directly, so both modes work. Setup, scenarios and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#specs).
+`playwright.config.ts` and the `pw:*` scripts still run the specs against staging. They are being removed: do not write a spec that needs staging.
 
-## Project Structure
+## Project structure
 
 ```
 e2e/
-├── playwright.config.ts       # Chromium-only, traces on failure
-├── tsconfig.json              # TypeScript config for e2e
-├── tests/                     # Tests describe business behavior, not implementation
-│   ├── smoke/                 # Critical path
-│   ├── e2e/                   # Full user flows
-│   └── regression/            # Bug-specific regression tests
-├── src/                       # Framework code (not tests)
-│   ├── pages/                 # Page interactions (locators + actions, NO assertions)
-│   ├── api/                   # API clients (CGW, TX Service)
-│   ├── fixtures/              # Custom Playwright fixtures (safePage, safeApiClient)
-│   ├── data/                  # Constants, test addresses, URLs, and data factories/builders
-│   ├── utils/                 # Shared helpers
-│   └── types/                 # TypeScript types
-├── docs/                      # Decisions and standards — the "why" behind the framework
-│   ├── README.md              # This file — philosophy, rules, patterns
-│   ├── AI_TEST_OUTPUT_FORMAT.md   # 12-step protocol for AI test generation
-│   └── developer-testability-contract.md  # What QA needs from dev code
-└── reports/                   # Generated — gitignored
+├── playwright.isolated.config.ts  # The config of the isolated runs
+├── tests/
+│   ├── e2e/                       # Journeys: act in the UI, check on chain and in CGW
+│   ├── regression/                # Feature checks; auth0/ runs against the Auth0 mock
+│   └── smoke/                     # Checks of the main pages
+├── src/
+│   ├── fixtures/                  # test.fixture.ts (every spec), journey.fixture.ts (journeys)
+│   ├── seed/                      # Seed a Safe and its state for a journey
+│   ├── chain/                     # Reads from the fork
+│   ├── api/                       # CGW client and helpers, WalletConnect dApp, Ledger emulator
+│   ├── pages/                     # Page objects: locators and actions, no assertions
+│   └── data/                      # Constants and credentials
+├── environment/                   # The isolated stack, the spec registry and scenarios
+└── docs/
 ```
 
-## Test Level Decision Rule
+## Write a journey
 
-Before writing any test, answer: **What is the right test level?**
+A journey is the default Playwright test. It acts in the UI as a user does, and checks the result where it lands: on chain and in CGW.
 
-| Signal                                    | Test Level                        |
-| ----------------------------------------- | --------------------------------- |
-| Pure business logic (parsing, validation) | Unit test                         |
-| Component renders correctly               | Component test (Jest/RTL)         |
-| API returns correct data                  | API test (`@api` tag)             |
-| UI renders data from backend              | Hybrid (API setup → UI verify)    |
-| Full user flow through UI                 | Playwright UI (`@smoke` / `@e2e`) |
-| Exploratory / edge cases                  | Manual                            |
-| Not automatable                           | Don't automate                    |
+```ts
+import { test, expect } from '../../src/fixtures/journey.fixture'
 
-**Default:** if unsure, don't automate yet — create a manual test case first.
+test('should execute a transfer when a second owner confirms the signature of the first', async ({
+  safePage,
+  safeApiClient,
+  journey,
+}) => {
+  const recipient = Wallet.createRandom().address
+  const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2 })
 
-## Writing Tests
+  const sendTokens = new SendTokensPage(safePage)
+  const queue = new TxQueuePage(safePage)
+  const review = new TxReviewPage(safePage)
+  await new HomePage(safePage).goto(safe.prefixedAddress)
+  await sendTokens.open()
+  await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
+  await sendTokens.nextButton.click()
+  await review.sign()
+  await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
 
-### Import from fixtures, not from @playwright/test
+  await journey.connectAs('owner1')
+  await queue.goto(safe.prefixedAddress)
+  await queue.confirm(0)
+  await review.continueAndExecute()
+  await review.waitForExecution()
 
-```typescript
-// ✅ Correct
-import { test, expect } from '../../src/fixtures/test.fixture'
-
-// ❌ Wrong — bypasses localStorage seeding
-import { test, expect } from '@playwright/test'
+  await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
+  expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
+})
 ```
 
-### Tags and Test Categories
+Full spec: [multisig-confirm.spec.ts](../tests/e2e/multisig-confirm.spec.ts).
 
-Use tags in `test.describe()`:
+- **Seed what the test needs.** `seedSafe(journey, { owners, threshold })` deploys a new Safe for this test, names its owners, and puts its address in the report. The other functions in `src/seed/` add tokens, NFTs, queued transactions, proposers and more. Seed through the SDK and the local APIs, never through the UI.
+- **Say who is connected.** The journey starts connected as `owner4`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation.
+- **Check the outcome, not the screen only.** Poll CGW with `expect.poll` and `SafeApiClient` (`getNonce`, `getQueued`), and read the fork with `src/chain/`.
+- **Register the spec** in `environment/playwright-specs.mjs` with `{}`. `e2e:env:test` fails for a spec that is not registered.
 
-```typescript
-test.describe('Feature name', { tag: '@smoke' }, () => { ... })
-```
+## Mock a path the stack cannot produce
 
-Use categories intentionally:
+A spec may use `page.route` when the flow needs the browser and the stack cannot produce the path: an error, an expired session, a third-party answer. Mock the calls that path needs, and nothing more. Example: [step-up-auth.spec.ts](../tests/regression/step-up-auth.spec.ts) tests the unhappy paths of an action kept in `sessionStorage` across the Auth0 redirect.
 
-| Tag            | Purpose                      | Rules                                                                                       |
-| -------------- | ---------------------------- | ------------------------------------------------------------------------------------------- |
-| `@smoke`       | Critical path                | Must be small and stable. If it flakes, fix immediately or demote.                          |
-| `@regression`  | Feature-specific             | Can be broader but must still provide clear value.                                          |
-| `@api`         | Pure API tests — no browser  | Fast and stable.                                                                            |
-| `@ui`          | UI-specific rendering checks | Only for things that require visual/browser verification.                                   |
-| `@critical`    | High-risk business flows     | Transaction creation, signing, owner changes — financial impact.                            |
-| `@permissions` | Role-based access tests      | Owner vs non-owner, proposer, threshold-dependent flows.                                    |
-| `@flaky`       | Quarantined flaky tests      | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently. |
-| `@migration`   | Migrated from Cypress        | Tracks migration progress. Remove tag once test is stable in Playwright.                    |
+When a spec mocks every call and the browser adds nothing, write the test in Jest.
 
-**Tag must match directory.** A `@smoke` test lives in `tests/smoke/`, etc. If unsure, default to `tests/regression/` — promotion to `tests/smoke/` is a deliberate decision after the test proves stable.
+## Page objects and fixtures
 
-**Flaky test policy**: A test tagged `@flaky` must have an owner and a deadline to fix. If not fixed within 2 weeks, it gets deleted. Flaky tests that are silently skipped erode trust in the entire suite.
+- **Page objects hold locators and actions only.** Assertions belong in the test, so the reader sees what the test checks.
+- **A page object action is one step of the user**, such as `review.signAndExecute()` or `sendTokens.fillTransfer(...)`. The test body then stays at one level of abstraction.
+- **A fixture does not change state that the test does not show.** The journey fixture says who is connected; `connectAs` changes it in the test body.
+- **Put a helper in a shared place on its second copy**, for example `src/api/transaction-items.ts`. Do not copy it into the next spec.
+- Import `test` and `expect` from `src/fixtures/test.fixture` or `src/fixtures/journey.fixture`, never from `@playwright/test`. The fixtures seed the cookie consent and attach the failure evidence.
 
-### Page Objects — thin
-
-Page Objects hold **locators** and **actions** only. **Assertions belong in the test.**
-
-```typescript
-// ✅ In the Page Object
-async goto(safe: string) { await this.page.goto(`/home?safe=${safe}`) }
-
-// ❌ Never in the Page Object
-async verifyLoaded() { expect(this.header).toBeVisible() }  // assertion in POM
-```
-
-### Assertion Philosophy
-
-Four rules for every assertion:
-
-1. **Assert visible user behavior** — what the user sees, not internal state
-2. **Assert important state changes** — meaningful transitions, not every intermediate step
-3. **Do not over-assert implementation details** — test WHAT, not HOW
-4. **Do not duplicate API business logic in UI assertions** — if the API test already validates data correctness, the UI test only checks that data renders
-
-Use web-first assertions (auto-retrying). Never extract text and assert on it manually.
-
-```typescript
-// ✅ Good — web-first, role-based, user-visible
-await expect(page.getByRole('alert').filter({ hasText: 'Email is required' })).toBeVisible()
-await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled()
-await expect(page.getByRole('heading', { name: user.name })).toBeVisible()
-
-// ❌ Avoid — non-retrying, implementation-coupled
-expect(await locator.textContent()).toBe('Saved')
-```
-
-Always narrow `getByRole('alert')` with `.filter({ hasText })`: Next.js renders its route announcer as a `role="alert"` element on every page, so a bare `getByRole('alert')` resolves to two elements the moment a toast appears and fails strict mode.
-
-### Locator Priority
+## Locators
 
 1. `getByRole()` — most accessible, most stable
 2. `getByLabel()` — for form fields
 3. `getByText()` — for visible text
 4. `getByTestId()` — last resort (coupled to implementation)
 
-### No Hard Waits
+Always narrow `getByRole('alert')` with `.filter({ hasText })`: Next.js renders its route announcer as a `role="alert"` element on every page, so a bare `getByRole('alert')` resolves to two elements the moment a toast appears and fails strict mode.
 
-**Principle: Waiting for time is not waiting for readiness.**
+## Assertions and waits
 
-`page.waitForTimeout()` is never acceptable. Unless the AI gives a very strong reason, and even then it must propose a better alternative.
+- Assert what the user sees and the state that the action changes, not each intermediate step or implementation detail.
+- Use web-first assertions; they retry. Never read text and assert on the raw value.
+- Never wait for time: `page.waitForTimeout()` is not allowed. Wait for a locator state, a URL, a response, or poll the backend with `expect.poll`.
 
-Approved alternatives — use these instead:
+```ts
+// ✅ Retries until the state is right
+await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled()
+await expect(page).toHaveURL(/\/home/)
+await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
 
-1. **Locator assertions** — `await expect(locator).toBeVisible()` / `.toHaveText()` / `.toBeEnabled()`
-2. **Response waiting** — `await page.waitForResponse(url => url.includes('/api/v1/safes'))`
-3. **URL assertions** — `await expect(page).toHaveURL(/\/home/)`
-4. **State assertions** — `await expect(locator).toHaveAttribute('aria-selected', 'true')`
-5. **API polling** — `await safeApiClient.waitForCondition(...)` when no UI signal exists
-6. **App-specific stable signals** — wait for a loading spinner to disappear, a skeleton to resolve, or a known data element to render
-
-```typescript
-// ✅ Web-first assertion — auto-retries
-await expect(page.getByText('Dashboard')).toBeVisible()
-
-// ✅ Wait for API response
-await page.waitForResponse((resp) => resp.url().includes('/v1/safes') && resp.status() === 200)
-
-// ❌ Never — arbitrary time, not readiness
+// ❌ Does not retry, or waits for time and not for readiness
+expect(await locator.textContent()).toBe('Saved')
 await page.waitForTimeout(3000)
 ```
 
-### API-First Setup Pattern
+## Parallel runs
 
-```typescript
-test('balance page shows tokens', async ({ safePage, safeApiClient }) => {
-  // 1. API: get expected data
-  const balances = await safeApiClient.getBalances(address)
+Spec files run in parallel workers on one stack. The tests of one file run in one worker, in order, and share the data its scenarios prepare.
 
-  // 2. UI: navigate
-  await safePage.goto(`/balances?safe=${safe}`)
+- A test that writes seeds its own Safe. No test changes a Safe that another test reads.
+- No test depends on another test or on the order of the tests.
+- Data that a test creates gets a unique name, for example with `testInfo.testId`.
 
-  // 3. Verify: UI matches API
-  await expect(safePage.getByText(balances.items[0].tokenInfo.symbol)).toBeVisible()
-})
-```
+## Debugging a failed test
 
-## Parallel Execution Rule
+Each run writes its artifacts to `e2e/environment/artifacts/playwright/`, and CI uploads them for each shard:
 
-Tests run in parallel in CI (`fullyParallel: true`). Every test must be designed for independent execution. Follow these rules strictly:
+- `html/` — the report. Open it with `yarn workspace @safe-global/web exec playwright show-report e2e/environment/artifacts/playwright/html`.
+- `results/<test>/trace.zip` — open it with `yarn workspace @safe-global/web exec playwright show-trace <trace.zip>`. It replays each step with the DOM, the network calls and the console.
+- `results/<test>/video.webm` and the screenshot at the failure.
 
-1. **No shared mutable test data** — if a test writes to a Safe (creates a tx, changes settings), it must use its own dedicated Safe, not one shared with other tests.
-2. **No test depends on another test** — each test must set up its own preconditions. Never rely on execution order.
-3. **No fixed user/object unless read-only** — shared static test Safes in `constants.ts` are fine for read-only verification (check balances, check owners). If the test mutates state, use a dedicated Safe.
-4. **No global state changes without isolation** — localStorage is scoped per browser context (Playwright handles this). But shared backend state (CGW, tx service) is not isolated — be careful with mutations.
-5. **Use unique names/IDs** — if a test creates an address book entry or label, use a unique name (e.g., include `testInfo.testId`) to avoid collisions.
-6. **Use separate Safes when needed** — if two tests both need to modify a Safe's owner list, they cannot share a Safe. Allocate separate test Safes.
+The fixtures attach this evidence to a failed test:
 
-```typescript
-// ✅ Read-only: safe to share across parallel tests
-test('dashboard shows balance', async ({ safePage }) => {
-  await safePage.goto('/home?safe=' + SAFES.SEP_STATIC_SAFE_2) // read-only
-  await expect(safePage.getByText('ETH')).toBeVisible()
-})
+| Attachment                | What it tells you                                                    |
+| ------------------------- | -------------------------------------------------------------------- |
+| `page-url-on-failure`     | The URL the browser was on when the test failed — start here         |
+| `console-errors`          | JavaScript errors (`TypeError`, `ReferenceError`): an app bug        |
+| `console-warnings`        | React warnings, deprecations, hydration mismatches                   |
+| `failed-network-requests` | Failed calls: 4xx is a wrong request, 5xx is a service of the stack  |
+| `environment-info`        | Base URL, CGW URL, browser, retry and worker                         |
+| `test-data`               | The Safes of the test (`seedSafe` and `journey.recordSafe` add them) |
 
-// ❌ Mutation: must NOT use a shared Safe
-test('create transaction', async ({ safePage }) => {
-  await safePage.goto('/home?safe=' + SAFES.SEP_STATIC_SAFE_2) // WRONG — other tests use this Safe
-  // ... creates a tx, changes nonce — breaks parallel tests
-})
-```
-
-## Environment Variables
-
-| Variable              | Default                                        | Description                                                    |
-| --------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `CI`                  | (unset)                                        | Set to `true` in CI — enables retries, parallel workers, JUnit |
-| `PLAYWRIGHT_BASE_URL` | `localhost:3000` (dev) / `localhost:8080` (CI) | App URL                                                        |
-| `SAFE_CGW_BASE_URL`   | `https://safe-client.staging.5afe.dev`         | CGW API URL                                                    |
-| `WALLET_CREDENTIALS`  | (unset)                                        | Private key for wallet connection (future)                     |
-
-## Debugging a Failed Test
-
-When a test fails in CI or locally, follow these steps in order.
-
-### Step 1: Open the HTML report
-
-```bash
-yarn pw:report
-```
-
-The report shows every test with pass/fail status. Click a failed test to see the screenshot at the failure point and all attached evidence.
-
-### Step 2: Check failure attachments
-
-Our test fixture automatically attaches 6 types of evidence on failure:
-
-| Attachment                | What it tells you                                                                   |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `page-url-on-failure`     | The exact URL the browser was on when it failed — start here                        |
-| `console-errors`          | JavaScript errors (`TypeError`, `ReferenceError`) = app bug                         |
-| `console-warnings`        | React prop warnings, deprecation notices, hydration issues = root cause clues       |
-| `failed-network-requests` | 502/503 from CGW = staging issue (re-run), 404 = wrong endpoint, 401 = auth problem |
-| `environment-info`        | baseURL, CGW URL, browser, retry count, worker index                                |
-| `test-data`               | Safe address used in the test (if annotated)                                        |
-
-### Step 3: Open the trace
-
-```bash
-npx playwright show-trace e2e/test-results/<test-folder>/trace.zip
-```
-
-The trace viewer shows a step-by-step replay with DOM snapshots, network calls, and console output at each action. This is the most powerful debugging tool — you can see exactly what the page looked like at every step.
-
-### Step 4: Watch the video
-
-Video files are in `e2e/test-results/<test-folder>/video.webm`. Open in any browser or video player to see the full test recording in real time.
-
-### Step 5: Reproduce locally
-
-```bash
-# Run the specific failing test
-yarn pw:test --grep "should display token balances"
-
-# Run with headed browser to watch it live
-yarn pw:test --grep "should display token balances" --headed
-
-# Run with Playwright Inspector for step-by-step debugging
-PWDEBUG=1 yarn pw:test --grep "should display token balances"
-```
-
-### Common failure patterns
-
-| You see                                    | Likely cause                                 | Action                                                                  |
-| ------------------------------------------ | -------------------------------------------- | ----------------------------------------------------------------------- |
-| `console-errors` with `TypeError`          | App bug — component received unexpected data | File a bug, not a test issue                                            |
-| `failed-network-requests` with 502/503     | CGW staging is down or flaky                 | Re-run the test — if it passes, it's transient                          |
-| `page-url` shows wrong page                | Navigation failed or redirected              | Check if the Safe address is valid, check for redirects                 |
-| `TimeoutError: waiting for getByRole(...)` | Element didn't render in time                | Check if the locator is correct, check for loading states               |
-| Test passes locally, fails in CI           | Timing difference or missing env var         | Check `environment-info` attachment, try `CI=true yarn pw:test` locally |
-| `console-warnings` with hydration mismatch | Server/client render mismatch                | Developer issue — flag to the team                                      |
-
-### Failure artifact locations
-
-All stored in `e2e/test-results/` (gitignored):
-
-- **Trace** — `trace.zip` (open with `npx playwright show-trace`)
-- **Screenshot** — `test-failed-1.png` (viewport at failure point)
-- **Video** — `video.webm` (full test recording)
-
-## Playwright MCP — AI-Assisted Testing (Phase 2)
-
-`@playwright/mcp` is the official Microsoft MCP server that exposes Playwright browser automation as structured tools for AI agents. Instead of screenshot-based guessing, the AI reads the browser's accessibility tree — making interactions fast and reliable.
-
-```bash
-npx @playwright/mcp@latest
-```
-
-### Planned use cases
-
-**1. Locator discovery** — AI runs `browser_snapshot` on the real staging app and generates locators from the actual accessibility tree. Produces `getByRole('button', { name: 'Send' })` from the real DOM, not from assumptions.
-
-**2. Exploratory testing** — Tell the AI: "Navigate to the dashboard for this Safe, check all visible elements, report anything broken." The AI navigates, reads the tree at each step, and reports findings without writing a test file.
-
-**3. Test generation from running app** — AI navigates a user flow, records the accessibility tree at each step, and generates a Playwright test following the 12-step protocol with real locators.
-
-**4. QA Review Companion integration** — After reviewing PR code, the AI launches a browser against the feature branch, verifies the change, and validates locators before generating tests.
-
-### Status
-
-This is a Phase 2 integration. The framework foundation must be stable first. Current blockers: requires a running staging app for locator discovery, and QA skill updates for review integration.
-
-## Relationship to Cypress
-
-Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging. Only Playwright runs in isolated mode.
+To run the failed spec again, set `SAFE_E2E_SPECS` to its file name. When a service of the stack fails, read its log with `yarn workspace @safe-global/web e2e:env logs`.
