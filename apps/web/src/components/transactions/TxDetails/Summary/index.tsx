@@ -26,8 +26,8 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
-// GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
-// Pay from Safe feature is off, so this renders nothing on non-GTF chains.
+// Fee breakdown for executed multisig txs on any chain: "Paid from the Safe" from the signed
+// payload, or "Paid from the signer" from the on-chain receipt.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
   const { HistoryFeesAccordion } = useLoadFeature(PayFromSafeFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)

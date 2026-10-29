@@ -231,15 +231,16 @@ describe('useHistoryFeesBreakdown', () => {
     await waitFor(() => expect(result.current?.paidFrom).toBe('safe'))
   })
 
-  it('shows no signer-paid breakdown where the relayer does not offer Pay from Safe', async () => {
+  it('shows the signer-paid breakdown where the relayer does not offer Pay from Safe', async () => {
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChainWithoutPayFromSafe)
-    const provider = { getTransactionReceipt: jest.fn() } as unknown as ReturnType<typeof web3Module.useWeb3ReadOnly>
+    const provider = {
+      getTransactionReceipt: jest.fn().mockResolvedValue({ gasUsed: 50_000n, gasPrice: 2_000_000_000n }),
+    } as unknown as ReturnType<typeof web3Module.useWeb3ReadOnly>
     jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
 
     const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
 
-    await waitFor(() => expect(result.current).toBeNull())
-    expect(provider!.getTransactionReceipt).not.toHaveBeenCalled()
+    await waitFor(() => expect(result.current?.paidFrom).toBe('signer'))
   })
 
   it('returns null for module-executed transactions', async () => {
