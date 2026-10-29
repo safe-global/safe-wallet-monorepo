@@ -1,6 +1,6 @@
 import { type ReactElement, useContext, useMemo, useCallback, useState, Suspense } from 'react'
 import { useRouter } from 'next/router'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { Settings } from 'lucide-react'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Button } from '@safe-global/views/components/ui/button'
