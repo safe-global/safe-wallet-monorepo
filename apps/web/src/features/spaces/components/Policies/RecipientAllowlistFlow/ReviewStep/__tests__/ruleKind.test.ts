@@ -29,6 +29,13 @@ describe('getRuleKind', () => {
   ] as const)('labels a %s entry as %s', (contract, kind) => {
     expect(getRuleKind(CHAIN_ID, entry({ policy: policy(contract).toLowerCase() }))).toBe(kind)
   })
+
+  it.each([
+    ['the zero policy of a revocation', ZERO_ADDRESS],
+    ['a policy the review does not know', '0x2222222222222222222222222222222222222222'],
+  ])('labels %s as unknown rather than an ERC-20 allowlist', (_, unknownPolicy) => {
+    expect(getRuleKind(CHAIN_ID, entry({ policy: unknownPolicy }))).toBe('unknown')
+  })
 })
 
 describe('getInstalledFallback', () => {

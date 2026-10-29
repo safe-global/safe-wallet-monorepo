@@ -85,6 +85,7 @@ export const POLICY_LABELS = {
   allow: 'Allow everything else',
   deny: 'Block everything else',
   multiSend: 'Batched transactions',
+  unknown: 'Other policy',
 } as const
 export const FALLBACK_TARGET_NAME = 'Any address'
 

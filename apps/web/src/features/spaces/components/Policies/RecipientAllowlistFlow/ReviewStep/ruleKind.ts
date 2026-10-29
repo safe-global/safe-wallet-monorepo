@@ -7,6 +7,7 @@ import { getPolicyEngineAddress, isFallbackAccess, type PolicyEngineContract } f
 export type RuleKind = keyof typeof POLICY_LABELS
 
 const RULE_POLICIES: [RuleKind, PolicyEngineContract][] = [
+  ['erc20', 'ERC20TransferPolicy'],
   ['native', 'NativeTransferPolicy'],
   ['allow', 'AllowPolicy'],
   ['deny', 'DenyPolicy'],
@@ -14,7 +15,7 @@ const RULE_POLICIES: [RuleKind, PolicyEngineContract][] = [
 ]
 
 export const getRuleKind = (chainId: string, { policy }: PolicyConfiguration): RuleKind =>
-  RULE_POLICIES.find(([, contract]) => sameAddress(getPolicyEngineAddress(chainId, contract), policy))?.[0] ?? 'erc20'
+  RULE_POLICIES.find(([, contract]) => sameAddress(getPolicyEngineAddress(chainId, contract), policy))?.[0] ?? 'unknown'
 
 export type InstalledFallback = 'allow' | 'deny'
 
