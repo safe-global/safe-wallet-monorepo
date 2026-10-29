@@ -74,6 +74,8 @@ export enum SettingsInfoType {
   DISABLE_MODULE = 'DISABLE_MODULE',
   SET_GUARD = 'SET_GUARD',
   DELETE_GUARD = 'DELETE_GUARD',
+  SET_MODULE_GUARD = 'SET_MODULE_GUARD',
+  DELETE_MODULE_GUARD = 'DELETE_MODULE_GUARD',
 }
 
 export enum TransactionInfoType {

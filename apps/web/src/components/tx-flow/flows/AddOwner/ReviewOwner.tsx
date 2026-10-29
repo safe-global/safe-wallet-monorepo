@@ -9,7 +9,6 @@ import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
-import { SettingsChangeContext } from '@safe-global/views/components/tx-flow/flows/AddOwner/context'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export const ReviewOwner = ({
@@ -63,9 +62,5 @@ export const ReviewOwner = ({
     onSubmit?.()
   }
 
-  return (
-    <SettingsChangeContext.Provider value={params}>
-      <ReviewTransaction onSubmit={handleSubmit}>{children}</ReviewTransaction>
-    </SettingsChangeContext.Provider>
-  )
+  return <ReviewTransaction onSubmit={handleSubmit}>{children}</ReviewTransaction>
 }
