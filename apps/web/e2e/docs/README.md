@@ -6,7 +6,7 @@ Only when the behaviour needs a real browser or several real services together. 
 
 ## Where the specs run
 
-Every spec runs on the isolated stack: the wallet, CGW, the Transaction Service, the Config Service and mocks of third-party services, against an Anvil fork of Sepolia. CI runs every registered spec on every pull request (`web-isolated-e2e-backend.yml`).
+Every spec runs on the isolated stack: the wallet, CGW, the Transaction Service, the Config Service and mocks of third-party services, against an Anvil fork of Sepolia. CI runs every registered spec on each pull request that changes the wallet, the Transaction Builder, shared packages, dependencies or the workflow (`web-isolated-e2e-backend.yml`). On other pull requests the `Isolated E2E result` check passes without a run.
 
 ```sh
 yarn workspace @safe-global/web e2e:env up
@@ -81,7 +81,9 @@ Full spec: [multisig-confirm.spec.ts](../tests/e2e/multisig-confirm.spec.ts).
 - **Seed what the test needs.** `seedSafe(journey, { owners, threshold })` deploys a new Safe for this test, names its owners, and puts its address in the report. The other functions in `src/seed/` add tokens, NFTs, queued transactions, proposers and more. Seed through the SDK and the local APIs, never through the UI.
 - **Say who is connected.** The journey starts connected as `owner4`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation.
 - **Check the outcome, not the screen only.** Poll CGW with `expect.poll` and `SafeApiClient` (`getNonce`, `getQueued`), and read the fork with `src/chain/`.
-- **Register the spec** in `environment/playwright-specs.mjs` with `{}`. `e2e:env:test` fails for a spec that is not registered.
+- **Register the spec** in `environment/playwright-specs.mjs`. A journey that seeds all its data gets `{}`; add `scenarios` and `safes` for scenario data, and `chains` for a fork besides Sepolia (see [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#specs)). `e2e:env:test` fails for a spec that is not registered.
+
+Not every journey seeds a Safe: [create-safe.spec.ts](../tests/e2e/create-safe.spec.ts) creates one in the UI, because that is the behaviour under test, and [portfolio.spec.ts](../tests/e2e/portfolio.spec.ts) only reads a Safe that its scenario prepares.
 
 ## Mock a path the stack cannot produce
 
@@ -127,7 +129,7 @@ await page.waitForTimeout(3000)
 
 Spec files run in parallel workers on one stack. The tests of one file run in one worker, in order, and share the data its scenarios prepare.
 
-- A test that writes seeds its own Safe. No test changes a Safe that another test reads.
+- A test that changes a Safe uses a Safe that no other test reads: one it seeds or creates.
 - No test depends on another test or on the order of the tests.
 - Data that a test creates gets a unique name, for example with `testInfo.testId`.
 
