@@ -40,14 +40,14 @@ describe('getSpendingLimitImpacts', () => {
     expect(impact).toMatchObject({ spender, impact: 'restricted', recipients })
   })
 
-  it('should mark an allowance as unaffected, when the allowlist leaves its token out', () => {
+  it('should mark an allowance as blocked, when the allowlist leaves its token out', () => {
     const policies = [
       makeSpendingLimit(safe, [{ spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(weth)] }]),
     ]
 
     const impacts = getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])
 
-    expect(impacts).toEqual([expect.objectContaining({ impact: 'unaffected', recipients: [] })])
+    expect(impacts).toEqual([expect.objectContaining({ impact: 'blocked', recipients: [] })])
   })
 
   it('leaves out the allowances of a deregistered spender', () => {
@@ -86,11 +86,11 @@ describe('getSpendingLimitImpacts', () => {
   })
 
   it('should return one impact per allowance with the restricted ones first, when spenders mix both kinds', () => {
-    const unaffectedSpender = faker.finance.ethereumAddress()
+    const blockedSpender = faker.finance.ethereumAddress()
     const restrictedSpender = faker.finance.ethereumAddress()
     const policies = [
       makeSpendingLimit(safe, [
-        { spender: unaffectedSpender, allowances: [makeAllowance(weth)] },
+        { spender: blockedSpender, allowances: [makeAllowance(weth)] },
         { spender: restrictedSpender, allowances: [makeAllowance(usdc)] },
       ]),
     ]
@@ -99,7 +99,7 @@ describe('getSpendingLimitImpacts', () => {
 
     expect(impacts.map(({ spender, impact }) => [spender, impact])).toEqual([
       [restrictedSpender, 'restricted'],
-      [unaffectedSpender, 'unaffected'],
+      [blockedSpender, 'blocked'],
     ])
   })
 })

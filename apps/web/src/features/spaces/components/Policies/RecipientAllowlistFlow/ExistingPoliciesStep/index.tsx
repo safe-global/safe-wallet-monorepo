@@ -6,12 +6,13 @@ import ExistingPoliciesContent, {
   type ExistingPoliciesContentProps,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ExistingPoliciesContent'
 import {
-  getPartlyRestrictedSpendingLimitsTitle,
+  BLOCKED_SPENDING_LIMITS_DESCRIPTION,
+  getBlockedSpendingLimitDescription,
+  getBlockedSpendingLimitsTitle,
   getRestrictedSpendingLimitsTitle,
   getSpendingLimitsLoadErrorTitle,
   getTokenInAllowlistText,
   getTokenNotInAllowlistText,
-  NO_RESTRICTED_SPENDING_LIMITS_TITLE,
   NO_SPENDING_LIMITS_TITLE,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
   RETRY_LABEL,
@@ -20,6 +21,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { RecipientAllowlistFlowData } from '../types'
 import { formatAllowanceAmount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
+import { formatAllowance } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
@@ -30,8 +32,8 @@ import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlis
 import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
 
 /**
- * Shown when the allowlist restricts one of the picked Safe's spending limits, or when they couldn't be loaded: lists
- * them all, Next waits for them to load and for the acknowledgement.
+ * Shown when the picked Safe has an active spending limit, which the allowlist restricts or blocks, or when they
+ * couldn't be loaded: lists them all, Next waits for them to load and for the acknowledgement.
  */
 const ExistingPoliciesStep = (): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
@@ -54,7 +56,8 @@ const ExistingPoliciesStep = (): ReactElement => {
     description: `${formatAllowanceAmount(allowance)} · ${impact === 'restricted' ? getTokenInAllowlistText(allowance.token.symbol) : getTokenNotInAllowlistText(allowance.token.symbol)}`,
     impact,
   }))
-  const restrictedCount = impacts.filter(({ impact }) => impact === 'restricted').length
+  const blocked = impacts.filter(({ impact }) => impact === 'blocked')
+  const [onlyBlocked] = blocked
 
   const getBanner = (): ExistingPoliciesContentProps['banner'] => {
     if (isLoading) return { tone: 'loading', title: SPENDING_LIMITS_LOADING_TITLE }
@@ -71,15 +74,25 @@ const ExistingPoliciesStep = (): ReactElement => {
       }
     }
     if (impacts.length === 0) return { tone: 'info', title: NO_SPENDING_LIMITS_TITLE }
-    if (restrictedCount === 0) return { tone: 'info', title: NO_RESTRICTED_SPENDING_LIMITS_TITLE }
+    if (blocked.length === 0) {
+      return {
+        tone: 'info',
+        title: getRestrictedSpendingLimitsTitle(impacts.length),
+        description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
+      }
+    }
 
     return {
-      tone: 'info',
-      title:
-        restrictedCount === impacts.length
-          ? getRestrictedSpendingLimitsTitle(restrictedCount)
-          : getPartlyRestrictedSpendingLimitsTitle(restrictedCount, impacts.length),
-      description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
+      tone: 'warning',
+      title: getBlockedSpendingLimitsTitle(blocked.length),
+      description:
+        blocked.length === 1
+          ? getBlockedSpendingLimitDescription(
+              spenderDisplayName({ address: onlyBlocked.spender, name: contactName(onlyBlocked.spender) }),
+              formatAllowance(onlyBlocked.allowance),
+              onlyBlocked.allowance.token.symbol,
+            )
+          : BLOCKED_SPENDING_LIMITS_DESCRIPTION,
     }
   }
 

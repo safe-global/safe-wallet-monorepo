@@ -8,20 +8,20 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { isActiveSpendingLimit } from '../../utils/mapPendingPolicies'
 
-/** `restricted`: it may only send to the allowed recipients; `unaffected`: its token is left out of the allowlist. */
-export type SpendingLimitImpactKind = 'restricted' | 'unaffected'
+/** `restricted`: it may only send to the allowed recipients; `blocked`: its token is left out of the allowlist. */
+export type SpendingLimitImpactKind = 'restricted' | 'blocked'
 
 export type SpendingLimitImpact = {
   spender: string
   allowance: PolicyAllowance
   impact: SpendingLimitImpactKind
-  /** The recipients the allowlist allows for the allowance's token; empty when it is unaffected. */
+  /** The recipients the allowlist allows for the allowance's token; empty when it is blocked. */
   recipients: string[]
 }
 
 /**
- * How the allowlist changes each active spending limit on `safe`, restricted ones first. The setup's Allow fallback
- * lets an allowance on a token the allowlist leaves out be spent as before.
+ * How the allowlist changes each active spending limit on `safe`, restricted ones first. The guard denies by default
+ * (the setup adds no fallback policy), so an allowance on a token the allowlist leaves out can no longer be spent.
  */
 export const getSpendingLimitImpacts = (
   policies: readonly Policy[],
@@ -41,8 +41,8 @@ export const getSpendingLimitImpacts = (
 
             return rule
               ? { spender, allowance, impact: 'restricted', recipients: rule.recipients }
-              : { spender, allowance, impact: 'unaffected', recipients: [] }
+              : { spender, allowance, impact: 'blocked', recipients: [] }
           }),
         ),
     )
-    .sort((a, b) => Number(a.impact === 'unaffected') - Number(b.impact === 'unaffected'))
+    .sort((a, b) => Number(a.impact === 'blocked') - Number(b.impact === 'blocked'))

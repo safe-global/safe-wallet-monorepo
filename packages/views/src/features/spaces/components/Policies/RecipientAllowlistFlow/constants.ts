@@ -136,7 +136,6 @@ export const SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION =
   'Check your connection and try again. You can continue once they load.'
 export const SPENDING_LIMITS_LOADING_TITLE = 'Loading the spending limits'
 export const NO_SPENDING_LIMITS_TITLE = 'This Safe account has no spending limits.'
-export const NO_RESTRICTED_SPENDING_LIMITS_TITLE = "None of your spending limits will follow this allowlist's rules."
 export const RETRY_LABEL = 'Retry'
 
 export const APPLY_REVIEW_STEP_TITLE = 'Apply allowlist'

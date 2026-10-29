@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import {
-  NO_RESTRICTED_SPENDING_LIMITS_TITLE,
+  BLOCKED_SPENDING_LIMITS_DESCRIPTION,
   NO_SPENDING_LIMITS_TITLE,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
   SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION,
@@ -59,7 +59,7 @@ const renderStep = () => {
 
 describe('ExistingPoliciesStep', () => {
   beforeEach(() => {
-    spendingLimits({ impacts: [makeImpact('USDC', 'restricted'), makeImpact('ETH', 'unaffected')] })
+    spendingLimits({ impacts: [makeImpact('USDC', 'restricted'), makeImpact('ETH', 'blocked')] })
   })
 
   it('should say the spending limit follows the rules, when the Safe has one restricted limit', () => {
@@ -70,11 +70,19 @@ describe('ExistingPoliciesStep', () => {
     expect(screen.getByText(RESTRICTED_SPENDING_LIMITS_DESCRIPTION)).toBeInTheDocument()
   })
 
-  it('should count the restricted limits out of all of them, when only some are restricted', () => {
+  it('should warn that one limit will be blocked, when the allowlist leaves its token out', () => {
     renderStep()
 
-    expect(screen.getByText("1 of your 2 spending limits will follow this allowlist's rules.")).toBeInTheDocument()
-    expect(screen.getByText(RESTRICTED_SPENDING_LIMITS_DESCRIPTION)).toBeInTheDocument()
+    expect(screen.getByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
+    expect(screen.getByText(/Once this allowlist is active, it can't send ETH anymore\./)).toBeInTheDocument()
+  })
+
+  it('should warn with the shared description, when the allowlist blocks more than one limit', () => {
+    spendingLimits({ impacts: [makeImpact('ETH', 'blocked'), makeImpact('DAI', 'blocked')] })
+    renderStep()
+
+    expect(screen.getByText('2 spending limits will be blocked by this allowlist.')).toBeInTheDocument()
+    expect(screen.getByText(BLOCKED_SPENDING_LIMITS_DESCRIPTION)).toBeInTheDocument()
   })
 
   it('should say all spending limits follow the rules, when every limit is restricted', () => {
@@ -84,12 +92,12 @@ describe('ExistingPoliciesStep', () => {
     expect(screen.getByText("Your 2 spending limits will follow this allowlist's rules.")).toBeInTheDocument()
   })
 
-  it('should list every limit and mark only the restricted one, when only some are restricted', () => {
+  it('should mark the restricted limit as following the allowlist and the other as blocked, when only some are restricted', () => {
     renderStep()
 
     expect(screen.getAllByTestId('spending-limit-impact')).toHaveLength(2)
     expect(screen.getByText('Follows the allowlist')).toBeInTheDocument()
-    expect(screen.queryByText('Will be blocked')).not.toBeInTheDocument()
+    expect(screen.getByText('Will be blocked')).toBeInTheDocument()
     expect(screen.getByText('500/day · USDC is in this allowlist')).toBeInTheDocument()
     expect(screen.getByText("500/day · ETH isn't in this allowlist")).toBeInTheDocument()
   })
@@ -148,11 +156,11 @@ describe('ExistingPoliciesStep', () => {
     expect(screen.queryByTestId('spending-limit-impact')).not.toBeInTheDocument()
   })
 
-  it('should say none of the limits follow the rules, when only unaffected limits load after a retry', () => {
-    spendingLimits({ impacts: [makeImpact('ETH', 'unaffected')] })
+  it('should warn that the limit will be blocked, when only a blocked limit loads after a retry', () => {
+    spendingLimits({ impacts: [makeImpact('ETH', 'blocked')] })
     renderStep()
 
-    expect(screen.getByText(NO_RESTRICTED_SPENDING_LIMITS_TITLE)).toBeInTheDocument()
+    expect(screen.getByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
     expect(screen.queryByText(RESTRICTED_SPENDING_LIMITS_DESCRIPTION)).not.toBeInTheDocument()
     expect(screen.getAllByTestId('spending-limit-impact')).toHaveLength(1)
   })

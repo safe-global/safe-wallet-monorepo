@@ -183,9 +183,7 @@ const CreateRecipientAllowlistPolicy = ({
             disabled={!canGoNext}
             onClick={() => {
               // A failed load shows the step with its error rather than skipping the warning.
-              onSpendingLimitImpact?.(
-                spendingLimits.isError || spendingLimits.impacts.some(({ impact }) => impact === 'restricted'),
-              )
+              onSpendingLimitImpact?.(spendingLimits.isError || spendingLimits.impacts.length > 0)
               onNext({ ...values, rules })
             }}
             data-testid="next-btn"

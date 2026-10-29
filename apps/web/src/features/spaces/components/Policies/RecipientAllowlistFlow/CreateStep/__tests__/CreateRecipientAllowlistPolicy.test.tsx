@@ -265,10 +265,10 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(onNext).toHaveBeenCalled()
   })
 
-  it('should add Existing policies on Next, when the allowlist restricts only some spending limits', () => {
+  it('should add Existing policies on Next, when the allowlist restricts some spending limits and blocks the others', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    spendingLimits({ impacts: [spendingLimitImpact('restricted'), spendingLimitImpact('unaffected')] })
+    spendingLimits({ impacts: [spendingLimitImpact('restricted'), spendingLimitImpact('blocked')] })
     const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
     fireEvent.click(screen.getByTestId('next-btn'))
@@ -276,15 +276,15 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
   })
 
-  it('should skip Existing policies on Next, when every spending limit is unaffected', () => {
+  it('should add Existing policies on Next, when the allowlist blocks every spending limit', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    spendingLimits({ impacts: [spendingLimitImpact('unaffected')] })
+    spendingLimits({ impacts: [spendingLimitImpact('blocked')] })
     const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
     fireEvent.click(screen.getByTestId('next-btn'))
 
-    expect(onSpendingLimitImpact).toHaveBeenCalledWith(false)
+    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
   })
 
   it('should skip Existing policies on Next, when the Safe has no spending limits', () => {
