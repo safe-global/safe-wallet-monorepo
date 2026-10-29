@@ -101,7 +101,7 @@ Test-only API routes are not needed.
 Before refactoring a component's DOM structure:
 
 - Search for `data-testid` attributes on the elements you're changing
-- Search for the component's visible text strings in `e2e/tests/`
+- Search for the component's visible text strings in `e2e/tests/` and, until it is deleted, `cypress/e2e/`
 - If you find matches, update the test locators in the same PR
 
 Broken selectors = broken CI = blocked merges.
