@@ -23,13 +23,26 @@ const columnHeaders = () => screen.getAllByRole('columnheader').map((header) => 
 describe('AddressBookTable', () => {
   beforeEach(() => mockIsMobile.mockReturnValue(false))
 
-  it('shows Contact, Chains and Added by for the workspace book', () => {
+  it('shows Contact, Chains, Tags and Added by for the workspace book', () => {
     render(<AddressBookTable contacts={[treasury]} />)
 
-    expect(columnHeaders()).toEqual(['Contact', 'Chains', 'Added by', ''])
+    expect(columnHeaders()).toEqual(['Contact', 'Chains', 'Tags', 'Added by', ''])
   })
 
-  it('leaves Added by out of the local book', () => {
+  it("shows a contact's tags, or a dash when it has none", () => {
+    const untagged = { ...treasury, address: ADDRESSES.usdc, tags: [] }
+    render(<AddressBookTable contacts={[payroll, untagged]} />)
+
+    const [payrollRow, untaggedRow] = screen.getAllByTestId('table-row')
+    expect(
+      within(payrollRow)
+        .getAllByTestId('tag-chip')
+        .map((chip) => chip.textContent),
+    ).toEqual(['Internal', 'Payroll'])
+    expect(within(untaggedRow).queryByTestId('tag-chip')).not.toBeInTheDocument()
+  })
+
+  it('leaves Tags and Added by out of the local book', () => {
     render(<AddressBookTable contacts={LOCAL_CONTACTS} book="local" />)
 
     expect(columnHeaders()).toEqual(['Contact', 'Chains', ''])
@@ -128,15 +141,16 @@ describe('AddressBookTable', () => {
     )
   })
 
-  it('folds Chains and Added by into the compact row detail of the workspace book', async () => {
+  it('folds Chains, Tags and Added by into the compact row detail of the workspace book', async () => {
     mockIsMobile.mockReturnValue(true)
     render(<AddressBookTable contacts={[treasury]} />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Show details' }))
 
-    expect(screen.getAllByRole('term').map((term) => term.textContent)).toEqual(['Chains', 'Added by'])
-    const [chains, addedBy] = screen.getAllByRole('definition')
+    expect(screen.getAllByRole('term').map((term) => term.textContent)).toEqual(['Chains', 'Tags', 'Added by'])
+    const [chains, tags, addedBy] = screen.getAllByRole('definition')
     expect(within(chains).getByTestId('chain-logos')).toBeInTheDocument()
+    expect(tags).toHaveTextContent('Internal')
     expect(addedBy).toHaveTextContent('Maya Chen')
   })
 

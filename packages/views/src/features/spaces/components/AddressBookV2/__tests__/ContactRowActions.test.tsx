@@ -39,4 +39,23 @@ describe('ContactRowActions', () => {
     await userEvent.click(screen.getByRole('menuitem', { name: 'Delete contact' }))
     expect(onDelete).toHaveBeenCalledTimes(1)
   })
+
+  it('lists Edit tags between editing and deleting', async () => {
+    const onEditTags = jest.fn()
+    render(<ContactRowActions name="Treasury" onEdit={jest.fn()} onDelete={jest.fn()} onEditTags={onEditTags} />)
+
+    await openMenu()
+    expect(menuItems()).toEqual(['Edit contact', 'Edit tags', 'Delete contact'])
+
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Edit tags' }))
+    expect(onEditTags).toHaveBeenCalledTimes(1)
+  })
+
+  it("gives a member's menu only Edit tags", async () => {
+    render(<ContactRowActions name="Treasury" onEditTags={jest.fn()} />)
+
+    await openMenu()
+
+    expect(menuItems()).toEqual(['Edit tags'])
+  })
 })
