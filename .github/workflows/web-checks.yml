@@ -42,6 +42,12 @@ jobs:
             package.json
             .yarnrc.yml
             .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            turbo.json
+            .prettierrc
+            .prettierignore
+            knip.json
             .github/workflows/web-checks.yml
             .github/actions/yarn/**
             .github/actions/corepack/**

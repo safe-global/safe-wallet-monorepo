@@ -34,13 +34,15 @@ jobs:
             package.json
             .yarnrc.yml
             .yarn/patches/**
+            config/**
+            yarn.config.cjs
             .github/workflows/package-utils-unit-tests.yml
             .github/actions/yarn/**
             .github/actions/corepack/**
             .github/actions/pr-changes/**
             .github/actions/required-result/**
 
-  eslint:
+  test:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
     permissions:
@@ -86,7 +88,7 @@ jobs:
     name: Utils unit tests result
     permissions: {}
     if: always()
-    needs: [changes, eslint]
+    needs: [changes, test]
     runs-on: ubuntu-latest
     steps:
       - uses: $/.github/actions/required-result

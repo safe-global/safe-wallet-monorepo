@@ -43,6 +43,12 @@ jobs:
             package.json
             .yarnrc.yml
             .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            turbo.json
+            .prettierrc
+            .prettierignore
+            scripts/verify.mjs
             .github/workflows/web-tanstack-checks.yml
             .github/actions/yarn/**
             .github/actions/corepack/**

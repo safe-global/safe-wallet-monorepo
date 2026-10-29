@@ -39,6 +39,8 @@ jobs:
             package.json
             .yarnrc.yml
             .yarn/patches/**
+            config/**
+            yarn.config.cjs
             .github/workflows/web-unit-tests.yml
             .github/actions/yarn/**
             .github/actions/corepack/**
@@ -104,7 +106,7 @@ jobs:
 
   base-coverage:
     needs: changes
-    if: ${{ needs.changes.outputs.relevant == 'true' && (github.event_name == 'pull_request') }}
+    if: needs.changes.outputs.relevant == 'true' && github.event_name == 'pull_request'
     permissions:
       contents: read
 
@@ -134,7 +136,7 @@ jobs:
 
   coverage-report:
     needs: [changes, test, base-coverage]
-    if: ${{ needs.changes.outputs.relevant == 'true' && (always() && github.event_name == 'pull_request' && needs.test.result != 'cancelled') }}
+    if: always() && needs.changes.outputs.relevant == 'true' && github.event_name == 'pull_request' && needs.test.result != 'cancelled'
     permissions:
       contents: read
       checks: write

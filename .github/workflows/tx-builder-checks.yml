@@ -41,6 +41,10 @@ jobs:
             package.json
             .yarnrc.yml
             .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            .prettierrc
+            .prettierignore
             .github/workflows/tx-builder-checks.yml
             .github/actions/yarn/**
             .github/actions/corepack/**

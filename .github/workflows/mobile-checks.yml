@@ -38,6 +38,11 @@ jobs:
             package.json
             .yarnrc.yml
             .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            expo-plugins/**
+            .prettierrc
+            .prettierignore
             .github/workflows/mobile-checks.yml
             .github/actions/yarn/**
             .github/actions/corepack/**
