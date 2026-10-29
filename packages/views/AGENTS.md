@@ -4,7 +4,8 @@
 
 ## Rules
 
-- **Only presentation lives here.** A file belongs in this package if a designer would edit it to change how something looks or reads: markup, styles, assets, UI text, and formatting a value for display. Code that decides what is true lives in the app, even when it is a pure function, and a view receives its result as props. That includes which state something is in, who may do what, what data means, and how API data maps to what is shown. To check: if changing the code could change what a user is allowed to do or what they are told is true, it does not belong here.
+- **Only presentation lives here.** A file belongs in this package if a designer would edit it to change how something looks or reads: markup, styles, assets and UI text. Code that decides what is true lives in the app, even when it is a pure function, and a view receives its result as props. That includes which state something is in, who may do what, what data means, and how API data maps to what is shown. To check: if changing the code could change what a user is allowed to do or what they are told is true, it does not belong here.
+- **No formatting logic.** Code that turns a value into a display string lives in `@safe-global/utils`; a view only places the string.
 - **No imports from an app.** Production files must not import `@/…` (apps/web) or anything that holds hooks, store access, SDK calls or analytics. Data and callbacks come in through props. ESLint (`no-restricted-imports`) enforces this; tests and stories are exempt.
 - Inside the package, import other package files as `@safe-global/views/…`.
 - Assets the views render (SVGs, CSS modules) live in the package (`src/assets/`, next to the view). An SVG that the app also serves by URL stays in `apps/web/public` as well.
