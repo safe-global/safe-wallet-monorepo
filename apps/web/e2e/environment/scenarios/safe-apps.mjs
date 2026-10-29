@@ -70,7 +70,3 @@ async function prepareFallbackHandlerScenario(env, owners, safeName) {
 export function prepareCowFallbackScenario(env, owners) {
   return prepareFallbackHandlerScenario(env, owners, 'SEP_STATIC_SAFE_43')
 }
-
-export async function prepareMessagePopupScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_10']) } }
-}
