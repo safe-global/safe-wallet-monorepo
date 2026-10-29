@@ -108,7 +108,7 @@ describe('ImportWorkspaceCsv', () => {
     await user.click(screen.getByTestId('import-btn'))
 
     await waitFor(() => expect(screen.queryByText('Import address book')).not.toBeInTheDocument())
-    expect(importMessages()).toEqual([expect.stringMatching(/^2 contacts imported to the Workspace address book/)])
+    expect(importMessages()).toEqual(['2 contacts imported to the Workspace address book across 2 networks'])
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT, {
       [MixpanelEventParams.ENTRY_COUNT]: 1,
       [MixpanelEventParams.UPDATED_COUNT]: 1,

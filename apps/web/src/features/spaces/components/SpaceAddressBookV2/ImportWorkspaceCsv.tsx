@@ -51,7 +51,7 @@ const ImportWorkspaceCsv = ({ items }: { items: SpaceAddressBookItemDto[] }) => 
     const networkCount = new Set(contacts.flatMap((contact) => contact.chainIds)).size
     dispatch(
       showNotification({
-        message: getImportSuccessMessage({ count: contacts.length, networkCount, bookLabel }),
+        message: getImportSuccessMessage({ count: contacts.length, networkCount, bookLabel, showsEveryNetwork: true }),
         variant: 'success',
         groupKey: 'import-contacts-success',
       }),
