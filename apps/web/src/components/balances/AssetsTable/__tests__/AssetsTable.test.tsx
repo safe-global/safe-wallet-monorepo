@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { render } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
+import { fakerChecksummedAddress, render } from '@/tests/test-utils'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChainIdModule from '@/hooks/useChainId'
 import * as useChains from '@/hooks/useChains'
+import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import { chainBuilder } from '@/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { toBeHex } from 'ethers'
@@ -22,6 +24,12 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: jest.fn(),
   useCurrentChain: jest.fn(),
   useHasFeature: jest.fn(),
+}))
+
+// jsdom has no canvas, so the QR code shows the value it encodes as an attribute
+jest.mock('qrcode.react', () => ({
+  __esModule: true,
+  default: ({ value }: { value: string }) => <canvas role="img" aria-label="QR code" data-value={value} />,
 }))
 
 const mockUseIsMobile = jest.fn(() => false)
@@ -85,6 +93,8 @@ describe('AssetsTable', () => {
     jest.mocked(useChains.useCurrentChain).mockReturnValue(undefined)
   })
 
+  afterEach(() => jest.restoreAllMocks())
+
   describe('empty state', () => {
     it('shows AddFundsCTA when balances list is empty', () => {
       renderAssetsTable({
@@ -114,6 +124,23 @@ describe('AssetsTable', () => {
 
       renderAssetsTable({ balances: zeroBalance })
       expect(screen.getByText(/Add funds to get started/i)).toBeInTheDocument()
+    })
+
+    it('shows the Safe address in a QR code and drops the chain prefix when the switch is turned off', async () => {
+      const safeAddress = fakerChecksummedAddress()
+      jest.spyOn(useSafeAddressModule, 'default').mockReturnValue(safeAddress)
+      jest.mocked(useChains.useCurrentChain).mockReturnValue(chainBuilder().with({ shortName: 'gor' }).build())
+
+      renderAssetsTable({ balances: balancesFixtures.empty })
+
+      const addFunds = screen.getByTestId('add-funds-section')
+      const qrCode = within(addFunds).getByRole('img', { name: 'QR code' })
+      expect(qrCode).toHaveAttribute('data-value', `gor:${safeAddress}`)
+      expect(addFunds).toHaveTextContent(safeAddress)
+
+      await userEvent.click(within(addFunds).getByRole('switch', { name: 'QR code with chain prefix' }))
+
+      expect(qrCode).toHaveAttribute('data-value', safeAddress)
     })
   })
 
