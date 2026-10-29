@@ -107,7 +107,7 @@ describe('RecipientAllowlistFlow steps', () => {
 
     expect(await screen.findByTestId('recipient-allowlist-existing-policies-step')).toBeInTheDocument()
     expect(stepTitle()).toHaveTextContent('Existing policies')
-    expect(await screen.findByText('Will be restricted')).toBeInTheDocument()
+    expect(await screen.findByText('Follows the allowlist')).toBeInTheDocument()
     expect(screen.getByText("Your spending limit will follow this allowlist's rules.")).toBeInTheDocument()
     expect(screen.getByText('They can only send allowed tokens to allowed recipients.')).toBeInTheDocument()
     expect(screen.queryByText('Will be blocked')).not.toBeInTheDocument()
@@ -140,9 +140,9 @@ describe('RecipientAllowlistFlow steps', () => {
     ).toBeInTheDocument()
     const [first, second] = screen.getAllByTestId('spending-limit-impact')
     expect(first).toHaveTextContent('USDC is in this allowlist')
-    expect(first).toHaveTextContent('Will be restricted')
+    expect(first).toHaveTextContent('Follows the allowlist')
     expect(second).toHaveTextContent("DAI isn't in this allowlist")
-    expect(second).not.toHaveTextContent('Will be restricted')
+    expect(second).not.toHaveTextContent('Follows the allowlist')
     expect(screen.queryByText('Will be blocked')).not.toBeInTheDocument()
   })
 
