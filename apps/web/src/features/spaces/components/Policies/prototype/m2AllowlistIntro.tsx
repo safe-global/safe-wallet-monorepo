@@ -1,26 +1,19 @@
-import { useRef, type ReactElement } from 'react'
-import { ArrowRight, Ban, Check, Clock, ShieldCheck, UsersRound } from 'lucide-react'
+import { useId, useState, type ReactElement } from 'react'
+import { ArrowRight, Ban, Check, Clock, ShieldCheck, UsersRound, X } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import Identicon from '@/components/common/Identicon'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@safe-global/views/components/ui/dialog'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { PolicyIntroExplainer } from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [
-  { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },
-  { Icon: ShieldCheck, text: 'It is checked onchain, so a blocked transfer fails even if every signer approves it.' },
-  {
-    Icon: Clock,
-    text: 'Setting it up, changing it or removing it requires a transaction. Every change waits 24 hours before it applies.',
-  },
+  { Icon: UsersRound, text: 'You choose who can receive funds and which tokens.' },
+  { Icon: ShieldCheck, text: "It's checked onchain, so a blocked action fails even if every signer approves it." },
+  { Icon: Clock, text: 'Every change needs a transaction and waits 24 hours before it applies.' },
 ]
 
 const ALLOWED = [
@@ -68,46 +61,78 @@ export type AllowlistIntroDialogProps = {
   onProceed: () => void
 }
 
-/** M1's PolicyIntroDialog with the help link moved from the title's ⓘ to "Learn more" after the description. */
+/** M1's PolicyIntroDialog without the subtitle; a checkbox on "every other action is blocked" gates Set up. */
 export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => {
-  const proceedRef = useRef<HTMLButtonElement>(null)
+  const [isUnderstood, setIsUnderstood] = useState(false)
+  const checkboxId = useId()
+
+  const changeOpen = (next: boolean) => {
+    if (!next) setIsUnderstood(false)
+    onOpenChange(next)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="xs" initialFocus={proceedRef} data-testid="recipient-allowlist-intro-dialog">
+    <Dialog open={open} onOpenChange={changeOpen}>
+      <DialogContent size="xs" initialFocus={false} data-testid="recipient-allowlist-intro-dialog">
         <DialogHeader>
           <DialogTitle className="text-xl leading-6 font-semibold">Allowlist</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-5 px-5 pb-5">
-          <DialogDescription className="text-base leading-6 text-secondary-foreground">
-            Only addresses on your list can receive funds. Everything else is blocked.{' '}
-            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
-              Learn more
-            </ExternalLink>
-          </DialogDescription>
-
           <AllowlistPreview />
 
-          <div className="flex flex-col gap-8">
-            <ul className="flex flex-col gap-8">
-              {EXPLAINERS.map(({ Icon, text }) => (
-                <li key={text} className="flex items-center gap-4">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
-                    <Icon className="size-4 text-badge-dot-success" aria-hidden />
-                  </div>
-                  <Typography variant="paragraph-small" color="muted">
-                    {text}
-                  </Typography>
-                </li>
-              ))}
-            </ul>
+          <ul className="flex flex-col gap-4">
+            {EXPLAINERS.map(({ Icon, text }) => (
+              <li key={text} className="flex items-center gap-4">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Icon className="size-4 text-badge-dot-success" aria-hidden />
+                </div>
+                <Typography variant="paragraph-small" color="muted">
+                  {text}
+                </Typography>
+              </li>
+            ))}
+          </ul>
 
-            <Button ref={proceedRef} className="w-full gap-2" onClick={onProceed}>
-              Set up allowlist
-              <ArrowRight className="text-[var(--color-static-text-brand)] dark:text-black" aria-hidden />
-            </Button>
+          {/* The one thing to confirm: anything the allowlist doesn't allow is blocked. */}
+          <div
+            className="flex flex-col gap-3 rounded-lg border border-border p-3"
+            data-m2-new="New · Every other action checkbox"
+          >
+            <div className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2">
+              <Typography variant="paragraph-small-medium">Every other action</Typography>
+              <Badge variant="destructive" size="status" shape="status">
+                <X aria-hidden />
+                Blocked
+              </Badge>
+            </div>
+            <label htmlFor={checkboxId} className="flex cursor-pointer items-start gap-3 px-1">
+              <Checkbox
+                id={checkboxId}
+                checked={isUnderstood}
+                onCheckedChange={(checked) => setIsUnderstood(checked === true)}
+                className="mt-0.5"
+              />
+              <Typography variant="paragraph-small">
+                I understand that anything not allowed will be blocked.{' '}
+                <ExternalLink noIcon href={HelpCenterArticle.POLICIES} onClick={(event) => event.stopPropagation()}>
+                  Learn more
+                </ExternalLink>
+              </Typography>
+            </label>
           </div>
+
+          <Button
+            className="w-full gap-2"
+            disabled={!isUnderstood}
+            onClick={() => {
+              setIsUnderstood(false)
+              onProceed()
+            }}
+          >
+            Set up allowlist
+            <ArrowRight className="text-[var(--color-static-text-brand)] dark:text-black" aria-hidden />
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

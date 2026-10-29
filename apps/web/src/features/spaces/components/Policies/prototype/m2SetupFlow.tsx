@@ -712,6 +712,25 @@ const PolicyDetailsCard = ({
         </Collapsible>
       </div>
     </Card>
+
+    <div
+      className="flex items-center gap-3 rounded-lg border border-dashed border-border p-4"
+      data-m2-new="New · Every other action row"
+    >
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-destructive/10" aria-hidden>
+        <X className="size-4 text-destructive" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <Typography variant="paragraph-small-medium">Every other action</Typography>
+        <Typography variant="paragraph-small" color="muted">
+          Anything this allowlist doesn&apos;t allow, even with every signature
+        </Typography>
+      </div>
+      <Badge variant="destructive" size="status" shape="status">
+        <X aria-hidden />
+        Blocked
+      </Badge>
+    </div>
   </div>
 )
 
