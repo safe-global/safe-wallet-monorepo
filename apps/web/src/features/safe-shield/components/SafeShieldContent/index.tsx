@@ -84,13 +84,16 @@ export const SafeShieldContent = ({
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
   const deadlockEmpty = isEmpty(deadlockResults)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
-  const hasGuardVerdict = !!guardCheck?.blocked || !!guardCheck?.isAllowed
-  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx && !hasGuardVerdict
+  const showGuardInPro = isSafePro && hasProFeatures
+  const guardRefusal = !showGuardInPro && guardCheck?.blocked
+  const hasGuardVerdict = showGuardInPro && (!!guardCheck?.blocked || !!guardCheck?.isAllowed)
+  const allEmpty =
+    recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx && !guardRefusal && !hasGuardVerdict
 
   const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
-  const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
+  const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx || hasGuardVerdict
 
   const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
 
@@ -122,7 +125,7 @@ export const SafeShieldContent = ({
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
-        {guardCheck && <PolicyGuardCheck {...guardCheck} />}
+        {guardRefusal && <PolicyGuardCheck blocked={guardRefusal} isAllowed={false} />}
 
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
@@ -182,6 +185,8 @@ export const SafeShieldContent = ({
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
+              {showGuardInPro && guardCheck && <PolicyGuardCheck {...guardCheck} />}
+
               {hasProFeatures ? (
                 <AnalysisGroupCard
                   data-testid="recipient-analysis-group-card"
