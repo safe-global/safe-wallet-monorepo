@@ -14,7 +14,8 @@ import { CHAIN_IDS } from '../data/constants'
 import type { Journey, JourneyEnvironment, OwnerName } from '../fixtures/journey.fixture'
 import type { SeededSafe } from './safe'
 
-type ContractName = 'SafePolicyGuard' | 'ERC20TransferPolicy' | 'ERC20ApprovePolicy'
+type ContractName =
+  'SafePolicyGuard' | 'ERC20TransferPolicy' | 'ERC20ApprovePolicy' | 'AllowPolicy' | 'DenyPolicy' | 'MultiSendPolicy'
 
 type PolicyEngineFixture = { contracts: Array<{ name: ContractName; address: string; code: string }> }
 
