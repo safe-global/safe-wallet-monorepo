@@ -1,16 +1,14 @@
-import { getCountdown } from '@safe-global/utils/utils/date'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { getCountdown, getPeriod } from '@safe-global/utils/utils/date'
 import { formatUtcDate } from '../SpendingLimitDrawer/format'
 
 export { formatUtcDateTime } from '../SpendingLimitDrawer/format'
 export { hoursUntil } from '../utils/policyStatusDetail'
 
-const formatDays = (days: number): string => `${days} day${maybePlural(days)}`
-
 /** `6 days left · until Oct 21, 2026`. Takes unix SECONDS; an expiry in the past is a closed state, not formatted. */
 export const formatTimeToSign = (expiresAt: number, nowMs: number): string => {
-  const { days } = getCountdown(expiresAt - nowMs / 1_000)
-  const left = days === 0 ? 'Less than a day left' : `${formatDays(days)} left`
+  const secondsLeft = expiresAt - nowMs / 1_000
+  const { days } = getCountdown(secondsLeft)
+  const left = days === 0 ? 'Less than a day left' : `${getPeriod(secondsLeft)} left`
 
   return `${left} · until ${formatUtcDate(expiresAt)}`
 }
@@ -34,5 +32,5 @@ export const formatTimeLeft = (until: number, nowMs: number): string => {
   const secondsLeft = secondsUntil(until, nowMs)
   const { days } = getCountdown(secondsLeft)
 
-  return days === 0 ? `${formatHoursMinutes(secondsLeft)} left` : `${formatDays(days)} left`
+  return days === 0 ? `${formatHoursMinutes(secondsLeft)} left` : `${getPeriod(secondsLeft)} left`
 }
