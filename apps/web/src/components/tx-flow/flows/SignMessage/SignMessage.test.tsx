@@ -33,6 +33,7 @@ import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxModalContext } from '@/components/tx-flow'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { initialState as initialSettings } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
@@ -785,6 +786,122 @@ describe('SignMessage', () => {
       expect(confirmationSpy).toHaveBeenCalled()
       expect(getByText('Error confirming the message. Try again.')).toBeInTheDocument()
     })
+  })
+
+  it('disables the Sign button while signing and enables it again after an error', async () => {
+    jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
+    jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => true)
+    jest
+      .spyOn(useWalletHook, 'default')
+      .mockImplementation(() => ({ address: zeroPadValue('0x03', 20) }) as ConnectedWallet)
+    const msg = {
+      type: 'MESSAGE',
+      messageHash: '0x456',
+      confirmations: [{ owner: { value: zeroPadValue('0x02', 20) } }],
+      confirmationsRequired: 2,
+      confirmationsSubmitted: 1,
+    } as unknown as MessageItem
+    jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn(), undefined])
+
+    let rejectConfirmation: (error: Error) => void = () => {}
+    jest.spyOn(sender, 'dispatchSafeMsgConfirmation').mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectConfirmation = reject
+        }),
+    )
+
+    const { getByText } = renderWithSafeShield(
+      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
+    )
+
+    await act(() => Promise.resolve())
+
+    expect(getByText('Sign')).toBeEnabled()
+
+    act(() => {
+      fireEvent.click(getByText('Sign'))
+    })
+
+    expect(getByText('Sign')).toBeDisabled()
+
+    await act(async () => {
+      rejectConfirmation(new Error('Error confirming'))
+    })
+
+    await waitFor(() => expect(getByText('Error confirming the message. Try again.')).toBeInTheDocument())
+    expect(getByText('Sign')).toBeEnabled()
+  })
+
+  type PendingConfirmation = { resolve: () => void; reject: (error: Error) => void }
+
+  it.each<[string, (settle: PendingConfirmation) => void]>([
+    ['succeeds', ({ resolve }) => resolve()],
+    ['fails', ({ reject }) => reject(new Error('Error confirming'))],
+  ])('starts a second sign request afresh and ignores the first one when it %s', async (_, settleFirst) => {
+    jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
+    jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => true)
+    jest
+      .spyOn(useWalletHook, 'default')
+      .mockImplementation(() => ({ address: zeroPadValue('0x03', 20) }) as ConnectedWallet)
+    const msg = {
+      type: 'MESSAGE',
+      messageHash: '0x456',
+      confirmations: [{ owner: { value: zeroPadValue('0x02', 20) } }],
+      confirmationsRequired: 2,
+      confirmationsSubmitted: 1,
+    } as unknown as MessageItem
+    jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn(), undefined])
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/messages/:messageHash`, () =>
+        HttpResponse.json({
+          messageHash: '0x456',
+          confirmations: [
+            { owner: { value: zeroPadValue('0x02', 20) } },
+            { owner: { value: zeroPadValue('0x03', 20) } },
+          ],
+          confirmationsRequired: 2,
+          confirmationsSubmitted: 2,
+          preparedSignature: '0x789',
+        } as unknown as Message),
+      ),
+    )
+
+    let firstConfirmation: PendingConfirmation = { resolve: () => {}, reject: () => {} }
+    jest.spyOn(sender, 'dispatchSafeMsgConfirmation').mockImplementation(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          firstConfirmation = { resolve, reject }
+        }),
+    )
+    const setTxFlow = jest.fn()
+    const renderFlow = (requestId: string) => (
+      <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+        <SignMessageFlow logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId={requestId} />
+      </TxModalContext.Provider>
+    )
+
+    const { getByText, queryByText, rerender } = render(renderFlow('1'))
+    await act(() => Promise.resolve())
+
+    act(() => {
+      fireEvent.click(getByText('Sign'))
+    })
+
+    expect(getByText('Sign')).toBeDisabled()
+
+    rerender(renderFlow('2'))
+
+    expect(getByText('Sign')).toBeEnabled()
+
+    await act(async () => {
+      settleFirst(firstConfirmation)
+    })
+    await act(() => jest.advanceTimersByTimeAsync(5_000))
+
+    expect(setTxFlow).not.toHaveBeenCalled()
+    expect(queryByText('Error confirming the message. Try again.')).not.toBeInTheDocument()
+    expect(getByText('Sign')).toBeEnabled()
   })
 
   it('shows all signatures and success message if message has already been signed', async () => {
