@@ -143,3 +143,6 @@ export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'
 export { DashboardHeader } from './components/Dashboard/DashboardHeader'
 export { default as SpacesLogin } from './components/SpacesLogin'
+
+export { ProPreview as UnifiedSidebarProPreview } from './components/Sidebar/unified/ProPreview'
+export { useUnifiedSidebarSafes } from './components/Sidebar/unified/useUnifiedSidebarSafes'

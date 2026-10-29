@@ -1,10 +1,14 @@
-import type { ReactElement } from 'react'
+import { useEffect, type ReactElement } from 'react'
 import { Sidebar, SidebarHeader } from '@safe-global/views/components/ui/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
+import { UnifiedTopBar } from './unified/UnifiedTopBar'
 import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
 import type { SpaceSelectorProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import type { SidebarVariantType } from './variants'
+import { UnifiedSidebarContent } from './unified/UnifiedSidebarContent'
+import { ScenarioBar } from './unified/ScenarioBar'
+import { syncSwitchFromUrl, useIsPrototypeOn } from './unified/scenario'
 
 interface SidebarProps extends SpaceSelectorProps {
   type: SidebarVariantType
@@ -27,7 +31,10 @@ export const EnhancedSidebar = ({
   isLoading = false,
   contained = false,
 }: SidebarProps): ReactElement => {
-  const Variant = getSidebarVariant(type)
+  useEffect(() => syncSwitchFromUrl(window.location.search), [])
+  // Design prototype, off in production builds: `?proto=sidebar` swaps the Safe sidebar for the unified one.
+  const isUnified = useIsPrototypeOn() && type === 'safe'
+  const Variant = isUnified ? UnifiedSidebarContent : getSidebarVariant(type)
   return (
     <Sidebar
       collapsible="icon"
@@ -37,12 +44,11 @@ export const EnhancedSidebar = ({
       innerClassName={SIDEBAR_INNER_CLASSNAME}
       data-testid="sidebar-container"
     >
-      <SidebarHeader>
-        <SidebarTopBar />
-      </SidebarHeader>
+      <SidebarHeader>{isUnified ? <UnifiedTopBar /> : <SidebarTopBar />}</SidebarHeader>
 
       <Variant spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} isLoading={isLoading} />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
+      {isUnified && <ScenarioBar />}
     </Sidebar>
   )
 }

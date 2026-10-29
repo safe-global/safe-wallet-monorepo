@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { useCallback, useContext, useMemo } from 'react'
 import { safeMainNavigation, safeDefiGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
@@ -34,7 +34,9 @@ export const SafeSidebarContent = ({
   spaces,
   spaceInitial,
   isLoading = false,
-}: SidebarVariantContentProps): ReactElement => {
+  header,
+  after,
+}: SidebarVariantContentProps & { header?: ReactNode; after?: ReactNode }): ReactElement => {
   const chain = useCurrentChain()
   const queueSize = useQueuedTxsLength()
   const isBlockedCountry = useContext(GeoblockingContext)
@@ -119,6 +121,8 @@ export const SafeSidebarContent = ({
       mainNavItems={mainNavItems}
       defiGroup={setupGroup}
       isLoading={isLoading}
+      header={header}
+      after={after}
     />
   )
 }
