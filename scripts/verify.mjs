@@ -112,7 +112,7 @@ const WORKSPACE_NAMES = {
 const workspacePkg = WORKSPACE_NAMES[workspace] ?? `@safe-global/${workspace}`
 
 // Jest defaults to cores - 1 workers, which is slower and runs out of memory when agents run verify in parallel
-const JEST_RESOURCE_ARGS = ['--maxWorkers=25%', '--workerIdleMemoryLimit=1GB', '--coverage=false']
+const JEST_RESOURCE_ARGS = ['--maxWorkers=50%', '--workerIdleMemoryLimit=1GB', '--coverage=false']
 
 // ---------------------------------------------------------------------------
 // Missing test detection
