@@ -7,6 +7,7 @@
  */
 import type { TestInfo } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { addSafeToAccounts } from '../../src/fixtures/seed-added-safes'
 import { LedgerEmulator } from '../../src/api/ledger-emulator'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
@@ -48,6 +49,7 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
   }, testInfo) => {
     const queue = new TxQueuePage(safePage)
     const transactionReview = new TxReviewPage(safePage)
+    await addSafeToAccounts(safePage, safes.SEP_LEDGER_SIGN_SAFE)
     await queue.goto(safes.SEP_LEDGER_SIGN_SAFE)
     await expect(queue.transactionWithNonce(0)).toContainText('1/3')
     await walletPage.connectLedger(ledgerOwner.address)
@@ -68,6 +70,7 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
   }, testInfo) => {
     const queue = new TxQueuePage(safePage)
     const transactionReview = new TxReviewPage(safePage)
+    await addSafeToAccounts(safePage, safes.SEP_LEDGER_EXECUTE_SAFE)
     await queue.goto(safes.SEP_LEDGER_EXECUTE_SAFE)
     await walletPage.connectLedger(ledgerOwner.address)
 
@@ -83,6 +86,6 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
     const deviceHash = deviceTransactionHash(review).toLowerCase()
     expect(deviceHash).toMatch(/^0x[0-9a-f]{64}$/)
     expect(appHash).toContain(deviceHash)
-    await expect(transactionReview.status).toHaveText('Transaction was successful', { timeout: 120_000 })
+    await expect(transactionReview.status).toHaveText('Transaction was successful')
   })
 })

@@ -17,7 +17,7 @@ import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useId, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@safe-global/views/components/dashboard/styled'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Switch } from '@safe-global/views/components/ui/switch'
@@ -109,6 +109,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
   const settings = useAppSelector(selectSettings)
   const qrPrefix = settings.shortName.qr ? `${chain?.shortName}:` : ''
   const qrCode = `${qrPrefix}${safeAddress}`
+  const qrPrefixLabelId = useId()
 
   const title = 'Add native assets'
   const content = `Receive ${chain?.nativeCurrency.name} to start interacting with your account.`
@@ -152,10 +153,11 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                 <Label className="justify-center">
                   <Switch
                     data-testid="qr-code-switch"
+                    aria-labelledby={qrPrefixLabelId}
                     checked={settings.shortName.qr}
                     onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
                   />
-                  <span>
+                  <span id={qrPrefixLabelId}>
                     QR code with chain prefix (<b>{chain?.shortName}:</b>)
                   </span>
                 </Label>

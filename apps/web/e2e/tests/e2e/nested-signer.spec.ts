@@ -17,8 +17,6 @@ import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 
 const AMOUNT = '0.01'
-// The Queue Service adds the parent's on-chain approval when the Transaction Service has indexed it
-const ON_CHAIN_CONFIRMATION_TIMEOUT_MS = 60_000
 
 /** Open the child Safe and fill a transfer up to its review */
 async function reviewTransfer(page: Page, child: SeededSafe, recipient: string): Promise<void> {
@@ -71,11 +69,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
         hash: safeTxHashOf(childTransaction),
       }),
     ).toBe(true)
-    await expect
-      .poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf), {
-        timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
-      })
-      .toEqual([1])
+    await expect.poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf)).toEqual([1])
     await queue.goto(child.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('1/1')
     await queue.execute(0)
@@ -142,11 +136,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await review.continueAndExecute()
     await review.waitForExecution()
 
-    await expect
-      .poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf), {
-        timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
-      })
-      .toEqual([2])
+    await expect.poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf)).toEqual([2])
     await queue.goto(child.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('2/2')
     await queue.execute(0)

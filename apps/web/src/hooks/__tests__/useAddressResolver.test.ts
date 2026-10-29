@@ -136,6 +136,48 @@ describe('useAddressResolver', () => {
     jest.useRealTimers()
   })
 
+  it('reports resolving from the moment the address changes until the lookup ends', async () => {
+    jest.useFakeTimers()
+    const TYPED_ADDRESS = zeroPadValue('0xee', 20)
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    let endLookup: (name: string | undefined) => void = () => {}
+    jest.spyOn(domains, 'lookupAddress').mockImplementation(() => new Promise((resolve) => (endLookup = resolve)))
+
+    const { result, rerender } = renderHook(({ address }) => useAddressResolver(address), {
+      initialProps: { address: '' },
+    })
+    expect(result.current.resolving).toBe(false)
+
+    rerender({ address: TYPED_ADDRESS })
+    expect(result.current.resolving).toBe(true)
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(200)
+    })
+    expect(result.current.resolving).toBe(true)
+
+    await act(async () => {
+      endLookup(undefined)
+    })
+    expect(result.current.resolving).toBe(false)
+
+    jest.useRealTimers()
+  })
+
+  it('does not report resolving while the debounce waits for an address with an address book name', () => {
+    jest.useFakeTimers()
+    const NAMED_ADDRESS = zeroPadValue('0xef', 20)
+    jest.spyOn(addressBook, 'default').mockReturnValue({ [NAMED_ADDRESS]: 'Named' })
+
+    const { result, rerender } = renderHook(({ address }) => useAddressResolver(address), {
+      initialProps: { address: '' },
+    })
+    rerender({ address: NAMED_ADDRESS })
+
+    expect(result.current.resolving).toBe(false)
+    jest.useRealTimers()
+  })
+
   it('does not reuse a primary name cached for another hub', async () => {
     const ADDR_ON_BOTH_HUBS = zeroPadValue('0xdd', 20)
     jest.spyOn(addressBook, 'default').mockReturnValue({})

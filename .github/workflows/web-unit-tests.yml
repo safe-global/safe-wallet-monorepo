@@ -1,13 +1,7 @@
 name: Web Unit tests
 on:
+  # No paths filter: the required result job must report on every pull request.
   pull_request:
-    paths:
-      - apps/web/**
-      - packages/**
-      - yarn.lock
-      - package.json
-      - .yarnrc.yml
-      - .yarn/patches/**
 
   push:
     branches:
@@ -27,7 +21,35 @@ concurrency:
 permissions: {}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/web/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            .github/workflows/web-unit-tests.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
   test:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
 
@@ -83,7 +105,8 @@ jobs:
             }
 
   base-coverage:
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true' && github.event_name == 'pull_request'
     permissions:
       contents: read
 
@@ -112,8 +135,8 @@ jobs:
           if-no-files-found: ignore
 
   coverage-report:
-    needs: [test, base-coverage]
-    if: always() && github.event_name == 'pull_request' && needs.test.result != 'cancelled'
+    needs: [changes, test, base-coverage]
+    if: always() && needs.changes.outputs.relevant == 'true' && github.event_name == 'pull_request' && needs.test.result != 'cancelled'
     permissions:
       contents: read
       checks: write
@@ -142,3 +165,16 @@ jobs:
           annotations: failed-tests
           working-directory: apps/web
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: Web unit tests result
+    permissions: {}
+    if: always()
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}
