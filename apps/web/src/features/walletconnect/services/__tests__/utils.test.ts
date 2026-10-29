@@ -1,4 +1,5 @@
-import { splitError } from '../utils'
+import { getInternalError } from '@walletconnect/utils'
+import { isExpiredProposalError, splitError } from '../utils'
 
 describe('WalletConnect utils', () => {
   describe('splitError', () => {
@@ -14,6 +15,28 @@ describe('WalletConnect utils', () => {
       const [summary, detail] = splitError(error.message)
       expect(summary).toEqual('WalletConnect failed to switch chain')
       expect(detail).toBeUndefined()
+    })
+  })
+
+  describe('isExpiredProposalError', () => {
+    it.each(['Missing or invalid. Record was recently deleted - proposal: 1234', 'No matching key. proposal: 1234'])(
+      'detects "%s"',
+      (message) => {
+        expect(isExpiredProposalError(new Error(message))).toBe(true)
+      },
+    )
+
+    // Built by the SDK, so an upgrade that rewords the error fails here instead of in production
+    it.each([
+      ['EXPIRED', 'proposal id: 1234'],
+      ['NO_MATCHING_KEY', "proposal id doesn't exist: 1234"],
+    ] as const)('detects the SDK %s error for a proposal', (key, context) => {
+      const { message } = getInternalError(key, context)
+      expect(isExpiredProposalError(new Error(message))).toBe(true)
+    })
+
+    it.each(['User rejected', 'Network request failed', ''])('ignores "%s"', (message) => {
+      expect(isExpiredProposalError(new Error(message))).toBe(false)
     })
   })
 })
