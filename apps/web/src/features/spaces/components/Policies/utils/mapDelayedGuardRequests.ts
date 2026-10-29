@@ -14,6 +14,7 @@ import {
   type PolicyTokenInfo,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
+import { isAllowlistRemoval } from '@/features/policy-guard/services'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 
@@ -22,21 +23,30 @@ const NATIVE_TRANSFER_SELECTOR = '0x00000000'
 const PERMISSIONS: Record<number, AllowlistRecipient['permission']> = { 1: 'ONCE', 2: 'ALWAYS' }
 
 type MapOptions = {
-  /** `update` when the Safe already enforces an allowlist, so the request changes it. */
-  operation: 'create' | 'update'
+  /** `update` when the Safe already enforces an allowlist, so the request changes it; `remove` when it deletes it. */
+  operation: 'create' | 'update' | 'remove'
   resolveToken: (address: string) => PolicyTokenInfo
 }
 
+/** Recipients a token rule names; none for data that isn't a recipient list, which CGW passes on as stored. */
 const decodeRecipients = (data: string): AllowlistRecipient[] => {
-  const [entries] = AbiCoder.defaultAbiCoder().decode(['tuple(address recipient, uint8 permission)[]'], data)
+  let entries: Array<[string, bigint]>
+  try {
+    entries = AbiCoder.defaultAbiCoder().decode(['tuple(address recipient, uint8 permission)[]'], data)[0]
+  } catch {
+    return []
+  }
 
-  return (entries as Array<[string, bigint]>).map(([account, permission]) => ({
+  return entries.map(([account, permission]) => ({
     account,
     permission: PERMISSIONS[Number(permission)] ?? 'ALWAYS',
   }))
 }
 
-/** One entry per token, the way the drawer lists them. Accesses other than token and native transfers are skipped. */
+/**
+ * One entry per token, the way the drawer lists them. Accesses other than token and native transfers are skipped,
+ * as are the guard's catch-all rules and a token rule being unbound, which names no recipient.
+ */
 export const toAllowlistData = (
   configurations: readonly PolicyConfigurationDto[],
   resolveToken: MapOptions['resolveToken'],
@@ -50,10 +60,12 @@ export const toAllowlistData = (
     return entry
   }
 
-  for (const { target, selector, data } of configurations) {
-    if (selector === ERC20_TRANSFER_SELECTOR) entryFor(target).recipients.push(...decodeRecipients(data))
-    else if (selector === NATIVE_TRANSFER_SELECTOR)
+  for (const { target, selector, policy, data } of configurations) {
+    if (selector === ERC20_TRANSFER_SELECTOR && !sameAddress(policy, ZERO_ADDRESS)) {
+      entryFor(target).recipients.push(...decodeRecipients(data))
+    } else if (selector === NATIVE_TRANSFER_SELECTOR && !sameAddress(target, ZERO_ADDRESS)) {
       entryFor(ZERO_ADDRESS).recipients.push({ account: target, permission: 'ALWAYS' })
+    }
   }
 
   return { entries }
@@ -152,8 +164,9 @@ export const mergeDelayedGuardRequests = (
         policy.safe.chainId === dto.safe.chainId &&
         sameAddress(policy.safe.address, dto.safe.address),
     )
+    const isRemoval = !!dto.configurations && isAllowlistRemoval(dto.configurations, dto.safe.address)
     const row = mapDelayedGuardRequest(dto, {
-      operation: live ? 'update' : 'create',
+      operation: isRemoval ? 'remove' : live ? 'update' : 'create',
       resolveToken: (address) => resolveToken(dto.safe.chainId, address),
     })
     if (!row) continue

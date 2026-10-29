@@ -111,7 +111,7 @@ export type AllowlistPolicyData = {
 /** An executed change waiting out the guard's delay. `create`: the allowlist is not enforced until then. */
 // Placeholder: CGW has no field for this yet, so the shape follows the design until the API defines it.
 export type AllowlistScheduledChange = {
-  operation: 'create' | 'update'
+  operation: 'create' | 'update' | 'remove'
   /** Unix SECONDS `applyConfiguration` is valid from (CGW `readyAt`). */
   appliesAt: number
   /** Unix SECONDS the apply window closes (CGW `expiresAt`); unset when unknown. */
@@ -141,6 +141,8 @@ export type AllowlistPolicy = PolicyBase & {
   /** Whether the guard also checks module transactions, such as spending limits. */
   spendingLimitsCovered: boolean
   scheduledChange?: AllowlistScheduledChange
+  /** An applied removal deleted every rule; the guard is still on and only lets itself be taken off. */
+  awaitingGuardRemoval?: boolean
 }
 
 export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | AllowlistPolicy
@@ -209,7 +211,7 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
   if (isPendingPolicy(policy)) return policy.status
-  if (isAllowlistPolicy(policy) && policy.scheduledChange) return 'change-pending'
+  if (isAllowlistPolicy(policy) && (policy.scheduledChange || policy.awaitingGuardRemoval)) return 'change-pending'
   if (policy.enabled) return 'active'
 
   // A proposer grant has no module to switch on, so one that is not in force was never activated.

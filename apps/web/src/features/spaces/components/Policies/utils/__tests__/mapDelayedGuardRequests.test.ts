@@ -46,6 +46,67 @@ const makeRequest = (overrides: Partial<PendingDelayedGuardPoliciesDto> = {}): P
   ...overrides,
 })
 
+describe('mapDelayedGuardRequest removals', () => {
+  it("should skip the unbound token rule, the guard's catch-all and the exit rules, when the request removes the allowlist", () => {
+    const safe = { chainId: '11155111', address: faker.finance.ethereumAddress() }
+    const policy = mapDelayedGuardRequest(
+      makeRequest({
+        safe,
+        configurations: [
+          {
+            target: token,
+            selector: '0xa9059cbb',
+            operation: 0,
+            policy: faker.finance.ethereumAddress(),
+            data: encodeErc20TransferPolicyData(recipients),
+          },
+          { target: token, selector: '0xa9059cbb', operation: 0, policy: ZERO_ADDRESS, data: '0x' },
+          { target: nativeRecipient, selector: '0x00000000', operation: 0, policy: ZERO_ADDRESS, data: '0x' },
+          {
+            target: ZERO_ADDRESS,
+            selector: '0x00000000',
+            operation: 0,
+            policy: faker.finance.ethereumAddress(),
+            data: '0x',
+          },
+          {
+            target: safe.address,
+            selector: '0xe19a9dd9',
+            operation: 0,
+            policy: faker.finance.ethereumAddress(),
+            data: '0x',
+          },
+        ],
+      }),
+      { operation: 'remove', resolveToken },
+    )
+
+    expect(policy?.data.entries.map(({ token, recipients }) => [token.address, recipients.length])).toEqual([
+      [token, 2],
+      [ZERO_ADDRESS, 1],
+    ])
+  })
+
+  it('should list no recipients for a token, when its rule data is not a recipient list', () => {
+    const policy = mapDelayedGuardRequest(
+      makeRequest({
+        configurations: [
+          {
+            target: token,
+            selector: '0xa9059cbb',
+            operation: 0,
+            policy: faker.finance.ethereumAddress(),
+            data: '0x12',
+          },
+        ],
+      }),
+      { operation: 'create', resolveToken },
+    )
+
+    expect(policy?.data.entries).toEqual([{ token: resolveToken(token), recipients: [] }])
+  })
+})
+
 describe('mapDelayedGuardRequest', () => {
   it('maps a requested root to an allowlist waiting out or past its delay, with its apply window', () => {
     const policy = mapDelayedGuardRequest(makeRequest(), { operation: 'create', resolveToken })

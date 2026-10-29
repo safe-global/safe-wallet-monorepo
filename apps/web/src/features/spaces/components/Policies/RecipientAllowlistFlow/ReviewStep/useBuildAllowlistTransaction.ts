@@ -24,7 +24,8 @@ type BuiltAllowlist = AllowlistSetup & { guardState: PolicyGuardState }
 export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<BuiltAllowlist> => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
-  const { buildAllowlistConfigurations, createAllowlistSetupTxs, $isReady } = useLoadFeature(PolicyGuardFeature)
+  const { buildAllowlistConfigurations, clearGuardExitConfigurations, createAllowlistSetupTxs, $isReady } =
+    useLoadFeature(PolicyGuardFeature)
   const [built, setBuilt] = useState<BuiltAllowlist>()
 
   const chainId = scope?.chainId
@@ -62,7 +63,10 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
 
     let setup: AllowlistSetup
     try {
-      const configurations = buildAllowlistConfigurations(chainId, stableRules)
+      const configurations = [
+        ...clearGuardExitConfigurations(safeAddress),
+        ...buildAllowlistConfigurations(chainId, stableRules),
+      ]
       setup = createAllowlistSetupTxs({ chainId, safeAddress, guardAddress, guardState: state, configurations })
     } catch (e) {
       setSafeTxError(asError(e))
@@ -93,6 +97,7 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
     safeAddress,
     $isReady,
     buildAllowlistConfigurations,
+    clearGuardExitConfigurations,
     createAllowlistSetupTxs,
     setSafeTx,
     setSafeTxError,

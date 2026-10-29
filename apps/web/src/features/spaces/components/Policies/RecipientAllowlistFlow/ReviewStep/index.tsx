@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, type ReactElement } from 'react'
+import { useContext, useMemo, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -17,7 +17,6 @@ import {
 } from '../utils/allowlistDisplay'
 import type { RecipientAllowlistFlowData } from '../types'
 import { REVIEW_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
@@ -32,7 +31,7 @@ import { joinNames, spenderDisplayName } from '../../SpendingLimitFlow/Summary/d
 import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import { useAllowlistAddressInfo } from '../hooks/useAllowlistAddressInfo'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
-import { useSaveAllowlistConfiguration } from '../hooks/useSaveAllowlistConfiguration'
+import { useSaveBeforeSubmit } from '../hooks/useSaveBeforeSubmit'
 import AllowlistPolicyDetails from './AllowlistPolicyDetails'
 import AllowlistSetupActions from './AllowlistSetupActions'
 import { getInstalledFallback } from './ruleKind'
@@ -54,39 +53,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const rules = data?.rules
   const { guardState, configurations, root, txs } = useBuildAllowlistTransaction(rules ?? [])
 
-  const { save, isSaving } = useSaveAllowlistConfiguration()
-  const { setIsSubmitLoading, setIsSubmitDisabled } = useContext(TxFlowContext)
-
-  useEffect(() => {
-    setIsSubmitLoading(isSaving)
-  }, [isSaving, setIsSubmitLoading])
-
-  useEffect(() => {
-    setIsSubmitDisabled(!configurations || isSaving)
-  }, [configurations, isSaving, setIsSubmitDisabled])
-
-  useEffect(
-    () => () => {
-      setIsSubmitLoading(false)
-      setIsSubmitDisabled(false)
-    },
-    [setIsSubmitLoading, setIsSubmitDisabled],
-  )
-
-  // The disabled state lands a render late, so a fast double click would otherwise save twice.
-  const isSubmittingRef = useRef(false)
-  const handleSubmit = useCallback<SubmitCallback>(
-    async (args) => {
-      if (!configurations || !root || isSubmittingRef.current) return
-      isSubmittingRef.current = true
-      try {
-        if (await save({ configurations, root })) onSubmit(args)
-      } finally {
-        isSubmittingRef.current = false
-      }
-    },
-    [configurations, root, save, onSubmit],
-  )
+  const request = useMemo(() => (configurations && root ? { configurations, root } : undefined), [configurations, root])
+  const handleSubmit = useSaveBeforeSubmit(request, onSubmit)
 
   const selected = findSafeAccount(accounts, scope?.scopeKey)
 
