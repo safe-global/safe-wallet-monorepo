@@ -17,14 +17,14 @@ describe('RecipientAllowlistIntroDialog', () => {
     expect(screen.getByText('Only let funds go to addresses you approve.')).toBeInTheDocument()
   })
 
-  it('explains who can receive funds, that other transfers are blocked, and the 24-hour wait', () => {
+  it('explains who can receive funds, that other transfers are blocked, and the 10-minute wait', () => {
     render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
 
     expect(screen.getByText('Only addresses on the list can receive funds from this Safe account.')).toBeInTheDocument()
     expect(screen.getByText('Transfers to any other address are blocked.')).toBeInTheDocument()
     expect(
       screen.getByText(
-        'Setting it up, changing it or removing it requires a transaction. Every change waits 24 hours before it applies.',
+        'Setting it up, changing it or removing it requires a transaction. Every change waits 10 minutes before it applies.',
       ),
     ).toBeInTheDocument()
   })

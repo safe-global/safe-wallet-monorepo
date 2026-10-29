@@ -6,8 +6,8 @@ import {
 } from '../policyEngineDeployments'
 
 describe('policyEngineDeployments', () => {
-  it.each(['1', '137', '11155111'])('returns the 60s-delay policy guard on chain %s', (chainId) => {
-    expect(getPolicyGuardAddress(chainId)).toBe('0xC83bC185770ac0Da8A970f35695064eEe62e236c')
+  it.each(['1', '137', '11155111'])('returns the 10-minute-delay policy guard on chain %s', (chainId) => {
+    expect(getPolicyGuardAddress(chainId)).toBe('0x46d22E0B3DC367b48bc2d64B789ae154b3177a57')
   })
 
   it.each(['1', '137', '11155111'])('returns the indexer-watched policies on chain %s', (chainId) => {

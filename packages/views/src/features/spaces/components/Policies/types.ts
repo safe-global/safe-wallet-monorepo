@@ -108,7 +108,7 @@ export type AllowlistPolicyData = {
   entries: AllowlistEntry[]
 }
 
-/** An executed change waiting out the guard's 24-hour delay. `create`: the allowlist is not enforced until then. */
+/** An executed change waiting out the guard's delay. `create`: the allowlist is not enforced until then. */
 // Placeholder: CGW has no field for this yet, so the shape follows the design until the API defines it.
 export type AllowlistScheduledChange = {
   operation: 'create' | 'update'

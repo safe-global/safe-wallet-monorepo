@@ -1,7 +1,15 @@
-import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
+import {
+  MIN_POLICY_GUARD_SAFE_VERSION,
+  POLICY_GUARD_DELAY_SECONDS,
+} from '@safe-global/utils/features/policy-guard/constants'
+import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 
-/** How long a policy change waits before it applies. */
-export const POLICY_CHANGE_DELAY = '24 hours'
+/** How long a policy change waits before it applies, e.g. `10 minutes`. */
+export const POLICY_CHANGE_DELAY = formatDurationFromMilliseconds(POLICY_GUARD_DELAY_SECONDS * 1_000, [
+  'days',
+  'hours',
+  'minutes',
+])
 
 export const FLOW_SUBTITLE = 'Allowlist'
 
@@ -126,4 +134,4 @@ export const SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL = 'I understand how this allo
 export const APPLY_REVIEW_STEP_TITLE = 'Apply allowlist'
 export const APPLY_SUMMARY_TITLE = 'Apply the allowlist to turn it on.'
 export const APPLY_SUMMARY_DESCRIPTION =
-  'The 24-hour wait is over. Once this transaction is executed, every transfer of an allowlisted token is checked against it.'
+  'The waiting period is over. Once this transaction is executed, every transfer of an allowlisted token is checked against it.'

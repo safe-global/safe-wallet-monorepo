@@ -1,5 +1,6 @@
 import {
   formatDate,
+  formatTimeUntil,
   formatUtcDate,
   formatUtcDateTime,
   formatUtcDayTime,
@@ -44,6 +45,22 @@ describe('formatUtcDateTime', () => {
 
   it('should write midnight as 00:00, when the time is a UTC midnight', () => {
     expect(formatUtcDateTime(OCT_22_MIDNIGHT_UTC)).toBe('Oct 22, 2026 · 00:00 UTC')
+  })
+})
+
+describe('formatTimeUntil', () => {
+  it('should give the hours and minutes left, when less than a day is left', () => {
+    expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 23 * 3_600 - 59 * 60) * 1_000)).toBe(
+      '23 hours 59 minutes',
+    )
+  })
+
+  it('should give the minutes left, when less than an hour is left', () => {
+    expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 9 * 60) * 1_000)).toBe('9 minutes')
+  })
+
+  it('should say less than a minute, when the time has passed', () => {
+    expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC + 60) * 1_000)).toBe('less than a minute')
   })
 })
 

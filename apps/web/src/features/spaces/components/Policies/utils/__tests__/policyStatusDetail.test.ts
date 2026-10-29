@@ -32,6 +32,8 @@ describe('getPendingStatusDetail', () => {
   })
 
   it('should say when a change waiting out the delay applies', () => {
-    expect(getPendingStatusDetail(mockAllowlistChangePending())).toMatch(/^Applies in 24h · /)
+    expect(getPendingStatusDetail(mockAllowlistChangePending())).toMatch(
+      /^Applies in (1 day|23 hours 5[89] minutes) · /,
+    )
   })
 })

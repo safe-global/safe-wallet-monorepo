@@ -1,5 +1,12 @@
 import { tz } from '@date-fns/tz'
-import { differenceInHours, format, formatDistanceToNow, formatRelative } from 'date-fns'
+import {
+  differenceInHours,
+  format,
+  formatDistanceToNow,
+  formatDuration,
+  formatRelative,
+  intervalToDuration,
+} from 'date-fns'
 import { maybePlural } from './formatters'
 
 export const currentMinutes = (): number => Math.floor(Date.now() / (1000 * 60))
@@ -51,6 +58,12 @@ export const formatUtcDateTime = (seconds: number): string =>
 /** Whole hours left, rounded up and at least 1, so a wait that just started reads `24`. Takes unix SECONDS. */
 export const hoursUntil = (at: number, nowMs: number): number =>
   Math.max(1, differenceInHours(at * MS_PER_SECOND, nowMs, { roundingMethod: 'ceil' }))
+
+/** `23 hours 59 minutes`, `9 minutes`, or `less than a minute` once under a minute or past. Takes unix SECONDS. */
+export const formatTimeUntil = (until: number, nowMs: number): string =>
+  formatDuration(intervalToDuration({ start: nowMs, end: Math.max(nowMs, until * MS_PER_SECOND) }, IN_UTC), {
+    format: ['days', 'hours', 'minutes'],
+  }) || 'less than a minute'
 
 export function getCountdown(seconds: number): { days: number; hours: number; minutes: number } {
   const MINUTE_IN_SECONDS = 60

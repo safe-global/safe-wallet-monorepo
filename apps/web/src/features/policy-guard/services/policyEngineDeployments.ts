@@ -1,6 +1,9 @@
 import semverSatisfies from 'semver/functions/satisfies'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
+import {
+  MIN_POLICY_GUARD_SAFE_VERSION,
+  POLICY_GUARD_DELAY_SECONDS,
+} from '@safe-global/utils/features/policy-guard/constants'
 
 export type PolicyEngineContract =
   | 'SafePolicyGuard'
@@ -23,7 +26,7 @@ const POLICY_GUARD_BY_DELAY = {
   '86400s': '0x2d4527fD0E79ca1e533E3C7BBEF7e0668b700aED',
 }
 
-const SAFE_POLICY_GUARD = POLICY_GUARD_BY_DELAY['60s']
+const SAFE_POLICY_GUARD = POLICY_GUARD_BY_DELAY[`${POLICY_GUARD_DELAY_SECONDS}s`]
 
 const INDEXED_CHAIN_IDS = ['1', '137', '11155111']
 
