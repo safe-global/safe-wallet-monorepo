@@ -173,8 +173,6 @@ const config: StorybookConfig = {
       ...(config.resolve.alias || {}),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),
-      // Mock next/image to bypass the image loader stub
-      'next/image': path.resolve(__dirname, '../.storybook/mocks/nextImage.js'),
       // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
       '@cowprotocol/widget-react': path.resolve(__dirname, '../.storybook/mocks/cowSwapWidget.tsx'),
       // Polyfill Node.js querystring module for browser

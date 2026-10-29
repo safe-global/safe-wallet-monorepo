@@ -18,25 +18,13 @@ exports[`./SafeProAnnouncement.stories Default 1`] = `
         >
           <img
             alt="A Workspace from Safe Pro, with its accounts, members and transactions"
-            class="object-cover dark:hidden"
-            data-nimg="fill"
-            decoding="async"
-            loading="lazy"
-            sizes="100vw"
-            src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75"
-            srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero.jpg&w=3840&q=75 3840w"
-            style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            class="absolute inset-0 h-full w-full object-cover dark:hidden"
+            src="/images/safe-pro/pro-announcement-hero.jpg"
           />
           <img
             alt="A Workspace from Safe Pro, with its accounts, members and transactions"
-            class="hidden object-cover dark:block"
-            data-nimg="fill"
-            decoding="async"
-            loading="lazy"
-            sizes="100vw"
-            src="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=3840&q=75"
-            srcset="/_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=640&q=75 640w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=750&q=75 750w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=828&q=75 828w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=1080&q=75 1080w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=1200&q=75 1200w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=1920&q=75 1920w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=2048&q=75 2048w, /_next/image?url=%2Fimages%2Fsafe-pro%2Fpro-announcement-hero-dark.jpg&w=3840&q=75 3840w"
-            style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; right: 0px; bottom: 0px; color: transparent;"
+            class="absolute inset-0 hidden h-full w-full object-cover dark:block"
+            src="/images/safe-pro/pro-announcement-hero-dark.jpg"
           />
         </div>
         <div

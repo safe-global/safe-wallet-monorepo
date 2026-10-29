@@ -9,7 +9,7 @@ This app **reuses `apps/web/src` verbatim** via aliases in `vite.config.ts`. Fea
 ## Layout
 
 - `src/routes/` — TanStack Router file-based routes (this app's counterpart to `apps/web/src/pages`)
-- `src/compat/` — shims that satisfy `next/*` imports from shared code (`next-router`, `next-link`, `next-image`, `next-dynamic`, …). If shared code needs a Next.js API a shim lacks, extend the shim — don't rewrite shared code around it.
+- `src/compat/` — shims that satisfy `next/*` imports from shared code (`next-router`, `next-link`, `next-dynamic`, …). If shared code needs a Next.js API a shim lacks, extend the shim — don't rewrite shared code around it.
 - `vite.config.ts` — alias order matters; it also re-injects `NEXT_PUBLIC_*` env vars so reused code and `packages/*` keep reading them, mirroring `apps/web/next.config.mjs`.
 
 ## Commands
