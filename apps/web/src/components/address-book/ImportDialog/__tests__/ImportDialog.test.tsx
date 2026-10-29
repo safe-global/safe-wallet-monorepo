@@ -64,6 +64,18 @@ describe('ImportDialog', () => {
     expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toEqual({ [address]: 'Second' })
   })
 
+  it('imports a file with a tags column and ignores the tags', async () => {
+    const address = fakerChecksummedAddress()
+    const { input } = renderDialog()
+    const file = new File([`${HEADER},tags\n${address},Treasury,${CHAIN_ID},Ops;Vendor`], 'address-book.csv', {
+      type: 'text/csv',
+    })
+
+    await uploadAndImport(input, file)
+
+    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toEqual({ [address]: 'Treasury' })
+  })
+
   it('counts the entries and distinct chains of the file in the summary', async () => {
     const chainIds = ['1', ' 100', '56', '1']
     const { input } = renderDialog()
@@ -229,5 +241,55 @@ describe('ImportDialog look-alike check', () => {
       }),
     )
     expect(savedAddresses()).toEqual([contact])
+  })
+})
+
+describe('ImportDialog with its own import', () => {
+  const renderWithImport = (props: { validateRows?: jest.Mock; onImport: jest.Mock }) => {
+    const handleClose = jest.fn()
+    render(<ImportDialog handleClose={handleClose} {...props} />)
+    const input = document.body.querySelector('input[type="file"]') as HTMLInputElement
+    return { handleClose, input }
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('hands the rows to onImport instead of the local address book, then closes', async () => {
+    const address = fakerChecksummedAddress()
+    const onImport = jest.fn().mockResolvedValue(undefined)
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${address},Treasury,${CHAIN_ID}`]))
+
+    await waitFor(() => expect(handleClose).toHaveBeenCalled())
+    expect(onImport).toHaveBeenCalledWith([[address, 'Treasury', CHAIN_ID]])
+    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toBeUndefined()
+  })
+
+  it('shows the error onImport returns and lets the user try again', async () => {
+    const onImport = jest.fn().mockResolvedValueOnce('The import failed').mockResolvedValueOnce(undefined)
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
+
+    expect(await screen.findByText('The import failed')).toBeInTheDocument()
+    expect(handleClose).not.toHaveBeenCalled()
+
+    await userEvent.setup().click(screen.getByTestId('import-btn'))
+
+    await waitFor(() => expect(handleClose).toHaveBeenCalled())
+  })
+
+  it('blocks the file with the reason validateRows gives', async () => {
+    const validateRows = jest.fn().mockReturnValue('Row 2: chain 999 is not supported')
+    const onImport = jest.fn()
+    const { input } = renderWithImport({ validateRows, onImport })
+
+    await userEvent.setup().upload(input, csvFile([`${fakerChecksummedAddress()},Treasury,999`]))
+
+    expect(await screen.findByText('Row 2: chain 999 is not supported')).toBeInTheDocument()
+    expect(screen.getByTestId('import-btn')).toBeDisabled()
   })
 })
