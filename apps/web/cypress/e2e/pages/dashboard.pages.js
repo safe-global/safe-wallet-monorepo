@@ -1,17 +1,12 @@
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
-import * as createtx from './create_tx.pages.js'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
-const noTxText = '[data-testid="no-tx-text"]'
 const actionRequiredPanel = '[data-testid="action-required-panel"]'
 const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
 const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
-export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
-export const pendingTxItem = '[data-testid="tx-pending-item"]'
-const singleTxDetailsHeader = '[data-testid="tx-details"]'
 // Case #1 — Outdated official mastercopy (Info) → "Update"
 export const outdatedOfficialTitlePrefix = 'New Safe version is available'
 export const outdatedOfficialContent =
@@ -26,54 +21,8 @@ export const mastercopyActions = {
 export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
 export const unsupportedMigratableContent =
   'It may miss security fixes and improvements. You should migrate it to a compatible version.'
-export const unsupportedCliContent =
-  'It may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
 const migrateSafeSubtitle = 'Update Safe account base contract'
-
-export function clickOnTxByIndex(index) {
-  // Wait for hydration to set the correct safe query param in the link href
-  cy.get(pendingTxItem)
-    .eq(index)
-    .should('have.attr', 'href')
-    .and('match', /safe=.{3,}/)
-  cy.get(pendingTxItem).eq(index).click()
-  cy.get(singleTxDetailsHeader).should('be.visible')
-}
-
-export function verifySingleTxItem(data) {
-  main.checkTextsExistWithinElement(createtx.transactionItem, data)
-}
-
-export function verifyDataInPendingTx(data) {
-  main.checkTextsExistWithinElement(pendingTxWidget, data)
-}
-
-export function verifyTxItemInPendingTx(data) {
-  let matchFound = false
-
-  cy.get(pendingTxItem)
-    .each(($item) => {
-      const itemText = $item.text()
-      const isMatch = data.every((tx) => itemText.includes(tx))
-
-      if (isMatch) {
-        matchFound = true
-        return false
-      }
-    })
-    .then(() => {
-      expect(matchFound).to.be.true
-    })
-}
-
-export function verifyEmptyTxSection() {
-  main.verifyElementsIsVisible([noTxText])
-}
-
-export function clickOnViewAllBtn() {
-  cy.get(viewAllLink).click()
-}
 
 export function pinAppByIndex(index) {
   return cy
@@ -124,16 +73,6 @@ export function expandActionRequiredPanel() {
 }
 
 /**
- * Verify the action required panel shows the expected message count.
- * @param {number} expectedCount - Expected count displayed in the panel badge
- */
-export function verifyActionRequiredPanelCount(expectedCount) {
-  cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
-  cy.get(actionRequiredPanel).contains('Action required').should('be.visible')
-  cy.get(actionRequiredPanel).invoke('text').should('include', String(expectedCount))
-}
-
-/**
  * Verify a card in the action required panel by message(s) and/or action label.
  * Uses main.verifyValuesExist for message verification (elements inside panel).
  * @param {Object} options
@@ -167,11 +106,4 @@ export function clickActionInPanel(actionTestId) {
 
 export function verifyMigrateSafeFlowOpened() {
   cy.contains(migrateSafeSubtitle, { timeout: 30000 }).should('be.visible')
-}
-
-/** Verifies the "Get CLI" link is visible in the action required panel (Case #3). */
-export function verifyGetCliLinkInPanel() {
-  cy.get(actionRequiredPanel).within(() => {
-    cy.get(mastercopyActions.getCli, { timeout: 10000 }).should('be.visible')
-  })
 }

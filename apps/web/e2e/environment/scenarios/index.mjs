@@ -9,10 +9,7 @@ import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
-import * as rejection from './rejection.mjs'
-import * as replacement from './replacement.mjs'
 import * as safeApps from './safe-apps.mjs'
-import * as sharing from './sharing.mjs'
 import * as spaces from './spaces.mjs'
 import * as transferForm from './transfer-form.mjs'
 import * as zerion from './zerion.mjs'
@@ -29,10 +26,7 @@ const modules = [
   ledger,
   proposers,
   recovery,
-  rejection,
-  replacement,
   safeApps,
-  sharing,
   spaces,
   transferForm,
   zerion,
