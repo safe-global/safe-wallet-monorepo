@@ -24,6 +24,40 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      addressBooksSetContactTagsV1: build.mutation<
+        AddressBooksSetContactTagsV1ApiResponse,
+        AddressBooksSetContactTagsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags`,
+          method: 'PUT',
+          body: queryArg.setContactTagsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksCreateTagV1: build.mutation<AddressBooksCreateTagV1ApiResponse, AddressBooksCreateTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags`,
+          method: 'POST',
+          body: queryArg.createTagDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksRenameTagV1: build.mutation<AddressBooksRenameTagV1ApiResponse, AddressBooksRenameTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags/${queryArg.tagId}`,
+          method: 'PATCH',
+          body: queryArg.renameTagDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksDeleteTagV1: build.mutation<AddressBooksDeleteTagV1ApiResponse, AddressBooksDeleteTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags/${queryArg.tagId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       addressBooksDeleteByAddressV1: build.mutation<
         AddressBooksDeleteByAddressV1ApiResponse,
         AddressBooksDeleteByAddressV1ApiArg
@@ -259,6 +293,36 @@ export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
   /** Address book items to create or update, including addresses and their labels */
   upsertAddressBookItemsDto: UpsertAddressBookItemsDto
 }
+export type AddressBooksSetContactTagsV1ApiResponse = /** status 200 Tags set successfully */ SpaceAddressBookDto
+export type AddressBooksSetContactTagsV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** The entries to tag, each with its full set of tag names */
+  setContactTagsDto: SetContactTagsDto
+}
+export type AddressBooksCreateTagV1ApiResponse = /** status 201 Tag created successfully */ SpaceAddressBookDto
+export type AddressBooksCreateTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** The tag name */
+  createTagDto: CreateTagDto
+}
+export type AddressBooksRenameTagV1ApiResponse = /** status 200 Tag renamed successfully */ SpaceAddressBookDto
+export type AddressBooksRenameTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** ID of the tag to rename */
+  tagId: number
+  /** The new tag name */
+  renameTagDto: RenameTagDto
+}
+export type AddressBooksDeleteTagV1ApiResponse = unknown
+export type AddressBooksDeleteTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** ID of the tag to delete */
+  tagId: number
+}
 export type AddressBooksDeleteByAddressV1ApiResponse = unknown
 export type AddressBooksDeleteByAddressV1ApiArg = {
   /** Space UUID containing the address book */
@@ -480,6 +544,8 @@ export type SpaceAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** IDs of the workspace tags assigned to the contact */
+  tagIds: number[]
   /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
   /** User ID of the creator */
@@ -491,18 +557,46 @@ export type SpaceAddressBookItemDto = {
   createdAt: string
   updatedAt: string
 }
+export type SpaceAddressBookTagDto = {
+  id: number
+  name: string
+  color: 'slate' | 'clay' | 'rose' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon'
+  /** Number of contacts that have this tag */
+  contactCount: number
+}
 export type SpaceAddressBookDto = {
   /** Space UUID */
   spaceUuid: string
   data: SpaceAddressBookItemDto[]
+  /** All tags defined in the workspace address book */
+  tags: SpaceAddressBookTagDto[]
 }
-export type AddressBookItem = {
+export type UpsertAddressBookItem = {
   name: string
   address: string
   chainIds: string[]
+  /** Tag names of the contact (replaces the current tags when provided; omit to leave them unchanged) */
+  tags?: string[]
 }
 export type UpsertAddressBookItemsDto = {
-  items: AddressBookItem[]
+  items: UpsertAddressBookItem[]
+}
+export type SetContactTagsItem = {
+  address: string
+  /** The full set of tag names for the contact. 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  tags: string[]
+}
+export type SetContactTagsDto = {
+  /** At most as many entries as the address book can hold, each address at most once */
+  items: SetContactTagsItem[]
+}
+export type CreateTagDto = {
+  /** 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  name: string
+}
+export type RenameTagDto = {
+  /** 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  name: string
 }
 export type AddressBookRequestItemDto = {
   id: number
@@ -598,6 +692,10 @@ export type SpaceAuditLogEntryDto = {
     | 'ADDRESS_BOOK_DELETED'
     | 'ADDRESS_BOOK_REQUEST_CREATED'
     | 'ADDRESS_BOOK_REQUEST_REJECTED'
+    | 'ADDRESS_BOOK_TAGS_UPDATED'
+    | 'ADDRESS_BOOK_TAG_CREATED'
+    | 'ADDRESS_BOOK_TAG_RENAMED'
+    | 'ADDRESS_BOOK_TAG_DELETED'
   actorUserId: number
   /** Resolved (and masked) display string of the acting user. */
   actor: string
@@ -621,6 +719,11 @@ export type SpaceAuditLogActorDto = {
 export type SpaceSafeDto = {
   chainId: string
   address: string
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
 }
 export type CreateSpaceSafesDto = {
   safes: SpaceSafeDto[]
@@ -1105,6 +1208,10 @@ export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
+  useAddressBooksSetContactTagsV1Mutation,
+  useAddressBooksCreateTagV1Mutation,
+  useAddressBooksRenameTagV1Mutation,
+  useAddressBooksDeleteTagV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
   useAddressBookRequestsGetPendingRequestsV1Query,
   useLazyAddressBookRequestsGetPendingRequestsV1Query,

@@ -1,7 +1,7 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
 import type { ContactItem } from './Import/ContactsList'
 import type { ImportContactsFormValues } from './Import/ImportAddressBookDialog'
-import type { AddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { UpsertAddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   ADDRESS_BOOK_NAME_MAX_LENGTH,
   NAME_MIN_LENGTH,
@@ -31,7 +31,7 @@ export const createContactItems = (data: ImportContactsFormValues) => {
         name: sanitizeName(name),
       }
     })
-    .filter(Boolean) as AddressBookItem[]
+    .filter(Boolean) as UpsertAddressBookItem[]
 }
 
 export const getSelectedAddresses = (contacts: ImportContactsFormValues['contacts']) => {
