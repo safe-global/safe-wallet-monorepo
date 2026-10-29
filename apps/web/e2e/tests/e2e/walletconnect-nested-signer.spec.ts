@@ -10,6 +10,7 @@ import { Wallet, hashMessage, parseEther } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
+import { addSafeToAccounts } from '../../src/fixtures/seed-added-safes'
 import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { CHAIN_IDS } from '../../src/data/constants'
@@ -69,6 +70,7 @@ const test = base.extend<NestedSignerFixtures>({
     const { parent, child } = await seedNestedSafe(journey, nestedSafes)
     await new HomePage(safePage).goto(parent.prefixedAddress)
     await new WalletPage(safePage).accountCenter.waitFor({ state: 'visible' })
+    await addSafeToAccounts(childPage, child.prefixedAddress)
     await new HomePage(childPage).goto(child.prefixedAddress)
 
     const uri = await new WalletPage(childPage).startWalletConnectPairing()
@@ -260,7 +262,6 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       const message = `Safe E2E nested message ${Date.now()}`
       const response = childDapp.request('personal_sign', [message, pairing.child.address])
       const childReview = new TxReviewPage(childPage)
-      await childReview.riskConfirmation.click()
       await childReview.signMessageButton.click()
       await new TxReviewPage(safePage).signMessage()
       await childReview.signedMessageContinueButton.click()
@@ -290,7 +291,6 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
         const message = `Safe E2E nested message ${Date.now()}`
         const response = childDapp.request('personal_sign', [message, pairing.child.address])
         const childReview = new TxReviewPage(childPage)
-        await childReview.riskConfirmation.click()
         await childReview.signMessageButton.click()
         await new TxReviewPage(safePage).signMessage()
         // The parent's signature proposes the message at 1/2; OWNER_4 adds the second one
@@ -324,9 +324,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
         const response = childDapp.request('personal_sign', [message, pairing.child.address])
         const childReview = new TxReviewPage(childPage)
         const parentReview = new TxReviewPage(safePage)
-        await childReview.riskConfirmation.click()
         await childReview.signMessageButton.click()
-        await parentReview.riskConfirmation.click()
         await parentReview.signMessageButton.click()
         // OWNER_4 signed the parent's message at 1/2; OWNER_1 adds the second one, then wallet B answers wallet A
         await confirmPendingMessage(journey.env, pairing.parent.address, journey.owners.owner1)

@@ -3,13 +3,11 @@ import { ROUTES } from '../data/constants'
 
 export class MessagesPage {
   readonly messages: Locator
-  readonly riskConfirmation: Locator
   /** The Sign button of the sign message modal */
   readonly modalSignButton: Locator
 
   constructor(private readonly page: Page) {
     this.messages = page.getByTestId('message-item')
-    this.riskConfirmation = page.getByTestId('risk-confirmation-checkbox')
     this.modalSignButton = page.getByRole('dialog').getByRole('button', { name: 'Sign', exact: true })
   }
 
@@ -23,10 +21,9 @@ export class MessagesPage {
     return this.messages.filter({ hasText: text })
   }
 
-  /** Open the sign modal from the message row, confirm the risk and sign with the connected wallet */
+  /** Open the sign modal from the message row and sign with the connected wallet */
   async sign(text: string): Promise<void> {
     await this.message(text).getByRole('button', { name: 'Sign', exact: true }).click()
-    await this.riskConfirmation.click()
     await this.modalSignButton.click()
   }
 }

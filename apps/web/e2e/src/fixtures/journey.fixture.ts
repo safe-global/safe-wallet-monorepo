@@ -2,6 +2,7 @@ import { cypressEnvironment } from '../../environment/cypress.mjs'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { createOwners } from '../../environment/scenarios/safe.mjs'
 import { WalletPage } from '../pages/wallet.page'
+import { addSafeToAccounts } from './seed-added-safes'
 import { seedSwitchableWallet } from './seed-wallet'
 import { test as base } from './test.fixture'
 
@@ -21,6 +22,8 @@ export type Journey = {
   connectAs: (owner: OwnerName) => Promise<void>
   /** Names the Safe in the report of the test */
   recordSafe: (safe: { prefixedAddress: string }) => void
+  /** Puts the Safe in the accounts of `safePage` from its next page load */
+  addToAccounts: (safe: { prefixedAddress: string }) => Promise<void>
 }
 
 function journeyEnvironment(): JourneyEnvironment {
@@ -57,6 +60,7 @@ export const test = base.extend<{ journey: Journey }>({
         await wallet.accountCenter.filter({ hasText: short(owners[owner].address) }).waitFor()
       },
       recordSafe: (safe) => testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress }),
+      addToAccounts: (safe) => addSafeToAccounts(safePage, safe.prefixedAddress),
     })
   },
 })

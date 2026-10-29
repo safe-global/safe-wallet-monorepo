@@ -12,7 +12,7 @@ test.describe('Load a Safe', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2, inAccounts: false })
 
     const load = new LoadSafePage(safePage)
     await load.goto()

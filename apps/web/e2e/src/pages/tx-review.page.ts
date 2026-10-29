@@ -1,13 +1,13 @@
 import { type Page, type Locator } from '@playwright/test'
 import { short } from '../../environment/scenarios/chain.mjs'
 
-// The review loads the transaction, its decoding and the Safe Shield scan before it shows the checkbox
+// The review loads the transaction, its decoding and the Safe Shield scan before its actions are enabled
 const REVIEW_LOAD_TIMEOUT_MS = 60_000
 const EXECUTION_TIMEOUT_MS = 60_000
 const EXECUTED_STATUS = /Transaction was (processed|successful)/
 
 export class TxReviewPage {
-  /** Safe Shield flags a Safe that is not in the user's accounts, which every seeded Safe is */
+  /** "I understand the risks": Safe Shield asks for it on a critical finding, e.g. a Safe not in the user's accounts */
   readonly riskConfirmation: Locator
   readonly continueButton: Locator
   /** Shown to an owner of a parent Safe, which can sign for the child Safe */
@@ -92,13 +92,9 @@ export class TxReviewPage {
     return this.page.getByRole('button', { name: new RegExp(`^${position} `) })
   }
 
-  /**
-   * Confirm the risk, continue from the review and sign with the connected wallet. Pass `confirmRisk: false` for a
-   * Safe that Safe Shield trusts, such as one in the user's Workspace: it reports no critical risk to confirm.
-   */
-  async sign({ confirmRisk = true }: { confirmRisk?: boolean } = {}): Promise<void> {
-    if (confirmRisk) await this.confirmRisk()
-    await this.continueButton.click()
+  /** Continue from the review and sign with the connected wallet */
+  async sign(): Promise<void> {
+    await this.continueFromReview()
     await this.signButton.click()
   }
 
@@ -118,10 +114,9 @@ export class TxReviewPage {
     await this.signerOption(address).click()
   }
 
-  /** Confirm the risk, continue from the review and propose the transaction as a proposer, without a signature */
+  /** Continue from the review and propose the transaction as a proposer, without a signature */
   async propose(): Promise<void> {
-    await this.confirmRisk()
-    await this.continueButton.click()
+    await this.continueFromReview()
     await this.proposeButton.click()
   }
 
@@ -144,26 +139,23 @@ export class TxReviewPage {
     await this.executeButton.click()
   }
 
-  /** Confirm the risk, continue from the review and add the transaction to the batch instead of signing it */
+  /** Continue from the review and add the transaction to the batch instead of signing it */
   async addToBatch(): Promise<void> {
-    await this.confirmRisk()
-    await this.continueButton.click()
+    await this.continueFromReview()
     await this.submitActions.click()
     await this.addToBatchChoice.click()
     await this.addToBatchButton.click()
   }
 
-  /** Confirm the risk and execute the reviewed bulk with the connected wallet, not the relay */
+  /** Execute the reviewed bulk with the connected wallet, not the relay */
   async executeBulk(): Promise<void> {
-    await this.confirmRisk()
-    await this.connectedWalletMethod.click()
+    await this.connectedWalletMethod.click({ timeout: REVIEW_LOAD_TIMEOUT_MS })
     await this.submitButton.click()
   }
 
-  /** Confirm the risk, continue from the review and execute a fully signed transaction with the connected wallet */
+  /** Continue from the review and execute a fully signed transaction with the connected wallet */
   async continueAndExecute(): Promise<void> {
-    await this.confirmRisk()
-    await this.continueButton.click()
+    await this.continueFromReview()
     await this.execute()
   }
 
@@ -188,10 +180,9 @@ export class TxReviewPage {
     await this.discardButton.click()
   }
 
-  /** Confirm the risk and sign a message of a 1/n Safe, then hand the signature to the app that asked for it */
+  /** Sign a message of a 1/n Safe, then hand the signature to the app that asked for it */
   async signMessage(): Promise<void> {
-    await this.confirmRisk()
-    await this.signMessageButton.click()
+    await this.signMessageButton.click({ timeout: REVIEW_LOAD_TIMEOUT_MS })
     await this.signedMessageContinueButton.click()
   }
 
@@ -205,7 +196,12 @@ export class TxReviewPage {
     await this.status.filter({ hasText: 'Transaction was successful' }).waitFor({ timeout: EXECUTION_TIMEOUT_MS })
   }
 
-  private async confirmRisk(): Promise<void> {
+  /** Tick the risk confirmation, which a Safe that is not in the user's accounts needs before it can continue */
+  async confirmRisk(): Promise<void> {
     await this.riskConfirmation.click({ timeout: REVIEW_LOAD_TIMEOUT_MS })
+  }
+
+  private async continueFromReview(): Promise<void> {
+    await this.continueButton.click({ timeout: REVIEW_LOAD_TIMEOUT_MS })
   }
 }
