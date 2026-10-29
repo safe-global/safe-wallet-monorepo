@@ -153,7 +153,7 @@ const historyCount = 28
  * Rebuilds staging SEP_STATIC_SAFE_7 and its executed history, with the staging owners impersonated.
  * The fixture `history.timeline` maps each staging execution date to the local one for the date filters.
  */
-export async function prepareHistoryScenario(env) {
+async function prepareHistoryScenario(env) {
   const provider = localProvider(env.SAFE_RPC_URL)
   try {
     // Known before its transfers, so CGW never caches the history without the token's symbol and decimals.

@@ -25,7 +25,6 @@ const notConnectedStatus = 'Connect'
 const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 
-export const safeAccountNonceStr = 'Safe account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe account'
 
 export function clickOnThresholdDropdown() {

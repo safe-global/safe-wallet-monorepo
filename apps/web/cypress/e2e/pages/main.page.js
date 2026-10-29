@@ -384,10 +384,6 @@ export function waitForElementByTextInContainer(containerSelector, elementText) 
     .should('be.visible')
 }
 
-export function verifyElementByTextExists(text) {
-  cy.contains(text).should('exist')
-}
-
 // ===========================================
 // Generic Helper Functions
 // ===========================================

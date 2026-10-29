@@ -25,6 +25,7 @@ export const playwrightSpecs = {
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
   'e2e/policies.spec.ts': {},
+  'e2e/workspace.spec.ts': {},
   'e2e/positions.spec.ts': {
     scenarios: ['prepareZerionPositionsScenario'],
     safes: { ETH_ZERION_POSITIONS_SAFE: 'ETH_ZERION_POSITIONS_SAFE' },
@@ -59,6 +60,10 @@ export const playwrightSpecs = {
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
+  },
+  'regression/dashboard-mastercopy-warning.spec.ts': {
+    scenarios: ['prepareMastercopyScenario'],
+    safes: { MATIC_MIGRATABLE_SAFE: 'MATIC_STATIC_SAFE_31', MATIC_UNOFFICIAL_SINGLETON_SAFE: 'MATIC_STATIC_SAFE_32' },
   },
   'regression/recipient-dropdown-caret-toggle.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],
@@ -97,6 +102,7 @@ export const playwrightSpecs = {
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'regression/auth0/step-up-workspace-rename.spec.ts': {},
+  'regression/auth0/workspace-invite.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

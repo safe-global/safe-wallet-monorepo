@@ -1,0 +1,164 @@
+{
+  "item": {
+    "type": "TRANSACTION",
+    "transaction": {
+      "txInfo": {
+        "type": "NativeStakingValidatorsExit",
+        "humanDescription": null,
+        "status": "EXITED",
+        "estimatedExitTime": 217728000,
+        "estimatedWithdrawalTime": 615194000,
+        "value": "32000000000000000000",
+        "numValidators": 1,
+        "tokenInfo": {
+          "address": "0x0000000000000000000000000000000000000000",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png",
+          "name": "Ether",
+          "symbol": "ETH",
+          "trusted": true
+        },
+        "validators": [
+          "0xad42c4579877d651bfda1251d1d438dd732612ea48db1b1c7af15285134bedb55b8aec0ad4027838ce08765c4d041950"
+        ]
+      },
+      "id": "multisig_0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B_0x84f2ec635b73eaaea60ba813b12deaa370f413651ba08861cc0e9f080bffbecc",
+      "txHash": "0x9373c4f04041a1f487f68534426629276d25d5960f8e442dc52329129b6e0c2d",
+      "timestamp": 1727798363000,
+      "txStatus": "SUCCESS",
+      "executionInfo": {
+        "type": "MULTISIG",
+        "nonce": 3,
+        "confirmationsRequired": 2,
+        "confirmationsSubmitted": 2,
+        "missingSigners": null
+      },
+      "safeAppInfo": null,
+      "note": null
+    },
+    "conflictType": "None"
+  },
+  "details": {
+    "safeAddress": "0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B",
+    "txId": "multisig_0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B_0x84f2ec635b73eaaea60ba813b12deaa370f413651ba08861cc0e9f080bffbecc",
+    "executedAt": 1727798363000,
+    "txStatus": "SUCCESS",
+    "txInfo": {
+      "type": "NativeStakingValidatorsExit",
+      "humanDescription": null,
+      "status": "EXITED",
+      "estimatedExitTime": 217728000,
+      "estimatedWithdrawalTime": 615194000,
+      "value": "32000000000000000000",
+      "numValidators": 1,
+      "tokenInfo": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png",
+        "name": "Ether",
+        "symbol": "ETH",
+        "trusted": true
+      },
+      "validators": [
+        "0xad42c4579877d651bfda1251d1d438dd732612ea48db1b1c7af15285134bedb55b8aec0ad4027838ce08765c4d041950"
+      ]
+    },
+    "txData": {
+      "hexData": "0xb6b06dec00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030ad42c4579877d651bfda1251d1d438dd732612ea48db1b1c7af15285134bedb55b8aec0ad4027838ce08765c4d04195000000000000000000000000000000000",
+      "dataDecoded": {
+        "method": "requestValidatorsExit",
+        "parameters": [
+          {
+            "name": "_publicKeys",
+            "type": "bytes",
+            "value": "0xad42c4579877d651bfda1251d1d438dd732612ea48db1b1c7af15285134bedb55b8aec0ad4027838ce08765c4d041950",
+            "valueDecoded": null
+          }
+        ],
+        "accuracy": "FULL_MATCH"
+      },
+      "to": {
+        "value": "0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3",
+        "name": "StakingContract",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3.png"
+      },
+      "value": "0",
+      "operation": 0,
+      "trustedDelegateCallTarget": null,
+      "addressInfoIndex": null,
+      "tokenInfoIndex": null
+    },
+    "txHash": "0x9373c4f04041a1f487f68534426629276d25d5960f8e442dc52329129b6e0c2d",
+    "detailedExecutionInfo": {
+      "type": "MULTISIG",
+      "submittedAt": 1727786901198,
+      "nonce": 3,
+      "safeTxGas": "0",
+      "baseGas": "0",
+      "gasPrice": "0",
+      "gasToken": "0x0000000000000000000000000000000000000000",
+      "fee": "2019260201803050",
+      "payment": "0",
+      "refundReceiver": {
+        "value": "0x0000000000000000000000000000000000000000",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      },
+      "safeTxHash": "0x84f2ec635b73eaaea60ba813b12deaa370f413651ba08861cc0e9f080bffbecc",
+      "executor": {
+        "value": "0x96eeD629D37AfEeACc0Cf67e90cC0eb89f8024Dc",
+        "name": null,
+        "logoUri": null
+      },
+      "signers": [
+        {
+          "value": "0x96eeD629D37AfEeACc0Cf67e90cC0eb89f8024Dc",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x3E95712cb031956874771F402a514F2a0a5F3c36",
+          "name": null,
+          "logoUri": null
+        }
+      ],
+      "confirmationsRequired": 2,
+      "confirmations": [
+        {
+          "signer": {
+            "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0x7291b9f111160ab64f10ccfba8f4bd89dc8e04813afce543a8a2c66c8398b3c724beb6b9547d402fbbedea0b9bcd636bc0cdcb5b840b7d70a8fb1de2081cc4b21b",
+          "submittedAt": 1727786901241
+        },
+        {
+          "signer": {
+            "value": "0x96eeD629D37AfEeACc0Cf67e90cC0eb89f8024Dc",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0x00000000000000000000000096eed629d37afeeacc0cf67e90cc0eb89f8024dc000000000000000000000000000000000000000000000000000000000000000001",
+          "submittedAt": 1727798363000
+        }
+      ],
+      "rejectors": [],
+      "gasTokenInfo": null,
+      "trusted": true,
+      "proposer": {
+        "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+        "name": null,
+        "logoUri": null
+      },
+      "proposedByDelegate": null
+    },
+    "safeAppInfo": null,
+    "note": null
+  }
+}

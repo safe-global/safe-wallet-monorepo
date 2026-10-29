@@ -340,16 +340,6 @@ export const addedSafes = {
   },
 }
 
-export const customApps = (url) => ({
-  safeTestApp: [{ url: url }],
-  grantedPermissions: {
-    [url]: [
-      { feature: 'camera', status: 'granted' },
-      { feature: 'microphone', status: 'granted' },
-    ],
-  },
-})
-
 const infoModalAccepted = {
   11155111: {
     consentsAccepted: true,

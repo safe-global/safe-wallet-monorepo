@@ -11,37 +11,23 @@ export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyTxHashBtn = '[data-testid="copy-tx-hash-btn"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 export const transactionSideList = '[data-testid="transaction-actions-list"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
-const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
-const baseGas = '[data-testid="tx-base-gas"]'
 export const txDate = '[data-testid="tx-date"]'
-export const txType = '[data-testid="tx-type"]'
-const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
 export const replacementNewSigner = '[data-testid="new-owner"]'
 const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
-const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
-const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
-export const altImgWeth = 'iframe[title="WETH"]'
-export const altImgUsdc = 'iframe[title="USDC"]'
-export const altImgUsdt = 'iframe[title="USDT"]'
-export const altImgSwaps = 'svg[alt="Swap order"]'
-export const altImgLimitOrder = 'svg[alt="Limit order"]'
-export const altImgTwapOrder = 'svg[alt="Twap Order"]'
-export const txShareLinkBtn = '[data-testid="share-tx-link-btn"]'
 const tableViewBtn = '[data-testid="table-view-btn"]'
 const gridViewBtn = '[data-testid="grid-view-btn"]'
 const txHexData = '[data-testid="tx-hex-data"]'
@@ -100,40 +86,12 @@ export function checkHashesExist(count) {
     })
 }
 
-export function clickOnReplaceTxOption() {
-  cy.get(replaceChoiceBtn).find('button').click()
-}
-
 export function getRejectButton() {
   return cy.get(rejectTxBtn)
 }
 
 export function clickOnRejectBtn() {
   getRejectButton().click()
-}
-
-export function verifyTxRejectModalVisible() {
-  main.verifyMinimumElementsCount(wallet.choiceBtn, 2)
-}
-
-export function clickOnRejectionChoiceBtn(choice) {
-  cy.get(wallet.choiceBtn).eq(choice).click()
-}
-
-export function clickOnShareLinkBtn() {
-  cy.get(txShareLinkBtn).click()
-}
-
-export function verifyCopiedURL() {
-  cy.window().then((win) => {
-    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
-  })
-
-  cy.url().then((currentUrl) => {
-    clickOnShareLinkBtn()
-
-    cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
-  })
 }
 
 export function deleteTx() {
@@ -161,14 +119,6 @@ export function clickOnClearBtn() {
 export function verifyNumberOfTransactions(count) {
   cy.get(txDate).should('have.length.at.least', count)
   cy.get(transactionItem).should('have.length.at.least', count)
-}
-
-export function verifyWarningModalVisible() {
-  cy.get(untrustedTokenWarningModal).should('be.visible')
-}
-
-export function clickOnCopyBtn(index) {
-  cy.get(copyIcon).parent().eq(index).trigger('click')
 }
 
 export function verifyCopyIconWorks(index, data) {
@@ -215,10 +165,6 @@ export function clickOnTransactionItemByName(name, token) {
   matches.first().scrollIntoView().click({ force: true })
 }
 
-export function scrollToBottom() {
-  cy.scrollTo('bottom').wait(500)
-}
-
 export function verifyExpandedDetails(data, warning) {
   main.checkTextsExistWithinElement(accordionDetails, data)
   if (warning) cy.get(warning).should('be.visible')
@@ -232,27 +178,11 @@ export function verifyAdvancedDetails(data) {
   main.checkTextsExistWithinElement(accordionDetails, data)
 }
 
-export function verifyActions(data) {
-  main.checkTextsExistWithinElement(accordionDetails, data)
-}
-
-export function clickOnExpandableAction(data) {
-  cy.get(accordionDetails).within(() => {
-    cy.get('div').contains(data).click()
-  })
-}
-
 export function clickOnAdvancedDetails() {
   cy.get(advancedDetails).click()
   //({ force: true })
 }
 
-export function expandAdvancedDetails(data) {
-  clickOnAdvancedDetails()
-  data.forEach((row) => {
-    cy.get('div').contains(row).should('be.visible')
-  })
-}
 //The whole block inside Transaction details accordion: data-root and advanced details together
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
@@ -276,140 +206,12 @@ export function clickOnCopyDataBtn(expectedData) {
   cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
 }
 
-export function verifyTxHashCopied(expectedHash) {
-  cy.window().then((win) => {
-    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
-  })
-
-  cy.get(copyTxHashBtn).click()
-  cy.get('@clipboardWrite').should('have.been.calledWith', expectedHash)
-}
-
 export function switchToGridView() {
   cy.get(gridViewBtn).click()
 }
 
-export function collapseAdvancedDetails() {
-  clickOnAdvancedDetails()
-  cy.get(baseGas).should('not.exist')
-}
-
-export function expandAllActions(actions) {
-  cy.get(expandAllBtn).click()
-  main.checkTextsExistWithinElement(accordionDetails, actions)
-}
-
 export function clickOnExpandAllActionsBtn() {
   cy.get(expandAllBtn).click()
-}
-
-export function collapseAllActions(data) {
-  cy.get(collapseAllBtn).click()
-  // Collapsed accordion panels are unmounted, so the rows are removed from the DOM entirely
-  data.forEach((action) => {
-    cy.contains(txRowTitle, action).should('not.exist')
-  })
-}
-
-export function verifyActionListExists(data) {
-  main.checkTextsExistWithinElement(transactionSideList, data)
-}
-
-/**
- * Helper function to verify icon alt/title attribute
- * Checks for iframe (title), img (alt), or svg (alt) in the given element
- */
-function verifyIconAlt($container, expectedAlt, context = 'element') {
-  const $iframe = $container.find('iframe')
-  const $img = $container.find('img')
-  const $svg = $container.find('svg')
-
-  if ($iframe.length > 0) {
-    const $targetIframe = $iframe.first()
-    const title = $targetIframe.attr('title')
-    expect(title, `iframe title attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
-    expect(title).to.equal(expectedAlt)
-  } else if ($img.length > 0) {
-    const $targetImg = $img.first()
-    const alt = $targetImg.attr('alt')
-    expect(alt, `img alt attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
-    expect(alt).to.equal(expectedAlt)
-  } else if ($svg.length > 0) {
-    const $targetSvg = $svg.first()
-    const alt = $targetSvg.attr('alt')
-    expect(alt, `svg alt attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
-    expect(alt).to.equal(expectedAlt)
-  } else {
-    throw new Error(`Expected alt "${expectedAlt}" in ${context} but no iframe, img, or svg found`)
-  }
-}
-
-/**
- * Helper function to verify token symbol in token text elements
- * Handles both single-word tokens (e.g., "ETH") and multi-word tokens (e.g., "FLOWER #6188", "$ ETH35.com")
- */
-function verifyTokenSymbol($element, expectedToken) {
-  const tokenTextElements = $element.find('b[class*="tokenText"]')
-  expect(tokenTextElements.length, 'At least one token text element should exist').to.be.greaterThan(0)
-
-  // Check if the expected token appears in any of the token text elements
-  let found = false
-  tokenTextElements.each((index, el) => {
-    const tokenText = Cypress.$(el).text().trim()
-    if (tokenText && tokenText.includes(expectedToken)) {
-      found = true
-      return false // Break the loop
-    }
-  })
-
-  expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
-}
-
-export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
-  if (!name) {
-    throw new Error('Name parameter is required for verification')
-  }
-
-  let selector = `${transactionItem}:contains("${name}")`
-  if (token) {
-    selector += `:contains("${token}")`
-  }
-
-  cy.get(selector).then(($elements) => {
-    expect($elements.length, `Transaction items found for name: ${name}`).to.be.greaterThan(0)
-
-    const $element = $elements.first()
-
-    // Verify data text content (use cy.wrap for retryability, e.g. async status like "Expired")
-    if (Array.isArray(data)) {
-      data.forEach((text) => {
-        cy.wrap($element).should('contain.text', text)
-      })
-    } else if (data) {
-      cy.wrap($element).should('contain.text', data)
-    }
-
-    // Verify transaction type icon (alt parameter)
-    if (alt) {
-      const $txTypeElement = $element.find(txType)
-      if ($txTypeElement.length > 0) {
-        // Transaction type icon is in the tx-type element
-        verifyIconAlt($txTypeElement, alt, 'tx-type element')
-      } else {
-        // Fallback: check entire element for backward compatibility
-        verifyIconAlt($element, alt, 'transaction element')
-      }
-    }
-
-    // Verify token symbol (altToken parameter)
-    if (altToken) {
-      cy.get(selector)
-        .first()
-        .should(($freshElement) => {
-          verifyTokenSymbol($freshElement, altToken)
-        })
-    }
-  })
 }
 
 export function verifyTransactionActionsVisibility(option) {
@@ -493,10 +295,6 @@ export function verifyReplacedSigner(newSignerName) {
   cy.get(replacementNewSigner).should('exist').contains(newSignerName)
 }
 
-export function toggleUntrustedTxs() {
-  cy.get(toggleUntrustedBtn).click()
-}
-
 export function clickOnSimulateTxBtn() {
   cy.get(simulateTxBtn).click()
 }
@@ -514,18 +312,4 @@ export function selectComboButtonOption(option) {
   cy.get(comboButtonPopover).findByText(comboButtonOptions[option]).click()
 }
 
-export function checkThatComboButtonOptionIsNotPresent(option) {
-  cy.get('body').then(($body) => {
-    if ($body.find(comboButton).length > 0) {
-      cy.get(comboButton).then(($dropdown) => {
-        if ($dropdown.is(':visible')) {
-          cy.get(comboButton).click()
-          cy.get(comboButtonPopover).should('be.visible')
-          cy.get(comboButtonPopover).should('not.contain.text', option)
-          cy.get('body').click(0, 0)
-        }
-      })
-    }
-  })
-}
 //Functions for the happy path flow

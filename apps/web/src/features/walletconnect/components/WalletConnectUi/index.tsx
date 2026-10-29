@@ -7,7 +7,8 @@ import WcHeaderWidget from '../WcHeaderWidget'
 import WcSessionManager from '../WcSessionManager'
 
 const WalletConnectWidget = () => {
-  const { walletConnect, error, open, setOpen, sessions } = useContext(WalletConnectContext)
+  const { walletConnect, error, setError, open, setOpen, sessions, sessionProposal, loading, rejectSession } =
+    useContext(WalletConnectContext)
   const [uri, clearUri] = useWcUri()
   const { safeLoaded } = useSafeInfo()
 
@@ -15,9 +16,13 @@ const WalletConnectWidget = () => {
     setOpen(true)
   }, [setOpen])
 
+  // A pending proposal is rejected on close, so the dApp gets an answer instead of waiting forever
   const onClose = useCallback(() => {
     setOpen(false)
-  }, [setOpen])
+    if (sessionProposal && !loading) {
+      rejectSession().catch(setError)
+    }
+  }, [setOpen, sessionProposal, loading, rejectSession, setError])
 
   // Open the popup if there is a pairing code in the URL or clipboard
   useEffect(() => {
