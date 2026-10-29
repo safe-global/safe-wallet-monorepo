@@ -441,6 +441,26 @@ describe('ReviewRecipientAllowlist', () => {
     expect(fallbacks[1]).toHaveTextContent('Delegate call')
   })
 
+  it('names only the catch-all access "Any address", whatever policy a rule binds', () => {
+    const installed = setupFor({ status: 'none' }).configurations
+    const fallback = installed[installed.length - 1]
+    const [, erc20] = configurations
+    const allowOnToken = { ...erc20, policy: fallback.policy, data: '0x' }
+    mockBuild.mockReturnValue({
+      guardState: { status: 'none' },
+      configurations: [allowOnToken, fallback],
+      txs: setupFor({ status: 'none' }, [allowOnToken, fallback]).txs,
+    })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const [tokenRule, fallbackRule] = screen.getAllByTestId('allowlist-rule')
+    expect(within(tokenRule).queryByText('Any address')).not.toBeInTheDocument()
+    expect(within(tokenRule).getByText('USDC')).toBeInTheDocument()
+    expect(within(fallbackRule).getByText('Any address')).toBeInTheDocument()
+  })
+
   it('says everything else stays allowed on a first setup and lists the gaps', () => {
     built({ status: 'none' })
     renderReview()

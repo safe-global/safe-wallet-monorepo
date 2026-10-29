@@ -27,6 +27,7 @@ import MethodCall from '@/components/transactions/TxDetails/TxData/DecodedData/M
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import singleTxCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
 import type { PolicyConfiguration, SetupCallDescription } from '@/features/policy-guard'
+import { isFallbackAccess } from '@/features/policy-guard/services'
 import { getRuleKind, type RuleKind } from './ruleKind'
 
 type AddressInfo = { name?: string; logoUri?: string }
@@ -124,9 +125,7 @@ const PolicyRuleRows = ({
       <div className="flex flex-col gap-0.5">
         <RuleAddress
           address={configuration.target}
-          info={
-            kind === 'allow' || kind === 'deny' ? { name: FALLBACK_TARGET_NAME } : getAddressInfo(configuration.target)
-          }
+          info={isFallbackAccess(configuration) ? { name: FALLBACK_TARGET_NAME } : getAddressInfo(configuration.target)}
         />
         {/* Indented past the 20px identicon and its gap, to the address text. */}
         <Typography variant="paragraph-small" color="muted" as="div" className="pl-7">
