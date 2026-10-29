@@ -210,7 +210,20 @@ function buildChecks() {
       checks.push({
         label: 'prettier',
         cmd: 'yarn',
-        args: ['workspace', workspacePkg, 'prettier', '--check', ...changedFiles],
+        // -B runs the prettier binary: the workspace's `prettier` script checks `.`, i.e. every file
+        args: [
+          'workspace',
+          workspacePkg,
+          'run',
+          '-B',
+          'prettier',
+          '--check',
+          '--config',
+          '../../.prettierrc',
+          '--ignore-path',
+          '../../.prettierignore',
+          ...changedFiles,
+        ],
       })
     }
 
