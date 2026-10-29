@@ -27,6 +27,10 @@ export class TxReviewPage {
   /** The success screen's status: "processed" once mined, "successful" once indexed */
   readonly status: Locator
   readonly submitActions: Locator
+  /** The last signer of an m/n Safe gets Execute by default, and Sign in the submit actions */
+  readonly signChoice: Locator
+  /** Shown when the last signer of an m/n Safe signs instead of executing */
+  readonly lastSignatureNotice: Locator
   readonly addToBatchChoice: Locator
   readonly addToBatchButton: Locator
   /** Submits a bulk execution, which has no sign step */
@@ -60,6 +64,8 @@ export class TxReviewPage {
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
     this.submitActions = page.getByTestId('combo-submit-dropdown')
+    this.signChoice = page.getByRole('menuitem', { name: 'Sign', exact: true })
+    this.lastSignatureNotice = page.getByText("You're providing the last signature")
     this.addToBatchChoice = page.getByRole('menuitem', { name: 'Add to batch' })
     this.addToBatchButton = page.getByTestId('combo-submit-batching')
     this.submitButton = page.getByRole('button', { name: 'Submit', exact: true })
@@ -159,6 +165,21 @@ export class TxReviewPage {
     await this.confirmRisk()
     await this.continueButton.click()
     await this.execute()
+  }
+
+  /** Confirm the risk, continue from the review and execute with the relay, which pays the gas */
+  async continueAndExecuteWithRelay(): Promise<void> {
+    await this.confirmRisk()
+    await this.continueButton.click()
+    await this.executeWithRelay()
+  }
+
+  /** Confirm the risk, continue from the review and pick Sign over Execute, as the last signer of an m/n Safe */
+  async continueAndChooseSign(): Promise<void> {
+    await this.confirmRisk()
+    await this.continueButton.click()
+    await this.submitActions.click()
+    await this.signChoice.click()
   }
 
   /** Close the flow and confirm "Discard this transaction?"; an app that asked for it gets a rejection */
