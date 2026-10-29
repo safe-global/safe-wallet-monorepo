@@ -28,7 +28,7 @@ const addressOf = (name: ContractName): string => {
   return getAddress(contract.address)
 }
 
-/** The 60 s delay guard that the wallet sets up on Sepolia */
+/** The 10-minute delay guard that the wallet sets up on Sepolia */
 export const POLICY_GUARD = addressOf('SafePolicyGuard')
 export const ERC20_TRANSFER_POLICY = addressOf('ERC20TransferPolicy')
 /** The guard's `EXPIRY`: how long a requested root stays applicable after its delay */
