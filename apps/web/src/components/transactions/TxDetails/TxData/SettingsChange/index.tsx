@@ -139,6 +139,21 @@ const SettingsChangeTxInfo = ({
     case SettingsInfoType.DELETE_GUARD: {
       return <InfoDetails title="Delete guard" />
     }
+    case SettingsInfoType.SET_MODULE_GUARD: {
+      return (
+        <InfoDetails title="Set module guard:">
+          <EthHashInfo
+            address={settingsInfo.moduleGuard.value}
+            name={settingsInfo.moduleGuard?.name}
+            customAvatar={settingsInfo.moduleGuard?.logoUri}
+            {...addressInfoProps}
+          />
+        </InfoDetails>
+      )
+    }
+    case SettingsInfoType.DELETE_MODULE_GUARD: {
+      return <InfoDetails title="Delete module guard" />
+    }
     default:
       return <></>
   }
