@@ -9,9 +9,11 @@ import { makeStore, setStoreInstance } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { server } from '@/tests/server'
-import { requestSafenetCheck } from '../requestSafenetCheck'
+import { MixpanelEventParams, SAFENET_EVENTS, trackEvent } from '@/services/analytics'
+import { requestSafenetCheck as requestCheck } from '../requestSafenetCheck'
 
 jest.mock('@/services/exceptions', () => ({ ...jest.requireActual('@/services/exceptions'), logError: jest.fn() }))
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const safeAddress = faker.finance.ethereumAddress()
 const safeTxHash = faker.string.hexadecimal({ length: 64 })
@@ -49,6 +51,11 @@ const mockCheckRoute = (chainId: string, status = 202) => {
   return received
 }
 
+const requestSafenetCheck = (
+  args: { chainId: string; safeAddress: string; safeTxHash: string },
+  isFirstSignature = true,
+) => requestCheck({ ...args, isFirstSignature })
+
 describe('requestSafenetCheck', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -66,6 +73,20 @@ describe('requestSafenetCheck', () => {
     expect(logError).not.toHaveBeenCalled()
   })
 
+  it('tracks one submission for the first signature and none for a co-signature', async () => {
+    const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
+    mockCheckRoute(chainId)
+
+    await requestSafenetCheck({ chainId, safeAddress, safeTxHash }, false)
+    expect(trackEvent).not.toHaveBeenCalled()
+
+    await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(SAFENET_EVENTS.SUBMITTED, {
+      [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash,
+    })
+  })
+
   it('sends nothing for a chain that does not list SAFENET_CHECKS', async () => {
     const chainId = await setupStore({ features: [] })
     const received = mockCheckRoute(chainId)
@@ -73,6 +94,7 @@ describe('requestSafenetCheck', () => {
     await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
 
     expect(received).not.toHaveBeenCalled()
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 
   it.each([
@@ -86,6 +108,7 @@ describe('requestSafenetCheck', () => {
     await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
 
     expect(received).not.toHaveBeenCalled()
+    expect(trackEvent).not.toHaveBeenCalled()
     expect(logError).not.toHaveBeenCalled()
   })
 
@@ -96,16 +119,18 @@ describe('requestSafenetCheck', () => {
     await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
 
     expect(received).not.toHaveBeenCalled()
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 
-  it('resolves and logs once when CGW fails the request', async () => {
+  it.each([500, 402])('resolves, logs once and tracks nothing when CGW answers %s', async (status) => {
     const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
-    mockCheckRoute(chainId, 500)
+    mockCheckRoute(chainId, status)
 
     await expect(requestSafenetCheck({ chainId, safeAddress, safeTxHash })).resolves.toBeUndefined()
 
     expect(logError).toHaveBeenCalledTimes(1)
-    expect(logError).toHaveBeenCalledWith(Errors._652, expect.objectContaining({ status: 500 }))
+    expect(logError).toHaveBeenCalledWith(Errors._652, expect.objectContaining({ status }))
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 
   it.each([
@@ -119,5 +144,6 @@ describe('requestSafenetCheck', () => {
     await expect(requestSafenetCheck({ chainId, safeAddress, safeTxHash })).resolves.toBeUndefined()
 
     expect(logError).not.toHaveBeenCalled()
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 })

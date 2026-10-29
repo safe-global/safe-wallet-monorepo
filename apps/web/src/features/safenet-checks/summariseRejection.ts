@@ -2,7 +2,9 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   AttestationVerificationStatus,
   CheckEventType,
+  CheckStatus,
   type NormalizedCheckEvent,
+  type PublicCheckStatus,
   type SafenetCheckSnapshot,
   type SentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks'
@@ -73,6 +75,10 @@ export const rejectionSeverity = ({ rules, unrecognised }: RejectionSummary): Se
   rules.length > 0 && !unrecognised && rules.every((rule) => rule.severity === Severity.WARN)
     ? Severity.WARN
     : Severity.CRITICAL
+
+/** A risk that cites only warning rules shows orange on every surface, as in Safe Shield; R-4.6 stays red. */
+export const isWarningRisk = (publicStatus: PublicCheckStatus, summary: RejectionSummary): boolean =>
+  publicStatus === CheckStatus.MALICIOUS && rejectionSeverity(summary) === Severity.WARN
 
 /** Checked in order: the furthest step a check reached names what is missing. */
 const FAILURE_REASONS: ReadonlyArray<[ReadonlyArray<CheckEventType>, string]> = [

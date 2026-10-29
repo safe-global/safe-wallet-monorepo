@@ -160,6 +160,50 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.getByText('Proposed')).toBeInTheDocument()
   })
 
+  describe('the name of the proposer', () => {
+    const mockUseAddressBook = jest.requireMock('@/hooks/useAddressBook') as jest.Mock
+    const proposerAddr = checksumAddress(faker.finance.ethereumAddress())
+
+    afterEach(() => {
+      mockUseAddressBook.mockReturnValue({})
+    })
+
+    const renderProposedTx = (proposedByDelegateName: string | null) => {
+      const { confirmations } = buildConfirmations(0, 2)
+      const txDetails = transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: multisigExecutionDetailsBuilder()
+            .with({
+              confirmations,
+              confirmationsRequired: 2,
+              proposer: { value: proposerAddr, name: null, logoUri: null },
+              proposedByDelegate: { value: proposerAddr, name: proposedByDelegateName, logoUri: null },
+            })
+            .build(),
+          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        })
+        .build()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />)
+    }
+
+    it('shows the name that the local address book gives the proposer', () => {
+      mockUseAddressBook.mockReturnValue({ [proposerAddr]: 'Treasury proposer' })
+
+      renderProposedTx('Name from the API')
+
+      expect(screen.getByText('By Treasury proposer')).toBeInTheDocument()
+      expect(screen.queryByText('By Name from the API')).not.toBeInTheDocument()
+    })
+
+    it('falls back to the name that the gateway gives the delegate proposer', () => {
+      renderProposedTx('Name from the API')
+
+      expect(screen.getByText('By Name from the API')).toBeInTheDocument()
+    })
+  })
+
   it('renders "Signed (N/M)" labels for each confirmation', () => {
     const { confirmations } = buildConfirmations(2, 3)
     const txDetails = transactionDetailsBuilder()
@@ -394,6 +438,24 @@ describe('TxSigners (Audit Log)', () => {
     expect(disabledExplorerBtn).toBeInTheDocument()
   })
 
+  it('offers to copy the transaction link for a queued transaction', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2 })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        txHash: null,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
+  })
+
   it('uses consistent labels for cancellation transactions', () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
@@ -518,7 +580,7 @@ describe('TxSigners (Audit Log)', () => {
 
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
-    const copyButtons = screen.getAllByRole('button', { name: /^By / })
+    const copyButtons = screen.getAllByRole('button', { name: /^Copy address / })
     fireEvent.click(copyButtons[0])
 
     await waitFor(() => {

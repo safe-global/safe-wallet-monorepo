@@ -13,6 +13,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
@@ -108,14 +109,8 @@ export const SpaceSelectorDropdown = ({
   }
 
   const handleCreateSpace = () => {
-    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
     // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
     router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
-  }
-
-  const handleViewSpaces = () => {
-    trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.space_selector })
-    router.push(AppRoutes.welcome.spaces)
   }
 
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
@@ -233,12 +228,19 @@ export const SpaceSelectorDropdown = ({
 
         <DropdownMenuSeparator className="my-1" />
 
-        <AddWorkspaceMenuItem isAtSpacesLimit={spaces.length >= SPACES_LIMIT} onClick={handleCreateSpace} />
+        <Track
+          {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+          mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.SIDEBAR }}
+        >
+          <AddWorkspaceMenuItem isAtSpacesLimit={spaces.length >= SPACES_LIMIT} onClick={handleCreateSpace} />
+        </Track>
 
-        <DropdownMenuItem onClick={handleViewSpaces} className={MENU_ITEM_CLASS}>
-          <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-          <span>View all</span>
-        </DropdownMenuItem>
+        <Track {...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE} label={SPACE_LABELS.space_selector}>
+          <DropdownMenuItem onClick={() => router.push(AppRoutes.welcome.spaces)} className={MENU_ITEM_CLASS}>
+            <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
+            <span>View all</span>
+          </DropdownMenuItem>
+        </Track>
       </DropdownMenuContent>
     </DropdownMenu>
   )

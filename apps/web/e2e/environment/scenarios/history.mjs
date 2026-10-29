@@ -3,7 +3,6 @@ import { ALLOWANCE_MODULE, allowanceCall, registerAllowanceModule } from './allo
 import { execute, stagingOwners } from './staging.mjs'
 import { dealToken, erc20, multiSend, send, waitForNextSecond, SEPOLIA } from './chain.mjs'
 import { registerToken, trustToken } from './tokens.mjs'
-import { rebuildStagingSafes } from './staging-safes.mjs'
 import { localProvider } from './provider.mjs'
 import { waitUntil } from './indexing.mjs'
 
@@ -154,7 +153,7 @@ const historyCount = 28
  * Rebuilds staging SEP_STATIC_SAFE_7 and its executed history, with the staging owners impersonated.
  * The fixture `history.timeline` maps each staging execution date to the local one for the date filters.
  */
-export async function prepareHistoryScenario(env) {
+async function prepareHistoryScenario(env) {
   const provider = localProvider(env.SAFE_RPC_URL)
   try {
     // Known before its transfers, so CGW never caches the history without the token's symbol and decimals.
@@ -191,10 +190,4 @@ export async function prepareHistoryScenario(env) {
   } finally {
     provider.destroy()
   }
-}
-
-export async function prepareAddressBookHistoryScenario(env, owners) {
-  const history = await prepareHistoryScenario(env)
-  const safes = await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_4'])
-  return { ...history, safes: { static: { ...history.safes.static, ...safes } } }
 }

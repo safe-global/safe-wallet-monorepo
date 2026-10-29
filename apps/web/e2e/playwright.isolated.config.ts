@@ -8,12 +8,15 @@ if (process.env.SAFE_E2E_ISOLATED !== 'true' || !baseURL) {
 }
 
 const artifacts = './environment/artifacts/playwright'
+const auth0MockPort = process.env.AUTH0_MOCK_PORT || '8443'
 
 export default defineConfig({
   testDir: './tests',
   testMatch: Object.keys(playwrightSpecs).map((spec) => `**/tests/${spec}`),
-  timeout: 120_000,
-  expect: { timeout: 30_000 },
+  // The stack polls every 2 s and indexes every 1 s, so a step that waits longer has failed.
+  // Polls fixed in code, e.g. useActivatingPolicies (15 s), need their own longer step timeout.
+  timeout: 90_000,
+  expect: { timeout: 20_000 },
   // The tests of a file share the data its scenarios prepare once, so a file stays in one worker.
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
@@ -27,12 +30,14 @@ export default defineConfig({
   ],
   use: {
     baseURL,
-    actionTimeout: 15_000,
-    navigationTimeout: 60_000,
+    actionTimeout: 20_000,
+    navigationTimeout: 20_000,
     timezoneId: 'UTC',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    // The local HTTPS mocks (Auth0, CoW) share a self-signed certificate.
+    ignoreHTTPSErrors: true,
   },
   projects: [
     {
@@ -41,7 +46,12 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         // The full Chromium build, which CI installs without the headless shell.
         channel: 'chromium',
-        launchOptions: { args: ['--host-resolver-rules=MAP *.safe-e2e.test 127.0.0.1'] },
+        launchOptions: {
+          // The gateway sends browsers to https://auth.safe-e2e.test (port 443); the mock is published on another port.
+          args: [
+            `--host-resolver-rules=MAP auth.safe-e2e.test 127.0.0.1:${auth0MockPort}, MAP *.safe-e2e.test 127.0.0.1`,
+          ],
+        },
       },
     },
   ],

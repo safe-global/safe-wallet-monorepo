@@ -1,7 +1,12 @@
 import { renderHook } from '@/tests/test-utils'
 import type { RootState } from '@/store'
 import { MemberStatus } from '../useSpaceMembers'
-import { getSafeWorkspaceAction, useSafeWorkspaceCheck, type SafeWorkspaceState } from '../useSafeWorkspaceCheck'
+import {
+  getSafeWorkspaceAction,
+  useAddUrlSpaceId,
+  useSafeWorkspaceCheck,
+  type SafeWorkspaceState,
+} from '../useSafeWorkspaceCheck'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
@@ -163,6 +168,27 @@ describe('useSafeWorkspaceCheck', () => {
     })
     expect(mockShowNotification).toHaveBeenCalledWith(
       expect.objectContaining({ groupKey: 'safe-workspace-not-member', variant: 'info' }),
+    )
+  })
+})
+
+describe('useAddUrlSpaceId', () => {
+  it('opens the current page in the Workspace, keeps the rest of the query, and adds no history entry', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+    const { result } = renderHook(() => useAddUrlSpaceId(), {
+      routerProps: {
+        pathname: '/transactions/tx',
+        query: { safe: `eth:${SAFE_ADDRESS}`, id: 'multisig_0x1' },
+        replace,
+      },
+    })
+
+    result.current(SPACE_ID)
+
+    expect(replace).toHaveBeenCalledWith(
+      { pathname: '/transactions/tx', query: { safe: `eth:${SAFE_ADDRESS}`, id: 'multisig_0x1', spaceId: SPACE_ID } },
+      undefined,
+      { shallow: true },
     )
   })
 })

@@ -1,3 +1,4 @@
+import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 import type { SafeAccountIneligibility } from './types'
 
 type EligibilityCopy = {
@@ -39,6 +40,8 @@ export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
     "Spending limits on this network aren't supported in the Workspace view. Set them up in the Safe account settings.",
   'no-spending-limits':
     "The spending limit module isn't deployed on this network yet, so new spending limits can't be created here.",
+  'no-recipient-allowlists': 'Not available on this network yet',
+  'unsupported-safe-version': `Requires Safe v${MIN_POLICY_GUARD_SAFE_VERSION} or newer`,
 }
 
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'
@@ -48,5 +51,5 @@ export const SAFE_ACCOUNT_SELECTOR_PLACEHOLDER = 'Select Safe account'
 export const NESTED_SAFES_NOTICE_TITLE = 'Nested Safe accounts'
 
 /** Each flow names what it manages, so the notice points at the right settings page. */
-export const getNestedSafesNoticeText = (policy: 'proposers' | 'spending limits') =>
+export const getNestedSafesNoticeText = (policy: 'proposers' | 'spending limits' | 'recipient allowlists') =>
   `To manage ${policy} for the Nested Safe accounts, go to the Safe account settings.`

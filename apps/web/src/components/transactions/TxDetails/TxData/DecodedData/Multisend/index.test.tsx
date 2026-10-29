@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@/tests/test-utils'
+import { fireEvent, render, waitFor, within } from '@/tests/test-utils'
 import Multisend from '.'
 import { Operation } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
@@ -6,6 +6,8 @@ import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { multiSendDefaultsToSelf } from '@safe-global/utils/utils/multiSend'
+import { basicTypesActions, multiSendTxDataBuilder } from '@/tests/builders/dataDecoded'
+import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 
 jest.mock('@/hooks/useSafeAddress')
 jest.mock('@safe-global/utils/utils/multiSend', () => ({
@@ -84,6 +86,63 @@ describe('Multisend', () => {
 
     expect(result.getByText('0x0000...0000')).toBeInTheDocument()
     expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
+  })
+
+  it('renders every action of a batch that uses every ABI type', () => {
+    const actions = basicTypesActions()
+    const result = render(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
+
+    fireEvent.click(result.getByTestId('expande-all-btn'))
+
+    const items = result.getAllByTestId('action-item')
+    expect(items).toHaveLength(actions.length)
+    items.forEach((item, index) => {
+      expect(within(item).getByText(actions[index].dataDecoded.method)).toBeInTheDocument()
+    })
+    expect(result.queryByText('Error parsing data')).not.toBeInTheDocument()
+  })
+
+  it('lists the actions under an "All actions" header', async () => {
+    const { getByTestId } = render(<Multisend txData={multiSendTxDataBuilder().build()} />)
+
+    await waitFor(() => expect(getByTestId('all-actions')).toHaveTextContent('All actions'))
+  })
+
+  it('expands every action with "Expand all" and collapses them with "Collapse all"', () => {
+    const actions = basicTypesActions()
+    const result = render(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
+    const expandedStates = () => result.getAllByTestId('action-item').map((item) => item.getAttribute('aria-expanded'))
+
+    expect(expandedStates()).toEqual(actions.map(() => 'false'))
+
+    fireEvent.click(result.getByRole('button', { name: 'Expand all' }))
+    expect(expandedStates()).toEqual(actions.map(() => 'true'))
+
+    fireEvent.click(result.getByRole('button', { name: 'Collapse all' }))
+    expect(expandedStates()).toEqual(actions.map(() => 'false'))
+  })
+
+  it('opens delegate call actions by default and keeps plain calls closed', async () => {
+    const [call, delegateCall] = basicTypesActions()
+    const actions = [call, { ...delegateCall, operation: Operation.DELEGATE }]
+    const result = render(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
+
+    await waitFor(() =>
+      expect(result.getAllByTestId('action-item').map((item) => item.getAttribute('aria-expanded'))).toEqual([
+        'false',
+        'true',
+      ]),
+    )
+  })
+
+  it('renders nothing when the multiSend call has no parameters', () => {
+    const txData = transactionDataBuilder()
+      .with({ dataDecoded: { method: 'multiSend', parameters: [] } })
+      .build()
+
+    const { container } = render(<Multisend txData={txData} />)
+
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('resolves a zero-address inner action to the executing Safe when overridden (nested Safe)', () => {

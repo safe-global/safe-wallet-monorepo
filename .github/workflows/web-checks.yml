@@ -1,15 +1,8 @@
 name: Web Checks
 
 on:
+  # No paths filter: the required result job must report on every pull request.
   pull_request:
-    paths:
-      - apps/web/**
-      - apps/web-tanstack/**
-      - packages/**
-      - yarn.lock
-      - package.json
-      - .yarnrc.yml
-      - .yarn/patches/**
   push:
     branches:
       - main
@@ -30,7 +23,40 @@ concurrency:
 permissions: {}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/web/**
+            apps/web-tanstack/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            turbo.json
+            .prettierrc
+            .prettierignore
+            knip.json
+            .github/workflows/web-checks.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
   lint:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -38,14 +64,14 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Run ESLint with suggestions (PR only)
         if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@aecb87aaa6d425dc2ac23c49fffbcbad7d5ce3b2 # v4.1.36
+        uses: CatChen/eslint-suggestion-action@v4.1.37
         with:
           request-changes: true
           fail-check: true
@@ -56,8 +82,12 @@ jobs:
       - name: Run ESLint (push only)
         if: github.event_name == 'push'
         run: yarn turbo run lint --filter=@safe-global/web
+      - name: Run ESLint (packages/views)
+        run: yarn turbo run lint --filter=@safe-global/views
 
   prettier:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -65,8 +95,8 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
@@ -74,6 +104,8 @@ jobs:
         run: yarn workspace @safe-global/web prettier
 
   type-check:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -81,8 +113,8 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
@@ -90,6 +122,8 @@ jobs:
         run: yarn turbo run type-check --filter=@safe-global/web
 
   knip-exports:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -97,8 +131,8 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
@@ -112,7 +146,7 @@ jobs:
     permissions: {}
     steps:
       - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        uses: slackapi/slack-github-action@v4.0.0
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook
@@ -129,3 +163,16 @@ jobs:
                 }
               ]
             }
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: Web checks result
+    permissions: {}
+    if: always()
+    needs: [changes, lint, prettier, type-check, knip-exports]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

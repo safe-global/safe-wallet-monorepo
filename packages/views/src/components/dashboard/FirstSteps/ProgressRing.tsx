@@ -39,8 +39,8 @@ export const ProgressRing = ({
           y2="22.621"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#5FDDFF" />
-          <stop offset="1" stopColor="#12FF80" />
+          <stop stopColor="var(--color-info-main)" />
+          <stop offset="1" stopColor="var(--color-static-text-brand)" />
         </linearGradient>
       </defs>
 

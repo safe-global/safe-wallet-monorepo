@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
+import { basename } from 'node:path'
 import { test } from 'node:test'
 import {
   cypressEnvironment,
   exposedValues,
-  forkShardCount,
   isRemoteBackendHost,
-  planShards,
+  isRemoteBackendRequest,
   selectCypressSpecs,
 } from './cypress.mjs'
 import { isolatedSpecs } from './specs.mjs'
@@ -40,29 +40,42 @@ test('blocks remote backend hosts without treating the static asset CDN as a tra
   }
 })
 
+test('decides by the request URL whether it reaches a remote backend', () => {
+  assert.equal(isRemoteBackendRequest('https://safe-client.safe.global/v1/chains'), true)
+  assert.equal(isRemoteBackendRequest('https://eth-sepolia.g.alchemy.com/v2/key'), true)
+  assert.equal(isRemoteBackendRequest('http://localhost:8000/cgw/v1/chains'), false)
+})
+
 const assets = 'cypress/e2e/regression/assets.cy.js'
-const assetsSmoke = 'cypress/e2e/smoke/assets.cy.js'
-const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
+const specName = (spec) => basename(spec, '.cy.js')
+// Samples come from the registry, so a deleted Cypress spec cannot break these tests
+const [first, second] = Object.keys(isolatedSpecs).filter(
+  (path, _, all) =>
+    path.startsWith('cypress/e2e/regression/') &&
+    all.filter((other) => specName(other) === specName(path)).length === 1,
+)
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
-  assert.deepEqual(selectCypressSpecs('regression/assets'), [assets])
-  assert.deepEqual(selectCypressSpecs('spaces_basicflow'), ['cypress/e2e/regression/spaces_basicflow.cy.js'])
-  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/assets,tx_queue_reject_btn'), [
-    rejection,
-    assets,
+  assert.deepEqual(selectCypressSpecs(specName(first)), [first])
+  assert.deepEqual(selectCypressSpecs(`regression/${specName(second)}`), [second])
+  assert.deepEqual(selectCypressSpecs(`${specName(first)}, regression/${specName(second)},${specName(first)}`), [
+    first,
+    second,
   ])
 })
 
 test('rejects unknown or empty spec selection instead of running staging-dependent specs', () => {
-  for (const selection of ['', '*', 'not_registered_spec', '../tx_queue_delete_btn', 'tx_queue_delete_btn,']) {
+  for (const selection of ['', '*', 'not_registered_spec', `../${specName(first)}`, `${specName(first)},`]) {
     assert.throws(() => selectCypressSpecs(selection), /No isolated scenario/)
   }
 })
 
-test('requires suite-qualified selection when existing specs share a file name', () => {
-  assert.throws(() => selectCypressSpecs('assets'), /Ambiguous isolated scenario/)
-  assert.deepEqual(selectCypressSpecs('regression/assets,smoke/assets'), [assets, assetsSmoke])
+test('requires suite-qualified selection when registered specs share a file name', () => {
+  const safeAppsAssets = 'cypress/e2e/safe-apps/assets.cy.js'
+  const specs = { [assets]: {}, [safeAppsAssets]: {} }
+  assert.throws(() => selectCypressSpecs('assets', specs), /Ambiguous isolated scenario/)
+  assert.deepEqual(selectCypressSpecs('regression/assets,safe-apps/assets', specs), [assets, safeAppsAssets])
 })
 
 test('browser credentials sign for the generated scenario owners', async () => {
@@ -157,56 +170,5 @@ test('retains legacy configuration without forwarding archive provider credentia
     {
       CYPRESS_WALLET_CREDENTIALS: 'legacy',
     },
-  )
-})
-
-test('plans shards that cover every spec once and start forks only where a spec needs them', () => {
-  const specs = Object.keys(isolatedSpecs)
-  const needsForks = (spec) => Boolean(isolatedSpecs[spec].chains)
-  const shards = planShards(specs, 6)
-  assert.equal(shards.length, 6)
-  assert.deepEqual(shards.flatMap(({ specs }) => specs).sort(), [...specs].sort())
-  for (const shard of shards) {
-    assert.equal(shard.chains.length > 0, shard.specs.some(needsForks))
-  }
-  assert.deepEqual(planShards([assets], 4), [{ specs: [assets], chains: [] }])
-  assert.throws(() => planShards(specs, 0), /positive integer/)
-})
-
-test('fills the fork shards with plain specs so that all shards cost about the same', () => {
-  const registry = Object.fromEntries([
-    ...Array.from({ length: 97 }, (_, index) => [`cypress/e2e/test/plain-${index}.cy.js`, {}]),
-    ...Array.from({ length: 17 }, (_, index) => [`cypress/e2e/test/fork-${index}.cy.js`, { chains: [1] }]),
-  ])
-  const cost = ({ specs }) => {
-    const forks = specs.filter((spec) => registry[spec].chains).length
-    return specs.length - forks + (forks ? forks * 1.2 + 2.5 : 0)
-  }
-  const costs = planShards(Object.keys(registry), 6, registry).map(cost)
-  assert.ok(Math.max(...costs) - Math.min(...costs) <= 1.2, `unbalanced shards: ${costs}`)
-  assert.ok(Math.max(...costs) <= 21)
-})
-
-test('gives the slower fork specs enough shards that they do not hold up the run', () => {
-  // 97 plain and 17 fork specs, as in CI: one fork shard would cost 22.9 against an average of 20.4.
-  assert.equal(forkShardCount(97, 17, 6), 2)
-  assert.equal(forkShardCount(97, 17, 8), 2)
-  assert.equal(forkShardCount(97, 0, 6), 0)
-  assert.equal(forkShardCount(0, 17, 6), 6)
-  assert.equal(forkShardCount(3, 1, 1), 1)
-})
-
-test('keeps fork specs that need the same forks in the same shard', () => {
-  const registry = {
-    'cypress/e2e/test/plain.cy.js': {},
-    'cypress/e2e/test/mainnet-a.cy.js': { chains: [1] },
-    'cypress/e2e/test/polygon-a.cy.js': { chains: [137] },
-    'cypress/e2e/test/mainnet-b.cy.js': { chains: [1] },
-    'cypress/e2e/test/polygon-b.cy.js': { chains: [137] },
-  }
-  const forkShards = planShards(Object.keys(registry), 3, registry).filter(({ chains }) => chains.length)
-  assert.deepEqual(
-    forkShards.map(({ chains }) => chains),
-    [['mainnet'], ['polygon']],
   )
 })

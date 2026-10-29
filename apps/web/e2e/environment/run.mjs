@@ -4,8 +4,9 @@ import { readFile, rm } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { planShards, requiredChains, selectCypressSpecs } from './cypress.mjs'
+import { requiredChains, selectCypressSpecs } from './cypress.mjs'
 import { assertProjectName, chainProfiles, localUrl } from './local-stack.mjs'
+import { playwrightSpecs } from './playwright-specs.mjs'
 import { isolatedSpecs } from './specs.mjs'
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -38,13 +39,22 @@ export function walletEnvironment(manifest, env = process.env) {
       ([key]) => !key.startsWith('FORK_') && key !== 'SEPOLIA_FORK_RPC_URL' && key !== 'ELECTRON_RUN_AS_NODE',
     ),
   )
+  // Stacks started before the Ledger emulator existed have no URL for it; only the Ledger specs need one.
+  const ledger = manifest.ledgerEmulatorUrl
+    ? { NEXT_PUBLIC_LEDGER_EMULATOR_URL: localUrl(manifest.ledgerEmulatorUrl, 'Ledger emulator') }
+    : {}
   return {
     ...filtered,
+    ...ledger,
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
+    NEXT_PUBLIC_POLLING_INTERVAL: '2000',
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
     NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
     NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: gatewayUrl,
+    NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: 'http://localhost:4003/simulate',
+    NEXT_PUBLIC_TENDERLY_ORG_NAME: 'safe',
+    NEXT_PUBLIC_TENDERLY_PROJECT_NAME: 'safe-apps',
     SAFE_CGW_BASE_URL: gatewayUrl,
     VITE_GATEWAY_URL: gatewayUrl,
   }
@@ -116,21 +126,18 @@ export function missingChainCommands(specs, manifest, infrastructure, registry =
     .map((chainId) => `python3 ${infrastructure}/scripts/test_env.py up --chain ${chainProfiles[chainId]}`)
 }
 
-const specName = (spec) => spec.replace(/^cypress\/e2e\/|\.cy\.js$/g, '')
-
 /**
- * The GitHub Actions matrix for the selected specs; each Cypress shard lists its specs and the forks they need.
- * One more entry runs every Playwright spec in playwright-specs.mjs on its own Sepolia stack.
+ * The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. Playwright assigns the specs to
+ * shards only when it runs, so every shard starts the forks that any registered spec needs.
  */
-export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
-  const shards = planShards(selectCypressSpecs(selection, registry), shardCount, registry)
-  const cypress = shards.map(({ specs, chains }, index) => ({
-    shard: index + 1,
-    runner: 'cypress',
-    specs: specs.map(specName).join(','),
-    chains: chains.join(' '),
-  }))
-  return { include: [...cypress, { shard: cypress.length + 1, runner: 'playwright', specs: '', chains: '' }] }
+export function planMatrix(shardCount, env = process.env, registry = playwrightSpecs) {
+  if (!Number.isInteger(shardCount) || shardCount < 1) throw new Error('Shard count must be a positive integer')
+  // A sharded Playwright run that matches no test passes, so an unmatched filter must fail here.
+  if (!selectPlaywrightSpecs(env, registry).length) {
+    throw new Error(`SAFE_E2E_SPECS matches no registered Playwright spec: ${env.SAFE_E2E_SPECS}`)
+  }
+  const chains = requiredChains(Object.keys(registry), registry).map((chainId) => chainProfiles[chainId])
+  return { include: Array.from({ length: shardCount }, (_, index) => ({ shard: index + 1, chains: chains.join(' ') })) }
 }
 
 const webUrl = (env) => env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`
@@ -173,10 +180,21 @@ export function cypressOpenArguments(specs, env = process.env) {
   ]
 }
 
-/** `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all. */
+const playwrightFilters = (env) => (env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : [])
+
+/**
+ * `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all.
+ * `SAFE_E2E_SHARD` (`current/total`) runs one Playwright shard of them.
+ */
 export function playwrightRunArguments(env = process.env) {
-  const filters = env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : []
-  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...filters]
+  const shard = env.SAFE_E2E_SHARD ? ['--shard', env.SAFE_E2E_SHARD] : []
+  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...shard, ...playwrightFilters(env)]
+}
+
+/** The registered Playwright specs that the `SAFE_E2E_SPECS` filters select, as Playwright matches them */
+export function selectPlaywrightSpecs(env = process.env, registry = playwrightSpecs) {
+  const filters = playwrightFilters(env).map((filter) => new RegExp(filter))
+  return Object.keys(registry).filter((spec) => !filters.length || filters.some((filter) => filter.test(spec)))
 }
 
 /** What both runners pass to their specs: the wallet environment plus the stack's service URLs. */
@@ -274,6 +292,10 @@ async function runCypress(config, runner, manifest, walletEnv) {
 }
 
 async function runPlaywright(config, runner, manifest, walletEnv) {
+  const missing = missingChainCommands(selectPlaywrightSpecs(), manifest, config.infrastructure, playwrightSpecs)
+  if (missing.length) {
+    throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
+  }
   const env = { ...stackEnvironment(config.project, manifest, walletEnv), PLAYWRIGHT_BASE_URL: webUrl(process.env) }
   await rm(resolve(webRoot, playwrightArtifacts), { recursive: true, force: true })
   await runner.execute('yarn', playwrightRunArguments(env), { env })
@@ -298,7 +320,7 @@ async function runCheck(config, runner) {
 async function main() {
   const config = configuration(process.argv.slice(2))
   if (config.action === 'plan') {
-    console.log(JSON.stringify(planMatrix(process.env.SAFE_E2E_SPECS, Number(process.env.SAFE_E2E_SHARDS || 1))))
+    console.log(JSON.stringify(planMatrix(Number(process.env.SAFE_E2E_SHARDS || 1))))
     return
   }
   const runner = createProcessRunner()

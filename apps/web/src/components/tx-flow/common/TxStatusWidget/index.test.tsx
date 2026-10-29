@@ -8,6 +8,8 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
 
 const mockWalletAddress = faker.finance.ethereumAddress()
 
@@ -67,6 +69,8 @@ describe('TxStatusWidget', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseAlreadySigned.mockReturnValue(false)
+    jest.mocked(useIsSafeOwner).mockReturnValue(true)
+    jest.mocked(useIsWalletProposer).mockReturnValue(false)
   })
 
   it('shows a Sign step before Execute on a 1/n Safe', () => {
@@ -116,5 +120,28 @@ describe('TxStatusWidget', () => {
 
     renderWidget(1, { isMessage: true })
     expect(screen.queryByText('Sign')).not.toBeInTheDocument()
+  })
+
+  describe('for a proposer', () => {
+    beforeEach(() => {
+      jest.mocked(useIsWalletProposer).mockReturnValue(true)
+    })
+
+    it('shows no Sign step and leaves the confirmation open when a proposer who is not an owner creates a tx', () => {
+      jest.mocked(useIsSafeOwner).mockReturnValue(false)
+
+      renderWidget(1)
+
+      const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
+      expect(labels).toEqual(['Create', 'Confirmed (0 of 1)', 'Execute'])
+      expect(screen.getByText('Confirmed (0 of 1)').closest('li')).toHaveClass('incomplete')
+    })
+
+    it('shows the owner steps to a proposer who is also an owner', () => {
+      renderWidget(1)
+
+      const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
+      expect(labels).toEqual(['Create', 'Confirmed (0 of 1)+1', 'Sign', 'Execute'])
+    })
   })
 })

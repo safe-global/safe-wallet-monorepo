@@ -10,12 +10,11 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Errors, logError } from '@/services/exceptions'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 type AddOutcome = 'added' | 'stepUp' | 'failed'
@@ -28,6 +27,7 @@ interface UseAddSafeToSpaceResult {
 /** Adds the current Safe to a Workspace, then opens the Safe in that Workspace. */
 export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
@@ -61,10 +61,6 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
         groupKey: 'add-safe-to-workspace-success',
       }),
     )
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-      { workspace_id: spaceId, safe_address: added.address, chain_id: added.chainId },
-    )
     void router.replace({ pathname: router.pathname, query: spaceQuery }, undefined, { shallow: true })
   }
 
@@ -86,7 +82,8 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     const toAdd = { chainId: chain.chainId, address: safe.address.value }
-    const { spaceId: _replaced, ...query } = router.query
+    // The Safe comes from safeLinkQuery: router.query is still empty if the user clicks before the router is ready
+    const { spaceId: _replaced, ...query } = { ...router.query, ...safeLinkQuery }
     const spaceQuery = withSpaceId(query, spaceId)
     // A step-up reloads the page, so it returns to this URL instead
     const stepUpReturnUrl = `${router.pathname}?${stringify(spaceQuery)}`

@@ -5,7 +5,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/comp
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -14,8 +14,6 @@ import {
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -101,7 +99,6 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         )
         return
       }
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
           message: 'Contact added to Workspace address book',
@@ -125,7 +122,6 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return
       }
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED)
       dispatch(showNotification({ message: 'Request rejected', variant: 'success', groupKey: 'reject-success' }))
     } catch {
       dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'reject-error' }))

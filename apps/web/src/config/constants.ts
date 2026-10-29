@@ -13,6 +13,8 @@ export const IS_DEV = APP_ENV === 'development'
 // build because of its NEXT_PUBLIC_ prefix.
 export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
+// Set only by the isolated e2e build: Ledger talks to the Speculos emulator at this URL instead of over USB.
+export const LEDGER_EMULATOR_URL = process.env.NEXT_PUBLIC_LEDGER_EMULATOR_URL || ''
 
 // default chain ID's as provided to the environment
 export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? chains.sep)
@@ -30,7 +32,8 @@ export const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 
 export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
 
 // Magic numbers
-export const POLLING_INTERVAL = 15_000
+// Shorter in the isolated E2E build, so journeys do not wait 15 s per relayed transaction
+export const POLLING_INTERVAL = Number(process.env.NEXT_PUBLIC_POLLING_INTERVAL) || 15_000
 export const PORTFOLIO_CACHE_TIME_MS = 10_000
 export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
@@ -152,11 +155,13 @@ export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/articles/9317165368-d
 export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams`
 
 export const SAFE_PRO_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/safe-pro-early-partner-program`
+export const SAFE_PRO_INTRO_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-safe-pro`
 export const SAFE_PRO_PRICING_URL = `${SAFE_GLOBAL_DOMAIN}/pricing`
 
 export const SAFE_PRO_USER_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-user-terms`
 export const SAFE_PRO_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-terms`
 export const LEGAL_URL = `${SAFE_GLOBAL_DOMAIN}/legal`
+export const SAFE_PRO_SERVICE_DESCRIPTIONS_URL = `${HELP_CENTER_URL}/articles/4148651106-safe-pro-service-descriptions`
 
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)

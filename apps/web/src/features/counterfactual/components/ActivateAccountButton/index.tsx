@@ -1,4 +1,5 @@
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import dynamic from 'next/dynamic'
 import React, { useContext } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -22,37 +23,34 @@ const ActivateAccountButton = () => {
 
   const isProcessing = undeployedSafe?.status.status !== PendingSafeStatus.AWAITING_EXECUTION
 
-  const activateAccount = () => {
-    trackEvent({ ...OVERVIEW_EVENTS.CHOOSE_TRANSACTION_TYPE, label: 'activate_now' })
-    setTxFlow(<ActivateAccountFlow />)
-  }
-
   return (
     <Tooltip>
       <TooltipTrigger render={<span />}>
         <CheckWallet allowNonOwner allowUndeployedSafe>
           {(isOk) => (
-            <Button
-              data-testid="activate-account-btn-cf"
-              size="default"
-              onClick={activateAccount}
-              disabled={isProcessing || !isOk}
-              className="w-full group-data-[collapsible=icon]:!min-w-9 group-data-[collapsible=icon]:!w-9 group-data-[collapsible=icon]:!px-0"
-            >
-              {isProcessing ? (
-                <>
-                  <Typography variant="paragraph-small" className="mr-2 group-data-[collapsible=icon]:hidden">
-                    Processing
-                  </Typography>
-                  <Spinner className="size-4" />
-                </>
-              ) : (
-                <>
-                  <Rocket className="hidden size-4 shrink-0 group-data-[collapsible=icon]:block" />
-                  <span className="group-data-[collapsible=icon]:hidden">Activate now</span>
-                </>
-              )}
-            </Button>
+            <Track {...OVERVIEW_EVENTS.CHOOSE_TRANSACTION_TYPE} label="activate_now">
+              <Button
+                data-testid="activate-account-btn-cf"
+                size="default"
+                onClick={() => setTxFlow(<ActivateAccountFlow />)}
+                disabled={isProcessing || !isOk}
+                className="w-full group-data-[collapsible=icon]:!min-w-9 group-data-[collapsible=icon]:!w-9 group-data-[collapsible=icon]:!px-0"
+              >
+                {isProcessing ? (
+                  <>
+                    <Typography variant="paragraph-small" className="mr-2 group-data-[collapsible=icon]:hidden">
+                      Processing
+                    </Typography>
+                    <Spinner className="size-4" />
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="hidden size-4 shrink-0 group-data-[collapsible=icon]:block" />
+                    <span className="group-data-[collapsible=icon]:hidden">Activate now</span>
+                  </>
+                )}
+              </Button>
+            </Track>
           )}
         </CheckWallet>
       </TooltipTrigger>

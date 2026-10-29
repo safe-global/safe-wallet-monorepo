@@ -12,15 +12,12 @@ import { getSpecificContractErrorMessage } from '@safe-global/utils/services/exc
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
 
 export const TX_WILL_FAIL_MESSAGE =
   'This transaction will most likely fail. To save gas costs, reject this transaction.'
-
-const onHypernativeCtaClick = () => {
-  trackEvent(HYPERNATIVE_EVENTS.EXECUTION_BLOCKED_APPROVAL_CLICKED)
-}
 
 /**
  * The transaction is awaiting approval, not failing — an action to take rather than
@@ -37,16 +34,17 @@ const HypernativeApprovalRequired = (): ReactElement => {
 
       {assessmentUrl && (
         <span className="mt-3 block">
-          <Button
-            variant="surface"
-            size="sm"
-            className="gap-2"
-            onClick={onHypernativeCtaClick}
-            render={<a href={assessmentUrl} target="_blank" rel="noreferrer noopener" />}
-          >
-            Approve in Hypernative
-            <ExternalLinkIcon />
-          </Button>
+          <Track {...HYPERNATIVE_EVENTS.EXECUTION_BLOCKED_APPROVAL_CLICKED}>
+            <Button
+              variant="surface"
+              size="sm"
+              className="gap-2"
+              render={<a href={assessmentUrl} target="_blank" rel="noreferrer noopener" />}
+            >
+              Approve in Hypernative
+              <ExternalLinkIcon />
+            </Button>
+          </Track>
         </span>
       )}
     </ErrorMessage>

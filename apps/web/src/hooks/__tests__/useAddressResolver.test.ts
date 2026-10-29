@@ -5,7 +5,7 @@ import * as domains from '@/services/ens'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as web3 from '@/hooks/wallets/web3'
 import * as useChains from '@/hooks/useChains'
-import { _clearEnsHubProviders } from '@/hooks/useEnsHubProvider'
+import { _clearSharedReadOnlyProviders } from '@/hooks/wallets/sharedReadOnlyProvider'
 import { renderHook, waitFor, act } from '@/tests/test-utils'
 import { JsonRpcProvider } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -28,7 +28,7 @@ const createChain = (overrides: Partial<Chain>): Chain =>
 describe('useAddressResolver', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    _clearEnsHubProviders()
+    _clearSharedReadOnlyProviders()
     jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(() => mockProvider)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue(mockHubProvider)
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(createChain({ chainId: '1' }))
@@ -133,6 +133,48 @@ describe('useAddressResolver', () => {
     expect(lookupMock).toHaveBeenCalledWith(mockProvider, ADDR_WITHOUT_ENS, ETH_COIN_TYPE)
     expect(result.current.ens).toBeUndefined()
 
+    jest.useRealTimers()
+  })
+
+  it('reports resolving from the moment the address changes until the lookup ends', async () => {
+    jest.useFakeTimers()
+    const TYPED_ADDRESS = zeroPadValue('0xee', 20)
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    let endLookup: (name: string | undefined) => void = () => {}
+    jest.spyOn(domains, 'lookupAddress').mockImplementation(() => new Promise((resolve) => (endLookup = resolve)))
+
+    const { result, rerender } = renderHook(({ address }) => useAddressResolver(address), {
+      initialProps: { address: '' },
+    })
+    expect(result.current.resolving).toBe(false)
+
+    rerender({ address: TYPED_ADDRESS })
+    expect(result.current.resolving).toBe(true)
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(200)
+    })
+    expect(result.current.resolving).toBe(true)
+
+    await act(async () => {
+      endLookup(undefined)
+    })
+    expect(result.current.resolving).toBe(false)
+
+    jest.useRealTimers()
+  })
+
+  it('does not report resolving while the debounce waits for an address with an address book name', () => {
+    jest.useFakeTimers()
+    const NAMED_ADDRESS = zeroPadValue('0xef', 20)
+    jest.spyOn(addressBook, 'default').mockReturnValue({ [NAMED_ADDRESS]: 'Named' })
+
+    const { result, rerender } = renderHook(({ address }) => useAddressResolver(address), {
+      initialProps: { address: '' },
+    })
+    rerender({ address: NAMED_ADDRESS })
+
+    expect(result.current.resolving).toBe(false)
     jest.useRealTimers()
   })
 

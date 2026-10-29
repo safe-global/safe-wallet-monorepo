@@ -28,7 +28,7 @@ import classNames from 'classnames'
 import css from './styles.module.css'
 import { Card } from '@safe-global/views/components/ui/card'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
 import SignTxButton from '@/components/transactions/SignTxButton'
 import RejectTxButton from '@/components/transactions/RejectTxButton'
@@ -139,7 +139,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           )}
 
           <div className={css.txData}>
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <TxData
                 txData={txDetails.txData}
                 txInfo={txDetails.txInfo}
@@ -155,7 +155,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                   />
                 </div>
               </TxData>
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           </div>
         </div>
 
@@ -183,9 +183,10 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               chainId={safe.chainId}
               timestampMs={safenetInfo.submittedAt}
               isQueued={isQueue}
+              executionInfo={safenetInfo}
             />
           )}
-          <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+          <ParsingErrorBoundary>
             <Summary
               txDetails={txDetails}
               txData={txDetails.txData}
@@ -194,7 +195,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               showDecodedData={!isDecodedDataVisible}
               showAuditLogFields={!showAuditLog}
             />
-          </ObservabilityErrorBoundary>
+          </ParsingErrorBoundary>
         </div>
 
         {(isMultiSendTxInfo(txDetails.txInfo) ||
@@ -202,9 +203,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           isBridgeOrderTxInfo(txDetails.txInfo) ||
           isLifiSwapTxInfo(txDetails.txInfo)) && (
           <div className={css.multiSend}>
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <Multisend txData={txDetails.txData} isExecuted={!!txDetails.executedAt} />
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           </div>
         )}
       </div>

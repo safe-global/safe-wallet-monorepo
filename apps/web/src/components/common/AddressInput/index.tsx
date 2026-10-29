@@ -19,7 +19,7 @@ import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import css from './styles.module.css'
-import Identicon from '../Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 
 export type AddressInputProps = {

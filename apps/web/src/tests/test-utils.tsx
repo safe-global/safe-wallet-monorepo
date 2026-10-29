@@ -1,5 +1,5 @@
 import type { RenderHookOptions } from '@testing-library/react'
-import { render, renderHook } from '@testing-library/react'
+import { render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
@@ -99,6 +99,12 @@ function customRenderHook<Result, Props>(
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
 
+/** Checksummed address with the first and last 4 hex characters of `address` and a random middle. */
+export const fakerLookalikeAddress = (address: string) =>
+  checksumAddress(
+    `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '' })}${address.slice(-4)}`.toLowerCase(),
+  )
+
 /**
  * Stub `navigator.clipboard.writeText` and return the mock so tests can assert
  * what was copied. Keeps clipboard mocking consistent across test files.
@@ -136,6 +142,18 @@ export const mockWeb3Provider = (
   jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValue(web3Provider)
   return web3Provider
 }
+
+export const getFieldValue = (container: HTMLElement, title: string): HTMLElement => {
+  const titleCell = within(container)
+    .getAllByTestId('tx-row-title')
+    .find((cell) => cell.textContent === title)
+  const valueCell = titleCell?.nextElementSibling
+  if (!(valueCell instanceof HTMLElement)) {
+    throw new Error(`No transaction details row titled "${title}"`)
+  }
+  return valueCell
+}
+
 // re-export everything
 export * from '@testing-library/react'
 

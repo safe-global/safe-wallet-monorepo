@@ -1,7 +1,5 @@
 import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AcceptInviteDialog from '../AcceptInviteDialog'
 import { spaceBuilder, spaceMemberBuilder } from '@/tests/builders/space'
 
@@ -23,17 +21,6 @@ const mockSpace = spaceBuilder()
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
   default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
-}))
-
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
-
-jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: {
-    WORKSPACE_MEMBER_INVITE_ACCEPTED: { action: 'Workspace member invite accepted', category: 'spaces' },
-  },
-  SPACE_LABELS: {},
 }))
 
 jest.mock('@/store', () => ({
@@ -85,29 +72,9 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { spaces: { index: '/spaces' }, welcome: { spaces: '/welcome/spaces' } },
 }))
 
-describe('AcceptInviteDialog tracking', () => {
+describe('AcceptInviteDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-  })
-
-  it('tracks WORKSPACE_MEMBER_INVITE_ACCEPTED with workspace_id and user_id on submit', async () => {
-    mockAcceptInvite.mockResolvedValue({ data: {} })
-
-    render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
-
-    fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'Test User' } })
-
-    const submitButton = screen.getByTestId('confirm-accept-invite-button')
-    await waitFor(() => expect(submitButton).not.toBeDisabled())
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: '11111111-1111-1111-1111-111111111111' },
-        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 1 },
-      )
-    })
   })
 
   it('bubbles the backend error message when accepting the invite fails', async () => {

@@ -16,7 +16,7 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                  |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                                                         |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | Shared packages: verification, codegen, dual env vars, theme workflow                  |
-| `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentational views and shadcn/ui primitives; no app imports                 |
+| `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation and shadcn/ui primitives; no app imports or business logic       |
 | `config/`              | [config/AGENTS.md](config/AGENTS.md)                           | Shared test workspace (`@safe-global/test`): MSW fixtures/scenarios, verify caveat     |
 
 When adding new guidance, place it in the most-specific subtree it applies to. When a workspace, script, generated path, test framework, or architecture boundary changes, update the nearest AGENTS.md in the same PR — and prefer replacing old rules over appending exceptions.
@@ -54,7 +54,7 @@ Every workspace's `type-check` script runs `yarn run -T -B tsc --noEmit`, which 
 - **apps/mobile** – Expo/React Native
 - **apps/tx-builder** – Safe App running in an iframe — MUI v6, not shadcn
 - **packages/** – `store`, `theme`, `utils` shared by web **and** mobile
-- **packages/views** – presentational views and shadcn/ui primitives, shared by `apps/web` and `apps/web-tanstack`
+- **packages/views** – presentation only (views, shadcn/ui, display formatting), shared by `apps/web` and `apps/web-tanstack`
 - **config/**, `expo-plugins/*`, `tools/codemods/*` – shared config and tooling workspaces
 
 Subtree-specific caveats live in the Nested guidance table above.
@@ -155,6 +155,10 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 - Do NOT start editing code until this checklist exists in the conversation. For small, strictly local changes, a one-line "local change, no shared surfaces touched" note is sufficient.
 - When you open the PR, carry the relevant lines into the "Affected flows", "Blast radius", and "Risks / not checked" fields of the PR template.
 - If the checklist reveals that a shared abstraction has many unknown consumers, slow down and investigate before coding — that is the signal this process is designed to surface.
+
+### Required CI checks
+
+A workflow that branch protection requires has no `pull_request` `paths` filter; it detects changes with the `pr-changes` action and reports one result job with `required-result`. See [docs/ci-required-checks.md](docs/ci-required-checks.md).
 
 ### Commit and PR conventions
 

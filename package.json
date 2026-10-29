@@ -31,7 +31,10 @@
     "brace-expansion@^5.0.2": "^5.0.8",
     "postcss": "8.5.23",
     "motion": "12.34.0",
+    "@ledgerhq/context-module": "1.8.0",
     "@ledgerhq/context-module/ethers": "6.17.0",
+    "@ledgerhq/device-management-kit": "0.9.2",
+    "@ledgerhq/device-signer-kit-ethereum": "1.8.0",
     "@gnosis.pm/zodiac/ethers": "6.17.0",
     "@ledgerhq/device-signer-kit-ethereum/ethers": "6.17.0",
     "@ethersproject/signing-key/elliptic": "^6.6.1",
@@ -54,7 +57,7 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
     "prettier": "^3.9.9",
-    "storybook": "^10.6.0",
+    "storybook": "^10.6.2",
     "turbo": "^2.11.3"
   },
   "dependenciesMeta": {

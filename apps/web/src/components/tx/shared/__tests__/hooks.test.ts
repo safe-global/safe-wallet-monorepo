@@ -356,6 +356,55 @@ describe('SignOrExecute hooks', () => {
       expect(id.txId).toBe('456')
     })
 
+    it('should sign a proposer tx and propose it with the proposer as sender', async () => {
+      const proposerWallet = {
+        label: 'MetaMask',
+        chainId: '1',
+        address: zeroPadValue('0x0789', 20),
+        provider: MockEip1193Provider,
+      } as ConnectedWallet
+      jest.spyOn(wallet, 'default').mockReturnValue(proposerWallet)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const signedTx = createSafeTx()
+      const signSpy = jest.spyOn(txSender, 'dispatchProposerTxSigning').mockResolvedValue(signedTx)
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+      const { result } = renderHook(() => useTxActions())
+      const safeTx = createSafeTx()
+
+      const txId = await result.current.signProposerTx(safeTx, 'origin')
+
+      expect(signSpy).toHaveBeenCalledWith(safeTx, proposerWallet, undefined)
+      expect(proposeSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: '1',
+          safeAddress: zeroPadValue('0x0000', 20),
+          sender: proposerWallet.address,
+          safeTx: signedTx,
+          origin: 'origin',
+        }),
+      )
+      expect(txId).toBe('123')
+    })
+
     it('should propose before signing on-chain when a non-Safe smart account is the first signer', async () => {
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
 

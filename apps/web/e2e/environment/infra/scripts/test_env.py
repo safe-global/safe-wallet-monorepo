@@ -32,7 +32,10 @@ CHAIN_STEPS = (
     ("start", ("txs-scheduler-{}", "txs-web-{}")),
     ("run", ("cfg-chain-{}", "decoder-chain-{}")),
 )
-INIT_JOBS = ("anvil-init", "txs-init", "cfg-init", "decoder-init")
+INIT_JOBS = ("mock-keys", "anvil-init", "txs-init", "cfg-init", "decoder-init")
+# The Queue Service reads the chain list once per 30 minutes and never on a miss.
+QUEUE_SERVICES = ("queue-web", "queue-worker")
+WALLET_FEATURES = ("DELETE_TX", "QUEUE_SERVICE")
 TXS_CHECKS = {
     "test": ["manage.py", "test", "/fork-tests", "--noinput"],
     "smoke": ["/fork-tests/smoke.py"],
@@ -110,6 +113,11 @@ def read_json(url, payload=None):
         return json.load(response)
 
 
+def read_content_type(url):
+    with urllib.request.urlopen(url, timeout=5) as response:
+        return response.headers.get_content_type()
+
+
 def public_config(config):
     services = config["services"]
     rpc = services["fork-rpc"]["environment"]
@@ -118,6 +126,7 @@ def public_config(config):
         raise ValueError("FORK_BLOCK_NUMBER must be positive")
     rpc_port = services["anvil"]["ports"][0]["published"]
     api_port = services["nginx"]["ports"][0]["published"]
+    ledger_port = services["ledger-emulator"]["ports"][0]["published"]
     init = services["txs-init"]["environment"]
     return {
         "forkBlock": block,
@@ -127,6 +136,7 @@ def public_config(config):
         "gatewayUrl": f"http://localhost:{api_port}/cgw",
         "transactionServiceUrl": f"http://localhost:{api_port}/txs/api",
         "decoderUrl": f"http://localhost:{api_port}/decoder",
+        "ledgerEmulatorUrl": f"http://localhost:{ledger_port}",
         "images": {name: service["image"] for name, service in services.items()},
     }
 
@@ -196,7 +206,7 @@ def check_fork(manifest):
 
 
 def check_ports(manifest):
-    for key in ("rpcUrl", "gatewayUrl"):
+    for key in ("rpcUrl", "gatewayUrl", "ledgerEmulatorUrl"):
         if key not in manifest:
             continue
         port = urllib.parse.urlparse(manifest[key]).port
@@ -206,7 +216,7 @@ def check_ports(manifest):
             except OSError as exc:
                 raise RuntimeError(
                     f"Local port {port} is already in use; "
-                    "choose distinct RPC_PORT and REVERSE_PROXY_PORT"
+                    "choose distinct RPC_PORT, REVERSE_PROXY_PORT and LEDGER_EMULATOR_PORT"
                 ) from exc
 
 
@@ -239,6 +249,20 @@ def check_gateway_chain(gateway_url, chain_id):
     chain_config = read_json(f"{gateway_url}/v1/chains/{chain_id}")
     if str(chain_config["chainId"]) != str(chain_id):
         raise RuntimeError("CGW returned a different chain")
+    check_chain_logo(gateway_url, chain_config["chainLogoUri"])
+
+
+# A broken media volume, nginx alias or MEDIA_URL breaks every logo the config service generated.
+def check_chain_logo(gateway_url, logo_url):
+    stack = urllib.parse.urlsplit(gateway_url)
+    logo = urllib.parse.urlsplit(logo_url)
+    if (logo.scheme, logo.netloc) != (stack.scheme, stack.netloc):
+        raise RuntimeError(
+            f"Chain logo {logo_url} is not served by the stack at {stack.netloc}; check MEDIA_URL"
+        )
+    content_type = read_content_type(logo_url)
+    if not content_type.startswith("image/"):
+        raise RuntimeError(f"Chain logo {logo_url} returned {content_type}, not an image")
 
 
 def check_stack(manifest):
@@ -249,10 +273,13 @@ def check_stack(manifest):
     chain_id = str(manifest["chainId"])
     url = f'{manifest["gatewayUrl"]}/v2/chains?serviceKey=WALLET_WEB'
     if not any(
-        str(chain["chainId"]) == chain_id and "DELETE_TX" in chain["features"]
+        str(chain["chainId"]) == chain_id
+        and all(feature in chain["features"] for feature in WALLET_FEATURES)
         for chain in read_json(url)["results"]
     ):
-        raise RuntimeError("Wallet v2 chain config is missing the fork or DELETE_TX feature")
+        raise RuntimeError(
+            f"Wallet v2 chain config is missing the fork or a feature of {WALLET_FEATURES}"
+        )
     read_json(f'{manifest["transactionServiceUrl"]}/v1/about/indexing/')
     return block_hash
 
@@ -289,6 +316,8 @@ def chain_step_commands(compose, name):
         else:
             wait = ["--wait"] if mode == "wait" else []
             commands.append(compose + ["up", "--detach", "--no-deps"] + wait + names)
+    commands.append(compose + ["restart"] + list(QUEUE_SERVICES))
+    commands.append(compose + ["up", "--detach", "--no-deps", "--wait"] + list(QUEUE_SERVICES))
     return commands
 
 
