@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { useLoadFeature } from '@/features/__core__'
 import { PolicyGuardFeature, type PolicyConfiguration } from '@/features/policy-guard'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
@@ -30,6 +31,7 @@ const AllowlistTransactionCalls = ({
 }: AllowlistTransactionCallsProps): ReactElement | null => {
   const { describeSetupCall, decodeErc20TransferPolicyData, getCallConfigurations } = useLoadFeature(PolicyGuardFeature)
   const getAddressInfo = useAllowlistAddressInfo()
+  const chainId = useSafeScope()?.chainId
 
   const calls = useMemo(() => (safeTx ? toCalls(safeTx.data) : undefined), [safeTx])
   const configurations = useMemo(
@@ -40,10 +42,11 @@ const AllowlistTransactionCalls = ({
     [calls, getCallConfigurations, requestedConfigurations],
   )
 
-  if (!calls || !configurations || !describeSetupCall || !decodeErc20TransferPolicyData) return null
+  if (!chainId || !calls || !configurations || !describeSetupCall || !decodeErc20TransferPolicyData) return null
 
   return (
     <AllowlistSetupActions
+      chainId={chainId}
       calls={calls}
       configurations={configurations}
       describeCall={describeSetupCall}

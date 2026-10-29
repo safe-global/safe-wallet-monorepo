@@ -6,12 +6,15 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import { safeTxBuilder, safeTxDataBuilder } from '@/tests/builders/safeTx'
 import type { PolicyConfiguration, PolicyGuardContract } from '@/features/policy-guard'
+import { getPolicyEngineAddress } from '@/features/policy-guard/services'
 import AllowlistTransactionCalls from '../AllowlistTransactionCalls'
+
+const CHAIN_ID = '11155111'
 
 const SAFE = checksumAddress(faker.finance.ethereumAddress())
 const GUARD = checksumAddress(faker.finance.ethereumAddress())
 const USDC = checksumAddress(faker.finance.ethereumAddress())
-const POLICY = checksumAddress(faker.finance.ethereumAddress())
+const POLICY = getPolicyEngineAddress(CHAIN_ID, 'ERC20TransferPolicy') ?? ''
 const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
 const OTHER = checksumAddress(faker.finance.ethereumAddress())
 const MULTI_SEND = checksumAddress(faker.finance.ethereumAddress())
@@ -43,6 +46,10 @@ jest.mock('@/features/__core__', () => ({
     decodeErc20TransferPolicyData: mockDecodeRecipients,
     getCallConfigurations: mockGetCallConfigurations,
   }),
+}))
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
+  useSafeScope: () => ({ chainId: '11155111' }),
 }))
 jest.mock('../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions', () => ({
   __esModule: true,
