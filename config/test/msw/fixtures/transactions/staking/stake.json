@@ -1,0 +1,173 @@
+{
+  "item": {
+    "type": "TRANSACTION",
+    "transaction": {
+      "txInfo": {
+        "type": "NativeStakingDeposit",
+        "humanDescription": null,
+        "status": "EXITED",
+        "estimatedEntryTime": 1928064000,
+        "estimatedExitTime": 217728000,
+        "estimatedWithdrawalTime": 615194000,
+        "fee": 0.06,
+        "monthlyNrr": 0.20358822197384305,
+        "annualNrr": 2.4430586636861165,
+        "value": "32000000000000000000",
+        "numValidators": 1,
+        "expectedAnnualReward": "781778772379557200",
+        "expectedMonthlyReward": "65148231031629770",
+        "expectedFiatAnnualReward": 1819.3314513418086,
+        "expectedFiatMonthlyReward": 151.61095427848406,
+        "tokenInfo": {
+          "address": "0x0000000000000000000000000000000000000000",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png",
+          "name": "Ether",
+          "symbol": "ETH",
+          "trusted": true
+        },
+        "validators": [
+          "0xad42c4579877d651bfda1251d1d438dd732612ea48db1b1c7af15285134bedb55b8aec0ad4027838ce08765c4d041950"
+        ]
+      },
+      "id": "multisig_0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B_0xd1699838071a472d26963f2b823a4c835e9acd449d0376ca1d468a666903130d",
+      "txHash": "0x8613c1bf32b07640f15ef5206e3bc0cba3014080693c2af53acf4942316200d8",
+      "timestamp": 1727454527000,
+      "txStatus": "SUCCESS",
+      "executionInfo": {
+        "type": "MULTISIG",
+        "nonce": 1,
+        "confirmationsRequired": 2,
+        "confirmationsSubmitted": 2,
+        "missingSigners": null
+      },
+      "safeAppInfo": null,
+      "note": null
+    },
+    "conflictType": "None"
+  },
+  "details": {
+    "safeAddress": "0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B",
+    "txId": "multisig_0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B_0xd1699838071a472d26963f2b823a4c835e9acd449d0376ca1d468a666903130d",
+    "executedAt": 1727454527000,
+    "txStatus": "SUCCESS",
+    "txInfo": {
+      "type": "NativeStakingDeposit",
+      "humanDescription": null,
+      "status": "EXITED",
+      "estimatedEntryTime": 1928064000,
+      "estimatedExitTime": 217728000,
+      "estimatedWithdrawalTime": 615194000,
+      "fee": 0.06,
+      "monthlyNrr": 0.20358822197384305,
+      "annualNrr": 2.4430586636861165,
+      "value": "32000000000000000000",
+      "numValidators": 1,
+      "expectedAnnualReward": "781778772379557200",
+      "expectedMonthlyReward": "65148231031629770",
+      "expectedFiatAnnualReward": 1819.3314513418086,
+      "expectedFiatMonthlyReward": 151.61095427848406,
+      "tokenInfo": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png",
+        "name": "Ether",
+        "symbol": "ETH",
+        "trusted": true
+      },
+      "validators": [
+        "0xad42c4579877d651bfda1251d1d438dd732612ea48db1b1c7af15285134bedb55b8aec0ad4027838ce08765c4d041950"
+      ]
+    },
+    "txData": {
+      "hexData": "0xd0e30db0",
+      "dataDecoded": {
+        "method": "deposit",
+        "parameters": [],
+        "accuracy": "FULL_MATCH"
+      },
+      "to": {
+        "value": "0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3",
+        "name": "StakingContract",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3.png"
+      },
+      "value": "32000000000000000000",
+      "operation": 0,
+      "trustedDelegateCallTarget": null,
+      "addressInfoIndex": null,
+      "tokenInfoIndex": null
+    },
+    "txHash": "0x8613c1bf32b07640f15ef5206e3bc0cba3014080693c2af53acf4942316200d8",
+    "detailedExecutionInfo": {
+      "type": "MULTISIG",
+      "submittedAt": 1727359532352,
+      "nonce": 1,
+      "safeTxGas": "0",
+      "baseGas": "0",
+      "gasPrice": "0",
+      "gasToken": "0x0000000000000000000000000000000000000000",
+      "fee": "3986325700000000",
+      "payment": "0",
+      "refundReceiver": {
+        "value": "0x0000000000000000000000000000000000000000",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      },
+      "safeTxHash": "0xd1699838071a472d26963f2b823a4c835e9acd449d0376ca1d468a666903130d",
+      "executor": {
+        "value": "0x3E95712cb031956874771F402a514F2a0a5F3c36",
+        "name": null,
+        "logoUri": null
+      },
+      "signers": [
+        {
+          "value": "0x96eeD629D37AfEeACc0Cf67e90cC0eb89f8024Dc",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x3E95712cb031956874771F402a514F2a0a5F3c36",
+          "name": null,
+          "logoUri": null
+        }
+      ],
+      "confirmationsRequired": 2,
+      "confirmations": [
+        {
+          "signer": {
+            "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0x8ff64d30dc2cfd8a759e017dab492cadd835fd0bde7e6b1566b6262f380442687c89cd2927514f6f596452c7c02ac0ec6af5ca6319f56ea66db44465dd0a62ca1b",
+          "submittedAt": 1727359532454
+        },
+        {
+          "signer": {
+            "value": "0x3E95712cb031956874771F402a514F2a0a5F3c36",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0x0000000000000000000000003e95712cb031956874771f402a514f2a0a5f3c36000000000000000000000000000000000000000000000000000000000000000001",
+          "submittedAt": 1727454527000
+        }
+      ],
+      "rejectors": [],
+      "gasTokenInfo": null,
+      "trusted": true,
+      "proposer": {
+        "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
+        "name": null,
+        "logoUri": null
+      },
+      "proposedByDelegate": null
+    },
+    "safeAppInfo": null,
+    "note": null
+  }
+}

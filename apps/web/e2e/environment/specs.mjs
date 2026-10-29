@@ -3,17 +3,11 @@
  * `chains` the forks besides Sepolia.
  */
 export const isolatedSpecs = {
-  'cypress/e2e/regression/limit_order_history.cy.js': { scenario: 'prepareLimitOrderHistoryScenario' },
   'cypress/e2e/regression/messages_popup.cy.js': { scenario: 'prepareMessagePopupScenario' },
   'cypress/e2e/regression/proposers.cy.js': { scenario: 'prepareProposersScenario' },
   'cypress/e2e/regression/spaces_basicflow.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/regression/spaces_dashboard.cy.js': { scenario: 'prepareSpacesDashboardScenario' },
-  'cypress/e2e/regression/swaps_history_2.cy.js': { scenario: 'prepareSwapDetailsScenario' },
-  'cypress/e2e/regression/swaps_history.cy.js': { scenario: 'prepareSwapHistoryScenario' },
-  'cypress/e2e/regression/twaps_history.cy.js': { scenario: 'prepareTwapHistoryScenario' },
   'cypress/e2e/regression/tx_details_queue.cy.js': { scenario: 'prepareFallbackHandlersScenario' },
-  'cypress/e2e/regression/tx_history_5.cy.js': { scenario: 'prepareHistorySummaryScenario' },
-  'cypress/e2e/regression/tx_history.cy.js': { scenario: 'prepareHistoryScenario' },
   'cypress/e2e/regression/tx_queue.cy.js': { scenario: 'prepareSwapQueueScenario' },
   'cypress/e2e/regression/walletconnect_2.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/safe-apps/apps_list.cy.js': { scenario: 'prepareSafeAppsHostScenario' },
