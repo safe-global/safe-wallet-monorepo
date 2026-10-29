@@ -3,7 +3,7 @@
  * Contract addresses are the real mainnet deployments; every person, vendor and Safe is made up.
  */
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
-import type { AddressBookContact } from '../types'
+import type { AddressBookContact, ContactTag, WorkspaceTag } from '../types'
 
 const logo = (chainId: string) => `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
 
@@ -42,20 +42,42 @@ export const ADDRESSES = {
   usdc: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 }
 
+export const WORKSPACE_TAGS: WorkspaceTag[] = [
+  { id: 1, name: 'Internal', color: 'lilac', contactCount: 3 },
+  { id: 2, name: 'Vendor', color: 'cobalt', contactCount: 2 },
+  { id: 3, name: 'Payroll', color: 'lagoon', contactCount: 1 },
+  { id: 4, name: 'Exchange', color: 'clay', contactCount: 0 },
+]
+
+const tags = (...names: string[]): ContactTag[] =>
+  WORKSPACE_TAGS.filter((tag) => names.includes(tag.name)).map(({ id, name, color }) => ({ id, name, color }))
+
 const contact = (fields: Partial<AddressBookContact> & Pick<AddressBookContact, 'address' | 'name'>) => ({
   chains: [ethereum],
   addedBy: MEMBERS.maya,
+  tags: [],
   ...fields,
 })
 
 export const WORKSPACE_CONTACTS: AddressBookContact[] = [
-  contact({ address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum, arbitrum, optimism] }),
-  contact({ address: ADDRESSES.payroll, name: 'Payroll', chains: [base, ethereum] }),
-  contact({ address: ADDRESSES.ops, name: 'Ops multisig', chains: [gnosis], addedBy: MEMBERS.jonas }),
+  contact({
+    address: ADDRESSES.treasury,
+    name: 'Treasury',
+    chains: [ethereum, arbitrum, optimism],
+    tags: tags('Internal'),
+  }),
+  contact({ address: ADDRESSES.payroll, name: 'Payroll', chains: [base, ethereum], tags: tags('Internal', 'Payroll') }),
+  contact({
+    address: ADDRESSES.ops,
+    name: 'Ops multisig',
+    chains: [gnosis],
+    addedBy: MEMBERS.jonas,
+    tags: tags('Internal'),
+  }),
   contact({ address: ADDRESSES.maya, name: 'Maya Chen (CFO)', chains: [ethereum, arbitrum, optimism, base] }),
   contact({ address: ADDRESSES.jonas, name: 'Jonas Weber', chains: [ethereum, gnosis], addedBy: MEMBERS.lena }),
-  contact({ address: ADDRESSES.northwind, name: 'Northwind Logistics', addedBy: MEMBERS.jonas }),
-  contact({ address: ADDRESSES.atlas, name: 'Atlas Audits', addedBy: undefined }),
+  contact({ address: ADDRESSES.northwind, name: 'Northwind Logistics', addedBy: MEMBERS.jonas, tags: tags('Vendor') }),
+  contact({ address: ADDRESSES.atlas, name: 'Atlas Audits', addedBy: undefined, tags: tags('Vendor') }),
   contact({
     address: ADDRESSES.lighthouse,
     name: 'Lighthouse Ventures Fund II strategic multisig (Series A lead)',
