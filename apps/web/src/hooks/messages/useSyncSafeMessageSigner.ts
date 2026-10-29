@@ -3,42 +3,72 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeSignerAddress from '@/hooks/wallets/useSafeSignerAddress'
 import { Errors, logError } from '@/services/exceptions'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { asError, getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { dispatchSafeMsgProposal, dispatchSafeMsgConfirmation } from '@/services/safe-messages/safeMsgSender'
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import useSafeInfo from '../useSafeInfo'
 import { getStoreInstance } from '@/store'
 import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
+import { backOff } from 'exponential-backoff'
 
 const HIDE_DELAY = 3000
 
-export const fetchSafeMessage = async (safeMessageHash: string, chainId: string): Promise<MessageItem | undefined> => {
-  let message: MessageItem | undefined
-  try {
-    // Use RTK Query endpoint to fetch message
-    const store = getStoreInstance()
-    const result = await store.dispatch(
-      cgwApi.endpoints.messagesGetMessageByHashV1.initiate(
-        { chainId, messageHash: safeMessageHash },
-        {
-          forceRefetch: true,
-        },
-      ),
-    )
+const queryMessage = async (safeMessageHash: string, chainId: string): Promise<MessageItem> => {
+  // Use RTK Query endpoint to fetch message
+  const store = getStoreInstance()
+  const result = await store.dispatch(
+    cgwApi.endpoints.messagesGetMessageByHashV1.initiate(
+      { chainId, messageHash: safeMessageHash },
+      {
+        forceRefetch: true,
+      },
+    ),
+  )
 
-    if ('data' in result && result.data) {
-      // Convert Message to MessageItem by adding the type field
-      message = { ...result.data, type: 'MESSAGE' as const }
-    } else {
-      throw 'error' in result ? asError(result.error) : new Error('Failed to fetch message')
-    }
+  if ('data' in result && result.data) {
+    // Convert Message to MessageItem by adding the type field
+    return { ...result.data, type: 'MESSAGE' as const }
+  }
+  throw 'error' in result ? asError(result.error) : new Error('Failed to fetch message')
+}
+
+export const fetchSafeMessage = async (safeMessageHash: string, chainId: string): Promise<MessageItem | undefined> => {
+  try {
+    return await queryMessage(safeMessageHash, chainId)
   } catch (err) {
     logError(Errors._613, err)
     throw err
   }
+}
 
-  return message
+// CGW can serve a cached 404 until the MESSAGE_CONFIRMATION event clears it (up to ~33 s)
+const fetchSignedSafeMessage = async (
+  safeMessageHash: string,
+  chainId: string,
+  isMounted: () => boolean,
+): Promise<MessageItem> => {
+  try {
+    return await backOff(() => queryMessage(safeMessageHash, chainId), {
+      startingDelay: 1000,
+      maxDelay: 5000,
+      numOfAttempts: 9,
+      retry: (err) => isMounted() && getHttpStatusFromError(err) === 404,
+    })
+  } catch (err) {
+    logError(Errors._613, err)
+    throw err
+  }
+}
+
+type SyncSafeMessageSignerOptions = {
+  message: MessageItem | undefined
+  decodedMessage: string | TypedData
+  safeMessageHash: string
+  requestId: string | undefined
+  origin: string | undefined
+  declared: DeclaredAttribution | undefined
+  onClose: () => void
 }
 
 const useSyncSafeMessageSigner = ({
@@ -49,19 +79,19 @@ const useSyncSafeMessageSigner = ({
   origin,
   declared,
   onClose,
-}: {
-  message: MessageItem | undefined
-  decodedMessage: string | TypedData
-  safeMessageHash: string
-  requestId: string | undefined
-  origin: string | undefined
-  declared: DeclaredAttribution | undefined
-  onClose: () => void
-}) => {
+}: SyncSafeMessageSignerOptions) => {
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const wallet = useWallet()
   const safeSignerAddress = useSafeSignerAddress()
   const { safe } = useSafeInfo()
+  const isMountedRef = useRef(false)
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // If the message gets updated in the messageSlice we dispatch it if the signature is complete
   useEffect(() => {
@@ -80,6 +110,11 @@ const useSyncSafeMessageSigner = ({
 
     setSubmitError(undefined)
 
+    const isMounted = () => isMountedRef.current
+    const closeIfMounted = () => {
+      if (isMounted()) onClose()
+    }
+
     try {
       // When collecting the first signature
       if (!message) {
@@ -93,11 +128,14 @@ const useSyncSafeMessageSigner = ({
         })
 
         // Fetch updated message
-        const updatedMsg = await fetchSafeMessage(safeMessageHash, safe.chainId)
+        const updatedMsg = await fetchSignedSafeMessage(safeMessageHash, safe.chainId, isMounted)
 
         // If threshold 1, we do not want to wait for polling
         if (safe.threshold === 1 && updatedMsg) {
-          setTimeout(() => dispatchPreparedSignature(updatedMsg, safeMessageHash, onClose, requestId), HIDE_DELAY)
+          setTimeout(
+            () => dispatchPreparedSignature(updatedMsg, safeMessageHash, closeIfMounted, requestId),
+            HIDE_DELAY,
+          )
         }
         return updatedMsg
       } else {
@@ -110,13 +148,16 @@ const useSyncSafeMessageSigner = ({
 
         // No requestID => we are in the confirm message dialog and do not need to leave the window open
         if (!requestId) {
-          onClose()
+          closeIfMounted()
           return
         }
 
-        const updatedMsg = await fetchSafeMessage(safeMessageHash, safe.chainId)
+        const updatedMsg = await fetchSignedSafeMessage(safeMessageHash, safe.chainId, isMounted)
         if (updatedMsg) {
-          setTimeout(() => dispatchPreparedSignature(updatedMsg, safeMessageHash, onClose, requestId), HIDE_DELAY)
+          setTimeout(
+            () => dispatchPreparedSignature(updatedMsg, safeMessageHash, closeIfMounted, requestId),
+            HIDE_DELAY,
+          )
         }
         return updatedMsg
       }
