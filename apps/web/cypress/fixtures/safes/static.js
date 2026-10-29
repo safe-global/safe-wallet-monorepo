@@ -39,7 +39,7 @@ export default {
   // Ethereum Safes
   /** Balances testing - Used in: Playwright token-lists.spec.ts */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
-  /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Used in: dashboard.cy.js. Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
+  /** Case #1 – Outdated official mastercopy (Info, "Update" CTA). Repro from requirements: app.safe.global/home?safe=eth:0x1230... */
   ETH_STATIC_SAFE_OUTDATED_MASTERCOPY: 'eth:0x1230B3d59858296A31053C1b8562Ecf89A2f888b',
 
   // More Sepolia Safes
@@ -87,7 +87,7 @@ export default {
   // More Polygon (Matic) Safes
   /** Available for general testing - Currently unused */
   MATIC_STATIC_SAFE_29: 'matic:0x5E9242FD52c4c4A60d874E8ff4Ba25657dd6e551',
-  /** Case #2 – Unsupported but migratable in-app (Warning, "Migrate" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0x0b26... */
+  /** Case #2 – Unsupported but migratable in-app (Warning, "Migrate" CTA). Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0x0b26... */
   MATIC_STATIC_SAFE_31: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
   /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
   MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',

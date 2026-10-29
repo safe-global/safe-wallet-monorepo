@@ -77,7 +77,7 @@ async function prepareUnofficialSingletonSafe(env, owners) {
   }
 }
 
-export async function prepareDashboardRegressionScenario(env, owners) {
+export async function prepareMastercopyScenario(env, owners) {
   return {
     safes: {
       static: {
