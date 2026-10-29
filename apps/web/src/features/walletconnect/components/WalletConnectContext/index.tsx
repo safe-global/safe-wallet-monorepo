@@ -14,6 +14,7 @@ import { wcPopupStore } from '../../store/wcPopupStore'
 import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useSafeAppSuggestion } from '../../hooks/useSafeAppSuggestion'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
 
@@ -47,6 +48,14 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   setLoading: () => {},
   approveSession: () => Promise.resolve(),
   rejectSession: () => Promise.resolve(),
+  safeAppSuggestion: {
+    status: 'off',
+    safeApp: undefined,
+    optOut: false,
+    setOptOut: () => {},
+    resolve: () => {},
+    decline: () => {},
+  },
 })
 
 export const WalletConnectProvider = ({ children }: { children: ReactNode }) => {
@@ -224,6 +233,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // --- Proposals
   //
   const [sessionProposal, setSessionProposal] = useState<WalletKitTypes.SessionProposal | null>(null)
+  const safeAppSuggestion = useSafeAppSuggestion(sessionProposal)
 
   const approveSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -268,14 +278,18 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setOpen(false)
   }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
 
-  // Auto approve previously approved non-malicious dApps
+  // Auto approve previously approved non-malicious dApps, unless the user gets to choose the Safe App instead
+  const suggestionStatus = safeAppSuggestion.status
+  const isSuggestionPending =
+    suggestionStatus === 'loading' || suggestionStatus === 'shown' || suggestionStatus === 'resolved'
   useEffect(() => {
+    if (isSuggestionPending) return
     if (sessionProposal && autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
       approveSession().catch((e) => {
         setError(e as Error)
       })
     }
-  }, [autoApprove, approveSession, sessionProposal, chainId])
+  }, [autoApprove, approveSession, sessionProposal, chainId, isSuggestionPending])
 
   const rejectSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -322,6 +336,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         sessionProposal,
         approveSession,
         rejectSession,
+        safeAppSuggestion,
       }}
     >
       {children}

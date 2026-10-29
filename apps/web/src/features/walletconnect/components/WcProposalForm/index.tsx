@@ -1,7 +1,7 @@
 import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import { WCLoadingState } from '../../types'
-import { getPeerName, getSupportedChainIds, isBlockedBridge, isWarnedBridge } from '../../services/utils'
-import { isSafePassApp } from '@/services/safe-apps/utils'
+import { getPeerName } from '../../services/utils'
+import { getProposalRisk } from '../../services/proposalRisk'
 import { WalletConnectContext } from '../WalletConnectContext'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -39,18 +39,15 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
   const { chainId } = safe
   const [understandsRisk, setUnderstandsRisk] = useState(false)
   const { proposer } = proposal.params
-  const { isScam, origin } = proposal.verifyContext.verified
-  const url = proposer.metadata.url || origin
+  const url = proposer.metadata.url || proposal.verifyContext.verified.origin
+  const name = getPeerName(proposer) || 'Unknown dApp'
 
-  const isSafePass = isSafePassApp(origin)
+  const { chainIds, isUnsupportedChain, isHighRisk, isBlocked, isSafePass } = useMemo(
+    () => getProposalRisk(proposal, configs, chainId),
+    [proposal, configs, chainId],
+  )
   const sanctionedAddress = useSanctionedAddress(isSafePass)
 
-  const chainIds = useMemo(() => getSupportedChainIds(configs, proposal.params), [configs, proposal.params])
-  const isUnsupportedChain = !chainIds.includes(chainId)
-
-  const name = getPeerName(proposer) || 'Unknown dApp'
-  const isHighRisk = proposal.verifyContext.verified.validation === 'INVALID' || isWarnedBridge(origin, name)
-  const isBlocked = isScam || isBlockedBridge(origin)
   const disabled =
     !safeLoaded ||
     isUnsupportedChain ||
