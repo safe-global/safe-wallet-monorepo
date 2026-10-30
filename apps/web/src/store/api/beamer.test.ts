@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
-import { useGetBeamerUpdatesQuery } from './beamer'
+import { parseBeamerUpdates, useGetBeamerUpdatesQuery } from './beamer'
 
 const NUMBER_FEATURES_URL = 'https://backend.getbeamer.com/numberFeatures'
 
@@ -47,5 +47,49 @@ describe('useGetBeamerUpdatesQuery', () => {
     const { result } = renderHook(() => useGetBeamerUpdatesQuery({ productId: 'product-id' }))
 
     await waitFor(() => expect(result.current.data).toEqual({ unreadCount: 0 }))
+  })
+})
+
+describe('parseBeamerUpdates', () => {
+  it('should, when the latest post is a top bar, return its id, category, text and link', () => {
+    const updates = parseBeamerUpdates({
+      number: 1,
+      lastPostId: 42,
+      lastPostBoostedAnnouncementType: 1,
+      lastPostCategory: 'Incident',
+      lastPostTitle: 'Some transactions are delayed.',
+      lastPostLinkText: 'Status page',
+      lastPostLinkUrl: 'https://status.safe.global/',
+    })
+
+    expect(updates.topBar).toEqual({
+      postId: 42,
+      title: 'Some transactions are delayed.',
+      category: 'Incident',
+      link: { text: 'Status page', url: 'https://status.safe.global/' },
+    })
+  })
+
+  it('should, when the top bar link is not https, return the top bar without a link', () => {
+    const updates = parseBeamerUpdates({
+      lastPostId: 42,
+      lastPostBoostedAnnouncementType: 1,
+      lastPostTitle: 'Some transactions are delayed.',
+      lastPostLinkText: 'Status page',
+      lastPostLinkUrl: 'javascript:alert(1)',
+    })
+
+    expect(updates.topBar).toEqual({ postId: 42, title: 'Some transactions are delayed.' })
+  })
+
+  it('should, when the latest post is a corner card, return no top bar', () => {
+    const updates = parseBeamerUpdates({
+      number: 0,
+      lastPostId: 282323458,
+      lastPostBoostedAnnouncementType: 3,
+      lastPostTitle: 'Safenet checks now available in Safe Pro',
+    })
+
+    expect(updates.topBar).toBeUndefined()
   })
 })

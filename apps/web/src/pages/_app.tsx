@@ -24,6 +24,7 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
@@ -205,6 +206,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           </PageLayout>
 
           <CookieAndTermBanner />
+
+          <WhatsNewTopBar />
 
           <TargetedOutreachPopupLoader />
 

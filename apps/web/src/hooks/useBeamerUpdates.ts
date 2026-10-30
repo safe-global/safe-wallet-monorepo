@@ -23,5 +23,5 @@ export const useBeamerUpdates = () => {
 
   const markAsSeen = useCallback(() => setLastSeen(new Date().toISOString()), [setLastSeen])
 
-  return { unreadCount: data?.unreadCount ?? 0, markAsSeen }
+  return { unreadCount: data?.unreadCount ?? 0, topBar: data?.topBar, markAsSeen }
 }

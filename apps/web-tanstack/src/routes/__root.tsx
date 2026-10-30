@@ -18,6 +18,7 @@ import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -113,6 +114,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <CookieAndTermBanner />
+      <WhatsNewTopBar />
       <TargetedOutreachPopupLoader />
       <Notifications />
       <RecoveryLoader />
