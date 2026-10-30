@@ -9,6 +9,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../mocks/policies'
+import { mockActiveAllowlist } from '../mocks/allowlistPolicies'
 import PoliciesList from '../PoliciesList'
 
 const mockResolveName = jest.fn()
@@ -119,6 +120,19 @@ describe('PoliciesList', () => {
     expect(screen.getByTestId('policies-filter-spending-limit')).toHaveAttribute('aria-pressed', 'false')
     expect(rules).toHaveLength(1)
     expect(rules[0]).toHaveTextContent('Proposer')
+  })
+
+  it('should, when the allowlist filter is picked, show only allowlists', async () => {
+    const { user } = renderWithUserEvent(<PoliciesList policies={[...mockPolicies(), mockActiveAllowlist()]} />)
+
+    await user.click(screen.getByTestId('policies-filter-allowlist'))
+
+    const rules = screen.getAllByTestId('policy-cell-rule')
+
+    expect(screen.getByTestId('policies-filter-allowlist')).toHaveTextContent('Allowlists')
+    expect(screen.getByTestId('policies-filter-allowlist')).toHaveAttribute('aria-pressed', 'true')
+    expect(rules).toHaveLength(1)
+    expect(rules[0]).toHaveTextContent('Allowlist')
   })
 
   it('should, when another type filter is picked, switch to that type', async () => {
