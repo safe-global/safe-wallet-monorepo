@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { ArrowRight, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Link } from '@safe-global/views/components/ui/link'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
@@ -13,13 +12,18 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import {
+  DismissAction,
+  FreeAccessEntryPoint,
+  MixpanelEventParams,
+  PlanLocation,
+} from '@/services/analytics/mixpanel-events'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { FeatureCheck } from './FeatureCheck'
-import { claimTiers } from './planTiers'
+import { PlanCard } from './PlanCard'
+import { _offersToTiers, claimTiers } from './planTiers'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
 import SelectAccountsStep from './SelectAccountsStep'
 import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -69,8 +73,6 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
       }
 }
 
-const GROUP_ICONS = { control: SlidersHorizontal, visibility: Eye, security: ShieldCheck } as const
-
 /** The Safes left out are removed from the Workspace, not from the user's accounts. */
 export default function ClaimTrialModal({
   spaceId,
@@ -92,6 +94,14 @@ export default function ClaimTrialModal({
   // The trial runs on the plan the CGW offers it on; the modal no longer shows which.
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN) ?? tiers[0]
   const option = tier?.options[0]
+  // The plans page's Business card without its price: what the trial includes, not what it would cost.
+  const cardTier = useMemo(
+    () =>
+      _offersToTiers(trialPlans).find(
+        (candidate) => candidate.name === tier?.name && candidate.billingCycle === 'month',
+      ),
+    [trialPlans, tier?.name],
+  )
   const seats = option?.seats ?? null
   const router = useRouter()
   const endsOn = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
@@ -150,31 +160,11 @@ export default function ClaimTrialModal({
                   <AlertDescription>{PRO_TRIAL_COPY.trialStart.unavailable}</AlertDescription>
                 </Alert>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-3" data-testid="trial-outcome-groups">
-                  {PRO_TRIAL_COPY.trialStart.groups.map((group) => {
-                    const Icon = GROUP_ICONS[group.id]
-                    return (
-                      <Card key={group.id} variant="muted-secondary" radius="lg-xl" size="sm">
-                        <CardContent>
-                          <div className="flex flex-col gap-3">
-                            <span className="flex items-center gap-2">
-                              <Icon aria-hidden className="size-4 shrink-0" />
-                              <Typography variant="paragraph-small-bold">{group.title}</Typography>
-                            </span>
-                            <ul className="flex flex-col gap-2">
-                              {group.items.map((item) => (
-                                <li key={item} className="flex items-start gap-2">
-                                  <FeatureCheck />
-                                  <Typography variant="paragraph-small">{item}</Typography>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
-                </div>
+                cardTier && (
+                  <div className="@container" data-testid="trial-plan-card">
+                    <PlanCard tier={cardTier} showPricing={false} readOnly location={PlanLocation.LOCKED_MODAL} />
+                  </div>
+                )
               )}
 
               <div className="flex flex-col items-center gap-0.5 text-center">

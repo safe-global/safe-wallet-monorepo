@@ -52,11 +52,6 @@ export const PRO_TRIAL_COPY = {
   trialStart: {
     title: 'Run your treasury like a team',
     migrated: "You've used Safe before, so your trial is 60 days instead of 30.",
-    groups: [
-      { id: 'control', title: 'Control', items: ['Policy engine', 'Transaction proposers'] },
-      { id: 'visibility', title: 'Visibility', items: ['Activity log', 'Shared address book'] },
-      { id: 'security', title: 'Security', items: ['Advanced threat analysis', 'Transaction simulation', 'MFA'] },
-    ],
     noCharge: 'No card. No charge. The trial ends on its own.',
     endsOn: (date: string) => `Trial ends ${date}.`,
     start: 'Start free trial',
