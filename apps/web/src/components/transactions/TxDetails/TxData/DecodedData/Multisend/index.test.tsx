@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor, within } from '@/tests/test-utils'
+import { render, renderWithUserEvent, waitFor, within } from '@/tests/test-utils'
 import Multisend from '.'
 import { Operation } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
@@ -54,45 +54,51 @@ describe('Multisend', () => {
     ;(multiSendDefaultsToSelf as jest.Mock).mockReturnValue(true)
   })
 
-  it('resolves a zero-address inner action to the Safe (MultiSend v1.5.0+ defaults `to` to address(this))', () => {
+  it('resolves a zero-address inner action to the Safe (MultiSend v1.5.0+ defaults `to` to address(this))', async () => {
     const moduleAddress = faker.finance.ethereumAddress()
-    const result = render(<Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />)
+    const result = renderWithUserEvent(
+      <Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />,
+    )
 
-    fireEvent.click(result.getByTestId('expande-all-btn'))
+    await result.user.click(result.getByTestId('expande-all-btn'))
 
     // The action is shown as targeting the Safe, not a bare call to the zero address
     expect(result.getByText('This Safe account')).toBeInTheDocument()
     expect(result.queryByText('0x0000...0000')).not.toBeInTheDocument()
   })
 
-  it('leaves a non-zero inner action target unchanged', () => {
+  it('leaves a non-zero inner action target unchanged', async () => {
     const contract = faker.finance.ethereumAddress()
     const moduleAddress = faker.finance.ethereumAddress()
-    const result = render(<Multisend txData={buildMultisendTxData([{ to: contract, module: moduleAddress }])} />)
+    const result = renderWithUserEvent(
+      <Multisend txData={buildMultisendTxData([{ to: contract, module: moduleAddress }])} />,
+    )
 
-    fireEvent.click(result.getByTestId('expande-all-btn'))
+    await result.user.click(result.getByTestId('expande-all-btn'))
 
     // A real target is not rewritten to the Safe
     expect(result.queryByText('This Safe account')).not.toBeInTheDocument()
   })
 
-  it('does NOT resolve the zero address for a pre-1.5.0 MultiSend (keeps the raw zero address)', () => {
+  it('does NOT resolve the zero address for a pre-1.5.0 MultiSend (keeps the raw zero address)', async () => {
     // Older MultiSend versions call the zero address as-is — no zero->Safe default
     ;(multiSendDefaultsToSelf as jest.Mock).mockReturnValue(false)
     const moduleAddress = faker.finance.ethereumAddress()
-    const result = render(<Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />)
+    const result = renderWithUserEvent(
+      <Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />,
+    )
 
-    fireEvent.click(result.getByTestId('expande-all-btn'))
+    await result.user.click(result.getByTestId('expande-all-btn'))
 
     expect(result.getByText('0x0000...0000')).toBeInTheDocument()
     expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
   })
 
-  it('renders every action of a batch that uses every ABI type', () => {
+  it('renders every action of a batch that uses every ABI type', async () => {
     const actions = basicTypesActions()
-    const result = render(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
+    const result = renderWithUserEvent(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
 
-    fireEvent.click(result.getByTestId('expande-all-btn'))
+    await result.user.click(result.getByTestId('expande-all-btn'))
 
     const items = result.getAllByTestId('action-item')
     expect(items).toHaveLength(actions.length)
@@ -108,17 +114,17 @@ describe('Multisend', () => {
     await waitFor(() => expect(getByTestId('all-actions')).toHaveTextContent('All actions'))
   })
 
-  it('expands every action with "Expand all" and collapses them with "Collapse all"', () => {
+  it('expands every action with "Expand all" and collapses them with "Collapse all"', async () => {
     const actions = basicTypesActions()
-    const result = render(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
+    const result = renderWithUserEvent(<Multisend txData={multiSendTxDataBuilder(actions).build()} />)
     const expandedStates = () => result.getAllByTestId('action-item').map((item) => item.getAttribute('aria-expanded'))
 
     expect(expandedStates()).toEqual(actions.map(() => 'false'))
 
-    fireEvent.click(result.getByRole('button', { name: 'Expand all' }))
+    await result.user.click(result.getByRole('button', { name: 'Expand all' }))
     expect(expandedStates()).toEqual(actions.map(() => 'true'))
 
-    fireEvent.click(result.getByRole('button', { name: 'Collapse all' }))
+    await result.user.click(result.getByRole('button', { name: 'Collapse all' }))
     expect(expandedStates()).toEqual(actions.map(() => 'false'))
   })
 
@@ -145,18 +151,18 @@ describe('Multisend', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('resolves a zero-address inner action to the executing Safe when overridden (nested Safe)', () => {
+  it('resolves a zero-address inner action to the executing Safe when overridden (nested Safe)', async () => {
     // Nested Safe: the batch executes in a different Safe than the connected one
     const nestedSafe = faker.finance.ethereumAddress()
     const moduleAddress = faker.finance.ethereumAddress()
-    const result = render(
+    const result = renderWithUserEvent(
       <Multisend
         txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])}
         executingSafeAddress={nestedSafe}
       />,
     )
 
-    fireEvent.click(result.getByTestId('expande-all-btn'))
+    await result.user.click(result.getByTestId('expande-all-btn'))
 
     // Resolves to the nested Safe, not the connected one ("This Safe account" is the connected Safe)
     expect(result.queryByText('This Safe account')).not.toBeInTheDocument()

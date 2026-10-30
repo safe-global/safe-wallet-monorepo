@@ -1,5 +1,5 @@
 import { render } from '@/tests/test-utils'
-import { screen, within, fireEvent, waitFor } from '@testing-library/react'
+import { act, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import TxSigners from './index'
 import {
   transactionDetailsBuilder,
@@ -13,6 +13,7 @@ import { mockSafeInfo, mockWallet, mockCurrentChain } from '@/tests/mocks/hooks'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/wallets/useWallet')
@@ -24,6 +25,13 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/hooks/useIsPending', () => jest.fn(() => false))
 jest.mock('@/hooks/useTransactionStatus', () => jest.fn(() => 'Awaiting confirmations'))
 jest.mock('@/hooks/useAddressBook', () => jest.fn(() => ({})))
+
+jest.mock('@safe-global/utils/hooks/useAsync', () => ({
+  __esModule: true,
+  ...jest.requireActual('@safe-global/utils/hooks/useAsync'),
+  default: jest.fn(),
+}))
+const actualUseAsync: typeof useAsync = jest.requireActual('@safe-global/utils/hooks/useAsync').default
 
 const mockGetTransaction = jest.fn()
 jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
@@ -67,6 +75,7 @@ describe('TxSigners (Audit Log)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockGetTransaction.mockReset()
+    jest.mocked(useAsync).mockReturnValue([undefined, undefined, false])
     mockSafeInfo({ threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
     mockWallet({ address: ownerAddress })
     mockCurrentChain()
@@ -529,7 +538,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
   })
 
-  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', () => {
+  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -558,8 +567,9 @@ describe('TxSigners (Audit Log)', () => {
 
       const trigger = button.closest<HTMLElement>('[data-slot="tooltip-trigger"]')
       expect(trigger).not.toBe(button)
-      trigger?.focus()
+      act(() => trigger?.focus())
       expect(trigger).toHaveFocus()
+      expect(await screen.findByText('Available after execution')).toBeInTheDocument()
     }
   })
 
@@ -635,6 +645,7 @@ describe('TxSigners (Audit Log)', () => {
     it('renders Created and Executed rows with initiator from on-chain lookup', async () => {
       const initiatorAddr = checksumAddress(faker.finance.ethereumAddress())
       mockGetTransaction.mockResolvedValue({ from: initiatorAddr })
+      jest.mocked(useAsync).mockImplementation(actualUseAsync)
 
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
@@ -653,6 +664,7 @@ describe('TxSigners (Audit Log)', () => {
 
     it('shows dash for Created row when RPC lookup has not resolved', () => {
       mockGetTransaction.mockReturnValue(new Promise(() => {})) // never resolves
+      jest.mocked(useAsync).mockImplementation(actualUseAsync)
 
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()

@@ -1,5 +1,5 @@
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { basicTypesActions, multiSendTxDataBuilder, multiSendTxInfo } from '@/tests/builders/dataDecoded'
 import * as DecodedDataModule from '@/components/transactions/TxDetails/TxData/DecodedData'
 import ConfirmationView from '.'
@@ -19,29 +19,29 @@ describe('ConfirmationView with decoded data', () => {
     jest.restoreAllMocks()
   })
 
-  it('renders every action of a batch that uses every ABI type', () => {
+  it('renders every action of a batch that uses every ABI type', async () => {
     const actions = basicTypesActions()
-    render(<ConfirmationView txPreview={batchPreview(actions)} />)
+    const { user } = renderWithUserEvent(<ConfirmationView txPreview={batchPreview(actions)} />)
 
-    fireEvent.click(screen.getByTestId('expande-all-btn'))
+    await user.click(screen.getByTestId('expande-all-btn'))
 
     expect(screen.getAllByTestId('action-item')).toHaveLength(actions.length)
     expect(screen.queryByText('Error parsing data')).not.toBeInTheDocument()
   })
 
-  it('keeps the rest of the review when the decoded data cannot be rendered', () => {
+  it('keeps the rest of the review when the decoded data cannot be rendered', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
     jest.spyOn(DecodedDataModule, 'default').mockImplementation(() => {
       throw new Error('Cannot render decoded value')
     })
     const actions = basicTypesActions().slice(0, 2)
-    render(
+    const { user } = renderWithUserEvent(
       <ConfirmationView txPreview={batchPreview(actions)}>
         <div>Review footer</div>
       </ConfirmationView>,
     )
 
-    fireEvent.click(screen.getByTestId('expande-all-btn'))
+    await user.click(screen.getByTestId('expande-all-btn'))
 
     expect(screen.getAllByText('Error parsing data')).toHaveLength(actions.length)
     expect(screen.getAllByTestId('action-item')).toHaveLength(actions.length)

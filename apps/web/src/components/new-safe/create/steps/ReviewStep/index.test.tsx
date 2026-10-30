@@ -23,6 +23,13 @@ import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spa
 import { getStoreInstance } from '@/store'
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
+jest.mock('@/features/multichain', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/multichain'),
+  NetworkLogosList: jest.requireActual('@/features/multichain/components/NetworkLogosList').default,
+}))
+jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
+jest.mock('@/hooks/useWalletCanPay', () => ({ __esModule: true, default: jest.fn(() => true) }))
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(),
