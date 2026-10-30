@@ -103,7 +103,7 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.option.label === current.seatsLabel
 
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
-  if (pick.tier.salesLed && !pick.tier.isCurrent) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
+  if (isSalesLedOption(pick.option) && !pick.tier.isCurrent) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
   if (pick.tier.isCurrent) {
     const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
     if (pick.tier.name === ENTERPRISE_TIER.name && !isAwaitingPaymentMethod) {
@@ -123,7 +123,8 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
     }
   }
   if (!pick.option.paymentLinkId) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
-  if (!current) return { kind: 'subscribe', label: PRO_TRIAL_COPY.upgradeTo(pick.tier.name) }
+  const planName = PRO_TRIAL_COPY.planName(pick.tier.name, pick.tier.options.length > 1 ? pick.option.seats : undefined)
+  if (!current) return { kind: 'subscribe', label: PRO_TRIAL_COPY.upgradeTo(planName) }
 
   const direction = getChangeDirection(current, pick)
   if (isCycleSwitch(pick, current)) {
@@ -134,7 +135,7 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
     }
   }
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
-  const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
+  const target = current.isTrialing ? planName : pick.tier.name === current.name ? pick.option.label : pick.tier.name
   // A trial is not a plan the user picked, so every move off it is an upgrade to the named plan.
   const isUpgrade = direction === 'upgrade' || current.isTrialing
   return {
@@ -253,11 +254,13 @@ export const buildPlanTiers = (
 }
 
 export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
-  const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
+  // A trial's size is ours, not the user's pick, so the card opens on the size that fits instead.
+  const isCurrentPlan = tier.isCurrent || (currentPlan?.name === tier.name && !currentPlan.isTrialing)
   return (
     tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options.find((candidate) => isCurrentPlan && candidate.label === currentPlan?.seatsLabel) ??
+    tier.options.find((candidate) => candidate.seats === tier.recommendedSeats) ??
     tier.options[0]
   )
 }
@@ -289,7 +292,7 @@ export const getPlanPrice = (tier: PlanTier, option: PlanSeatOption): { headline
   }
   const price = formatPlanPrice(option.price, tier.currency)
   return {
-    headline: tier.salesLed ? PRO_TRIAL_COPY.fromPrice(price) : price,
+    headline: isSalesLedOption(option) ? PRO_TRIAL_COPY.fromPrice(price) : price,
     suffix: priceSuffix(tier.billingCycle),
   }
 }
@@ -317,31 +320,17 @@ export const getCardSaving = (
   return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
 }
 
-/** One card per seat size, named by it ("Business 10"), so no plan hides behind a dropdown. */
-export const splitSeatSizes = (tiers: PlanTier[]): PlanTier[] =>
-  tiers.flatMap((tier) =>
-    tier.options.length < 2
-      ? [tier]
-      : tier.options.map((option) => ({
-          ...tier,
-          id: `${tier.id}-${option.seats ?? option.label}`,
-          name: PRO_TRIAL_COPY.planName(tier.name, option.seats),
-          options: [option],
-          features: option.features?.length ? option.features : tier.features,
-          isCurrent: tier.isCurrent && option.priceId === tier.currentPriceId,
-        })),
-  )
+/** A seat size above the self-serve threshold: "from" pricing and a sales conversation instead of checkout. */
+export const isSalesLedOption = (option: Pick<PlanSeatOption, 'paymentLinkId' | 'seats'>): boolean =>
+  option.paymentLinkId !== null && option.seats != null && isSalesLed(option.seats)
 
-/** Marks the right-sized plan for `safeCount` Safes, and the sizes that go to sales. */
+/** Opens the multi-size card on the size that fits `safeCount` Safes and marks it recommended. */
 export const withRecommendation = (tiers: PlanTier[], safeCount: number | undefined): PlanTier[] => {
-  const recommended =
-    safeCount === undefined ? undefined : PRO_TRIAL_COPY.planName('Business', recommendSeats(safeCount))
-  return tiers.map((tier) => {
-    const seats = tier.options.length === 1 ? tier.options[0].seats : undefined
-    return {
-      ...tier,
-      isRecommended: tier.name === recommended,
-      salesLed: seats !== undefined && tier.options[0].paymentLinkId !== null && isSalesLed(seats ?? null),
-    }
-  })
+  if (safeCount === undefined) return tiers
+  const seats = recommendSeats(safeCount)
+  return tiers.map((tier) =>
+    tier.options.some((option) => option.seats === seats)
+      ? { ...tier, isRecommended: true, recommendedSeats: seats }
+      : tier,
+  )
 }

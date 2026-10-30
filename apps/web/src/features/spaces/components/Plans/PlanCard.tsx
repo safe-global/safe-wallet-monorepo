@@ -5,8 +5,8 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Link } from '@safe-global/views/components/ui/link'
 import { List, ListItem } from '@safe-global/views/components/ui/list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import Track from '@/components/common/Track'
@@ -23,7 +23,15 @@ import type {
 } from '@safe-global/views/features/spaces/components/Plans/types'
 import { FeatureCheck } from './FeatureCheck'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
-import { getCardSaving, getPlanCta, getPlanPrice, pickProps, pickSeatOption, plansClickParams } from './planTiers'
+import {
+  getCardSaving,
+  getPlanCta,
+  getPlanPrice,
+  isSalesLedOption,
+  pickProps,
+  pickSeatOption,
+  plansClickParams,
+} from './planTiers'
 
 const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
   billing: PlanCtaKind.ADD_PAYMENT_METHOD,
@@ -39,6 +47,7 @@ const SUPPORT_HIGHLIGHT_CLASSES = [
 
 const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
+/** Every size in view, so the price visibly follows the pick; a single size is just stated. */
 const Seats = ({
   options,
   value,
@@ -51,25 +60,26 @@ const Seats = ({
   label?: string
 }) =>
   options.length > 1 ? (
-    <Select
-      value={optionKey(value)}
-      onValueChange={(key) => {
-        const next = options.find((option) => optionKey(option) === key)
-        if (next) onChange(next)
-      }}
-    >
-      <SelectTrigger className="w-full" aria-label={label}>
-        {/* The closed trigger would otherwise print the raw value, the price id. */}
-        <SelectValue>{value.label}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={optionKey(option)} value={optionKey(option)}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="flex flex-col gap-1.5">
+      <Typography variant="paragraph-small" color="muted">
+        {PRO_TRIAL_COPY.seatsLabel}
+      </Typography>
+      <Tabs
+        value={optionKey(value)}
+        onValueChange={(key) => {
+          const next = options.find((option) => optionKey(option) === key)
+          if (next) onChange(next)
+        }}
+      >
+        <TabsList aria-label={label} className="w-full" data-testid="plan-seats-switch">
+          {options.map((option) => (
+            <TabsTrigger key={optionKey(option)} value={optionKey(option)} aria-label={option.label}>
+              {option.seats ?? option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    </div>
   ) : (
     <Input readOnly value={value.label} aria-label={label} />
   )
@@ -280,7 +290,7 @@ export const PlanCard = ({
               {!actions.readOnly && (
                 <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
                   <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                  {isPrimary && !tier.salesLed && (
+                  {isPrimary && !isSalesLedOption(option) && (
                     <SalesCta
                       label={PRO_TRIAL_COPY.talkToUs}
                       kind="sales"

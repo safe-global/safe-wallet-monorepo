@@ -13,7 +13,7 @@ import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpane
 import AuthState from '../AuthState'
 import Plans from './index'
 import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, pickSeatOption, splitSeatSizes, toCurrentPlan, withRecommendation } from './planTiers'
+import { buildPlanTiers, pickSeatOption, toCurrentPlan, withRecommendation } from './planTiers'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
 import { useSpaceSafeCount } from '../../hooks/useIsCurrentSpaceAtSafeLimit'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -67,11 +67,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const tiers = useMemo(
     () =>
       withRecommendation(
-        splitSeatSizes(
-          buildPlanTiers(
-            paidPlans,
-            currentPlan && subscription && !isTrialing ? { subscription, seatsQuota: seats?.quota } : undefined,
-          ),
+        buildPlanTiers(
+          paidPlans,
+          currentPlan && subscription && !isTrialing ? { subscription, seatsQuota: seats?.quota } : undefined,
         ),
         safeCount,
       ),
