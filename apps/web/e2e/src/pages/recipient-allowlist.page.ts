@@ -41,7 +41,7 @@ export class RecipientAllowlistPage {
     this.disabledPanelAction = this.panel.getByRole('button', { disabled: true })
   }
 
-  /** Starts the setup from the catalogue tile; a fresh browser sees the intro dialog first */
+  /** Starts the setup from the catalogue tile, through the intro that opens before every setup */
   async startFromCatalogue(): Promise<void> {
     await this.setPolicyButton.click()
     await this.proceedFromIntro()

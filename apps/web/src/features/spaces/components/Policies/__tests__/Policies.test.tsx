@@ -398,16 +398,15 @@ describe('Policies', () => {
       expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
     })
 
-    it('opens the flow directly once the intro has been seen', async () => {
+    it('should open the intro again, when it has been seen, so the owner confirms every setup', async () => {
       mockIsAllowlistActive = true
       mockHasSeenAllowlistIntro = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
 
-      expect(setTxFlow).toHaveBeenCalledTimes(1)
-      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: RecipientAllowlistFlow })
-      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
+      expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
     })
   })
 
