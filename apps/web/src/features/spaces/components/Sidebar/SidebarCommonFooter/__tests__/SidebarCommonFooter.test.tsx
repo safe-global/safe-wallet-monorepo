@@ -199,6 +199,12 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: mockPathname }),
 }))
 
+let mockUnreadCount = 0
+const mockMarkAsSeen = jest.fn()
+jest.mock('@/hooks/useBeamerUpdates', () => ({
+  useBeamerUpdates: () => ({ unreadCount: mockUnreadCount, markAsSeen: mockMarkAsSeen }),
+}))
+
 jest.mock('../../WhatsNewDrawer', () => ({
   WhatsNewDrawer: ({ productId, open }: { productId: string; open: boolean }) =>
     open ? <div data-testid="whats-new-drawer" data-product-id={productId} /> : null,
@@ -209,6 +215,7 @@ describe('SidebarCommonFooter', () => {
     jest.clearAllMocks()
     isProductionMock = true
     mockHasBeamerConsent = true
+    mockUnreadCount = 0
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProAnnouncementEnabled = false
@@ -483,6 +490,35 @@ describe('SidebarCommonFooter', () => {
     fireEvent.click(screen.getByTestId('list-item-whats-new'))
 
     expect(screen.getByTestId('whats-new-drawer')).toHaveAttribute('data-product-id', 'beamer-product-id')
+  })
+
+  it("should, when Beamer reports unread posts, show their number on the What's new button", () => {
+    mockUnreadCount = 6
+    render(<SidebarCommonFooter />)
+
+    expect(screen.getByTestId('list-item-whats-new')).toContainElement(screen.getByTestId('whats-new-unread-count'))
+    expect(screen.getByTestId('whats-new-unread-count')).toHaveTextContent('6')
+  })
+
+  it("should, when there are no unread posts, show no number on the What's new button", () => {
+    render(<SidebarCommonFooter />)
+
+    expect(screen.queryByTestId('whats-new-unread-count')).not.toBeInTheDocument()
+  })
+
+  it("should, when the user opens What's new, mark the posts as seen", () => {
+    render(<SidebarCommonFooter />)
+    fireEvent.click(screen.getByTestId('list-item-whats-new'))
+
+    expect(mockMarkAsSeen).toHaveBeenCalledTimes(1)
+  })
+
+  it("should, when What's new is clicked without updates consent, leave the posts unseen", () => {
+    mockHasBeamerConsent = false
+    render(<SidebarCommonFooter />)
+    fireEvent.click(screen.getByTestId('list-item-whats-new'))
+
+    expect(mockMarkAsSeen).not.toHaveBeenCalled()
   })
 
   it('renders footer and help entry', () => {

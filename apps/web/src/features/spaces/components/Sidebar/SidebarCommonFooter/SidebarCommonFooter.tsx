@@ -13,6 +13,7 @@ import { BEAMER_ID, IS_PRODUCTION } from '@/config/constants'
 import { OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import Track from '@/components/common/Track'
 import { Switch } from '@safe-global/views/components/ui/switch'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -40,6 +41,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { reloadPage } from '@/utils/navigation'
+import { useBeamerUpdates } from '@/hooks/useBeamerUpdates'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -48,6 +50,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
   const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false)
+  const { unreadCount, markAsSeen } = useBeamerUpdates()
   const { SafeProSidebarBanner, $isReady: isSafeProLoaded, $error: safeProError } = useLoadFeature(SafeProFeature)
   const {
     WorkspaceTwoFactorAwarenessCard,
@@ -99,7 +102,8 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       return
     }
     setIsWhatsNewOpen(true)
-  }, [dispatch, hasBeamerConsent])
+    markAsSeen()
+  }, [dispatch, hasBeamerConsent, markAsSeen])
 
   const handleWhatsNewClose = useCallback(() => {
     setIsWhatsNewOpen(false)
@@ -192,7 +196,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
                     data-testid="list-item-whats-new"
                     aria-label="What's new"
                     className={cn(
-                      'h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
+                      'relative h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
                       '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.25]',
                       css.sidebarInteractive,
                     )}
@@ -201,6 +205,16 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
                 }
               >
                 <Sparkles aria-hidden strokeWidth={1.25} />
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="brand"
+                    size="sm"
+                    className="absolute -top-1 -right-1"
+                    data-testid="whats-new-unread-count"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
               </TooltipTrigger>
               <TooltipContent side="top">What&apos;s new</TooltipContent>
             </Tooltip>
