@@ -69,7 +69,7 @@ describe('SignTxButton', () => {
     expect(getConfirmButton()).toBeEnabled()
   })
 
-  it('keeps its usual size unless the dense row size is asked for', () => {
+  it('keeps its usual size and label unless the dense Space queue row is asked for', () => {
     const wallet = mockRole('owner')
     const tx = txAwaitingSignatureFrom(wallet?.address ?? '')
 
@@ -79,7 +79,8 @@ describe('SignTxButton', () => {
 
     rerender(<SignTxButton txSummary={tx} compact dense />)
 
-    expect(getConfirmButton()).toHaveClass('h-6', 'w-20')
+    expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign' })).toHaveClass('h-6', 'w-20')
   })
 
   it('should be disabled for a proposer who is not a missing signer', () => {
