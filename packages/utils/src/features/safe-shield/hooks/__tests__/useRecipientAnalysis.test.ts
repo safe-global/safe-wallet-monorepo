@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
-import { getAddress } from 'ethers'
+import { getAddress, type JsonRpcProvider } from 'ethers'
 import { useRecipientAnalysis } from '../useRecipientAnalysis'
 import { useFetchRecipientAnalysis } from '../useFetchRecipientAnalysis'
 import {
@@ -11,6 +11,7 @@ import { useAddressActivity, type AddressActivityResult } from '../address-analy
 import { useMemo } from 'react'
 import { StatusGroup } from '../../types'
 import { RecipientAnalysisResultBuilder } from '../../builders'
+import { ErrorType, getErrorInfo } from '../../utils/errors'
 
 // Mock dependencies
 jest.mock('../useFetchRecipientAnalysis')
@@ -273,6 +274,54 @@ describe('useRecipientAnalysis', () => {
         [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
       })
     }
+  })
+
+  it('should keep the backend findings and report a failed activity lookup on its address', async () => {
+    const { useAddressActivity: actualUseAddressActivity } = jest.requireActual<{
+      useAddressActivity: typeof useAddressActivity
+    }>('../address-analysis/address-activity/useAddressActivity')
+    mockUseAddressActivity.mockImplementation(actualUseAddressActivity)
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+    const web3ReadOnly = {
+      getTransactionCount: jest.fn().mockRejectedValue(new Error('RPC error')),
+    } as unknown as JsonRpcProvider
+
+    const backendResults = {
+      [mockAddress1]: { [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()] },
+    }
+    mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+    const { result } = renderHook(() => {
+      const recipients = useMemo(() => [mockAddress1], [])
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+        web3ReadOnly,
+      })
+    })
+
+    await waitFor(() => {
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
+    })
+
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [results, error] = result.current
+      expect(error).toBeUndefined()
+      expect(results![getAddress(mockAddress1)]).toEqual({
+        [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
+        [StatusGroup.RECIPIENT_ACTIVITY]: [getErrorInfo(ErrorType.RECIPIENT)],
+      })
+    }
+
+    consoleErrorSpy.mockRestore()
   })
 
   it('should merge all three types of checks', async () => {
