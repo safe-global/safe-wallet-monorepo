@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { runInLocalService } from './scenarios/local-service.mjs'
 import { registerContract } from './scenarios/contracts.mjs'
-import { ensFixtureFiles, setEnsName } from './scenarios/ens.mjs'
+import { setEnsName } from './scenarios/ens.mjs'
 import { localAddress } from './scenarios/staging.mjs'
 
 test('metadata commands reject unrelated projects and services before accessing Docker', async () => {
@@ -35,16 +35,6 @@ test('ENS setup requires a .eth name and a valid address before accessing the fo
   ]) {
     await assert.rejects(setEnsName({}, name, value), /\.eth name and an address/)
   }
-})
-
-test('the ENS fixture answers the mocked resolver call with the scenario address', async () => {
-  const address = '0x00000000000000000000000000000000000000ab'
-  const files = await ensFixtureFiles(address)
-  assert.equal(
-    files['ens_e2etestsafe.json']['0x8fade66b79cc9f707ab26799354482eb93a5b7dd'],
-    `0x${'0'.repeat(24)}${address.slice(2)}`,
-  )
-  await assert.rejects(ensFixtureFiles('invalid'), /requires an address/)
 })
 
 test('staging wallets that sign in tests map to generated owners and other addresses stay unchanged', () => {

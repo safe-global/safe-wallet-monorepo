@@ -4,15 +4,12 @@ import { readFile, rm } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { requiredChains, selectCypressSpecs } from './cypress.mjs'
 import { assertProjectName, chainProfiles, localUrl } from './local-stack.mjs'
 import { playwrightSpecs } from './playwright-specs.mjs'
-import { isolatedSpecs } from './specs.mjs'
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const cypressArtifacts = 'e2e/environment/artifacts/cypress'
 const playwrightArtifacts = 'e2e/environment/artifacts/playwright'
-const walletActions = ['dev', 'build', 'cypress', 'cypress-open', 'playwright']
+const walletActions = ['dev', 'build', 'playwright']
 const actions = new Set(['up', 'down', 'reset', 'status', 'logs', 'config', 'test', 'smoke', 'indexing', 'check'])
 for (const action of [...walletActions, 'plan']) actions.add(action)
 
@@ -120,7 +117,9 @@ async function assertForkReady(fork) {
   }
 }
 
-export function missingChainCommands(specs, manifest, infrastructure, registry = isolatedSpecs) {
+const requiredChains = (selected, registry) => [...new Set(selected.flatMap((spec) => registry[spec]?.chains ?? []))]
+
+export function missingChainCommands(specs, manifest, infrastructure, registry = playwrightSpecs) {
   return requiredChains(specs, registry)
     .filter((chainId) => !manifest.chains?.[chainId])
     .map((chainId) => `python3 ${infrastructure}/scripts/test_env.py up --chain ${chainProfiles[chainId]}`)
@@ -142,44 +141,6 @@ export function planMatrix(shardCount, env = process.env, registry = playwrightS
 
 const webUrl = (env) => env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`
 
-const cypressConfig = (env, extra) =>
-  JSON.stringify({
-    baseUrl: webUrl(env),
-    retries: 0,
-    video: true,
-    trashAssetsBeforeRuns: false,
-    videosFolder: `${cypressArtifacts}/videos`,
-    ...extra,
-  })
-
-export function cypressRunArguments(specs, env = process.env) {
-  return [
-    'cypress:run',
-    '--browser',
-    env.SAFE_E2E_BROWSER || 'chrome',
-    '--config',
-    cypressConfig(env, {}),
-    '--spec',
-    specs.join(','),
-    '--record',
-    'false',
-    '--reporter',
-    'junit',
-    '--reporter-options',
-    `mochaFile=${cypressArtifacts}/reports/[hash].xml,toConsole=true`,
-  ]
-}
-
-export function cypressOpenArguments(specs, env = process.env) {
-  return [
-    'cypress:open',
-    '--browser',
-    env.SAFE_E2E_BROWSER || 'chrome',
-    '--config',
-    cypressConfig(env, { specPattern: specs }),
-  ]
-}
-
 const playwrightFilters = (env) => (env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : [])
 
 /**
@@ -197,7 +158,7 @@ export function selectPlaywrightSpecs(env = process.env, registry = playwrightSp
   return Object.keys(registry).filter((spec) => !filters.length || filters.some((filter) => filter.test(spec)))
 }
 
-/** What both runners pass to their specs: the wallet environment plus the stack's service URLs. */
+/** What the Playwright run passes to its specs: the wallet environment plus the stack's service URLs. */
 export function stackEnvironment(project, manifest, walletEnv) {
   return {
     ...walletEnv,
@@ -275,24 +236,8 @@ function stackRunner(config, runner) {
   }
 }
 
-async function runCypress(config, runner, manifest, walletEnv) {
-  const specs = selectCypressSpecs(process.env.SAFE_E2E_SPECS)
-  const missing = missingChainCommands(specs, manifest, config.infrastructure)
-  if (missing.length) {
-    throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
-  }
-  const env = stackEnvironment(config.project, manifest, walletEnv)
-  if (config.action === 'cypress-open') {
-    await runner.execute('yarn', cypressOpenArguments(specs, env), { env })
-    return
-  }
-  await rm(resolve(webRoot, cypressArtifacts), { recursive: true, force: true })
-  // One process for the whole shard: Cypress starts once, and browser memory management clears between specs.
-  await runner.execute('yarn', cypressRunArguments(specs, env), { env })
-}
-
 async function runPlaywright(config, runner, manifest, walletEnv) {
-  const missing = missingChainCommands(selectPlaywrightSpecs(), manifest, config.infrastructure, playwrightSpecs)
+  const missing = missingChainCommands(selectPlaywrightSpecs(), manifest, config.infrastructure)
   if (missing.length) {
     throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
   }
@@ -305,8 +250,7 @@ async function runWalletAction(config, runner) {
   const manifest = await readManifest(config.infrastructure, config.project)
   const env = { ...walletEnvironment(manifest), PORT: process.env.SAFE_E2E_WEB_PORT || '3080' }
   await assertEnvironmentReady(manifest)
-  if (config.action.startsWith('cypress')) await runCypress(config, runner, manifest, env)
-  else if (config.action === 'playwright') await runPlaywright(config, runner, manifest, env)
+  if (config.action === 'playwright') await runPlaywright(config, runner, manifest, env)
   else await runner.execute('yarn', [config.action], { env })
 }
 

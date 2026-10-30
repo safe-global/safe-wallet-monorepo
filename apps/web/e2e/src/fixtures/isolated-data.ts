@@ -1,7 +1,7 @@
 /**
  * Test data for runs against the isolated backend (`yarn e2e:env playwright`). The registry in
- * e2e/environment/playwright-specs.mjs names each spec's scenarios; they run once per spec file and worker,
- * like the isolated Cypress specs, and replace the staging Safes and wallets.
+ * e2e/environment/playwright-specs.mjs names each spec's scenarios; they run once per spec file and worker
+ * and replace the staging Safes and wallets.
  */
 import { relative, sep } from 'node:path'
 import type { TestInfo } from '@playwright/test'
@@ -54,10 +54,10 @@ function mappedSafes(spec: string, entry: SpecEntry, available: Record<string, s
 async function prepare(spec: string): Promise<SpecData> {
   const entry = registry[spec]
   if (!entry) throw new Error(`${spec} is not registered in e2e/environment/playwright-specs.mjs`)
-  const { cypressEnvironment } = await import('../../environment/cypress.mjs')
+  const { isolatedEnvironment } = await import('../../environment/isolated-environment.mjs')
   const { createOwners } = await import('../../environment/scenarios/safe.mjs')
   const { scenarios } = await import('../../environment/scenarios/index.mjs')
-  const env = cypressEnvironment(process.env)
+  const env = isolatedEnvironment(process.env)
   const owners = createOwners()
   const available: Record<string, string> = {}
   // Sequential: the scenarios share OWNER_4 as the sender.

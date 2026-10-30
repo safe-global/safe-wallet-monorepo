@@ -26,7 +26,7 @@ CI=true yarn pw:ci        # Smoke tests with retries, JUnit output
 
 ### Isolated mode (local backend)
 
-The same specs also run against the local Docker stack (CGW, Transaction Service, Config Service and an Anvil Sepolia fork) with generated Safes and wallets: `yarn e2e:env playwright`. Read Safes from the `safes` fixture and wallets from the `credentials` fixture, never from `SAFES` directly, so both modes work. Setup, scenarios and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#playwright).
+The same specs also run against the local Docker stack (CGW, Transaction Service, Config Service and an Anvil Sepolia fork) with generated Safes and wallets: `yarn e2e:env playwright`. Read Safes from the `safes` fixture and wallets from the `credentials` fixture, never from `SAFES` directly, so both modes work. Setup, scenarios and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#specs).
 
 ## Project Structure
 
@@ -316,4 +316,4 @@ This is a Phase 2 integration. The framework foundation must be stable first. Cu
 
 ## Relationship to Cypress
 
-Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging. In isolated mode, both use the same scenario functions in `environment/scenarios/`.
+Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging. Only Playwright runs in isolated mode.
