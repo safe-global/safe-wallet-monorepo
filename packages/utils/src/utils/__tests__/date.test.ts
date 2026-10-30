@@ -7,7 +7,6 @@ import {
   getCountdown,
   getDetailedPeriod,
   getPeriod,
-  hoursUntil,
   parseTimestamp,
 } from '../date'
 
@@ -61,17 +60,6 @@ describe('formatTimeUntil', () => {
 
   it('should say less than a minute, when the time has passed', () => {
     expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC + 60) * 1_000)).toBe('less than a minute')
-  })
-})
-
-describe('hoursUntil', () => {
-  it('should round up, when a part hour is left', () => {
-    expect(hoursUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 24 * 3_600 + 60) * 1_000)).toBe(24)
-    expect(hoursUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 2 * 3_600 - 1) * 1_000)).toBe(3)
-  })
-
-  it('should never go below one, when the time has passed', () => {
-    expect(hoursUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC + 3_600) * 1_000)).toBe(1)
   })
 })
 
