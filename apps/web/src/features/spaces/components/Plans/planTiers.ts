@@ -9,6 +9,8 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
+import { isSalesLed, recommendSeats } from './proTrial/recommendPlan'
 import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
@@ -101,6 +103,7 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.option.label === current.seatsLabel
 
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
+  if (pick.tier.salesLed && !pick.tier.isCurrent) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
   if (pick.tier.isCurrent) {
     const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
     if (pick.tier.name === ENTERPRISE_TIER.name && !isAwaitingPaymentMethod) {
@@ -119,8 +122,8 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
       label: direction === 'upgrade' ? `Upgrade to ${pick.option.label}` : `Switch to ${pick.option.label}`,
     }
   }
-  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
+  if (!pick.option.paymentLinkId) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
+  if (!current) return { kind: 'subscribe', label: PRO_TRIAL_COPY.upgradeTo(pick.tier.name) }
 
   const direction = getChangeDirection(current, pick)
   if (isCycleSwitch(pick, current)) {
@@ -132,10 +135,12 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
   }
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
   const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
+  // A trial is not a plan the user picked, so every move off it is an upgrade to the named plan.
+  const isUpgrade = direction === 'upgrade' || current.isTrialing
   return {
     kind: 'change',
     direction,
-    label: direction === 'upgrade' ? `Upgrade to ${target}` : `Switch to ${target}`,
+    label: isUpgrade ? PRO_TRIAL_COPY.upgradeTo(target) : `Switch to ${target}`,
   }
 }
 
@@ -282,8 +287,9 @@ export const getPlanPrice = (tier: PlanTier, option: PlanSeatOption): { headline
       suffix: 'Annual term',
     }
   }
+  const price = formatPlanPrice(option.price, tier.currency)
   return {
-    headline: formatPlanPrice(option.price, tier.currency),
+    headline: tier.salesLed ? PRO_TRIAL_COPY.fromPrice(price) : price,
     suffix: priceSuffix(tier.billingCycle),
   }
 }
@@ -309,4 +315,33 @@ export const getCardSaving = (
   if (twelveMonths == null || yearly == null || yearly >= twelveMonths) return undefined
   const saved = twelveMonths - yearly
   return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
+}
+
+/** One card per seat size, named by it ("Business 10"), so no plan hides behind a dropdown. */
+export const splitSeatSizes = (tiers: PlanTier[]): PlanTier[] =>
+  tiers.flatMap((tier) =>
+    tier.options.length < 2
+      ? [tier]
+      : tier.options.map((option) => ({
+          ...tier,
+          id: `${tier.id}-${option.seats ?? option.label}`,
+          name: PRO_TRIAL_COPY.planName(tier.name, option.seats),
+          options: [option],
+          features: option.features?.length ? option.features : tier.features,
+          isCurrent: tier.isCurrent && option.priceId === tier.currentPriceId,
+        })),
+  )
+
+/** Marks the right-sized plan for `safeCount` Safes, and the sizes that go to sales. */
+export const withRecommendation = (tiers: PlanTier[], safeCount: number | undefined): PlanTier[] => {
+  const recommended =
+    safeCount === undefined ? undefined : PRO_TRIAL_COPY.planName('Business', recommendSeats(safeCount))
+  return tiers.map((tier) => {
+    const seats = tier.options.length === 1 ? tier.options[0].seats : undefined
+    return {
+      ...tier,
+      isRecommended: tier.name === recommended,
+      salesLed: seats !== undefined && tier.options[0].paymentLinkId !== null && isSalesLed(seats ?? null),
+    }
+  })
 }

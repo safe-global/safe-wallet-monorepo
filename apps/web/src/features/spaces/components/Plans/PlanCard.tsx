@@ -14,7 +14,6 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
-import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanCta as PlanCtaKindOf,
@@ -23,6 +22,7 @@ import type {
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
 import { FeatureCheck } from './FeatureCheck'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
 import { getCardSaving, getPlanCta, getPlanPrice, pickProps, pickSeatOption, plansClickParams } from './planTiers'
 
 const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
@@ -190,7 +190,7 @@ export const PlanCard = ({
   onSwitchToYearly?: () => void
 } & PlanCardActions) => {
   const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
-  const isPrimary = tier.name === RECOMMENDED_PLAN
+  const isPrimary = Boolean(tier.isRecommended)
   const isCurrentPlan = Boolean(tier.isCurrent)
   const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
   const price = option ? getPlanPrice(tier, option) : undefined
@@ -220,10 +220,16 @@ export const PlanCard = ({
         <div className="flex flex-col gap-1.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-1">
           <div className="flex items-center gap-2">
             <Typography variant="h4">{tier.name}</Typography>
-            {isCurrentPlan && (
+            {isCurrentPlan ? (
               <Badge variant="mint" size="status" shape="status" data-testid="plan-current-badge">
                 Current
               </Badge>
+            ) : (
+              isPrimary && (
+                <Badge variant="mint" size="status" shape="status" data-testid="plan-recommended-badge">
+                  {PRO_TRIAL_COPY.recommended}
+                </Badge>
+              )
             )}
           </div>
           {subtitle && (
@@ -274,12 +280,14 @@ export const PlanCard = ({
               {!actions.readOnly && (
                 <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
                   <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                  {isPrimary && (
+                  {isPrimary && !tier.salesLed && (
                     <SalesCta
-                      label="Talk to sales"
+                      label={PRO_TRIAL_COPY.talkToUs}
                       kind="sales"
                       location={actions.location}
-                      onClick={() => actions.onCta?.({ tier, option }, { kind: 'sales', label: 'Talk to sales' })}
+                      onClick={() =>
+                        actions.onCta?.({ tier, option }, { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs })
+                      }
                     />
                   )}
                 </div>

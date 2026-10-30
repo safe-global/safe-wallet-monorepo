@@ -9,6 +9,7 @@ import { COMPARE_FEATURES_ID } from '@safe-global/views/features/spaces/componen
 import type { PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PlanCard, type PlanCardActions } from './PlanCard'
 import { getCatalogTiers, getVisibleTiers } from './planTiers'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
 
 type Cycle = 'month' | 'year'
 
@@ -27,6 +28,28 @@ export function PlanCatalog({
   const [cycle, setCycle] = useState<Cycle>('month')
   const [seatsByPlan, setSeatsByPlan] = useState<Record<string, string>>({})
   const visible = getVisibleTiers(getCatalogTiers(tiers), cycle)
+  const isSelfServe = (tier: PlanTier) => !tier.salesLed && tier.options.some((option) => option.paymentLinkId)
+  const selfServe = visible.filter((tier) => isSelfServe(tier) || tier.isCurrent)
+  const salesLed = visible.filter((tier) => !selfServe.includes(tier))
+
+  const cards = (group: PlanTier[]) => (
+    <div className="group/plans flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
+      {group.map((tier) => (
+        <PlanCard
+          key={tier.id}
+          tier={tier}
+          seatsLabel={seatsByPlan[tier.name]}
+          onSeatsChange={(label) => setSeatsByPlan((picked) => ({ ...picked, [tier.name]: label }))}
+          counterpartTier={tiers.find(
+            (other) =>
+              other.name === tier.name && other.billingCycle !== null && other.billingCycle !== tier.billingCycle,
+          )}
+          onSwitchToYearly={() => setCycle('year')}
+          {...actions}
+        />
+      ))}
+    </div>
+  )
 
   const catalog = (
     <div className="@container flex flex-col gap-4">
@@ -54,22 +77,19 @@ export function PlanCatalog({
         )}
       </div>
 
-      <div className="group/plans flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
-        {visible.map((tier) => (
-          <PlanCard
-            key={tier.id}
-            tier={tier}
-            seatsLabel={seatsByPlan[tier.name]}
-            onSeatsChange={(label) => setSeatsByPlan((picked) => ({ ...picked, [tier.name]: label }))}
-            counterpartTier={tiers.find(
-              (other) =>
-                other.name === tier.name && other.billingCycle !== null && other.billingCycle !== tier.billingCycle,
-            )}
-            onSwitchToYearly={() => setCycle('year')}
-            {...actions}
-          />
-        ))}
-      </div>
+      {cards(selfServe)}
+
+      {salesLed.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-0.5">
+            <Typography variant="paragraph-bold">{PRO_TRIAL_COPY.salesHeading}</Typography>
+            <Typography variant="paragraph-small" color="muted">
+              {PRO_TRIAL_COPY.salesBody}
+            </Typography>
+          </div>
+          {cards(salesLed)}
+        </div>
+      )}
 
       {actions.readOnly && (
         <Typography variant="paragraph-small" color="muted" align="center">
