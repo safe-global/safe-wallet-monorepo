@@ -4,7 +4,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 
 const SpaceSettingsSection = ({ className, ...props }: ComponentProps<'section'>) => {
-  // eslint-disable-next-line no-restricted-syntax -- SpaceSettingsSection preset owns its 24px padding + 16px radius (rounded-2xl); no matching Card variants
+  // eslint-disable-next-line shadcn/no-restyle -- SpaceSettingsSection preset owns its 24px padding + 16px radius (rounded-2xl); no matching Card variants
   return <Card as="section" size="none" className={cn('mb-3 rounded-2xl p-6', className)} {...props} />
 }
 
