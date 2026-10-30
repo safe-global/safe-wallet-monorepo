@@ -114,7 +114,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
 ]
 
 export const getPersistedState = () => {
-  return getPreloadedState(persistedSlices)
+  return getPreloadedState(persistedSlices, rootReducer(undefined, { type: '' }))
 }
 
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
