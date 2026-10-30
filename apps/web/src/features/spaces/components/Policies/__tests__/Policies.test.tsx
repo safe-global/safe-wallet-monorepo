@@ -62,6 +62,8 @@ let mockIsAllowlistActive: boolean | undefined = false
 
 jest.mock('@/features/policy-guard', () => ({
   useIsAllowlistActiveInSpace: () => mockIsAllowlistActive,
+  usePolicyGuardDelay: () =>
+    jest.requireActual('@safe-global/utils/features/policy-guard/constants').POLICY_GUARD_DELAY_SECONDS,
 }))
 
 jest.mock('../RecipientAllowlistFlow', () => ({

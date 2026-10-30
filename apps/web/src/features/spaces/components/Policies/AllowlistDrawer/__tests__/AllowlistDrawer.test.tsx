@@ -1,3 +1,4 @@
+import { POLICY_GUARD_DELAY_SECONDS } from '@safe-global/utils/features/policy-guard/constants'
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
 import {
@@ -23,6 +24,13 @@ jest.mock('@/components/common/ChainIndicator', () => {
   Mock.displayName = 'ChainIndicator'
   return { __esModule: true, default: Mock }
 })
+
+const mockGuardDelay = jest.fn()
+
+jest.mock('@/features/policy-guard', () => ({
+  ...jest.requireActual('@/features/policy-guard'),
+  usePolicyGuardDelay: (...args: unknown[]) => mockGuardDelay(...args),
+}))
 
 const mockReviewTransaction = jest.fn()
 
@@ -60,6 +68,8 @@ const setup = (policy: AllowlistDrawerPolicy, viewer: Viewer = MOCK_VIEWERS.sign
       )
 
 describe('AllowlistDrawer', () => {
+  beforeEach(() => mockGuardDelay.mockReturnValue(POLICY_GUARD_DELAY_SECONDS))
+
   it('summarises the distinct recipients and tokens', () => {
     setup(mockActiveAllowlist())
 
@@ -190,6 +200,16 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.getByText('The current recipients still apply until the change is executed.')).toBeInTheDocument()
     expect(screen.queryByText('Removed')).not.toBeInTheDocument()
+  })
+
+  it('should say the delay of the installed guard, when it differs from the configured one', () => {
+    mockGuardDelay.mockReturnValue(600)
+
+    render(
+      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
+    )
+
+    expect(screen.getByText('The allowlist becomes active after a delay of 10 minutes.')).toBeInTheDocument()
   })
 
   it('says an executed transaction applies after the delay and offers no action', () => {
