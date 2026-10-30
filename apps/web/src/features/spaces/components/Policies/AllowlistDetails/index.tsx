@@ -11,10 +11,18 @@ export type AllowlistDetailsProps = {
   policies: Policy[]
   onClose: () => void
   justActivated?: boolean
+  /** Set once the guard's delay is over: opens the apply flow. */
+  onApply?: () => void
 }
 
 /** Active allowlists only: pending ones are not wired to CGW yet. */
-const AllowlistDetails = ({ policy, policies, onClose, justActivated }: AllowlistDetailsProps): ReactElement => {
+const AllowlistDetails = ({
+  policy,
+  policies,
+  onClose,
+  justActivated,
+  onApply,
+}: AllowlistDetailsProps): ReactElement => {
   const content = useAllowlistDetails(policy, policies)
   const { txFlow } = useContext(TxModalContext)
 
@@ -25,6 +33,7 @@ const AllowlistDetails = ({ policy, policies, onClose, justActivated }: Allowlis
       policy={policy}
       {...content}
       justActivated={justActivated}
+      onApply={onApply}
       // TODO: placeholder handlers so the buttons look live; replace with the edit and remove flows
       onEdit={() => console.log('Edit allowlist', policy)}
       onRemove={() => console.log('Remove allowlist', policy)}

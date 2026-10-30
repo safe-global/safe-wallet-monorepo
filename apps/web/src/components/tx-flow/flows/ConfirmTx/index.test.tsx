@@ -61,6 +61,13 @@ describe('ConfirmTxFlow', () => {
     expect(lastProps.ReviewTransactionComponent).toBe(firstProps.ReviewTransactionComponent)
   })
 
+  it('should pass the given review to TxFlow, when the flow sets its own', () => {
+    const OwnReview = () => <div />
+    render(<ConfirmTxFlow txSummary={buildTxSummary()} ReviewTransactionComponent={OwnReview} />)
+
+    expect(mockTxFlow.mock.calls[0][0].ReviewTransactionComponent).toBe(OwnReview)
+  })
+
   it('forwards txId and txNonce so ConfirmProposedTx can read them from TxFlowContext', () => {
     render(<ConfirmTxFlow txSummary={buildTxSummary()} />)
 

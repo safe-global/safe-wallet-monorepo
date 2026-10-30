@@ -1,6 +1,8 @@
 import { renderHook } from '@testing-library/react'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { usePolicyDetailsBase } from '../../../hooks/usePolicyDetailsBase'
-import { mockActiveAllowlist, mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
+import { mockActiveAllowlist, mockAllowlistChangePending, mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
 import {
   MOCK_ADDRESSES,
   MOCK_SAFES,
@@ -11,7 +13,10 @@ import {
 } from '../../../mocks/policies'
 import { useAllowlistDetails } from '../useAllowlistDetails'
 
-jest.mock('../../../hooks/usePolicyDetailsBase')
+jest.mock('../../../hooks/usePolicyDetailsBase', () => ({ usePolicyDetailsBase: jest.fn() }))
+jest.mock('@/store/api/gateway', () => ({ useGetSafeOverviewQuery: jest.fn() }))
+
+const mockUseGetSafeOverviewQuery = useGetSafeOverviewQuery as jest.Mock
 
 const mockUsePolicyDetailsBase = usePolicyDetailsBase as jest.MockedFunction<typeof usePolicyDetailsBase>
 
@@ -27,6 +32,7 @@ const base = {
 describe('useAllowlistDetails', () => {
   beforeEach(() => {
     mockUsePolicyDetailsBase.mockReturnValue(base)
+    mockUseGetSafeOverviewQuery.mockReturnValue({ currentData: undefined })
   })
 
   it('names the distinct recipients of the Safe', () => {
@@ -44,6 +50,30 @@ describe('useAllowlistDetails', () => {
     const { result } = renderHook(() => useAllowlistDetails(policy, []))
 
     expect(result.current.overview).toEqual({ enforcedBy: 'Safe policy contract' })
+  })
+
+  describe('signatures', () => {
+    it("reads the Safe's threshold and owner count while a change waits to be applied", () => {
+      const changing = mockAllowlistChangePending()
+      mockUseGetSafeOverviewQuery.mockReturnValue({
+        currentData: { threshold: 2, owners: [{ value: MOCK_ADDRESSES.alice }, { value: MOCK_ADDRESSES.bob }] },
+      })
+
+      const { result } = renderHook(() => useAllowlistDetails(changing, []))
+
+      expect(mockUseGetSafeOverviewQuery).toHaveBeenCalledWith({
+        chainId: changing.safe.chainId,
+        safeAddress: changing.safe.address,
+      })
+      expect(result.current.signatures).toEqual({ threshold: 2, owners: 2 })
+    })
+
+    it('skips the request when no change is scheduled', () => {
+      const { result } = renderHook(() => useAllowlistDetails(policy, []))
+
+      expect(mockUseGetSafeOverviewQuery).toHaveBeenCalledWith(skipToken)
+      expect(result.current.signatures).toBeUndefined()
+    })
   })
 
   describe('uncovered spending limits', () => {
