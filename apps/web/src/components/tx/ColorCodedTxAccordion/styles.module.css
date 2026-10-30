@@ -10,7 +10,7 @@
   box-shadow: none;
 }
 
-/* Same token as the BalanceChanges and gtf-fees cards that stack against this one, so the seam
+/* Same token as the BalanceChanges and pay-from-safe fee cards that stack against this one, so the seam
    between them stays one line. The tx-type tint rides the border only on hover and while open,
    which is what the block had before #8040 made it unconditional. */
 .item:hover,

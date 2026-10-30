@@ -1423,7 +1423,7 @@ describe('SignOrExecute hooks', () => {
     })
   })
 
-  describe('useTxActions — GTF fee-params merge', () => {
+  describe('useTxActions — Pay from Safe fee-params merge', () => {
     const GAS_TOKEN = '0xa0b86991000000000000000000000000000000aa'
     const SAFE_ADDRESS = zeroPadValue('0x0000', 20)
 
@@ -1439,10 +1439,10 @@ describe('SignOrExecute hooks', () => {
         setSafeTxGas: jest.fn(),
         setTxOrigin: jest.fn(),
         isReadOnly: false,
-        gtfPaymentMode: 'safe',
-        setGtfPaymentMode: jest.fn(),
-        gtfSelectedGasToken: GAS_TOKEN,
-        setGtfSelectedGasToken: jest.fn(),
+        feePaymentMode: 'safe',
+        setFeePaymentMode: jest.fn(),
+        feeGasToken: GAS_TOKEN,
+        setFeeGasToken: jest.fn(),
         ...overrides,
       }
       const Harness = () => {
@@ -1453,9 +1453,9 @@ describe('SignOrExecute hooks', () => {
       return ref
     }
 
-    const setupGtfChain = () => {
-      // Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
-      const gtfChain = chainBuilder()
+    const setupPayFromSafeChain = () => {
+      // Safe-pays requires both the Pay from Safe flag and a RELAY_FEE relayer on the chain.
+      const payFromSafeChain = chainBuilder()
         .with({
           chainId: '1',
           features: [FEATURES.GTF],
@@ -1464,11 +1464,11 @@ describe('SignOrExecute hooks', () => {
             safeCreationSponsored: false,
             safeTransactionSponsored: false,
             enableTenderlySimulationBeforeRelay: false,
-            gasPaymentOptions: ['SUBSCRIPTION'],
+            gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
           },
         })
         .build()
-      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(gtfChain)
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(payFromSafeChain)
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
         safe: {
           ...extendedSafeInfo,
@@ -1496,7 +1496,7 @@ describe('SignOrExecute hooks', () => {
     }
 
     it('invokes resolveFeeParams on first-signer sign when GTF + Safe-pays guards pass', async () => {
-      setupGtfChain()
+      setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
       const mergedTx = createSafeTx()
@@ -1518,7 +1518,7 @@ describe('SignOrExecute hooks', () => {
     })
 
     it('skips the merge for confirmers (safeTx already has a signature)', async () => {
-      setupGtfChain()
+      setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
       const resolveFeeParams = jest.fn()
@@ -1545,7 +1545,7 @@ describe('SignOrExecute hooks', () => {
     })
 
     it('skips the merge in signer-pays mode', async () => {
-      setupGtfChain()
+      setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
       const resolveFeeParams = jest.fn()
@@ -1556,7 +1556,7 @@ describe('SignOrExecute hooks', () => {
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
 
-      const ref = captureActions({ gtfPaymentMode: 'signer', gtfSelectedGasToken: undefined })
+      const ref = captureActions({ feePaymentMode: 'signer', feeGasToken: undefined })
       await ref.current!.signTx(createSafeTx())
 
       expect(resolveFeeParams).not.toHaveBeenCalled()

@@ -1,36 +1,47 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useFeesPreview, useIsGtfSlotVisible } from '@/features/gtf'
+import { PayFromSafeFeature, useGasPayerSelection, useIsPayFromSafeSlotVisible } from '@/features/pay-from-safe'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
+import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 
-const FeesPreview = (): ReactElement => {
-  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(GTFFeature)
-  const feesData = useFeesPreview()
+/**
+ * Sign step of the fee payment spec: the first signer picks who pays the network fee (Pay from Safe is
+ * the one choice made at signing); later signers see the locked line, or nothing.
+ */
+const FeePayerSignStep = (): ReactElement | null => {
+  const { GasPayerSelector, $isReady } = useLoadFeature(PayFromSafeFeature)
+  const { safeTx } = useContext(SafeTxContext)
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
+  const selection = useGasPayerSelection({ safeTx, offer: null, step: 'sign' })
 
-  // Block submit while the CGW fee preview is resolving. Otherwise a fast click on Continue/Execute
-  // signs before `gtfSelectedGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
+  // Signing with "Pay from Safe" depends on the quote: hold the CTA until it is in, and while it fails.
+  const blocksSubmit = selection.isQuoteLoading || selection.hasQuoteError
   useEffect(() => {
-    setIsSubmitDisabled(!!feesData.loading)
+    setIsSubmitDisabled(blocksSubmit)
     return () => setIsSubmitDisabled(false)
-  }, [feesData.loading, setIsSubmitDisabled])
+  }, [blocksSubmit, setIsSubmitDisabled])
 
-  // Hand the CGW resolved payload to Safe Shield so the threat-analysis simulation runs against
-  // the same gasToken/baseGas/gasPrice the user is about to sign. Without this the analyzer sees
-  // the bare safeTx (gasToken=0x0, baseGas=0) and misses Safe-pays specific issues like
-  // "insufficient gas-token balance to cover the refund" (only surfaced at sign time otherwise).
-  useSafeShieldForTxData(feesData.previewedSafeTx)
+  // Safe Shield simulates the payload the user is about to sign, fee params included.
+  useSafeShieldForTxData(selection.isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
 
-  return <FeesPreviewComponent {...feesData} />
+  if (!$isReady || !selection.view) return null
+  return (
+    <GasPayerSelector
+      view={selection.view}
+      onChoiceChange={selection.setChoice}
+      onGasTokenChange={selection.onGasTokenChange}
+    />
+  )
 }
 
+// Shown only where the chain's relayer offers Pay from Safe (`useIsPayFromSafeSlotVisible`).
 const FeesPreviewSlot = withSlot({
-  Component: FeesPreview,
+  Component: FeePayerSignStep,
   slotName: SlotName.Main,
   id: 'feesPreview',
-  useSlotCondition: useIsGtfSlotVisible,
+  useSlotCondition: useIsPayFromSafeSlotVisible,
 })
 
 export default FeesPreviewSlot

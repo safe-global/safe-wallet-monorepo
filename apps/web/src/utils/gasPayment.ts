@@ -7,7 +7,8 @@ export type SponsoredOption = Exclude<GasPaymentOption, 'PAY_FROM_SAFE'>
 
 export const SPONSORED_OPTIONS: SponsoredOption[] = ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION']
 
-export type GasPayer = SponsoredOption | 'WALLET'
+/** Who pays the gas of an execution: a sponsor, the Safe itself (fee params signed into the payload), or the connected wallet. */
+export type GasPayer = SponsoredOption | 'PAY_FROM_SAFE' | 'WALLET'
 
 export type SponsoredOffer =
   | {

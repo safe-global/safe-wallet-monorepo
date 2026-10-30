@@ -64,6 +64,10 @@ export enum FEATURES {
   HIDE_NATIVE_TOKEN = 'HIDE_NATIVE_TOKEN',
   TEMPO_GAS_TOKEN = 'TEMPO_GAS_TOKEN',
   SUPPORT_CHAT = 'SUPPORT_CHAT',
+  /**
+   * @deprecated Only mobile reads it, to show the fee breakdown. The web offers Pay from Safe wherever
+   * the chain's relayer lists `PAY_FROM_SAFE` in `gasPaymentOptions`, with no feature flag.
+   */
   GTF = 'GTF',
   SAFE_STAKING = 'SAFE_STAKING',
   WELCOME_ACCOUNTS_REDESIGN = 'WELCOME_ACCOUNTS_REDESIGN',

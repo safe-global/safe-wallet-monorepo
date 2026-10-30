@@ -1,7 +1,7 @@
 import { formatUnits } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import type { Balance, Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -56,7 +56,7 @@ export const buildFeesBreakdown = ({
 }: BuildFeesBreakdownArgs): FeesBreakdownData => {
   const { safeTxGas, baseGas, gasPrice, gasToken, gasTokenInfo } = detailedExecutionInfo
 
-  const paidFromSafe = isGtfSafePaid({
+  const paidFromSafe = isPaidFromSafe({
     gasPrice,
     baseGas,
     refundReceiver: detailedExecutionInfo.refundReceiver?.value,

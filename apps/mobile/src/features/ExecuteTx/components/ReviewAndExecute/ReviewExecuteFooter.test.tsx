@@ -39,10 +39,10 @@ const baseProps = {
   onConfirmPress: jest.fn(),
 }
 
-const renderFooter = (isGtfEnabled: boolean) =>
+const renderFooter = (isPayFromSafeEnabled: boolean) =>
   render(
     <TamaguiProvider config={config} defaultTheme="light">
-      <ReviewExecuteFooter {...baseProps} isGtfEnabled={isGtfEnabled} />
+      <ReviewExecuteFooter {...baseProps} isPayFromSafeEnabled={isPayFromSafeEnabled} />
     </TamaguiProvider>,
   )
 

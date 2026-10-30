@@ -83,9 +83,9 @@ const safeTxContext: SafeTxContextParams = {
   txOrigin: TX_ORIGIN,
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: jest.fn(),
-  setGtfSelectedGasToken: jest.fn(),
+  feePaymentMode: 'safe',
+  setFeePaymentMode: jest.fn(),
+  setFeeGasToken: jest.fn(),
 }
 
 describe('Propose slot', () => {

@@ -32,7 +32,7 @@ export function FeesBreakdown({
 }) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-  const isGtfEnabled = hasFeature(activeChain, FEATURES.GTF)
+  const isPayFromSafeEnabled = hasFeature(activeChain, FEATURES.GTF)
   const nativeCurrency = useAppSelector(selectActiveChainCurrency)
   const currency = useAppSelector(selectCurrency)
   const { balances } = useBalances()
@@ -59,7 +59,7 @@ export function FeesBreakdown({
   const breakdown = useFeesBreakdown({ detailedExecutionInfo, outgoing, balances })
 
   // The fees block is part of the GTF rollout, hide it entirely on chains where GTF is disabled
-  if (!isGtfEnabled || !breakdown) {
+  if (!isPayFromSafeEnabled || !breakdown) {
     return null
   }
 

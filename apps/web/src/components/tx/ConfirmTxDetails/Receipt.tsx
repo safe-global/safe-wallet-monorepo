@@ -14,7 +14,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { isGtfFeePreviewAvailable, useGtfFeePreview } from '@/features/gtf'
+import { isPayFromSafeAvailable, usePayFromSafeFeePreview } from '@/features/pay-from-safe'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
@@ -58,7 +58,7 @@ export const Receipt = ({
 }: ReceiptProps) => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
-  const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { safeTx, feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
 
@@ -67,12 +67,12 @@ export const Receipt = ({
     return isMultisigDetailedExecutionInfo(detailedExecutionInfo) ? detailedExecutionInfo.confirmations : []
   }, [txDetails?.detailedExecutionInfo])
 
-  const shouldPreviewGtf =
-    isGtfFeePreviewAvailable(chain) &&
+  const shouldPreviewPayFromSafe =
+    isPayFromSafeAvailable(chain) &&
     (!safeTx || safeTx.signatures.size === 0) &&
-    gtfPaymentMode === 'safe' &&
-    !!gtfSelectedGasToken
-  const displayGasToken = shouldPreviewGtf ? gtfSelectedGasToken : safeTxData.gasToken
+    feePaymentMode === 'safe' &&
+    !!feeGasToken
+  const displayGasToken = shouldPreviewPayFromSafe ? feeGasToken : safeTxData.gasToken
   // Show which token actually pays the gas — the logo/symbol of the native currency or of the held
   // ERC-20 — beside the bare address, which on its own says nothing about what is being spent.
   const isNativeGasToken = displayGasToken === ZERO_ADDRESS
@@ -82,22 +82,22 @@ export const Receipt = ({
   const gasTokenLogo = isNativeGasToken ? chain?.nativeCurrency.logoUri : heldToken?.tokenInfo.logoUri
   const gasTokenSymbol = isNativeGasToken ? chain?.nativeCurrency.symbol : heldToken?.tokenInfo.symbol
 
-  const { data: previewData } = useGtfFeePreview({
-    enabled: shouldPreviewGtf,
+  const { data: previewData } = usePayFromSafeFeePreview({
+    enabled: shouldPreviewPayFromSafe,
     safeTx,
     chain,
     safeAddress,
-    gasToken: gtfSelectedGasToken,
+    gasToken: feeGasToken,
     numberSignatures: safe.threshold,
   })
 
-  const previewTxData = shouldPreviewGtf ? previewData?.txData : undefined
+  const previewTxData = shouldPreviewPayFromSafe ? previewData?.txData : undefined
   const displayRefundReceiver = previewTxData?.refundReceiver ?? safeTxData.refundReceiver
   const displaySafeTxGas = previewTxData?.safeTxGas ?? safeTxData.safeTxGas
   const displayBaseGas = previewTxData?.baseGas ?? safeTxData.baseGas
   const displayGasPrice = previewTxData?.gasPrice ?? safeTxData.gasPrice
 
-  // The payload actually signed in Safe-pays carries the merged GTF fee fields. Build it once so the
+  // The payload actually signed in Safe-pays carries the merged Pay from Safe fee fields. Build it once so the
   // Data/JSON/Hashes tabs all reflect what the wallet will sign and not the bare pre-merge safeTx.
   const displaySafeTxData = useMemo(
     () => ({

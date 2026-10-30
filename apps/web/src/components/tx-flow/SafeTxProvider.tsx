@@ -8,9 +8,9 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/c
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from '@/features/gtf/store'
-import type { GtfPaymentMode } from '@/features/gtf/types'
+import { useAppSelector } from '@/store'
+import { selectFeePaymentSourcePreference } from '@/features/pay-from-safe/store'
+import type { FeePaymentMode } from '@/features/pay-from-safe/types'
 import useWallet from '@/hooks/wallets/useWallet'
 
 export { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -28,17 +28,12 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
     typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
   )
-  const dispatch = useAppDispatch()
   const signerAddress = useWallet()?.address
-  const gtfPaymentMode = useAppSelector((state) => selectGtfPaymentSourcePreference(state, signerAddress)) ?? 'safe'
-  const setGtfPaymentMode = useCallback(
-    (source: GtfPaymentMode) => {
-      if (!signerAddress) return
-      dispatch(setGtfPaymentSourcePreference({ signerAddress, source }))
-    },
-    [dispatch, signerAddress],
-  )
-  const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string>()
+  const preferredFeePaymentMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress))
+  // The mode this flow signs with. It starts from the signer's remembered pick (Signer wallet by default);
+  // the fee selector keeps it in step with what is shown and persists only explicit picks.
+  const [feePaymentMode, setFeePaymentMode] = useState<FeePaymentMode>(preferredFeePaymentMode ?? 'signer')
+  const [feeGasToken, setFeeGasToken] = useState<string>()
 
   // Every flow routes a failed tx build here, so this is the one place it is reported.
   const setSafeTxError = useCallback((error: Error | undefined) => {
@@ -100,10 +95,10 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         txOrigin,
         setTxOrigin,
         isReadOnly,
-        gtfPaymentMode,
-        setGtfPaymentMode,
-        gtfSelectedGasToken,
-        setGtfSelectedGasToken,
+        feePaymentMode,
+        setFeePaymentMode,
+        feeGasToken,
+        setFeeGasToken,
       }}
     >
       {children}

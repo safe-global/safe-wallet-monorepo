@@ -30,9 +30,8 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { useIsPayFromSafeEnabled } from '@/features/pay-from-safe'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
@@ -257,7 +256,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useIsPayFromSafeEnabled() ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
@@ -267,10 +266,10 @@ const TxFlowProvider = <T extends unknown>({
         details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
           ? details.detailedExecutionInfo
           : undefined
-      const gasPaymentSource = !isGtfChain
+      const gasPaymentSource = !isPayFromSafeChain
         ? undefined
         : exec &&
-            isGtfSafePaid({
+            isPaidFromSafe({
               gasPrice: exec.gasPrice,
               baseGas: exec.baseGas,
               refundReceiver: exec.refundReceiver?.value,
@@ -304,7 +303,7 @@ const TxFlowProvider = <T extends unknown>({
       txOrigin,
       data,
       safe.threshold,
-      isGtfChain,
+      isPayFromSafeChain,
       gasPaymentOption,
     ],
   )

@@ -2,7 +2,7 @@ import { createContext } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { GtfPaymentMode } from '@safe-global/views/features/gtf/types'
+import type { FeePaymentMode } from '@safe-global/views/features/pay-from-safe/types'
 
 /**
  * Kept apart from `SafeTxProvider`, whose imports reach `features/spaces` and
@@ -39,10 +39,10 @@ export type SafeTxContextParams = {
 
   // GTF: proposer's payment choice. Meaningful only for the first signer; confirmers
   // read the locked fee fields directly from safeTx.data.
-  gtfPaymentMode: GtfPaymentMode
-  setGtfPaymentMode: (source: GtfPaymentMode) => void
-  gtfSelectedGasToken?: string
-  setGtfSelectedGasToken: Dispatch<SetStateAction<string | undefined>>
+  feePaymentMode: FeePaymentMode
+  setFeePaymentMode: (source: FeePaymentMode) => void
+  feeGasToken?: string
+  setFeeGasToken: Dispatch<SetStateAction<string | undefined>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -55,7 +55,7 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: () => {},
-  setGtfSelectedGasToken: () => {},
+  feePaymentMode: 'safe',
+  setFeePaymentMode: () => {},
+  setFeeGasToken: () => {},
 })

@@ -5,7 +5,7 @@ import { cgwApi as delegatesApi, type DelegatePage } from '@safe-global/store/ga
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
-// Local copy of gtfFeePreview.ts's alias, so this module needs no import from the barrel it joins.
+// Local copy of payFromSafeFeePreview.ts's alias, so this module needs no import from the barrel it joins.
 type GatewayEndpointBuilder = EndpointBuilder<
   ReturnType<typeof fakeBaseQuery<Error>>,
   'Submissions' | 'SafeOverviews',
