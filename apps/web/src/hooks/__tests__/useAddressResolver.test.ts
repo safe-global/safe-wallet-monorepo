@@ -164,6 +164,40 @@ describe('useAddressResolver', () => {
     jest.useRealTimers()
   })
 
+  it('reports resolving on every render between the address change and the end of the lookup', async () => {
+    jest.useFakeTimers()
+    const TYPED_ADDRESS = zeroPadValue('0xe1', 20)
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    let endLookup: (name: string | undefined) => void = () => {}
+    jest.spyOn(domains, 'lookupAddress').mockImplementation(() => new Promise((resolve) => (endLookup = resolve)))
+
+    const renderedResolving: boolean[] = []
+    const { rerender } = renderHook(
+      ({ address }) => {
+        const resolved = useAddressResolver(address)
+        renderedResolving.push(resolved.resolving)
+        return resolved
+      },
+      { initialProps: { address: '' } },
+    )
+
+    renderedResolving.length = 0
+    rerender({ address: TYPED_ADDRESS })
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(200)
+    })
+
+    expect(renderedResolving.length).toBeGreaterThan(1)
+    expect(renderedResolving).not.toContain(false)
+
+    await act(async () => {
+      endLookup(undefined)
+    })
+    expect(renderedResolving[renderedResolving.length - 1]).toBe(false)
+
+    jest.useRealTimers()
+  })
+
   it('does not report resolving while the debounce waits for an address with an address book name', () => {
     jest.useFakeTimers()
     const NAMED_ADDRESS = zeroPadValue('0xef', 20)

@@ -24,36 +24,34 @@ export const useAddressResolver = (address?: string) => {
   const shouldResolve = canResolve && !!debouncedValue
   const cacheKey = `${hubChain?.chainId}:${ETH_COIN_TYPE}`
 
-  const [ens, _, isResolving] = useAsync<string | undefined>(() => {
+  const [lookup] = useAsync<{ address: string; cacheKey: string; ens: string | undefined } | undefined>(() => {
     if (!shouldResolve) return
     // Wait for debounce to settle so we never resolve a stale address
     if (debouncedValue !== address) return
-    if (debouncedValue && cache[cacheKey]?.[debouncedValue]) {
-      return Promise.resolve(cache[cacheKey][debouncedValue])
-    }
+    const cached = cache[cacheKey]?.[debouncedValue]
     // Primary names live on the hub with ETH coin type 60
-    return lookupAddress(ethersProvider, debouncedValue, ETH_COIN_TYPE)
+    const ensLookup = cached ? Promise.resolve(cached) : lookupAddress(ethersProvider, debouncedValue, ETH_COIN_TYPE)
+    return ensLookup.then((ens) => ({ address: debouncedValue, cacheKey, ens }))
   }, [ethersProvider, debouncedValue, shouldResolve, address, cacheKey])
 
-  // Clear stale ENS while debounce catches up to the new address
-  const isStale = debouncedValue !== address
-
-  // A pending debounce counts as resolving, or a form gated on it can submit before the lookup starts
-  const resolving = canResolve && (isStale || (shouldResolve && isResolving))
+  // Resolving until this address has a result from this hub; a gated form must not submit sooner
+  const settledLookup = lookup?.address === address && lookup?.cacheKey === cacheKey ? lookup : undefined
+  const ens = settledLookup?.ens
+  const resolving = canResolve && !settledLookup
 
   useEffect(() => {
-    if (ens && debouncedValue) {
-      cache[cacheKey] = cache[cacheKey] || {}
-      cache[cacheKey][debouncedValue] = ens
+    if (lookup?.ens) {
+      cache[lookup.cacheKey] = cache[lookup.cacheKey] || {}
+      cache[lookup.cacheKey][lookup.address] = lookup.ens
     }
-  }, [cacheKey, debouncedValue, ens])
+  }, [lookup])
 
   return useMemo(
     () => ({
-      ens: isStale ? undefined : ens,
+      ens,
       name: addressBookName,
       resolving,
     }),
-    [ens, addressBookName, resolving, isStale],
+    [ens, addressBookName, resolving],
   )
 }
