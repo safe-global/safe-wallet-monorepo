@@ -12,7 +12,7 @@ const mockLoadError = new Error('chunk failed')
 jest.mock('../../services/readModuleGuard', () => {
   throw mockLoadError
 })
-jest.mock('../../services/getReadOnlyProvider', () => ({
+jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({
   getReadOnlyProvider: jest.fn().mockResolvedValue({ getStorage: jest.fn() } as unknown as JsonRpcProvider),
 }))
 jest.mock('@/services/exceptions', () => ({ logError: jest.fn() }))

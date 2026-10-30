@@ -20,7 +20,7 @@ export function isDomain(domain: string): boolean {
 // below, or codeless errors (raw fetch rejections when the RPC is unreachable).
 const GENUINE_FAILURE_CODES = ['NETWORK_ERROR', 'SERVER_ERROR', 'TIMEOUT', 'BAD_DATA', 'UNKNOWN_ERROR'] as const
 
-const logResolverFailure = (e: unknown): void => {
+export const logResolverFailure = (e: unknown): void => {
   const err = e as EthersError
   // no code = not classified by ethers, e.g. a raw fetch rejection (RPC unreachable)
   if (err?.code === undefined || GENUINE_FAILURE_CODES.some((code) => isError(e, code))) {
