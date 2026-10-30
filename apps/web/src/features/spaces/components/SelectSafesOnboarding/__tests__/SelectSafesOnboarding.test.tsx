@@ -1,6 +1,9 @@
 import { render, screen, act, fireEvent } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
-import type { AllSafeItems } from '@/hooks/safes'
+import type useOnboardingSubmit from '../hooks/useOnboardingSubmit'
+import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import * as gatewayApi from '@/store/api/gateway'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
 jest.mock('@/features/spaces/constants', () => ({
@@ -13,6 +16,10 @@ let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { li
 const mockRetryLimit = jest.fn()
 jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
+}))
+let mockSpaceSafes: AllSafeItems = []
+jest.mock('../../../hooks/useSpaceSafes', () => ({
+  useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
@@ -48,6 +55,7 @@ jest.mock('../hooks/useOnboardingNavigation', () => ({
 
 let mockTrustedSafes: AllSafeItems = []
 let mockOwnedSafes: AllSafeItems = []
+let mockAllSafes: AllSafeItems = []
 let mockFlagged = new Set<string>()
 
 jest.mock('../hooks/useOnboardingSafes', () => ({
@@ -55,6 +63,7 @@ jest.mock('../hooks/useOnboardingSafes', () => ({
   default: () => ({
     trustedSafes: mockTrustedSafes,
     ownedSafes: mockOwnedSafes,
+    allSafes: mockAllSafes,
     flaggedAddresses: mockFlagged,
     handleSearch: jest.fn(),
     hasNoSafes: false,
@@ -63,12 +72,16 @@ jest.mock('../hooks/useOnboardingSafes', () => ({
 
 let mockStep: 'select' | 'name' = 'select'
 const mockShowSelectStep = jest.fn()
+let mockInitialSelection: Record<string, boolean> = {}
+let mockUseRealSubmit = false
 
-jest.mock('../hooks/useOnboardingSubmit', () => ({
-  __esModule: true,
-  default: function useOnboardingSubmitMock() {
+jest.mock('../hooks/useOnboardingSubmit', () => {
+  const { default: useRealSubmit } = jest.requireActual<{ default: typeof useOnboardingSubmit }>(
+    '../hooks/useOnboardingSubmit',
+  )
+  const useFakeSubmit = () => {
     const { useForm } = require('react-hook-form')
-    const formMethods = useForm({ defaultValues: { selectedSafes: {}, names: {} } })
+    const formMethods = useForm({ defaultValues: { selectedSafes: mockInitialSelection, names: {} } })
     return {
       formMethods,
       onSubmit: jest.fn((e?: Event) => e?.preventDefault?.()),
@@ -80,13 +93,24 @@ jest.mock('../hooks/useOnboardingSubmit', () => ({
       safesToName: mockStep === 'name' ? mockTrustedSafes : [],
       showSelectStep: mockShowSelectStep,
     }
-  },
-}))
+  }
+  return {
+    __esModule: true,
+    default: function useOnboardingSubmitMock(...args: Parameters<typeof useOnboardingSubmit>) {
+      const useSubmit = mockUseRealSubmit ? useRealSubmit : useFakeSubmit
+      return useSubmit(...args)
+    },
+  }
+})
 
 jest.mock('../../NameAccounts', () => ({
   ...jest.requireActual('../../NameAccounts'),
-  NameAccountsFields: ({ items }: { items: unknown[] }) => (
-    <div data-testid="name-accounts-fields" data-count={items.length} />
+  NameAccountsFields: ({ items }: { items: Array<{ address: string; name?: string }> }) => (
+    <div data-testid="name-accounts-fields" data-count={items.length}>
+      {items.map((item) => (
+        <span key={item.address}>{`${item.address}: ${item.name ?? ''}`}</span>
+      ))}
+    </div>
   ),
 }))
 
@@ -332,5 +356,146 @@ describe('SelectSafesOnboarding — naming step', () => {
 
     expect(mockShowSelectStep).toHaveBeenCalled()
     expect(mockHandleBack).not.toHaveBeenCalled()
+  })
+})
+
+describe('SelectSafesOnboarding — selected Safes outside the visible list', () => {
+  const SAFE_A = '0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa'
+  const SAFE_B = '0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb'
+  const FIAT: Record<string, string> = { [SAFE_A]: '69.75', [SAFE_B]: '46.5' }
+  const safeA = makeSafe('1', SAFE_A)
+  const safeB = makeSafe('1', SAFE_B)
+  const multichainA: MultiChainSafeItem = {
+    address: SAFE_A,
+    isPinned: false,
+    lastVisited: 0,
+    name: undefined,
+    safes: [makeSafe('1', SAFE_A), makeSafe('137', SAFE_A)],
+  }
+
+  const makeOverview = ({ chainId, address }: SafeItem): SafeOverview => ({
+    address: { value: address },
+    chainId,
+    threshold: 1,
+    owners: [],
+    fiatTotal: FIAT[address],
+    queued: 0,
+  })
+  const safeLine = (safe: SafeItem) => ({
+    key: `${safe.chainId}:${safe.address}`,
+    variant: 'single',
+    address: safe.address,
+    source: safe,
+  })
+  const groupLine = (group: MultiChainSafeItem) => ({
+    key: group.address,
+    variant: 'group',
+    address: group.address,
+    source: group,
+  })
+  const toggleOn = (line: unknown) => {
+    const onToggle = capturedListProps.onToggle as (line: unknown, checked: boolean) => void
+    act(() => onToggle(line, true))
+  }
+
+  let overviewsQuery: jest.SpyInstance
+  let queriedSafes: SafeItem[] = []
+  const queriedKeys = () => queriedSafes.map((s) => `${s.chainId}:${s.address}`).sort()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    capturedListProps = {}
+    queriedSafes = []
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+    mockSafeLimit = { limit: 10, isError: false }
+    overviewsQuery = jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery').mockImplementation((({
+      safes,
+    }: {
+      safes: SafeItem[]
+    }) => {
+      queriedSafes = safes
+      return { data: safes.map(makeOverview) }
+    }) as never)
+  })
+
+  afterEach(() => {
+    mockAllSafes = []
+    mockSpaceSafes = []
+    mockInitialSelection = {}
+    mockUseRealSubmit = false
+    overviewsQuery.mockRestore()
+  })
+
+  it('keeps a selected Safe the search hides in the balance query and its preview row', () => {
+    mockTrustedSafes = [safeA, safeB]
+    mockAllSafes = [safeA, safeB]
+    const { rerender } = render(<SelectSafesOnboarding />)
+    toggleOn(safeLine(safeA))
+    toggleOn(safeLine(safeB))
+
+    mockTrustedSafes = [safeB]
+    rerender(<SelectSafesOnboarding />)
+
+    expect(queriedKeys()).toEqual([`1:${SAFE_A}`, `1:${SAFE_B}`].sort())
+    expect(screen.getByText('$69.75')).toBeInTheDocument()
+    expect(screen.getByText(/116\.25/)).toBeInTheDocument()
+  })
+
+  it('keeps every chain of a selected multichain Safe the search hides in the balance query', () => {
+    mockTrustedSafes = [multichainA, safeB]
+    mockAllSafes = [multichainA, safeB]
+    const { rerender } = render(<SelectSafesOnboarding />)
+    toggleOn(groupLine(multichainA))
+    toggleOn(safeLine(safeB))
+
+    mockTrustedSafes = [safeB]
+    rerender(<SelectSafesOnboarding />)
+
+    expect(queriedKeys()).toEqual([`1:${SAFE_A}`, `137:${SAFE_A}`, `1:${SAFE_B}`].sort())
+  })
+
+  it('totals a selected Workspace Safe that is neither trusted nor owned', () => {
+    mockTrustedSafes = [safeA]
+    mockAllSafes = [safeA]
+    mockSpaceSafes = [safeA, safeB]
+    mockInitialSelection = { [`1:${SAFE_A}`]: true, [`1:${SAFE_B}`]: true }
+
+    render(<SelectSafesOnboarding />)
+
+    expect(queriedKeys()).toEqual([`1:${SAFE_A}`, `1:${SAFE_B}`].sort())
+    expect(screen.getByText('$46.5')).toBeInTheDocument()
+    expect(screen.getByText(/116\.25/)).toBeInTheDocument()
+  })
+
+  it('previews a Safe that is both trusted and in the Workspace from its trusted entry', () => {
+    const trustedA = { ...safeA, name: 'Trusted name' }
+    mockTrustedSafes = [trustedA]
+    mockAllSafes = [trustedA]
+    mockSpaceSafes = [{ ...safeA, name: 'Workspace name' }]
+    mockInitialSelection = { [`1:${SAFE_A}`]: true }
+
+    render(<SelectSafesOnboarding />)
+
+    expect(queriedSafes).toEqual([trustedA])
+    expect(screen.getByText('Trusted name')).toBeInTheDocument()
+    expect(screen.queryByText('Workspace name')).not.toBeInTheDocument()
+  })
+
+  it('keeps the known name of a selected Safe the search hides on the naming step', async () => {
+    mockUseRealSubmit = true
+    const namedA = { ...safeA, name: 'Alpha' }
+    mockTrustedSafes = [namedA, safeB]
+    mockAllSafes = [namedA, safeB]
+    const { rerender } = render(<SelectSafesOnboarding />)
+    toggleOn(safeLine(namedA))
+    toggleOn(safeLine(safeB))
+
+    mockTrustedSafes = [safeB]
+    rerender(<SelectSafesOnboarding />)
+    await act(async () => fireEvent.click(screen.getByTestId('select-safes-continue-button')))
+
+    expect(await screen.findByText(`${SAFE_A}: Alpha`)).toBeInTheDocument()
   })
 })

@@ -7,7 +7,7 @@ import { applySafeSelectionToggle, getSelectedLeafKeys } from '../utils/selectio
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 
 interface Args {
-  /** Combined trusted + owned visible items, used to reconcile multi-chain parents. */
+  /** All selectable items, unfiltered by the search. */
   items: AllSafeItems
   control: Control<AddAccountsFormValues>
   setValue: UseFormSetValue<AddAccountsFormValues>
@@ -17,13 +17,15 @@ interface Args {
   limit: SafeLimit
 }
 
+const EMPTY_SELECTION: Record<string, boolean> = {}
+
 /**
  * Bridges the accounts table's leaf-key selection model to the onboarding form's
  * `selectedSafes` record, reconciling multi-chain parent keys, and gates selection of
  * address-poisoning-flagged safes behind a confirmation dialog.
  */
 const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, limit }: Args) => {
-  const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
+  const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? EMPTY_SELECTION
   const [pendingConfirmation, setPendingConfirmation] = useState<AccountLine | null>(null)
 
   const selectedKeys = useMemo(() => getSelectedLeafKeys(selectedSafes), [selectedSafes])
