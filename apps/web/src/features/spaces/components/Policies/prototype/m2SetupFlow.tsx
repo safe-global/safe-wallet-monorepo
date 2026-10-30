@@ -31,7 +31,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { BalanceChanges, FeesPreview, TxNote } from '@/components/tx-flow/features'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { SlotName, SlotProvider } from '@/components/tx-flow/slots'
+import { SlotProvider } from '@/components/tx-flow/slots'
 import TxFlowProvider, { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
@@ -2939,8 +2939,8 @@ type SetupSummary = {
   description?: string
   /** Behind the info icon at the end of the description. */
   details?: string
-  /** Yellow when the choice leaves funds exposed; blue otherwise. */
-  tone?: 'info' | 'warning'
+  /** Red on the review step, yellow when the choice leaves funds exposed, blue otherwise. */
+  tone?: 'info' | 'warning' | 'error'
 }
 
 const useSetupSummary = (
