@@ -92,14 +92,13 @@ const TestForm = ({
   )
 }
 
-const setup = async (
+const setup = (
   address: string,
   validate?: AddressInputProps['validate'],
   disabled?: boolean,
   chain?: AddressInputProps['chain'],
 ) => {
   const utils = render(<TestForm address={address} validate={validate} disabled={disabled} chain={chain} />)
-  await act(async () => {})
   const input = utils.getByLabelText('Recipient address', { exact: false })
 
   return {
@@ -132,12 +131,14 @@ describe('AddressInput tests', () => {
   })
 
   it('should render with a default address value', async () => {
-    const { input } = await setup(TEST_ADDRESS_A)
+    const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} />))
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
     expect(input.value).toBe(TEST_ADDRESS_A)
   })
 
   it('should render with a default prefixed address value', async () => {
-    const { input } = await setup(`eth:${TEST_ADDRESS_A}`)
+    const utils = await act(async () => render(<TestForm address={`eth:${TEST_ADDRESS_A}`} />))
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
     expect(input.value).toBe(`eth:${TEST_ADDRESS_A}`)
   })
 
@@ -165,7 +166,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should validate the address on input', async () => {
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     act(() => {
       fireEvent.change(input, { target: { value: `eth:${TEST_ADDRESS_A}` } })
@@ -196,7 +197,7 @@ describe('AddressInput tests', () => {
   })
 
   it('flags an address with a wrong checksum', async () => {
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     act(() => {
       fireEvent.change(input, { target: { value: '0X6D0B6F96F665BB4490F9DDB2E450DA2F7E546DC1' } })
@@ -207,7 +208,7 @@ describe('AddressInput tests', () => {
   })
 
   it('shows the checksummed address for a lowercase address', async () => {
-    const { input } = await setup('')
+    const { input } = setup('')
     const address = fakerChecksummedAddress()
 
     await act(async () => {
@@ -218,7 +219,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should accept a custom validate function', async () => {
-    const { input, utils } = await setup('', (val) => `${val} is wrong`)
+    const { input, utils } = setup('', (val) => `${val} is wrong`)
 
     act(() => {
       fireEvent.change(input, { target: { value: `${mockChain.shortName}:${TEST_ADDRESS_A}` } })
@@ -238,7 +239,7 @@ describe('AddressInput tests', () => {
   it('should show a spinner when validation is in progress', async () => {
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-    const { input, utils } = await setup('', async (val) => {
+    const { input, utils } = setup('', async (val) => {
       await sleep(2000)
       return `${val} is wrong`
     })
@@ -261,7 +262,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should resolve ENS names', async () => {
-    const { input } = await setup('')
+    const { input } = setup('')
 
     await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
@@ -274,7 +275,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should label the field with the ENS name it resolved from', async () => {
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
@@ -287,7 +288,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should revert the label when the resolved address is edited', async () => {
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
@@ -315,7 +316,7 @@ describe('AddressInput tests', () => {
       features: [],
     }))
 
-    const { input } = await setup('', undefined, undefined, mockMainnetChain)
+    const { input } = setup('', undefined, undefined, mockMainnetChain)
 
     await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
@@ -328,7 +329,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should show an error if ENS resolution has failed', async () => {
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     await act(async () => {
       fireEvent.change(input, { target: { value: 'bogus.eth' } })
@@ -351,7 +352,7 @@ describe('AddressInput tests', () => {
       chainId === '1' ? { ...mockMainnetChain, features: [] } : undefined,
     )
 
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     act(() => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
@@ -371,7 +372,7 @@ describe('AddressInput tests', () => {
       features: [],
     }))
 
-    const { input, utils } = await setup('')
+    const { input, utils } = setup('')
 
     act(() => {
       fireEvent.change(input, { target: { value: 'vitalik.eth' } })
@@ -384,7 +385,8 @@ describe('AddressInput tests', () => {
   })
 
   it('should show chain prefix in an adornment', async () => {
-    const { input } = await setup(TEST_ADDRESS_A)
+    const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} />))
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
 
     await waitFor(() => expect(input.value).toBe(TEST_ADDRESS_A))
 
@@ -432,7 +434,7 @@ describe('AddressInput tests', () => {
       features: [],
     }))
 
-    const { input } = await setup(``)
+    const { input } = setup(``)
 
     await act(async () => {
       fireEvent.change(input, { target: { value: `Here's my address: ${TEST_ADDRESS_A}` } })
@@ -462,7 +464,7 @@ describe('AddressInput tests', () => {
     jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
-    const { input, utils } = await setup(TEST_ADDRESS_A)
+    const { input, utils } = setup(TEST_ADDRESS_A)
 
     await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
@@ -474,7 +476,7 @@ describe('AddressInput tests', () => {
   it('should render a readable read-only field when disabled even if the address is not in the address book', async () => {
     // Address book is empty (mocked in beforeEach), mirroring a contact shown under a source
     // (e.g. spaceOnly) that does not contain it. The disabled field must still be readable.
-    const { utils } = await setup(TEST_ADDRESS_A, undefined, true)
+    const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} disabled />))
 
     await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument())
   })
@@ -500,7 +502,7 @@ describe('AddressInput tests', () => {
     jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
-    const { input, utils } = await setup(TEST_ADDRESS_A)
+    const { input, utils } = setup(TEST_ADDRESS_A)
 
     await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
@@ -541,7 +543,7 @@ describe('AddressInput tests', () => {
     jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
-    const { input, utils } = await setup(TEST_ADDRESS_A, undefined, true)
+    const { input, utils } = setup(TEST_ADDRESS_A, undefined, true)
 
     await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
@@ -582,7 +584,7 @@ describe('AddressInput tests', () => {
 
     it('moves focus from the hidden input to the chip when the address becomes a saved contact', async () => {
       mockSavedContact()
-      const { input, utils } = await setup('')
+      const { input, utils } = setup('')
 
       // Assert synchronously: earlier tests leave un-awaited userEvent clicks whose fake-timer
       // steps blur the active element as soon as a waitFor advances the clock.
@@ -598,7 +600,7 @@ describe('AddressInput tests', () => {
 
     it('opens the kept address for editing and refocuses the input on Enter', async () => {
       mockSavedContact()
-      const { input, utils } = await setup(TEST_ADDRESS_A)
+      const { input, utils } = setup(TEST_ADDRESS_A)
 
       const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
 
@@ -614,7 +616,7 @@ describe('AddressInput tests', () => {
 
     it('clears the address and refocuses the input on Backspace', async () => {
       mockSavedContact()
-      const { input, utils } = await setup(TEST_ADDRESS_A)
+      const { input, utils } = setup(TEST_ADDRESS_A)
 
       const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
 
@@ -629,7 +631,7 @@ describe('AddressInput tests', () => {
 
     it('shows the chip again when focus leaves the field while editing', async () => {
       mockSavedContact()
-      const { input, utils } = await setup(TEST_ADDRESS_A)
+      const { input, utils } = setup(TEST_ADDRESS_A)
 
       await act(async () => {
         fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
@@ -645,7 +647,7 @@ describe('AddressInput tests', () => {
     })
 
     it('does not add a tab stop for a disabled read-only address', async () => {
-      const { utils } = await setup(TEST_ADDRESS_A, undefined, true)
+      const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} disabled />))
 
       const chip = await utils.findByTestId('address-book-recipient')
       expect(chip.parentElement).not.toHaveAttribute('tabindex')

@@ -13,7 +13,7 @@ import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
-import { renderSettled } from '@/tests/test-utils'
+import { render } from '@/tests/test-utils'
 import { fireEvent, waitFor } from '@testing-library/react'
 import type {
   RecipientAnalysisResults,
@@ -25,6 +25,20 @@ import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
+
+jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
+jest.mock('@/hooks/useGasLimit', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ gasLimit: undefined, gasLimitError: undefined, gasLimitLoading: false })),
+}))
+jest.mock('@/hooks/useIsValidExecution', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isValidExecution: undefined,
+    executionValidationError: undefined,
+    isValidExecutionLoading: false,
+  })),
+}))
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
 jest.mock('@/hooks/useGasPaymentOptions', () => ({
@@ -141,14 +155,14 @@ describe('ExecuteForm', () => {
     mockUseSafeScope.mockReturnValue(undefined)
   })
 
-  it('shows estimated fees', async () => {
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} />)
+  it('shows estimated fees', () => {
+    const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Estimated fee')).toBeInTheDocument()
   })
 
-  it('renders a secondary action before the submit button when one is passed', async () => {
-    const { getByTestId, queryByTestId } = await renderSettled(
+  it('renders a secondary action before the submit button when one is passed', () => {
+    const { getByTestId, queryByTestId } = render(
       <ExecuteForm {...defaultProps} secondaryAction={<button data-testid="secondary-action">Later</button>} />,
     )
 
@@ -159,45 +173,45 @@ describe('ExecuteForm', () => {
     expect(queryByTestId('secondary-action')?.closest('.txCardActions')).toHaveClass('[&>div]:justify-between')
   })
 
-  it('shows a non-owner error if the transaction still needs signatures and its not an owner', async () => {
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={false} />)
+  it('shows a non-owner error if the transaction still needs signatures and its not an owner', () => {
+    const { getByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={false} />)
 
     expect(
       getByText("You are currently not a signer of this Safe account and won't be able to submit this transaction."),
     ).toBeInTheDocument()
   })
 
-  it('does not show a non-owner error if the transaction is fully signed and its not an owner', async () => {
-    const { queryByText } = await renderSettled(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={true} />)
+  it('does not show a non-owner error if the transaction is fully signed and its not an owner', () => {
+    const { queryByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={true} />)
 
     expect(
       queryByText("You are currently not a signer of this Safe account and won't be able to submit this transaction."),
     ).not.toBeInTheDocument()
   })
 
-  it('shows an error if the same safe tries to execute', async () => {
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} isExecutionLoop={true} />)
+  it('shows an error if the same safe tries to execute', () => {
+    const { getByText } = render(<ExecuteForm {...defaultProps} isExecutionLoop={true} />)
 
     expect(
       getByText('Cannot execute a transaction from the Safe account itself, please connect a different account.'),
     ).toBeInTheDocument()
   })
 
-  it('shows an error if the connected wallet has insufficient funds and no sponsored option is offered', async () => {
+  it('shows an error if the connected wallet has insufficient funds and no sponsored option is offered', () => {
     jest.spyOn(walletCanPay, 'default').mockReturnValue(false)
 
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} />)
+    const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(
       getByText("Your connected wallet doesn't have enough funds to execute this transaction."),
     ).toBeInTheDocument()
   })
 
-  it('hides the insufficient funds error while a sponsored option is selected', async () => {
+  it('hides the insufficient funds error while a sponsored option is selected', () => {
     jest.spyOn(walletCanPay, 'default').mockReturnValue(false)
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: dailyOffer }))
 
-    const { queryByText } = await renderSettled(<ExecuteForm {...defaultProps} />)
+    const { queryByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(
       queryByText("Your connected wallet doesn't have enough funds to execute this transaction."),
@@ -208,7 +222,7 @@ describe('ExecuteForm', () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: dailyOffer }))
     const mockExecuteTx = jest.fn()
 
-    const { getByText, getByTestId } = await renderSettled(
+    const { getByText, getByTestId } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -236,7 +250,7 @@ describe('ExecuteForm', () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: subscriptionOffer }))
     const mockExecuteTx = jest.fn()
 
-    const { getByText } = await renderSettled(
+    const { getByText } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -263,7 +277,7 @@ describe('ExecuteForm', () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: exhaustedSubscriptionOffer }))
     const mockExecuteTx = jest.fn()
 
-    const { getByText, getByTestId } = await renderSettled(
+    const { getByText, getByTestId } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -291,10 +305,10 @@ describe('ExecuteForm', () => {
     })
   })
 
-  it('renders the selector for the Pro upsell when nothing is offered', async () => {
+  it('renders the selector for the Pro upsell when nothing is offered', () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ showsProUpsell: true }))
 
-    const { getByTestId } = await renderSettled(<ExecuteForm {...defaultProps} />)
+    const { getByTestId } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByTestId('execution-method-selector')).toHaveAttribute('data-offer', 'null')
     expect(getByTestId('execution-method-selector')).toHaveAttribute('data-upsell', 'true')
@@ -304,7 +318,7 @@ describe('ExecuteForm', () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: null, showsProUpsell: false }))
     const mockExecuteTx = jest.fn()
 
-    const { getByText, queryByTestId } = await renderSettled(
+    const { getByText, queryByTestId } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -329,11 +343,11 @@ describe('ExecuteForm', () => {
     })
   })
 
-  it('publishes the gas payer to the tx flow and clears it on unmount', async () => {
+  it('publishes the gas payer to the tx flow and clears it on unmount', () => {
     const setGasPaymentOption = jest.fn()
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: dailyOffer }))
 
-    const { unmount } = await renderSettled(
+    const { unmount } = render(
       <TxFlowContext.Provider value={{ ...initialContext, setGasPaymentOption }}>
         <ExecuteForm {...defaultProps} safeTx={safeTransaction} />
       </TxFlowContext.Provider>,
@@ -344,12 +358,12 @@ describe('ExecuteForm', () => {
     expect(setGasPaymentOption).toHaveBeenLastCalledWith(undefined)
   })
 
-  it('shows an execution validation error', async () => {
+  it('shows an execution validation error', () => {
     jest
       .spyOn(useIsValidExecution, 'default')
       .mockReturnValue({ executionValidationError: new Error('Some error'), isValidExecutionLoading: false })
 
-    const { getByText } = await renderSettled(
+    const { getByText } = render(
       <ExecuteForm
         {...defaultProps}
         txActions={{
@@ -364,12 +378,12 @@ describe('ExecuteForm', () => {
     expect(getByText(/Could not check this transaction/)).toBeInTheDocument()
   })
 
-  it('shows a gasLimit error', async () => {
+  it('shows a gasLimit error', () => {
     jest
       .spyOn(useGasLimit, 'default')
       .mockReturnValue({ gasLimitError: new Error('Gas limit error'), gasLimitLoading: false })
 
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} />)
+    const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText(/Could not check this transaction/)).toBeInTheDocument()
   })
@@ -377,7 +391,7 @@ describe('ExecuteForm', () => {
   it('execute the tx when the submit button is clicked', async () => {
     const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0x123', isExecuted: true })
 
-    const { getByText } = await renderSettled(
+    const { getByText } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -400,10 +414,10 @@ describe('ExecuteForm', () => {
   })
 
   describe('success screen scope', () => {
-    const renderWithModal = async () => {
+    const renderWithModal = () => {
       const setTxFlow = jest.fn()
       const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
-      const view = await renderSettled(
+      const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm
             {...defaultProps}
@@ -423,7 +437,7 @@ describe('ExecuteForm', () => {
         safeLoaded: true,
         safeLoading: false,
       })
-      const { getByText, setTxFlow, mockExecuteTx } = await renderWithModal()
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal()
 
       fireEvent.click(getByText('Execute'))
 
@@ -439,7 +453,7 @@ describe('ExecuteForm', () => {
 
     it('opens the success screen without a scope on a Safe-level route', async () => {
       mockUseSafeScope.mockReturnValue(undefined)
-      const { getByText, setTxFlow, mockExecuteTx } = await renderWithModal()
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal()
 
       fireEvent.click(getByText('Execute'))
 
@@ -449,8 +463,8 @@ describe('ExecuteForm', () => {
     })
   })
 
-  it('shows a disabled submit button if there is no safeTx', async () => {
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} safeTx={undefined} />)
+  it('shows a disabled submit button if there is no safeTx', () => {
+    const { getByText } = render(<ExecuteForm {...defaultProps} safeTx={undefined} />)
 
     const button = getByText('Execute')
 
@@ -458,8 +472,8 @@ describe('ExecuteForm', () => {
     expect(button).toBeDisabled()
   })
 
-  it('shows a disabled submit button if passed via props', async () => {
-    const { getByText } = await renderSettled(<ExecuteForm safeTx={safeTransaction} disableSubmit {...defaultProps} />)
+  it('shows a disabled submit button if passed via props', () => {
+    const { getByText } = render(<ExecuteForm safeTx={safeTransaction} disableSubmit {...defaultProps} />)
 
     const button = getByText('Execute')
 
@@ -467,8 +481,8 @@ describe('ExecuteForm', () => {
     expect(button).toBeDisabled()
   })
 
-  it('shows a disabled submit button if the same safe is connected', async () => {
-    const { getByText } = await renderSettled(<ExecuteForm {...defaultProps} isExecutionLoop={true} />)
+  it('shows a disabled submit button if the same safe is connected', () => {
+    const { getByText } = render(<ExecuteForm {...defaultProps} isExecutionLoop={true} />)
 
     const button = getByText('Execute')
 
@@ -476,8 +490,8 @@ describe('ExecuteForm', () => {
     expect(button).toBeDisabled()
   })
 
-  it('shows a disabled submit button if there is a high or critical risk and user has not confirmed it', async () => {
-    const { getByText } = await renderSettled(
+  it('shows a disabled submit button if there is a high or critical risk and user has not confirmed it', () => {
+    const { getByText } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -491,8 +505,8 @@ describe('ExecuteForm', () => {
     expect(button).toBeDisabled()
   })
 
-  it('shows an enabled submit button if there is a high or critical risk and user has confirmed it', async () => {
-    const { getByText } = await renderSettled(
+  it('shows an enabled submit button if there is a high or critical risk and user has confirmed it', () => {
+    const { getByText } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -509,7 +523,7 @@ describe('ExecuteForm', () => {
   it('blocks execution and shows the simulation-failed banner on SIMULATION_FAILED', async () => {
     const mockExecuteTx = jest.fn().mockRejectedValue(new RelaySimulationError('SIMULATION_FAILED', 'expected revert'))
 
-    const { getByText } = await renderSettled(
+    const { getByText } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -535,7 +549,7 @@ describe('ExecuteForm', () => {
           new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'Quota exceeded'),
         )
 
-      const { getByText } = await renderSettled(
+      const { getByText } = render(
         <ExecuteForm
           {...defaultProps}
           safeTx={safeTransaction}
@@ -562,7 +576,7 @@ describe('ExecuteForm', () => {
       const error = new Error('Something broke')
       const mockExecuteTx = jest.fn().mockRejectedValue(error)
 
-      const { getByText } = await renderSettled(
+      const { getByText } = render(
         <TxFlowContext.Provider value={{ ...initialContext, setSubmitError }}>
           <ExecuteForm
             {...defaultProps}
@@ -583,7 +597,7 @@ describe('ExecuteForm', () => {
     const setIsRejectedByUser = jest.fn()
     const mockExecuteTx = jest.fn().mockRejectedValue({ code: 4001, message: 'User rejected transaction' })
 
-    const { getByText } = await renderSettled(
+    const { getByText } = render(
       <TxFlowContext.Provider value={{ ...initialContext, setSubmitError, setIsRejectedByUser }}>
         <ExecuteForm
           {...defaultProps}
@@ -604,7 +618,7 @@ describe('ExecuteForm', () => {
       .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
       .mockResolvedValueOnce({ txId: '0xnewtx', isExecuted: true })
 
-    const { getByText, getByTestId } = await renderSettled(
+    const { getByText, getByTestId } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}

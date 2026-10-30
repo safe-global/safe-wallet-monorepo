@@ -8,6 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
 import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import * as wallets from '@/utils/wallets'
 
 jest.mock('@/hooks/useSafeAddress')
 jest.mock('@/hooks/useChainId')
@@ -101,6 +102,8 @@ describe('TxData — spending limit batch', () => {
     dataDecoded: { method, parameters: values.map((value) => ({ name: '', type: 'address', value })) },
   })
 
+  const contractCheck = Promise.resolve(false)
+
   const renderBatch = async (actions: ReturnType<typeof moduleCall>[]) => {
     const multisendLib = faker.finance.ethereumAddress()
     const txData = {
@@ -126,13 +129,14 @@ describe('TxData — spending limit batch', () => {
     } as unknown as TransactionDetails['txInfo']
 
     const result = render(<TxData txInfo={txInfo} txData={txData} trusted imitation={false} />)
-    await act(async () => {})
+    await act(() => contractCheck)
     return result
   }
 
   beforeEach(() => {
     ;(useSafeAddress as jest.Mock).mockReturnValue(faker.finance.ethereumAddress())
     ;(useChainId as jest.Mock).mockReturnValue(chainId)
+    jest.spyOn(wallets, 'isSmartContract').mockReturnValue(contractCheck)
   })
 
   it('summarises a policy batch above its actions', async () => {
@@ -149,7 +153,7 @@ describe('TxData — spending limit batch', () => {
     expect(result.getByTestId('all-actions')).toBeInTheDocument()
   })
 
-  it('summarises a policy batch when the details page passes its own decoded data', async () => {
+  it('summarises a policy batch when the details page passes its own decoded data', () => {
     const multisendLib = faker.finance.ethereumAddress()
     const txData = {
       to: { value: multisendLib },
@@ -177,7 +181,6 @@ describe('TxData — spending limit batch', () => {
         <div>decoded children</div>
       </TxData>,
     )
-    await act(async () => {})
 
     expect(result.getByTestId('spending-limit-batch-summary')).toBeInTheDocument()
     expect(result.getByText('decoded children')).toBeInTheDocument()

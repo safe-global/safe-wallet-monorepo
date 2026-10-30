@@ -4,7 +4,7 @@ import {
   TransactionTokenType,
   TransferDirection,
 } from '@safe-global/store/gateway/types'
-import { act, mockClipboard, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { mockClipboard, renderWithUserEvent, screen } from '@/tests/test-utils'
 import TransferTxInfo from '.'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
@@ -25,10 +25,20 @@ jest.mock('@/hooks/useChains', () => ({
   }),
 }))
 
+jest.mock('@/components/common/NamedAddressInfo', () => ({
+  __esModule: true,
+  get useAddressName() {
+    return jest.requireActual('@/components/common/NamedAddressInfo').useAddressName
+  },
+  get default() {
+    return jest.requireActual('@/components/common/EthHashInfo').default
+  },
+}))
+
 const addr = (): `0x${string}` => faker.finance.ethereumAddress() as `0x${string}`
 const useTransferFiatValueSpy = jest.spyOn(useTransferFiatValueModule, 'default')
 
-const renderTransferTxInfo = async ({
+const renderTransferTxInfo = ({
   direction = TransferDirection.OUTGOING,
   trusted = true,
   imitation = false,
@@ -49,32 +59,33 @@ const renderTransferTxInfo = async ({
   const sender = addr()
   const tokenAddress = addr()
 
-  const rendered = renderWithUserEvent(
-    <TransferTxInfo
-      imitation={imitation}
-      trusted={trusted}
-      txInfo={{
-        direction,
-        recipient: { value: recipient },
-        sender: { value: sender },
-        type: TransactionInfoType.TRANSFER,
-        transferInfo: {
-          tokenAddress,
-          trusted: tokenTrusted,
-          type: TransactionTokenType.ERC20,
-          decimals: 18,
-          value: tokenValue,
-          tokenName: 'Test',
-          tokenSymbol: 'TST',
-          imitation: tokenImitation,
-        },
-      }}
-      txStatus={txStatus}
-    />,
-  )
-  await act(async () => {})
-
-  return { recipient, sender, ...rendered }
+  return {
+    recipient,
+    sender,
+    ...renderWithUserEvent(
+      <TransferTxInfo
+        imitation={imitation}
+        trusted={trusted}
+        txInfo={{
+          direction,
+          recipient: { value: recipient },
+          sender: { value: sender },
+          type: TransactionInfoType.TRANSFER,
+          transferInfo: {
+            tokenAddress,
+            trusted: tokenTrusted,
+            type: TransactionTokenType.ERC20,
+            decimals: 18,
+            value: tokenValue,
+            tokenName: 'Test',
+            tokenSymbol: 'TST',
+            imitation: tokenImitation,
+          },
+        }}
+        txStatus={txStatus}
+      />,
+    ),
+  }
 }
 
 describe('TransferTxInfo', () => {
@@ -84,8 +95,8 @@ describe('TransferTxInfo', () => {
   })
 
   describe('should render non-malicious', () => {
-    it('outgoing tx', async () => {
-      const { recipient, getByText, queryByText, queryByLabelText } = await renderTransferTxInfo()
+    it('outgoing tx', () => {
+      const { recipient, getByText, queryByText, queryByLabelText } = renderTransferTxInfo()
 
       expect(getByText('1 TST')).toBeInTheDocument()
       expect(getByText(recipient)).toBeInTheDocument()
@@ -93,8 +104,8 @@ describe('TransferTxInfo', () => {
       expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
 
-    it('incoming tx', async () => {
-      const { sender, getByText, queryByText, queryByLabelText } = await renderTransferTxInfo({
+    it('incoming tx', () => {
+      const { sender, getByText, queryByText, queryByLabelText } = renderTransferTxInfo({
         direction: TransferDirection.INCOMING,
         tokenValue: parseUnits('12.34', 18).toString(),
       })
@@ -108,7 +119,7 @@ describe('TransferTxInfo', () => {
 
   describe('should render untrusted', () => {
     it('outgoing tx', async () => {
-      const { recipient, getByText, queryByText, container, user } = await renderTransferTxInfo({
+      const { recipient, getByText, queryByText, container, user } = renderTransferTxInfo({
         trusted: false,
         tokenTrusted: false,
       })
@@ -129,7 +140,7 @@ describe('TransferTxInfo', () => {
     })
 
     it('incoming tx', async () => {
-      const { sender, getByText, queryByText, container, user } = await renderTransferTxInfo({
+      const { sender, getByText, queryByText, container, user } = renderTransferTxInfo({
         direction: TransferDirection.INCOMING,
         trusted: false,
         tokenValue: parseUnits('12.34', 18).toString(),
@@ -150,7 +161,7 @@ describe('TransferTxInfo', () => {
     })
 
     it('asks for confirmation before copying the sender of an untrusted transfer', async () => {
-      const { user } = await renderTransferTxInfo({ direction: TransferDirection.INCOMING, trusted: false })
+      const { user } = renderTransferTxInfo({ direction: TransferDirection.INCOMING, trusted: false })
       const writeText = mockClipboard()
 
       await user.click(screen.getByRole('button', { name: 'Copy to clipboard' }))
@@ -162,8 +173,8 @@ describe('TransferTxInfo', () => {
   })
 
   describe('should render imitations', () => {
-    it('outgoing tx', async () => {
-      const { recipient, getByText, queryByLabelText } = await renderTransferTxInfo({
+    it('outgoing tx', () => {
+      const { recipient, getByText, queryByLabelText } = renderTransferTxInfo({
         imitation: true,
         tokenImitation: true,
       })
@@ -174,8 +185,8 @@ describe('TransferTxInfo', () => {
       expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
 
-    it('incoming tx', async () => {
-      const { sender, getByText, queryByLabelText } = await renderTransferTxInfo({
+    it('incoming tx', () => {
+      const { sender, getByText, queryByLabelText } = renderTransferTxInfo({
         direction: TransferDirection.INCOMING,
         imitation: true,
         tokenImitation: true,
@@ -188,8 +199,8 @@ describe('TransferTxInfo', () => {
       expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
 
-    it('untrusted and imitation tx', async () => {
-      const { sender, getByText, queryByLabelText } = await renderTransferTxInfo({
+    it('untrusted and imitation tx', () => {
+      const { sender, getByText, queryByLabelText } = renderTransferTxInfo({
         direction: TransferDirection.INCOMING,
         trusted: false,
         imitation: true,
@@ -208,14 +219,14 @@ describe('TransferTxInfo', () => {
     it('should show fiat value when useTransferFiatValue returns a value', async () => {
       useTransferFiatValueSpy.mockReturnValue(1000)
 
-      const { user } = await renderTransferTxInfo()
+      const { user } = renderTransferTxInfo()
 
       await user.hover(screen.getByText('$ 1,000'))
       expect(await screen.findByText('$ 1,000.00', { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
     })
 
-    it('should not show fiat value when useTransferFiatValue returns null', async () => {
-      const { queryByLabelText } = await renderTransferTxInfo()
+    it('should not show fiat value when useTransferFiatValue returns null', () => {
+      const { queryByLabelText } = renderTransferTxInfo()
 
       expect(queryByLabelText(/^\$/)).not.toBeInTheDocument()
     })
@@ -223,7 +234,7 @@ describe('TransferTxInfo', () => {
     it('should show a different fiat value when hook returns a different amount', async () => {
       useTransferFiatValueSpy.mockReturnValue(500)
 
-      const { user } = await renderTransferTxInfo({
+      const { user } = renderTransferTxInfo({
         tokenValue: parseUnits('5', 18).toString(),
       })
 

@@ -12,7 +12,11 @@ import {
 
 import TxSummary from '@/components/transactions/TxSummary/index'
 import * as pending from '@/hooks/useIsPending'
-import { renderSettled } from '@/tests/test-utils'
+import { render } from '@/tests/test-utils'
+
+jest.mock('@/features/hypernative/hooks/useShowHypernativeAssessment', () => ({
+  useShowHypernativeAssessment: jest.fn(() => false),
+}))
 
 const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
@@ -69,43 +73,39 @@ const mockSignMessageLibTxInHistory = {
 }
 
 describe('TxSummary', () => {
-  it('should display a nonce if transaction is not grouped', async () => {
-    const { getByText } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+  it('should display a nonce if transaction is not grouped', () => {
+    const { getByText } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(getByText('7')).toBeInTheDocument()
   })
 
-  it('should not display a nonce if transaction is grouped', async () => {
-    const { queryByText } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={true} />)
+  it('should not display a nonce if transaction is grouped', () => {
+    const { queryByText } = render(<TxSummary item={mockTransaction} isConflictGroup={true} />)
 
     expect(queryByText('7')).not.toBeInTheDocument()
   })
 
-  it('should not display a nonce if there is no executionInfo', async () => {
-    const { queryByText } = await renderSettled(
-      <TxSummary item={mockTransactionWithoutExecutionInfo} isConflictGroup={true} />,
-    )
+  it('should not display a nonce if there is no executionInfo', () => {
+    const { queryByText } = render(<TxSummary item={mockTransactionWithoutExecutionInfo} isConflictGroup={true} />)
 
     expect(queryByText('7')).not.toBeInTheDocument()
   })
 
-  it('should display a nonce for items in a bulk execution group', async () => {
-    const { getByTestId } = await renderSettled(
-      <TxSummary item={mockTransaction} isBulkGroup={true} isConflictGroup={false} />,
-    )
+  it('should display a nonce for items in a bulk execution group', () => {
+    const { getByTestId } = render(<TxSummary item={mockTransaction} isBulkGroup={true} isConflictGroup={false} />)
 
     expect(getByTestId('nonce')).toHaveTextContent('7')
   })
 
-  it('should not display a nonce for items in a bulk execution group without executionInfo', async () => {
-    const { queryByTestId } = await renderSettled(
+  it('should not display a nonce for items in a bulk execution group without executionInfo', () => {
+    const { queryByTestId } = render(
       <TxSummary item={mockTransactionWithoutExecutionInfo} isBulkGroup={true} isConflictGroup={false} />,
     )
 
     expect(queryByTestId('nonce')).not.toBeInTheDocument()
   })
 
-  it('should show the imitation warning instead of the nonce, not on top of it', async () => {
+  it('should show the imitation warning instead of the nonce, not on top of it', () => {
     const imitationTx = {
       ...mockTransaction,
       transaction: {
@@ -123,79 +123,75 @@ describe('TxSummary', () => {
       } as unknown as Transaction,
     }
 
-    const { getByTestId, queryByTestId } = await renderSettled(<TxSummary item={imitationTx} isConflictGroup={false} />)
+    const { getByTestId, queryByTestId } = render(<TxSummary item={imitationTx} isConflictGroup={false} />)
 
     expect(getByTestId('warning')).toBeInTheDocument()
     expect(queryByTestId('nonce')).not.toBeInTheDocument()
   })
 
-  it('should display confirmations if transactions is in queue', async () => {
-    const { getByText } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+  it('should display confirmations if transactions is in queue', () => {
+    const { getByText } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(getByText('1/3')).toBeInTheDocument()
   })
 
-  it('should not display confirmations if transactions is already executed', async () => {
-    const { queryByText } = await renderSettled(<TxSummary item={mockTransactionInHistory} isConflictGroup={false} />)
+  it('should not display confirmations if transactions is already executed', () => {
+    const { queryByText } = render(<TxSummary item={mockTransactionInHistory} isConflictGroup={false} />)
 
     expect(queryByText('1/3')).not.toBeInTheDocument()
   })
 
-  it('should not display confirmations if there is no executionInfo', async () => {
-    const { queryByText } = await renderSettled(
-      <TxSummary item={mockTransactionWithoutExecutionInfo} isConflictGroup={false} />,
-    )
+  it('should not display confirmations if there is no executionInfo', () => {
+    const { queryByText } = render(<TxSummary item={mockTransactionWithoutExecutionInfo} isConflictGroup={false} />)
 
     expect(queryByText('1/3')).not.toBeInTheDocument()
   })
 
-  it('should display a Sign button if confirmations are missing', async () => {
-    const { getByText } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+  it('should display a Sign button if confirmations are missing', () => {
+    const { getByText } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(getByText('Confirm')).toBeInTheDocument()
   })
 
-  it('should display a status label if transaction is in queue and pending', async () => {
+  it('should display a status label if transaction is in queue and pending', () => {
     jest.spyOn(pending, 'default').mockReturnValue(true)
-    const { getByTestId } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+    const { getByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(getByTestId('tx-status-label')).toBeInTheDocument()
   })
 
-  it('should display a status label if transaction is not in queue', async () => {
+  it('should display a status label if transaction is not in queue', () => {
     jest.spyOn(pending, 'default').mockReturnValue(true)
-    const { getByTestId } = await renderSettled(<TxSummary item={mockTransactionInHistory} isConflictGroup={false} />)
+    const { getByTestId } = render(<TxSummary item={mockTransactionInHistory} isConflictGroup={false} />)
 
     expect(getByTestId('tx-status-label')).toBeInTheDocument()
   })
 
-  it('should place a pending status in the same grid cell as the queue action', async () => {
+  it('should place a pending status in the same grid cell as the queue action', () => {
     jest.spyOn(pending, 'default').mockReturnValue(false)
-    const { getByText, unmount } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+    const { getByText, unmount } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
     const actionCell = getByText('Confirm').closest<HTMLElement>('[style*="grid-area"]')
     expect(actionCell?.style.gridArea).toBe('actions')
     unmount()
 
     jest.spyOn(pending, 'default').mockReturnValue(true)
-    const { getByTestId } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+    const { getByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
     const statusCell = getByTestId('tx-status-label').closest<HTMLElement>('[style*="grid-area"]')
     expect(statusCell?.style.gridArea).toBe('actions')
   })
 
-  it('should display the contract, the method and the success status of an executed SignMessageLib transaction', async () => {
+  it('should display the contract, the method and the success status of an executed SignMessageLib transaction', () => {
     jest.spyOn(pending, 'default').mockReturnValue(false)
-    const { getByTestId } = await renderSettled(
-      <TxSummary item={mockSignMessageLibTxInHistory} isConflictGroup={false} />,
-    )
+    const { getByTestId } = render(<TxSummary item={mockSignMessageLibTxInHistory} isConflictGroup={false} />)
 
     expect(getByTestId('tx-type')).toHaveTextContent(SIGN_MESSAGE_LIB_NAME)
     expect(getByTestId('tx-info')).toHaveTextContent('signMessage')
     expect(getByTestId('tx-status-label')).toHaveTextContent('Success')
   })
 
-  it('should not display a status label if transaction is in queue and not pending', async () => {
+  it('should not display a status label if transaction is in queue and not pending', () => {
     jest.spyOn(pending, 'default').mockReturnValue(false)
-    const { queryByTestId } = await renderSettled(<TxSummary item={mockTransaction} isConflictGroup={false} />)
+    const { queryByTestId } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
     expect(queryByTestId('tx-status-label')).not.toBeInTheDocument()
   })

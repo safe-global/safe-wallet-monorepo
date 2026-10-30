@@ -106,7 +106,7 @@ const TestFormWithClear = () => {
   )
 }
 
-const setup = async (
+const setup = (
   address: string,
   initialAddressBook: AddressBook,
   validate?: AddressInputProps['validate'],
@@ -119,7 +119,6 @@ const setup = async (
       },
     },
   })
-  await act(async () => {})
   const input = utils.getByLabelText('Recipient address', { exact: false })
 
   return {
@@ -149,8 +148,8 @@ describe('AddressBookInput', () => {
     jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChain)
   })
 
-  it('should not open autocomplete without entries', async () => {
-    const { input } = await setup('', {})
+  it('should not open autocomplete without entries', () => {
+    const { input } = setup('', {})
 
     expect(input).toHaveAttribute('aria-expanded', 'false')
 
@@ -161,8 +160,8 @@ describe('AddressBookInput', () => {
     expect(input).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('should open autocomplete with entries', async () => {
-    const { input } = await setup('', {
+  it('should open autocomplete with entries', () => {
+    const { input } = setup('', {
       [checksumAddress(faker.finance.ethereumAddress())]: 'Tim Testermann',
     })
 
@@ -180,7 +179,6 @@ describe('AddressBookInput', () => {
     const utils = render(<TestFormWithClear />, {
       initialReduxState: { addressBook: { [mockChain.chainId]: { [address]: 'Tim Testermann' } } },
     })
-    await act(async () => {})
     const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
 
     await act(async () => {
@@ -199,7 +197,7 @@ describe('AddressBookInput', () => {
 
   it('should open the suggestion list while typing, without clicking the field', async () => {
     const address = checksumAddress(faker.finance.ethereumAddress())
-    const { input, utils } = await setup('', { [address]: 'Tim Testermann' })
+    const { input, utils } = setup('', { [address]: 'Tim Testermann' })
 
     expect(input).toHaveAttribute('aria-expanded', 'false')
 
@@ -217,7 +215,7 @@ describe('AddressBookInput', () => {
     const validationError = 'You cannot use this address'
     const validation = (value: string) => (value === invalidAddress ? validationError : undefined)
 
-    const { input, utils } = await setup(
+    const { input, utils } = setup(
       '',
       {
         [checksumAddress(faker.finance.ethereumAddress())]: 'Tim Testermann',
@@ -257,7 +255,7 @@ describe('AddressBookInput', () => {
     const validationError = 'You cannot use this address'
     const validation = (value: string) => (value === invalidAddress ? validationError : undefined)
 
-    const { input, utils } = await setup(
+    const { input, utils } = setup(
       '',
       {
         [invalidAddress]: 'InvalidAddress',
@@ -311,7 +309,7 @@ describe('AddressBookInput', () => {
   })
 
   it('should offer to add unknown addresses if canAdd is true', async () => {
-    const { input, utils } = await setup('', {}, undefined, true)
+    const { input, utils } = setup('', {}, undefined, true)
 
     const newAddress = checksumAddress(faker.finance.ethereumAddress())
     await act(async () => {
@@ -337,7 +335,7 @@ describe('AddressBookInput', () => {
   })
 
   it('should not offer to add unknown addresses if canAdd is false', async () => {
-    const { input, utils } = await setup('', {}, undefined, false)
+    const { input, utils } = setup('', {}, undefined, false)
 
     const newAddress = checksumAddress(faker.finance.ethereumAddress())
     await act(async () => {
@@ -354,19 +352,16 @@ describe('AddressBookInput', () => {
       .with({ owners: [addressExBuilder().with({ value: signer }).build()] })
       .build()
 
-    const renderWithSafeSigner = async (addressBook: AddressBook) => {
-      const utils = render(<TestForm address={signer} canAdd />, {
+    const renderWithSafeSigner = (addressBook: AddressBook) =>
+      render(<TestForm address={signer} canAdd />, {
         initialReduxState: {
           addressBook: { [mockChain.chainId]: addressBook },
           safeInfo: { loading: false, error: undefined, data: safe, loaded: true },
         },
       })
-      await act(async () => {})
-      return utils
-    }
 
     it('should say it is a signer instead of an unknown address', async () => {
-      const utils = await renderWithSafeSigner({})
+      const utils = await act(async () => renderWithSafeSigner({}))
 
       await waitFor(() => expect(utils.getByText('This is a signer of this Safe', { exact: false })).toBeDefined())
       expect(utils.queryByText('This is an unknown address', { exact: false })).toBeNull()
@@ -374,7 +369,7 @@ describe('AddressBookInput', () => {
     })
 
     it('should show no hint when the signer is already in the address book', async () => {
-      const utils = await renderWithSafeSigner({ [signer]: 'Alice' })
+      const utils = await act(async () => renderWithSafeSigner({ [signer]: 'Alice' }))
 
       await waitFor(() => expect(utils.getByText('Alice', { exact: false })).toBeDefined())
       expect(utils.queryByText('This is a signer of this Safe', { exact: false })).toBeNull()
@@ -422,7 +417,7 @@ describe('AddressBookInput', () => {
   })
 
   it('should group a local contact under the local contacts header with the local icon', async () => {
-    const { input, utils } = await setup('', {
+    const { input, utils } = setup('', {
       [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
     })
 
@@ -450,7 +445,7 @@ describe('AddressBookInput', () => {
    * recipient.
    */
   describe('dismissing the suggestion list', () => {
-    const openList = async (utils: Awaited<ReturnType<typeof setup>>['utils'], input: HTMLInputElement) => {
+    const openList = async (utils: ReturnType<typeof setup>['utils'], input: HTMLInputElement) => {
       act(() => {
         fireEvent.mouseDown(input)
         fireEvent.mouseUp(input)
@@ -459,7 +454,7 @@ describe('AddressBookInput', () => {
     }
 
     it('closes on Escape', async () => {
-      const { input, utils } = await setup('', {
+      const { input, utils } = setup('', {
         [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
       })
       await openList(utils, input)
@@ -473,7 +468,7 @@ describe('AddressBookInput', () => {
     })
 
     it('does not let Escape reach an enclosing dialog while the list is open', async () => {
-      const { input, utils } = await setup('', {
+      const { input, utils } = setup('', {
         [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
       })
       // Stands in for the tx modal's own document-level Escape handler.
@@ -502,7 +497,7 @@ describe('AddressBookInput', () => {
 
     it('keeps the list open when clicking the field after typing a name query', async () => {
       const address = checksumAddress(faker.finance.ethereumAddress())
-      const { input } = await setup('', { [address]: 'Tim Testermann' })
+      const { input } = setup('', { [address]: 'Tim Testermann' })
 
       await act(async () => {
         fireEvent.input(input, { target: { value: 'tim' } })
@@ -517,7 +512,7 @@ describe('AddressBookInput', () => {
 
     it('keeps the list open when clicking the field after typing a lowercased address fragment', async () => {
       const address = checksumAddress(faker.finance.ethereumAddress())
-      const { input } = await setup('', { [address]: 'Tim Testermann' })
+      const { input } = setup('', { [address]: 'Tim Testermann' })
 
       await act(async () => {
         fireEvent.input(input, { target: { value: address.slice(30).toLowerCase() } })
@@ -531,7 +526,7 @@ describe('AddressBookInput', () => {
     })
 
     it('closes when pointing down outside the field', async () => {
-      const { input, utils } = await setup('', {
+      const { input, utils } = setup('', {
         [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
       })
       await openList(utils, input)
@@ -545,7 +540,7 @@ describe('AddressBookInput', () => {
 
     it('closes when focus leaves the field, without selecting a contact', async () => {
       const address = checksumAddress(faker.finance.ethereumAddress())
-      const { input, utils } = await setup('', { [address]: 'Alice' })
+      const { input, utils } = setup('', { [address]: 'Alice' })
       await openList(utils, input)
 
       const submit = utils.getByText('Submit')
@@ -568,7 +563,7 @@ describe('AddressBookInput', () => {
     it('offers every contact again when the chip is clicked', async () => {
       const alice = checksumAddress(faker.finance.ethereumAddress())
       const bob = checksumAddress(faker.finance.ethereumAddress())
-      const { input, utils } = await setup(alice, { [alice]: 'Alice', [bob]: 'Bob' })
+      const { input, utils } = setup(alice, { [alice]: 'Alice', [bob]: 'Bob' })
 
       expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument()
 
@@ -587,7 +582,7 @@ describe('AddressBookInput', () => {
     it('does not suggest contacts for a complete address that is not saved', async () => {
       const alice = checksumAddress(faker.finance.ethereumAddress())
       const unknown = checksumAddress(faker.finance.ethereumAddress())
-      const { input, utils } = await setup(unknown, { [alice]: 'Alice' })
+      const { input, utils } = setup(unknown, { [alice]: 'Alice' })
 
       await act(async () => {
         fireEvent.mouseDown(input)
@@ -606,7 +601,7 @@ describe('AddressBookInput', () => {
       return { alice, bob, addressBook: { [alice]: 'Alice', [bob]: 'Bob' } }
     }
 
-    const openListWithMouse = async (utils: Awaited<ReturnType<typeof setup>>['utils'], input: HTMLInputElement) => {
+    const openListWithMouse = async (utils: ReturnType<typeof setup>['utils'], input: HTMLInputElement) => {
       await act(async () => {
         fireEvent.mouseDown(input)
         fireEvent.mouseUp(input)
@@ -621,16 +616,16 @@ describe('AddressBookInput', () => {
       return activeId ? document.getElementById(activeId) : null
     }
 
-    it('keeps the caret out of the tab order since ArrowDown opens the list', async () => {
+    it('keeps the caret out of the tab order since ArrowDown opens the list', () => {
       const { addressBook } = twoContacts()
-      const { utils } = await setup('', addressBook)
+      const { utils } = setup('', addressBook)
 
       expect(utils.getByTestId('address-book-toggle')).toHaveAttribute('tabindex', '-1')
     })
 
     it('opens the list and activates the first option on ArrowDown', async () => {
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
 
       expect(input).toHaveAttribute('aria-expanded', 'false')
 
@@ -646,7 +641,7 @@ describe('AddressBookInput', () => {
 
     it('moves through the options with ArrowDown/ArrowUp/Home/End', async () => {
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
 
       act(() => {
         fireEvent.keyDown(input, { key: 'ArrowDown' })
@@ -680,7 +675,7 @@ describe('AddressBookInput', () => {
 
     it('writes the active contact into the field on Enter', async () => {
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
 
       await act(async () => {
         fireEvent.keyDown(input, { key: 'ArrowDown' })
@@ -702,7 +697,7 @@ describe('AddressBookInput', () => {
     it('does not submit the form when Enter selects a contact', async () => {
       const onSubmit = jest.fn()
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
       utils.getByText('Submit').closest('form')?.addEventListener('submit', onSubmit)
 
       await act(async () => {
@@ -723,7 +718,7 @@ describe('AddressBookInput', () => {
     // option is already gone and the click never selects anything.
     it('keeps the portalled list open on pointerdown so the click can select', async () => {
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
       await openListWithMouse(utils, input)
 
       const option = utils.getAllByTestId('address-item')[0]
@@ -744,7 +739,7 @@ describe('AddressBookInput', () => {
 
     it('closes without selecting when the pointer lands outside both the field and the list', async () => {
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
       await openListWithMouse(utils, input)
 
       act(() => {
@@ -757,7 +752,7 @@ describe('AddressBookInput', () => {
 
     it('leaves Enter alone when no option is active', async () => {
       const { addressBook } = twoContacts()
-      const { input, utils } = await setup('', addressBook)
+      const { input, utils } = setup('', addressBook)
       await openListWithMouse(utils, input)
 
       expect(input).not.toHaveAttribute('aria-activedescendant')

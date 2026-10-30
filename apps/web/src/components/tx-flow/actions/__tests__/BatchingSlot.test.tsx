@@ -1,5 +1,5 @@
 import { type PropsWithChildren } from 'react'
-import { act, renderHook } from '@/tests/test-utils'
+import { renderHook } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
@@ -10,6 +10,11 @@ import { OperationType } from '@safe-global/types-kit'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -67,7 +72,7 @@ const safeTxContext: SafeTxContextParams = {
   setGtfSelectedGasToken: jest.fn(),
 }
 
-const renderComboSubmitIds = async ({ isBatch }: { isBatch: boolean }) => {
+const renderComboSubmitIds = ({ isBatch }: { isBatch: boolean }) => {
   const Wrapper = ({ children }: PropsWithChildren) => (
     <SafeTxContext.Provider value={safeTxContext}>
       <TxFlowProvider step={0} data={undefined} prevStep={jest.fn()} nextStep={jest.fn()} isBatch={isBatch}>
@@ -79,9 +84,7 @@ const renderComboSubmitIds = async ({ isBatch }: { isBatch: boolean }) => {
     </SafeTxContext.Provider>
   )
 
-  const rendered = renderHook(() => useSlotIds(SlotName.ComboSubmit), { wrapper: Wrapper })
-  await act(async () => {})
-  return rendered
+  return renderHook(() => useSlotIds(SlotName.ComboSubmit), { wrapper: Wrapper })
 }
 
 describe('Batching slot', () => {
@@ -97,14 +100,14 @@ describe('Batching slot', () => {
     jest.mocked(useIsSafeOwner).mockReturnValue(true)
   })
 
-  it('offers Add to batch to an owner creating a transaction', async () => {
-    const { result } = await renderComboSubmitIds({ isBatch: false })
+  it('offers Add to batch to an owner creating a transaction', () => {
+    const { result } = renderComboSubmitIds({ isBatch: false })
 
     expect(result.current).toContain('batching')
   })
 
-  it('does not offer Add to batch when reviewing a batch', async () => {
-    const { result } = await renderComboSubmitIds({ isBatch: true })
+  it('does not offer Add to batch when reviewing a batch', () => {
+    const { result } = renderComboSubmitIds({ isBatch: true })
 
     expect(result.current).not.toContain('batching')
   })
