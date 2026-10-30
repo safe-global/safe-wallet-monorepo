@@ -19,6 +19,7 @@ import {
   signAndExecuteLine,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import {
+  APPLIED_ON_EXECUTION_LINE,
   CONNECT_TO_REMOVE_HELPER,
   NOT_A_SIGNER_HELPER,
   OUTCOME_TITLE,
@@ -200,7 +201,10 @@ const resolveClosed = (
   operation: policy.operation,
   action: 'none',
   bannerTitle: OUTCOME_TITLE[outcome],
-  bannerLine2: outcomeLine(outcome, policy.operation, changeDelay),
+  bannerLine2:
+    outcome === 'executed' && policy.appliesOnExecution
+      ? APPLIED_ON_EXECUTION_LINE
+      : outcomeLine(outcome, policy.operation, changeDelay),
 })
 
 export const resolveAllowlistDrawerState = (

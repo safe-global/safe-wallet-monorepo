@@ -22,6 +22,7 @@ export const mapImmediateGuardPolicies = (
     data,
     status: 'pending',
     operation: 'create',
+    appliesOnExecution: true,
     safeTxHash: dto.transaction.safeTxHash,
     nonce: dto.transaction.nonce,
     confirmationsSubmitted: dto.transaction.confirmations,
