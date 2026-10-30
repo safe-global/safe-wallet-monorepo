@@ -13,6 +13,8 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import SafeRowStats from '../../SafeSelectorDropdown/components/SafeRowStats'
+import ChainIndicator from '@/components/common/ChainIndicator'
+import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import { AccountBalance, toStatChains } from '../SafeAccountSelector/components/SafeAccountRow'
 import type {
   SafeAccountGroup,
@@ -22,7 +24,6 @@ import { SafeAddress } from './m2Prototype'
 import {
   getEligibilityCopy,
   INELIGIBILITY_TEXT,
-  SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import {
@@ -31,6 +32,9 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import { M2Alert } from './m2Alert'
+
+/** M1's label says "Safe Account"; the prototype uses sentence case. */
+const ACCOUNT_FIELD_LABEL = 'Which Safe account does this apply to?'
 
 const TRIGGER_CONTENT_HEIGHT = 'min-h-9'
 
@@ -66,6 +70,28 @@ const AccountSummary = ({ account, fitStats }: { account: SafeAccountOption; fit
       fitColumns={fitStats}
     />
     <AccountBalance fiatTotal={account.fiatTotal} fitColumn={fitStats} />
+  </div>
+)
+
+/** The picked account in the tile: identity, signers, network and balance spread evenly, the details in tooltips. */
+export const SpreadAccountSummary = ({ account }: { account: SafeAccountOption }): ReactElement => (
+  <div className={cn('flex w-full min-w-0 items-center justify-between gap-6', ROW_CONTENT_HEIGHT)}>
+    <SafeAddress name={account.name} address={account.address} avatarSize={32} chainId={account.chainId} />
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>
+        <ThresholdBadge threshold={account.threshold} owners={account.owners} />
+      </TooltipTrigger>
+      <TooltipContent>
+        {account.threshold} of {account.owners} signers needed
+      </TooltipContent>
+    </Tooltip>
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />} aria-label={account.chain?.chainName}>
+        <ChainIndicator chainId={account.chainId} onlyLogo imageSize={24} />
+      </TooltipTrigger>
+      <TooltipContent>{account.chain?.chainName ?? account.chainId}</TooltipContent>
+    </Tooltip>
+    <AccountBalance fiatTotal={account.fiatTotal} fitColumn />
   </div>
 )
 
@@ -160,6 +186,8 @@ export const AccountSelect = ({
   notice,
   id,
   readOnly = false,
+  variant = 'field',
+  fixed = false,
 }: {
   accounts: SafeAccountEntry[]
   /** `${chainId}:${address}` */
@@ -169,9 +197,24 @@ export const AccountSelect = ({
   id?: string
   /** M1's read-only field (edit flow): the picked account, dimmed, and no dropdown. */
   readOnly?: boolean
+  /** `tile`: a grey card titled "Safe account" with a borderless white item, like the setup's other cards. */
+  variant?: 'field' | 'tile'
+  /** Tile only: the account is a given (started from its row), so it's shown plainly, with no dropdown. */
+  fixed?: boolean
 }): ReactElement => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
+  const isTile = variant === 'tile'
+  const wrapperClass = isTile ? 'flex w-full flex-col gap-3 rounded-xl bg-muted p-4' : 'flex w-full flex-col gap-1.5'
+  const label = isTile ? (
+    <Label htmlFor={fieldId} className="text-base font-semibold">
+      Safe account
+    </Label>
+  ) : (
+    <Label htmlFor={fieldId}>{ACCOUNT_FIELD_LABEL}</Label>
+  )
+  // The tile's item: white, no border or shadow, at the cards' 8px radius.
+  const surfaceClass = isTile ? 'border-0 bg-card shadow-none hover:bg-card data-popup-open:bg-card' : undefined
   const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
   const ineligibilityText =
     !readOnly && selectedAccount?.ineligibleReason ? INELIGIBILITY_TEXT[selectedAccount.ineligibleReason] : undefined
@@ -186,20 +229,34 @@ export const AccountSelect = ({
     </Typography>
   )
 
+  if (isTile && fixed && selectedAccount) {
+    return (
+      <div className={wrapperClass} data-m2-new="New · Safe account tile (fixed)">
+        <Typography variant="paragraph-bold">Safe account</Typography>
+        <div className={cn('flex min-h-16 w-full items-center rounded-lg bg-card py-1.5', FIELD_PADDING)}>
+          <SpreadAccountSummary account={selectedAccount} />
+        </div>
+      </div>
+    )
+  }
+
   if (readOnly && selectedAccount) {
     return (
-      <div className="flex w-full flex-col gap-1.5" data-m2-new="M1 copy · Account select (read-only)">
-        <Label htmlFor={fieldId}>{SAFE_ACCOUNT_SELECTOR_LABEL}</Label>
+      <div className={wrapperClass} data-m2-new="M1 copy · Account select (read-only)">
+        {label}
 
         {/* No copy button: SafeAddress's tooltip already copies. */}
         <div
           id={fieldId}
           data-testid="safe-account-readonly"
           // The chevron's 24px stays empty so the columns don't move.
-          className="border-border bg-input flex min-h-16 w-full cursor-not-allowed items-center gap-2 rounded-lg border py-1.5 pr-9 pl-[18px] shadow-xs"
+          className={cn(
+            'border-border bg-input flex min-h-16 w-full cursor-not-allowed items-center gap-2 rounded-lg border py-1.5 pr-9 pl-[18px] shadow-xs',
+            surfaceClass,
+          )}
         >
           <span className="flex min-w-0 flex-1 opacity-50">
-            <AccountSummary account={selectedAccount} />
+            {isTile ? <SpreadAccountSummary account={selectedAccount} /> : <AccountSummary account={selectedAccount} />}
           </span>
         </div>
       </div>
@@ -207,8 +264,8 @@ export const AccountSelect = ({
   }
 
   return (
-    <div className="flex w-full flex-col gap-1.5" data-m2-new="M1 copy · Account select">
-      <Label htmlFor={fieldId}>{SAFE_ACCOUNT_SELECTOR_LABEL}</Label>
+    <div className={wrapperClass} data-m2-new="M1 copy · Account select">
+      {label}
 
       <Select
         value={value || null}
@@ -218,17 +275,21 @@ export const AccountSelect = ({
       >
         <SelectTrigger
           id={fieldId}
-          aria-label={SAFE_ACCOUNT_SELECTOR_LABEL}
+          aria-label={ACCOUNT_FIELD_LABEL}
           aria-invalid={ineligibilityText ? true : undefined}
           data-testid="safe-account-selector"
           // A plain `min-h-16` loses to SelectTrigger's own height; the `data-[size=default]` prefix is its escape hatch.
           // eslint-disable-next-line no-restricted-syntax -- two-line account trigger is taller than any SelectTrigger size
-          className={cn('w-full rounded-lg data-[size=default]:min-h-16', FIELD_PADDING)}
+          className={cn('w-full rounded-lg data-[size=default]:min-h-16', FIELD_PADDING, surfaceClass)}
         >
           <SelectValue render={<div />} className={TRIGGER_CONTENT_HEIGHT}>
             {() =>
               selectedAccount ? (
-                <AccountSummary account={selectedAccount} />
+                isTile ? (
+                  <SpreadAccountSummary account={selectedAccount} />
+                ) : (
+                  <AccountSummary account={selectedAccount} />
+                )
               ) : (
                 <span className={cn('flex min-w-0 items-center gap-3', TRIGGER_CONTENT_HEIGHT)}>
                   <span className="bg-muted size-8 shrink-0 rounded-full" />

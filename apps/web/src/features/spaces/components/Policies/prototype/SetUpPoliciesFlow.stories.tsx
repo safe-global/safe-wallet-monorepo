@@ -10,7 +10,6 @@ import {
   INTRO_STEP,
   EXECUTE_STEP,
   PREFILLED_RECIPIENTS,
-  PERMISSIONS_STEP,
   SETTINGS_STEP,
   REVIEW_STEP,
   SecondSignerConfirm,
@@ -129,11 +128,6 @@ export const CreateNoRecipients: Story = {
 /** Safe account settings: which changes to the Safe account the allowlist still lets through. */
 export const Settings: Story = {
   args: { initialStep: SETTINGS_STEP },
-}
-
-/** Permissions ("Existing policies"): Payments' spending limits, one blocked since USDC starts unchecked. */
-export const Permissions: Story = {
-  args: { initialStep: PERMISSIONS_STEP },
 }
 
 /** Review ("Confirm policies"): M1's confirm-screen summary for the policies about to be turned on. */

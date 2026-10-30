@@ -57,7 +57,7 @@ const InsetCardBanner = (): ReactElement => (
       description="A Safe account can only have one policy of this kind, remove it to set up an allowlist."
       action={<SettingsButton />}
     />
-    <Card className="gap-0 divide-y divide-border p-0">
+    <Card size="none" className="divide-y divide-border">
       {UNKNOWN_POLICIES.map(({ name, address }) => (
         <div key={address} className="px-3 py-2.5">
           <SafeAddress name={name} address={address} />
@@ -78,7 +78,7 @@ const SplitBanner = (): ReactElement => (
     />
     <div className="flex flex-col gap-2">
       <Typography variant="paragraph-small-medium">Installed policies</Typography>
-      <Card className="gap-0 divide-y divide-border border border-border p-0">
+      <Card variant="outlined" size="none" className="divide-y divide-border">
         {UNKNOWN_POLICIES.map(({ name, address }) => (
           <div key={address} className="px-3 py-2.5">
             <SafeAddress name={name} address={address} />

@@ -1,9 +1,8 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
-import { ChevronDown, ChevronRight, Copy, ShieldCheck } from 'lucide-react'
+import { Ban, Check, ChevronDown, ChevronRight, Copy, Landmark, Settings, X, type LucideIcon } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import {
   Drawer,
   DrawerBody,
@@ -16,11 +15,11 @@ import {
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
-import { Link } from '@safe-global/views/components/ui/link'
 import { PolicyDrawerActions } from '../components/PolicyDrawerActions'
-import { MOCK_VIEWERS } from '../mocks/policies'
-import ProposerDrawer, { ProposerStatus } from '../ProposerDrawer'
-import { SpendingLimitDrawer } from '../SpendingLimitDrawer'
+import { ProposerStatus } from '../ProposerDrawer'
+import { ProposerVariantContent } from '../ProposerDrawer/variants'
+import { toPolicyStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/utils'
+import type { ProposerVariantContentProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { CopyTransactionLink } from '../SpendingLimitDrawer/components/CopyTransactionLink'
 import {
@@ -33,6 +32,7 @@ import { PAYMENTS_LIMIT } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
 import { BlockedSpendingLimitDrawer, type ProtectionLink } from './m2BlockedSpendingLimitDrawer'
 import { CopyPolicyDialog } from './m2CopyPolicyDialog'
+import { PanelNavButtons, PinnedTop, PolicyIconTile, type PanelNav } from './m2PanelParts'
 import {
   getStatusDetail,
   POLICY_ROW_LABELS,
@@ -53,30 +53,74 @@ import {
   SIGNING_TIME_LEFT,
   WaitingForSigners,
   type M2Account,
+  AccountProtectionIcon,
+  usePrototypeModel,
 } from './m2Prototype'
-import { getAccountTokens } from './m2SetupFlow'
+import { ACCOUNT_SETTING_GROUPS, getAccountTokens, type Baseline } from './m2SetupFlow'
 import TokenIcon from '@/components/common/TokenIcon'
 
 const NADIA_ADDRESS = '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F'
 
-/** The setup's fake guard contract, as in m2SetupFlow's transaction. */
-const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
-const ENFORCED_BY = 'Safe protection contract'
-
 /** M1's PolicyDrawerHeader markup; its chip only knows M1's statuses, so this one also shows "Change pending". */
-const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | null }): ReactElement => {
-  const { Icon } = POLICY_TYPES[row.type]
-
-  return (
-    <DrawerHeader>
-      <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-card">
-        <Icon className="size-4 text-muted-foreground" />
-      </div>
+const M2DrawerHeader = ({
+  row,
+  status,
+  nav,
+  onOpenProtection,
+}: {
+  row: PolicyRow
+  status: RowStatus | null
+  nav?: PanelNav
+  /** Set when the account's protection checks this policy: the icon gets its badge. */
+  onOpenProtection?: () => void
+}): ReactElement => (
+  <DrawerHeader>
+    <PolicyIconTile Icon={POLICY_TYPES[row.type].Icon} onOpenProtection={onOpenProtection} />
+    <div className="flex min-w-0 flex-col items-start gap-1">
       <DrawerTitle size="lg">{POLICY_ROW_LABELS[row.type]}</DrawerTitle>
-      <div className="ml-auto">{status && <RowStatusChip status={status} />}</div>
-    </DrawerHeader>
-  )
-}
+      {status && <RowStatusChip status={status} />}
+    </div>
+    {nav && (
+      <div className="ml-auto">
+        <PanelNavButtons nav={nav} />
+      </div>
+    )}
+  </DrawerHeader>
+)
+
+/** M1's ProposerDrawer, rebuilt from its parts so its header can take the protection badge and the arrows. */
+const M2ProposerDrawer = ({
+  open,
+  onClose,
+  nav,
+  onOpenProtection,
+  row,
+  actionLabel,
+  actionVariant,
+  onAction,
+  ...content
+}: ProposerVariantContentProps & {
+  open: boolean
+  onClose: () => void
+  nav?: PanelNav
+  /** Set when the account's protection checks what the proposer drafts. */
+  onOpenProtection?: () => void
+  row: PolicyRow
+  actionLabel: string
+  actionVariant?: 'default' | 'secondary'
+  onAction: () => void
+}): ReactElement => (
+  <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
+    <M2DrawerHeader row={row} status={toPolicyStatus(content.status)} nav={nav} onOpenProtection={onOpenProtection} />
+    <DrawerBody>
+      <div className="flex flex-col gap-6">
+        <PinnedTop account={row.account} />
+        <ProposerVariantContent {...content} />
+      </div>
+    </DrawerBody>
+    <PolicyDrawerActions actionLabel={actionLabel} onClick={onAction} variant={actionVariant} />
+  </Drawer>
+)
 
 const PROTECTION_TITLE = 'Account protection'
 
@@ -124,27 +168,23 @@ const PermissionsSection = ({
   <DrawerSection title="Applied to">
     {permissions.length === 0 ? (
       <Typography variant="paragraph-small" color="muted">
-        No spending limits or proposers yet. Any you add will follow the protection.
+        No spending limits or proposers yet. Any you add will be enforced too.
       </Typography>
     ) : (
       <Card variant="muted" size="none" radius="lg" data-m2-new="New · Covered permissions">
         <div className="flex flex-col divide-y divide-border">
-          {permissions.map((row) => {
-            const follows = row.coverage !== 'not-covered'
-
-            return (
-              <PolicyListItem
-                key={row.id}
-                row={row}
-                onSelect={onSelect}
-                tag={
-                  <Badge variant={follows ? 'subtle' : 'warning'} shape="tag">
-                    {follows ? 'Protection applied' : 'Protection not applied'}
-                  </Badge>
-                }
-              />
-            )
-          })}
+          {permissions.map((row) => (
+            <PolicyListItem
+              key={row.id}
+              row={row}
+              onSelect={onSelect}
+              tag={
+                <Badge variant="subtle" shape="tag">
+                  Enforced
+                </Badge>
+              }
+            />
+          ))}
         </div>
       </Card>
     )}
@@ -169,61 +209,6 @@ const EnforcedPoliciesSection = ({
     </Card>
   </DrawerSection>
 )
-
-const EXPLORERS: Record<string, string> = {
-  '1': 'https://etherscan.io/address/',
-  '42161': 'https://arbiscan.io/address/',
-  '8453': 'https://basescan.org/address/',
-}
-
-/** M1's PolicyOverview (SpendingLimitDrawer), with the prototype's address tooltip in place of M1's copy icon. */
-const PolicyOverviewSection = ({
-  account,
-  lastUpdated,
-}: {
-  account: M2Account
-  lastUpdated?: string
-}): ReactElement => {
-  const explorer = EXPLORERS[account.chainId]
-
-  return (
-    <div data-m2-new="M1 copy · Policy overview">
-      <DrawerSection title="Details">
-        <DrawerList
-          items={[
-            { label: 'Safe account', content: <SafeAddress name={account.name} address={account.address} /> },
-            {
-              label: 'Network',
-              content: <ChainIndicator chainId={account.chainId} inline className="min-w-0! justify-end!" />,
-            },
-            ...(lastUpdated ? [{ label: 'Last updated', content: lastUpdated }] : []),
-            {
-              label: 'Enforced by',
-              content: (
-                <span className="inline-flex items-center gap-1">
-                  <ShieldCheck className="size-3.5" />
-                  {explorer ? (
-                    <Link
-                      href={`${explorer}${GUARD_ADDRESS}`}
-                      variant="inherit"
-                      className="underline"
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      {ENFORCED_BY}
-                    </Link>
-                  ) : (
-                    <span>{ENFORCED_BY}</span>
-                  )}
-                </span>
-              ),
-            },
-          ]}
-        />
-      </DrawerSection>
-    </div>
-  )
-}
 
 /** A grey summary row that opens to its details underneath; the chevron points right when closed, down when open. */
 const ExpandableCard = ({
@@ -392,7 +377,7 @@ export type AllowlistPanelScenario = { viewer: PanelViewer; operation?: PanelOpe
 // M1's SpendingLimitDrawer copy (SpendingLimitDrawer/messages.ts), worded for the allowlist.
 const PENDING_TITLE: Record<PanelOperation, string> = {
   create: 'Account protection isn’t active until the transaction is executed.',
-  update: 'The current rules still apply until the change is executed.',
+  update: 'The current policies still apply until the change is executed.',
   remove: 'Account protection stays active until the removal is executed.',
 }
 
@@ -411,11 +396,11 @@ const formatUtc = (date: Date): string =>
 // Every change to the allowlist waits out the 24‑hour delay after execution; the prototype counts it from now.
 const EXECUTED_LINE: Record<PanelOperation, (at: string) => string> = {
   create: (at) => `Account protection becomes active after the 24‑hour delay, on ${at}.`,
-  update: (at) => `The new rules apply after the 24‑hour delay, on ${at}.`,
+  update: (at) => `The new policies apply after the 24‑hour wait, on ${at}.`,
   remove: (at) => `Account protection is removed after the 24‑hour delay, on ${at}.`,
 }
 
-const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit its protection.'
+const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit its account protection.'
 
 type PanelState =
   | { kind: 'live'; action: 'manage' | 'connect' | 'not-signer' }
@@ -485,30 +470,52 @@ const getPanelStatus = (row: PolicyRow, state: PanelState): RowStatus | null => 
 }
 
 /** SpendingLimitDrawer's top of body: the pending or closed banner and the signatures, or the change waiting out its delay. */
-const StatusSection = ({ row, state }: { row: PolicyRow; state: PanelState }): ReactElement | null => {
+const StatusSection = ({
+  row,
+  state,
+  part = 'all',
+}: {
+  row: PolicyRow
+  state: PanelState
+  /** The banner on its own (pinned at the top) or the details on their own (further down). */
+  part?: 'all' | 'banner' | 'details'
+}): ReactElement | null => {
+  if (part === 'details' && state.kind !== 'pending') return null
   switch (state.kind) {
     case 'pending':
       return (
         <div className="flex flex-col gap-6">
-          <M2Alert tone="warning" title={PENDING_TITLE[state.operation]} description={state.line2} />
-          {/* M1's PendingSignatures layout, with the tooltip address in place of its copy icon. */}
-          <DrawerSection title="Pending signatures" rightNode={`${state.signed} of ${state.required} signatures`}>
-            <DrawerList
-              items={[
-                { label: 'Time to sign', content: SIGNING_TIME_LEFT },
-                {
-                  label: 'Safe account',
-                  content: <SafeAddress name={row.account.name} address={row.account.address} />,
-                },
-                {
-                  label: 'Waiting for',
-                  content: (
-                    <WaitingForSigners signed={state.signed} required={state.required} owners={row.account.owners} />
-                  ),
-                },
-              ]}
+          {part !== 'details' && (
+            <M2Alert
+              tone="warning"
+              title={
+                row.singlePolicy && state.operation === 'create'
+                  ? 'This allowlist isn’t active until the transaction is executed.'
+                  : PENDING_TITLE[state.operation]
+              }
+              description={state.line2}
             />
-          </DrawerSection>
+          )}
+          {/* M1's PendingSignatures layout, with the tooltip address in place of its copy icon. */}
+          {part !== 'banner' && (
+            <DrawerSection title="Pending signatures" rightNode={`${state.signed} of ${state.required} signatures`}>
+              <DrawerList
+                items={[
+                  { label: 'Time to sign', content: SIGNING_TIME_LEFT },
+                  {
+                    label: 'Safe account',
+                    content: <SafeAddress name={row.account.name} address={row.account.address} />,
+                  },
+                  {
+                    label: 'Waiting for',
+                    content: (
+                      <WaitingForSigners signed={state.signed} required={state.required} owners={row.account.owners} />
+                    ),
+                  },
+                ]}
+              />
+            </DrawerSection>
+          )}
         </div>
       )
 
@@ -651,9 +658,11 @@ const AllowlistDrawer = ({
   onOpenProtection,
   justActivated = false,
   onClose,
+  nav,
   ...handlers
 }: M2DrawerHandlers & {
   open: boolean
+  nav?: PanelNav
   row: PolicyRow
   viewerHasSigned: boolean
   scenario?: AllowlistPanelScenario
@@ -680,44 +689,28 @@ const AllowlistDrawer = ({
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={POLICY_ROW_LABELS[row.type]}>
-      <M2DrawerHeader row={row} status={getPanelStatus(row, state)} />
+      <M2DrawerHeader
+        row={row}
+        status={getPanelStatus(row, state)}
+        nav={nav}
+        onOpenProtection={onOpenProtection ? () => onOpenProtection(row.account) : undefined}
+      />
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
-          {justActivated && state.kind === 'live' && (
-            <M2Alert
-              tone="success"
-              title="Account protection is now active"
-              description={`${row.account.name} can only send the allowed tokens to the ${recipientCount}. Further changes will take 24 hours to apply.`}
-            />
-          )}
-          <StatusSection row={row} state={state} />
+          <PinnedTop account={row.account}>
+            {justActivated && state.kind === 'live' && (
+              <M2Alert
+                tone="success"
+                title="Account protection is now active"
+                description={`${row.account.name} can only send the allowed tokens to the ${recipientCount}. Any change waits 24 hours.`}
+              />
+            )}
+            <StatusSection row={row} state={state} part="banner" />
+          </PinnedTop>
           <RecipientList recipients={row.people} isRemoved={isRemoved} />
           <TokenList tokens={tokens} isRemoved={isRemoved} />
-          {/* A policy like the others; what it means for the account sits in the protection overview. */}
-          {onOpenProtection && (
-            <button
-              type="button"
-              onClick={() => onOpenProtection(row.account)}
-              className="flex w-full cursor-pointer items-center gap-3 rounded-lg bg-muted p-3 text-left transition-colors hover:bg-secondary-hover"
-              data-m2-new="New · Part of account protection"
-            >
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-mint">
-                <ShieldCheck className="size-4" aria-hidden />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <Typography variant="paragraph-small-medium">
-                  Part of {row.account.name}’s account protection
-                </Typography>
-                <Typography variant="paragraph-small" color="muted">
-                  See every policy it checks and the spending limits it applies to.
-                </Typography>
-              </div>
-              <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-            </button>
-          )}
-          {/* Last in every state, as in SpendingLimitDrawer. */}
-          <PolicyOverviewSection account={row.account} lastUpdated={row.lastUpdated} />
+          <StatusSection row={row} state={state} part="details" />
         </div>
       </DrawerBody>
 
@@ -757,7 +750,10 @@ export type PolicyDrawerProps = M2DrawerHandlers & {
   onOpenAllowlist?: (account: M2Account) => void
   /** The account's protection overview: from a spending limit's protection section or the allowlist's link. */
   onOpenProtection?: (account: M2Account) => void
+  /** Account settings only: what its enforcement setup blocked. */
+  accountSettingsRules?: ProtectionRules
   onClose: () => void
+  nav?: PanelNav
 }
 
 /** The drawer for one policy row: M1's own drawers for M1's types, the M2 drawer for the rest. */
@@ -769,11 +765,12 @@ export const PolicyDrawer = ({
   spendingLimitBlockedTokens = [],
   paymentsExcludedTokens = [],
   justActivated = false,
-  allRows = [],
   protectedAccountKeys = [],
   onOpenAllowlist,
   onOpenProtection,
+  accountSettingsRules = DEFAULT_PROTECTION_RULES,
   onClose,
+  nav,
   ...handlers
 }: PolicyDrawerProps): ReactElement | null => {
   if (!row) return null
@@ -786,8 +783,6 @@ export const PolicyDrawer = ({
     case 'spending-limit': {
       const limit = row.spendingLimit ?? PAYMENTS_LIMIT
       const protection: ProtectionLink | undefined = row.coverage && {
-        coverage: row.coverage,
-        excludedTokens,
         onOpenProtection: onOpenProtection ? () => onOpenProtection(row.account) : undefined,
       }
 
@@ -797,6 +792,7 @@ export const PolicyDrawer = ({
             variant="blocked"
             open={open}
             onClose={onClose}
+            nav={nav}
             limit={limit}
             protection={protection}
             blockedTokens={row.blockedTokens ?? spendingLimitBlockedTokens}
@@ -811,42 +807,48 @@ export const PolicyDrawer = ({
             variant="locked"
             open={open}
             onClose={onClose}
+            nav={nav}
             limit={limit}
             protection={protection}
           />
         )
-      if (protection)
-        return (
-          <BlockedSpendingLimitDrawer
-            variant="covered"
-            open={open}
-            onClose={onClose}
-            limit={limit}
-            protection={protection}
-            onEdit={handlers.onEdit}
-          />
-        )
-
+      // Without protection too, so every spending limit panel has the arrows and the account at the top.
       return (
-        <SpendingLimitDrawer
+        <BlockedSpendingLimitDrawer
+          variant="covered"
           open={open}
           onClose={onClose}
-          policy={limit.policy}
-          viewer={MOCK_VIEWERS.signer}
-          safe={{ address: row.account.address, name: row.account.name }}
-          overview={limit.overview}
-          names={limit.names}
+          nav={nav}
+          limit={limit}
+          protection={protection}
           onEdit={handlers.onEdit}
-          onConnectWallet={() => {}}
         />
       )
     }
 
-    case 'proposer':
+    case 'account-settings':
       return (
-        <ProposerDrawer
+        <AccountSettingsDrawer
           open={open}
           onClose={onClose}
+          nav={nav}
+          row={row}
+          rules={accountSettingsRules}
+          onOpenProtection={onOpenProtection ? () => onOpenProtection(row.account) : undefined}
+          onEdit={handlers.onEdit}
+        />
+      )
+
+    case 'proposer':
+      return (
+        <M2ProposerDrawer
+          open={open}
+          onClose={onClose}
+          nav={nav}
+          onOpenProtection={
+            row.coverage === 'follows' && onOpenProtection ? () => onOpenProtection(row.account) : undefined
+          }
+          row={row}
           status={ProposerStatus.ACTIVE}
           overview={{
             proposer: { address: TOM_ADDRESS, name: 'Tom Reyes' },
@@ -874,6 +876,7 @@ export const PolicyDrawer = ({
           onOpenProtection={onOpenProtection}
           justActivated={justActivated}
           onClose={onClose}
+          nav={nav}
           {...handlers}
         />
       )
@@ -887,53 +890,401 @@ export type ProtectionDrawerProps = {
   allRows: PolicyRow[]
   onSelectPolicy?: (row: PolicyRow) => void
   onClose: () => void
+  /** Two levels: the allowlist is one of the policies under the protection, in a single list. */
+  levels?: boolean
+  nav?: PanelNav
+  /** The protection's own rules, set in its setup and changed with Edit. */
+  rules?: ProtectionRules
+  /** The viewer is among the signatures on the protection's pending transaction. */
+  viewerHasSigned?: boolean
+  /** Edited and executed: the change waits out its 24 hours. */
+  changePending?: boolean
+  onConfirm?: () => void
+  onExecute?: () => void
+  onCancelChange?: () => void
+  onEditProtection?: () => void
+  /** Not enforced: starts the Enforce policies flow for this account. */
+  onEnforce?: () => void
+}
+
+/** What the protection itself decides: what happens to anything no policy covers, and which account changes it lets through. */
+export type ProtectionRules = { baseline: Baseline; blockedSettings: string[] }
+
+export const DEFAULT_PROTECTION_RULES: ProtectionRules = { baseline: 'block-all', blockedSettings: [] }
+
+type Verdict = 'allowed' | 'blocked' | 'partly'
+
+const VERDICTS: Record<Verdict, ReactElement> = {
+  allowed: (
+    <Badge variant="success" size="status" shape="status">
+      <Check aria-hidden />
+      Allowed
+    </Badge>
+  ),
+  blocked: (
+    <Badge variant="destructive" size="status" shape="status">
+      <X aria-hidden />
+      Blocked
+    </Badge>
+  ),
+  partly: (
+    <Badge variant="warning" size="status" shape="status">
+      Partly blocked
+    </Badge>
+  ),
+}
+
+const getSettingsVerdict = (groupTitles: string[], blockedSettings: string[]): Verdict => {
+  const ids = ACCOUNT_SETTING_GROUPS.filter(({ title }) => groupTitles.includes(title)).flatMap(({ settings }) =>
+    settings.map(({ id }) => id),
+  )
+  const blocked = ids.filter((id) => blockedSettings.includes(id)).length
+  return blocked === 0 ? 'allowed' : blocked === ids.length ? 'blocked' : 'partly'
+}
+
+/** A policy row's verdict: a live policy is allowed, a blocked one says so, anything in between keeps its status. */
+const getPolicyVerdict = (row: PolicyRow): ReactElement =>
+  row.status === 'active' || row.status === 'change-pending' ? (
+    VERDICTS.allowed
+  ) : row.status === 'blocked' ? (
+    VERDICTS.blocked
+  ) : (
+    <RowStatusChip status={row.status} />
+  )
+
+/** Laid out like PolicyListItem, with a blank where its chevron goes, so the badges line up. */
+const VerdictRow = ({
+  Icon,
+  title,
+  description,
+  verdict,
+  onClick,
+}: {
+  Icon: LucideIcon
+  title: string
+  description: string
+  verdict: ReactNode
+  onClick?: () => void
+}): ReactElement => {
+  const content = (
+    <>
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+        <Icon className="size-4 text-muted-foreground" aria-hidden />
+      </div>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <Typography variant="paragraph-small-medium">{title}</Typography>
+        <Typography variant="paragraph-small" color="muted">
+          {description}
+        </Typography>
+      </span>
+      {verdict}
+      {onClick ? (
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+      ) : (
+        <span aria-hidden className="size-4 shrink-0" />
+      )}
+    </>
+  )
+
+  return onClick ? (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full cursor-pointer items-center gap-3 p-3 text-left transition-colors first:rounded-t-lg last:rounded-b-lg hover:bg-secondary-hover"
+    >
+      {content}
+    </button>
+  ) : (
+    <div className="flex items-center gap-3 p-3">{content}</div>
+  )
+}
+
+/** Account settings, created with enforcement: every account change, one by one, with whether it's allowed. */
+const AccountSettingsDrawer = ({
+  open,
+  onClose,
+  nav,
+  row,
+  rules,
+  onOpenProtection,
+  onEdit,
+}: {
+  open: boolean
+  onClose: () => void
+  nav?: PanelNav
+  row: PolicyRow
+  rules: ProtectionRules
+  onOpenProtection?: () => void
+  onEdit?: () => void
+}): ReactElement => (
+  <Drawer open={open} onClose={onClose} ariaLabel={POLICY_ROW_LABELS[row.type]}>
+    <M2DrawerHeader row={row} status={row.status} nav={nav} onOpenProtection={onOpenProtection} />
+
+    <DrawerBody>
+      <div className="flex flex-col gap-6" data-m2-new="New · Account settings panel">
+        <PinnedTop account={row.account} />
+        <Typography variant="paragraph-small" color="muted">
+          What can change on {row.account.name} itself. Anything blocked here can’t happen, even with every signature.
+          Any change to these settings waits 24 hours.
+        </Typography>
+        {ACCOUNT_SETTING_GROUPS.map(({ title, settings }) => (
+          <DrawerSection key={title} title={title}>
+            <Card variant="muted" size="none" radius="lg">
+              <div className="flex flex-col divide-y divide-border">
+                {settings.map(({ id, title: settingTitle, description }) => (
+                  <div key={id} className="flex items-center gap-3 p-3">
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <Typography variant="paragraph-small-medium">{settingTitle}</Typography>
+                      <Typography variant="paragraph-small" color="muted">
+                        {description}
+                      </Typography>
+                    </span>
+                    {VERDICTS[rules.blockedSettings.includes(id) ? 'blocked' : 'allowed']}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </DrawerSection>
+        ))}
+      </div>
+    </DrawerBody>
+
+    {onEdit && (
+      <DrawerFooter>
+        <Button className="w-full" onClick={onEdit}>
+          Edit account settings
+        </Button>
+      </DrawerFooter>
+    )}
+  </Drawer>
+)
+
+/** Everything enforcement lets through, policy by policy, then the one thing it blocks: every other action. */
+const EnforcedListSection = ({
+  rules,
+  policies,
+  accountSettings,
+  onSelect,
+  isPending = false,
+}: {
+  rules: ProtectionRules
+  policies: PolicyRow[]
+  /** Both account rows open the account settings policy. */
+  accountSettings?: PolicyRow
+  onSelect?: (row: PolicyRow) => void
+  /** Enforcement isn't executed yet: what it sets up, and what it blocks, are pending too. */
+  isPending?: boolean
+}): ReactElement => {
+  const openSettings = accountSettings && onSelect ? () => onSelect(accountSettings) : undefined
+  const pendingChip = <RowStatusChip status="pending" />
+  // Set up with enforcement first (the allowlist), then the policies that work on their own.
+  const ordered = [...policies].sort((a, b) => Number(b.type === 'allowlist') - Number(a.type === 'allowlist'))
+
+  return (
+    <DrawerSection title="Policies">
+      <Card variant="muted" size="none" radius="lg" data-m2-new="New · Enforced policies list">
+        <div className="flex flex-col divide-y divide-border">
+          <VerdictRow
+            Icon={Settings}
+            title="Account changes"
+            description="Signers, threshold, advanced"
+            verdict={
+              isPending ? pendingChip : VERDICTS[getSettingsVerdict(['Signers', 'Advanced'], rules.blockedSettings)]
+            }
+            onClick={openSettings}
+          />
+          <VerdictRow
+            Icon={Settings}
+            title="Policy changes"
+            description="Creating and changing policies"
+            verdict={isPending ? pendingChip : VERDICTS[getSettingsVerdict(['Policies'], rules.blockedSettings)]}
+            onClick={openSettings}
+          />
+          {ordered.map((row) => (
+            <PolicyListItem key={row.id} row={row} onSelect={onSelect} tag={getPolicyVerdict(row)} />
+          ))}
+          <VerdictRow
+            Icon={Ban}
+            title="Every other action"
+            description="Anything no policy allows"
+            verdict={isPending ? pendingChip : VERDICTS.blocked}
+          />
+        </div>
+      </Card>
+    </DrawerSection>
+  )
 }
 
 /**
  * The account's protection, opened from "Protected" on its row or a policy's "Protection applied" tag: what it does,
  * the policies it checks, and the spending limits and proposers it applies to. The policies keep their own panels.
  */
+/** B: the Policies tab's icon on the dark tile, set up or not; A keeps its own icon. */
+const ProtectionHeaderIcon = ({ isOn }: { isOn: boolean }): ReactElement => {
+  if (usePrototypeModel() === 'policies')
+    return (
+      <div className="flex size-10 items-center justify-center rounded-lg bg-foreground text-background">
+        <Landmark className="size-4" aria-hidden />
+      </div>
+    )
+
+  return isOn ? (
+    <div className="flex size-10 items-center justify-center rounded-lg bg-mint">
+      <AccountProtectionIcon className="size-4" />
+    </div>
+  ) : (
+    <div className="flex size-10 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground">
+      <AccountProtectionIcon className="size-4" />
+    </div>
+  )
+}
+
 export const ProtectionDrawer = ({
   open,
   account,
   allRows,
   onSelectPolicy,
   onClose,
+  levels = false,
+  nav,
+  rules = DEFAULT_PROTECTION_RULES,
+  viewerHasSigned = false,
+  changePending = false,
+  onConfirm,
+  onExecute,
+  onCancelChange,
+  onEditProtection,
+  onEnforce,
 }: ProtectionDrawerProps): ReactElement | null => {
   if (!account) return null
 
-  const rows = allRows.filter((row) => getAccountKey(row.account) === getAccountKey(account))
+  const accountRows = allRows.filter((row) => getAccountKey(row.account) === getAccountKey(account))
+  // A Safe account has one allowlist: a failed earlier setup gives way to the current one.
+  const hasLiveAllowlist = accountRows.some(({ type, status }) => type === 'allowlist' && status !== 'failed')
+  const rows = accountRows.filter(
+    ({ type, status }) => !(hasLiveAllowlist && type === 'allowlist' && status === 'failed'),
+  )
   const enforced = rows.filter(({ type }) => type === 'allowlist')
   const appliedTo = rows.filter(({ type }) => type !== 'allowlist')
   const isActive = enforced.some(({ status }) => status === 'active' || status === 'change-pending')
-  const lastUpdated = enforced.find(({ lastUpdated }) => lastUpdated)?.lastUpdated
+  // The transaction that turned the protection on: its signatures and Confirm or Execute show here until it applies.
+  const setup = enforced[0]
+  const setupState =
+    setup && resolvePanelState(setup, { viewer: setup.viewer ?? (viewerHasSigned ? 'signer-signed' : 'signer') })
+  const isSettingUp = setupState !== undefined && setupState.kind !== 'live'
+  // Never set up, or its setup failed: explain what that leaves open instead of rules.
+  const isOff = !setup || setup.status === 'failed'
+
+  if (isOff)
+    return (
+      <Drawer open={open} onClose={onClose} ariaLabel={PROTECTION_TITLE}>
+        <DrawerHeader>
+          <ProtectionHeaderIcon isOn={false} />
+          <div className="flex min-w-0 flex-col items-start gap-1">
+            <DrawerTitle size="lg">{PROTECTION_TITLE}</DrawerTitle>
+            <RowStatusChip status="unenforced" />
+          </div>
+          {nav && (
+            <div className="ml-auto">
+              <PanelNavButtons nav={nav} />
+            </div>
+          )}
+        </DrawerHeader>
+
+        <DrawerBody>
+          <div className="flex flex-col gap-6" data-m2-new="New · Account protection off">
+            <PinnedTop account={account}>
+              <M2Alert
+                tone="warning"
+                title="Funds can be sent to any address"
+                description={`Set up account protection so ${account.name} can only do what its policies allow.`}
+              />
+            </PinnedTop>
+          </div>
+        </DrawerBody>
+
+        {onEnforce && (
+          <DrawerFooter>
+            <Button className="w-full" onClick={onEnforce}>
+              Set up account protection
+            </Button>
+          </DrawerFooter>
+        )}
+      </Drawer>
+    )
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={PROTECTION_TITLE}>
       <DrawerHeader>
-        <div className="flex size-10 items-center justify-center rounded-lg bg-mint">
-          <ShieldCheck className="size-4" />
-        </div>
-        <DrawerTitle size="lg">{PROTECTION_TITLE}</DrawerTitle>
-        <div className="ml-auto">
+        <ProtectionHeaderIcon isOn />
+        <div className="flex min-w-0 flex-col items-start gap-1">
+          <DrawerTitle size="lg">{PROTECTION_TITLE}</DrawerTitle>
           <Badge variant={isActive ? 'success' : 'subtle'} size="status" shape="status">
-            {isActive ? 'Protected' : 'Not active yet'}
+            {isActive ? 'Active' : 'Pending'}
           </Badge>
         </div>
+        {nav && (
+          <div className="ml-auto">
+            <PanelNavButtons nav={nav} />
+          </div>
+        )}
       </DrawerHeader>
 
       <DrawerBody>
         <div className="flex flex-col gap-6" data-m2-new="New · Account protection overview">
-          <Typography variant="paragraph-small" color="muted">
-            {isActive ? 'Every' : 'Once active, every'} transaction on {account.name} is checked against these policies
-            right before it runs, after the signers approve it. Anything not allowed is blocked, and any change waits 24
-            hours.
-          </Typography>
-          <EnforcedPoliciesSection policies={enforced} onSelect={onSelectPolicy} />
-          <PermissionsSection permissions={appliedTo} onSelect={onSelectPolicy} />
-          <PolicyOverviewSection account={account} lastUpdated={lastUpdated} />
+          <PinnedTop account={account}>
+            {setup && setupState && isSettingUp && <StatusSection row={setup} state={setupState} part="banner" />}
+          </PinnedTop>
+          {changePending && (
+            <M2Alert
+              tone="warning"
+              title="Your change applies in 24 hours"
+              description="The policies below apply then. Until that, the current ones stay and any signer can cancel."
+            />
+          )}
+          {levels ? (
+            <>
+              <Typography variant="paragraph-small" color="muted">
+                {isActive ? 'Anything' : 'Once it’s executed, anything'} your policies don’t allow on {account.name} is
+                blocked, even with every signature. Any change waits 24 hours.
+              </Typography>
+              <EnforcedListSection
+                rules={rules}
+                policies={rows.filter(({ protectionOnly, type }) => !protectionOnly && type !== 'account-settings')}
+                accountSettings={rows.find(({ type }) => type === 'account-settings')}
+                onSelect={onSelectPolicy}
+                isPending={!isActive}
+              />
+              {setup && setupState && isSettingUp && <StatusSection row={setup} state={setupState} part="details" />}
+            </>
+          ) : (
+            <>
+              <Typography variant="paragraph-small" color="muted">
+                {isActive ? 'Every' : 'Once active, every'} transaction on {account.name} is checked against these
+                policies right before it runs, after the signers approve it. Anything not allowed is blocked, and any
+                change waits 24 hours.
+              </Typography>
+              <EnforcedPoliciesSection policies={enforced} onSelect={onSelectPolicy} />
+              <PermissionsSection permissions={appliedTo} onSelect={onSelectPolicy} />
+              {setup && setupState && isSettingUp && <StatusSection row={setup} state={setupState} part="details" />}
+            </>
+          )}
         </div>
       </DrawerBody>
+
+      {setup && setupState && isSettingUp ? (
+        <M2DrawerActions row={setup} state={setupState} onConfirm={onConfirm} onExecute={onExecute} />
+      ) : changePending ? (
+        <PolicyDrawerActions actionLabel="Cancel change" variant="secondary" onClick={onCancelChange} />
+      ) : (
+        onEditProtection && (
+          <DrawerFooter>
+            <Button className="w-full" onClick={onEditProtection} data-m2-new="New · Edit protection">
+              Edit account protection
+            </Button>
+          </DrawerFooter>
+        )
+      )}
     </Drawer>
   )
 }
