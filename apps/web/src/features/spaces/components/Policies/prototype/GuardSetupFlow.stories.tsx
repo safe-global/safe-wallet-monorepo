@@ -1147,6 +1147,16 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           editRestore: null,
           editFromCreate: false,
           justActivated: false,
+          protectionKey: null,
+          returnToProtectionKey: null,
+          pendingAccountKey: null,
+          setupKind: undefined,
+          ruleKind: undefined,
+          ruleIsEdit: false,
+          ruleReturnPolicyId: null,
+          protectionEditKey: null,
+          protectionEditReturn: null,
+          protectionForPolicy: false,
           ...WIZARD_DEFAULTS,
           ...patch,
         }))
@@ -1765,12 +1775,20 @@ const B_TERMS: [RegExp, string][] = [
   [/account protection/g, 'policy enforcement'],
 ]
 
+const renameTerms = (text: string): string =>
+  B_TERMS.reduce((next, [pattern, replacement]) => next.replace(pattern, replacement), text)
+
 const rewriteTerms = (root: Node): void => {
+  // React updates text in place, so a characterData mutation's target is the text node itself.
+  if (root.nodeType === Node.TEXT_NODE) {
+    if (/ccount protection/.test(root.nodeValue ?? '')) root.nodeValue = renameTerms(root.nodeValue ?? '')
+    return
+  }
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const text = node.nodeValue ?? ''
     if (!/ccount protection/.test(text)) continue
-    node.nodeValue = B_TERMS.reduce((next, [pattern, replacement]) => next.replace(pattern, replacement), text)
+    node.nodeValue = renameTerms(text)
   }
 }
 

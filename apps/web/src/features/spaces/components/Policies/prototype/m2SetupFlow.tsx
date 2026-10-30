@@ -305,10 +305,6 @@ const ACCOUNT_GROUPS: M2Account[][] = [
 export const findM2Account = (key: string): M2Account | undefined =>
   ACCOUNT_GROUPS.flat().find((account) => getAccountKey(account) === key)
 
-/** M1's dropdown entries; accounts that already have an allowlist are disabled with that reason. */
-/** Every account the setup's picker lists, keyed like getAccountKey. */
-export const PICKER_ACCOUNT_KEYS: string[] = ACCOUNT_GROUPS.flat().map(getAccountKey)
-
 const getAccountEntries = (disabledKeys: string[], reason: SafeAccountIneligibility): SafeAccountEntry[] =>
   ACCOUNT_GROUPS.map((accounts) => {
     const options = accounts.map((account) =>
@@ -1023,7 +1019,11 @@ const AddFromAddressBook = ({
 
   // Opening scrolls the button towards the middle of the screen, so the list has room below it and Add stays in view.
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setPicked([])
+      setQuery('')
+      return
+    }
     const frame = requestAnimationFrame(() =>
       (anchorRef?.current ?? triggerRef.current)?.scrollIntoView({ block: 'center', behavior: 'smooth' }),
     )
@@ -2103,10 +2103,6 @@ const getExistingPermissions = (account: M2Account): ExistingPermission[] =>
     Icon: POLICY_ICONS['spending-limit'],
   }))
 
-/** Account protection on its own adds an allowlist in the same setup when picked on its Policies step. */
-export const setupAddsAllowlist = (_account: M2Account | undefined, choices: SetupChoices): boolean =>
-  choices.addAllowlist ?? true
-
 type AccountSetting = { id: string; title: string; description: string; note?: string }
 
 /** The Safe account changes the allowlist can still let through, in plain words: no "guard" or "module". */
@@ -2248,146 +2244,6 @@ const SettingsGroup = ({
         })}
       </ItemList>
     </GroupSurface>
-  )
-}
-
-/**
- * One 7-second loop, left to right: three signatures tick in, a pulse runs along the line to the protection, it
- * checks, then a pulse runs down each branch and its outcome lights up, green then red. Reduced motion: the end state.
- */
-const PROTECTION_DIAGRAM_CSS = `
-.m2-diagram-sig { background: var(--foreground); border-color: var(--foreground); color: var(--background); }
-.m2-diagram-allowed { background: var(--color-success-background); color: var(--color-success-dark); }
-.m2-diagram-blocked { background: color-mix(in srgb, var(--destructive) 12%, var(--card)); color: var(--destructive); }
-.m2-diagram-pulse { stroke-dasharray: 30 100; stroke-dashoffset: 30; }
-@keyframes m2-diagram-sig {
-  0%, 4% { background: transparent; border-color: var(--border); color: transparent; }
-  8%, 90% { background: var(--foreground); border-color: var(--foreground); color: var(--background); }
-  96%, 100% { background: transparent; border-color: var(--border); color: transparent; }
-}
-@keyframes m2-diagram-pulse-1 {
-  0%, 22% { stroke-dashoffset: 30; }
-  34%, 100% { stroke-dashoffset: -100; }
-}
-@keyframes m2-diagram-check {
-  0%, 34% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
-  39% { transform: scale(1.08); box-shadow: 0 0 0 6px color-mix(in srgb, var(--mint) 60%, transparent); }
-  45% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
-  49% { transform: scale(1.08); box-shadow: 0 0 0 6px color-mix(in srgb, var(--mint) 60%, transparent); }
-  55%, 100% { transform: scale(1); box-shadow: 0 0 0 12px transparent; }
-}
-@keyframes m2-diagram-pulse-2 {
-  0%, 55% { stroke-dashoffset: 30; }
-  65%, 100% { stroke-dashoffset: -100; }
-}
-@keyframes m2-diagram-pulse-3 {
-  0%, 62% { stroke-dashoffset: 30; }
-  72%, 100% { stroke-dashoffset: -100; }
-}
-@keyframes m2-diagram-allowed {
-  0%, 64% { background: var(--card); color: var(--muted-foreground); }
-  67%, 90% { background: var(--color-success-background); color: var(--color-success-dark); }
-  96%, 100% { background: var(--card); color: var(--muted-foreground); }
-}
-@keyframes m2-diagram-blocked {
-  0%, 71% { background: var(--card); color: var(--muted-foreground); }
-  74%, 90% { background: color-mix(in srgb, var(--destructive) 12%, var(--card)); color: var(--destructive); }
-  96%, 100% { background: var(--card); color: var(--muted-foreground); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .m2-diagram-sig { animation: m2-diagram-sig 7s infinite both; }
-  .m2-diagram-sig:nth-child(2) { animation-delay: 0.5s; }
-  .m2-diagram-sig:nth-child(3) { animation-delay: 1s; }
-  .m2-diagram-pulse-1 { animation: m2-diagram-pulse-1 7s infinite both; }
-  .m2-diagram-check { animation: m2-diagram-check 7s infinite both; }
-  .m2-diagram-pulse-2 { animation: m2-diagram-pulse-2 7s infinite both; }
-  .m2-diagram-pulse-3 { animation: m2-diagram-pulse-3 7s infinite both; }
-  .m2-diagram-allowed { animation: m2-diagram-allowed 7s infinite both; }
-  .m2-diagram-blocked { animation: m2-diagram-blocked 7s infinite both; }
-}
-`
-
-/** A grey line with a dark pulse that runs along it, left to right. */
-const DiagramLine = ({ d, pulseClassName }: { d: string; pulseClassName: string }): ReactElement => (
-  <>
-    <path d={d} pathLength={100} fill="none" stroke="var(--border)" strokeWidth={2} />
-    <path
-      d={d}
-      pathLength={100}
-      fill="none"
-      stroke="var(--foreground)"
-      strokeWidth={2}
-      className={classnames('m2-diagram-pulse', pulseClassName)}
-    />
-  </>
-)
-
-/** Dev's animation: signers approve, the protection checks, the transaction runs or stops. Sized for a 600px dialog. */
-export const ProtectionDiagram = (): ReactElement => {
-  const node = 'flex flex-col items-center gap-2 text-center'
-  const tile = 'relative flex size-9 items-center justify-center rounded-lg'
-  const outcome = 'flex h-8 items-center gap-1.5 rounded-md px-2.5'
-
-  return (
-    // items-start with 36px-tall connectors: every line meets the middle of the tiles, not of the labels.
-    // pt 29px: 12px plus the 17px the outcomes rise above the tiles, so the drawing sits centred.
-    <div
-      aria-hidden
-      className="flex items-start justify-center rounded-lg bg-muted px-3 pt-[29px] pb-3"
-      data-m2-new="New · How protection works diagram"
-    >
-      <style>{PROTECTION_DIAGRAM_CSS}</style>
-      <div className={node}>
-        <div className={classnames(tile, 'border border-border bg-card')}>
-          <UsersRound className="size-4 text-muted-foreground" />
-          {/* On the tile's bottom edge, so this step is as tall as the protection one. */}
-          <div className="absolute -bottom-1.5 left-1/2 flex -translate-x-1/2 gap-0.5">
-            {[0, 1, 2].map((index) => (
-              <span
-                key={index}
-                className="m2-diagram-sig flex size-3.5 items-center justify-center rounded-full border bg-card"
-              >
-                <Check className="size-2" strokeWidth={3} />
-              </span>
-            ))}
-          </div>
-        </div>
-        <Typography variant="paragraph-mini-medium">Signers approve</Typography>
-      </div>
-
-      <svg width="36" height="36" viewBox="0 0 36 36" className="shrink-0">
-        <DiagramLine d="M4 18 H32" pulseClassName="m2-diagram-pulse-1" />
-      </svg>
-
-      <div className={node}>
-        <div className={classnames(tile, 'm2-diagram-check bg-mint')}>
-          <AccountProtectionIcon className="size-4" />
-        </div>
-        <Typography variant="paragraph-mini-medium">Policies checked</Typography>
-      </div>
-
-      {/* 70px tall, centred on the tiles' middle (18px): -17px lifts it into place. */}
-      <div className="-mt-[17px] flex items-center">
-        <svg width="36" height="70" viewBox="0 0 36 70" className="shrink-0">
-          <DiagramLine d="M4 35 C 18 35, 18 16, 32 16" pulseClassName="m2-diagram-pulse-2" />
-          <DiagramLine d="M4 35 C 18 35, 18 54, 32 54" pulseClassName="m2-diagram-pulse-3" />
-        </svg>
-        <div className="flex flex-col gap-1.5">
-          <span className={classnames(outcome, 'm2-diagram-allowed')}>
-            <Check className="size-3.5" />
-            <Typography variant="paragraph-mini-medium" className="text-foreground">
-              Allowed: it runs
-            </Typography>
-          </span>
-          <span className={classnames(outcome, 'm2-diagram-blocked')}>
-            <X className="size-3.5" />
-            <Typography variant="paragraph-mini-medium" className="text-foreground">
-              Not allowed: blocked
-            </Typography>
-          </span>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -2544,8 +2400,8 @@ const getBaselineBanner = (baseline: Baseline, hasPolicies: boolean): SetupSumma
   return {
     title: 'Protection won’t stop any transaction.',
     description: hasPolicies
-      ? 'Everything stays allowed, so it only guards your account settings.'
-      : 'With no policies and everything allowed, it only guards your account settings.',
+      ? 'Everything stays allowed, so it only covers your account settings.'
+      : 'With no policies and everything allowed, it only covers your account settings.',
     tone: 'warning',
   }
 }

@@ -851,7 +851,7 @@ export const PolicyDrawer = ({
           row={row}
           status={ProposerStatus.ACTIVE}
           overview={{
-            proposer: { address: TOM_ADDRESS, name: 'Tom Reyes' },
+            proposer: row.people[0] ?? { address: TOM_ADDRESS, name: 'Tom Reyes' },
             appliesTo: { address: row.account.address, name: row.account.name },
             initiatedBy: { address: NADIA_ADDRESS, name: 'Nadia Kaur' },
             chainId: row.account.chainId,
