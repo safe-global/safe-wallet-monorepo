@@ -222,7 +222,9 @@ describe('AllowlistDrawer', () => {
       <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
     )
 
-    expect(screen.getByText('The allowlist becomes active after a delay of 10 minutes.')).toBeInTheDocument()
+    expect(
+      screen.getByText('After 10 minutes, a second transaction needs to be executed to activate the allowlist.'),
+    ).toBeInTheDocument()
   })
 
   it('says an executed transaction applies after the delay and offers no action', () => {
@@ -231,7 +233,9 @@ describe('AllowlistDrawer', () => {
     )
 
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
-    expect(screen.getByText('The allowlist becomes active after a delay of 3 minutes.')).toBeInTheDocument()
+    expect(
+      screen.getByText('After 3 minutes, a second transaction needs to be executed to activate the allowlist.'),
+    ).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
@@ -281,7 +285,9 @@ describe('AllowlistDrawer', () => {
       />,
     )
 
-    expect(screen.getByText('The allowlist is removed after a delay of 3 minutes.')).toBeInTheDocument()
+    expect(
+      screen.getByText('After 3 minutes, a second transaction needs to be executed to remove the allowlist.'),
+    ).toBeInTheDocument()
     expect(screen.getAllByText('Removed')).toHaveLength(2)
   })
 
