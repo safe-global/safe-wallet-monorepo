@@ -6,8 +6,8 @@ import ExistingPoliciesContent, {
   type ExistingPoliciesContentProps,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ExistingPoliciesContent'
 import {
-  BLOCKED_SPENDING_LIMITS_DESCRIPTION,
   getBlockedSpendingLimitDescription,
+  getBlockedSpendingLimitsDescription,
   getBlockedSpendingLimitsTitle,
   getRestrictedSpendingLimitsTitle,
   getSpendingLimitsLoadErrorTitle,
@@ -23,6 +23,7 @@ import type { RecipientAllowlistFlowData } from '../types'
 import { formatAllowanceAmount } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 import { formatAllowance } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { AccountIdentity } from '../../components/AccountIdentity'
@@ -45,6 +46,7 @@ const ExistingPoliciesStep = (): ReactElement => {
   const { accounts } = useRecipientAllowlistSafeAccounts()
   const selectedSafe = findSafeAccount(accounts, scope?.scopeKey)
   const [acknowledged, setAcknowledged] = useState(false)
+  const isEditMode = useIsEditMode()
 
   const safeName = scope?.safeAddress
     ? spenderDisplayName({ address: scope.safeAddress, name: selectedSafe?.name })
@@ -91,8 +93,9 @@ const ExistingPoliciesStep = (): ReactElement => {
               spenderDisplayName({ address: onlyBlocked.spender, name: contactName(onlyBlocked.spender) }),
               formatAllowance(onlyBlocked.allowance),
               onlyBlocked.allowance.token.symbol,
+              isEditMode,
             )
-          : BLOCKED_SPENDING_LIMITS_DESCRIPTION,
+          : getBlockedSpendingLimitsDescription(isEditMode),
     }
   }
 

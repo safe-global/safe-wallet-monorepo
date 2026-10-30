@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
 import { EDIT_LABEL } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import {
   DISCARD_LABEL,
@@ -47,19 +46,17 @@ const AllowlistActions = ({
     case 'connect':
       return <PolicyDrawerActions actionLabel="Connect wallet" onClick={onConnectWallet} hint={state.helper} />
 
+    // A non-signer can do neither, so only the primary action shows, disabled with the reason.
     case 'manage':
+      if (state.disabled) return <PolicyDrawerActions actionLabel={EDIT_LABEL} hint={state.helper} disabled />
+
       return (
         <DrawerFooter>
           <div className="flex flex-col gap-2">
-            {state.helper && (
-              <Typography variant="paragraph-mini" color="muted" align="center">
-                {state.helper}
-              </Typography>
-            )}
-            <Button className="w-full" onClick={onEdit} disabled={state.disabled || !onEdit}>
+            <Button className="w-full" onClick={onEdit} disabled={!onEdit}>
               {EDIT_LABEL}
             </Button>
-            <Button variant="secondary" className="w-full" onClick={onRemove} disabled={state.disabled || !onRemove}>
+            <Button variant="secondary" className="w-full" onClick={onRemove} disabled={!onRemove}>
               Remove
             </Button>
           </div>

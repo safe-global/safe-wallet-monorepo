@@ -127,10 +127,16 @@ export const getRestrictedSpendingLimitsTitle = (count: number): string =>
 export const RESTRICTED_SPENDING_LIMITS_DESCRIPTION = 'They can only send allowed tokens to allowed recipients.'
 export const getBlockedSpendingLimitsTitle = (count: number): string =>
   `${count} spending ${count === 1 ? 'limit' : 'limits'} will be blocked by this allowlist.`
-export const getBlockedSpendingLimitDescription = (spender: string, amount: string, symbol: string): string =>
-  `${spender} can send up to ${amount} to any address today. Once this allowlist is active, it can't send ${symbol} anymore.`
-export const BLOCKED_SPENDING_LIMITS_DESCRIPTION =
-  "They can send their tokens to any address today. Once this allowlist is active, they can't send them anymore."
+const onceApplied = (isEdit: boolean): string => (isEdit ? 'Once the change applies' : 'Once this allowlist is active')
+export const getBlockedSpendingLimitDescription = (
+  spender: string,
+  amount: string,
+  symbol: string,
+  isEdit = false,
+): string =>
+  `${spender} can send up to ${amount} to any address today. ${onceApplied(isEdit)}, it can't send ${symbol} anymore.`
+export const getBlockedSpendingLimitsDescription = (isEdit = false): string =>
+  `They can send their tokens to any address today. ${onceApplied(isEdit)}, they can't send them anymore.`
 export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
 export const FOLLOWS_ALLOWLIST_LABEL = 'Follows the allowlist'
 export const WILL_BE_BLOCKED_LABEL = 'Will be blocked'
@@ -167,9 +173,10 @@ export const EDIT_LABEL = 'Edit'
 export const getEditSummaryTitle = (account: string): string => `You're editing the allowlist on ${account}.`
 export const EDIT_SUMMARY_DESCRIPTION = 'Anything you deselect will be blocked once the change applies.'
 export const EDIT_SUMMARY_DETAILS = 'Any signer can cancel the change before it applies.'
-export const EDIT_TOKENS_CALLOUT_TITLE =
+export const EDIT_TOKENS_DESCRIPTION =
   'These are the tokens the allowlist allows today. Add a token or deselect one to change it.'
-export const EDIT_RECIPIENTS_CALLOUT_TITLE =
+export const EDIT_RECIPIENTS_DESCRIPTION =
   'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.'
+export const EDIT_SAFE_LOAD_ERROR_TEXT = 'Could not load this Safe account.'
 export const getEditReviewDescription = (delay: string): string =>
   `Check the details below before you sign. This starts a ${delay} wait, and a second transaction will be needed to apply the changes to the policy.`

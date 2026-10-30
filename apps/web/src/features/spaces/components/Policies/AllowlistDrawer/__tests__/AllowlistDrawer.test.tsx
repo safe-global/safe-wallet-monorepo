@@ -190,15 +190,15 @@ describe('AllowlistDrawer', () => {
     await user.click(screen.getByRole('button', { name: 'Connect wallet' }))
 
     expect(onConnectWallet).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('Connect a signer wallet to remove this allowlist.')).toBeInTheDocument()
+    expect(screen.getByText('Connect a signer wallet to edit.')).toBeInTheDocument()
   })
 
-  it('should disable Edit and Remove and say why, when the wallet is not a signer', () => {
+  it('should offer only a disabled Edit and say why, when the wallet is not a signer', () => {
     setup(mockActiveAllowlist(), MOCK_VIEWERS.nonSigner)
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
-    expect(screen.getByText('Only signers of this Safe account can remove this allowlist.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
+    expect(screen.getByText('Only signers of this Safe account can edit this allowlist.')).toBeInTheDocument()
   })
 
   it('disables Review transaction until the transaction link has loaded', () => {

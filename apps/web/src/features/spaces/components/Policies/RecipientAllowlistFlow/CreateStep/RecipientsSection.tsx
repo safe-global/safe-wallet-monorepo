@@ -12,6 +12,7 @@ import SelectableChip from '@safe-global/views/features/spaces/components/Polici
 import {
   ADD_RECIPIENT_LABEL,
   ADDRESS_BOOK_TRIGGER_LABEL,
+  EDIT_RECIPIENTS_DESCRIPTION,
   RECIPIENTS_CALLOUT_DESCRIPTION,
   RECIPIENTS_CALLOUT_TITLE,
   RECIPIENTS_EMPTY_TEXT,
@@ -23,6 +24,7 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import RecipientIdentity from '../components/RecipientIdentity'
 import AddFromAddressBook from './AddFromAddressBook'
 import RecipientDraftRow from './RecipientDraftRow'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 
 type RecipientsSectionProps = {
   values: RecipientAllowlistFormValues
@@ -31,7 +33,6 @@ type RecipientsSectionProps = {
   chainId?: string
   isCalloutDismissed: boolean
   onDismissCallout: () => void
-  calloutTitle?: string
 }
 
 const RecipientsSection = ({
@@ -41,11 +42,11 @@ const RecipientsSection = ({
   chainId,
   isCalloutDismissed,
   onDismissCallout,
-  calloutTitle = RECIPIENTS_CALLOUT_TITLE,
 }: RecipientsSectionProps): ReactElement => {
   const { recipients } = values
   const account = safeAddress && chainId ? { safeAddress, chainId } : undefined
   const hasAccount = Boolean(account)
+  const isEditMode = useIsEditMode()
   const addressBook = useMergedAddressBooks(chainId)
   const [isDrafting, setIsDrafting] = useState(() => hasAccount && recipients.length === 0)
   const isDraftOpen = isDrafting && hasAccount
@@ -72,11 +73,15 @@ const RecipientsSection = ({
     Boolean(fromAddressBook || (account && addressBook.has(address, account.chainId)))
 
   return (
-    <AllowlistSection title={RECIPIENTS_SECTION_TITLE} data-testid="allowlist-recipients-section">
-      {hasAccount && !isCalloutDismissed && (
+    <AllowlistSection
+      title={RECIPIENTS_SECTION_TITLE}
+      description={hasAccount && isEditMode ? EDIT_RECIPIENTS_DESCRIPTION : undefined}
+      data-testid="allowlist-recipients-section"
+    >
+      {hasAccount && !isEditMode && !isCalloutDismissed && (
         <DismissibleCallout
           className="mb-1"
-          title={calloutTitle}
+          title={RECIPIENTS_CALLOUT_TITLE}
           description={RECIPIENTS_CALLOUT_DESCRIPTION}
           onDismiss={onDismissCallout}
           data-testid="allowlist-recipients-callout"

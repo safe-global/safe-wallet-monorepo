@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import {
-  BLOCKED_SPENDING_LIMITS_DESCRIPTION,
+  getBlockedSpendingLimitsDescription,
   NO_SPENDING_LIMITS_TITLE,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
   SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION,
@@ -12,6 +12,7 @@ import type { PolicyAllowance } from '@safe-global/views/features/spaces/compone
 import type { RecipientAllowlistFlowData } from '../../types'
 import { useSpendingLimitImpacts, type SpendingLimitImpactsResult } from '../../hooks/useSpendingLimitImpacts'
 import type { SpendingLimitImpact, SpendingLimitImpactKind } from '../../utils/spendingLimitImpacts'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import ExistingPoliciesStep from '..'
 
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
@@ -46,13 +47,14 @@ const spendingLimits = (overrides: Partial<SpendingLimitImpactsResult> = {}) =>
 
 const data: RecipientAllowlistFlowData = { excludedTokens: [], addedTokens: [], recipients: [], rules: [] }
 
-const renderStep = () => {
+const renderStep = (isEditMode = false) => {
   const onNext = jest.fn()
-  const view = renderWithUserEvent(
+  const step = (
     <TxFlowContext.Provider value={{ ...initialContext, data, onNext }}>
       <ExistingPoliciesStep />
-    </TxFlowContext.Provider>,
+    </TxFlowContext.Provider>
   )
+  const view = renderWithUserEvent(isEditMode ? <EditModeProvider>{step}</EditModeProvider> : step)
 
   return { ...view, onNext }
 }
@@ -82,7 +84,7 @@ describe('ExistingPoliciesStep', () => {
     renderStep()
 
     expect(screen.getByText('2 spending limits will be blocked by this allowlist.')).toBeInTheDocument()
-    expect(screen.getByText(BLOCKED_SPENDING_LIMITS_DESCRIPTION)).toBeInTheDocument()
+    expect(screen.getByText(getBlockedSpendingLimitsDescription())).toBeInTheDocument()
   })
 
   it('should say all spending limits follow the rules, when every limit is restricted', () => {
@@ -163,5 +165,22 @@ describe('ExistingPoliciesStep', () => {
     expect(screen.getByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
     expect(screen.queryByText(RESTRICTED_SPENDING_LIMITS_DESCRIPTION)).not.toBeInTheDocument()
     expect(screen.getAllByTestId('spending-limit-impact')).toHaveLength(1)
+  })
+
+  it('should say the limit is blocked once the change applies, when an edit leaves its token out', () => {
+    renderStep(true)
+
+    expect(screen.getByText(/Once the change applies, it can't send ETH anymore\./)).toBeInTheDocument()
+  })
+
+  it('should say the limits are blocked once the change applies, when an edit blocks more than one', () => {
+    spendingLimits({ impacts: [makeImpact('ETH', 'blocked'), makeImpact('DAI', 'blocked')] })
+    renderStep(true)
+
+    expect(
+      screen.getByText(
+        "They can send their tokens to any address today. Once the change applies, they can't send them anymore.",
+      ),
+    ).toBeInTheDocument()
   })
 })

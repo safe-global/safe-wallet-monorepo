@@ -12,6 +12,7 @@ import type {
   Viewer,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
+  ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
   connectHelper,
   executeLine,
@@ -20,8 +21,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import {
   APPLIED_ON_EXECUTION_LINE,
-  CONNECT_TO_REMOVE_HELPER,
-  NOT_A_SIGNER_HELPER,
+  NOT_A_SIGNER_EDIT_HELPER,
   OUTCOME_TITLE,
   PENDING_BANNER_TITLE,
   APPLY_CONNECT_HELPER,
@@ -108,8 +108,8 @@ export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: numb
 }
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
-  if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: CONNECT_TO_REMOVE_HELPER }
-  if (!viewer.isSigner) return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
+  if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
+  if (!viewer.isSigner) return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_EDIT_HELPER }
 
   return { kind: 'active', action: 'manage', disabled: false }
 }

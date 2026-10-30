@@ -17,7 +17,8 @@ import EditRecipientAllowlistFlow from '..'
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 
-const mockScope = { safeLoaded: true }
+const mockScope: { safeLoaded: boolean; safeError?: string } = { safeLoaded: true }
+const mockRefetchSafe = jest.fn()
 const mockFlowProps = jest.fn()
 
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
@@ -35,6 +36,7 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
           scopeKey: `${initial.chainId}:${initial.safeAddress}`,
           safeLoaded: mockScope.safeLoaded,
           safeLoading: !mockScope.safeLoaded,
+          safeError: mockScope.safeError,
         },
         setScope: jest.fn(),
         clearScope: jest.fn(),
@@ -73,6 +75,10 @@ jest.mock('@/components/tx-flow/TxFlow', () => ({
   },
 }))
 
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/safes'),
+  useSafesGetSafeV1Query: () => ({ refetch: mockRefetchSafe }),
+}))
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('../../hooks/useHeldTokenAddresses')
@@ -132,6 +138,7 @@ describe('EditRecipientAllowlistFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockScope.safeLoaded = true
+    mockScope.safeError = undefined
     holdTokens()
     mockSpendingLimits.mockReturnValue({ impacts: [], isLoading: false, isError: false, refetch: jest.fn() })
     jest.mocked(useGuardStatus).mockReturnValue({
@@ -200,10 +207,10 @@ describe('EditRecipientAllowlistFlow', () => {
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
-  it('should show the edit copy in the summary and the callouts', () => {
+  it('should show the edit copy in the summary and as the section descriptions, without the create callouts', () => {
     renderFlow()
 
-    expect(screen.getByText(/^You're editing the allowlist on Treasury/)).toBeInTheDocument()
+    expect(screen.getByText("You're editing the allowlist on Treasury on Ethereum.")).toBeInTheDocument()
     expect(screen.getByText('Anything you deselect will be blocked once the change applies.')).toBeInTheDocument()
     expect(
       screen.getByText('These are the tokens the allowlist allows today. Add a token or deselect one to change it.'),
@@ -213,6 +220,20 @@ describe('EditRecipientAllowlistFlow', () => {
         'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.',
       ),
     ).toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-tokens-callout')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-recipients-callout')).not.toBeInTheDocument()
+  })
+
+  it('should say the Safe could not be loaded and retry loading it, when the Safe read fails', () => {
+    mockScope.safeLoaded = false
+    mockScope.safeError = 'Failed to load safe info'
+    renderFlow()
+
+    expect(screen.getByText('Could not load this Safe account.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(mockRefetchSafe).toHaveBeenCalledTimes(1)
+    expect(mockFlowProps).not.toHaveBeenCalled()
   })
 
   it('should enable Next only while the allowlist differs from the live one', () => {

@@ -26,15 +26,15 @@ describe('resolveAllowlistDrawerState', () => {
   it('should ask a viewer without a wallet to connect one', () => {
     expect(resolveAllowlistDrawerState(mockActiveAllowlist(), MOCK_VIEWERS.disconnected, 'Treasury')).toMatchObject({
       action: 'connect',
-      helper: 'Connect a signer wallet to remove this allowlist.',
+      helper: 'Connect a signer wallet to edit.',
     })
   })
 
-  it('should disable removing, when the wallet is not a signer', () => {
+  it('should disable editing, when the wallet is not a signer', () => {
     expect(resolveAllowlistDrawerState(mockActiveAllowlist(), MOCK_VIEWERS.nonSigner, 'Treasury')).toMatchObject({
       action: 'manage',
       disabled: true,
-      helper: 'Only signers of this Safe account can remove this allowlist.',
+      helper: 'Only signers of this Safe account can edit this allowlist.',
     })
   })
 

@@ -21,6 +21,7 @@ import type { RecipientAllowlistFormValues } from '../types'
 import {
   ADD_TOKEN_LABEL,
   DESELECT_ALL_LABEL,
+  EDIT_TOKENS_DESCRIPTION,
   SELECT_ALL_LABEL,
   TOKENS_CALLOUT_DESCRIPTION,
   TOKENS_CALLOUT_TITLE,
@@ -32,6 +33,7 @@ import {
 import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokenDraftRow from './TokenDraftRow'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 
 const SKELETON_CHIP_COUNT = 4
 const RETRY_LABEL = 'Retry'
@@ -43,7 +45,6 @@ type TokensSectionProps = {
   hasAccount: boolean
   isCalloutDismissed: boolean
   onDismissCallout: () => void
-  calloutTitle?: string
 }
 
 const LoadErrorAlert = ({
@@ -74,7 +75,6 @@ const TokensSection = ({
   hasAccount,
   isCalloutDismissed,
   onDismissCallout,
-  calloutTitle = TOKENS_CALLOUT_TITLE,
 }: TokensSectionProps): ReactElement => {
   const {
     addresses,
@@ -87,6 +87,7 @@ const TokensSection = ({
     refetchPopular,
     identityKey,
   } = heldTokens
+  const isEditMode = useIsEditMode()
   // Keyed to the account it was opened for, so switching accounts closes the row
   const [addingFor, setAddingFor] = useState<string>()
   const isAdding = addingFor !== undefined && addingFor === identityKey
@@ -168,13 +169,13 @@ const TokensSection = ({
   return (
     <AllowlistSection
       title={TOKENS_SECTION_TITLE}
-      description={hasAccount ? undefined : TOKENS_NO_ACCOUNT_DESCRIPTION}
+      description={!hasAccount ? TOKENS_NO_ACCOUNT_DESCRIPTION : isEditMode ? EDIT_TOKENS_DESCRIPTION : undefined}
       data-testid="allowlist-tokens-section"
     >
-      {hasAccount && !isCalloutDismissed && (
+      {hasAccount && !isEditMode && !isCalloutDismissed && (
         <DismissibleCallout
           className="mb-1"
-          title={calloutTitle}
+          title={TOKENS_CALLOUT_TITLE}
           description={TOKENS_CALLOUT_DESCRIPTION}
           onDismiss={onDismissCallout}
           data-testid="allowlist-tokens-callout"

@@ -1,4 +1,5 @@
 import { useState, type ReactElement } from 'react'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
@@ -10,6 +11,7 @@ import LoadError from '@safe-global/views/features/spaces/components/Policies/co
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { EDIT_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
+  EDIT_SAFE_LOAD_ERROR_TEXT,
   FLOW_SUBTITLE,
   TOKENS_LOAD_ERROR_TEXT,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -67,6 +69,11 @@ const EditTxFlow = ({ initialData }: { initialData: RecipientAllowlistFlowData }
 const EditFlowBody = ({ policy }: { policy: ActiveAllowlistPolicy }): ReactElement => {
   const scope = useSafeScope()
   const heldTokens = useHeldTokenAddresses()
+  // Shares the scope's own query, so a retry reloads the Safe the scope reads.
+  const { refetch: refetchSafe } = useSafesGetSafeV1Query({
+    chainId: policy.safe.chainId,
+    safeAddress: policy.safe.address,
+  })
   const [initialData, setInitialData] = useState<RecipientAllowlistFlowData>()
   const isError = heldTokens.isError || Boolean(scope?.safeError)
   const isReady = Boolean(scope?.safeLoaded) && !heldTokens.isLoading && !isError
@@ -80,7 +87,9 @@ const EditFlowBody = ({ policy }: { policy: ActiveAllowlistPolicy }): ReactEleme
 
   return (
     <Chrome>
-      {isError ? (
+      {scope?.safeError ? (
+        <LoadError message={EDIT_SAFE_LOAD_ERROR_TEXT} onRetry={refetchSafe} data-testid="allowlist-edit-error" />
+      ) : heldTokens.isError ? (
         <LoadError message={TOKENS_LOAD_ERROR_TEXT} onRetry={heldTokens.refetch} data-testid="allowlist-edit-error" />
       ) : (
         <FormSkeleton />

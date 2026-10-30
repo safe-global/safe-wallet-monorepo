@@ -13,9 +13,7 @@ export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   update: 'The current recipients still apply until the change is executed.',
 }
 
-export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can remove this allowlist.'
-
-export const CONNECT_TO_REMOVE_HELPER = 'Connect a signer wallet to remove this allowlist.'
+export const NOT_A_SIGNER_EDIT_HELPER = 'Only signers of this Safe account can edit this allowlist.'
 
 // Every change to the allowlist waits out the guard's delay after execution.
 const EXECUTED_LINE: Record<PendingPolicyOperation, (changeDelay: string) => string> = {
