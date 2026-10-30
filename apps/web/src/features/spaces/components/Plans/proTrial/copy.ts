@@ -50,13 +50,14 @@ export const PRO_TRIAL_COPY = {
   },
 
   trialStart: {
-    title: 'Introducing Safe Pro',
-    tagline: 'Policies, a shared activity log and threat checks for every Safe your team runs.',
+    title: (days: number | null) => (days === null ? 'Safe Pro free trial' : `Safe Pro ${days}-day free trial`),
+    /** Followed by the "see plans" link. */
+    tagline: 'All Pro features unlocked,',
     migrated: "You've used Safe before, so your trial is 60 days instead of 30.",
     noCharge: 'No card. No charge. The trial ends on its own.',
     endsOn: (date: string) => `Trial ends ${date}.`,
     start: 'Start free trial',
-    seePlans: 'See plans and pricing',
+    seePlans: 'see plans',
     back: 'Go to My accounts',
     unavailable: 'There is no trial available for this Workspace.',
   },

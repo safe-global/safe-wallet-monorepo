@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useRouter } from 'next/router'
-import { ArrowRight } from 'lucide-react'
-import { AppRoutes } from '@/config/routes'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
@@ -43,7 +42,7 @@ export const _freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVa
 export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
   if (variant === 'new') {
     return {
-      title: PRO_TRIAL_COPY.trialStart.title,
+      title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
       subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
       note: "No payment method required. We'll remind you 7 days before your free access ends.",
       back: 'Go to My accounts',
@@ -58,13 +57,13 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
   return trialPeriodDays === MIGRATED_TRIAL_DAYS
     ? {
         ...existing,
-        title: PRO_TRIAL_COPY.trialStart.title,
+        title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
         subtitle:
           'You’ve used Safe before, so your free access is 60 days instead of 30.\nYour Safe accounts remain available in My accounts.',
       }
     : {
         ...existing,
-        title: PRO_TRIAL_COPY.trialStart.title,
+        title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
         subtitle: 'All Pro features unlocked. No billing details needed upfront.',
       }
 }
@@ -99,7 +98,6 @@ export default function ClaimTrialModal({
     [trialPlans, tier?.name],
   )
   const seats = option?.seats ?? null
-  const router = useRouter()
   const endsOn = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
   const entry = {
     [MixpanelEventParams.ENTRY_POINT]:
@@ -124,7 +122,7 @@ export default function ClaimTrialModal({
   return (
     <Dialog open onOpenChange={() => undefined}>
       <DialogContent
-        size="sm-md"
+        size={step === 'accounts' ? 'sm-md' : 'xs'}
         surface="card"
         padding="sm"
         showCloseButton={false}
@@ -145,9 +143,21 @@ export default function ClaimTrialModal({
             <>
               <div className="flex flex-col gap-1">
                 <Typography variant="h3" as={DialogTitle}>
-                  {highlightSafePro(PRO_TRIAL_COPY.trialStart.title)}
+                  {highlightSafePro(PRO_TRIAL_COPY.trialStart.title(trialPeriodDays))}
                 </Typography>
-                <Typography color="muted">{PRO_TRIAL_COPY.trialStart.tagline}</Typography>
+                <Typography color="muted">
+                  {PRO_TRIAL_COPY.trialStart.tagline}{' '}
+                  <Link
+                    href={SAFE_PRO_PRICING_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="muted"
+                    className="whitespace-nowrap"
+                    data-testid="trial-see-plans"
+                  >
+                    {PRO_TRIAL_COPY.trialStart.seePlans} <ArrowUpRight />
+                  </Link>
+                </Typography>
                 {trialPeriodDays === MIGRATED_TRIAL_DAYS && (
                   <Typography variant="paragraph-small" color="muted">
                     {PRO_TRIAL_COPY.trialStart.migrated}
@@ -173,15 +183,6 @@ export default function ClaimTrialModal({
                 </ul>
               )}
 
-              <div className="flex flex-col items-center gap-0.5 text-center">
-                <Typography variant="paragraph-small-medium">{PRO_TRIAL_COPY.trialStart.noCharge}</Typography>
-                {endsOn && (
-                  <Typography variant="paragraph-small" color="muted">
-                    {PRO_TRIAL_COPY.trialStart.endsOn(endsOn)}
-                  </Typography>
-                )}
-              </div>
-
               {error && (
                 <Alert variant="destructive">
                   <AlertSeverityIcon variant="destructive" />
@@ -189,45 +190,42 @@ export default function ClaimTrialModal({
                 </Alert>
               )}
 
-              <div className="flex gap-4">
-                <Track
-                  {...SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED}
-                  mixpanelParams={{ ...entry, [MixpanelEventParams.DISMISS_ACTION]: DismissAction.GO_TO_MY_ACCOUNTS }}
-                  as="div"
-                  className="flex-1"
-                >
-                  <Button variant="secondary" size="lg" className="w-full" onClick={onBack} disabled={isBusy}>
-                    {PRO_TRIAL_COPY.trialStart.back}
-                  </Button>
-                </Track>
-                <Track
-                  {...SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED}
-                  mixpanelParams={entry}
-                  as="div"
-                  className="flex-1"
-                >
+              <div className="flex flex-col gap-2">
+                <Track {...SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED} mixpanelParams={entry} as="div">
                   <Button
                     size="lg"
+                    weight="semibold"
                     accentIcon
                     className="w-full"
                     disabled={!option?.paymentLinkId || isBusy}
                     onClick={claim}
                   >
                     {PRO_TRIAL_COPY.trialStart.start}
-                    <ArrowRight />
+                    <ArrowRight data-icon="inline-end" />
+                  </Button>
+                </Track>
+                <Track
+                  {...SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED}
+                  mixpanelParams={{ ...entry, [MixpanelEventParams.DISMISS_ACTION]: DismissAction.GO_TO_MY_ACCOUNTS }}
+                  as="div"
+                >
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    weight="semibold"
+                    className="w-full"
+                    onClick={onBack}
+                    disabled={isBusy}
+                  >
+                    {PRO_TRIAL_COPY.trialStart.back}
                   </Button>
                 </Track>
               </div>
 
-              <Link
-                render={<button type="button" />}
-                variant="muted"
-                className="self-center"
-                onClick={() => void router.push({ pathname: AppRoutes.spaces.plans, query: { spaceId } })}
-                data-testid="trial-see-plans"
-              >
-                {PRO_TRIAL_COPY.trialStart.seePlans}
-              </Link>
+              <Typography variant="paragraph-mini" color="muted" align="center">
+                {PRO_TRIAL_COPY.trialStart.noCharge}
+                {endsOn && ` ${PRO_TRIAL_COPY.trialStart.endsOn(endsOn)}`}
+              </Typography>
             </>
           )}
         </div>
