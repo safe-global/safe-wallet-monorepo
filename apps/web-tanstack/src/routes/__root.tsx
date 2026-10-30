@@ -31,6 +31,7 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
+import { useBeamerLiveUpdates } from '@/hooks/useBeamerLiveUpdates'
 import LaunchScreen from '@/components/common/LaunchScreen'
 import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
@@ -93,6 +94,7 @@ const InitApp = (): ReactElement => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
+  useBeamerLiveUpdates()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()

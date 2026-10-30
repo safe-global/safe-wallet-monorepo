@@ -45,13 +45,17 @@ export const parseBeamerUpdates = (response: NumberFeaturesResponse): BeamerUpda
 export const beamerApi = createApi({
   reducerPath: 'beamerApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'https://backend.getbeamer.com' }),
+  tagTypes: ['BeamerUpdates'],
   endpoints: (builder) => ({
     getBeamerUpdates: builder.query<BeamerUpdates, { productId: string; lastSeen?: string }>({
       query: ({ productId, lastSeen }) => ({
         url: 'numberFeatures',
         params: { product: productId, url: window.location.host, v: 1, date: lastSeen },
+        // Beamer lets browsers cache this answer for 20 minutes, which would hide a post announced in the meantime.
+        cache: 'no-cache',
       }),
       transformResponse: parseBeamerUpdates,
+      providesTags: ['BeamerUpdates'],
     }),
   }),
 })

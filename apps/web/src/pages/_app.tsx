@@ -82,6 +82,7 @@ const TargetedOutreachPopupLoader = () => {
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
+import { useBeamerLiveUpdates } from '@/hooks/useBeamerLiveUpdates'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -141,6 +142,7 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
+  useBeamerLiveUpdates()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
