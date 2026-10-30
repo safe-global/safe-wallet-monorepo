@@ -140,9 +140,7 @@ export const getApplyAllowlistRequest = (dto: PendingDelayedGuardPoliciesDto): A
     : undefined
 
 export type MergedDelayedGuardRequests = {
-  /** The active rows, with a waiting or expired request folded into the Safe's live allowlist as an `update`. */
-  active: Policy[]
-  /** Rows of their own: a first allowlist waiting for its apply, or any queued apply. */
+  /** Rows of their own beside the live allowlist: a request waiting for its apply, or any queued transaction. */
   added: Policy[]
   /** What the apply flow replays, keyed by the row id that offers it. */
   applyRequests: ReadonlyMap<string, ApplyAllowlistFlowData>
@@ -153,7 +151,6 @@ export const mergeDelayedGuardRequests = (
   active: readonly Policy[],
   resolveToken: (chainId: string, address: string) => PolicyTokenInfo,
 ): MergedDelayedGuardRequests => {
-  const replaced = new Map<string, Policy>()
   const added: Policy[] = []
   const applyRequests = new Map<string, ApplyAllowlistFlowData>()
 
@@ -171,16 +168,11 @@ export const mergeDelayedGuardRequests = (
     })
     if (!row) continue
 
+    // A removal's configurations name no recipients, so its row lists the live ones it takes away.
+    added.push(isRemoval && live ? { ...row, data: live.data } : row)
     const request = getApplyAllowlistRequest(dto)
-    if (live && row.status === 'active') {
-      replaced.set(live.id, { ...live, scheduledChange: row.scheduledChange })
-      if (request) applyRequests.set(live.id, request)
-      continue
-    }
-
-    added.push(row)
     if (request) applyRequests.set(row.id, request)
   }
 
-  return { active: active.map((policy) => replaced.get(policy.id) ?? policy), added, applyRequests }
+  return { added, applyRequests }
 }
