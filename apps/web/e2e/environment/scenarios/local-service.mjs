@@ -7,9 +7,16 @@ const execute = promisify(execFile)
 export async function runInLocalService(env, service, args, input = '') {
   const project = assertProjectName(env.SAFE_E2E_PROJECT)
   if (
-    !['txs-web', 'txs-web-mainnet', 'txs-web-polygon', 'decoder-web', 'cow-api', 'zerion-api', 'redis'].includes(
-      service,
-    )
+    ![
+      'txs-web',
+      'txs-web-mainnet',
+      'txs-web-polygon',
+      'decoder-web',
+      'cow-api',
+      'zerion-api',
+      'policy-indexer',
+      'redis',
+    ].includes(service)
   ) {
     throw new Error(`Metadata setup does not support the ${service} service`)
   }
