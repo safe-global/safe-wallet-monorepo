@@ -30,9 +30,14 @@ const serveSimulation = (status: boolean) => {
   return payloads
 }
 
+const pasteInto = async (user: UserEvent, field: HTMLElement, text: string): Promise<void> => {
+  await user.click(field)
+  await user.paste(text)
+}
+
 const addSetAddressCall = async (user: UserEvent): Promise<void> => {
-  await user.type(await screen.findByLabelText('Enter Address or ENS Name'), TEST_CONTRACT)
-  await user.type(await screen.findByLabelText(/^newValue \(address\)/), SAFE_INFO.owners[0])
+  await pasteInto(user, await screen.findByLabelText('Enter Address or ENS Name'), TEST_CONTRACT)
+  await pasteInto(user, await screen.findByLabelText(/^newValue \(address\)/), SAFE_INFO.owners[0])
   await user.click(screen.getByRole('button', { name: 'Add new transaction' }))
 }
 
