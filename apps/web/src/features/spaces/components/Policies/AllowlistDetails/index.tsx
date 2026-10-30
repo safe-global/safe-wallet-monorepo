@@ -5,6 +5,7 @@ import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import { AllowlistDrawer } from '../AllowlistDrawer'
 import RemoveAllowlistFlow from '../RemoveAllowlistFlow'
 import RemoveGuardFlow from '../RemoveGuardFlow'
+import { toAllowlistRules } from '../RecipientAllowlistFlow/utils/allowlistEdit'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
 
 export type AllowlistDetailsProps = {
@@ -38,10 +39,7 @@ const AllowlistDetails = ({
               chainId={chainId}
               safeAddress={safeAddress}
               guardAddress={enforcement.guardAddress}
-              rules={policy.data.entries.map(({ token, recipients }) => ({
-                tokenAddress: token.address,
-                recipients: recipients.map(({ account }) => account),
-              }))}
+              rules={toAllowlistRules(policy.data.entries)}
             />,
           )
       : undefined

@@ -13,7 +13,10 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration } from '../types'
 import { SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR } from './guardExit'
+import { getAllowlistPairKeys, pairKey } from './allowlistPairs'
 import { getPolicyEngineAddress, type PolicyEngineContract } from './policyEngineDeployments'
+
+export { getAllowlistPairKeys }
 
 export const MAX_POLICY_CONFIGURATIONS = 100
 
@@ -131,15 +134,6 @@ export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRu
 
   return configurations
 }
-
-const pairKey = (tokenAddress: string, recipient: string): string =>
-  `${tokenAddress.toLowerCase()}:${recipient.toLowerCase()}`
-
-/** Case-insensitive `token:recipient` keys; the native token is the zero address. */
-export const getAllowlistPairKeys = (rules: AllowlistRule[]): Set<string> =>
-  new Set(
-    rules.flatMap(({ tokenAddress, recipients }) => recipients.map((recipient) => pairKey(tokenAddress, recipient))),
-  )
 
 const erc20TransferConfiguration = (
   chainId: string,
