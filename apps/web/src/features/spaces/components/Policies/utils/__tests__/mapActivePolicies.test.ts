@@ -14,7 +14,7 @@ import {
   mockTreasuryAllowlistDtos,
 } from '../../mocks/activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
-import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../mapActivePolicies'
+import { mapActivePolicies, type NativeTokenResolver } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {
   it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {
@@ -172,7 +172,7 @@ describe('mapActivePolicies', () => {
     }
 
     const usdtDto = (recipients: AllowlistRecipient[]) =>
-      mockErc20TransferDto({ data: { tokenAddress: MOCK_TOKENS.usdt.address, recipients } })
+      mockErc20TransferDto({ data: { tokenAddress: MOCK_TOKENS.usdt.address, tokenMetadata: null, recipients } })
 
     const toAllowlists = (dtos: ActivePolicyDto[], resolver: NativeTokenResolver = resolveNativeToken) =>
       mapActivePolicies(dtos, resolver).filter(isAllowlistPolicy)
@@ -243,16 +243,10 @@ describe('mapActivePolicies', () => {
       ])
     })
 
-    it('names an ERC-20 token from the resolver and keeps the address for one it does not know', () => {
-      const resolveErc20Token: Erc20TokenResolver = (_chainId, address) =>
-        address.toLowerCase() === MOCK_TOKENS.usdc.address.toLowerCase() ? MOCK_TOKENS.usdc : undefined
-
-      const [policy] = mapActivePolicies(mockTreasuryAllowlistDtos(), resolveNativeToken, resolveErc20Token).filter(
-        isAllowlistPolicy,
-      )
+    it('names an ERC-20 token from its metadata and keeps the address for one CGW could not resolve', () => {
+      const [policy] = toAllowlists([mockErc20TransferDto(), usdtDto([])])
 
       expect(policy.data.entries.map((entry) => entry.token)).toEqual([
-        ETH,
         MOCK_TOKENS.usdc,
         { address: MOCK_TOKENS.usdt.address, symbol: '0xdAC1...1ec7', decimals: 0, logoUri: null },
       ])

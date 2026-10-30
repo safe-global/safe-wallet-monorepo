@@ -13,9 +13,11 @@ export type {
   GuardSlot,
   ForeignGuard,
   PolicyConfiguration,
+  AllowlistSetup,
   AllowlistEligibility,
   AllowlistIneligibilityReason,
   PolicyGuardTarget,
+  SetupCallDescription,
 } from './types'
 export { usePolicyGuard } from './hooks/usePolicyGuard'
 export type { UsePolicyGuardResult } from './hooks/usePolicyGuard'
