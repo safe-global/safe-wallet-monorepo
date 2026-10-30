@@ -1,55 +1,87 @@
-import type { ReactElement } from 'react'
-import { Ban, Check, Clock, ShieldCheck, UsersRound } from 'lucide-react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { useId, useState, type ReactElement } from 'react'
+import { ArrowRight, Check, Send, UsersRound, X } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import PolicyIntroDialog, {
-  type PolicyIntroExplainer,
-} from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
+import { PROTECTION_FACTS } from './m2SetupFlow'
+import { cn } from '@safe-global/views/utils/cn'
+import { usePrototypeModel } from './m2Prototype'
 
-const EXPLAINERS: PolicyIntroExplainer[] = [
-  { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },
-  { Icon: ShieldCheck, text: 'It is checked onchain, so a blocked transfer fails even if every signer approves it.' },
-  {
-    Icon: Clock,
-    text: 'Setting it up, changing it or removing it requires a transaction. Every change waits 24 hours before it applies.',
-  },
-]
+/** Illustrative only: the values are invented and the copy explains the check. */
+const PREVIEW_SAFE = '0x8674ff2cC41CE1A26D0A1B4b8f6c8B58F7bca19b'
 
-const ALLOWED = [
-  '0x4bc91d2e3f4a5b6c7d8e9f0a1b2c3d4e5f60a88b',
-  '0x7a219e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b4412',
-  '0x1f8e2a3b4c5d6e7f8091a2b3c4d5e6f708195517',
-]
-const BLOCKED = '0x6D0a9f2c71b8e04d6a3c5b17e92f08d4c6a13e58'
-
-const PreviewRow = ({ address, isBlocked = false }: { address: string; isBlocked?: boolean }): ReactElement => (
-  <div className="flex items-center gap-2 rounded-md bg-muted p-2">
-    <Identicon address={address} size={20} />
-    <span className="h-2 w-24 rounded-full bg-border" />
-    {isBlocked ? (
-      <Ban className="ml-auto size-4 text-destructive" />
-    ) : (
-      <Check className="ml-auto size-4 text-badge-dot-success" />
-    )}
-  </div>
+const PlaceholderBar = ({ className }: { className: string }): ReactElement => (
+  <span className={`h-2.5 rounded-full bg-muted ${className}`} />
 )
 
-/** SpendingLimitPreview's frame and card style: the allowed recipients go through, any other address is stopped. */
-const AllowlistPreview = (): ReactElement => (
-  // Hidden from assistive tech: the addresses are invented and the copy already explains the allowlist.
+const OUTCOMES = [
+  { allowed: true, label: 'Allowed', Icon: Check },
+  { allowed: false, label: 'Blocked', Icon: X },
+]
+
+/** Static, in the style of M1's intro previews: one Safe account, one transaction, the two things that can happen to it. */
+const EnforcementPreview = (): ReactElement => (
   <div
     aria-hidden
-    className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken"
-    data-m2-new="New · Allowlist preview"
+    className="flex h-[148px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken px-4"
+    data-m2-new="New · Account protection preview"
   >
-    <div className="flex w-[300px] flex-col gap-1.5 rounded-md bg-card p-3 shadow-lg">
-      <Typography variant="paragraph-mini-medium">Allowed recipients</Typography>
-      {ALLOWED.map((address) => (
-        <PreviewRow key={address} address={address} />
-      ))}
-      <div className="opacity-60">
-        <PreviewRow address={BLOCKED} isBlocked />
+    {/* C's narrower dialog: the same picture, scaled down to fit. */}
+    <div
+      className={cn(
+        'flex shrink-0 items-center gap-3 whitespace-nowrap',
+        usePrototypeModel() === 'simple' && 'origin-center scale-[0.82]',
+      )}
+    >
+      <div className="flex flex-col gap-2 rounded-xl bg-card p-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Identicon address={PREVIEW_SAFE} size={28} />
+          <div className="flex flex-col gap-1">
+            <Typography variant="paragraph-mini-medium">Safe account</Typography>
+            <PlaceholderBar className="w-14" />
+          </div>
+        </div>
+        <span className="inline-flex w-fit items-center gap-1 rounded-md bg-muted px-1.5 py-0.5">
+          <UsersRound className="size-3 text-muted-foreground" />
+          <Typography variant="paragraph-mini-medium">2/3</Typography>
+        </span>
+      </div>
+
+      <span className="w-4 shrink-0 border-t border-dashed border-border" />
+
+      <div className="flex items-center gap-2 rounded-xl bg-card p-3 shadow-sm">
+        <span className="flex size-7 items-center justify-center rounded-md bg-muted">
+          <Send className="size-3.5 text-muted-foreground" />
+        </span>
+        <div className="flex flex-col gap-1">
+          <Typography variant="paragraph-mini-medium">Transaction</Typography>
+          <PlaceholderBar className="w-12" />
+        </div>
+      </div>
+
+      {/* One line splits into the two outcomes. */}
+      <span className="h-[52px] w-4 shrink-0 rounded-l-md border-y border-l border-dashed border-border" />
+
+      <div className="flex flex-col gap-3">
+        {OUTCOMES.map(({ allowed, label, Icon }) => (
+          <div key={label} className="flex items-center rounded-xl bg-card p-2 shadow-sm">
+            <Badge variant={allowed ? 'success' : 'destructive'} size="status" shape="status">
+              <Icon aria-hidden />
+              {label}
+            </Badge>
+          </div>
+        ))}
       </div>
     </div>
   </div>
@@ -61,19 +93,98 @@ export type AllowlistIntroDialogProps = {
   onProceed: () => void
 }
 
-/** The allowlist's intro, in M1's PolicyIntroDialog like SpendingLimitIntroDialog and ProposerIntroDialog. */
-export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => (
-  <PolicyIntroDialog
-    open={open}
-    onOpenChange={onOpenChange}
-    onProceed={onProceed}
-    title="Allowlist"
-    description="Only addresses on your list can receive funds. Everything else is blocked."
-    helpArticle={HelpCenterArticle.POLICIES}
-    helpLabel="Learn more about allowlists"
-    explainers={EXPLAINERS}
-    preview={<AllowlistPreview />}
-    proceedLabel="Set up allowlist"
-    testId="recipient-allowlist-intro-dialog"
-  />
-)
+/** Account protection's intro, laid out like M1's PolicyIntroDialog, plus bold titles and "I understand". */
+export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => {
+  const [hasUnderstood, setHasUnderstood] = useState(false)
+  const checkboxId = useId()
+  // C: the same width as the other policies' intros, and no "I understand" before Set up.
+  const isSimpleModel = usePrototypeModel() === 'simple'
+  // B lists every rule it can hold, and which one is required.
+  const facts =
+    usePrototypeModel() === 'policies'
+      ? PROTECTION_FACTS.map((fact, index) =>
+          index === 0
+            ? {
+                ...fact,
+                description: 'Account changes, allowlist, spending limits and proposers.',
+              }
+            : fact,
+        )
+      : PROTECTION_FACTS
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) setHasUnderstood(false)
+        onOpenChange(next)
+      }}
+    >
+      <DialogContent size={isSimpleModel ? 'xs' : 'sm'} data-testid="account-protection-intro-dialog">
+        <DialogHeader>
+          <DialogTitle className="text-xl leading-6 font-semibold">Account protection</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-4 px-5 pb-5" data-m2-new="New · Account protection intro">
+          <DialogDescription className="text-base leading-6 text-secondary-foreground">
+            Make sure your Safe account can only do what your policies allow.{' '}
+            <ExternalLink
+              href={HelpCenterArticle.POLICIES}
+              className="font-normal [&>span]:underline [&>span]:decoration-current [&>span]:underline-offset-2"
+            >
+              Learn more about account protection
+            </ExternalLink>
+          </DialogDescription>
+
+          <EnforcementPreview />
+
+          <ul className="flex flex-col gap-4">
+            {facts.map(({ Icon, title, description }) => (
+              <li key={title} className="flex items-center gap-3">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Icon className="size-4 text-badge-dot-success" aria-hidden />
+                </div>
+                <div className="flex flex-col">
+                  <Typography variant="paragraph-small-bold">{title}</Typography>
+                  <Typography variant="paragraph-small" color="muted">
+                    {description}
+                  </Typography>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {!isSimpleModel && (
+            <label
+              htmlFor={checkboxId}
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3"
+              data-m2-new="New · I understand"
+            >
+              <Checkbox
+                id={checkboxId}
+                checked={hasUnderstood}
+                onCheckedChange={(checked) => setHasUnderstood(checked === true)}
+              />
+              <Typography variant="paragraph-small">
+                I understand that anything my policies don’t allow will be blocked, and that future changes take 24
+                hours to apply.
+              </Typography>
+            </label>
+          )}
+
+          <Button
+            className="w-full gap-2"
+            disabled={!isSimpleModel && !hasUnderstood}
+            onClick={() => {
+              setHasUnderstood(false)
+              onProceed()
+            }}
+          >
+            Set up
+            <ArrowRight className="text-[var(--color-static-text-brand)] dark:text-black" aria-hidden />
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

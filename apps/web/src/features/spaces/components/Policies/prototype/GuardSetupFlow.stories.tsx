@@ -12,7 +12,8 @@ import {
   type RefObject,
 } from 'react'
 import type { Decorator, Meta, StoryObj } from '@storybook/react'
-import { Check, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, ChevronUp, FileCode2, Settings2, Users, type LucideIcon } from 'lucide-react'
+import { POLICY_ICONS } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import { createPortal } from 'react-dom'
 import Notifications from '@/components/common/Notifications'
 import SafeLogo from '@/components/common/SafeLogo'
@@ -39,25 +40,38 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { cn } from '@safe-global/views/utils/cn'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
-import AddPolicyOptionButton from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/AddPolicyOptionButton'
 import {
   ADD_POLICY_OPTIONS,
   type AddPolicyOption,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import { AccountPanel, type AccountDialog, type AccountState } from './m2AccountPanel'
 import {
+  getAllowlistAccountKeys,
+  getPanelOrder,
   getPolicyRows,
+  POLICY_ROW_LABELS,
+  POLICY_TYPES,
   PoliciesByPolicyPage,
   PoliciesOverviewPage,
   SETUP_ROW_ID,
+  type PanelEntry,
   type PaymentsSnapshot,
   type PolicyFilters,
   type PolicyRow,
   type SpendingLimitState,
 } from './m2OverviewPage'
 import { AllowlistIntroDialog } from './m2AllowlistIntro'
-import { PolicyDrawer, type AllowlistPanelScenario } from './m2PolicyDrawers'
+import { PolicyIntro, type IntroKind } from './m2PolicyIntros'
+import type { PanelNav } from './m2PanelParts'
 import {
+  DEFAULT_PROTECTION_RULES,
+  PolicyDrawer,
+  ProtectionDrawer,
+  type AllowlistPanelScenario,
+  type ProtectionRules,
+} from './m2PolicyDrawers'
+import {
+  AccountProtectionIcon,
   ADDRESS_BOOK,
   createPoliciesM2Story,
   getAccountKey,
@@ -71,15 +85,19 @@ import {
   VAULT_3,
   type M2Account,
   type SignerId,
+  PrototypeModelContext,
+  usePrototypeModel,
 } from './m2Prototype'
 import {
   ACCOUNT_SETTING_GROUPS,
   CONFIRM_STEP,
+  CREATE_STEP,
   DEFAULT_CHOICES,
   EXECUTE_STEP,
   findM2Account,
   getActiveDetails,
-  PERMISSIONS_STEP,
+  POLICIES_STEP,
+  PROPOSERS_STEP,
   POPULAR_TOKENS,
   SETTINGS_STEP,
   REVIEW_STEP,
@@ -89,40 +107,258 @@ import {
   type Preflight,
   type Recipient,
   type SetupChoices,
+  type SingleRuleKind,
   type WizardMode,
 } from './m2SetupFlow'
 
-// AddPolicyDialog only takes its own policy ids, so the new tile borrows `recovery`, which M1 doesn't offer yet.
-const ALLOWLIST_OPTION: AddPolicyOption = {
-  id: 'recovery',
-  title: 'Allowlist',
-  description: 'Only addresses on your list can receive funds. Everything else is blocked.',
-  Icon: ShieldCheck,
-}
+const SUGGESTION_OPTION = ADD_POLICY_OPTIONS.find(({ id }) => id === 'suggestion')
 
-const ADD_POLICY_OPTIONS_WITH_ALLOWLIST = [ALLOWLIST_OPTION, ...ADD_POLICY_OPTIONS]
+/** A quiet footer line, not a tile: it's feedback, not something to set up. */
+const SuggestPolicyFooter = ({ onSelect }: { onSelect: (id: AddPolicyOption['id']) => void }): ReactElement | null =>
+  SUGGESTION_OPTION ? (
+    <div
+      className="flex items-center justify-between gap-3 border-t border-border pt-4"
+      data-m2-new="New · Suggest a policy"
+    >
+      <Typography variant="paragraph-small" color="muted">
+        Missing a policy you need?
+      </Typography>
+      <Button variant="ghost-muted" size="sm" onClick={() => onSelect(SUGGESTION_OPTION.id)}>
+        Suggest one
+        <ArrowRight data-icon="inline-end" />
+      </Button>
+    </div>
+  ) : null
 
-/** M1's AddPolicyDialog markup, kept in one column: M1's goes two-column past three options. */
-const AddPolicyChooser = ({
+/** Two levels: M1's tiles, as in the live Add policy dialog, with the allowlist as one of them. */
+const OTHER_POLICY_OPTIONS: AddPolicyOption[] = ADD_POLICY_OPTIONS.filter(({ id }) => id !== 'suggestion')
+
+const PROTECTION_PARTS: { label: string; soon?: boolean }[] = [
+  { label: 'Allowlist' },
+  { label: 'Account settings' },
+  { label: 'Contract interactions', soon: true },
+]
+
+/** M1's AddPolicyOptionButton markup a size down (padding, icon, type), so the second level stays compact. */
+const CompactPolicyTile = ({
+  option: { title, description, Icon },
+  onSelect,
+}: {
+  option: Pick<AddPolicyOption, 'title' | 'description' | 'Icon'>
+  onSelect: () => void
+}): ReactElement => (
+  <button
+    type="button"
+    onClick={onSelect}
+    className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg bg-muted p-3 text-left transition-colors hover:bg-secondary-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:transition-colors hover:[&_svg]:text-green-500"
+  >
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-card">
+      <Icon className="size-4" aria-hidden />
+    </span>
+    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <span className="flex items-center gap-1">
+        <Typography variant="paragraph-small-medium" as="span">
+          {title}
+        </Typography>
+        <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />
+      </span>
+      <Typography variant="paragraph-mini" color="muted" as="span">
+        {description}
+      </Typography>
+    </span>
+  </button>
+)
+
+const SIMPLE_POLICY_OPTIONS: { id: IntroKind; title: string; description: string; Icon: LucideIcon }[] = [
+  { id: 'allowlist', title: 'Allowlist', description: 'Which tokens can be sent, and to whom.', Icon: Users },
+  {
+    id: 'settings',
+    title: 'Settings lock',
+    description: 'Which changes to signers, threshold and policies are allowed.',
+    Icon: Settings2,
+  },
+  {
+    id: 'limits',
+    title: 'Spending limits',
+    description: 'Let spenders send tokens without collecting signatures.',
+    Icon: POLICY_ICONS['spending-limit'],
+  },
+  {
+    id: 'proposers',
+    title: 'Proposers',
+    description: 'Let teammates without signing rights propose transactions.',
+    Icon: POLICY_ICONS.proposer,
+  },
+  {
+    id: 'contracts',
+    title: 'Contract interactions',
+    description: 'Which apps and contracts the account can use.',
+    Icon: FileCode2,
+  },
+]
+
+/** C: every policy on its own, as tiles; picking one starts its flow. Contract interactions waits at the end. */
+/** One row of C's list: icon, name, what it does, and an arrow. */
+const PolicyListRow = ({
+  title,
+  description,
+  icon,
+  onSelect,
+  className,
+}: {
+  title: string
+  description: string
+  icon: ReactNode
+  onSelect: () => void
+  className?: string
+}): ReactElement => (
+  <button
+    type="button"
+    onClick={onSelect}
+    className={cn(
+      'group flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      className ?? 'bg-muted hover:bg-secondary-hover',
+    )}
+  >
+    {icon}
+    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <Typography variant="paragraph-small-medium" as="span">
+        {title}
+      </Typography>
+      <Typography variant="paragraph-mini" color="muted" as="span">
+        {description}
+      </Typography>
+    </span>
+    <ArrowRight
+      className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+      aria-hidden
+    />
+  </button>
+)
+
+/** C: every policy in one list; policy enforcement comes last, set apart because it covers the whole account. */
+const SimplePolicyChooser = ({
   open,
   onOpenChange,
+  onEnforce,
   onSelect,
+  onSuggest,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (id: AddPolicyOption['id']) => void
+  onEnforce: () => void
+  onSelect: (kind: IntroKind) => void
+  onSuggest: () => void
 }): ReactElement => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent size="xs" data-testid="add-policy-dialog">
+    <DialogContent size="sm" data-testid="simple-policy-dialog">
       <DialogHeader>
-        <DialogTitle className="text-xl leading-6 font-semibold">Add policy</DialogTitle>
+        <DialogTitle className="text-xl leading-6 font-semibold">Policies</DialogTitle>
+      </DialogHeader>
+      <div className="flex flex-col gap-4 px-4 pb-4" data-m2-new="New · One list of policies">
+        <div className="flex flex-col gap-2">
+          {SIMPLE_POLICY_OPTIONS.map(({ id, title, description, Icon }) => (
+            <PolicyListRow
+              key={id}
+              title={title}
+              description={description}
+              icon={
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-card">
+                  <Icon className="size-4" aria-hidden />
+                </span>
+              }
+              onSelect={() => onSelect(id)}
+            />
+          ))}
+          <PolicyListRow
+            title="Policy enforcement"
+            description="Blocks anything your policies don’t allow, even with every signature."
+            icon={
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+                <AccountProtectionIcon className="size-4" aria-hidden />
+              </span>
+            }
+            onSelect={onEnforce}
+            className="border border-border bg-card hover:bg-muted"
+          />
+        </div>
+        <SuggestPolicyFooter onSelect={onSuggest} />
+      </div>
+    </DialogContent>
+  </Dialog>
+)
+
+/** Contract interactions, on its way: the compact tile's shape, dashed and flat, with no arrow. */
+/** Account protection first, set apart: it covers the whole account; the other policies work on their own. */
+const LevelsAddPolicyChooser = ({
+  open,
+  onOpenChange,
+  onSetUpProtection,
+  onSelect,
+  protectedCount,
+  accountCount,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSetUpProtection: () => void
+  onSelect: (id: AddPolicyOption['id']) => void
+  /** Accounts with account protection on or pending. */
+  protectedCount: number
+  accountCount: number
+}): ReactElement => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent size="sm" data-testid="add-policy-dialog">
+      <DialogHeader>
+        <DialogTitle className="text-xl leading-6 font-semibold">Set up policies</DialogTitle>
       </DialogHeader>
 
-      {/* auto-rows-fr: every tile takes the tallest one's height, so a description that wraps doesn't make one bigger. */}
-      <div className="grid auto-rows-fr gap-3 px-4 pb-4" data-m2-new="M1 copy · Add policy dialog (one column)">
-        {ADD_POLICY_OPTIONS_WITH_ALLOWLIST.map((option) => (
-          <AddPolicyOptionButton key={option.id} {...option} onClick={() => onSelect(option.id)} />
-        ))}
+      {/* Scrolls on its own once more policies make it taller than the screen. */}
+      <div
+        className="flex max-h-[calc(100vh-10rem)] flex-col gap-4 overflow-y-auto px-4 pb-4"
+        data-m2-new="New · Add policy: account protection and other policies"
+      >
+        <section className="flex flex-col gap-3 rounded-xl border border-border p-3">
+          <div className="flex items-end justify-between gap-4">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <Typography variant="paragraph-bold">Account protection</Typography>
+              <Typography variant="paragraph-small" color="muted">
+                Blocks anything your policies don’t allow, even with every signature.
+              </Typography>
+            </div>
+            <Button size="sm" onClick={onSetUpProtection} className="shrink-0">
+              Set up
+              <ArrowRight data-icon="inline-end" />
+            </Button>
+          </div>
+          {/* What the account protection flow sets up. */}
+          <div className="flex flex-wrap items-center gap-1.5" data-m2-new="New · What account protection includes">
+            {PROTECTION_PARTS.map(({ label, soon }) => (
+              <Badge key={label} variant="subtle" shape="tag">
+                {label}
+                {soon && <span className="text-muted-foreground">· Soon</span>}
+              </Badge>
+            ))}
+          </div>
+          <Typography variant="paragraph-mini" color="muted">
+            Active on {protectedCount} of {accountCount} accounts
+          </Typography>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <div className="flex flex-col gap-0.5">
+            <Typography variant="paragraph-bold">Other policies</Typography>
+            <Typography variant="paragraph-small" color="muted">
+              They work on their own. Once account protection is set up, it checks them too.
+            </Typography>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {OTHER_POLICY_OPTIONS.map((option) => (
+              <CompactPolicyTile key={option.title} option={option} onSelect={() => onSelect(option.id)} />
+            ))}
+          </div>
+        </section>
+
+        <SuggestPolicyFooter onSelect={onSelect} />
       </div>
     </DialogContent>
   </Dialog>
@@ -139,6 +375,10 @@ type PrototypeState = {
   panelKey: string | null
   /** The policy row whose drawer is open over the By policy view. */
   policyId: string | null
+  /** The account (getAccountKey) whose protection overview is open; one panel at a time, so it clears policyId. */
+  protectionKey?: string | null
+  /** A policy opened from the account protection panel: its panel shows Back to that account's enforcement. */
+  returnToProtectionKey?: string | null
   /** An allowlist side panel state picked in Jump to; null follows the prototype's own state. */
   panelScenario: AllowlistPanelScenario | null
   /** The Ops bot's spending limit next to the Payments allowlist; set by the All states canvas only. */
@@ -148,6 +388,29 @@ type PrototypeState = {
   introOpen: boolean
   /** The account the new allowlist is for (getAccountKey); null until picked on Create. */
   setupAccountKey: string | null
+  /** "Set up protection" on an account's row: the account the intro was opened for, kept until it proceeds. */
+  pendingAccountKey: string | null
+  /** The setup was started from an account's row, so Create shows the account instead of the dropdown. */
+  setupFromRow: boolean
+  /** Account protection on its own (New → Account protection, a row's Set up), or the allowlist (New → Allowlist). */
+  setupKind?: 'protection' | 'protection-edit' | 'policy' | 'rule'
+  /** B: the rule added or edited on its own (setupKind 'rule'). */
+  ruleKind?: SingleRuleKind
+  ruleIsEdit?: boolean
+  /** Where the rule flow goes back to: the panel it was opened from, or the table. */
+  ruleReturnPolicyId?: string | null
+  /** B: Trading desk's policy enforcement is live; off in the starting state, on through Jump to. */
+  tradingDeskEnforced?: boolean
+  /** An account whose protection change was executed and is waiting out its 24 hours. */
+  protectionChangeKey?: string | null
+  /** The account whose protection is being edited; the setup's own account and choices stay as they were. */
+  protectionEditKey?: string | null
+  /** What the edit borrowed, put back when it ends. */
+  protectionEditReturn?: Pick<PrototypeState, 'choices' | 'setupKind'> | null
+  /** Rules saved by an executed protection edit, per account (getAccountKey). */
+  protectionRulesByAccount?: Record<string, ProtectionRules>
+  /** Protection setup started by picking a policy for an unprotected account. */
+  protectionForPolicy?: boolean
   /** The prototype follows one setup at a time. */
   account: AccountState
   signedBy: SignerId[]
@@ -182,6 +445,8 @@ const INITIAL_STATE: PrototypeState = {
   addPolicyOpen: false,
   introOpen: false,
   setupAccountKey: null,
+  pendingAccountKey: null,
+  setupFromRow: false,
   account: 'not-set-up',
   signedBy: [],
   pendingChange: false,
@@ -220,6 +485,7 @@ const NOT_STARTED: Partial<PrototypeState> = { account: 'not-set-up', signedBy: 
 const POLICY_TABLE: Partial<PrototypeState> = { screen: 'overview', panelKey: null }
 const WIZARD: Partial<PrototypeState> = {
   screen: 'wizard',
+  setupFromRow: true,
   panelKey: null,
   wizardMode: 'create',
   editInitialChoices: null,
@@ -276,8 +542,6 @@ const MANY_TOKENS_CHOICES: SetupChoices = {
 // A new setup starts with no recipients; later steps keep the prefilled ones so they have something to show.
 const FRESH_CHOICES: SetupChoices = { ...DEFAULT_CHOICES, recipients: [] }
 const CONFLICT_ONE: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC'] }
-const CONFLICT_TWO: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC', 'ETH'] }
-const CONFLICT_ONE_EXEMPT: SetupChoices = { ...CONFLICT_ONE, applyToSpendingLimits: false }
 const BLOCKED_SPENDING_LIMIT_TOKENS = ['USDC']
 
 const PENDING_SETUP: Partial<PrototypeState> = { account: 'waiting', ...SETUP_STARTED }
@@ -356,11 +620,30 @@ const OTHER_ACCOUNTS: { account: M2Account; state: AccountState }[] = [
 
 const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
   {
-    heading: 'Create allowlist',
+    heading: 'Test session (B)',
     jumps: [
-      { label: 'Create', state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES } },
-      { label: 'Create · 20 tokens, 20 recipients', state: { ...WIZARD, wizardStep: 0, choices: MANY_TOKENS_CHOICES } },
-      { label: 'Policies', state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } },
+      {
+        label: 'Start · no policy enforcement',
+        view: 'by-policy',
+        state: { ...POLICY_TABLE, tradingDeskEnforced: false },
+      },
+      {
+        label: 'Policy enforcement active · Trading desk',
+        view: 'by-policy',
+        state: { ...POLICY_TABLE, tradingDeskEnforced: true },
+      },
+    ],
+  },
+  {
+    heading: 'Set up account protection',
+    jumps: [
+      { label: 'How it works', state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES } },
+      { label: 'Create', state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES } },
+      {
+        label: 'Create · 20 tokens, 20 recipients',
+        state: { ...WIZARD, wizardStep: CREATE_STEP, choices: MANY_TOKENS_CHOICES },
+      },
+      { label: 'Policies', state: { ...WIZARD, wizardStep: POLICIES_STEP, setupKind: 'protection' } },
       { label: 'Safe account settings', state: { ...WIZARD, wizardStep: SETTINGS_STEP } },
       { label: 'Review', state: { ...WIZARD, wizardStep: REVIEW_STEP } },
       { label: 'Confirm', state: { ...WIZARD, wizardStep: CONFIRM_STEP } },
@@ -369,9 +652,9 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
   },
   {
     // The edit flow on Payments' live allowlist, opened as its side panel's Edit does.
-    heading: 'Edit allowlist',
+    heading: 'Edit account protection',
     jumps: [
-      { label: 'Edit · Create', view: 'by-policy', state: { ...EDIT, wizardStep: 0 } },
+      { label: 'Edit · Create', view: 'by-policy', state: { ...EDIT, wizardStep: CREATE_STEP } },
       {
         label: 'Edit · Review (2 changes)',
         view: 'by-policy',
@@ -390,27 +673,22 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
     jumps: [
       {
         label: 'Unknown policy installed',
-        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'other-guard' },
+        state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES, preflight: 'other-guard' },
       },
       // Picking an account that already has an allowlist turns Create into an edit of it, the account still changeable.
-      { label: 'Account already has an allowlist', view: 'by-policy', state: { ...EDIT, editFromCreate: true } },
+      { label: 'Account protection already set up', view: 'by-policy', state: { ...EDIT, editFromCreate: true } },
       {
         label: 'Safe account needs an update',
-        state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'old-version' },
+        state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES, preflight: 'old-version' },
       },
     ],
   },
   {
     // The same states as M1's SpendingLimitDrawer stories, on the new allowlist (Payments).
-    heading: 'Allowlist side panel',
+    heading: 'Account protection side panel',
     jumps: [
       allowlistPanel('Active · signer', LIVE_SETUP, { viewer: 'signer' }),
       allowlistPanel('Active · just activated', { ...LIVE_SETUP, justActivated: true }, { viewer: 'signer' }),
-      allowlistPanel(
-        'Active · spending limits not covered',
-        { ...LIVE_SETUP, choices: { ...DEFAULT_CHOICES, applyToSpendingLimits: false } },
-        { viewer: 'signer' },
-      ),
       allowlistPanel('Active · no wallet', LIVE_SETUP, { viewer: 'disconnected' }),
       allowlistPanel('Active · not a signer', LIVE_SETUP, { viewer: 'non-signer' }),
       allowlistPanel('Pending · already signed', PENDING_SETUP, { viewer: 'signer-signed' }),
@@ -449,7 +727,7 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
       { id: 'policy-table', label: 'Default', jump: { view: BY_POLICY, state: PENDING_TABLE } },
       {
         id: 'policy-table-filtered',
-        label: 'Filtered: Allowlist',
+        label: 'Filtered: Account protection',
         jump: { view: BY_POLICY, state: PENDING_TABLE },
         policyFilters: { types: ['allowlist'] },
       },
@@ -478,34 +756,20 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
     frames: [
       {
         id: 'drawer-allowlist-active',
-        label: 'Allowlist · Active',
+        label: 'Account protection · Active',
         jump: {
           view: BY_POLICY,
           state: { ...POLICY_TABLE, policyId: SETUP_ROW_ID, account: 'enforcing', ...FULLY_SIGNED },
         },
       },
       {
-        id: 'drawer-allowlist-not-covered',
-        label: 'Allowlist · Active, spending limits not covered',
-        jump: {
-          view: BY_POLICY,
-          state: {
-            ...POLICY_TABLE,
-            policyId: SETUP_ROW_ID,
-            account: 'enforcing',
-            ...FULLY_SIGNED,
-            choices: { ...DEFAULT_CHOICES, applyToSpendingLimits: false },
-          },
-        },
-      },
-      {
         id: 'drawer-allowlist-pending',
-        label: 'Allowlist · Pending',
+        label: 'Account protection · Pending',
         jump: { view: BY_POLICY, state: { ...PENDING_TABLE, policyId: SETUP_ROW_ID } },
       },
       {
         id: 'drawer-allowlist-change-pending',
-        label: 'Allowlist · Change pending',
+        label: 'Account protection · Change pending',
         jump: {
           view: BY_POLICY,
           state: {
@@ -524,12 +788,12 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
       },
       {
         id: 'drawer-spending-limit-blocked',
-        label: 'Spending limit · Blocked by allowlist (Payments)',
+        label: 'Spending limit · Blocked by the allowlist (Payments)',
         jump: { view: BY_POLICY, state: SPENDING_LIMIT_BLOCKED },
       },
       {
         id: 'drawer-spending-limit-locked',
-        label: 'Spending limit · Locked by allowlist (Payments)',
+        label: 'Spending limit · Locked by account protection (Payments)',
         jump: { view: BY_POLICY, state: SPENDING_LIMIT_LOCKED },
       },
       {
@@ -565,41 +829,55 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
       {
         id: 'create-no-account',
         label: 'No account',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: null } },
+        jump: { state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES, setupAccountKey: null } },
       },
       {
         id: 'create-payments',
         label: 'Payments',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES } },
+        jump: { state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES } },
       },
       {
         id: 'create-many',
         label: '20 tokens, 20 recipients',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: MANY_TOKENS_CHOICES } },
+        jump: { state: { ...WIZARD, wizardStep: CREATE_STEP, choices: MANY_TOKENS_CHOICES } },
       },
       {
         id: 'create-treasury',
         label: 'Treasury',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: getAccountKey(TREASURY) } },
+        jump: {
+          state: {
+            ...WIZARD,
+            wizardStep: CREATE_STEP,
+            choices: FRESH_CHOICES,
+            setupAccountKey: getAccountKey(TREASURY),
+          },
+        },
       },
       {
         id: 'create-vault-3',
         label: 'Vault 3',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: getAccountKey(VAULT_3) } },
+        jump: {
+          state: {
+            ...WIZARD,
+            wizardStep: CREATE_STEP,
+            choices: FRESH_CHOICES,
+            setupAccountKey: getAccountKey(VAULT_3),
+          },
+        },
       },
       {
         id: 'create-old-version',
         label: 'Failure · Old version',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'old-version' } },
+        jump: { state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES, preflight: 'old-version' } },
       },
       {
         id: 'create-other-guard',
         label: 'Failure · Unknown policy installed',
-        jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, preflight: 'other-guard' } },
+        jump: { state: { ...WIZARD, wizardStep: CREATE_STEP, choices: FRESH_CHOICES, preflight: 'other-guard' } },
       },
       {
         id: 'create-existing-allowlist',
-        label: 'Account already has an allowlist (edit)',
+        label: 'Account protection already set up (edit)',
         jump: { view: 'by-policy', state: { ...EDIT, editFromCreate: true } },
       },
     ],
@@ -607,21 +885,10 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
   {
     title: 'Policies',
     frames: [
-      { id: 'permissions', label: 'Payments', jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } } },
       {
-        id: 'permissions-conflict-one',
-        label: 'Policies · Spending limit conflict',
-        jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE } },
-      },
-      {
-        id: 'permissions-conflict-two',
-        label: 'Policies · Spending limit conflict (2)',
-        jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_TWO } },
-      },
-      {
-        id: 'permissions-spending-limits-exempt',
-        label: 'Policies · Spending limits exempt',
-        jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE_EXEMPT } },
+        id: 'permissions',
+        label: 'Payments',
+        jump: { state: { ...WIZARD, wizardStep: POLICIES_STEP, setupKind: 'protection' } },
       },
     ],
   },
@@ -663,7 +930,7 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
       {
         id: 'edit-create',
         label: 'Edit · Create (Payments)',
-        jump: { view: BY_POLICY, state: { ...EDIT, wizardStep: 0 } },
+        jump: { view: BY_POLICY, state: { ...EDIT, wizardStep: CREATE_STEP } },
       },
       {
         id: 'edit-review',
@@ -930,6 +1197,10 @@ const FullScreenFlow = ({ children }: { children: ReactNode }): ReactElement | n
 
 /** The M2 screens wired together with local state only: nothing is signed or sent. */
 const GuardSetupFlowPrototype = (): ReactElement => {
+  const isRulesModel = usePrototypeModel() === 'policies'
+  const isSimpleModel = usePrototypeModel() === 'simple'
+  // C: the policy whose intro is open, and the account it was started from (null from New).
+  const [simpleIntro, setSimpleIntro] = useState<{ kind: IntroKind; accountKey: string | null } | null>(null)
   const dispatch = useAppDispatch()
   const { viewer, setViewer, view, setCurrentJump, handlers } = usePrototypeFrame()
   const [canvasFrame] = useState(getCanvasFrame)
@@ -948,6 +1219,10 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     },
     [setCurrentJump],
   )
+  const updateFrom = (patch: (current: PrototypeState) => Partial<PrototypeState>) => {
+    setState((current) => ({ ...current, ...patch(current) }))
+    setCurrentJump(null)
+  }
 
   const toast = useCallback(
     (message: string) => dispatch(showNotification({ message, variant: 'success', groupKey: 'guard-setup-prototype' })),
@@ -963,15 +1238,25 @@ const GuardSetupFlowPrototype = (): ReactElement => {
 
   // Back to where the flow started: the policy table in By policy, the Payments panel in By account.
   // Back on the table with the new allowlist's side panel open, so its status is the first thing seen.
-  const backToPaymentsPanel: Partial<PrototypeState> =
-    view === 'by-policy'
-      ? { screen: 'overview', panelKey: null, policyId: SETUP_ROW_ID, panelScenario: null }
-      : { screen: 'overview', panelKey: PAYMENTS_KEY, policyId: null }
+  // A protection set up on its own has no allowlist panel: its own panel opens instead.
+  // Read from the latest state when it runs: the flow's Sign can outlive the render that picked the account.
+  const getBackToPanel = (current: PrototypeState): Partial<PrototypeState> =>
+    current.setupKind === 'protection' && current.setupAccountKey
+      ? {
+          screen: 'overview',
+          panelKey: null,
+          policyId: null,
+          panelScenario: null,
+          protectionKey: current.setupAccountKey,
+        }
+      : view === 'by-policy'
+        ? { screen: 'overview', panelKey: null, policyId: SETUP_ROW_ID, panelScenario: null }
+        : { screen: 'overview', panelKey: PAYMENTS_KEY, policyId: null }
 
   /** Execute: back on the overview with the panel open, Executing until the transaction is "mined", then Active. */
   const execute = () => {
     stopExecution()
-    update({ ...backToPaymentsPanel, account: 'executing', dialog: undefined, wizardStep: 0 })
+    updateFrom((current) => ({ ...getBackToPanel(current), account: 'executing', dialog: undefined, wizardStep: 0 }))
     executionTimer.current = setTimeout(() => {
       update({ account: 'enforcing', justActivated: true })
     }, EXECUTION_TIME_MS)
@@ -995,6 +1280,16 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           editRestore: null,
           editFromCreate: false,
           justActivated: false,
+          protectionKey: null,
+          returnToProtectionKey: null,
+          pendingAccountKey: null,
+          setupKind: undefined,
+          ruleKind: undefined,
+          ruleIsEdit: false,
+          ruleReturnPolicyId: null,
+          protectionEditKey: null,
+          protectionEditReturn: null,
+          protectionForPolicy: false,
           ...WIZARD_DEFAULTS,
           ...patch,
         }))
@@ -1038,7 +1333,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           ...EDIT_ENDED,
           ...(state.editRestore ?? {}),
         })
-      : update(backToPaymentsPanel)
+      : updateFrom(getBackToPanel)
 
   /** Edit in a live allowlist's panel: the create flow on that account, starting from the allowlist as it is. */
   /** A live allowlist's tokens and recipients as form choices: for Edit, and for Create on an account that has one. */
@@ -1055,6 +1350,11 @@ const GuardSetupFlowPrototype = (): ReactElement => {
 
   /** Picking an account with an allowlist prefills its current rules; leaving it starts over with an empty form. */
   const pickSetupAccount = (account: M2Account) => {
+    // Protection on its own: the field stays on How it works, and protected accounts can't be picked.
+    if (state.setupKind === 'protection' || state.setupKind === 'rule') {
+      update({ setupAccountKey: getAccountKey(account) })
+      return
+    }
     const existing = getPolicyRows(payments).find(
       (row) => row.type === 'allowlist' && getAccountKey(row.account) === getAccountKey(account),
     )
@@ -1072,14 +1372,44 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       })
       return
     }
-    // Back to an account without one: a fresh create again.
+    // Single policies don't need account protection: the allowlist is set up on its own.
     update({
       setupAccountKey: getAccountKey(account),
-      ...(state.editFromCreate
-        ? { ...EDIT_ENDED, policyId: null, choices: FRESH_CHOICES, wizardStep: state.wizardStep }
-        : {}),
+      ...(state.editFromCreate ? { ...EDIT_ENDED, policyId: null, choices: FRESH_CHOICES } : {}),
     })
   }
+
+  /** B: one rule on its own, added from the account's row or edited from its panel; the flow runs on that account. */
+  const startRuleChange = (account: M2Account | null, ruleKind: SingleRuleKind, isEdit = false) =>
+    update({
+      screen: 'wizard',
+      setupKind: 'rule',
+      ruleKind,
+      ruleIsEdit: isEdit,
+      ruleReturnPolicyId: isEdit ? state.policyId : null,
+      wizardMode: 'create',
+      wizardStep: { allowlist: CREATE_STEP, settings: SETTINGS_STEP, limits: POLICIES_STEP, proposers: PROPOSERS_STEP }[
+        ruleKind
+      ],
+      setupAccountKey: account ? getAccountKey(account) : null,
+      setupFromRow: Boolean(account),
+      ...(isSimpleModel && { choices: FRESH_CHOICES }),
+      policyId: null,
+      panelKey: null,
+      protectionKey: null,
+      addPolicyOpen: false,
+    })
+
+  const endRuleChange = () =>
+    update({
+      screen: 'overview',
+      setupKind: undefined,
+      ruleKind: undefined,
+      ruleIsEdit: false,
+      policyId: state.ruleReturnPolicyId ?? null,
+      ruleReturnPolicyId: null,
+      wizardStep: 0,
+    })
 
   const editAllowlist = (row: PolicyRow) => {
     const initialChoices = choicesFromAllowlist(row)
@@ -1087,7 +1417,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     update({
       screen: 'wizard',
       wizardMode: 'edit',
-      wizardStep: 0,
+      wizardStep: CREATE_STEP,
       panelKey: null,
       addPolicyOpen: false,
       setupAccountKey: getAccountKey(row.account),
@@ -1118,7 +1448,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       return
     }
 
-    update({ ...backToPaymentsPanel, account: 'waiting', signedBy, wizardStep: 0 })
+    updateFrom((current) => ({ ...getBackToPanel(current), account: 'waiting', signedBy, wizardStep: 0 }))
   }
 
   const otherAccount = OTHER_ACCOUNTS.find(({ account }) => getAccountKey(account) === state.panelKey)
@@ -1136,6 +1466,21 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     account: setupTarget,
     recipients: selectedRecipients.map(({ name, address }) => ({ name, address })),
     spendingLimit: state.spendingLimitState,
+    // Protection always comes with its allowlist now, so the row is a real allowlist; in C it's the enforcement alone.
+    protectionOnly: isSimpleModel,
+    // An allowlist added from New on its own leaves the account not enforced.
+    singlePolicy: state.setupKind === 'policy',
+    // B's test set: five Safe accounts, none with policy enforcement until Jump to turns Trading desk's on.
+    testAccounts: isRulesModel || isSimpleModel,
+    simple: isSimpleModel,
+    tradingDeskEnforced: !(isRulesModel || isSimpleModel) || Boolean(state.tradingDeskEnforced),
+    // The setup's own choices, then whatever an edit saved, so the account settings row says what's blocked.
+    blockedSettings: {
+      ...(state.setupAccountKey ? { [state.setupAccountKey]: state.choices.blockedSettings } : {}),
+      ...Object.fromEntries(
+        Object.entries(state.protectionRulesByAccount ?? {}).map(([key, rules]) => [key, rules.blockedSettings]),
+      ),
+    },
   }
   // The account view follows Payments only, so a setup on another account leaves Payments not protected there.
   const paymentsForAccountView: PaymentsSnapshot = isPaymentsSetup
@@ -1143,18 +1488,146 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     : { ...payments, state: 'not-set-up', signedCount: 0, pendingChange: false }
   const paymentsPanelState = paymentsForAccountView.state
   const openPanel = (account: M2Account) => update({ panelKey: getAccountKey(account), dialog: undefined })
+  // The setup's own account follows the prototype's choices; every other protected account uses the default rules.
+  const isSetupProtection = Boolean(state.protectionKey) && state.protectionKey === state.setupAccountKey
+  const getProtectionRules = (accountKey: string | null): ProtectionRules =>
+    (accountKey && state.protectionRulesByAccount?.[accountKey]) ||
+    (accountKey && accountKey === state.setupAccountKey
+      ? { baseline: state.choices.baseline ?? 'block-all', blockedSettings: state.choices.blockedSettings }
+      : DEFAULT_PROTECTION_RULES)
+  const protectionRules = getProtectionRules(state.protectionKey ?? null)
+  /** Edit: Settings, Everything else, Review, then sign and execute; the change waits 24 hours. */
+  const editProtection = (account: M2Account, rules: ProtectionRules) =>
+    update({
+      screen: 'wizard',
+      setupKind: 'protection-edit',
+      protectionEditKey: getAccountKey(account),
+      protectionEditReturn: { choices: state.choices, setupKind: state.setupKind },
+      wizardMode: 'create',
+      wizardStep: SETTINGS_STEP,
+      protectionKey: null,
+      choices: { ...state.choices, baseline: rules.baseline, blockedSettings: rules.blockedSettings },
+    })
+  /** Back to the protection's panel, the setup's own choices put back; `saved` keeps the edit's rules. */
+  const endProtectionEdit = (saved: boolean) => {
+    const key = state.protectionEditKey ?? null
+    update({
+      screen: 'overview',
+      protectionKey: key,
+      ...(saved && key
+        ? {
+            protectionChangeKey: key,
+            protectionRulesByAccount: {
+              ...state.protectionRulesByAccount,
+              [key]: {
+                baseline: state.choices.baseline ?? 'block-all',
+                blockedSettings: state.choices.blockedSettings,
+              },
+            },
+          }
+        : {}),
+      ...(state.protectionEditReturn ?? {}),
+      protectionEditKey: null,
+      protectionEditReturn: null,
+    })
+  }
   const openWizardAt = (wizardStep: number) =>
     update({ screen: 'wizard', panelKey: null, policyId: null, panelScenario: null, addPolicyOpen: false, wizardStep })
   const openPolicy = (row: PolicyRow) =>
-    update({ policyId: row.id, panelKey: null, panelScenario: null, dialog: undefined })
+    update({
+      policyId: row.id,
+      protectionKey: null,
+      returnToProtectionKey: null,
+      panelKey: null,
+      panelScenario: null,
+      dialog: undefined,
+    })
+  const openProtection = (account: M2Account) =>
+    update({
+      protectionKey: getAccountKey(account),
+      returnToProtectionKey: null,
+      policyId: null,
+      panelKey: null,
+      panelScenario: null,
+    })
+  // Into a policy from the enforcement panel and back out: the panels push sideways, like pages.
+  const [slide, setSlide] = useState<'forward' | 'back' | null>(null)
+  // Set before the panels swap, so the new one never plays its own slide-in; cleared once the push is done.
+  const startSlide = (direction: 'forward' | 'back') => {
+    document.documentElement.dataset.m2Slide = direction
+    setSlide(direction)
+  }
+  useEffect(() => {
+    if (!slide) return
+    const timer = setTimeout(() => {
+      delete document.documentElement.dataset.m2Slide
+      setSlide(null)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [slide])
+  const openPolicyFromProtection = (row: PolicyRow) => {
+    startSlide('forward')
+    update({
+      policyId: row.id,
+      protectionKey: null,
+      returnToProtectionKey: state.protectionKey ?? null,
+      panelKey: null,
+      panelScenario: null,
+      dialog: undefined,
+    })
+  }
+  const backToProtection = state.returnToProtectionKey
+    ? () => {
+        startSlide('back')
+        update({
+          protectionKey: state.returnToProtectionKey,
+          returnToProtectionKey: null,
+          policyId: null,
+          panelScenario: null,
+        })
+      }
+    : undefined
+  const panelOrder = getPanelOrder(getPolicyRows(payments))
+  const panelIndex = panelOrder.findIndex((entry) =>
+    entry.kind === 'protection' ? entry.accountKey === state.protectionKey : entry.id === state.policyId,
+  )
+  const openEntry = (entry?: PanelEntry) =>
+    entry &&
+    (() =>
+      entry.kind === 'protection'
+        ? update({
+            protectionKey: entry.accountKey,
+            returnToProtectionKey: null,
+            policyId: null,
+            panelKey: null,
+            panelScenario: null,
+          })
+        : update({
+            policyId: entry.id,
+            returnToProtectionKey: null,
+            protectionKey: null,
+            panelKey: null,
+            panelScenario: null,
+          }))
+  const panelNav: PanelNav = {
+    onPrevious: panelIndex > 0 ? openEntry(panelOrder[panelIndex - 1]) : undefined,
+    onNext: panelIndex >= 0 ? openEntry(panelOrder[panelIndex + 1]) : undefined,
+  }
+  const policyPanelNav: PanelNav = { ...panelNav, onBack: state.policyId ? backToProtection : undefined }
+  const protectionAccount = state.protectionKey ? findM2Account(state.protectionKey) : undefined
   const openRow = getPolicyRows(payments).find(({ id }) => id === state.policyId)
   const isSetupRow = openRow?.id === SETUP_ROW_ID
   // Only the allowlist panel's Edit is wired; M1's spending limit and proposer panels keep theirs unset.
   const openAllowlistRow = openRow?.type === 'allowlist' ? openRow : undefined
 
-  /** "Allowlist" in Add policy: a fresh setup, starting with the account dropdown. */
-  const startAllowlist = () =>
+  /** A fresh setup, opening on the onboarding: from "New" without an account, from an account's row with that one. */
+  const startAllowlist = (accountKey: string | null = state.pendingAccountKey) =>
     update({
+      setupAccountKey: accountKey,
+      setupFromRow: accountKey !== null,
+      setupKind: 'protection',
+      protectionForPolicy: false,
+      pendingAccountKey: null,
       ...WIZARD_DEFAULTS,
       ...EDIT_ENDED,
       choices: FRESH_CHOICES,
@@ -1163,15 +1636,26 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       introOpen: false,
       panelKey: null,
       policyId: null,
-      wizardStep: 0,
-      setupAccountKey: null,
+      // C enforces the account's live policies as they are, so it goes straight to Review.
+      wizardStep: isSimpleModel ? REVIEW_STEP : SETTINGS_STEP,
       account: 'not-set-up',
       signedBy: [],
       pendingChange: false,
     })
 
+  /** Every Enforce policies entry opens the intro modal first; its button starts the flow for that account. */
+  const openEnforceIntro = (accountKey: string | null) =>
+    update({
+      introOpen: true,
+      pendingAccountKey: accountKey,
+      addPolicyOpen: false,
+      protectionKey: null,
+      policyId: null,
+    })
+
   return (
     <>
+      <style>{PANEL_SLIDE_CSS}</style>
       {view === 'by-account' ? (
         <PoliciesOverviewPage
           key={resetId}
@@ -1182,25 +1666,70 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       ) : (
         <PoliciesByPolicyPage
           key={resetId}
+          levels
+          simple={isSimpleModel}
           payments={payments}
           initialFilters={canvasFrame?.policyFilters}
-          onAddPolicy={() => update({ addPolicyOpen: true, policyId: null })}
+          activeRowId={state.policyId ?? undefined}
+          // B starts from an account's row: Set up, Add policies, or Add rule; there is no New.
+          onAddPolicy={
+            isRulesModel ? undefined : () => update({ addPolicyOpen: true, policyId: null, pendingAccountKey: null })
+          }
           onSelectAccount={openPanel}
           onSelectPolicy={openPolicy}
+          // The onboarding's first step explains protection, so the row goes straight in, without the old intro dialog.
+          onProtectAccount={(account) => openEnforceIntro(getAccountKey(account))}
+          onOpenProtection={openProtection}
+          // An account with no policies: Set up policies, already on that account.
+          onAddRule={isRulesModel ? (account, rule) => startRuleChange(account, rule) : undefined}
+          onAddPolicies={(account) =>
+            isRulesModel
+              ? openEnforceIntro(getAccountKey(account))
+              : update({ addPolicyOpen: true, policyId: null, pendingAccountKey: getAccountKey(account) })
+          }
         />
       )}
 
-      <AddPolicyChooser
-        open={state.screen === 'overview' && state.addPolicyOpen}
+      <SimplePolicyChooser
+        open={isSimpleModel && state.screen === 'overview' && state.addPolicyOpen}
         onOpenChange={(addPolicyOpen) => update({ addPolicyOpen })}
-        // Only the new tile is wired, and it shows the intro first, as M1's tiles do; M1's tiles just close the dialog.
-        onSelect={(id) => update({ addPolicyOpen: false, introOpen: id === ALLOWLIST_OPTION.id })}
+        onEnforce={() => openEnforceIntro(state.pendingAccountKey)}
+        onSelect={(kind) => {
+          setSimpleIntro({ kind, accountKey: state.pendingAccountKey })
+          update({ addPolicyOpen: false })
+        }}
+        onSuggest={() => update({ addPolicyOpen: false })}
+      />
+
+      {simpleIntro && (
+        <PolicyIntro
+          open
+          kind={simpleIntro.kind}
+          onOpenChange={(open) => (open ? undefined : setSimpleIntro(null))}
+          // Contract interactions has no flow yet: its intro is as far as it goes.
+          onProceed={() => {
+            const { kind, accountKey } = simpleIntro
+            setSimpleIntro(null)
+            if (kind !== 'contracts') startRuleChange(accountKey ? (findM2Account(accountKey) ?? null) : null, kind)
+          }}
+        />
+      )}
+
+      <LevelsAddPolicyChooser
+        open={!isSimpleModel && state.screen === 'overview' && state.addPolicyOpen}
+        onOpenChange={(addPolicyOpen) => update({ addPolicyOpen })}
+        // The same flow as a row's Set up, with the account picked inside it.
+        onSetUpProtection={() => openEnforceIntro(state.pendingAccountKey)}
+        // M1's spending limit and proposer tiles just close the dialog.
+        onSelect={() => update({ addPolicyOpen: false })}
+        protectedCount={getAllowlistAccountKeys(payments).length}
+        accountCount={new Set(getPolicyRows(payments).map(({ account }) => getAccountKey(account))).size}
       />
 
       <AllowlistIntroDialog
         open={state.screen === 'overview' && state.introOpen}
         onOpenChange={(open) => (open ? undefined : update({ introOpen: false }))}
-        onProceed={startAllowlist}
+        onProceed={() => startAllowlist()}
       />
 
       <PolicyDrawer
@@ -1210,14 +1739,28 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         scenario={isSetupRow ? (state.panelScenario ?? undefined) : undefined}
         spendingLimitBlockedTokens={BLOCKED_SPENDING_LIMIT_TOKENS}
         paymentsExcludedTokens={state.choices.excludedTokens}
-        paymentsAppliesToSpendingLimits={state.choices.applyToSpendingLimits}
         justActivated={isSetupRow && state.justActivated}
-        onClose={() => update({ policyId: null, panelScenario: null, justActivated: false })}
+        allRows={getPolicyRows(payments)}
+        protectedAccountKeys={getAllowlistAccountKeys(payments)}
+        onSelectPolicy={openPolicy}
+        onClose={() =>
+          update({ policyId: null, returnToProtectionKey: null, panelScenario: null, justActivated: false })
+        }
+        nav={policyPanelNav}
         // Only the new allowlist is driven by the prototype: Confirm reviews it, Execute opens the execute step.
         onConfirm={isSetupRow ? () => openWizardAt(REVIEW_STEP) : undefined}
         onExecute={isSetupRow ? () => openWizardAt(EXECUTE_STEP) : undefined}
         onCancelChange={() => (isSetupRow ? update({ pendingChange: false }) : undefined)}
-        onEdit={openAllowlistRow ? () => editAllowlist(openAllowlistRow) : undefined}
+        accountSettingsRules={openRow && getProtectionRules(getAccountKey(openRow.account))}
+        onEdit={
+          openAllowlistRow
+            ? () => editAllowlist(openAllowlistRow)
+            : openRow?.type === 'account-settings'
+              ? () => editProtection(openRow.account, getProtectionRules(getAccountKey(openRow.account)))
+              : isRulesModel && openRow?.type === 'spending-limit'
+                ? () => startRuleChange(openRow.account, 'limits', true)
+                : undefined
+        }
         // "See policy here" on a blocked spending limit: swap to the allowlist row on the same account.
         onOpenAllowlist={(account) => {
           const allowlistRow = getPolicyRows(payments).find(
@@ -1225,6 +1768,26 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           )
           if (allowlistRow) update({ policyId: allowlistRow.id, panelScenario: null })
         }}
+        onOpenProtection={openProtection}
+      />
+
+      <ProtectionDrawer
+        open={state.screen === 'overview' && Boolean(protectionAccount)}
+        account={protectionAccount}
+        allRows={getPolicyRows(payments)}
+        onSelectPolicy={openPolicyFromProtection}
+        onClose={() => update({ protectionKey: null })}
+        levels
+        nav={panelNav}
+        rules={protectionRules}
+        viewerHasSigned={isSetupProtection && state.signedBy.includes(viewer)}
+        changePending={Boolean(state.protectionKey) && state.protectionChangeKey === state.protectionKey}
+        // Only the prototype's own setup is driven: Confirm reviews it, Execute opens the execute step.
+        onConfirm={isSetupProtection ? () => openWizardAt(REVIEW_STEP) : undefined}
+        onExecute={isSetupProtection ? () => openWizardAt(EXECUTE_STEP) : undefined}
+        onCancelChange={() => update({ protectionChangeKey: null })}
+        onEditProtection={protectionAccount ? () => editProtection(protectionAccount, protectionRules) : undefined}
+        onEnforce={protectionAccount ? () => openEnforceIntro(getAccountKey(protectionAccount)) : undefined}
       />
 
       {otherAccount ? (
@@ -1272,7 +1835,11 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       {state.screen === 'wizard' && (
         <FullScreenFlow>
           <SetUpPoliciesFlow
-            account={setupAccount}
+            account={
+              state.setupKind === 'protection-edit' && state.protectionEditKey
+                ? findM2Account(state.protectionEditKey)
+                : setupAccount
+            }
             onAccountChange={pickSetupAccount}
             step={state.wizardStep}
             onStepChange={(wizardStep) => update({ wizardStep })}
@@ -1280,11 +1847,50 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             onChoicesChange={(choices) => update({ choices })}
             preflight={state.preflight}
             viewer={viewer}
-            onSign={sign}
-            onExecute={execute}
-            onClose={closeWizard}
+            // Editing protection: one signature in the prototype, then Execute starts the 24-hour wait.
+            onSign={
+              state.setupKind === 'protection-edit' || state.setupKind === 'rule'
+                ? () => update({ wizardStep: EXECUTE_STEP })
+                : sign
+            }
+            onExecute={
+              state.setupKind === 'protection-edit'
+                ? () => endProtectionEdit(true)
+                : state.setupKind === 'rule'
+                  ? endRuleChange
+                  : execute
+            }
+            onClose={
+              state.setupKind === 'protection-edit'
+                ? () => endProtectionEdit(false)
+                : state.setupKind === 'rule'
+                  ? endRuleChange
+                  : closeWizard
+            }
             mode={state.wizardMode}
             isAccountLocked={state.wizardMode === 'edit' && !state.editFromCreate}
+            accountFromRow={
+              (state.setupFromRow && state.wizardMode === 'create') ||
+              state.setupKind === 'protection-edit' ||
+              (state.setupKind === 'rule' && state.setupFromRow)
+            }
+            kind={state.setupKind ?? 'policy'}
+            ruleKind={state.ruleKind}
+            isRuleEdit={state.ruleIsEdit}
+            forPolicy={state.protectionForPolicy}
+            livePolicies={
+              setupAccount &&
+              getPolicyRows(payments)
+                .filter((row) => getAccountKey(row.account) === getAccountKey(setupAccount) && row.status !== 'failed')
+                .sort((a, b) => LIVE_POLICY_ORDER.indexOf(a.type) - LIVE_POLICY_ORDER.indexOf(b.type))
+                .map(({ id, type, summary }) => ({
+                  id,
+                  Icon: POLICY_TYPES[type].Icon,
+                  title: POLICY_ROW_LABELS[type],
+                  summary,
+                }))
+            }
+            disabledAccountKeys={state.setupKind === 'protection' ? getAllowlistAccountKeys(payments) : undefined}
             initialChoices={state.editInitialChoices ?? undefined}
             topBar={<FlowTopBar />}
           />
@@ -1303,6 +1909,16 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     </>
   )
 }
+
+/** While moving between the enforcement panel and a policy's: no panel slide-in, the content pushes sideways instead. */
+const PANEL_SLIDE_CSS = `
+html[data-m2-slide] [data-slot=sheet-content], html[data-m2-slide] [data-slot=sheet-overlay] { animation: none !important; transition: none !important; }
+html[data-m2-slide] [data-slot=sheet-content][data-closed] { display: none; }
+@keyframes m2-push-from-right { from { transform: translateX(48px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes m2-push-from-left { from { transform: translateX(-48px); opacity: 0; } to { transform: none; opacity: 1; } }
+html[data-m2-slide=forward] [data-slot=sheet-content] > div:first-child { animation: m2-push-from-right 240ms ease-out; }
+html[data-m2-slide=back] [data-slot=sheet-content] > div:first-child { animation: m2-push-from-left 240ms ease-out; }
+`
 
 const shell = createPoliciesM2Story({ wallet: 'owner', store: WIZARD_STORE, notifications: false })
 
@@ -1327,5 +1943,145 @@ type Story = StoryObj<typeof meta>
 
 /** Overview → side panel → Create … Confirm → Change pending → second signer → Execute → Active, in local state only. */
 export const PoliciesM2FullFlow: Story = {
-  name: 'Policies M2 – full flow',
+  name: 'A · Account protection + other policies (29 Oct)',
+}
+
+// B's name for the one thing you set up, in place of A's "account protection".
+const B_TERMS: [RegExp, string][] = [
+  [/Account protection/g, 'Policy enforcement'],
+  [/account protection/g, 'policy enforcement'],
+]
+
+const LIVE_POLICY_ORDER: PolicyRow['type'][] = ['account-settings', 'allowlist', 'spending-limit', 'proposer']
+
+// C also names the account settings policy "Settings lock", wherever it's the policy's name on its own.
+const C_TERMS: [RegExp, string][] = [...B_TERMS, [/^Account settings$/, 'Settings lock']]
+
+const renameTerms = (text: string, terms: [RegExp, string][]): string =>
+  terms.reduce((next, [pattern, replacement]) => next.replace(pattern, replacement), text)
+
+const rewriteNode = (node: Node, terms: [RegExp, string][]): void => {
+  const text = node.nodeValue ?? ''
+  const renamed = renameTerms(text, terms)
+  if (renamed !== text) node.nodeValue = renamed
+}
+
+const rewriteTerms = (root: Node, terms: [RegExp, string][]): void => {
+  // React updates text in place, so a characterData mutation's target is the text node itself.
+  if (root.nodeType === Node.TEXT_NODE) return rewriteNode(root, terms)
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) rewriteNode(node, terms)
+}
+
+/** Renames account protection to policy enforcement on screen, so B and C share A's screens and only the model differs. */
+const BTerms = ({ children, terms = B_TERMS }: { children: ReactNode; terms?: [RegExp, string][] }): ReactElement => {
+  useEffect(() => {
+    rewriteTerms(document.body, terms)
+    const observer = new MutationObserver((mutations) =>
+      mutations.forEach((mutation) => rewriteTerms(mutation.target, terms)),
+    )
+    observer.observe(document.body, { subtree: true, childList: true, characterData: true })
+    return () => observer.disconnect()
+  }, [terms])
+
+  return <>{children}</>
+}
+
+/**
+ * B: one account policies per account, every module a rule inside it. The warning modal still comes first; only the
+ * allowlist is required, spending limits and proposers are an optional step, pre-filled when the account has some.
+ */
+export const AccountPoliciesWithRules: Story = {
+  name: 'B · Policy enforcement with policies inside (30 Oct)',
+  decorators: [
+    (Story) => (
+      <PrototypeModelContext.Provider value="policies">
+        <BTerms>
+          <Story />
+        </BTerms>
+      </PrototypeModelContext.Provider>
+    ),
+  ],
+}
+
+/** C: no container, every policy on its own; New lists them all and each account shows its policies underneath. */
+export const SimplePolicies: Story = {
+  name: 'C · Simple policies, one at a time (30 Oct)',
+  decorators: [
+    (Story) => (
+      <PrototypeModelContext.Provider value="simple">
+        <BTerms terms={C_TERMS}>
+          <Story />
+        </BTerms>
+      </PrototypeModelContext.Provider>
+    ),
+  ],
+}
+
+const VERSIONS: { date: string; title: string; href: string; note: string }[] = [
+  {
+    date: '21 Oct',
+    title: 'Allowlist with account settings',
+    href: 'https://design-policies-m2--walletweb.review.5afe.dev/storybook/?path=/story/prototype-policies-m2-full-flow--policies-m-2-full-flow',
+    note: 'Frozen preview of that day’s branch.',
+  },
+  {
+    date: '29 Oct',
+    title: 'Edit panels and banners',
+    href: 'https://design-policies-m2-edit-panels--walletweb.review.5afe.dev/storybook/?path=/story/prototype-policies-m2-full-flow--policies-m-2-full-flow',
+    note: 'Frozen preview of that day’s branch.',
+  },
+  {
+    date: '29 Oct',
+    title: 'Single policies + policy enforcement (as presented at 13:30)',
+    href: '?path=/story/prototype-policies-archive-29-oct-13-30-policy-enforcement--policies-m-2-full-flow',
+    note: 'Frozen copy in this Storybook.',
+  },
+  {
+    date: '29 Oct',
+    title: 'A · Account protection + other policies, with the allow fallback',
+    href: '?path=/story/prototype-policies-m2-full-flow--policies-m-2-full-flow',
+    note: 'In this Storybook.',
+  },
+  {
+    date: '30 Oct',
+    title: 'B · Policy enforcement with policies inside',
+    href: '?path=/story/prototype-policies-m2-full-flow--account-policies-with-rules',
+    note: 'In this Storybook.',
+  },
+  {
+    date: '30 Oct',
+    title: 'C · Simple policies, one at a time',
+    href: '?path=/story/prototype-policies-m2-full-flow--simple-policies',
+    note: 'In this Storybook.',
+  },
+]
+
+/** Every version worth going back to, newest last, with where to open it. */
+export const VersionHistory: Story = {
+  name: 'Version history',
+  render: () => (
+    <div className="mx-auto flex max-w-2xl flex-col gap-3 p-8">
+      <Typography variant="h3">Policies prototype versions</Typography>
+      {VERSIONS.map(({ date, title, href, note }) => (
+        <a
+          key={title}
+          href={href}
+          target="_top"
+          className="flex items-center gap-4 rounded-lg bg-muted p-4 transition-colors hover:bg-secondary-hover"
+        >
+          <Badge variant="subtle" shape="tag" className="shrink-0">
+            {date}
+          </Badge>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <Typography variant="paragraph-small-medium">{title}</Typography>
+            <Typography variant="paragraph-mini" color="muted">
+              {note}
+            </Typography>
+          </span>
+          <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        </a>
+      ))}
+    </div>
+  ),
 }

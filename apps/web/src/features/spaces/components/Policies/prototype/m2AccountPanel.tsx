@@ -127,7 +127,7 @@ export type StatusPill = { label: string; variant: 'success' | 'warning' | 'subt
 export const getStatusPill = (state: AccountState, pendingChange: boolean): StatusPill => {
   switch (state) {
     case 'not-set-up':
-      return { label: 'Not protected', variant: 'subtle' }
+      return { label: 'Off', variant: 'subtle' }
     // A setup that is signed but not yet executed is a pending change, whether it still needs signatures or not.
     case 'waiting':
     case 'ready':
@@ -404,7 +404,7 @@ const PanelBody = ({
         <div className="flex flex-col gap-4" data-m2-new={PANEL_MARK}>
           <ActiveM1Policies onOpen={onOpenSpendingLimit} />
 
-          <DrawerSection title="Add protection">
+          <DrawerSection title="Account protection">
             <div className="flex flex-col gap-3">
               <MutedLine>{SETUP_DESCRIPTION}</MutedLine>
               <SetupCoverageList />
