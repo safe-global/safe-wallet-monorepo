@@ -20,10 +20,10 @@ export const toAllowlistEditValues = (
 ): RecipientAllowlistFormValues => {
   const liveTokens = entries.map(({ token }) => token.address)
   const isLive = (token: string) => liveTokens.some((live) => sameAddress(live, token))
-  const isHeld = (token: string) => heldTokens.some((held) => sameAddress(held, token))
 
   return {
-    addedTokens: liveTokens.filter((token) => !isHeld(token)),
+    // Every live token, held or not, so a later change to the held list never drops one
+    addedTokens: liveTokens,
     excludedTokens: heldTokens.filter((token) => !isLive(token)),
     recipients: uniqueByAddress(entries.flatMap(({ recipients }) => recipients.map(({ account }) => account))).map(
       (address) => ({ address: checksumAddress(address), selected: true }),

@@ -3,7 +3,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
 import { mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
 import { MOCK_ADDRESSES, MOCK_TOKENS } from '../../../mocks/policies'
-import { buildAllowlistRules } from '../allowlistForm'
+import { buildAllowlistRules, getAllowedTokenAddresses, getFormTokenAddresses } from '../allowlistForm'
 import {
   hasAllowlistChanges,
   markAllowlistChanges,
@@ -36,13 +36,27 @@ describe('allowlistEdit', () => {
   })
 
   describe('toAllowlistEditValues', () => {
-    it('marks live tokens the Safe does not hold as added and held tokens that are not live as excluded', () => {
+    it('marks every live token as added, held or not, and held tokens that are not live as excluded', () => {
       const entries = [entry(usdc, [alice]), entry(usdt, [alice])]
 
       const values = toAllowlistEditValues(entries, [usdc.address.toLowerCase(), unknown])
 
-      expect(values.addedTokens).toEqual([usdt.address])
+      expect(values.addedTokens).toEqual([usdc.address, usdt.address])
       expect(values.excludedTokens).toEqual([unknown])
+    })
+
+    it('should keep a live token selected, when it is no longer held after the prefill', () => {
+      const entries = [entry(usdc, [alice]), entry(usdt, [alice])]
+      const values = toAllowlistEditValues(entries, [usdc.address, usdt.address])
+
+      expect(getAllowedTokenAddresses([usdt.address], values)).toEqual([usdt.address, usdc.address])
+    })
+
+    it('should list a live token once, when it is both held and added', () => {
+      const entries = [entry(usdc, [alice])]
+      const values = toAllowlistEditValues(entries, [usdc.address.toLowerCase()])
+
+      expect(getFormTokenAddresses([usdc.address.toLowerCase()], values)).toEqual([usdc.address.toLowerCase()])
     })
 
     it('lists the union of recipients once, selected, ignoring case', () => {
