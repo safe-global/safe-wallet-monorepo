@@ -101,7 +101,9 @@ describe('RecipientsSection', () => {
     expect(screen.getByText('Recipients will show here.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add a recipient' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Add from address book' })).toBeDisabled()
-    expect(screen.queryByText('Only transactions to the recipients selected below will be allowed.')).toBeNull()
+    expect(
+      screen.queryByText('Only the recipients selected below can receive the tokens on this allowlist.'),
+    ).toBeNull()
     expect(screen.queryByText('confirm draft')).not.toBeInTheDocument()
   })
 
@@ -229,7 +231,9 @@ describe('RecipientsSection', () => {
   it('shows the callout and dismisses it', async () => {
     const { user, onDismissCallout } = setup([recipient({ name: 'Alice' })])
 
-    expect(screen.getByText('Only transactions to the recipients selected below will be allowed.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Only the recipients selected below can receive the tokens on this allowlist.'),
+    ).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Dismiss' }))
     expect(onDismissCallout).toHaveBeenCalled()
   })
@@ -237,6 +241,8 @@ describe('RecipientsSection', () => {
   it('hides the callout once dismissed', () => {
     setup([recipient({ name: 'Alice' })], { isCalloutDismissed: true })
 
-    expect(screen.queryByText('Only transactions to the recipients selected below will be allowed.')).toBeNull()
+    expect(
+      screen.queryByText('Only the recipients selected below can receive the tokens on this allowlist.'),
+    ).toBeNull()
   })
 })
