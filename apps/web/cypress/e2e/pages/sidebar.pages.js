@@ -9,8 +9,6 @@ import sidebar from '../../fixtures/sidebar.js'
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
-const sidebarTopBar = '[data-testid="sidebar-top-bar"]'
-const sidebarTrigger = '[data-testid="sidebar-trigger"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
 export const copyAddressBtn = '[data-testid="copy-address-btn"]'
@@ -34,7 +32,6 @@ const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const expandSafesList = '[data-testid="expand-safes-list"]'
 export const importBtn = '[data-testid="import-btn"]'
-export const pendingActivationIcon = '[data-testid="safe-selector-not-activated-icon"]'
 const safeItemMenuIcon = '[data-testid="MoreVertIcon"]'
 const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const addChainDialog = "[data-testid='add-chain-dialog']"
@@ -80,10 +77,6 @@ export function clickOnOpenNestedSafeListBtn() {
 
 export function checkSafesInPopverList(safes) {
   main.verifyValuesExist(nestedSafeListPopover, safes)
-}
-
-export function checkSafesCountInPopverList(number) {
-  main.verifyElementsCount(nestedSafeListPopover, number)
 }
 
 export function clickOnSafeInPopover(safe) {
@@ -381,14 +374,6 @@ export function openSidebar() {
   cy.wait(500)
   showAllSafes()
   main.verifyElementsExist([sidebarSafeContainer])
-}
-
-export function collapseSidebar() {
-  cy.get(sidebarTrigger).click()
-}
-
-export function verifySidebarCollapsed() {
-  cy.get(sidebarTopBar).should('have.attr', 'data-sidebar-state', 'collapsed')
 }
 
 export function verifyAddedSafesExist(safes) {

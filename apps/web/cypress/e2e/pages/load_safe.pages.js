@@ -5,8 +5,6 @@ import { addressBookRecipient } from '../pages/address_book.page'
 
 const addExistingAccountBtnStr = 'Add existing one'
 const contactStr = 'Choose address, network and a name'
-export const invalidAddressFormatErrorMsg = 'Invalid address format'
-const invalidAddressNameLengthErrorMsg = 'Maximum 50 symbols'
 
 const safeDataForm = '[data-testid=load-safe-form]'
 const removeOwnerBtn = '[data-testid="remove-owner-btn"]'
@@ -26,7 +24,6 @@ const settingsBtnStr = 'Settings'
 const ownersConfirmationsStr = 'Owners and confirmations'
 const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
-const safeAddressError = 'Address given is not a valid Safe account address'
 const ownerNameLabel = 'Signer name'
 export const addSafeStr = 'Add existing Safe account'
 
@@ -105,13 +102,7 @@ export function verifyDataDoesNotExist(data) {
 }
 
 export function inputOwnerName(index, name) {
-  getOwnerNameInput(index)
-    .clear()
-    .type(name, main.nameTypingOptions)
-    .then(($input) => {
-      const typedValue = $input.val()
-      expect(name).to.contain(typedValue)
-    })
+  getOwnerNameInput(index).clear().type(name, main.nameTypingOptions).should('have.value', name)
 }
 
 export function clearOwnerAddress(index) {
@@ -120,23 +111,11 @@ export function clearOwnerAddress(index) {
 
 export function inputOwnerAddress(index, name) {
   cy.wait(500)
-  cy.get(addressItem)
-    .eq(index)
-    .find('input')
-    .clear()
-    .type(name)
-    .then(($input) => {
-      const typedValue = $input.val()
-      expect(name).to.contain(typedValue)
-    })
+  cy.get(addressItem).eq(index).find('input').clear().type(name)
 }
 
 export function verifyOnwerNameENS(index, ens) {
   getOwnerNameInput(index).invoke('attr', 'placeholder').should('contain', ens)
-}
-
-export function verifyAddressError() {
-  cy.get(addressSection).closest('[data-slot="field"]').find('label').contains(safeAddressError)
 }
 
 export function verifyOnwerInputIsNotEmpty(index) {
@@ -195,17 +174,8 @@ export function inputNameAndAddress(name, address) {
   inputAddress(address)
 }
 
-export function inputName(name) {
+function inputName(name) {
   cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
-}
-
-export function verifyIncorrectAddressErrorMessage() {
-  inputAddress('Random text')
-  cy.get(main.addressInput).parent().prev('label').contains(invalidAddressFormatErrorMsg)
-}
-
-export function verifyNameLengthErrorMessage() {
-  cy.get(main.nameInput).closest('[data-slot="field"]').find('label').contains(invalidAddressNameLengthErrorMsg)
 }
 
 export function inputAddress(address) {

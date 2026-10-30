@@ -292,7 +292,7 @@ export function fiatCodesHandlers(): RequestHandler[] {
  */
 export function delegatesHandlers(): RequestHandler[] {
   const emptyDelegatePage: DelegatePage = { count: 0, next: null, previous: null, results: [] }
-  return [http.get(/\/v[12]\/chains\/\d+\/delegates$/, () => HttpResponse.json(emptyDelegatePage))]
+  return [http.get(/\/v[123]\/chains\/\d+\/delegates$/, () => HttpResponse.json(emptyDelegatePage))]
 }
 
 /**

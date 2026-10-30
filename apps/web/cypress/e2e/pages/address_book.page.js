@@ -16,7 +16,6 @@ const importBtn = '[data-testid="import-btn"]'
 const uploadErrorMsg = '[data-testid="error-message"]'
 const modalSummaryMessage = '[data-testid="summary-message"]'
 const saveBtn = '[data-testid="save-btn"]'
-const divInput = '[data-testid="name-input"]'
 const exportSummary = '[data-testid="export-summary"]'
 const sendBtn = '[data-testid="send-btn"]'
 export const entryDialog = '[data-testid="entry-dialog"]'
@@ -202,7 +201,7 @@ export function typeInNameInput(name) {
 }
 
 export function verifyNameWasChanged(name, editedName) {
-  cy.get(name).should('not.exist')
+  cy.contains(new RegExp(`^${name}$`)).should('not.exist')
   cy.contains(editedName).should('exist')
 }
 
@@ -233,10 +232,4 @@ export function verifyBeamerIsChecked() {
 export function verifyBeameriFrameExists() {
   cy.wait(1000)
   cy.get(beameriFrameContainer).should('exist')
-}
-
-export function verifyEmptyOwnerNameNotAllowed() {
-  cy.get(main.nameInput).clear()
-  main.verifyElementsStatus([saveBtn], constants.enabledStates.disabled)
-  cy.get(divInput).should('have.attr', 'aria-invalid', 'true')
 }

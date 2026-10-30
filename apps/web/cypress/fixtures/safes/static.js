@@ -15,9 +15,9 @@ export default {
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
   /** Dashboard, assets, tokens, and NFTs testing - Used in: dashboard.cy.js, batch_tx.cy.js, tokens.cy.js, nfts.cy.js, assets.cy.js, safe-apps tests */
   SEP_STATIC_SAFE_2: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-  /** Owner management and load safe testing - Used in: add_owner.cy.js, remove_owner.cy.js, replace_owner.cy.js, load_safe_3.cy.js, spending_limits_nonowner.cy.js */
+  /** Load safe testing - Used in: load_safe_3.cy.js, spending_limits_nonowner.cy.js */
   SEP_STATIC_SAFE_3: 'sep:0x33C4AA5729D91FfB3B87AEf8a324bb6304Fb905c',
-  /** Load safe and owner management testing - Used in: load_safe.cy.js, add_owner.cy.js, replace_owner.cy.js, address_book.cy.js, load_safe_3.cy.js */
+  /** Load safe testing - Used in: load_safe.cy.js, address_book.cy.js, load_safe_3.cy.js */
   SEP_STATIC_SAFE_4: 'sep:0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   /** Address book and CSV import testing - Used in: constants.js (CSV entry), address_book tests */
   SEP_STATIC_SAFE_5: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
@@ -36,7 +36,7 @@ export default {
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
-  /** Recovery, owner management, and data import/export testing - Used in: recovery.cy.js, remove_owner.cy.js, load_safe_2.cy.js, import_export_data.cy.js */
+  /** Recovery and data import/export testing - Used in: recovery.cy.js, load_safe_2.cy.js, import_export_data.cy.js */
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
@@ -76,12 +76,8 @@ export default {
   ZKSYNC_STATIC_SAFE_22: 'zksync:0x49136c0270c5682FFbb38Cb29Ecf0563b2E1F9f6',
 
   // More Sepolia Safes
-  /** Transaction history, messages, and spending limits testing - Used in: visual/tx_history.cy.js, msg_details.cy.js, spending_limits.cy.js */
+  /** Transaction history, messages, and spending limits testing - Used in: spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
-  /** Add owner testing - Used in: add_owner.cy.js (happypath_2) */
-  SEP_STATIC_SAFE_24: 'sep:0x49DC5764961DA4864DC5469f16BC68a0F765f2F2',
-  /** Replace owner testing - Used in: replace_owner.cy.js */
-  SEP_STATIC_SAFE_25: 'sep:0x4ECFAa2E8cb4697bCD27bdC9Ce3E16f03F73124F',
   /** Transaction notes and messages testing - Used in: tx_notes.cy.js */
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
   /** TWAP and swap testing - Used in: twaps_integration.cy.js, twaps_history.cy.js */
@@ -99,20 +95,14 @@ export default {
   // More Sepolia Safes
   /** Available for general testing */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
-  /** Proposers testing - Used in: proposers.cy.js, proposers_2.cy.js, tx_share_block.cy.js */
+  /** Proposers testing - Used in: proposers.cy.js, tx_share_block.cy.js */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-  /** Proposers testing - Used in: proposers.cy.js (happypath_2) */
-  SEP_STATIC_SAFE_32: 'sep:0x698C8D95D7B6b0B50338c2885d9583737546768f',
-  /** Proposers testing - Used in: proposers_2.cy.js */
-  SEP_STATIC_SAFE_33: 'sep:0x597D644b1F2b66B84F2C56f0D40D0314E8D5895b',
-  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js, swaps_queue.cy.js, limit_order_queue.cy.js, twaps_queue.cy.js */
+  /** Queue transaction testing - Used in: tx_queue.cy.js, tx_queue_replace_btn.cy.js, tx_queue_reject_btn.cy.js */
   SEP_STATIC_SAFE_34: 'sep:0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
   /** Transaction details queue and spaces testing - Used in: tx_details_queue.cy.js, spaces_basicflow.cy.js */
   SEP_STATIC_SAFE_35: 'sep:0xc36A530ccD728d36a654ccedEB7994473474C018',
   /** Transaction details create tx testing - Used in: tx_details_createtx.cy.js */
   SEP_STATIC_SAFE_36: 'sep:0xD9BD8a5F97A003f948d684695667BB8Ff9F3d61E',
-  /** Transaction history filter testing - Used in: tx_history_filter_2.cy.js */
-  SEP_STATIC_SAFE_38: 'sep:0x30aeC11779d29dB096C434D4e72E77276EB01BdE',
   /** Nested safes testing - Used in: nested_safes.cy.js, nested_safes_review.cy.js */
   SEP_STATIC_SAFE_39: 'sep:0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD',
   /** Nested safes testing - Used in: nested_safes.cy.js */

@@ -20,7 +20,6 @@ const creationModalLetsGoBtn = '[data-testid="cf-creation-lets-go-btn"]'
 const nextBtn = '[data-testid="next-btn"]'
 const backBtn = '[data-testid="back-btn"]'
 const cancelBtn = '[data-testid="cancel-btn"]'
-const safeActivationSection = '[data-testid="activation-section"]'
 export const addressAutocompleteOptions = '[data-testid="address-item"]'
 export const qrCode = '[data-testid="qr-code"]'
 export const addressInfo = '[data-testid="address-info"]'
@@ -29,7 +28,6 @@ const addFundsBtn = '[data-testid="add-funds-btn"]'
 const createTxBtn = '[data-testid="create-tx-btn"]'
 const qrCodeSwitch = '[data-testid="qr-code-switch"]'
 export const activateAccountBtn = '[data-testid="activate-account-btn-cf"]'
-export const activateFlowAccountBtn = '[data-testid="activate-account-flow-btn"]'
 const notificationsSwitch = '[data-testid="notifications-switch"]'
 export const addFundsSection = '[data-testid="add-funds-section"]'
 export const noTokensAlert = '[data-testid="no-tokens-alert"]'
@@ -74,45 +72,6 @@ export function clickOnActivateAccountBtn(index) {
   cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
 }
 
-const submitErrorMsg = 'Could not submit the transaction. Try again.'
-const errorMessage = '[data-testid="error-message"]'
-
-export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
-  cy.get(activateFlowAccountBtn).should('be.enabled').click()
-  // Wait for the submission to resolve: on success the tx-flow modal closes; on a
-  // retryable RPC error the app shows a submission error and re-enables the button.
-  cy.get('body', { timeout: 180000 }).should(($body) => {
-    const flowStillOpen = $body.find(activateFlowAccountBtn).length > 0
-    const hasSubmitError = $body.text().includes(submitErrorMsg)
-    expect(!flowStillOpen || hasSubmitError, 'deployment submitted or retryable error shown').to.be.true
-  })
-  cy.get('body').then(($body) => {
-    const needsRetry = $body.find(activateFlowAccountBtn).length > 0 && $body.text().includes(submitErrorMsg)
-    if (!needsRetry) return
-    if (retriesLeft === 0) {
-      // Expand the error's Details section (when present) and include its text in the failure.
-      cy.get(errorMessage)
-        .last()
-        .then(($err) => {
-          if ($err.find('button:contains("Details")').length) {
-            cy.wrap($err).contains('button', 'Details').click()
-          }
-        })
-      cy.get(errorMessage)
-        .last()
-        .invoke('text')
-        .then((details) => {
-          throw new Error(
-            `Safe activation kept failing to submit after 3 attempts. Error shown: ${details || submitErrorMsg}`,
-          )
-        })
-      return
-    }
-    cy.wait(10000)
-    clickOnFinalActivateAccountBtn(retriesLeft - 1)
-  })
-}
-
 export function clickOnQRCodeSwitch() {
   // Force: the dialog overlay covers the switch while the open animation settles
   cy.get(qrCodeSwitch).click({ force: true })
@@ -145,10 +104,6 @@ export function checkAllTxTypesOrder(expectedOrder) {
 
 export function clickOnTxType(tx) {
   cy.get(choiceBtn).contains(tx).click()
-}
-
-export function verifyCFSafeCreated() {
-  main.verifyElementsIsVisible([sidebar.pendingActivationIcon, safeActivationSection])
 }
 
 export function selectRelayOption() {
@@ -298,10 +253,6 @@ export function clearNetworkInput(index) {
   cy.get(cancelIcon).click()
 }
 
-export function clickOnNetwrokRemoveIcon() {
-  cy.get(cancelIcon).click()
-}
-
 export function clickOnNextBtn() {
   main.clickOnNextBtn(nextBtn)
 }
@@ -445,17 +396,6 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
       checkNetworkLogo(network)
     })
   })
-}
-
-export function visitWelcomeAccountPage(chain = 'sep') {
-  cy.visit(`${constants.welcomeAccountUrl}?chain=${chain}`)
-  cy.wait(2000)
-}
-
-export function connectWalletAndCreateSafe(signer) {
-  wallet.connectSignerViaStorage(signer)
-  owner.waitForConnectionStatus()
-  clickOnCreateNewSafeBtn()
 }
 
 /** Opens the create-Safe form with the wallet connected first, so the form preselects the wallet's network. */

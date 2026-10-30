@@ -64,13 +64,25 @@ describe('EntryDialog scope', () => {
       />,
     )
 
-  const save = async (name = 'Treasury') => {
+  const typeName = (name: string) => {
     const field = screen.getByTestId('name-input')
     const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
     fireEvent.change(input, { target: { value: name } })
+  }
+
+  const save = async (name = 'Treasury') => {
+    typeName(name)
     await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
     fireEvent.click(screen.getByTestId('save-btn'))
   }
+
+  it('blocks Save and marks the name invalid when the name is cleared', async () => {
+    renderDialog()
+    typeName('')
+
+    await waitFor(() => expect(screen.getByTestId('save-btn')).toBeDisabled())
+    expect(screen.getByTestId('name-input')).toHaveAttribute('aria-invalid', 'true')
+  })
 
   it('writes to the workspace address book when scoped to workspace', async () => {
     renderDialog('workspace')

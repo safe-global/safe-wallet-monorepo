@@ -56,6 +56,7 @@ export const OwnerList = () => {
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
+                                aria-label="Replace signer"
                                 onClick={() => setTxFlow(<ReplaceOwnerFlow address={address} />)}
                                 disabled={!isOk}
                               >
@@ -83,6 +84,7 @@ export const OwnerList = () => {
                                 <Button
                                   variant="ghost"
                                   size="icon-sm"
+                                  aria-label="Remove signer"
                                   onClick={() => setTxFlow(<RemoveOwnerFlow name={name} address={address} />)}
                                   disabled={!isOk}
                                 >

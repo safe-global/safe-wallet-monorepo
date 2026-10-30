@@ -11,7 +11,6 @@ const WORKFLOWS = [
   'web-nextjs-bundle-analysis.yml',
   'web-e2e-smoke.yml',
   'web-e2e-full-ondemand.yml',
-  'web-e2e-hp-ondemand.yml',
   'web-argos-e2e.yml',
 ]
 

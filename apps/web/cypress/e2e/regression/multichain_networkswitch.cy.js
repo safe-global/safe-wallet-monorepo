@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
-import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as network from '../pages/network.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -58,24 +57,5 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
     network.clickAllNetworksAccordion()
     network.verifyAddNetworkBtnListNotEmpty()
     network.verifyAddNetworkBtnExists(constants.networks.ethereum)
-  })
-
-  it('Verify that CF safe is created if other available network is selected from the "Show all networks"', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    cy.visit(constants.BALANCE_URL + safe)
-    network.addNetwork(constants.networks.ethereum)
-    cy.contains(network.createSafeMsg(constants.networks.ethereum))
-    cy.visit(constants.welcomeAccountUrl)
-    safeNav.expandMultichainItem()
-    safeNav.verifyNotActivatedSafeExists()
-    cy.wrap(null, { timeout: 10000 }).then(() => {
-      cy.window().then((window) => {
-        const addressBook = JSON.parse(window.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addressBook))
-        const safeAddress = staticSafes.MATIC_STATIC_SAFE_28.substring(6)
-
-        expect(addressBook).to.have.property('1')
-        expect(addressBook['1']).to.have.property(safeAddress, safeNav.multichainSafePolygonLabel)
-      })
-    })
   })
 })

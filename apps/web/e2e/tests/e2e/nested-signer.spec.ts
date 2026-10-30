@@ -3,17 +3,14 @@
  * OWNER_4, an owner of the parent only. On the child's review it picks the parent as the signer: the app then
  * proposes an `approveHash` transaction in the parent, which carries the child transaction to the Queue Service.
  */
-import { Interface, Wallet, parseEther } from 'ethers'
+import { Wallet, parseEther } from 'ethers'
 import type { Page } from '@playwright/test'
-import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { isIsolated } from '../../src/fixtures/isolated-data'
 import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
-import type { SafeApiClient } from '../../src/api/safe-api-client'
-import { transactionsIn } from '../../src/api/transaction-items'
+import { approveHashData, confirmationsOf, safeTxHashOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { isApprovedHash } from '../../src/chain/signatures'
-import { ROUTES } from '../../src/data/constants'
 import { NestedTxSuccessPage } from '../../src/pages/nested-tx-success.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
@@ -23,21 +20,9 @@ const AMOUNT = '0.01'
 // The Queue Service adds the parent's on-chain approval when the Transaction Service has indexed it
 const ON_CHAIN_CONFIRMATION_TIMEOUT_MS = 60_000
 
-const safeInterface = new Interface(['function approveHash(bytes32 hashToApprove)'])
-
-/** The CGW ID of a multisig transaction is `multisig_<safe>_<safeTxHash>` */
-const safeTxHashOf = (transaction: Transaction): string => transaction.id.split('_')[2]
-
-const confirmationsOf = (transaction: Transaction): number | undefined =>
-  transaction.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.confirmationsSubmitted : undefined
-
-async function queuedIn(safeApiClient: SafeApiClient, safe: SeededSafe): Promise<Transaction[]> {
-  return transactionsIn(await safeApiClient.getQueuedTransactions(safe.address))
-}
-
 /** Open the child Safe and fill a transfer up to its review */
 async function reviewTransfer(page: Page, child: SeededSafe, recipient: string): Promise<void> {
-  await page.goto(`${ROUTES.home}?safe=${child.prefixedAddress}`)
+  await new HomePage(page).goto(child.prefixedAddress)
   const sendTokens = new SendTokensPage(page)
   await sendTokens.open()
   await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
@@ -45,16 +30,16 @@ async function reviewTransfer(page: Page, child: SeededSafe, recipient: string):
 }
 
 test.describe('In-app nested signer', { tag: '@e2e' }, () => {
-  test.skip(!isIsolated, 'Seeds its own Safes on the isolated stack')
-
   test('should execute a transfer of the child Safe once the parent Safe executes its approval', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const recipient = Wallet.createRandom().address
-    const { parent, child } = await seedNestedSafe(journey)
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['parent'], threshold: 1 },
+    })
     const review = new TxReviewPage(safePage)
     const success = new NestedTxSuccessPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -65,14 +50,12 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
 
     await expect(success.status).toHaveText('One more step in the parent Safe')
     await expect(safePage.getByText('approveHash', { exact: true })).toBeVisible()
-    await expect.poll(async () => (await queuedIn(safeApiClient, child)).map(confirmationsOf)).toEqual([0])
-    const [childTransaction] = await queuedIn(safeApiClient, child)
-    const [parentTransaction] = await queuedIn(safeApiClient, parent)
+    await expect.poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf)).toEqual([0])
+    const [childTransaction] = await safeApiClient.getQueued(child.address)
+    const [parentTransaction] = await safeApiClient.getQueued(parent.address)
     const parentDetails = await safeApiClient.findTransaction(parentTransaction.id)
-    expect(parentDetails?.txData?.hexData).toBe(
-      safeInterface.encodeFunctionData('approveHash', [safeTxHashOf(childTransaction)]),
-    )
-    expect((await safeApiClient.getSafeInfo(parent.address)).nonce).toBe(0)
+    expect(parentDetails?.txData?.hexData).toBe(approveHashData(safeTxHashOf(childTransaction)))
+    expect(await safeApiClient.getNonce(parent.address)).toBe(0)
 
     await success.openParentTransaction()
     await expect(safePage.getByText('Nested transaction')).toBeVisible()
@@ -89,7 +72,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
       }),
     ).toBe(true)
     await expect
-      .poll(async () => (await queuedIn(safeApiClient, child)).map(confirmationsOf), {
+      .poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf), {
         timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
       })
       .toEqual([1])
@@ -99,7 +82,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await review.continueAndExecute()
     await review.waitForExecution()
 
-    await expect.poll(async () => (await safeApiClient.getSafeInfo(child.address)).nonce).toBe(1)
+    await expect.poll(() => safeApiClient.getNonce(child.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
   })
 
@@ -107,9 +90,11 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
-    const { parent, child } = await seedNestedSafe(journey)
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+  }) => {
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['parent'], threshold: 1 },
+    })
     const review = new TxReviewPage(safePage)
 
     await reviewTransfer(safePage, child, Wallet.createRandom().address)
@@ -117,20 +102,22 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await review.discard()
 
     await expect(review.signerSelect).toBeHidden()
-    expect(await queuedIn(safeApiClient, child)).toEqual([])
-    expect(await queuedIn(safeApiClient, parent)).toEqual([])
-    expect((await safeApiClient.getSafeInfo(parent.address)).nonce).toBe(0)
+    expect(await safeApiClient.getQueued(child.address)).toEqual([])
+    expect(await safeApiClient.getQueued(parent.address)).toEqual([])
+    expect(await safeApiClient.getNonce(parent.address)).toBe(0)
   })
 
   test('should add the parent Safe as the second confirmation of a transfer that the owner already signed', async ({
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
+  }) => {
     const recipient = Wallet.createRandom().address
     const { owner4 } = journey.owners
-    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['owner4', 'parent'], threshold: 2 },
+    })
     const seeded = await seedQueuedTransfer(child, { nonce: 0, recipient, amount: AMOUNT })
     const review = new TxReviewPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -144,11 +131,11 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await review.sign()
 
     await expect(new NestedTxSuccessPage(safePage).status).toHaveText('One more step in the parent Safe')
-    await expect.poll(async () => (await queuedIn(safeApiClient, parent)).length).toBe(1)
-    const [parentTransaction] = await queuedIn(safeApiClient, parent)
+    await expect.poll(async () => (await safeApiClient.getQueued(parent.address)).length).toBe(1)
+    const [parentTransaction] = await safeApiClient.getQueued(parent.address)
     const parentDetails = await safeApiClient.findTransaction(parentTransaction.id)
-    expect(parentDetails?.txData?.hexData).toBe(safeInterface.encodeFunctionData('approveHash', [seeded.safeTxHash]))
-    expect((await queuedIn(safeApiClient, child)).map(safeTxHashOf)).toEqual([seeded.safeTxHash])
+    expect(parentDetails?.txData?.hexData).toBe(approveHashData(seeded.safeTxHash))
+    expect((await safeApiClient.getQueued(child.address)).map(safeTxHashOf)).toEqual([seeded.safeTxHash])
 
     await queue.goto(parent.prefixedAddress)
     await queue.execute(0)
@@ -156,7 +143,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await review.waitForExecution()
 
     await expect
-      .poll(async () => (await queuedIn(safeApiClient, child)).map(confirmationsOf), {
+      .poll(async () => (await safeApiClient.getQueued(child.address)).map(confirmationsOf), {
         timeout: ON_CHAIN_CONFIRMATION_TIMEOUT_MS,
       })
       .toEqual([2])
@@ -166,7 +153,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await review.continueAndExecute()
     await review.waitForExecution()
 
-    await expect.poll(async () => (await safeApiClient.getSafeInfo(child.address)).nonce).toBe(1)
+    await expect.poll(() => safeApiClient.getNonce(child.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
   })
 
@@ -174,9 +161,11 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     safePage,
     safeApiClient,
     journey,
-  }, testInfo) => {
-    const { parent, child } = await seedNestedSafe(journey, { child: { withOwner4: true, threshold: 2 } })
-    testInfo.annotations.push({ type: 'safe-address', description: child.prefixedAddress })
+  }) => {
+    const { parent, child } = await seedNestedSafe(journey, {
+      parent: { owners: ['owner4'], threshold: 1 },
+      child: { owners: ['owner4', 'parent'], threshold: 2 },
+    })
     const review = new TxReviewPage(safePage)
 
     await reviewTransfer(safePage, child, Wallet.createRandom().address)
@@ -187,7 +176,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
 
     await expect(new NestedTxSuccessPage(safePage).status).toHaveText('One more step in the parent Safe')
     await expect(safePage.getByText('approveHash', { exact: true })).toBeVisible()
-    await expect.poll(async () => (await queuedIn(safeApiClient, parent)).length).toBe(1)
-    expect((await queuedIn(safeApiClient, child)).map(confirmationsOf)).toEqual([0])
+    await expect.poll(async () => (await safeApiClient.getQueued(parent.address)).length).toBe(1)
+    expect((await safeApiClient.getQueued(child.address)).map(confirmationsOf)).toEqual([0])
   })
 })

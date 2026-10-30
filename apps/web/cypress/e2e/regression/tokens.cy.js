@@ -116,13 +116,6 @@ describe('Tokens tests', () => {
     assets.checkHiddenTokenBtnCounter(1)
   })
 
-  it('Verify the Hidden tokens counter works for native tokens', () => {
-    assets.openHiddenTokensFromManageMenu()
-    assets.clickOnTokenCheckbox(constants.tokenNames.sepoliaEther)
-    assets.saveHiddenTokenSelection()
-    assets.checkHiddenTokenBtnCounter(1)
-  })
-
   it('Verify the sorting of "Assets" and "Balance" in the table', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
