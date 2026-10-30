@@ -17,6 +17,7 @@ import useTxHistory from './useTxHistory'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import useSafeInfo from './useSafeInfo'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { useIndexingTxWatcher } from './useIndexingTxWatcher'
 
 const FINAL_PENDING_STATUSES = [TxEvent.SIGNATURE_INDEXED, TxEvent.SUCCESS, TxEvent.REVERTED, TxEvent.FAILED]
 
@@ -122,6 +123,7 @@ const useTxPendingStatuses = (): void => {
   }, [txHistory.page?.results])
 
   useTxMonitor()
+  useIndexingTxWatcher()
 
   // Subscribe to pending statuses
   useEffect(() => {
