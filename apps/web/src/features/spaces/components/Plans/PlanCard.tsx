@@ -204,7 +204,6 @@ export const PlanCard = ({
   onSeatsChange,
   counterpartTier,
   onSwitchToYearly,
-  showPricing = true,
   ...actions
 }: {
   tier: PlanTier
@@ -212,8 +211,6 @@ export const PlanCard = ({
   onSeatsChange?: (label: string) => void
   counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
-  /** Off where the card describes the plan without selling it, e.g. the trial start modal. */
-  showPricing?: boolean
 } & PlanCardActions) => {
   const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
   const isPrimary = tier.name === RECOMMENDED_PLAN
@@ -274,82 +271,74 @@ export const PlanCard = ({
           )}
         </div>
 
-        {showPricing && (
-          <>
-            <div className="mt-5 flex flex-col gap-0.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-3">
-              {price && (
-                <div className="flex items-baseline gap-1">
-                  <Typography variant="h3">{price.headline}</Typography>
-                  <Typography variant="paragraph-small" color="muted">
-                    {price.suffix}
-                  </Typography>
+        <div className="mt-5 flex flex-col gap-0.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-3">
+          {price && (
+            <div className="flex items-baseline gap-1">
+              <Typography variant="h3">{price.headline}</Typography>
+              <Typography variant="paragraph-small" color="muted">
+                {price.suffix}
+              </Typography>
+            </div>
+          )}
+          {saving && isYearly && (
+            <Typography variant="paragraph-small" className="flex items-center gap-1" data-testid="plan-yearly-saving">
+              <Check aria-hidden className="size-3.5 shrink-0 text-accent-success" />
+              Save {saving.amount} ({saving.percent}) vs monthly
+            </Typography>
+          )}
+          {saving && !isYearly && onSwitchToYearly && (
+            <Typography variant="paragraph-small">
+              <Link
+                render={<button type="button" />}
+                variant="muted"
+                data-testid="plan-yearly-saving"
+                onClick={onSwitchToYearly}
+              >
+                Save {saving.amount} ({saving.percent}) with yearly
+              </Link>
+            </Typography>
+          )}
+          {!hasPicked && !isYearly && onSwitchToYearly && (
+            <Typography variant="paragraph-small">
+              <Link
+                render={<button type="button" />}
+                variant="muted"
+                data-testid="plan-yearly-saving"
+                onClick={onSwitchToYearly}
+              >
+                {PRO_TRIAL_COPY.unpickedSaving}
+              </Link>
+            </Typography>
+          )}
+        </div>
+
+        <div className="mt-5 flex flex-col gap-2.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-4">
+          {option && (
+            <>
+              <Seats
+                options={tier.options}
+                value={hasPicked ? option : null}
+                onChange={(next) => onSeatsChange?.(next.label)}
+                label={`Safe accounts for ${tier.name}`}
+              />
+              {!actions.readOnly && (
+                <div
+                  className={cn('flex gap-2', isPrimary ? 'flex-col' : 'flex-wrap *:min-w-max *:flex-1 *:basis-0')}
+                  data-testid="plan-ctas"
+                >
+                  {hasPicked ? (
+                    <>
+                      <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
+                      {isPrimary && !isSalesLedOption(option) && talkToUs(false)}
+                    </>
+                  ) : (
+                    talkToUs(isPrimary)
+                  )}
                 </div>
               )}
-              {saving && isYearly && (
-                <Typography
-                  variant="paragraph-small"
-                  className="flex items-center gap-1"
-                  data-testid="plan-yearly-saving"
-                >
-                  <Check aria-hidden className="size-3.5 shrink-0 text-accent-success" />
-                  Save {saving.amount} ({saving.percent}) vs monthly
-                </Typography>
-              )}
-              {saving && !isYearly && onSwitchToYearly && (
-                <Typography variant="paragraph-small">
-                  <Link
-                    render={<button type="button" />}
-                    variant="muted"
-                    data-testid="plan-yearly-saving"
-                    onClick={onSwitchToYearly}
-                  >
-                    Save {saving.amount} ({saving.percent}) with yearly
-                  </Link>
-                </Typography>
-              )}
-              {!hasPicked && !isYearly && onSwitchToYearly && (
-                <Typography variant="paragraph-small">
-                  <Link
-                    render={<button type="button" />}
-                    variant="muted"
-                    data-testid="plan-yearly-saving"
-                    onClick={onSwitchToYearly}
-                  >
-                    {PRO_TRIAL_COPY.unpickedSaving}
-                  </Link>
-                </Typography>
-              )}
-            </div>
-
-            <div className="mt-5 flex flex-col gap-2.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-4">
-              {option && (
-                <>
-                  <Seats
-                    options={tier.options}
-                    value={hasPicked ? option : null}
-                    onChange={(next) => onSeatsChange?.(next.label)}
-                    label={`Safe accounts for ${tier.name}`}
-                  />
-                  {!actions.readOnly && (
-                    <div
-                      className={cn('flex gap-2', isPrimary ? 'flex-col' : 'flex-wrap *:min-w-max *:flex-1 *:basis-0')}
-                      data-testid="plan-ctas"
-                    >
-                      {hasPicked ? (
-                        <>
-                          <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                          {isPrimary && !isSalesLedOption(option) && talkToUs(false)}
-                        </>
-                      ) : (
-                        talkToUs(isPrimary)
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
 
         <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
           <Separator className="@2xl:@max-4xl:hidden" />

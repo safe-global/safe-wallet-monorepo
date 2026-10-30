@@ -50,7 +50,8 @@ export const PRO_TRIAL_COPY = {
   },
 
   trialStart: {
-    title: 'Run your treasury like a team',
+    title: 'Introducing Safe Pro',
+    tagline: 'Policies, a shared activity log and threat checks for every Safe your team runs.',
     migrated: "You've used Safe before, so your trial is 60 days instead of 30.",
     noCharge: 'No card. No charge. The trial ends on its own.',
     endsOn: (date: string) => `Trial ends ${date}.`,

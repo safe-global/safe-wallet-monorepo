@@ -8,21 +8,17 @@ import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/component
 import { Link } from '@safe-global/views/components/ui/link'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import {
-  DismissAction,
-  FreeAccessEntryPoint,
-  MixpanelEventParams,
-  PlanLocation,
-} from '@/services/analytics/mixpanel-events'
+import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { PlanCard } from './PlanCard'
+import { FeatureCheck } from './FeatureCheck'
 import { _offersToTiers, claimTiers } from './planTiers'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
 import SelectAccountsStep from './SelectAccountsStep'
@@ -94,12 +90,12 @@ export default function ClaimTrialModal({
   // The trial runs on the plan the CGW offers it on; the modal no longer shows which.
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN) ?? tiers[0]
   const option = tier?.options[0]
-  // The plans page's Business card without its price: what the trial includes, not what it would cost.
-  const cardTier = useMemo(
+  // What the trial plan includes, as Stripe lists it, without its seat count or price.
+  const features = useMemo(
     () =>
       _offersToTiers(trialPlans).find(
         (candidate) => candidate.name === tier?.name && candidate.billingCycle === 'month',
-      ),
+      )?.features ?? [],
     [trialPlans, tier?.name],
   )
   const seats = option?.seats ?? null
@@ -127,7 +123,14 @@ export default function ClaimTrialModal({
 
   return (
     <Dialog open onOpenChange={() => undefined}>
-      <DialogContent size="sm-md" surface="card" padding="sm" showCloseButton={false}>
+      <DialogContent
+        size="sm-md"
+        surface="card"
+        padding="sm"
+        showCloseButton={false}
+        // eslint-disable-next-line no-restricted-syntax -- prototype: the trial modal carries the Safe Pro mint stroke; a real PR adds a DialogContent variant
+        className="border-2 border-mint"
+      >
         <div className="flex flex-col gap-6 pt-5">
           {step === 'accounts' && tier && seats !== null ? (
             <SelectAccountsStep
@@ -142,9 +145,9 @@ export default function ClaimTrialModal({
             <>
               <div className="flex flex-col gap-1">
                 <Typography variant="h3" as={DialogTitle}>
-                  {PRO_TRIAL_COPY.trialStart.title}
+                  {highlightSafePro(PRO_TRIAL_COPY.trialStart.title)}
                 </Typography>
-                <Typography color="muted">{PRO_TRIAL_COPY.safesStayFree}</Typography>
+                <Typography color="muted">{PRO_TRIAL_COPY.trialStart.tagline}</Typography>
                 {trialPeriodDays === MIGRATED_TRIAL_DAYS && (
                   <Typography variant="paragraph-small" color="muted">
                     {PRO_TRIAL_COPY.trialStart.migrated}
@@ -160,11 +163,14 @@ export default function ClaimTrialModal({
                   <AlertDescription>{PRO_TRIAL_COPY.trialStart.unavailable}</AlertDescription>
                 </Alert>
               ) : (
-                cardTier && (
-                  <div className="@container" data-testid="trial-plan-card">
-                    <PlanCard tier={cardTier} showPricing={false} readOnly location={PlanLocation.LOCKED_MODAL} />
-                  </div>
-                )
+                <ul className="flex flex-col gap-3" data-testid="trial-features">
+                  {features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2">
+                      <FeatureCheck />
+                      <Typography variant="paragraph-small">{feature}</Typography>
+                    </li>
+                  ))}
+                </ul>
               )}
 
               <div className="flex flex-col items-center gap-0.5 text-center">
