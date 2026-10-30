@@ -8,6 +8,7 @@ import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERAT
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
 import { MOCK_SPACE_ID, createChainData, createChainsPageData, createMockStory } from '@/stories/mocks'
 import { createChainsPageDataV2 } from '@/stories/mocks/chains'
@@ -20,7 +21,10 @@ import {
   RECIPIENT_REMOVE_LABEL,
   REVIEW_FALLBACK_ALLOW,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { mockAllowlistPolicy } from '../mocks/allowlistPolicies'
+import { asActivePolicy } from '../mocks/policies'
 import RecipientAllowlistFlow from '.'
+import EditRecipientAllowlistFlow from './EditFlow'
 
 /** The policy guard is only deployed on Sepolia. */
 const CHAIN_ID = '11155111'
@@ -392,5 +396,60 @@ export const CreateOldVersion: Story = {
     await waitFor(() => expectEnabled(trigger), { timeout: 30000 })
     await userEvent.click(trigger)
     await expect(await screen.findByRole('option', { name: /Payments/ })).toHaveAttribute('aria-disabled', 'true')
+  },
+}
+
+const liveRecipients = [PAYROLL, CONTRACTOR, OPS_WALLET, COINBASE].map((account) => ({
+  account,
+  permission: 'ALWAYS' as const,
+}))
+
+const editPolicy = asActivePolicy(
+  mockAllowlistPolicy({
+    safe: { address: EF_SAFE, chainId: CHAIN_ID },
+    enforcement: { via: 'guard', guardAddress: POLICY_GUARD },
+    data: {
+      entries: [
+        {
+          token: { address: SEPOLIA_USDC, symbol: 'USDC', decimals: 6, logoUri: USDC_LOGO },
+          recipients: liveRecipients,
+        },
+        {
+          token: { address: SEPOLIA_USDT, symbol: 'USDT', decimals: 6, logoUri: USDT_LOGO },
+          recipients: liveRecipients,
+        },
+        {
+          token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: chain.nativeCurrency.logoUri },
+          recipients: liveRecipients,
+        },
+      ],
+    },
+  }),
+)
+
+const renderEdit = () => <EditRecipientAllowlistFlow policy={editPolicy} />
+
+/** The live Payments allowlist, opened from its side panel: every live token and recipient selected. */
+export const EditCreate: Story = {
+  name: 'Edit · Create',
+  render: renderEdit,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByRole('button', { name: 'Allow USDT' }, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** Coinbase Prime and USDT unchecked: the review lists them as removed beside the unchanged rest. */
+export const EditReviewTwoChanges: Story = {
+  name: 'Edit · Review (2 changes)',
+  render: renderEdit,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(await canvas.findByRole('button', { name: 'Allow USDT' }, { timeout: 30000 }))
+    await userEvent.click(
+      await canvas.findByRole('button', { name: `Allow ${shortenAddress(checksumAddress(COINBASE))}` }),
+    )
+    await goToReview(canvasElement)
+    await expect(canvas.getAllByText('Removed').length).toBeGreaterThan(0)
   },
 }

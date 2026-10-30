@@ -44,6 +44,7 @@ const meta = {
     safe: { address: MOCK_SAFES.treasury.address, name: MOCK_SAFE_NAME },
     overview: { lastUpdated: 'Oct 12, 2026 · 13:02 UTC', enforcedBy: 'Safe policy contract' },
     names: { [MOCK_ADDRESSES.alice]: 'Alice Contractor', [MOCK_ADDRESSES.bob]: 'Bob Supplier' },
+    onEdit: fn(),
     onRemove: fn(),
     onRemoveGuard: fn(),
     onApply: fn(),
