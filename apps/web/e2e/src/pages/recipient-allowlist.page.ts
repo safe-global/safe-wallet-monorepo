@@ -44,7 +44,7 @@ export class RecipientAllowlistPage {
   /** Starts the setup from the catalogue tile; a fresh browser sees the intro dialog first */
   async startFromCatalogue(): Promise<void> {
     await this.setPolicyButton.click()
-    await this.page.getByRole('button', { name: 'Set up recipient allowlist' }).click()
+    await this.proceedFromIntro()
   }
 
   /** Starts the setup from Add policy, when the Workspace already lists policies */
@@ -54,7 +54,14 @@ export class RecipientAllowlistPage {
       .getByRole('dialog', { name: 'Add policy' })
       .getByRole('button', { name: /Recipient allowlist/ })
       .click()
-    await this.page.getByRole('button', { name: 'Set up recipient allowlist' }).click()
+    await this.proceedFromIntro()
+  }
+
+  /** The intro's Set up stays disabled until the owner confirms that every other action is blocked */
+  private async proceedFromIntro(): Promise<void> {
+    const intro = this.page.getByTestId('recipient-allowlist-intro-dialog')
+    await intro.getByRole('checkbox', { name: /I understand that anything not allowed/ }).click()
+    await intro.getByRole('button', { name: 'Set up allowlist' }).click()
   }
 
   async selectSafe(safeName: string): Promise<void> {
