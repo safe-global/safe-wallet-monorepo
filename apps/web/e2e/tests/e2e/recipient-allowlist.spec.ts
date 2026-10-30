@@ -221,7 +221,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       // CGW can still serve the policies it cached before the request was registered, so reload until it doesn't.
       await expect(async () => {
         await policies.goto(workspaceId)
-        await allowlist.openPanel(safe.address)
+        await allowlist.openPendingPanel(safe.address)
         await expect(allowlist.disabledPanelAction).toBeVisible({ timeout: 5_000 })
       }).toPass({ timeout: 90_000 })
       await expect(allowlist.reviewTransactionButton).toHaveCount(0)
@@ -230,7 +230,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       // Fakes the browser clock from here on; the panel reads the time when it renders, so it is opened again.
       await safePage.clock.setSystemTime(new Date((readyAt + 1) * 1000))
       await allowlist.closePanel()
-      await allowlist.openPanel(safe.address)
+      await allowlist.openPendingPanel(safe.address)
       await expect(allowlist.reviewTransactionButton).toBeEnabled()
       await expect(allowlist.disabledPanelAction).toHaveCount(0)
 
