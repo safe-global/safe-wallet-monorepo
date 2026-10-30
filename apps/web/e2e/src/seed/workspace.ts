@@ -38,7 +38,8 @@ async function waitForOverviews(safes: SeededSafe[]): Promise<void> {
   const ids = safes.map(({ address }) => `${CHAIN_IDS.sepolia}:${address}`).join(',')
   await waitUntil(
     env,
-    `${env.SAFE_CGW_BASE_URL}/v2/safes?currency=usd&safes=${encodeURIComponent(ids)}`,
+    // Same variant as the dashboard request: CGW caches each query string on its own
+    `${env.SAFE_CGW_BASE_URL}/v2/safes?currency=usd&safes=${encodeURIComponent(ids)}&trusted=false`,
     (overviews: SafeOverview[]) =>
       safes.every(({ address }) =>
         overviews.some((overview) => overview.address.value.toLowerCase() === address.toLowerCase()),
