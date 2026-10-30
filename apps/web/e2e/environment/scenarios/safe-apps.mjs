@@ -1,6 +1,5 @@
 import { Interface } from 'ethers'
 import { getSafeL2SingletonDeployment } from '@safe-global/safe-deployments'
-import { createSafeAddress } from './safe.mjs'
 import { registerContract } from './contracts.mjs'
 import { rebuildStagingSafe } from './staging.mjs'
 import { rebuildStagingSafes, stagingSafeAppSafes } from './staging-safes.mjs'
@@ -44,12 +43,6 @@ export async function registerBuilderContracts(env) {
       abi: singleton.abi,
     })
   }
-}
-
-/** A Safe to open the Safe Apps pages with. */
-export async function prepareSafeAppsHostScenario(env, owners) {
-  const safe = `sep:${await createSafeAddress(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })}`
-  return { safes: { static: { SEP_STATIC_SAFE_2: safe } } }
 }
 
 /** The staging Safe App Safes, used by Transaction Builder and Drain Account. */

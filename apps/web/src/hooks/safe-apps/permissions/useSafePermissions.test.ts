@@ -1,3 +1,5 @@
+import { Methods } from '@safe-global/safe-apps-sdk'
+import type { Permission } from '@safe-global/safe-apps-sdk/dist/types/types/permissions'
 import { renderHook, act } from '@/tests/test-utils'
 import { useSafePermissions } from './useSafePermissions'
 import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
@@ -24,6 +26,27 @@ describe('useSafePermissions', () => {
     // SDK's permission check, which matches on parentCapability alone — so the app reads the permission as
     // granted, never asks again, and quietly gets an empty address book until the user clears it in Settings.
     expect(JSON.stringify(result.current.getPermissions(origin))).toContain('userRestricted')
+  })
+
+  it('stores an unrestricted permission and returns it when a request is granted', () => {
+    const grantedOrigin = 'https://granted.url'
+    const { result } = renderHook(() => useSafePermissions())
+
+    act(() => {
+      result.current.setPermissionsRequest({ origin: grantedOrigin, requestId, request: [{ requestAddressBook: {} }] })
+    })
+    let granted: Permission[] = []
+    act(() => {
+      granted = result.current.confirmPermissionRequest(PermissionStatus.GRANTED)
+    })
+
+    const expected = [
+      expect.objectContaining({ invoker: grantedOrigin, parentCapability: 'requestAddressBook', caveats: [] }),
+    ]
+    expect(granted).toEqual(expected)
+    expect(result.current.getPermissions(grantedOrigin)).toEqual(expected)
+    expect(result.current.hasPermission(grantedOrigin, Methods.requestAddressBook)).toBe(true)
+    expect(result.current.permissionsRequest).toBeUndefined()
   })
 
   it('stores no permission at all when a request is dropped without an answer', () => {
