@@ -18,7 +18,7 @@ const Approvals = ({ approvalInfos }: { approvalInfos: ApprovalInfo[] }) => {
 
             return (
               <li
-                key={tx.tokenAddress + tx.spender}
+                key={tx.transactionIndex}
                 className={`flex w-full ${BigInt(0) === BigInt(tx.amount) ? css.zeroValueApproval : ''}`}
                 data-testid="approval-item"
               >

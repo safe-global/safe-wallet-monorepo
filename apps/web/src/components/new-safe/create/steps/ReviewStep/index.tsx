@@ -563,7 +563,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
             {effectivePayMethod === PayMethod.PayNow && (
               <div className="mt-4">
-                <Typography>
+                <Typography as="div">
                   {!showFeeInConfirmationText ? (
                     'You will have to confirm a transaction with your connected wallet'
                   ) : (
