@@ -201,7 +201,7 @@ describe('clearGuardExitConfigurations', () => {
 
 describe('buildAllowlistChangeConfigurations', () => {
   const CAROL = '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
-  const USDC = TOKEN
+  const USDC = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'
   const DAI = TOKEN_2
   const erc20Policy = getPolicyEngineAddress(CHAIN_ID, 'ERC20TransferPolicy')
   const nativePolicy = getPolicyEngineAddress(CHAIN_ID, 'NativeTransferPolicy')
@@ -299,6 +299,25 @@ describe('buildAllowlistChangeConfigurations', () => {
 
     expect(configuration.target).toBe(USDC)
     expect(decodeErc20TransferPolicyData(configuration.data)).toEqual([BOB])
+  })
+
+  it('should revoke and unbind checksummed addresses, when what is removed is lowercase in the baseline', () => {
+    const configurations = buildAllowlistChangeConfigurations(
+      CHAIN_ID,
+      [
+        rule(USDC.toLowerCase(), ALICE.toLowerCase(), BOB.toLowerCase()),
+        rule(DAI, ALICE),
+        rule(ZERO_ADDRESS, ALICE.toLowerCase(), BOB.toLowerCase()),
+      ],
+      [rule(DAI, ALICE), rule(ZERO_ADDRESS, ALICE)],
+    )
+
+    expect(configurations).toEqual([
+      transfer(USDC, [ALICE, BOB], 0),
+      unbindConfig(USDC, '0xa9059cbb'),
+      unbindConfig(BOB, '0x00000000'),
+    ])
+    expect(decodeErc20TransferPolicyData(configurations[0].data)).toEqual([ALICE, BOB])
   })
 
   it('should throw, when a desired recipient is the zero address', () => {

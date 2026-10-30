@@ -160,7 +160,7 @@ const uniqueRecipients = (rules: AllowlistRule[], tokenAddress: string): string[
   return [...recipients.values()]
 }
 
-/** Builds only what differs between the live allowlist and the desired one, each token compared against its own recipients. */
+/** Builds only the configurations that turn the baseline's token-recipient pairs into the desired ones. */
 export const buildAllowlistChangeConfigurations = (
   chainId: string,
   baseline: AllowlistRule[],
