@@ -6,6 +6,7 @@ import { DrawerSection } from '@/components/common/Drawer'
 import { Avatar, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { AccountIdentity } from '../../components/AccountIdentity'
 import ExpandableCard from './ExpandableCard'
 import RemovedBadge from './RemovedBadge'
@@ -45,7 +46,7 @@ const AllowlistRecipients = ({ recipients, names, isRemoved = false }: Allowlist
       {recipients.map((address) => (
         <Card key={address} variant="muted" size="none" radius="lg" data-testid="allowlist-recipient">
           <div className="flex items-center gap-3 p-3">
-            <div className="min-w-0 flex-1">
+            <div className={cn('min-w-0 flex-1', isRemoved && 'text-muted-foreground line-through')}>
               <AccountIdentity address={address} name={findName(names, address)} showCopyButton />
             </div>
             {isRemoved && <RemovedBadge alignWithChevron />}

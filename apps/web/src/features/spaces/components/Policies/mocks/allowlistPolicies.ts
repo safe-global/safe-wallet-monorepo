@@ -143,7 +143,7 @@ export const mockExpiredRequestAllowlist = (
     }),
   )
 
-/** A live allowlist with an executed edit waiting out the guard's delay. */
+/** An executed change waiting out the guard's delay, listed beside the live allowlist. */
 export const mockAllowlistChangePending = (): AllowlistPolicy & { status: 'active' } =>
   asActivePolicy(
     mockAllowlistPolicy({

@@ -198,8 +198,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   })
 
   const policies = useMemo(
-    () => [...delayed.active, ...delayed.added, ...setupRows, ...pendingRows, ...activatingRows],
-    [delayed, setupRows, pendingRows, activatingRows],
+    () => [...activeRows, ...delayed.added, ...setupRows, ...pendingRows, ...activatingRows],
+    [activeRows, delayed, setupRows, pendingRows, activatingRows],
   )
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
