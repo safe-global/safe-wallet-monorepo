@@ -1,4 +1,3 @@
-import { AbiCoder } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type {
@@ -9,7 +8,6 @@ import {
   isActiveAllowlistPolicy,
   type AllowlistEntry,
   type AllowlistPolicyData,
-  type AllowlistRecipient,
   type Policy,
   type PolicyTokenInfo,
   type QueuedAllowlistPolicy,
@@ -17,35 +15,17 @@ import {
 import { isAllowlistRemoval } from '@/features/policy-guard/services'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
-
-const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
-const NATIVE_TRANSFER_SELECTOR = '0x00000000'
-const PERMISSION_NONE = 0
-const PERMISSIONS: Record<number, AllowlistRecipient['permission']> = { 1: 'ONCE', 2: 'ALWAYS' }
+import {
+  applyAllowlistRequest,
+  decodeRecipients,
+  ERC20_TRANSFER_SELECTOR,
+  NATIVE_TRANSFER_SELECTOR,
+} from './applyAllowlistRequest'
 
 type MapOptions = {
   /** `update` when the Safe already enforces an allowlist, so the request changes it; `remove` when it deletes it. */
   operation: 'create' | 'update' | 'remove'
   resolveToken: (address: string) => PolicyTokenInfo
-}
-
-/** Recipients a token rule allows, and whether it revokes any; none for data that is not a recipient list. */
-const decodeRecipients = (data: string): { recipients: AllowlistRecipient[]; hasRevokes: boolean } => {
-  let entries: Array<[string, bigint]>
-  try {
-    entries = AbiCoder.defaultAbiCoder().decode(['tuple(address recipient, uint8 permission)[]'], data)[0]
-  } catch {
-    return { recipients: [], hasRevokes: false }
-  }
-
-  const allowed = entries.filter(([, permission]) => Number(permission) !== PERMISSION_NONE)
-  return {
-    recipients: allowed.map(([account, permission]) => ({
-      account,
-      permission: PERMISSIONS[Number(permission)] ?? 'ALWAYS',
-    })),
-    hasRevokes: allowed.length < entries.length,
-  }
 }
 
 /**
@@ -67,8 +47,8 @@ export const toAllowlistData = (
 
   for (const { target, selector, policy, data } of configurations) {
     if (selector === ERC20_TRANSFER_SELECTOR && !sameAddress(policy, ZERO_ADDRESS)) {
-      const { recipients, hasRevokes } = decodeRecipients(data)
-      if (recipients.length > 0 || !hasRevokes) entryFor(target).recipients.push(...recipients)
+      const { recipients, revoked } = decodeRecipients(data)
+      if (recipients.length > 0 || revoked.length === 0) entryFor(target).recipients.push(...recipients)
     } else if (
       selector === NATIVE_TRANSFER_SELECTOR &&
       !sameAddress(target, ZERO_ADDRESS) &&
@@ -172,14 +152,21 @@ export const mergeDelayedGuardRequests = (
         sameAddress(policy.safe.address, dto.safe.address),
     )
     const isRemoval = !!dto.configurations && isAllowlistRemoval(dto.configurations, dto.safe.address)
+    const resolveRequestToken = (address: string) => resolveToken(dto.safe.chainId, address)
     const row = mapDelayedGuardRequest(dto, {
       operation: isRemoval ? 'remove' : live ? 'update' : 'create',
-      resolveToken: (address) => resolveToken(dto.safe.chainId, address),
+      resolveToken: resolveRequestToken,
     })
     if (!row) continue
 
     // A removal's configurations name no recipients, so its row lists the live ones it takes away.
-    added.push(isRemoval && live ? { ...row, data: live.data } : row)
+    const data =
+      live && dto.configurations
+        ? isRemoval
+          ? live.data
+          : applyAllowlistRequest(live.data, dto.configurations, resolveRequestToken)
+        : row.data
+    added.push({ ...row, data })
     const request = getApplyAllowlistRequest(dto)
     if (request) applyRequests.set(row.id, request)
   }

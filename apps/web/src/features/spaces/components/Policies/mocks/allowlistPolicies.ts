@@ -97,6 +97,38 @@ export const mockPendingAllowlistUpdate = (): QueuedAllowlistPolicy =>
 export const mockPendingAllowlistRemoval = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-remove', operation: 'remove' })
 
+const MOCK_NEW_RECIPIENT = '0x0000000000000000000000000000000000000ca1'
+
+/** An edit of the treasury's allowlist: adds a recipient and a token, drops another of each. */
+export const mockPendingAllowlistEdit = (): QueuedAllowlistPolicy =>
+  mockPendingAllowlist({
+    id: '0xallowlist-pending-edit',
+    safe: MOCK_SAFES.treasury,
+    operation: 'update',
+    data: {
+      entries: [
+        {
+          token: MOCK_TOKENS.usdc,
+          recipients: [...RECIPIENTS.slice(0, 2), { account: MOCK_NEW_RECIPIENT, permission: 'ALWAYS' }],
+        },
+        { token: MOCK_TOKENS.unknown, recipients: RECIPIENTS.slice(0, 1) },
+      ],
+      changes: {
+        recipients: [
+          { address: MOCK_ADDRESSES.alice },
+          { address: MOCK_ADDRESSES.bob },
+          { address: MOCK_NEW_RECIPIENT, change: 'added' },
+          { address: MOCK_ADDRESSES.unresolved, change: 'removed' },
+        ],
+        tokens: [
+          MOCK_TOKENS.usdc,
+          { ...MOCK_TOKENS.unknown, change: 'added' },
+          { ...MOCK_TOKENS.usdt, change: 'removed' },
+        ],
+      },
+    },
+  })
+
 /** A new allowlist, executed and waiting out the guard's delay before it is enforced. */
 export const mockActivatingAllowlist = (): AllowlistPolicy & { status: 'active' } =>
   asActivePolicy(

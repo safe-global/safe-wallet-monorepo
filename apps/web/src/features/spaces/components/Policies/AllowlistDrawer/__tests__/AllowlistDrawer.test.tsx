@@ -1,5 +1,5 @@
 import { POLICY_GUARD_DELAY_SECONDS } from '@safe-global/utils/features/policy-guard/constants'
-import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
 import {
   mockActiveAllowlist,
@@ -12,6 +12,7 @@ import {
   mockFailedAllowlist,
   mockReadyToApplyAllowlist,
   mockPendingAllowlist,
+  mockPendingAllowlistEdit,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
   mockUnenforcedAllowlist,
@@ -248,6 +249,47 @@ describe('AllowlistDrawer', () => {
     setup(mockPendingAllowlistUpdate())
 
     expect(screen.getByText('The current recipients still apply until the change is executed.')).toBeInTheDocument()
+    expect(screen.queryByText('Removed')).not.toBeInTheDocument()
+  })
+
+  it('should count the resulting recipients and tokens, when an edit is pending', () => {
+    setup(mockPendingAllowlistEdit())
+
+    expect(screen.getByText('3 recipients')).toBeInTheDocument()
+    expect(screen.getByText('2 tokens')).toBeInTheDocument()
+  })
+
+  it('should list unchanged, added and removed recipients and tokens without a click, when an edit is pending', () => {
+    setup(mockPendingAllowlistEdit())
+
+    expect(screen.getByRole('button', { name: 'Hide recipient details' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: 'Hide token details' })).toHaveAttribute('aria-expanded', 'true')
+
+    const recipients = screen.getAllByTestId('allowlist-recipient')
+    expect(recipients.map((row) => within(row).queryByText(/^(Added|Removed)$/)?.textContent ?? null)).toEqual([
+      null,
+      null,
+      'Added',
+      'Removed',
+    ])
+    expect(recipients[3].querySelector('.line-through')).toBeInTheDocument()
+    expect(recipients[2].querySelector('.line-through')).not.toBeInTheDocument()
+
+    const tokens = screen.getAllByTestId('allowlist-token')
+    expect(tokens.map((row) => row.textContent)).toEqual(['USDC', 'UNKNOWNAdded', 'USDTRemoved'])
+    expect(within(tokens[2]).getByText('USDT')).toHaveClass('line-through')
+    expect(within(tokens[0]).getByText('USDC')).not.toHaveClass('line-through')
+  })
+
+  it('should mark no recipient or token, when the allowlist is active', async () => {
+    const { user } = setup(mockActiveAllowlist())
+
+    expect(screen.getByRole('button', { name: 'Show recipient details' })).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(screen.getByRole('button', { name: 'Show recipient details' }))
+    await user.click(screen.getByRole('button', { name: 'Show token details' }))
+
+    expect(screen.queryByText('Added')).not.toBeInTheDocument()
     expect(screen.queryByText('Removed')).not.toBeInTheDocument()
   })
 

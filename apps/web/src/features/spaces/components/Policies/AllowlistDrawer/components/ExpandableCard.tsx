@@ -8,10 +8,16 @@ export type ExpandableCardProps = {
   /** Names the details for screen readers, e.g. "recipient details". */
   detailsLabel: string
   children: ReactNode
+  defaultOpen?: boolean
 }
 
-const ExpandableCard = ({ summary, detailsLabel, children }: ExpandableCardProps): ReactElement => {
-  const [isOpen, setIsOpen] = useState(false)
+const ExpandableCard = ({
+  summary,
+  detailsLabel,
+  children,
+  defaultOpen = false,
+}: ExpandableCardProps): ReactElement => {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
   const Chevron = isOpen ? ChevronDown : ChevronRight
 
   return (

@@ -5,6 +5,7 @@ import type {
   PolicyConfigurationDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
+import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { mockActiveAllowlist } from '../../mocks/allowlistPolicies'
 import { mergeDelayedGuardRequests } from '../mapDelayedGuardRequests'
 
@@ -64,7 +65,7 @@ const queuedTransaction = () => ({
 })
 
 describe('mergeDelayedGuardRequests', () => {
-  it('should add a waiting request as its own row with the requested entries, when the Safe has a live allowlist', () => {
+  it('should add a waiting request as its own row with the resulting entries and its changes, when the Safe has a live allowlist', () => {
     const live = mockActiveAllowlist()
     const recipient = faker.finance.ethereumAddress()
     const token = faker.finance.ethereumAddress()
@@ -87,8 +88,16 @@ describe('mergeDelayedGuardRequests', () => {
         status: 'active',
         data: {
           entries: [
+            ...live.data.entries,
             { token: resolveToken('', token), recipients: [{ account: getAddress(recipient), permission: 'ALWAYS' }] },
           ],
+          changes: {
+            recipients: [
+              ...getAllowlistRecipients(live.data).map((address) => ({ address })),
+              { address: getAddress(recipient), change: 'added' },
+            ],
+            tokens: [...live.data.entries.map((entry) => entry.token), { ...resolveToken('', token), change: 'added' }],
+          },
         },
         scheduledChange: { operation: 'update', appliesAt: 1_800_000_000, expiresAt: 1_800_604_800 },
       }),
@@ -150,7 +159,57 @@ describe('mergeDelayedGuardRequests', () => {
     expect(added).toEqual([
       expect.objectContaining({ status: 'active', scheduledChange: expect.objectContaining({ operation: 'create' }) }),
     ])
+    expect(added[0].data).not.toHaveProperty('changes')
     expect(applyRequests.get(added[0].id)).toBeDefined()
+  })
+
+  it('should mark the recipients a queued update revokes as removed, when the Safe has a live allowlist', () => {
+    const live = mockActiveAllowlist()
+    const [usdc, usdt] = live.data.entries
+    const [alice, bob] = usdt.recipients
+    const request = makeRequest(live.safe, {
+      status: 'configuration-in-signing',
+      transaction: queuedTransaction(),
+      configurations: [
+        {
+          target: usdc.token.address,
+          selector: '0xa9059cbb',
+          operation: 0,
+          policy: faker.finance.ethereumAddress(),
+          data: AbiCoder.defaultAbiCoder().encode(
+            ['tuple(address recipient, uint8 permission)[]'],
+            [usdc.recipients.slice(1).map(({ account }) => [account, 0])],
+          ),
+        },
+        {
+          target: usdc.token.address,
+          selector: '0xa9059cbb',
+          operation: 0,
+          policy: '0x0000000000000000000000000000000000000000',
+          data: '0x',
+        },
+      ],
+    })
+
+    const { added } = mergeDelayedGuardRequests([request], [live], resolveToken)
+
+    expect(added).toEqual([
+      expect.objectContaining({
+        status: 'pending',
+        operation: 'update',
+        data: {
+          entries: [usdt],
+          changes: {
+            recipients: [
+              { address: alice.account },
+              { address: bob.account },
+              { address: usdc.recipients[2].account, change: 'removed' },
+            ],
+            tokens: [usdt.token, { ...usdc.token, change: 'removed' }],
+          },
+        },
+      }),
+    ])
   })
 
   it('should add a queued apply as a pending update row, when the Safe has a live allowlist', () => {

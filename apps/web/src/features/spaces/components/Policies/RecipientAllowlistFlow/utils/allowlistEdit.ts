@@ -1,9 +1,9 @@
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
+import type { AllowlistEntry, AllowlistItemChange } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getAllowlistPairKeys } from '@/features/policy-guard/services'
 import type { AllowlistRule, RecipientAllowlistFormValues } from '../types'
 
-export type ListChange = 'added' | 'removed'
+export type ListChange = AllowlistItemChange
 
 export const toAllowlistRules = (entries: AllowlistEntry[]): AllowlistRule[] =>
   entries.map(({ token, recipients }) => ({

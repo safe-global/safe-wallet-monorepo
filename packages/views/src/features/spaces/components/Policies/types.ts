@@ -104,8 +104,18 @@ export type AllowlistEntry = {
   recipients: AllowlistRecipient[]
 }
 
+export type AllowlistItemChange = 'added' | 'removed'
+
+/** Every recipient and token of an edit against the live allowlist; unchanged items carry no `change`. */
+export type AllowlistChanges = {
+  recipients: Array<{ address: string; change?: AllowlistItemChange }>
+  tokens: Array<PolicyTokenInfo & { change?: AllowlistItemChange }>
+}
+
 export type AllowlistPolicyData = {
   entries: AllowlistEntry[]
+  /** Set on a requested edit, whose `entries` are the allowlist as it will be once the edit applies. */
+  changes?: AllowlistChanges
 }
 
 /** An executed change waiting out the guard's delay. `create`: the allowlist is not enforced until then. */

@@ -184,8 +184,12 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ))}
           {state.kind !== 'remove-guard' && (
             <>
-              <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
-              <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
+              <AllowlistRecipients
+                recipients={policy.data.changes?.recipients ?? recipients.map((address) => ({ address }))}
+                names={names}
+                isRemoved={isRemoved}
+              />
+              <AllowlistTokens tokens={policy.data.changes?.tokens ?? getPolicyTokens(policy)} isRemoved={isRemoved} />
             </>
           )}
           {!isPendingDrawer(props) &&

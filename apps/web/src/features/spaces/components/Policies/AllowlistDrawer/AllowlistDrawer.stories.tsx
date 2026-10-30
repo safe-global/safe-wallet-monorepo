@@ -15,6 +15,7 @@ import {
   mockReadyToApplyAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
+  mockPendingAllowlistEdit,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
 } from '../mocks/allowlistPolicies'
@@ -96,6 +97,10 @@ export const PendingFullySigned: Story = {
 
 export const PendingUpdate: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlistUpdate(), viewer: MOCK_VIEWERS.signer },
+}
+
+export const PendingEdit: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingAllowlistEdit(), viewer: MOCK_VIEWERS.signer },
 }
 
 export const PendingRemoval: Story = {
