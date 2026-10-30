@@ -40,14 +40,6 @@ describe('useGetBeamerUpdatesQuery', () => {
     await waitFor(() => expect(result.current.data).toEqual({ unreadCount: 0 }))
     expect(requests[0].searchParams.has('date')).toBe(false)
   })
-
-  it('should, when Beamer returns a count that is not a whole number, report no unread posts', async () => {
-    server.use(http.get(NUMBER_FEATURES_URL, () => HttpResponse.json({ number: '3' })))
-
-    const { result } = renderHook(() => useGetBeamerUpdatesQuery({ productId: 'product-id' }))
-
-    await waitFor(() => expect(result.current.data).toEqual({ unreadCount: 0 }))
-  })
 })
 
 describe('parseBeamerUpdates', () => {

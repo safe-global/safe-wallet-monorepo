@@ -1,5 +1,15 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+type NumberFeaturesResponse = {
+  number?: number
+  lastPostId?: number
+  lastPostBoostedAnnouncementType?: number
+  lastPostTitle?: string
+  lastPostCategory?: string
+  lastPostLinkText?: string
+  lastPostLinkUrl?: string
+}
+
 export type BeamerTopBar = {
   postId: number
   title: string
@@ -14,43 +24,22 @@ export type BeamerUpdates = {
 
 const TOP_BAR_ANNOUNCEMENT_TYPE = 1
 
-const toText = (value: unknown): string | undefined => (typeof value === 'string' && value !== '' ? value : undefined)
+export const parseBeamerUpdates = (response: NumberFeaturesResponse): BeamerUpdates => {
+  const { lastPostId, lastPostTitle, lastPostLinkText, lastPostLinkUrl } = response
+  const isTopBar = response.lastPostBoostedAnnouncementType === TOP_BAR_ANNOUNCEMENT_TYPE && lastPostId && lastPostTitle
+  const linkUrl = lastPostLinkUrl?.startsWith('https://') ? lastPostLinkUrl : undefined
 
-const toHttpsUrl = (value: unknown): string | undefined => {
-  if (typeof value !== 'string') return undefined
-  let url: URL
-  try {
-    url = new URL(value)
-  } catch {
-    return undefined
-  }
-  return url.protocol === 'https:' ? url.href : undefined
-}
-
-const parseTopBar = (response: unknown): BeamerTopBar | undefined => {
-  const post = (response ?? {}) as Record<string, unknown>
-  const title = toText(post.lastPostTitle)
-  if (
-    post.lastPostBoostedAnnouncementType !== TOP_BAR_ANNOUNCEMENT_TYPE ||
-    typeof post.lastPostId !== 'number' ||
-    !title
-  ) {
-    return undefined
-  }
-  const linkText = toText(post.lastPostLinkText)
-  const linkUrl = toHttpsUrl(post.lastPostLinkUrl)
   return {
-    postId: post.lastPostId,
-    title,
-    category: toText(post.lastPostCategory),
-    link: linkText && linkUrl ? { text: linkText, url: linkUrl } : undefined,
+    unreadCount: response.number ?? 0,
+    topBar: isTopBar
+      ? {
+          postId: lastPostId,
+          title: lastPostTitle,
+          category: response.lastPostCategory,
+          link: lastPostLinkText && linkUrl ? { text: lastPostLinkText, url: linkUrl } : undefined,
+        }
+      : undefined,
   }
-}
-
-export const parseBeamerUpdates = (response: unknown): BeamerUpdates => {
-  const { number } = (response ?? {}) as { number?: unknown }
-  const isCount = typeof number === 'number' && Number.isInteger(number) && number >= 0
-  return { unreadCount: isCount ? number : 0, topBar: parseTopBar(response) }
 }
 
 export const beamerApi = createApi({
