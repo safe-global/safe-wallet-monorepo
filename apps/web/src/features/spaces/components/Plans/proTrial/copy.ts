@@ -54,8 +54,8 @@ export const PRO_TRIAL_COPY = {
     /** Followed by the "see all features" link. */
     tagline: 'All Pro features unlocked,',
     migrated: "You've used Safe before, so your trial is 60 days instead of 30.",
-    noCharge: 'No card. No charge. The trial ends on its own.',
-    endsOn: (date: string) => `Trial ends ${date}.`,
+    noCharge: (endsOn: string | null) =>
+      endsOn ? `No card. No charge. Trial ends on its own ${endsOn}.` : 'No card. No charge. Trial ends on its own.',
     start: 'Start free trial',
     seePlans: 'see all features',
     back: 'Go to My accounts',

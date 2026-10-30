@@ -222,9 +222,8 @@ export default function ClaimTrialModal({
                 </Track>
               </div>
 
-              <Typography variant="paragraph-mini" color="muted" align="center">
-                {PRO_TRIAL_COPY.trialStart.noCharge}
-                {endsOn && ` ${PRO_TRIAL_COPY.trialStart.endsOn(endsOn)}`}
+              <Typography variant="paragraph-small" color="muted" align="center">
+                {PRO_TRIAL_COPY.trialStart.noCharge(endsOn)}
               </Typography>
             </>
           )}
