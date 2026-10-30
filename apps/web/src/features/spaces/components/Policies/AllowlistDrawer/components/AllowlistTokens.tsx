@@ -4,6 +4,7 @@ import TokenIcon from '@/components/common/TokenIcon'
 import { DrawerSection } from '@/components/common/Drawer'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import ExpandableCard from './ExpandableCard'
 import RemovedBadge from './RemovedBadge'
@@ -39,7 +40,10 @@ const AllowlistTokens = ({ tokens, isRemoved = false }: AllowlistTokensProps): R
         <Card key={token.address} variant="muted" size="none" radius="lg" data-testid="allowlist-token">
           <div className="flex items-center gap-3 p-3">
             <TokenIcon logoUri={token.logoUri ?? undefined} tokenSymbol={token.symbol} size={24} />
-            <Typography variant="paragraph-small-medium" className="min-w-0 flex-1 truncate">
+            <Typography
+              variant="paragraph-small-medium"
+              className={cn('min-w-0 flex-1 truncate', isRemoved && 'text-muted-foreground line-through')}
+            >
               {token.symbol}
             </Typography>
             {isRemoved && <RemovedBadge alignWithChevron />}
