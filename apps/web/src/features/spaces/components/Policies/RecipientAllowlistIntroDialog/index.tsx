@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
-import { Clock, ShieldCheck, UsersRound, X } from 'lucide-react'
+import { Clock, ShieldCheck, UsersRound } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import PolicyIntroDialog, {
   type PolicyIntroExplainer,
 } from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
 import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { BlockedBadge } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/BlockedBadge'
 import RecipientAllowlistPreview from './RecipientAllowlistPreview'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [
@@ -20,10 +20,7 @@ const ACKNOWLEDGEMENT = {
   summary: (
     <div className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2">
       <Typography variant="paragraph-small-medium">Every other action</Typography>
-      <Badge variant="destructive" size="status" shape="status">
-        <X aria-hidden />
-        Blocked
-      </Badge>
+      <BlockedBadge />
     </div>
   ),
   label: (

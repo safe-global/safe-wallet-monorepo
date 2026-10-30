@@ -64,6 +64,11 @@ export class RecipientAllowlistPage {
     await intro.getByRole('button', { name: 'Set up allowlist' }).click()
   }
 
+  /** Ticks the review's confirmation that the Safe can only do what the allowlist allows; Continue needs it */
+  async confirmBlockedActions(): Promise<void> {
+    await this.page.getByRole('checkbox', { name: /will only be able to do what this allowlist allows/ }).click()
+  }
+
   async selectSafe(safeName: string): Promise<void> {
     await this.safeAccountSelector.click()
     await this.page.getByRole('option').filter({ hasText: safeName }).click()

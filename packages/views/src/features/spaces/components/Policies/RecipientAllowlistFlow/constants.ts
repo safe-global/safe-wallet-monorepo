@@ -101,10 +101,13 @@ export const POLICY_LABELS = {
 } as const
 export const FALLBACK_TARGET_NAME = 'Any address'
 
-export const REVIEW_FALLBACK_LABEL = 'Everything else'
+export const REVIEW_FALLBACK_LABEL = 'Every other action'
 export const REVIEW_FALLBACK_ALLOW =
   'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.'
-export const REVIEW_FALLBACK_DENY = 'Blocked. Only the transfers on this allowlist can be made.'
+export const BLOCKED_LABEL = 'Blocked'
+export const reviewConsentLabel = (safeName: string, changeDelay: string): string =>
+  `I understand that ${safeName} will only be able to do what this allowlist allows, and that every later change takes ${changeDelay} to apply.`
+export const REVIEW_CONSENT_ERROR = 'Tick the box to continue.'
 
 export const ALLOWLIST_GAPS_TITLE = "What this allowlist doesn't cover"
 export const ALLOWLIST_GAP_APPROVALS =
