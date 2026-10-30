@@ -15,6 +15,8 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'error',
       'shadcn/no-raw-colors': 'error',
+      'shadcn/no-inline-styles': 'warn',
+      'shadcn/require-static-classes': 'warn',
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
       'no-restricted-imports': [
         'error',
