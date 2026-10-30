@@ -103,7 +103,7 @@ export class RecipientAllowlistPage {
     await this.page.getByRole('button', { name: `Open Allowlist for ${short(safeAddress)}` }).click()
   }
 
-  /** The row of a queued allowlist transaction that waits for signatures; it is listed next to the live allowlist */
+  /** The row of a requested change, queued or waiting out the delay; it is listed next to the live allowlist */
   pendingRow(safeAddress: string): Locator {
     return this.row(safeAddress).filter({ has: this.page.getByTestId('policy-cell-status').getByText('Pending') })
   }
