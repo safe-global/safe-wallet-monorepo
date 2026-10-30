@@ -5,7 +5,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Button } from '@safe-global/views/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
-import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
@@ -14,9 +13,8 @@ import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
-import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { useGasPaymentOptions } from '@/hooks/useGasPaymentOptions'
-import { getGasPayment } from '@/utils/gasPayment'
+import type { GasPayer } from '@/utils/gasPayment'
 import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -26,7 +24,6 @@ import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
-import css from './styles.module.css'
 import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
@@ -38,6 +35,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { useLoadFeature } from '@/features/__core__'
 import { PayFromSafeFeature, useGasPayerSelection } from '@/features/pay-from-safe'
+import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 
 export const ExecuteForm = ({
@@ -86,29 +84,20 @@ export const ExecuteForm = ({
     setGasPaymentOption,
   } = useContext(TxFlowContext)
 
-  const { offer, showsProUpsell, exclude } = useGasPaymentOptions({ safeTx })
-  const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
-  const { gasPayer: offeredGasPayer, sponsorSpaceId: offeredSponsorSpaceId } = getGasPayment(offer, executionMethod)
+  const { offer, exclude } = useGasPaymentOptions({ safeTx })
 
-  // The fee payment spec's selector where the chain lists PAY_FROM_SAFE; the sponsored/wallet one elsewhere.
+  // The fee card of the fee payment spec decides who pays on every chain: a sponsor, the Safe or the wallet.
   const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(PayFromSafeFeature)
+  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
   const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
   const isPayFromSafe = selection.isPayFromSafe
-  const showsGasPayerSelector = isPayFromSafeReady && selection.view !== null
+  const isSponsored = selection.choice === 'SPONSORED' && !!offer && !offer.disabledReason
 
   // Paying from the Safe relays through the public route, never against a Workspace allowance: the
   // Safe refunds the relayer on-chain (`handlePayment()`), and `WorkspaceRelayer` refuses such payloads.
-  const gasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : offeredGasPayer
-  const sponsorSpaceId = isPayFromSafe ? null : offeredSponsorSpaceId
+  const gasPayer: GasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : isSponsored ? offer.option : 'WALLET'
+  const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'
-  const showExecutionSelector = !showsGasPayerSelector && (offer !== null || showsProUpsell)
-
-  // Keep the legacy execution method in step with the spec selector while the latter is the one rendered.
-  useEffect(() => {
-    if (showsGasPayerSelector) {
-      setExecutionMethod(selection.choice === 'SPONSORED' ? ExecutionMethod.RELAY : ExecutionMethod.WALLET)
-    }
-  }, [showsGasPayerSelector, selection.choice])
 
   // Safe Shield simulates the payload the user is about to sign, fee params included.
   useSafeShieldForTxData(isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
@@ -226,11 +215,7 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div
-          className={classNames(commonCss.params, {
-            [css.noBottomBorderRadius]: showExecutionSelector,
-          })}
-        >
+        <div className={commonCss.params}>
           <AdvancedParams
             willExecute
             params={advancedParams}
@@ -245,27 +230,19 @@ export const ExecuteForm = ({
                 : undefined
             }
           />
-
-          {showExecutionSelector && (
-            <div className={css.noTopBorder}>
-              <ExecutionMethodSelector
-                executionMethod={executionMethod}
-                setExecutionMethod={setExecutionMethod}
-                offer={offer}
-                showsProUpsell={showsProUpsell}
-              />
-            </div>
-          )}
         </div>
 
         {/* The fee card of the fee payment design stands on its own, under the gas params. */}
-        {showsGasPayerSelector && selection.view && (
+        {isPayFromSafeReady && selection.view && (
           <GasPayerSelector
             view={selection.view}
             onChoiceChange={selection.setChoice}
             onGasTokenChange={selection.onGasTokenChange}
           />
         )}
+
+        {/* The campaign is on offer but refuses this gas price: the card locks the wallet, the banner says why. */}
+        {offer?.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && <GasTooHighBanner />}
 
         {/* Error messages */}
         {cannotPropose ? (

@@ -255,8 +255,8 @@ const ProUpsell = (): ReactElement => {
 
 /**
  * The fee card of the fee payment design: who pays and in which token, the Execution and Gas fee rows,
- * the total leaving the Safe, and the plan strip (Pro upsell or sponsored counter). Two payers render
- * as a dropdown; one renders as a locked pill with the reason in its tooltip.
+ * the total leaving the Safe, and the plan strip (Pro upsell or sponsored counter, where the chain
+ * sponsors). Two payers render as a dropdown; one renders as a locked pill with the reason in its tooltip.
  */
 const GasPayerSelector = ({
   view,
@@ -321,19 +321,21 @@ const GasPayerSelector = ({
           )}
         </div>
 
-        <div className={css.footer}>
-          {footer.kind === 'upsell' ? (
-            <ProUpsell />
-          ) : (
-            <SponsoredTxsCounter
-              left={footer.left}
-              quota={footer.quota}
-              resetsAt={footer.resetsAt}
-              isSubscription={footer.isSubscription}
-              isPro={footer.isSubscription}
-            />
-          )}
-        </div>
+        {footer.kind !== 'none' && (
+          <div className={css.footer}>
+            {footer.kind === 'upsell' ? (
+              <ProUpsell />
+            ) : (
+              <SponsoredTxsCounter
+                left={footer.left}
+                quota={footer.quota}
+                resetsAt={footer.resetsAt}
+                isSubscription={footer.isSubscription}
+                isPro={footer.isSubscription}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Safe-pays only: signing is not blocked, another signer or a top-up may cover it before execution. */}

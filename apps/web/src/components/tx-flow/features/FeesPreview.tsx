@@ -1,6 +1,6 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { PayFromSafeFeature, useGasPayerSelection, useIsPayFromSafeSlotVisible } from '@/features/pay-from-safe'
+import { PayFromSafeFeature, useGasPayerSelection, useIsFeeCardSlotVisible } from '@/features/pay-from-safe'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
@@ -36,12 +36,12 @@ const FeePayerSignStep = (): ReactElement | null => {
   )
 }
 
-// Shown only where the chain's relayer offers Pay from Safe (`useIsPayFromSafeSlotVisible`).
+// Shown on every chain while no execute form is mounted (`useIsFeeCardSlotVisible`).
 const FeesPreviewSlot = withSlot({
   Component: FeePayerSignStep,
   slotName: SlotName.Main,
   id: 'feesPreview',
-  useSlotCondition: useIsPayFromSafeSlotVisible,
+  useSlotCondition: useIsFeeCardSlotVisible,
 })
 
 export default FeesPreviewSlot

@@ -18,17 +18,19 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockUseWallet(),
 }))
 
+/** What the chain's relayer sponsors; the default offers everything the selector can show. */
+let gasPaymentOptions: string[] = ['PAY_FROM_SAFE', 'SUBSCRIPTION', 'FREE_DAILY_LIMIT']
 jest.mock('@/hooks/useChains', () => ({
-  useCurrentChain: () => ({ chainId: '11155111', nativeCurrency: { symbol: 'ETH', decimals: 18 } }),
+  useCurrentChain: () => ({
+    chainId: '11155111',
+    nativeCurrency: { symbol: 'ETH', decimals: 18, logoUri: 'eth.svg' },
+    relayer: { type: 'RELAY_FEE', gasPaymentOptions },
+  }),
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: () => ({ safe: { threshold: 1 }, safeAddress: '0xSafe' }),
-}))
-
-jest.mock('../../utils/isPayFromSafeAvailable', () => ({
-  isPayFromSafeAvailable: () => true,
 }))
 
 const mockUseSafeSponsoredTxs = jest.fn()
@@ -99,6 +101,7 @@ describe('useGasPayerSelection', () => {
     // The preference slice is persisted to localStorage, which would carry picks across tests
     localStorage.clear()
     currentMode = undefined
+    gasPaymentOptions = ['PAY_FROM_SAFE', 'SUBSCRIPTION', 'FREE_DAILY_LIMIT']
     mockUseWallet.mockReturnValue({ address: SIGNER } as unknown as ConnectedWallet)
     mockUseSafeSponsoredTxs.mockReturnValue({ isPro: false, left: undefined, meter: undefined })
     mockUseFeesPreview.mockReturnValue(buildFees())
@@ -172,6 +175,20 @@ describe('useGasPayerSelection', () => {
 
     expect(result.current.choice).toBe('PAY_FROM_SAFE')
     expect(currentMode).toBe('safe')
+  })
+
+  it("shows the chain's native token when the Safe holds none", () => {
+    mockUseFeesPreview.mockReturnValue(buildFees({ availableGasTokens: [] }))
+
+    const { result } = renderSelection()
+
+    expect(result.current.view?.gasToken).toEqual(
+      expect.objectContaining({
+        tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH', logoUri: 'eth.svg' }],
+        selected: ZERO_ADDRESS,
+        locked: true,
+      }),
+    )
   })
 
   it('ignores a remembered Safe account pick for a Pro Workspace with sponsored transactions left', () => {
@@ -270,6 +287,74 @@ describe('useGasPayerSelection', () => {
     expect(currentMode).toBe('safe')
     expect(mockUsePayFromSafeFeePreview.mock.calls.every(([args]) => args.enabled)).toBe(true)
   })
+  describe('footer', () => {
+    it('is the Pro upsell for a Safe outside a Workspace where the chain sponsors plans', () => {
+      const { result } = renderSelection()
+
+      expect(result.current.view?.footer).toEqual({ kind: 'upsell' })
+    })
+
+    it("is the Workspace's meter for a Pro Safe where the chain sponsors plans", () => {
+      mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 0, meter: { quota: 50, resetsAt: null } })
+
+      const { result } = renderSelection()
+
+      expect(result.current.view?.footer).toEqual({
+        kind: 'counter',
+        left: 0,
+        quota: 50,
+        resetsAt: null,
+        isSubscription: true,
+      })
+    })
+
+    it('is empty where the chain sponsors no plans, whatever the Safe', () => {
+      gasPaymentOptions = ['PAY_FROM_SAFE', 'FREE_DAILY_LIMIT']
+      mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 10, meter: { quota: 50, resetsAt: null } })
+
+      const { result } = renderSelection()
+
+      expect(result.current.view?.footer).toEqual({ kind: 'none' })
+    })
+  })
+
+  describe('on a chain whose relayer does not offer Pay from Safe', () => {
+    beforeEach(() => {
+      gasPaymentOptions = []
+      mockUseFeesPreview.mockReturnValue(buildFees({ availableGasTokens: [] }))
+    })
+
+    it('still shows the card, with the Signer wallet locked and no footer', () => {
+      const { result } = renderSelection()
+
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'WALLET' })
+      expect(result.current.view?.gasToken).toEqual(
+        expect.objectContaining({
+          tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH', logoUri: 'eth.svg' }],
+          locked: true,
+        }),
+      )
+      expect(result.current.view?.footer).toEqual({ kind: 'none' })
+      expect(quoteRequested()).toBe(false)
+    })
+
+    it('ignores a remembered Safe account pick', () => {
+      const { result } = renderSelection(preference('safe'))
+
+      expect(result.current.choice).toBe('WALLET')
+      expect(currentMode).toBe('signer')
+    })
+
+    it('shows the Pro upsell where the chain sponsors plans', () => {
+      gasPaymentOptions = ['SUBSCRIPTION']
+
+      const { result } = renderSelection()
+
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'WALLET' })
+      expect(result.current.view?.footer).toEqual({ kind: 'upsell' })
+    })
+  })
+
   describe('sponsor at execution', () => {
     const signedTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
     signedTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)
@@ -291,6 +376,30 @@ describe('useGasPayerSelection', () => {
       expect(result.current.choice).toBe('SPONSORED')
       expect(result.current.view?.sponsorKind).toBe('free')
       expect(result.current.view?.footer).toEqual(expect.objectContaining({ kind: 'counter', isSubscription: false }))
+    })
+
+    it("is the campaign's free transactions while it is on offer", () => {
+      gasPaymentOptions = ['NO_FEE_CAMPAIGN']
+      const { result } = renderExecution({ option: 'NO_FEE_CAMPAIGN', disabledReason: null, remaining: 2, limit: 5 })
+
+      expect(result.current.choice).toBe('SPONSORED')
+      expect(result.current.view?.sponsorKind).toBe('free')
+      expect(result.current.view?.footer).toEqual({
+        kind: 'counter',
+        left: 2,
+        quota: 5,
+        resetsAt: null,
+        isSubscription: false,
+      })
+    })
+
+    it('locks the wallet without a footer where the chain sponsors nothing', () => {
+      gasPaymentOptions = ['PAY_FROM_SAFE']
+      const { result } = renderExecution(null)
+
+      expect(result.current.choice).toBe('WALLET')
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'WALLET' })
+      expect(result.current.view?.footer).toEqual({ kind: 'none' })
     })
   })
 })

@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
+import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
@@ -12,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import type {
+  GasTokenOption,
   FeePayerControl,
   FeePayerFooter,
   FeePayerPlanState,
@@ -26,7 +28,7 @@ import { withoutFees } from '../services/totalOutgoing'
 import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '../store'
 
 export type GasPayerSelection = {
-  /** The fee card to render, or null before the payload exists or where the chain does not list PAY_FROM_SAFE. */
+  /** The fee card to render, or null before the payload exists. Options the chain does not offer render locked. */
   view: FeePayerView | null
   /** The effective choice: the user's, or the default for this payload. */
   choice: GasPayerChoice
@@ -79,6 +81,7 @@ export const useGasPayerSelection = ({
   const isUnsigned = !!safeTx && signatures === 0
   const isLocked = !!safeTx && isPaidFromSafe(safeTx.data)
   const isChainReady = isPayFromSafeAvailable(chain)
+  const chainOptions = useMemo(() => getGasPaymentOptions(chain), [chain])
   const hasSponsoredOffer = !!offer && !offer.disabledReason
 
   const planState: FeePayerPlanState = !isPro ? 'FREE' : left === 0 ? 'PRO_NO_SPONSORED' : 'PRO_SPONSORED_LEFT'
@@ -157,7 +160,7 @@ export const useGasPayerSelection = ({
   }, [choice, isLocked, feePaymentMode, setFeePaymentMode])
 
   const view = useMemo<FeePayerView | null>(() => {
-    if (!safeTx || !isChainReady) return null
+    if (!safeTx) return null
 
     const payer: FeePayerControl = (() => {
       if (isLocked) return { kind: 'locked', value: 'PAY_FROM_SAFE' }
@@ -193,7 +196,13 @@ export const useGasPayerSelection = ({
     const paysFromSafe = payer.value === 'PAY_FROM_SAFE'
     const sponsored = payer.value === 'SPONSORED'
     const tokens = fees.availableGasTokens ?? []
-    const nativeToken = tokens.find((t) => t.address === ZERO_ADDRESS) ?? tokens[0]
+    // A Safe without native balance has no token to list; the signer still pays in the chain's currency.
+    const chainNativeToken: GasTokenOption | undefined = chain && {
+      address: ZERO_ADDRESS,
+      symbol: chain.nativeCurrency.symbol,
+      logoUri: chain.nativeCurrency.logoUri,
+    }
+    const nativeToken = tokens.find((t) => t.address === ZERO_ADDRESS) ?? tokens[0] ?? chainNativeToken
     const gasToken: FeePayerView['gasToken'] = paysFromSafe
       ? {
           tokens,
@@ -222,34 +231,41 @@ export const useGasPayerSelection = ({
     // The fee leaves the Safe only when the Safe pays it.
     const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : withoutFees(fees.totalOutgoing)
 
-    // At execution the offer is the truth (it already accounts for a quota used up since signing);
-    // at signing there is none, so the Workspace's meter stands in.
-    const footer: FeePayerFooter =
-      offer?.option === 'SUBSCRIPTION'
-        ? {
-            kind: 'counter',
-            left: offer.left,
-            quota: offer.meter?.quota ?? null,
-            resetsAt: offer.meter?.resetsAt ?? null,
-            isSubscription: true,
-          }
-        : offer?.option === 'FREE_DAILY_LIMIT'
-          ? {
-              kind: 'counter',
-              left: offer.relays?.remaining ?? null,
-              quota: offer.relays?.limit ?? null,
-              resetsAt: null,
-              isSubscription: false,
-            }
-          : planState === 'FREE'
-            ? { kind: 'upsell' }
-            : {
-                kind: 'counter',
-                left,
-                quota: meter?.quota ?? null,
-                resetsAt: meter?.resetsAt ?? null,
-                isSubscription: true,
-              }
+    // The strip follows what the chain's relayer sponsors. At execution the offer is the truth (it
+    // already accounts for a quota used up since signing); at signing there is none, so the Workspace's
+    // meter stands in where the chain sponsors plans. A chain that sponsors nothing shows no strip.
+    const footer: FeePayerFooter = (() => {
+      if (offer?.option === 'SUBSCRIPTION') {
+        return {
+          kind: 'counter',
+          left: offer.left,
+          quota: offer.meter?.quota ?? null,
+          resetsAt: offer.meter?.resetsAt ?? null,
+          isSubscription: true,
+        }
+      }
+      if (offer?.option === 'FREE_DAILY_LIMIT') {
+        return {
+          kind: 'counter',
+          left: offer.relays?.remaining ?? null,
+          quota: offer.relays?.limit ?? null,
+          resetsAt: null,
+          isSubscription: false,
+        }
+      }
+      if (offer?.option === 'NO_FEE_CAMPAIGN') {
+        return { kind: 'counter', left: offer.remaining, quota: offer.limit, resetsAt: null, isSubscription: false }
+      }
+      if (!chainOptions.includes('SUBSCRIPTION')) return { kind: 'none' }
+      if (planState === 'FREE') return { kind: 'upsell' }
+      return {
+        kind: 'counter',
+        left,
+        quota: meter?.quota ?? null,
+        resetsAt: meter?.resetsAt ?? null,
+        isSubscription: true,
+      }
+    })()
 
     return {
       payer,
@@ -266,7 +282,7 @@ export const useGasPayerSelection = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     safeTx,
-    isChainReady,
+    chainOptions,
     isLocked,
     step,
     planState,

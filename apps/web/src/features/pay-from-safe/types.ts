@@ -30,8 +30,12 @@ export type OutgoingLine = { amount: string; currency: string }
 export type FeePayerControl =
   { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] } | { kind: 'locked'; value: GasPayerChoice }
 
-/** The strip under the fee rows: the Pro upsell on the free plan, the sponsored counter on Pro. */
+/**
+ * The strip under the fee rows: the Pro upsell on the free plan, the sponsored counter on Pro or on a
+ * chain with free relays, nothing where the chain's relayer sponsors no transactions.
+ */
 export type FeePayerFooter =
+  | { kind: 'none' }
   | { kind: 'upsell' }
   | {
       kind: 'counter'

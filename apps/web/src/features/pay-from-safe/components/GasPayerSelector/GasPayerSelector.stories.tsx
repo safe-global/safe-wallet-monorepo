@@ -318,3 +318,17 @@ export const ExecuteFreePlan: Story = {
     },
   },
 }
+
+export const SignNoPayFromSafeChain: Story = {
+  name: 'Sign · Chain without Pay from Safe or sponsoring',
+  args: {
+    view: {
+      ...base,
+      payer: locked('WALLET'),
+      gasToken: nativeLocked,
+      gasFee: { note: 'Calculated at execution' },
+      totalOutgoing: outgoing(false),
+      footer: { kind: 'none' },
+    },
+  },
+}
