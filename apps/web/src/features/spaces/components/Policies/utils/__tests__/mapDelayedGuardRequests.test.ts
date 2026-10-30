@@ -1,7 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { AbiCoder, getAddress } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { PendingDelayedGuardPoliciesDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  PendingDelayedGuardPoliciesDto,
+  PolicyConfigurationDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getApplyAllowlistRequest, mapDelayedGuardRequest } from '../mapDelayedGuardRequests'
 
@@ -108,7 +111,7 @@ describe('mapDelayedGuardRequest removals', () => {
 
 describe('mapDelayedGuardRequest edits', () => {
   const [kept, revoked] = recipients
-  const erc20Config = (entries: Array<[string, number]>) => ({
+  const erc20Config = (entries: Array<[string, number]>): PolicyConfigurationDto => ({
     target: token,
     selector: '0xa9059cbb',
     operation: 0,
@@ -118,10 +121,19 @@ describe('mapDelayedGuardRequest edits', () => {
   const entriesOf = (configurations: PendingDelayedGuardPoliciesDto['configurations']) =>
     mapDelayedGuardRequest(makeRequest({ configurations }), { operation: 'update', resolveToken })?.data.entries
 
-  it('should list no recipient for an ERC-20 revoke', () => {
-    const [entry] = entriesOf([erc20Config([[revoked, 0]])]) ?? []
+  it('should list no entry for a token that is only revoked', () => {
+    expect(entriesOf([erc20Config([[revoked, 0]])])).toEqual([])
+  })
 
-    expect(entry.recipients).toEqual([])
+  it('should list only the kept token, when another token is revoked and unbound', () => {
+    const removed = faker.finance.ethereumAddress()
+    const entries = entriesOf([
+      erc20Config([[kept, 2]]),
+      { ...erc20Config([[revoked, 0]]), target: removed },
+      { ...erc20Config([]), target: removed, policy: ZERO_ADDRESS, data: '0x' },
+    ])
+
+    expect(entries?.map(({ token: { address } }) => address)).toEqual([token])
   })
 
   it('should list only the added recipient, when a config adds one and revokes another', () => {

@@ -29,18 +29,23 @@ type MapOptions = {
   resolveToken: (address: string) => PolicyTokenInfo
 }
 
-/** Recipients a token rule allows; none for revoked entries or data that is not a recipient list. */
-const decodeRecipients = (data: string): AllowlistRecipient[] => {
+/** Recipients a token rule allows, and whether it revokes any; none for data that is not a recipient list. */
+const decodeRecipients = (data: string): { recipients: AllowlistRecipient[]; hasRevokes: boolean } => {
   let entries: Array<[string, bigint]>
   try {
     entries = AbiCoder.defaultAbiCoder().decode(['tuple(address recipient, uint8 permission)[]'], data)[0]
   } catch {
-    return []
+    return { recipients: [], hasRevokes: false }
   }
 
-  return entries
-    .filter(([, permission]) => Number(permission) !== PERMISSION_NONE)
-    .map(([account, permission]) => ({ account, permission: PERMISSIONS[Number(permission)] ?? 'ALWAYS' }))
+  const allowed = entries.filter(([, permission]) => Number(permission) !== PERMISSION_NONE)
+  return {
+    recipients: allowed.map(([account, permission]) => ({
+      account,
+      permission: PERMISSIONS[Number(permission)] ?? 'ALWAYS',
+    })),
+    hasRevokes: allowed.length < entries.length,
+  }
 }
 
 /**
@@ -62,7 +67,8 @@ export const toAllowlistData = (
 
   for (const { target, selector, policy, data } of configurations) {
     if (selector === ERC20_TRANSFER_SELECTOR && !sameAddress(policy, ZERO_ADDRESS)) {
-      entryFor(target).recipients.push(...decodeRecipients(data))
+      const { recipients, hasRevokes } = decodeRecipients(data)
+      if (recipients.length > 0 || !hasRevokes) entryFor(target).recipients.push(...recipients)
     } else if (
       selector === NATIVE_TRANSFER_SELECTOR &&
       !sameAddress(target, ZERO_ADDRESS) &&
