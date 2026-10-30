@@ -23,7 +23,7 @@ const SignTxButton = ({
 }: {
   txSummary: Transaction
   compact?: boolean
-  // The Space queue table's 24px row action
+  // The Space queue table's 24px row action, labelled "Sign" as in its design
   dense?: boolean
 }): ReactElement => {
   const setTxFlow = useSetScopedTxFlow()
@@ -57,7 +57,7 @@ const SignTxButton = ({
                 size={dense ? '2xs' : compact ? 'default' : 'action'}
                 className={dense ? 'w-20' : undefined}
               >
-                Confirm
+                {dense ? 'Sign' : 'Confirm'}
               </Button>
             </Track>
           </span>
