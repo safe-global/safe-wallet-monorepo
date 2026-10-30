@@ -57,8 +57,10 @@ type AllowlistDrawerBaseProps = {
 
 type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   policy: ActiveAllowlistPolicy
-  onEdit?: () => void
+  /** Requests the removal, which deletes every rule once the guard's delay is over. */
   onRemove?: () => void
+  /** Takes the guard off once the removal is applied. */
+  onRemoveGuard?: () => void
   /** Drops an expired request. */
   onDiscard?: () => void
   /** The Safe's threshold and owner count, which the ready-to-apply banner names. */
@@ -126,8 +128,8 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction }
     : {
-        onEdit: props.onEdit,
         onRemove: props.onRemove,
+        onRemoveGuard: props.onRemoveGuard,
         onApply: props.onApply,
         onDiscard: props.onDiscard,
         applyLaterLabel: scheduledChange ? applyInLabel(scheduledChange.appliesAt, now) : undefined,
@@ -152,7 +154,9 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
               />
             </>
           )}
-          {state.kind === 'unenforced' && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
+          {(state.kind === 'unenforced' || state.kind === 'remove-guard') && (
+            <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
+          )}
           {state.kind === 'active' && !isPendingDrawer(props) && props.justActivated && (
             <ActivatedBanner
               title={ACTIVATED_BANNER_TITLE}
@@ -174,8 +178,12 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ) : (
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ))}
-          <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
-          <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
+          {state.kind !== 'remove-guard' && (
+            <>
+              <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
+              <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />
+            </>
+          )}
           {!isPendingDrawer(props) &&
             !applyStage &&
             state.kind !== 'unenforced' &&

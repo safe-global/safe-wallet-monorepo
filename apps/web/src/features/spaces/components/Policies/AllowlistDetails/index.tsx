@@ -3,6 +3,8 @@ import type { Policy } from '@safe-global/views/features/spaces/components/Polic
 import { TxModalContext } from '@/components/tx-flow'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import { AllowlistDrawer } from '../AllowlistDrawer'
+import RemoveAllowlistFlow from '../RemoveAllowlistFlow'
+import RemoveGuardFlow from '../RemoveGuardFlow'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
 
 export type AllowlistDetailsProps = {
@@ -24,7 +26,25 @@ const AllowlistDetails = ({
   onApply,
 }: AllowlistDetailsProps): ReactElement => {
   const content = useAllowlistDetails(policy, policies)
-  const { txFlow } = useContext(TxModalContext)
+  const { txFlow, setTxFlow } = useContext(TxModalContext)
+  const { chainId, address: safeAddress } = policy.safe
+  const { enforcement } = policy
+
+  const onRemove =
+    enforcement.via === 'guard'
+      ? () =>
+          setTxFlow(
+            <RemoveAllowlistFlow
+              chainId={chainId}
+              safeAddress={safeAddress}
+              guardAddress={enforcement.guardAddress}
+              rules={policy.data.entries.map(({ token, recipients }) => ({
+                tokenAddress: token.address,
+                recipients: recipients.map(({ account }) => account),
+              }))}
+            />,
+          )
+      : undefined
 
   return (
     <AllowlistDrawer
@@ -34,9 +54,8 @@ const AllowlistDetails = ({
       {...content}
       justActivated={justActivated}
       onApply={onApply}
-      // TODO: placeholder handlers so the buttons look live; replace with the edit and remove flows
-      onEdit={() => console.log('Edit allowlist', policy)}
-      onRemove={() => console.log('Remove allowlist', policy)}
+      onRemove={onRemove}
+      onRemoveGuard={() => setTxFlow(<RemoveGuardFlow chainId={chainId} safeAddress={safeAddress} />)}
     />
   )
 }

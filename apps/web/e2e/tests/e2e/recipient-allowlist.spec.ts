@@ -171,7 +171,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       await expect(allowlist.row(safe.address)).toContainText('1 recipient')
       await allowlist.openPanel(safe.address)
       await expect(allowlist.panel).toContainText('1 recipient')
-      await expect(allowlist.panel.getByRole('button', { name: 'Edit' })).toBeEnabled()
+      await expect(allowlist.panel.getByRole('button', { name: 'Remove' })).toBeEnabled()
     })
   }
 
@@ -199,13 +199,13 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       await policies.goto(workspaceId)
       await expect(allowlist.row(safe.address)).toContainText('1 recipient')
 
-      // The panel's Edit is not wired yet, so the change starts from Add policy, as the guard is already set.
+      // The panel has no Edit, so the change starts from Add policy, as the guard is already set.
       await allowlist.startFromAddPolicy()
       await fillAllowlist(allowlist, [current, added])
       await expectReviewedCalls(allowlist, REQUEST_CALLS)
       await signAndExecute(safePage, signing, REQUEST_CALLS)
 
-      const request = { guard: POLICY_GUARD, safe: safe.address, root: configurationRootOf(changed) }
+      const request = { guard: POLICY_GUARD, safe: safe.address, root: configurationRootOf(changed, safe.address) }
       await expect.poll(() => readConfigurationRequest(env, request)).toBeGreaterThan(0)
       const readyAt = await readConfigurationRequest(env, request)
       await registerAllowlist(safe, {

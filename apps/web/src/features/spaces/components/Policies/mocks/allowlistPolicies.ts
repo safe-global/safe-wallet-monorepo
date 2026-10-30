@@ -157,6 +157,30 @@ export const mockAllowlistChangePending = (): AllowlistPolicy & { status: 'activ
     }),
   )
 
+/** An executed removal waits out the delay; the allowlist stays active until a second transaction applies it. */
+export const mockAllowlistRemovalScheduled = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-removal-scheduled',
+      scheduledChange: {
+        operation: 'remove',
+        appliesAt: secondsFromNow(DAY - 60),
+        expiresAt: secondsFromNow(8 * DAY - 60),
+        requestedAt: secondsFromNow(-60),
+      },
+    }),
+  )
+
+/** The removal is applied: no rule is left, and the guard only lets itself be taken off. */
+export const mockAllowlistAwaitingGuardRemoval = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-awaiting-guard-removal',
+      data: { entries: [] },
+      awaitingGuardRemoval: true,
+    }),
+  )
+
 /** Executed but reverted: nothing changed on the Safe. */
 export const mockFailedAllowlist = (): FailedAllowlistPolicy => ({
   ...mockFullySignedPendingAllowlist(),

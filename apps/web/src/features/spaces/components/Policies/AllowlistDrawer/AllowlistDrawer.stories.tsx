@@ -3,7 +3,9 @@ import { fn } from 'storybook/test'
 import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../mocks/policies'
 import {
   mockActivatingAllowlist,
+  mockAllowlistAwaitingGuardRemoval,
   mockAllowlistChangePending,
+  mockAllowlistRemovalScheduled,
   mockCgwAllowlist,
   mockCgwUncoveredAllowlist,
   mockCgwUnenforcedAllowlist,
@@ -42,8 +44,8 @@ const meta = {
     safe: { address: MOCK_SAFES.treasury.address, name: MOCK_SAFE_NAME },
     overview: { lastUpdated: 'Oct 12, 2026 · 13:02 UTC', enforcedBy: 'Safe policy contract' },
     names: { [MOCK_ADDRESSES.alice]: 'Alice Contractor', [MOCK_ADDRESSES.bob]: 'Bob Supplier' },
-    onEdit: fn(),
     onRemove: fn(),
+    onRemoveGuard: fn(),
     onApply: fn(),
     onDiscard: fn(),
     onConnectWallet: fn(),
@@ -126,6 +128,16 @@ export const Unenforced: Story = { args: { policy: mockCgwUnenforcedAllowlist() 
 
 /** An executed edit waits out the delay before a second transaction can apply it. */
 export const ChangePending: Story = { args: { policy: mockAllowlistChangePending() } }
+
+/** An executed removal waits out the delay; the allowlist stays active until it is applied. */
+export const RemovalPending: Story = { args: { policy: mockAllowlistRemovalScheduled() } }
+
+/** The removal is applied, so no rule is left: Remove guard takes the guard off and unlocks the Safe. */
+export const AwaitingGuardRemoval: Story = { args: { policy: mockAllowlistAwaitingGuardRemoval() } }
+
+export const AwaitingGuardRemovalNotASigner: Story = {
+  args: { policy: mockAllowlistAwaitingGuardRemoval(), viewer: MOCK_VIEWERS.nonSigner },
+}
 
 export const FailedSetup: Story = { args: { ...PENDING_ARGS, policy: mockFailedAllowlist() } }
 

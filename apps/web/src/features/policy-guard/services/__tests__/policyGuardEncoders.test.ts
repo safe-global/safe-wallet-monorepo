@@ -2,10 +2,12 @@ import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@saf
 import { getAddress, id, Interface, keccak256 } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { PolicyConfiguration } from '../../types'
 import {
   createApplyConfigurationTx,
   createFirstSetupTxs,
+  createRemoveGuardTxs,
   createRequestConfigurationTx,
   createSetGuardTx,
   createSetModuleGuardTx,
@@ -64,6 +66,18 @@ describe('createSetGuardTx / createSetModuleGuardTx', () => {
     expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
     expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
     expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(guardAddress)
+  })
+})
+
+describe('createRemoveGuardTxs', () => {
+  it('should set both guard slots of the Safe to the zero address, when the guard comes off', () => {
+    const [guardTx, moduleTx] = createRemoveGuardTxs(safeAddress)
+
+    expect([guardTx.to, moduleTx.to]).toEqual([safeAddress, safeAddress])
+    expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
+    expect(safeIface.parseTransaction({ data: guardTx.data })?.args[0]).toBe(ZERO_ADDRESS)
+    expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
+    expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(ZERO_ADDRESS)
   })
 })
 

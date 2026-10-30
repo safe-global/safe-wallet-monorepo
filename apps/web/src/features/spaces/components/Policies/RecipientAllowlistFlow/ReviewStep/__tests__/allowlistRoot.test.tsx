@@ -54,6 +54,7 @@ const setUp = (status: 'none' | 'known') => {
   ;(useLoadFeature as jest.Mock).mockReturnValue({
     $isReady: true,
     buildAllowlistConfigurations: mockConfigs.buildAllowlistConfigurations,
+    clearGuardExitConfigurations: mockConfigs.clearGuardExitConfigurations,
     createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
   })
   return mutate
@@ -113,6 +114,9 @@ describe('allowlist configuration root', () => {
 
     expect(posted).toMatch(/^0x[0-9a-f]{64}$/)
     expect(decoded?.args[0]).toBe(posted)
-    expect(saved).toEqual(mockConfigs.buildAllowlistConfigurations(CHAIN_ID, rules))
+    expect(saved).toEqual([
+      ...mockConfigs.clearGuardExitConfigurations(SAFE),
+      ...mockConfigs.buildAllowlistConfigurations(CHAIN_ID, rules),
+    ])
   })
 })

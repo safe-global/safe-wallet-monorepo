@@ -58,6 +58,7 @@ const mockFeature = (isReady = true) =>
   (useLoadFeature as jest.Mock).mockReturnValue({
     $isReady: isReady,
     buildAllowlistConfigurations: mockServices.buildAllowlistConfigurations,
+    clearGuardExitConfigurations: mockServices.clearGuardExitConfigurations,
     createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
   })
 
@@ -80,18 +81,24 @@ describe('useBuildAllowlistTransaction', () => {
     expect(sentBatch()).toHaveLength(3)
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
     expect(result.current.guardState).toEqual({ status: 'none' })
-    const installed = withFirstSetupDefaults(CHAIN_ID, mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules))
+    const installed = withFirstSetupDefaults(CHAIN_ID, [
+      ...mockServices.clearGuardExitConfigurations(SAFE),
+      ...mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules),
+    ])
     expect(result.current.configurations).toEqual(installed)
     expect(result.current.root).toBe(getConfigurationRoot(installed))
     expect(result.current.txs).toEqual(sentBatch())
   })
 
-  it('returns only the allowlist configurations when the guard is already known', async () => {
+  it('should return the exit clean-up and the allowlist configurations, when the guard is already known', async () => {
     mockGuard({ state: { status: 'known' } })
     const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
     await waitFor(() => expect(result.current.configurations).toBeDefined())
-    expect(result.current.configurations).toEqual(mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules))
+    expect(result.current.configurations).toEqual([
+      ...mockServices.clearGuardExitConfigurations(SAFE),
+      ...mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules),
+    ])
   })
 
   it('sets a single call to the guard when it is already known', async () => {
@@ -182,6 +189,7 @@ describe('useBuildAllowlistTransaction', () => {
       buildAllowlistConfigurations: () => {
         throw new Error(ALLOWLIST_UNAVAILABLE_ERROR)
       },
+      clearGuardExitConfigurations: mockServices.clearGuardExitConfigurations,
       createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
     })
     mockGuard({ state: { status: 'none' } })

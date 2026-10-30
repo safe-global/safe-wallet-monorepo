@@ -27,11 +27,13 @@ const encoders: Pick<
   | 'getConfigurationRoot'
   | 'describeSetupCall'
   | 'getCallConfigurations'
+  | 'createRemoveGuardTxs'
 > = jest.requireActual('@/features/policy-guard/services/policyGuardEncoders')
 const {
   decodeErc20TransferPolicyData: mockDecodeRecipients,
+  buildAllowlistRemovalConfigurations,
   encodeErc20TransferPolicyData,
-}: Pick<PolicyGuardContract, 'decodeErc20TransferPolicyData'> & {
+}: Pick<PolicyGuardContract, 'decodeErc20TransferPolicyData' | 'buildAllowlistRemovalConfigurations'> & {
   encodeErc20TransferPolicyData: (recipients: string[]) => string
 } = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
 const mockDescribeSetupCall = encoders.describeSetupCall
@@ -145,6 +147,35 @@ describe('AllowlistTransactionCalls', () => {
     fireEvent.click(screen.getByTestId('action-item'))
 
     expect(screen.queryByTestId('allowlist-rule')).not.toBeInTheDocument()
+  })
+
+  it('should label each rule of a removal by what it does, when the transaction applies a removal', () => {
+    const configurations = buildAllowlistRemovalConfigurations({
+      chainId: CHAIN_ID,
+      safeAddress: SAFE,
+      rules: [{ tokenAddress: USDC, recipients: [RECIPIENT] }],
+    })
+    render(<AllowlistTransactionCalls safeTx={safeTxOf(encoders.createApplyConfigurationTx(GUARD, configurations))} />)
+
+    fireEvent.click(screen.getByTestId('action-item'))
+
+    const [revoke, unbind, allowSetGuard, allowSetModuleGuard] = screen.getAllByTestId('allowlist-rule')
+    expect(within(revoke).getByText('Removed recipients')).toBeInTheDocument()
+    expect(within(revoke).getByText('Alice')).toBeInTheDocument()
+    expect(unbind).toHaveTextContent('None, the rule is deleted')
+    expect(allowSetGuard).toHaveTextContent('Always allowed')
+    expect(allowSetModuleGuard).toHaveTextContent('Always allowed')
+  })
+
+  it('should not name the zero address the guard, when the batch takes the guard off', () => {
+    render(<AllowlistTransactionCalls safeTx={multiSendOf(encoders.createRemoveGuardTxs(SAFE))} />)
+
+    expect(actionLabels()).toEqual(['1setGuard', '2setModuleGuard'])
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    expect(screen.getByText('guard')).toBeInTheDocument()
+    expect(screen.queryByText('SafePolicyGuard')).not.toBeInTheDocument()
   })
 
   it('should render nothing, when the transaction has not been built yet', () => {

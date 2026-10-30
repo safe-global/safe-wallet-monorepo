@@ -97,6 +97,20 @@ export const mockNativeTransferDto = (
   ...overrides,
 })
 
+/** The `setGuard` rule an applied removal leaves until the guard comes off. */
+export const mockGuardExitDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'allow',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: MOCK_SAFES.treasury.address, selector: '0xe19a9dd9', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
 /** The allowlist is active, but spending limits are not covered. */
 export const TRANSACTION_GUARD_ONLY: GuardSlotsDto = { transactionGuard: POLICY_CONTRACTS }
 

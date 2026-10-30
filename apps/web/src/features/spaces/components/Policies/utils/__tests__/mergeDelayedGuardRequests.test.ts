@@ -57,6 +57,49 @@ describe('mergeDelayedGuardRequests', () => {
     expect(applyRequests.get(live.id)).toMatchObject({ guardAddress: request.guard })
   })
 
+  it("should fold a waiting removal into the Safe's live allowlist as a remove, when the request binds its setGuard", () => {
+    const live = mockActiveAllowlist()
+    const request = makeRequest(live.safe, {
+      configurations: [
+        {
+          target: live.safe.address,
+          selector: '0xe19a9dd9',
+          operation: 0,
+          policy: faker.finance.ethereumAddress(),
+          data: '0x',
+        },
+      ],
+    })
+
+    const { active, applyRequests } = mergeDelayedGuardRequests([request], [live], resolveToken)
+
+    expect(active).toEqual([
+      { ...live, scheduledChange: { operation: 'remove', appliesAt: 1_800_000_000, expiresAt: 1_800_604_800 } },
+    ])
+    expect(applyRequests.get(live.id)).toMatchObject({ guardAddress: request.guard })
+  })
+
+  it('should fold a waiting request in as an update, when it only unbinds the setGuard rule a removal left', () => {
+    const live = mockActiveAllowlist()
+    const request = makeRequest(live.safe, {
+      configurations: [
+        {
+          target: live.safe.address,
+          selector: '0xe19a9dd9',
+          operation: 0,
+          policy: '0x0000000000000000000000000000000000000000',
+          data: '0x',
+        },
+      ],
+    })
+
+    const { active } = mergeDelayedGuardRequests([request], [live], resolveToken)
+
+    expect(active).toEqual([
+      expect.objectContaining({ scheduledChange: expect.objectContaining({ operation: 'update' }) }),
+    ])
+  })
+
   it('adds a first allowlist on a Safe without one as its own row', () => {
     const safe = { chainId: '11155111', address: faker.finance.ethereumAddress() }
 

@@ -13,7 +13,7 @@ import type {
   PolicyTokenInfo,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getPolicyGuardAddress, isFallbackAccess } from '@/features/policy-guard/services'
+import { getPolicyGuardAddress, isFallbackAccess, isSetGuardAccess } from '@/features/policy-guard/services'
 import { toPolicyToken } from './toPolicyToken'
 
 export type NativeTokenResolver = (chainId: string) => PolicyTokenInfo | undefined
@@ -37,11 +37,19 @@ type AllowlistGroup = {
   guardAddress?: string
   tokens: Map<string, AllowlistEntry>
   nativeRecipients: AllowlistRecipient[]
+  awaitingGuardRemoval: boolean
 }
 
 const isAllowlistDto = (dto: ActivePolicyDto): dto is AllowlistDto =>
   dto.enforcement.via === 'guard' &&
   (dto.type === 'native-transfer' || (dto.type === 'erc20-transfer' && 'tokenAddress' in dto.data))
+
+/** The rule an applied removal binds on `setGuard`; it matters only while the guard is on, waiting to be taken off. */
+const isGuardExitDto = (dto: ActivePolicyDto): dto is ActivePolicyDto & { enforcement: GuardEnforcement } =>
+  dto.type === 'allow' &&
+  dto.enforcement.via === 'guard' &&
+  !!dto.enforcement.guards.transactionGuard &&
+  isSetGuardAccess(dto.enforcement.access, dto.safe.address)
 
 /** CGW calls a policy enabled when either slot holds the guard, but owner transactions go through the transaction slot. */
 const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard
@@ -85,7 +93,8 @@ const toAllowlist = (
     ...(nativeToken ? [{ token: nativeToken, recipients: group.nativeRecipients }] : []),
     ...group.tokens.values(),
   ]
-  if (entries.length === 0) return []
+  // A removal deleted every rule, but the row stays to offer taking the guard off.
+  if (entries.length === 0 && !group.awaitingGuardRemoval) return []
 
   return [
     {
@@ -99,6 +108,7 @@ const toAllowlist = (
       enabled: group.enabled,
       spendingLimitsCovered: group.spendingLimitsCovered,
       data: { entries },
+      ...(group.awaitingGuardRemoval && { awaitingGuardRemoval: true }),
     },
   ]
 }
@@ -107,9 +117,7 @@ const toAllowlist = (
 export const toAllowlists = (dtos: ActivePolicyDto[], resolveNativeToken: NativeTokenResolver): AllowlistPolicy[] => {
   const bySafe = new Map<string, AllowlistGroup>()
 
-  for (const dto of dtos) {
-    if (!isAllowlistDto(dto)) continue
-
+  const groupFor = (dto: ActivePolicyDto & { enforcement: GuardEnforcement }): AllowlistGroup => {
     const key = toChainAddressKey(dto.safe.chainId, dto.safe.address)
     const { guards } = dto.enforcement
     const group: AllowlistGroup = bySafe.get(key) ?? {
@@ -118,13 +126,19 @@ export const toAllowlists = (dtos: ActivePolicyDto[], resolveNativeToken: Native
       spendingLimitsCovered: true,
       tokens: new Map(),
       nativeRecipients: [],
+      awaitingGuardRemoval: false,
     }
 
     group.enabled = group.enabled && isEnforced(guards)
     group.spendingLimitsCovered = group.spendingLimitsCovered && !!guards.moduleGuard
     group.guardAddress ??= (guards.transactionGuard ?? guards.moduleGuard)?.safePolicyGuard
-    addToGroup(group, dto)
     bySafe.set(key, group)
+    return group
+  }
+
+  for (const dto of dtos) {
+    if (isGuardExitDto(dto)) groupFor(dto).awaitingGuardRemoval = true
+    else if (isAllowlistDto(dto)) addToGroup(groupFor(dto), dto)
   }
 
   return [...bySafe].flatMap(([key, group]) => toAllowlist(key, group, resolveNativeToken))

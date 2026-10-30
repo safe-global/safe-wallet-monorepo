@@ -1,3 +1,4 @@
+import { AbiCoder } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { PolicyConfiguration } from '@/features/policy-guard'
@@ -22,7 +23,7 @@ const fallback = (contract: 'AllowPolicy' | 'DenyPolicy', operation = OperationT
 describe('getRuleKind', () => {
   it.each([
     ['NativeTransferPolicy', 'native'],
-    ['AllowPolicy', 'allow'],
+    ['AllowPolicy', 'allowCall'],
     ['DenyPolicy', 'deny'],
     ['MultiSendPolicy', 'multiSend'],
     ['ERC20TransferPolicy', 'erc20'],
@@ -30,11 +31,43 @@ describe('getRuleKind', () => {
     expect(getRuleKind(CHAIN_ID, entry({ policy: policy(contract).toLowerCase() }))).toBe(kind)
   })
 
-  it.each([
-    ['the zero policy of a revocation', ZERO_ADDRESS],
-    ['a policy the review does not know', '0x2222222222222222222222222222222222222222'],
-  ])('labels %s as unknown rather than an ERC-20 allowlist', (_, unknownPolicy) => {
-    expect(getRuleKind(CHAIN_ID, entry({ policy: unknownPolicy }))).toBe('unknown')
+  it('should label the catch-all allow, when the allow policy is the fallback', () => {
+    expect(getRuleKind(CHAIN_ID, fallback('AllowPolicy'))).toBe('allow')
+  })
+
+  it('labels a policy the review does not know as unknown rather than an ERC-20 allowlist', () => {
+    expect(getRuleKind(CHAIN_ID, entry({ policy: '0x2222222222222222222222222222222222222222' }))).toBe('unknown')
+  })
+
+  it('should label a removal, when the configuration binds the zero policy', () => {
+    expect(getRuleKind(CHAIN_ID, entry({ policy: ZERO_ADDRESS }))).toBe('removal')
+  })
+
+  it('should label an allowed call, when the allow policy is bound to one access rather than the catch-all', () => {
+    expect(getRuleKind(CHAIN_ID, entry({ selector: '0xe19a9dd9', policy: policy('AllowPolicy') }))).toBe('allowCall')
+  })
+
+  it('should label a revocation, when the ERC-20 rule sets every recipient to no permission', () => {
+    const data = AbiCoder.defaultAbiCoder().encode(
+      ['tuple(address recipient, uint8 permission)[]'],
+      [[['0x3333333333333333333333333333333333333333', 0]]],
+    )
+
+    expect(getRuleKind(CHAIN_ID, entry({ data }))).toBe('erc20Revoke')
+  })
+
+  it('should label an ERC-20 allowlist, when one recipient keeps a permission', () => {
+    const data = AbiCoder.defaultAbiCoder().encode(
+      ['tuple(address recipient, uint8 permission)[]'],
+      [
+        [
+          ['0x3333333333333333333333333333333333333333', 0],
+          ['0x4444444444444444444444444444444444444444', 2],
+        ],
+      ],
+    )
+
+    expect(getRuleKind(CHAIN_ID, entry({ data }))).toBe('erc20')
   })
 })
 

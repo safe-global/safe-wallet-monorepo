@@ -2,3 +2,4 @@
 export * from './policyEngineDeployments'
 export * from './allowlistAvailability'
 export * from './fallbackAccess'
+export * from './guardExit'
