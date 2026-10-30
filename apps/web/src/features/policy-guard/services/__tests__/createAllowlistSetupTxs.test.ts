@@ -75,49 +75,69 @@ describe('createAllowlistSetupTxs', () => {
       target: getAddress(`0x${(i + 1).toString(16).padStart(40, '0')}`),
     }))
 
-    expect(() => setup({ status: 'known' }, many)).not.toThrow()
+    expect(() => setup({ status: 'known', guardAddress }, many)).not.toThrow()
     expect(() => setup({ status: 'none' }, many)).toThrow(TOO_MANY_CONFIGURATIONS_ERROR)
     expect(() => setup({ status: 'none' }, many.slice(1))).not.toThrow()
   })
 
   it('only requests the configuration root when both slots are set', () => {
-    const txs = build({ status: 'known' })
+    const txs = build({ status: 'known', guardAddress })
 
-    expect(describeCalls({ status: 'known' })).toEqual([{ to: guardAddress, name: 'requestConfiguration' }])
+    expect(describeCalls({ status: 'known', guardAddress })).toEqual([
+      { to: guardAddress, name: 'requestConfiguration' },
+    ])
     expect(iface.parseTransaction({ data: txs[0].data })?.args[0]).toBe(getConfigurationRoot(configurations))
   })
 
   it('requests the configuration before setting the missing transaction guard', () => {
-    expect(describeCalls({ status: 'partial', missingSlot: 'transaction' })).toEqual([
+    expect(describeCalls({ status: 'partial', missingSlot: 'transaction', guardAddress })).toEqual([
       { to: guardAddress, name: 'requestConfiguration' },
       { to: safeAddress, name: 'setGuard' },
     ])
 
-    const txs = build({ status: 'partial', missingSlot: 'transaction' })
+    const txs = build({ status: 'partial', missingSlot: 'transaction', guardAddress })
     expect(iface.parseTransaction({ data: txs[0].data })?.args[0]).toBe(getConfigurationRoot(configurations))
     expect(iface.parseTransaction({ data: txs[1].data })?.args[0]).toBe(guardAddress)
   })
 
   it('requests the configuration before setting the missing module guard', () => {
-    expect(describeCalls({ status: 'partial', missingSlot: 'module' })).toEqual([
+    expect(describeCalls({ status: 'partial', missingSlot: 'module', guardAddress })).toEqual([
       { to: guardAddress, name: 'requestConfiguration' },
       { to: safeAddress, name: 'setModuleGuard' },
     ])
 
-    const txs = build({ status: 'partial', missingSlot: 'module' })
+    const txs = build({ status: 'partial', missingSlot: 'module', guardAddress })
     expect(iface.parseTransaction({ data: txs[0].data })?.args[0]).toBe(getConfigurationRoot(configurations))
     expect(iface.parseTransaction({ data: txs[1].data })?.args[0]).toBe(guardAddress)
   })
 
-  it.each<PolicyGuardState>([{ status: 'known' }, { status: 'partial', missingSlot: 'module' }])(
-    'returns only the given configurations and their root for $status, adding no defaults',
-    (guardState) => {
-      const { configurations: requested, root } = setup(guardState)
+  it.each<PolicyGuardState>([
+    { status: 'known', guardAddress },
+    { status: 'partial', missingSlot: 'module', guardAddress },
+  ])('returns only the given configurations and their root for $status, adding no defaults', (guardState) => {
+    const { configurations: requested, root } = setup(guardState)
 
-      expect(requested).toEqual(configurations)
-      expect(root).toBe(getConfigurationRoot(configurations))
-    },
-  )
+    expect(requested).toEqual(configurations)
+    expect(root).toBe(getConfigurationRoot(configurations))
+  })
+
+  it('targets the installed guard, not the configured one, when finishing a partial setup', () => {
+    const installed = getAddress(faker.finance.ethereumAddress())
+    const guardState: PolicyGuardState = { status: 'partial', missingSlot: 'module', guardAddress: installed }
+    const txs = createAllowlistSetupTxs({
+      chainId,
+      safeAddress,
+      guardAddress: installed,
+      guardState,
+      configurations,
+    }).txs
+
+    expect(txs.map((tx) => ({ to: tx.to, name: iface.parseTransaction({ data: tx.data })?.name }))).toEqual([
+      { to: installed, name: 'requestConfiguration' },
+      { to: safeAddress, name: 'setModuleGuard' },
+    ])
+    expect(iface.parseTransaction({ data: txs[1].data })?.args[0]).toBe(installed)
+  })
 
   it('throws for a foreign guard', () => {
     expect(() => build({ status: 'unknown', foreignGuards: [] })).toThrow(GUARD_NOT_SUPPORTED_ERROR)

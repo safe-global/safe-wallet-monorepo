@@ -60,5 +60,13 @@ export const isPolicyGuard = (address?: string | null): boolean =>
     Object.values(networkAddresses).some((guard) => sameAddress(guard, address ?? undefined)),
   )
 
+export const isPolicyGuardOnChain = (chainId: string, address?: string | null): boolean =>
+  Object.values(POLICY_GUARD_BY_DELAY).some(({ networkAddresses }) =>
+    sameAddress(networkAddresses[chainId], address ?? undefined),
+  )
+
+export const hasPolicyGuardOnChain = (chainId: string): boolean =>
+  Object.values(POLICY_GUARD_BY_DELAY).some(({ networkAddresses }) => !!networkAddresses[chainId])
+
 export const isSafeVersionSupported = (version?: string | null): boolean =>
   !!version && semverSatisfies(version, `>=${MIN_POLICY_GUARD_SAFE_VERSION}`)

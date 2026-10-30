@@ -8,7 +8,7 @@ import AllowlistConsent from '@safe-global/views/features/spaces/components/Poli
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import {
   getNextSignersText,
-  POLICY_CHANGE_DELAY,
+  formatPolicyChangeDelay,
   REVIEW_SUMMARY_DESCRIPTION,
   reviewConsentLabel,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -26,7 +26,7 @@ import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton'
 import { useLoadFeature } from '@/features/__core__'
-import { PolicyGuardFeature } from '@/features/policy-guard'
+import { PolicyGuardFeature, usePolicyGuardDelay } from '@/features/policy-guard'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -56,6 +56,10 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const rules = data?.rules
   const { guardState, configurations, root, txs } = useBuildAllowlistTransaction(rules ?? [])
+
+  const installedGuard =
+    guardState?.status === 'known' || guardState?.status === 'partial' ? guardState.guardAddress : undefined
+  const changeDelay = formatPolicyChangeDelay(usePolicyGuardDelay(chainId ?? '', installedGuard))
 
   const request = useMemo(() => (configurations && root ? { configurations, root } : undefined), [configurations, root])
   const handleSubmit = useSaveBeforeSubmit(request, onSubmit)
@@ -142,7 +146,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
       {hasSummary && selected && (
         <AllowlistConsent
           ref={consentRef}
-          label={reviewConsentLabel(spenderDisplayName(selected), POLICY_CHANGE_DELAY)}
+          label={reviewConsentLabel(spenderDisplayName(selected), changeDelay)}
           checked={isConsentGiven}
           showError={showConsentError}
           onCheckedChange={setIsConsentGiven}

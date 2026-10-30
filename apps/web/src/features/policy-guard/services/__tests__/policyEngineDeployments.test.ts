@@ -2,6 +2,8 @@ import {
   getPolicyEngineAddress,
   getPolicyGuardAddress,
   isPolicyGuard,
+  isPolicyGuardOnChain,
+  hasPolicyGuardOnChain,
   isSafeVersionSupported,
 } from '../policyEngineDeployments'
 import type * as PolicyEngineDeployments from '../policyEngineDeployments'
@@ -41,6 +43,31 @@ describe('policyEngineDeployments', () => {
   it('returns undefined for a chain without a deployment', () => {
     expect(getPolicyGuardAddress('999999')).toBeUndefined()
     expect(getPolicyEngineAddress('999999', 'ERC20TransferPolicy')).toBeUndefined()
+  })
+})
+
+describe('isPolicyGuardOnChain', () => {
+  const guard180 = '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f'
+  const guard600 = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
+
+  it('accepts the guard of any delay deployed on the chain, in any casing', () => {
+    expect(isPolicyGuardOnChain('11155111', guard600)).toBe(true)
+    expect(isPolicyGuardOnChain('11155111', guard180.toLowerCase())).toBe(true)
+  })
+
+  it('rejects a guard that is not deployed on the chain', () => {
+    expect(isPolicyGuardOnChain('1', guard180)).toBe(false)
+  })
+
+  it('rejects other addresses and missing ones', () => {
+    expect(isPolicyGuardOnChain('11155111', '0x0000000000000000000000000000000000000001')).toBe(false)
+    expect(isPolicyGuardOnChain('11155111', undefined)).toBe(false)
+    expect(isPolicyGuardOnChain('11155111', null)).toBe(false)
+  })
+
+  it('has a guard on chains with any deployment only', () => {
+    expect(hasPolicyGuardOnChain('1')).toBe(true)
+    expect(hasPolicyGuardOnChain('999999')).toBe(false)
   })
 })
 

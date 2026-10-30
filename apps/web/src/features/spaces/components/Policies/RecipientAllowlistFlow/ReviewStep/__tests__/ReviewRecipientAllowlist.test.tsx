@@ -15,6 +15,7 @@ import type { AllowlistFormRecipient } from '../../types'
 import type { PolicyGuardState } from '@/features/policy-guard'
 import type { PolicyGuardContract } from '@/features/policy-guard'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import * as guardDelayApi from '@/features/policy-guard/store/guardDelayApi'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { groupSafeAccounts } from '../../../SafeAccountSelector/utils'
@@ -262,11 +263,16 @@ const mockOwners = (owners: string[], threshold = 2) =>
     safeLoading: false,
   })
 
+type GuardDelayQuery = ReturnType<typeof guardDelayApi.useGetGuardDelayQuery>
+const mockGuardDelay = (currentData?: number) =>
+  jest.spyOn(guardDelayApi, 'useGetGuardDelayQuery').mockReturnValue({ currentData } as unknown as GuardDelayQuery)
+
 const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
 
 beforeEach(() => {
   mockDefaultFallback = 'allow'
   jest.clearAllMocks()
+  mockGuardDelay()
   mockSave.mockResolvedValue(true)
   mockOwners([WALLET, TOM, PRIYA])
   ;(useWallet as jest.Mock).mockReturnValue({ address: WALLET })
@@ -315,7 +321,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it('hides the generic decoded data and action list, since it lists the setup calls itself', () => {
-    built({ status: 'partial', missingSlot: 'module' })
+    built({ status: 'partial', missingSlot: 'module', guardAddress })
     renderReview()
 
     const review = screen.getByTestId('review-transaction')
@@ -394,9 +400,15 @@ describe('ReviewRecipientAllowlist', () => {
 
   it.each([
     [{ status: 'none' }, ['SafePolicyGuard: configureImmediately', 'setGuard', 'setModuleGuard']],
-    [{ status: 'known' }, ['SafePolicyGuard: requestConfiguration']],
-    [{ status: 'partial', missingSlot: 'transaction' }, ['SafePolicyGuard: requestConfiguration', 'setGuard']],
-    [{ status: 'partial', missingSlot: 'module' }, ['SafePolicyGuard: requestConfiguration', 'setModuleGuard']],
+    [{ status: 'known', guardAddress }, ['SafePolicyGuard: requestConfiguration']],
+    [
+      { status: 'partial', missingSlot: 'transaction', guardAddress },
+      ['SafePolicyGuard: requestConfiguration', 'setGuard'],
+    ],
+    [
+      { status: 'partial', missingSlot: 'module', guardAddress },
+      ['SafePolicyGuard: requestConfiguration', 'setModuleGuard'],
+    ],
   ] as const)('lists the actions the transaction contains for %j', (guardState, labels) => {
     built(guardState)
     renderReview()
@@ -405,7 +417,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it('should say the changes wait 3 minutes, when the guard is already enabled', () => {
-    built({ status: 'known' })
+    built({ status: 'known', guardAddress })
     renderReview()
 
     expect(screen.getByText(/wait 3 minutes after execution/)).toBeInTheDocument()
@@ -491,7 +503,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it('shows no fallback row or gaps when the guard is already set, since nothing new is installed', () => {
-    built({ status: 'known' })
+    built({ status: 'known', guardAddress })
     renderReview()
 
     expect(screen.queryByText('Every other action')).not.toBeInTheDocument()
@@ -516,7 +528,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it('never shows the configuration root or the raw calldata', () => {
-    built({ status: 'known' })
+    built({ status: 'known', guardAddress })
     renderReview()
 
     fireEvent.click(screen.getAllByTestId('action-item')[0])
@@ -524,14 +536,14 @@ describe('ReviewRecipientAllowlist', () => {
     const {
       root,
       txs: [request],
-    } = setupFor({ status: 'known' })
+    } = setupFor({ status: 'known', guardAddress })
     expect(screen.getAllByTestId('allowlist-rule')).toHaveLength(configurations.length)
     expect(document.body.textContent).not.toContain(root)
     expect(document.body.textContent).not.toContain(request.data)
   })
 
   it('shows the guard a setter action sets', () => {
-    built({ status: 'partial', missingSlot: 'module' })
+    built({ status: 'partial', missingSlot: 'module', guardAddress })
     renderReview()
 
     fireEvent.click(screen.getAllByTestId('action-item')[1])
@@ -539,18 +551,21 @@ describe('ReviewRecipientAllowlist', () => {
     expect(screen.getByText('moduleGuard')).toBeInTheDocument()
   })
 
-  it.each([['none'], ['known']] as const)('review submit saves before continuing to sign (%s)', async (status) => {
-    built({ status })
-    renderReview()
+  it.each<[PolicyGuardState]>([[{ status: 'none' }], [{ status: 'known', guardAddress }]])(
+    'review submit saves before continuing to sign (%o)',
+    async (guardState) => {
+      built(guardState)
+      renderReview()
 
-    confirmBlockedActions()
-    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+      confirmBlockedActions()
+      fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
-    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
-    const { configurations: installed, root } = setupFor({ status })
-    expect(mockSave).toHaveBeenCalledWith({ configurations: installed, root })
-    expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
-  })
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+      const { configurations: installed, root } = setupFor(guardState)
+      expect(mockSave).toHaveBeenCalledWith({ configurations: installed, root })
+      expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
+    },
+  )
 
   it('should neither save nor continue, when the owner has not confirmed what the allowlist blocks', async () => {
     built({ status: 'none' })
@@ -572,6 +587,22 @@ describe('ReviewRecipientAllowlist', () => {
         name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 3 minutes to apply.',
       }),
     ).not.toBeChecked()
+  })
+
+  it('should name the delay of the installed guard, when the Safe is on a guard of another delay', () => {
+    const installed = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
+    mockGuardDelay(600)
+    built({ status: 'known', guardAddress: installed })
+    renderReview()
+
+    expect(guardDelayApi.useGetGuardDelayQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: SEPOLIA, guardAddress: installed }),
+    )
+    expect(
+      screen.getByRole('checkbox', {
+        name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 10 minutes to apply.',
+      }),
+    ).toBeInTheDocument()
   })
 
   it('should show the summary in red, when the review opens', () => {

@@ -44,10 +44,14 @@ const wrapper = ({ children }: { children: ReactNode }) => (
   </SafeTxContext.Provider>
 )
 
+const GUARD = '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f'
+
 const setUp = (status: 'none' | 'known') => {
   const mutate = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
   ;(useSafeScope as jest.Mock).mockReturnValue({ chainId: CHAIN_ID, safeAddress: SAFE, sdk: {} })
-  ;(usePolicyGuard as jest.Mock).mockReturnValue({ state: { status } })
+  ;(usePolicyGuard as jest.Mock).mockReturnValue({
+    state: status === 'known' ? { status, guardAddress: GUARD } : { status },
+  })
   ;(createMultiSendCallOnlyTx as jest.Mock).mockResolvedValue({ data: { to: SAFE } })
   ;(usePoliciesCreateConfigurationRequestV1Mutation as jest.Mock).mockReturnValue([mutate, { isLoading: false }])
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue('42')

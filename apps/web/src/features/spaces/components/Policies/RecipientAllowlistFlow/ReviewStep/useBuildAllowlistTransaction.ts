@@ -15,7 +15,7 @@ import {
   type PolicyGuardState,
   type PolicyGuardTarget,
 } from '@/features/policy-guard'
-import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import { getPolicyGuardAddress, hasPolicyGuardOnChain } from '@/features/policy-guard/services'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 
 type BuiltAllowlist = AllowlistSetup & { guardState: PolicyGuardState }
@@ -50,8 +50,11 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
     setBuilt(undefined)
     setSafeTx(undefined)
     setSafeTxError(undefined)
-    const guardAddress = chainId ? getPolicyGuardAddress(chainId) : undefined
-    if (chainId && !guardAddress) {
+    const configuredGuard = chainId ? getPolicyGuardAddress(chainId) : undefined
+    const isUnavailable = state
+      ? state.status === 'none' && !configuredGuard
+      : !!chainId && !hasPolicyGuardOnChain(chainId)
+    if (isUnavailable) {
       setSafeTxError(new Error(GUARD_UNAVAILABLE_ERROR))
       return
     }
@@ -59,6 +62,7 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
       if (error) setSafeTxError(new Error(GUARD_READ_ERROR, { cause: error }))
       return
     }
+    const guardAddress = state.status === 'known' || state.status === 'partial' ? state.guardAddress : configuredGuard
     if (!$isReady || !sdk || !chainId || !safeAddress || !guardAddress) return
 
     let setup: AllowlistSetup

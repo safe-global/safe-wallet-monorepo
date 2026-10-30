@@ -32,9 +32,16 @@ jest.mock('@/features/policy-guard', () => ({
   ...jest.requireActual('@/features/policy-guard'),
   usePolicyGuard: jest.fn(),
 }))
+const mockConfiguredGuard = jest.fn()
+jest.mock('@/features/policy-guard/services', () => {
+  const actual = jest.requireActual('@/features/policy-guard/services')
+  return { ...actual, getPolicyGuardAddress: (chainId: string) => mockConfiguredGuard(chainId) }
+})
 jest.mock('@/services/tx/tx-sender/create', () => ({ createMultiSendCallOnlyTx: jest.fn() }))
 
 const CHAIN_ID = '11155111'
+const GUARD_180 = '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f'
+const GUARD_600 = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
 const SAFE = '0x0000000000000000000000000000000000000001'
 const TOKEN = '0x0000000000000000000000000000000000000abc'
 const RECIPIENT = '0x0000000000000000000000000000000000000def'
@@ -68,6 +75,9 @@ const sentBatch = () => (createMultiSendCallOnlyTx as jest.Mock).mock.calls.at(-
 describe('useBuildAllowlistTransaction', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfiguredGuard.mockImplementation((chainId: string) =>
+      jest.requireActual('@/features/policy-guard/services').getPolicyGuardAddress(chainId),
+    )
     ;(useSafeScope as jest.Mock).mockReturnValue(scope)
     ;(createMultiSendCallOnlyTx as jest.Mock).mockResolvedValue(builtTx)
     mockFeature()
@@ -91,7 +101,7 @@ describe('useBuildAllowlistTransaction', () => {
   })
 
   it('should return the exit clean-up and the allowlist configurations, when the guard is already known', async () => {
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
     await waitFor(() => expect(result.current.configurations).toBeDefined())
@@ -102,7 +112,7 @@ describe('useBuildAllowlistTransaction', () => {
   })
 
   it('sets a single call to the guard when it is already known', async () => {
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
@@ -115,7 +125,7 @@ describe('useBuildAllowlistTransaction', () => {
     await waitFor(() => expect(txSetCount()).toBe(1))
     expect(sentBatch()).toHaveLength(3)
 
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     rerender()
 
     await waitFor(() => expect(txSetCount()).toBe(2))
@@ -123,7 +133,7 @@ describe('useBuildAllowlistTransaction', () => {
   })
 
   it('does not rebuild when the rules are re-created with the same values', async () => {
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     const { rerender } = renderHook(() => useBuildAllowlistTransaction(structuredClone(erc20Rules)), { wrapper })
     await waitFor(() => expect(txSetCount()).toBe(1))
 
@@ -133,14 +143,14 @@ describe('useBuildAllowlistTransaction', () => {
   })
 
   it('keeps the transaction while the guard is re-read after a new Safe transaction', async () => {
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     const { result, rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
     await waitFor(() => expect(txSetCount()).toBe(1))
     setSafeTx.mockClear()
 
     mockGuard({ isLoading: true })
     rerender()
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     rerender()
 
     expect(setSafeTx).not.toHaveBeenCalled()
@@ -201,7 +211,7 @@ describe('useBuildAllowlistTransaction', () => {
   })
 
   it('sets the error when creating the transaction fails', async () => {
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     ;(createMultiSendCallOnlyTx as jest.Mock).mockRejectedValue(new Error('sdk failed'))
     const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
@@ -218,7 +228,7 @@ describe('useBuildAllowlistTransaction', () => {
 
     const knownTx = { data: { to: 'known' } }
     ;(createMultiSendCallOnlyTx as jest.Mock).mockResolvedValue(knownTx)
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     rerender()
 
     expect(setSafeTx).toHaveBeenNthCalledWith(1, undefined)
@@ -226,7 +236,7 @@ describe('useBuildAllowlistTransaction', () => {
   })
 
   it('clears the transaction when the guard read then fails', async () => {
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
     setSafeTx.mockClear()
@@ -243,12 +253,49 @@ describe('useBuildAllowlistTransaction', () => {
     const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
     setSafeTxError.mockClear()
 
-    mockGuard({ state: { status: 'known' } })
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     rerender()
 
     expect(setSafeTxError).toHaveBeenCalledWith(undefined)
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
     expect(setSafeTxError).not.toHaveBeenCalledWith(expect.any(Error))
+  })
+
+  it('builds a single call to the installed guard, when the Safe is on a guard of another delay', async () => {
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_600 } })
+    renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+    expect(setSafeTxError).not.toHaveBeenCalledWith(expect.any(Error))
+    expect(sentBatch()).toEqual([expect.objectContaining({ to: GUARD_600 })])
+  })
+
+  it('finishes a partial setup on the installed guard', async () => {
+    mockGuard({ state: { status: 'partial', missingSlot: 'module', guardAddress: GUARD_600 } })
+    renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+    expect(sentBatch()).toEqual([expect.objectContaining({ to: GUARD_600 }), expect.objectContaining({ to: SAFE })])
+  })
+
+  describe('when the configured delay has no deployment on the chain', () => {
+    beforeEach(() => mockConfiguredGuard.mockReturnValue(undefined))
+
+    it('sets the error when no guard is set up', () => {
+      mockGuard({ state: { status: 'none' } })
+      renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: GUARD_UNAVAILABLE_ERROR }))
+      expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
+    })
+
+    it('still builds for a Safe on an installed guard', async () => {
+      mockGuard({ state: { status: 'known', guardAddress: GUARD_600 } })
+      renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+      await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+      expect(setSafeTxError).not.toHaveBeenCalledWith(expect.any(Error))
+    })
   })
 
   it('sets the error when the chain has no policy guard', () => {

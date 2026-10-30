@@ -16,6 +16,7 @@ import * as moduleGuardApi from '../../store/moduleGuardApi'
 import { usePolicyGuard } from '../usePolicyGuard'
 
 const GUARD = getPolicyGuardAddress('11155111')!
+const GUARD_600 = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
 const FOREIGN = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
 const guardInfo = (value: string) => ({ value, name: null, logoUri: null })
 
@@ -64,8 +65,8 @@ describe('usePolicyGuard', () => {
 
   it.each([
     ['none', null, ZERO_ADDRESS, { status: 'none' }],
-    ['known', GUARD, GUARD, { status: 'known' }],
-    ['partial', GUARD, ZERO_ADDRESS, { status: 'partial', missingSlot: 'module' }],
+    ['known', GUARD, GUARD, { status: 'known', guardAddress: GUARD }],
+    ['partial', GUARD, ZERO_ADDRESS, { status: 'partial', missingSlot: 'module', guardAddress: GUARD }],
     [
       'unknown',
       FOREIGN,
@@ -83,6 +84,13 @@ describe('usePolicyGuard', () => {
       isRetrying: false,
       refetch: expect.any(Function),
     })
+  })
+
+  it('recognises a policy guard of another delay than the configured one', () => {
+    mockSafe({ guard: guardInfo(GUARD_600) })
+    mockModuleGuard({ currentData: GUARD_600 })
+    const { result } = renderHook(() => usePolicyGuard())
+    expect(result.current.state).toEqual({ status: 'known', guardAddress: GUARD_600 })
   })
 
   it('reads the module guard for the Safe at its current tx history', () => {
@@ -330,7 +338,7 @@ describe('usePolicyGuard', () => {
       mockTargetQuery({ currentData: buildSafe({ guard: guardInfo(GUARD), txHistoryTag: '3' }), isFetching: false })
       const { query } = mockModuleGuard({ currentData: GUARD })
       const { result } = renderHook(() => usePolicyGuard(TARGET))
-      expect(result.current.state).toEqual({ status: 'known' })
+      expect(result.current.state).toEqual({ status: 'known', guardAddress: GUARD })
       expect(query).toHaveBeenCalledWith({ ...TARGET, txHistoryTag: '3' })
     })
 
