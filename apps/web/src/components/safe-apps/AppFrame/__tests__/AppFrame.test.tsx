@@ -15,15 +15,18 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
 import type { SafePermissions } from '@/hooks/safe-apps/permissions'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import type { AddressBookState } from '@/store/addressBookSlice'
+import useChainId from '@/hooks/useChainId'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 const emptySafeApp = getEmptySafeApp()
 
 const APP_ORIGIN = `https://${faker.internet.domainName()}`
 const permissionsTestApp = { ...getEmptySafeApp(APP_ORIGIN), name: 'Permissions test app' }
 
-const renderAppFrameWithLoadedSafe = async () => {
+const renderAppFrameWithLoadedSafe = async (addressBook: AddressBookState = {}) => {
   render(<AppFrame appUrl={APP_ORIGIN} allowedFeaturesList="" safeAppFromManifest={permissionsTestApp} />, {
-    initialReduxState: { safeInfo: { loading: false, loaded: true, data: defaultSafeInfo } },
+    initialReduxState: { safeInfo: { loading: false, loaded: true, data: defaultSafeInfo }, addressBook },
   })
 
   const iframe = await screen.findByTitle<HTMLIFrameElement>(permissionsTestApp.name)
@@ -81,6 +84,29 @@ describe('AppFrame permission requests', () => {
     await waitFor(() =>
       expect(replyToApp).toHaveBeenCalledWith(
         expect.objectContaining({ id: requestId, success: false, error: 'Permissions were rejected' }),
+        APP_ORIGIN,
+      ),
+    )
+  })
+
+  it('shares the address book with the app only after the user granted access to it', async () => {
+    const chainId = renderHook(() => useChainId()).result.current
+    const address = checksumAddress(faker.finance.ethereumAddress())
+    const name = faker.person.firstName()
+    const { appWindow, replyToApp } = await renderAppFrameWithLoadedSafe({ [chainId]: { [address]: name } })
+
+    const beforeGrant = sendFromApp(appWindow, Methods.requestAddressBook)
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(expect.objectContaining({ id: beforeGrant, data: [] }), APP_ORIGIN),
+    )
+
+    sendFromApp(appWindow, Methods.wallet_requestPermissions, [{ requestAddressBook: {} }])
+    fireEvent.click(await screen.findByRole('button', { name: 'Accept' }))
+    const afterGrant = sendFromApp(appWindow, Methods.requestAddressBook)
+
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: afterGrant, data: [{ address, name, chainId }] }),
         APP_ORIGIN,
       ),
     )

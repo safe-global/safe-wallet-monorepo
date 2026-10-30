@@ -7,7 +7,6 @@ import { COW, DAI } from './cow-protocol.mjs'
 const { owner1, owner3, owner4, sepoliaOwner2 } = stagingOwners
 const beneficiary = '0x4c8bF5541D21288836F5B7AdE01E102F074c5F4a'
 const automationOwner = '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
-const sharedOwner = '0xb43470d6913f548Bf90E299De2fe3f94140aaf7c'
 
 const shortNames = { [SEPOLIA]: 'sep', 1: 'eth', 137: 'matic' }
 
@@ -78,17 +77,6 @@ export const stagingSafes = {
     tokens: [{ address: COW, amount: parseEther('500') }],
   },
   SEP_STATIC_SAFE_31: { owners: [owner3, owner4], threshold: 1, nonce: 1, ether: parseEther('0.000001') },
-  SEP_STATIC_SAFE_43: {
-    owners: [automationOwner, owner4, sharedOwner],
-    threshold: 1,
-    ether: parseEther('0.001'),
-    tokens: [
-      { address: DAI, amount: parseEther('5') },
-      { address: '0x58Eb19eF91e8A6327FEd391b51aE1887b833cc91', amount: 6_000_000n },
-      { address: '0xEbCC972B6B3eB15C0592BE1871838963d0B94278', amount: 7_000_000n },
-      { address: '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', amount: parseEther('0.002') },
-    ],
-  },
   SEP_STATIC_SAFE_42: { owners: [owner4], threshold: 1, ether: parseEther('0.0003') },
   ETH_STATIC_SAFE_15: {
     chainId: 1,

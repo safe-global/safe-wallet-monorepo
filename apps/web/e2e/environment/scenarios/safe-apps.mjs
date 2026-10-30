@@ -2,7 +2,7 @@ import { Interface } from 'ethers'
 import { getSafeL2SingletonDeployment } from '@safe-global/safe-deployments'
 import { registerContract } from './contracts.mjs'
 import { rebuildStagingSafe } from './staging.mjs'
-import { rebuildStagingSafes, stagingSafeAppSafes } from './staging-safes.mjs'
+import { stagingSafeAppSafes } from './staging-safes.mjs'
 import { localProvider } from './provider.mjs'
 import { SEPOLIA } from './chain.mjs'
 
@@ -53,13 +53,4 @@ export async function prepareSafeAppSafesScenario(env, owners) {
   return {
     safes: { safeapps: { SEP_SAFEAPP_SAFE_1: `sep:${safe}`, SEP_SAFEAPP_SAFE_2: `sep:${stagingRecipientSafe}` } },
   }
-}
-
-async function prepareFallbackHandlerScenario(env, owners, safeName) {
-  await registerBuilderContracts(env)
-  return { safes: { static: await rebuildStagingSafes(env, owners, [safeName]) } }
-}
-
-export function prepareCowFallbackScenario(env, owners) {
-  return prepareFallbackHandlerScenario(env, owners, 'SEP_STATIC_SAFE_43')
 }

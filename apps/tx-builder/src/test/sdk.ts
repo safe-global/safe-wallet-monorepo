@@ -39,10 +39,13 @@ const LATEST_BLOCK = {
   transactions: [],
 }
 
-const fakeSdk = {
+export const fakeSdk = {
   safe: {
     getChainInfo: jest.fn(async () => CHAIN_INFO),
     requestAddressBook: jest.fn(async () => []),
+  },
+  txs: {
+    send: jest.fn(async () => ({ safeTxHash: ZERO_WORD })),
   },
   eth: {
     call: jest.fn(async () => '0x'),
