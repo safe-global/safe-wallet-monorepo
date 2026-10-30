@@ -1,14 +1,18 @@
-import { useContext, useMemo, type ReactElement } from 'react'
+import { useContext, useMemo, useRef, useState, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import AllowlistConsent from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistConsent'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import {
   getNextSignersText,
+  POLICY_CHANGE_DELAY,
   REVIEW_SUMMARY_DESCRIPTION,
+  reviewConsentLabel,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import {
   getAllowlistSafeLabel,
   isAllowlistGuardEnabled,
@@ -55,6 +59,9 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const request = useMemo(() => (configurations && root ? { configurations, root } : undefined), [configurations, root])
   const handleSubmit = useSaveBeforeSubmit(request, onSubmit)
+  const [isConsentGiven, setIsConsentGiven] = useState(false)
+  const [showConsentError, setShowConsentError] = useState(false)
+  const consentRef = useRef<HTMLDivElement>(null)
 
   const selected = findSafeAccount(accounts, scope?.scopeKey)
 
@@ -93,13 +100,23 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const hasSummary = Boolean(guardState && selected && chainId)
 
+  // Signing locks the Safe to the allowlist, so the owner confirms that before continuing
+  const submitWithConsent: SubmitCallback = (args) => {
+    if (hasSummary && !isConsentGiven) {
+      setShowConsentError(true)
+      consentRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+      return
+    }
+    return handleSubmit(args)
+  }
+
   return (
     <ReviewTransaction
       {...props}
       title={REVIEW_STEP_TITLE}
       withDecodedData={false}
       withMultisend={false}
-      onSubmit={handleSubmit}
+      onSubmit={submitWithConsent}
     >
       {hasSummary && selected && (
         <AllowlistSummary
@@ -108,6 +125,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           recipientNames={recipients.map(spenderDisplayName)}
           isGuardEnabled={isAllowlistGuardEnabled(guardState)}
           description={REVIEW_SUMMARY_DESCRIPTION}
+          tone="error"
         />
       )}
 
@@ -118,6 +136,16 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           recipients={recipients}
           fallback={chainId && configurations ? getInstalledFallback(chainId, configurations) : undefined}
           hasNativeRule={Boolean(rules?.some(({ tokenAddress }) => sameAddress(tokenAddress, ZERO_ADDRESS)))}
+        />
+      )}
+
+      {hasSummary && selected && (
+        <AllowlistConsent
+          ref={consentRef}
+          label={reviewConsentLabel(spenderDisplayName(selected), POLICY_CHANGE_DELAY)}
+          checked={isConsentGiven}
+          showError={showConsentError}
+          onCheckedChange={setIsConsentGiven}
         />
       )}
 

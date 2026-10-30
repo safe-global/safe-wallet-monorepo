@@ -30,6 +30,19 @@ describe('AllowlistSummary', () => {
     expect(screen.getByRole('button', { name: 'When this takes effect' })).toBeInTheDocument()
   })
 
+  it('should show the summary in red, when the review asks for the error tone', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments on Sepolia"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        tone="error"
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Payments on Sepolia will be able to send A only to Alice.')
+  })
+
   it('lists up to three tokens by symbol and a single recipient by name', () => {
     render(
       <AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B', 'C']} recipientNames={['Alice']} />,

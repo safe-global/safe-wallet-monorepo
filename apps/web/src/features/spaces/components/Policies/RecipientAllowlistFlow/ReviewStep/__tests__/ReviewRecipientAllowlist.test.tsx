@@ -228,6 +228,9 @@ const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}, flowRe
     </SafeScopeContext.Provider>,
   )
 
+const confirmBlockedActions = () =>
+  fireEvent.click(screen.getByRole('checkbox', { name: /^I understand that Treasury will only be able to do/ }))
+
 const configurations = buildAllowlistConfigurations(SEPOLIA, rules)
 const guardAddress = getPolicyGuardAddress(SEPOLIA)!
 
@@ -467,7 +470,7 @@ describe('ReviewRecipientAllowlist', () => {
     renderReview()
 
     const summary = within(screen.getByTestId('allowlist-review-summary'))
-    expect(summary.getByText('Everything else')).toBeInTheDocument()
+    expect(summary.getByText('Every other action')).toBeInTheDocument()
     expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent(
       'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.',
     )
@@ -483,9 +486,7 @@ describe('ReviewRecipientAllowlist', () => {
     built({ status: 'none' })
     renderReview()
 
-    expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent(
-      'Blocked. Only the transfers on this allowlist can be made.',
-    )
+    expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent('Blocked')
     expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
   })
 
@@ -493,7 +494,7 @@ describe('ReviewRecipientAllowlist', () => {
     built({ status: 'known' })
     renderReview()
 
-    expect(screen.queryByText('Everything else')).not.toBeInTheDocument()
+    expect(screen.queryByText('Every other action')).not.toBeInTheDocument()
     expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
   })
 
@@ -542,6 +543,7 @@ describe('ReviewRecipientAllowlist', () => {
     built({ status })
     renderReview()
 
+    confirmBlockedActions()
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
@@ -550,11 +552,41 @@ describe('ReviewRecipientAllowlist', () => {
     expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
   })
 
+  it('should neither save nor continue, when the owner has not confirmed what the allowlist blocks', async () => {
+    built({ status: 'none' })
+    renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    expect(await screen.findByText('Tick the box to continue.')).toBeInTheDocument()
+    expect(mockSave).not.toHaveBeenCalled()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('should ask the owner to confirm what the Safe can still do and the delay of later changes, when the review opens', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(
+      screen.getByRole('checkbox', {
+        name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 3 minutes to apply.',
+      }),
+    ).not.toBeChecked()
+  })
+
+  it('should show the summary in red, when the review opens', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/will be able to send/)
+  })
+
   it('stays on the review and does not sign when the save fails', async () => {
     built({ status: 'none' })
     mockSave.mockResolvedValue(false)
     renderReview()
 
+    confirmBlockedActions()
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(mockSave).toHaveBeenCalledTimes(1))
@@ -578,6 +610,7 @@ describe('ReviewRecipientAllowlist', () => {
     mockSave.mockReturnValue(new Promise<boolean>((resolve) => (finishSave = resolve)))
     renderReview()
 
+    confirmBlockedActions()
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
     finishSave(true)
