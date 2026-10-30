@@ -1,5 +1,6 @@
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 
+import { IS_DEV } from '@/config/constants'
 import EventBus from '../EventBus'
 
 export enum SafeMsgEvent {
@@ -36,9 +37,10 @@ export const safeMsgDispatch = safeMsgEventBus.dispatch.bind(safeMsgEventBus)
 
 export const safeMsgSubscribe = safeMsgEventBus.subscribe.bind(safeMsgEventBus)
 
-// Log all events
-Object.values(SafeMsgEvent).forEach((event: SafeMsgEvent) => {
-  safeMsgSubscribe<SafeMsgEvent>(event, (detail) => {
-    console.info(`Message ${event} event received`, detail)
+if (IS_DEV) {
+  Object.values(SafeMsgEvent).forEach((event: SafeMsgEvent) => {
+    safeMsgSubscribe<SafeMsgEvent>(event, (detail) => {
+      console.info(`Message ${event} event received`, detail)
+    })
   })
-})
+}
