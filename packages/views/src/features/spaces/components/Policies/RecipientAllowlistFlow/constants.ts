@@ -145,7 +145,7 @@ export const RETRY_LABEL = 'Retry'
 export const REMOVE_REVIEW_STEP_TITLE = 'Remove allowlist'
 export const REMOVE_SUMMARY_TITLE = 'Request to remove the allowlist.'
 export const removeSummaryDescription = (changeDelay: string): string =>
-  `After ${changeDelay}, a second transaction deletes its rules, and a third one takes the guard off. Until the second one, the allowlist stays active.`
+  `After ${changeDelay}, a second transaction needs to be executed to delete its rules, and a third to take the guard off. Until the second one is executed, the allowlist stays active.`
 export const APPLY_REMOVAL_REVIEW_STEP_TITLE = 'Apply removal'
 export const APPLY_REMOVAL_SUMMARY_TITLE = 'Apply the removal to delete the allowlist.'
 export const APPLY_REMOVAL_SUMMARY_DESCRIPTION =

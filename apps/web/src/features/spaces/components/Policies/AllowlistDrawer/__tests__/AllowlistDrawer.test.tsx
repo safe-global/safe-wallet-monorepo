@@ -222,7 +222,9 @@ describe('AllowlistDrawer', () => {
       <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
     )
 
-    expect(screen.getByText('The allowlist becomes active after a delay of 10 minutes.')).toBeInTheDocument()
+    expect(
+      screen.getByText('After 10 minutes, a second transaction needs to be executed to activate the allowlist.'),
+    ).toBeInTheDocument()
   })
 
   it('says an executed transaction applies after the delay and offers no action', () => {
@@ -231,7 +233,9 @@ describe('AllowlistDrawer', () => {
     )
 
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
-    expect(screen.getByText('The allowlist becomes active after a delay of 3 minutes.')).toBeInTheDocument()
+    expect(
+      screen.getByText('After 3 minutes, a second transaction needs to be executed to activate the allowlist.'),
+    ).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
@@ -281,7 +285,9 @@ describe('AllowlistDrawer', () => {
       />,
     )
 
-    expect(screen.getByText('The allowlist is removed after a delay of 3 minutes.')).toBeInTheDocument()
+    expect(
+      screen.getByText('After 3 minutes, a second transaction needs to be executed to remove the allowlist.'),
+    ).toBeInTheDocument()
     expect(screen.getAllByText('Removed')).toHaveLength(2)
   })
 
@@ -481,7 +487,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
   })
 
-  it('should say the allowlist is removed and offer to remove the guard, when an applied removal waits for it', async () => {
+  it('should say the allowlist is removed, show it as blocking and offer to remove the guard, when an applied removal waits for it', async () => {
     const onRemoveGuard = jest.fn()
     const { user } = renderWithUserEvent(
       <AllowlistDrawer
@@ -496,7 +502,7 @@ describe('AllowlistDrawer', () => {
     expect(
       screen.getByText("Remove the guard to finish. Until then, this Safe account can't send anything."),
     ).toBeInTheDocument()
-    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+    expect(screen.getByTestId('policy-status-blocking')).toHaveTextContent('Blocking')
     expect(screen.queryByText('Who can receive funds')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
 

@@ -19,9 +19,10 @@ export type PolicySortContext = {
   getChainName: (chainId: string) => string
 }
 
-// Pending is first because it is the only status where the user has something to do.
+// Pending and blocking are first because they are where the user has something to do.
 const STATUS_ORDER = {
   pending: 0,
+  blocking: 0,
   activating: 1,
   'change-pending': 1,
   unenforced: 2,

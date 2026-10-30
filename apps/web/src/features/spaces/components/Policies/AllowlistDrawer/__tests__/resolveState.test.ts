@@ -148,11 +148,17 @@ describe('resolveAllowlistDrawerState', () => {
   it('should say the given delay, when an executed transaction waits out the installed guard', () => {
     expect(
       resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll', 'executed', 0, '10 minutes'),
-    ).toMatchObject({ bannerLine2: 'The allowlist becomes active after a delay of 10 minutes.' })
+    ).toMatchObject({
+      bannerLine2: 'After 10 minutes, a second transaction needs to be executed to activate the allowlist.',
+    })
   })
 
   it.each([
-    ['executed', 'The transaction was executed.', 'The allowlist becomes active after a delay of 3 minutes.'],
+    [
+      'executed',
+      'The transaction was executed.',
+      'After 3 minutes, a second transaction needs to be executed to activate the allowlist.',
+    ],
     [
       'failed',
       'The transaction failed and can no longer be executed.',
