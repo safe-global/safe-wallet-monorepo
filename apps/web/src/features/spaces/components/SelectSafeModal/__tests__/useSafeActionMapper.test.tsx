@@ -40,6 +40,7 @@ jest.mock('@/hooks/safe-apps/useTxBuilderApp', () => ({
 
 jest.mock('@/components/tx-flow/flows', () => ({
   TokenTransferFlow: () => null,
+  NewTxFlow: () => null,
 }))
 
 const mockSafe: SafeItem = {
@@ -85,6 +86,7 @@ describe('useSafeActionMapper', () => {
     expect(typeof result.current.actionMapper[ESafeAction.Receive]).toBe('function')
     expect(typeof result.current.actionMapper[ESafeAction.Swap]).toBe('function')
     expect(typeof result.current.actionMapper[ESafeAction.BuildTransaction]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.NewTransaction]).toBe('function')
   })
 
   describe(ESafeAction.Send, () => {
@@ -203,6 +205,40 @@ describe('useSafeActionMapper', () => {
         pathname: '/apps/open',
         query: { appUrl: 'https://tx-builder.example', safe: `eth:${mockSafe.address}` },
       })
+    })
+  })
+
+  describe(ESafeAction.NewTransaction, () => {
+    it('navigates to the Safe, then opens the new transaction flow that clears the Safe when closed', async () => {
+      const callOrder: string[] = []
+      mockReplace.mockImplementation(() => {
+        callOrder.push('replace')
+        return Promise.resolve(true)
+      })
+      const setTxFlow = jest.fn<void, unknown[]>(() => {
+        callOrder.push('setTxFlow')
+      })
+      const { result } = renderMapper(jest.fn(), setTxFlow)
+
+      await act(async () => {
+        await result.current.actionMapper[ESafeAction.NewTransaction](mockSafe)
+      })
+
+      expect(callOrder).toEqual(['replace', 'setTxFlow'])
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/current/path',
+        query: { foo: 'bar', safe: `eth:${mockSafe.address}` },
+      })
+      const [flow, onClose, shouldWarn] = setTxFlow.mock.calls[0] as [React.ReactElement, () => Promise<void>, boolean]
+      expect(flow.type).toBe(jest.requireMock('@/components/tx-flow/flows').NewTxFlow)
+      expect(shouldWarn).toBe(false)
+
+      mockQuery.mockReturnValue({ foo: 'bar', safe: `eth:${mockSafe.address}` })
+      mockReplace.mockClear()
+      await act(async () => {
+        await onClose()
+      })
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: '/current/path', query: { foo: 'bar' } })
     })
   })
 

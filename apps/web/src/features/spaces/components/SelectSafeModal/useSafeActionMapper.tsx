@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { SafeItem } from '@/hooks/safes'
 import { TxModalContext } from '@/components/tx-flow'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { NewTxFlow, TokenTransferFlow } from '@/components/tx-flow/flows'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -87,6 +87,11 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
           pathname: txBuilderLink.pathname,
           query: { ...(txBuilderLink.query as Record<string, string>), safe: safeParam },
         })
+      },
+
+      [ESafeAction.NewTransaction]: async (safe) => {
+        await navigateToSafe(safe)
+        setTxFlow(<NewTxFlow />, resetActiveSafe, false)
       },
     }),
     [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink, spaceId],
