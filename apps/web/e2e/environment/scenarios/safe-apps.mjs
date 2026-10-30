@@ -49,7 +49,7 @@ export async function registerBuilderContracts(env) {
 /** A Safe to open the Safe Apps pages with. */
 export async function prepareSafeAppsHostScenario(env, owners) {
   const safe = `sep:${await createSafeAddress(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })}`
-  return { safes: { static: { SEP_STATIC_SAFE_1: safe, SEP_STATIC_SAFE_2: safe } } }
+  return { safes: { static: { SEP_STATIC_SAFE_2: safe } } }
 }
 
 /** The staging Safe App Safes, used by Transaction Builder and Drain Account. */
