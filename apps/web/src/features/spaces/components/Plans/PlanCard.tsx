@@ -298,6 +298,18 @@ export const PlanCard = ({
               </Link>
             </Typography>
           )}
+          {!hasPicked && !isYearly && onSwitchToYearly && (
+            <Typography variant="paragraph-small">
+              <Link
+                render={<button type="button" />}
+                variant="muted"
+                data-testid="plan-yearly-saving"
+                onClick={onSwitchToYearly}
+              >
+                {PRO_TRIAL_COPY.unpickedSaving}
+              </Link>
+            </Typography>
+          )}
         </div>
 
         <div className="mt-5 flex flex-col gap-2.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-4">

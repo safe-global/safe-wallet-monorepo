@@ -9,6 +9,8 @@ export const PRO_TRIAL_COPY = {
   talkToUs: 'Talk to us',
   /** A multi-size plan before a size is picked. */
   unpickedPrice: { headline: 'Custom', suffix: 'price per Safe' },
+  /** Under "Custom" before a size is picked; every Business size saves about 10% yearly. */
+  unpickedSaving: 'Save 10% with annual',
   fromPrice: (price: string) => `from ${price}`,
   seatsShort: (seats: number) => `${seats} Safes`,
   /** A plan with one size, e.g. "2 Safe accounts" → "2 Safes". */
