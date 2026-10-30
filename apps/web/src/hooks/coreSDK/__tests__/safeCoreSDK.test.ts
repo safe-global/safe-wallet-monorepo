@@ -106,7 +106,7 @@ describe('safeCoreSDK', () => {
         const chainId = '1'
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -125,7 +125,7 @@ describe('safeCoreSDK', () => {
         const chainId = '1'
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -148,7 +148,7 @@ describe('safeCoreSDK', () => {
         const chainId = '137' // Polygon
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -171,7 +171,7 @@ describe('safeCoreSDK', () => {
         const chainId = '137' // Polygon
         const version = '1.0.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -194,7 +194,7 @@ describe('safeCoreSDK', () => {
         const chainId = '10' // Optimism mainnet
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -219,8 +219,9 @@ describe('safeCoreSDK', () => {
       it('should retrieve the Safe version from the contract if not provided', async () => {
         const chainId = '1'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        mockProvider.getCode = jest.fn().mockRejectedValue(new Error('RPC unavailable'))
 
         await initSafeSDK({
           provider: mockProvider,
@@ -237,8 +238,9 @@ describe('safeCoreSDK', () => {
       it('should return an L1 SDK instance for L1 contracts not deployed on mainnet', async () => {
         const chainId = '137' // Polygon
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        mockProvider.getCode = jest.fn().mockRejectedValue(new Error('RPC unavailable'))
 
         await initSafeSDK({
           provider: mockProvider,
@@ -259,7 +261,7 @@ describe('safeCoreSDK', () => {
       it('should return undefined for unsupported mastercopies', async () => {
         const chainId = '1'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         const sdk = await initSafeSDK({
@@ -279,7 +281,7 @@ describe('safeCoreSDK', () => {
       const chainId = '1'
       const safeChainId = '100'
 
-      const mockProvider = new JsonRpcProvider()
+      const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
       mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
       const sdk = await initSafeSDK({
