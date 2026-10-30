@@ -1,11 +1,12 @@
 import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
+import { selectCheckRequestedAtMs } from '@safe-global/store/safenet/safenetCheckSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { Errors, logError } from '@/services/exceptions'
-import { makeStore, setStoreInstance } from '@/store'
+import { getStoreInstance, makeStore, setStoreInstance } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { server } from '@/tests/server'
@@ -85,6 +86,27 @@ describe('requestSafenetCheck', () => {
     expect(trackEvent).toHaveBeenCalledWith(SAFENET_EVENTS.SUBMITTED, {
       [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash,
     })
+  })
+
+  it('records the request time of an accepted check in the Safenet slice', async () => {
+    const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
+    mockCheckRoute(chainId)
+    const before = Date.now()
+
+    await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
+
+    const state = getStoreInstance().getState()
+    expect(selectCheckRequestedAtMs(state, { chainId, safeAddress, safeTxHash })).toBeGreaterThanOrEqual(before)
+  })
+
+  it.each([403, 500])('records no request time when CGW answers %s', async (status) => {
+    const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
+    mockCheckRoute(chainId, status)
+
+    await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
+
+    const state = getStoreInstance().getState()
+    expect(selectCheckRequestedAtMs(state, { chainId, safeAddress, safeTxHash })).toBeUndefined()
   })
 
   it('sends nothing for a chain that does not list SAFENET_CHECKS', async () => {

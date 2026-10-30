@@ -17,6 +17,11 @@ export type PinnedVerdict = {
 export type SafenetCheckSliceState = {
   /** Pinned verdicts keyed by {@link checkKey}. */
   pinned: Record<string, PinnedVerdict>
+  /**
+   * When this client last had a check request accepted, in ms, keyed by
+   * {@link checkKey}. A check requested by another client leaves no entry.
+   */
+  requested: Record<string, number>
 }
 
 /** Identity of one check: the Safe it belongs to, plus its transaction hash. */
@@ -31,7 +36,7 @@ export type CheckIdentity = CheckTarget & { safeTxHash: string }
 export const checkKey = ({ chainId, safeAddress, safeTxHash }: CheckIdentity): string =>
   `${chainId}:${safeAddress.toLowerCase()}:${safeTxHash}`
 
-export const safenetCheckInitialState: SafenetCheckSliceState = { pinned: {} }
+export const safenetCheckInitialState: SafenetCheckSliceState = { pinned: {}, requested: {} }
 
 export const safenetCheckSlice = createSlice({
   name: 'safenetChecks',
@@ -41,10 +46,13 @@ export const safenetCheckSlice = createSlice({
       const { status, atBlock, verification } = action.payload
       state.pinned[checkKey(action.payload)] = { status, atBlock, verification }
     },
+    recordCheckRequest: (state, action: PayloadAction<CheckIdentity & { requestedAtMs: number }>) => {
+      state.requested[checkKey(action.payload)] = action.payload.requestedAtMs
+    },
   },
 })
 
-export const { pinVerdict } = safenetCheckSlice.actions
+export const { pinVerdict, recordCheckRequest } = safenetCheckSlice.actions
 
 /** Minimal root-state shape a selector needs — compatible with either app store. */
 export type SafenetCheckPartialState = { [safenetCheckSlice.name]: SafenetCheckSliceState }
@@ -53,3 +61,8 @@ export const selectPinnedVerdict = (
   state: SafenetCheckPartialState,
   identity: CheckIdentity,
 ): PinnedVerdict | undefined => state[safenetCheckSlice.name].pinned[checkKey(identity)]
+
+export const selectCheckRequestedAtMs = (
+  state: SafenetCheckPartialState,
+  identity: CheckIdentity,
+): number | undefined => state[safenetCheckSlice.name].requested[checkKey(identity)]

@@ -1,6 +1,7 @@
 import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
 import { getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
 import { cgwApi as safenetApi } from '@safe-global/store/gateway/AUTO_GENERATED/safenet'
+import { recordCheckRequest } from '@safe-global/store/safenet/safenetCheckSlice'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
@@ -41,6 +42,7 @@ export const requestSafenetCheck = async ({
 
     const check = { spaceId, chainId, safeAddress, createSafenetCheckDto: { safeTxHash } }
     await store.dispatch(safenetApi.endpoints.safenetChecksRequestCheckV1.initiate(check)).unwrap()
+    store.dispatch(recordCheckRequest({ chainId, safeAddress, safeTxHash, requestedAtMs: Date.now() }))
     if (isFirstSignature) trackEvent(SAFENET_EVENTS.SUBMITTED, { [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash })
   } catch (error) {
     if (!EXPECTED_REFUSALS.includes(getHttpStatusFromError(error))) logError(Errors._652, error)
