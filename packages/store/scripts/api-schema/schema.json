@@ -7474,18 +7474,9 @@
     },
     "/v1/spaces/{spaceId}/transactions/queued": {
       "get": {
-        "description": "Retrieves the pending transactions of every Safe in a Space, across chains, ordered by nonce. Results come in runs of one Safe each; a page never ends inside a nonce.",
+        "description": "Retrieves the pending transactions of every Safe in a Space, across chains, in nonce order. Results are keyed by Safe address and then by chain ID. The queue is read up to a maximum number of queue service pages; `count` is the size of the whole queue.",
         "operationId": "spaceTransactionsGetTransactionQueueV1",
         "parameters": [
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "description": "Pagination cursor from the `next` URL of a previous page",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "spaceId",
             "required": true,
@@ -7498,7 +7489,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Paginated queue of the Safes in the Space",
+            "description": "Queue of the Safes in the Space",
             "content": {
               "application/json": {
                 "schema": {
@@ -7515,6 +7506,9 @@
           },
           "403": {
             "description": "Not a member of this Space"
+          },
+          "404": {
+            "description": "Space not found"
           }
         },
         "summary": "Get the transaction queue of a Space",
@@ -18270,22 +18264,46 @@
         "properties": {
           "count": {
             "type": "number",
-            "nullable": true
+            "nullable": true,
+            "description": "Size of the whole queue, which can exceed the items returned when the queue is longer than the pages read"
           },
           "next": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Always null: the queue is returned in one response"
           },
           "previous": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Always null: the queue is returned in one response"
           },
           "results": {
-            "description": "Consecutive runs of queued items of one Safe, in nonce order. A Safe can appear in several runs, and a run can continue on the next page.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SpaceQueueSafeItems"
-            }
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictHeaderQueuedItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/LabelQueuedItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionQueuedItem"
+                    }
+                  ]
+                }
+              }
+            },
+            "example": {
+              "{safeAddress}": {
+                "{chainId}": []
+              }
+            },
+            "description": "Queued items, keyed by Safe address and then by chain ID, each list in nonce order."
           },
           "unavailableSafes": {
             "description": "Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover.",
@@ -18296,40 +18314,11 @@
           }
         },
         "required": [
+          "count",
+          "next",
+          "previous",
           "results",
           "unavailableSafes"
-        ]
-      },
-      "SpaceQueueSafeItems": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "safeAddress": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ConflictHeaderQueuedItem"
-                },
-                {
-                  "$ref": "#/components/schemas/LabelQueuedItem"
-                },
-                {
-                  "$ref": "#/components/schemas/TransactionQueuedItem"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "chainId",
-          "safeAddress",
-          "items"
         ]
       },
       "SpaceQueueSafe": {

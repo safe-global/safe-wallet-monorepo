@@ -1,9 +1,5 @@
 import { useEffect } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
-import {
-  useSpaceTransactionsGetTransactionQueueV1Query,
-  type SpaceQueuedItemPage,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
@@ -16,6 +12,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
+import { useGetSpaceQueueQuery, type SpaceQueue } from '../store/spaceQueueApi'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsActiveMember } from './useSpaceMembers'
 
@@ -30,13 +27,9 @@ const REFETCH_EVENTS = [
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again
 const notifiedTxIds = new Set<string>()
 
-const getTxIdsAwaitingSignature = (
-  page: SpaceQueuedItemPage,
-  walletAddress: string,
-  pendingTxs: PendingTxsState,
-): string[] =>
-  page.results
-    .flatMap((run) => run.items.filter(isTransactionQueuedItem))
+const getTxIdsAwaitingSignature = (queue: SpaceQueue, walletAddress: string, pendingTxs: PendingTxsState): string[] =>
+  queue.sections
+    .flatMap((safe) => safe.chains.flatMap((chain) => chain.items.filter(isTransactionQueuedItem)))
     .filter(
       ({ transaction }) =>
         transaction.txStatus === TransactionStatus.AWAITING_CONFIRMATIONS &&
@@ -45,7 +38,7 @@ const getTxIdsAwaitingSignature = (
     )
     .map(({ transaction }) => transaction.id)
 
-/** Polls the first page of the current Space's queue, which spaceQueueReconciliationListener settles pending txs from. */
+/** Polls the current Space's queue, which spaceQueueReconciliationListener settles pending txs from. */
 export const useSpaceQueuePolling = (): void => {
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
@@ -56,7 +49,8 @@ export const useSpaceQueuePolling = (): void => {
   const walletAddress = useWallet()?.address
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
-  const { currentData, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(isActive ? { spaceId } : skipToken, {
+  // The same arguments as the queue page, so the page and this poll share one request
+  const { currentData, refetch } = useGetSpaceQueueQuery(isActive ? { spaceId } : skipToken, {
     pollingInterval: POLLING_INTERVAL,
     skipPollingIfUnfocused: true,
   })

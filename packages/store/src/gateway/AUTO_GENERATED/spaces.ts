@@ -233,12 +233,7 @@ const injectedRtkApi = api
         SpaceTransactionsGetTransactionQueueV1ApiResponse,
         SpaceTransactionsGetTransactionQueueV1ApiArg
       >({
-        query: (queryArg) => ({
-          url: `/v1/spaces/${queryArg.spaceId}/transactions/queued`,
-          params: {
-            cursor: queryArg.cursor,
-          },
-        }),
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/transactions/queued` }),
         providesTags: ['transactions'],
       }),
     }),
@@ -451,10 +446,8 @@ export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
   safes?: string[]
 }
 export type SpaceTransactionsGetTransactionQueueV1ApiResponse =
-  /** status 200 Paginated queue of the Safes in the Space */ SpaceQueuedItemPage
+  /** status 200 Queue of the Safes in the Space */ SpaceQueuedItemPage
 export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
-  /** Pagination cursor from the `next` URL of a previous page */
-  cursor?: string
   /** Space UUID */
   spaceId: string
 }
@@ -1469,21 +1462,23 @@ export type TransactionQueuedItem = {
   transaction: Transaction
   conflictType: 'None' | 'HasNext' | 'End'
 }
-export type SpaceQueueSafeItems = {
-  chainId: string
-  safeAddress: string
-  items: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
-}
 export type SpaceQueueSafe = {
   chainId: string
   safeAddress: string
 }
 export type SpaceQueuedItemPage = {
-  count?: number | null
-  next?: string | null
-  previous?: string | null
-  /** Consecutive runs of queued items of one Safe, in nonce order. A Safe can appear in several runs, and a run can continue on the next page. */
-  results: SpaceQueueSafeItems[]
+  /** Size of the whole queue, which can exceed the items returned when the queue is longer than the pages read */
+  count: number | null
+  /** Always null: the queue is returned in one response */
+  next: string | null
+  /** Always null: the queue is returned in one response */
+  previous: string | null
+  /** Queued items, keyed by Safe address and then by chain ID, each list in nonce order. */
+  results: {
+    [key: string]: {
+      [key: string]: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
+    }
+  }
   /** Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover. */
   unavailableSafes: SpaceQueueSafe[]
 }
