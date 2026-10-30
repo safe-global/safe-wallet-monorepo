@@ -5,6 +5,7 @@ import {
   createFirstSetupTxs,
   createRequestConfigurationTx,
   describeSetupCall,
+  getCallConfigurations,
   getConfigurationRoot,
 } from './services/policyGuardEncoders'
 
@@ -13,6 +14,7 @@ export default {
   createRequestConfigurationTx,
   createApplyConfigurationTx,
   getConfigurationRoot,
+  getCallConfigurations,
   describeSetupCall,
   buildAllowlistConfigurations,
   decodeErc20TransferPolicyData,
