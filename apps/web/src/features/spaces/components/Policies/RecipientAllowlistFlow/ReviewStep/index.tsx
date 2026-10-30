@@ -7,6 +7,8 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import AllowlistConsent from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistConsent'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import {
+  EDIT_SUMMARY_DETAILS,
+  getEditReviewDescription,
   getNextSignersText,
   formatPolicyChangeDelay,
   REVIEW_SUMMARY_DESCRIPTION,
@@ -19,6 +21,7 @@ import {
   toAllowlistRecipients,
   toAllowlistTokens,
 } from '../utils/allowlistDisplay'
+import { getLiveRecipients, markAllowlistChanges, toAllowlistRules } from '../utils/allowlistEdit'
 import type { RecipientAllowlistFlowData } from '../types'
 import { REVIEW_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -55,7 +58,13 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const { describeSetupCall, decodeErc20TransferPolicyData } = useLoadFeature(PolicyGuardFeature)
 
   const rules = data?.rules
-  const { guardState, configurations, root, txs } = useBuildAllowlistTransaction(rules ?? [])
+  const baseline = data?.baseline
+  const baselineRules = useMemo(() => (baseline ? toAllowlistRules(baseline) : undefined), [baseline])
+  const { guardState, configurations, root, txs } = useBuildAllowlistTransaction(
+    rules ?? [],
+    baselineRules,
+    data?.baselineGuard,
+  )
 
   const installedGuard =
     guardState?.status === 'known' || guardState?.status === 'partial' ? guardState.guardAddress : undefined
@@ -69,19 +78,44 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const selected = findSafeAccount(accounts, scope?.scopeKey)
 
+  const liveTokens = useMemo(
+    () => (baseline ?? []).map(({ token }) => ({ ...token, logoUri: token.logoUri ?? undefined })),
+    [baseline],
+  )
+
   const tokens = useMemo(
     () =>
       toAllowlistTokens(
         (rules ?? []).map(({ tokenAddress }) => tokenAddress),
         tokenOptions,
+        liveTokens,
       ),
-    [rules, tokenOptions],
+    [rules, tokenOptions, liveTokens],
   )
 
   const recipients = useMemo(
     () => (data && chainId ? toAllowlistRecipients(data, (address) => resolveName(address, chainId)) : []),
     [data, chainId, resolveName],
   )
+
+  const markedTokens = useMemo(() => {
+    if (!baseline) return tokens
+    const previous = toAllowlistTokens(
+      liveTokens.map(({ address }) => address),
+      tokenOptions,
+      liveTokens,
+    )
+    return markAllowlistChanges(tokens, previous, ({ address }) => address.toLowerCase())
+  }, [baseline, tokens, liveTokens, tokenOptions])
+
+  const markedRecipients = useMemo(() => {
+    if (!baselineRules || !chainId) return recipients
+    const previous = getLiveRecipients(baselineRules).map((address) => {
+      const name = resolveName(address, chainId)
+      return { address, name: name || undefined, isInAddressBook: Boolean(name) }
+    })
+    return markAllowlistChanges(recipients, previous, ({ address }) => address.toLowerCase())
+  }, [baselineRules, recipients, chainId, resolveName])
 
   const otherSigners = useMemo(() => {
     if (!chainId) return ''
@@ -128,7 +162,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           tokenSymbols={tokens.map(({ symbol }) => symbol)}
           recipientNames={recipients.map(spenderDisplayName)}
           isGuardEnabled={isAllowlistGuardEnabled(guardState)}
-          description={REVIEW_SUMMARY_DESCRIPTION}
+          description={baseline ? getEditReviewDescription(changeDelay) : REVIEW_SUMMARY_DESCRIPTION}
+          details={baseline ? EDIT_SUMMARY_DETAILS : undefined}
           tone="error"
         />
       )}
@@ -136,8 +171,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
       {hasSummary && selected && (
         <AllowlistPolicyDetails
           safe={selected}
-          tokens={tokens}
-          recipients={recipients}
+          tokens={markedTokens}
+          recipients={markedRecipients}
           fallback={chainId && configurations ? getInstalledFallback(chainId, configurations) : undefined}
           hasNativeRule={Boolean(rules?.some(({ tokenAddress }) => sameAddress(tokenAddress, ZERO_ADDRESS)))}
         />

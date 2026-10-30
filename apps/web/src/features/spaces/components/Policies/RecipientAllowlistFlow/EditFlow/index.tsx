@@ -80,7 +80,13 @@ const EditFlowBody = ({ policy }: { policy: ActiveAllowlistPolicy }): ReactEleme
 
   if (!initialData && isReady) {
     const { entries } = policy.data
-    setInitialData({ ...toAllowlistEditValues(entries, heldTokens.addresses), rules: [], baseline: entries })
+    const baselineGuard = policy.enforcement.via === 'guard' ? policy.enforcement.guardAddress : undefined
+    setInitialData({
+      ...toAllowlistEditValues(entries, heldTokens.addresses),
+      rules: [],
+      baseline: entries,
+      baselineGuard,
+    })
   }
 
   if (initialData) return <EditTxFlow initialData={initialData} />

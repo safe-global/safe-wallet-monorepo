@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import StatusAlert from '@safe-global/views/components/common/StatusAlert'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -20,21 +21,32 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { BlockedBadge } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/BlockedBadge'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import { cn } from '@safe-global/views/utils/cn'
 import TokenIcon from '@/components/common/TokenIcon'
 import { SafeAccountSummary } from '../../SafeAccountSelector/components/SafeAccountRow'
 import RecipientIdentity from '../components/RecipientIdentity'
 import type { AllowlistRecipientDisplay, AllowlistTokenDisplay } from '../utils/allowlistDisplay'
+import type { ListChange } from '../utils/allowlistEdit'
 import type { InstalledFallback } from './ruleKind'
 
 const ADDRESS_CLASS = 'flex min-w-0 items-center gap-2 text-sm leading-none font-medium'
 
+type Changed<T> = T & { change?: ListChange }
+
 type AllowlistPolicyDetailsProps = {
   safe: SafeAccountOption
-  tokens: AllowlistTokenDisplay[]
-  recipients: AllowlistRecipientDisplay[]
+  tokens: Changed<AllowlistTokenDisplay>[]
+  recipients: Changed<AllowlistRecipientDisplay>[]
   fallback?: InstalledFallback
   hasNativeRule: boolean
 }
+
+const ChangeBadge = ({ change }: { change: ListChange }): ReactElement => (
+  <Badge variant={CHANGE_BADGE[change].variant} size="status" shape="status" className="w-20 shrink-0 justify-center">
+    {CHANGE_BADGE[change].label}
+  </Badge>
+)
 
 /** The account on its own card, then the tokens and recipients as one card, since they are one policy. */
 const AllowlistPolicyDetails = ({
@@ -57,12 +69,18 @@ const AllowlistPolicyDetails = ({
       <div className="flex flex-col p-4">
         <SummaryRow label={REVIEW_TOKENS_LABEL}>
           <SummaryLine className="flex-wrap gap-x-5 gap-y-2">
-            {tokens.map(({ address, symbol, logoUri }) => (
-              <span key={address} className="flex items-center gap-2">
-                <span className="flex shrink-0">
+            {tokens.map(({ address, symbol, logoUri, change }) => (
+              <span key={address} className="flex items-center gap-2" data-testid={`allowlist-review-token-${address}`}>
+                <span className={cn('flex shrink-0', change === 'removed' && 'opacity-50')}>
                   <TokenIcon logoUri={logoUri} tokenSymbol={symbol} size={24} />
                 </span>
-                <Typography variant="paragraph-small-medium">{symbol}</Typography>
+                <Typography
+                  variant="paragraph-small-medium"
+                  className={cn(change === 'removed' && 'text-muted-foreground opacity-50')}
+                >
+                  {symbol}
+                </Typography>
+                {change && <ChangeBadge change={change} />}
               </span>
             ))}
           </SummaryLine>
@@ -70,11 +88,14 @@ const AllowlistPolicyDetails = ({
 
         <Separator className="my-3" />
 
-        <SummaryRow label={getReviewRecipientsLabel(recipients.length)}>
+        <SummaryRow label={getReviewRecipientsLabel(recipients.filter(({ change }) => change !== 'removed').length)}>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-            {recipients.map(({ address, name, isInAddressBook }) => (
-              <div key={address} className={ADDRESS_CLASS}>
-                <RecipientIdentity address={address} name={name} isInAddressBook={isInAddressBook} />
+            {recipients.map(({ address, name, isInAddressBook, change }) => (
+              <div key={address} className={ADDRESS_CLASS} data-testid={`allowlist-review-recipient-${address}`}>
+                <span className={cn('flex min-w-0 flex-1 items-center gap-2', change === 'removed' && 'opacity-50')}>
+                  <RecipientIdentity address={address} name={name} isInAddressBook={isInAddressBook} />
+                </span>
+                {change && <ChangeBadge change={change} />}
               </div>
             ))}
           </div>

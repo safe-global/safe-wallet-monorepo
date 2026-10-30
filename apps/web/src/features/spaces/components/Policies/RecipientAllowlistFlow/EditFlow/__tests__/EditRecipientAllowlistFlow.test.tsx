@@ -267,6 +267,8 @@ describe('EditRecipientAllowlistFlow', () => {
 
     const data = JSON.parse(screen.getByTestId('review-data').textContent ?? '') as RecipientAllowlistFlowData
     expect(data.baseline).toEqual(JSON.parse(JSON.stringify(policy.data.entries)))
+    expect(data.baselineGuard).toBe(policy.enforcement.via === 'guard' ? policy.enforcement.guardAddress : undefined)
+    expect(data.baselineGuard).toBeDefined()
     expect(data.rules).toHaveLength(2)
     expect(data.rules.every(({ recipients }) => recipients.length === 2)).toBe(true)
     expect(

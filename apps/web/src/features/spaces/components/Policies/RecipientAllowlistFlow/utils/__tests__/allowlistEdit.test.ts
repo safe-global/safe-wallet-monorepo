@@ -4,7 +4,13 @@ import type { AllowlistEntry } from '@safe-global/views/features/spaces/componen
 import { mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
 import { MOCK_ADDRESSES, MOCK_TOKENS } from '../../../mocks/policies'
 import { buildAllowlistRules } from '../allowlistForm'
-import { hasAllowlistChanges, markAllowlistChanges, toAllowlistEditValues, toAllowlistRules } from '../allowlistEdit'
+import {
+  hasAllowlistChanges,
+  markAllowlistChanges,
+  toAllowlistEditValues,
+  toAllowlistRules,
+  toFormBaseline,
+} from '../allowlistEdit'
 
 const { alice, bob, unresolved } = MOCK_ADDRESSES
 const usdc = MOCK_TOKENS.usdc
@@ -48,6 +54,17 @@ describe('allowlistEdit', () => {
         { address: checksumAddress(alice), selected: true },
         { address: checksumAddress(bob), selected: true },
         { address: checksumAddress(unresolved), selected: true },
+      ])
+    })
+  })
+
+  describe('toFormBaseline', () => {
+    it('gives every live token the union of the live recipients, once each, ignoring case', () => {
+      const uneven = [entry(usdc, [alice, bob]), entry(usdt, [alice.toLowerCase(), unresolved])]
+
+      expect(toFormBaseline(toAllowlistRules(uneven))).toEqual([
+        { tokenAddress: usdc.address, recipients: [alice, bob, unresolved] },
+        { tokenAddress: usdt.address, recipients: [alice, bob, unresolved] },
       ])
     })
   })

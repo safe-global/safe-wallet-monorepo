@@ -11,7 +11,13 @@ import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-sco
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { AllowlistFormRecipient } from '../../types'
+import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
+import {
+  getEditReviewDescription,
+  POLICY_LABELS,
+  RULE_REVOKED_RECIPIENTS_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { AllowlistFormRecipient, RecipientAllowlistFlowData } from '../../types'
 import type { PolicyGuardState } from '@/features/policy-guard'
 import type { PolicyGuardContract } from '@/features/policy-guard'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
@@ -25,6 +31,7 @@ import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
 import useSpendingLimitTokenOptions from '../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
 import { useSaveAllowlistConfiguration } from '../../hooks/useSaveAllowlistConfiguration'
+import { toAllowlistRules, toFormBaseline } from '../../utils/allowlistEdit'
 import ReviewRecipientAllowlist from '..'
 import RecipientAllowlistFlow from '../..'
 
@@ -40,8 +47,9 @@ const mockResolveName = (address: string): string => ({ [RECIPIENT]: 'Alice', [T
 const PRIYA = checksumAddress(faker.finance.ethereumAddress())
 const {
   buildAllowlistConfigurations,
+  buildAllowlistChangeConfigurations,
   encodeErc20TransferPolicyData,
-}: Pick<PolicyGuardContract, 'buildAllowlistConfigurations'> & {
+}: Pick<PolicyGuardContract, 'buildAllowlistConfigurations' | 'buildAllowlistChangeConfigurations'> & {
   encodeErc20TransferPolicyData: (recipients: string[]) => string
 } = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
 const { createAllowlistSetupTxs }: Pick<PolicyGuardContract, 'createAllowlistSetupTxs'> = jest.requireActual(
@@ -207,14 +215,18 @@ const onSubmit = jest.fn()
 const setIsSubmitLoading = jest.fn()
 const setIsSubmitDisabled = jest.fn()
 
-const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}, flowRecipients = recipients) =>
+const renderReview = (
+  safeTxOverrides: Partial<SafeTxContextParams> = {},
+  flowRecipients = recipients,
+  flowData: Partial<RecipientAllowlistFlowData> = { rules },
+) =>
   render(
     <SafeScopeContext.Provider value={scopeValue}>
       <TxFlowContext.Provider
         value={
           {
             ...initialContext,
-            data: { rules, recipients: flowRecipients },
+            data: { ...flowData, recipients: flowRecipients },
             setIsSubmitLoading,
             setIsSubmitDisabled,
           } as unknown as TxFlowContextType
@@ -679,6 +691,123 @@ describe('ReviewRecipientAllowlist', () => {
 
     expect(setIsSubmitLoading).toHaveBeenCalledWith(false)
     expect(setIsSubmitDisabled).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
+  const NEWBIE = checksumAddress(faker.finance.ethereumAddress())
+  const DAI = checksumAddress(faker.finance.ethereumAddress())
+  const INSTALLED_GUARD = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
+  const token = (address: string, symbol: string, logoUri: string | null = null) => ({
+    address,
+    symbol,
+    decimals: 18,
+    logoUri,
+  })
+  const entry = (entryToken: AllowlistEntry['token'], accounts: string[]): AllowlistEntry => ({
+    token: entryToken,
+    recipients: accounts.map((account) => ({ account, permission: 'ALWAYS' as const })),
+  })
+  const baseline = [
+    entry(token(USDC, 'USDC'), [RECIPIENT, OTHER]),
+    entry(token(DAI, 'DAI', 'https://dai.png'), [RECIPIENT]),
+  ]
+  const editedRules = [{ tokenAddress: USDC, recipients: [RECIPIENT, NEWBIE] }]
+  const editedRecipients: AllowlistFormRecipient[] = [
+    { address: RECIPIENT, selected: true },
+    { address: OTHER, selected: false },
+    { address: NEWBIE, selected: true },
+  ]
+  const changeSet = buildAllowlistChangeConfigurations(SEPOLIA, toFormBaseline(toAllowlistRules(baseline)), editedRules)
+  const guardState: PolicyGuardState = { status: 'known', guardAddress: INSTALLED_GUARD }
+
+  const renderEdit = () => {
+    const setup = createAllowlistSetupTxs({
+      chainId: SEPOLIA,
+      safeAddress: SAFE,
+      guardAddress: INSTALLED_GUARD,
+      guardState,
+      configurations: changeSet,
+    })
+    mockBuild.mockReturnValue({ guardState, ...setup })
+    return renderReview({}, editedRecipients, {
+      rules: editedRules,
+      baseline,
+      baselineGuard: INSTALLED_GUARD,
+    })
+  }
+
+  const recipientRow = (address: string) =>
+    within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-recipient-${address}`)
+  const tokenItem = (address: string) =>
+    within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-token-${address}`)
+
+  it('builds the edit from the live rules on the guard holding them', () => {
+    renderEdit()
+
+    expect(mockBuild).toHaveBeenCalledWith(editedRules, toAllowlistRules(baseline), INSTALLED_GUARD)
+  })
+
+  it('marks an added recipient Added and a removed one Removed and faded, counting only the kept ones', () => {
+    renderEdit()
+
+    expect(within(recipientRow(NEWBIE)).getByText('Added')).toBeInTheDocument()
+    expect(within(recipientRow(RECIPIENT)).queryByText(/Added|Removed/)).not.toBeInTheDocument()
+    const removed = recipientRow(OTHER)
+    expect(within(removed).getByText('Removed')).toBeInTheDocument()
+    expect(within(removed).getByText(shortenAddress(OTHER)).closest('.opacity-50')).not.toBeNull()
+    expect(
+      within(screen.getByTestId('allowlist-review-summary')).getByText('Allowed recipients (2)'),
+    ).toBeInTheDocument()
+  })
+
+  it('shows a removed token the Safe no longer holds by its live symbol and logo', () => {
+    renderEdit()
+
+    const removed = tokenItem(DAI)
+    expect(within(removed).getByText('Removed')).toBeInTheDocument()
+    expect(within(removed).getByText('DAI')).toHaveClass('text-muted-foreground', 'opacity-50')
+    expect(within(removed).getByTitle('DAI').getAttribute('srcdoc')).toContain('https://dai.png')
+    expect(within(tokenItem(USDC)).queryByText(/Added|Removed/)).not.toBeInTheDocument()
+  })
+
+  it('describes the wait with the delay of the installed guard', () => {
+    mockGuardDelay(600)
+    renderEdit()
+
+    expect(guardDelayApi.useGetGuardDelayQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: SEPOLIA, guardAddress: INSTALLED_GUARD }),
+    )
+    expect(screen.getByText(getEditReviewDescription('10 minutes'))).toBeInTheDocument()
+    expect(screen.getByText('Any signer can cancel the change before it applies.')).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', {
+        name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 10 minutes to apply.',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('lists the revoked recipients and the deleted rule in the request', () => {
+    renderEdit()
+
+    expect(actionLabels()).toEqual(['1SafePolicyGuard: requestConfiguration'])
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const rows = screen.getAllByTestId('allowlist-rule')
+    expect(rows).toHaveLength(changeSet.length)
+    expect(rows.filter((row) => within(row).queryByText(RULE_REVOKED_RECIPIENTS_LABEL))).toHaveLength(2)
+    expect(rows.filter((row) => within(row).queryByText(POLICY_LABELS.removal))).toHaveLength(1)
+  })
+
+  it('saves only the change set before continuing to sign', async () => {
+    renderEdit()
+
+    confirmBlockedActions()
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    const { getConfigurationRoot } = jest.requireActual('@/features/policy-guard/services/policyGuardEncoders')
+    expect(mockSave).toHaveBeenCalledWith({ configurations: changeSet, root: getConfigurationRoot(changeSet) })
   })
 })
 

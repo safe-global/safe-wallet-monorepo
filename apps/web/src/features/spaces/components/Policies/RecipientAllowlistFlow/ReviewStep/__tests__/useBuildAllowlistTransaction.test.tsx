@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
 import { renderHook, waitFor } from '@/tests/test-utils'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import {
+  EMPTY_ALLOWLIST_ERROR,
   GUARD_NOT_SUPPORTED_ERROR,
   GUARD_READ_ERROR,
   GUARD_UNAVAILABLE_ERROR,
@@ -65,6 +67,7 @@ const mockFeature = (isReady = true) =>
   (useLoadFeature as jest.Mock).mockReturnValue({
     $isReady: isReady,
     buildAllowlistConfigurations: mockServices.buildAllowlistConfigurations,
+    buildAllowlistChangeConfigurations: mockServices.buildAllowlistChangeConfigurations,
     clearGuardExitConfigurations: mockServices.clearGuardExitConfigurations,
     createAllowlistSetupTxs: mockSetup.createAllowlistSetupTxs,
   })
@@ -305,5 +308,83 @@ describe('useBuildAllowlistTransaction', () => {
 
     expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: GUARD_UNAVAILABLE_ERROR }))
     expect(setSafeTx).not.toHaveBeenCalledWith(builtTx)
+  })
+
+  describe('when editing a live allowlist', () => {
+    const DAI = '0x0000000000000000000000000000000000000da1'
+    const ADDED = '0x0000000000000000000000000000000000000add'
+    const KEPT = '0x0000000000000000000000000000000000000bee'
+    const baseline: AllowlistRule[] = [{ tokenAddress: TOKEN, recipients: [RECIPIENT] }]
+    const desired: AllowlistRule[] = [{ tokenAddress: TOKEN, recipients: [RECIPIENT, ADDED] }]
+    const changeSet = () => mockServices.buildAllowlistChangeConfigurations(CHAIN_ID, baseline, desired)
+
+    it('sets a single request to the installed guard holding only the change set', async () => {
+      mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
+      const { result } = renderHook(() => useBuildAllowlistTransaction(desired, baseline, GUARD_180), { wrapper })
+
+      await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+      expect(result.current.configurations).toEqual(changeSet())
+      expect(result.current.root).toBe(getConfigurationRoot(changeSet()))
+      expect(sentBatch()).toEqual([expect.objectContaining({ to: GUARD_180 })])
+      const exitTargets = mockServices
+        .clearGuardExitConfigurations(SAFE)
+        .map(({ target }: { target: string }) => target)
+      expect(result.current.configurations?.some(({ target }) => exitTargets.includes(target))).toBe(false)
+    })
+
+    it.each<[UsePolicyGuardResult['state']]>([
+      [{ status: 'partial', missingSlot: 'module', guardAddress: GUARD_180 }],
+      [{ status: 'none' }],
+    ])('sets the not-supported error and no transaction for %j', (state) => {
+      mockGuard({ state })
+      renderHook(() => useBuildAllowlistTransaction(desired, baseline, GUARD_180), { wrapper })
+
+      expect(setSafeTxError).toHaveBeenCalledWith(new Error(GUARD_NOT_SUPPORTED_ERROR))
+      expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
+    })
+
+    it('builds on a Safe on a guard of another delay, and sends it to that guard', async () => {
+      mockGuard({ state: { status: 'known', guardAddress: GUARD_600 } })
+      renderHook(() => useBuildAllowlistTransaction(desired, baseline, GUARD_600.toLowerCase()), { wrapper })
+
+      await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+      expect(setSafeTxError).not.toHaveBeenCalledWith(expect.any(Error))
+      expect(sentBatch()).toEqual([expect.objectContaining({ to: GUARD_600 })])
+    })
+
+    it('sets the not-supported error when the installed guard is not the one holding the allowlist', () => {
+      mockGuard({ state: { status: 'known', guardAddress: GUARD_600 } })
+      renderHook(() => useBuildAllowlistTransaction(desired, baseline, GUARD_180), { wrapper })
+
+      expect(setSafeTxError).toHaveBeenCalledWith(new Error(GUARD_NOT_SUPPORTED_ERROR))
+      expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
+    })
+
+    it('sets the empty error when nothing changes', () => {
+      mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
+      renderHook(() => useBuildAllowlistTransaction(baseline, baseline, GUARD_180), { wrapper })
+
+      expect(setSafeTxError).toHaveBeenCalledWith(new Error(EMPTY_ALLOWLIST_ERROR))
+      expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
+    })
+
+    it('adds to a token only what the form adds, when the live tokens have different recipients', async () => {
+      const uneven: AllowlistRule[] = [
+        { tokenAddress: TOKEN, recipients: [RECIPIENT, KEPT] },
+        { tokenAddress: DAI, recipients: [RECIPIENT] },
+      ]
+      const widened: AllowlistRule[] = [
+        { tokenAddress: TOKEN, recipients: [RECIPIENT, KEPT, ADDED] },
+        { tokenAddress: DAI, recipients: [RECIPIENT, KEPT, ADDED] },
+      ]
+      mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
+      const { result } = renderHook(() => useBuildAllowlistTransaction(widened, uneven, GUARD_180), { wrapper })
+
+      await waitFor(() => expect(result.current.configurations).toBeDefined())
+      const daiConfigurations = result.current.configurations!.filter(({ target }) => target.toLowerCase() === DAI)
+      expect(daiConfigurations.map(({ data }) => mockServices.decodeErc20TransferPolicyData(data))).toEqual([
+        [checksumAddress(ADDED)],
+      ])
+    })
   })
 })

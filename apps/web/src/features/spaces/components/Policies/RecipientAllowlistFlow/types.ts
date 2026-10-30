@@ -28,4 +28,6 @@ export type RecipientAllowlistFlowData = RecipientAllowlistFormValues & {
   rules: AllowlistRule[]
   /** The live allowlist being edited; its presence means edit mode. */
   baseline?: AllowlistEntry[]
+  /** The guard holding the live allowlist's rules. */
+  baselineGuard?: string
 }

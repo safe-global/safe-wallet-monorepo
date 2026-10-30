@@ -31,11 +31,17 @@ export const toAllowlistEditValues = (
   }
 }
 
-/** The form holds one recipient set for every token, so the baseline is widened to that shape before comparing. */
+export const getLiveRecipients = (baseline: AllowlistRule[]): string[] =>
+  uniqueByAddress(baseline.flatMap((rule) => rule.recipients))
+
+/** The form holds one recipient set for every token, so the live rules are widened to that shape before comparing. */
+export const toFormBaseline = (baseline: AllowlistRule[]): AllowlistRule[] => {
+  const recipients = getLiveRecipients(baseline)
+  return baseline.map(({ tokenAddress }) => ({ tokenAddress, recipients }))
+}
+
 export const hasAllowlistChanges = (baseline: AllowlistRule[], desired: AllowlistRule[]): boolean => {
-  const recipients = uniqueByAddress(baseline.flatMap((rule) => rule.recipients))
-  const formShaped = baseline.map(({ tokenAddress }) => ({ tokenAddress, recipients }))
-  const before = getAllowlistPairKeys(formShaped)
+  const before = getAllowlistPairKeys(toFormBaseline(baseline))
   const after = getAllowlistPairKeys(desired)
 
   return before.size !== after.size || [...after].some((key) => !before.has(key))

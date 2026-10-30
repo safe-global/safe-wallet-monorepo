@@ -2,11 +2,14 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import {
+  EMPTY_ALLOWLIST_ERROR,
+  GUARD_NOT_SUPPORTED_ERROR,
   GUARD_READ_ERROR,
   GUARD_UNAVAILABLE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistRule } from '../types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useLoadFeature } from '@/features/__core__'
 import {
   PolicyGuardFeature,
@@ -17,15 +20,25 @@ import {
 } from '@/features/policy-guard'
 import { getPolicyGuardAddress, hasPolicyGuardOnChain } from '@/features/policy-guard/services'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
+import { toFormBaseline } from '../utils/allowlistEdit'
 
 type BuiltAllowlist = AllowlistSetup & { guardState: PolicyGuardState }
 
-/** Returns the installed setup only once its tx is set, so the review and the CGW save always match it. */
-export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<BuiltAllowlist> => {
+/** Returns the installed setup only once its tx is set, so the review and the CGW save always match it. With `baseline`, only the edit's changes. */
+export const useBuildAllowlistTransaction = (
+  rules: AllowlistRule[],
+  baseline?: AllowlistRule[],
+  baselineGuard?: string,
+): Partial<BuiltAllowlist> => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
-  const { buildAllowlistConfigurations, clearGuardExitConfigurations, createAllowlistSetupTxs, $isReady } =
-    useLoadFeature(PolicyGuardFeature)
+  const {
+    buildAllowlistConfigurations,
+    buildAllowlistChangeConfigurations,
+    clearGuardExitConfigurations,
+    createAllowlistSetupTxs,
+    $isReady,
+  } = useLoadFeature(PolicyGuardFeature)
   const [built, setBuilt] = useState<BuiltAllowlist>()
 
   const chainId = scope?.chainId
@@ -44,12 +57,24 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
   const rulesKey = JSON.stringify(rules)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by value so an equal rules array doesn't rebuild
   const stableRules = useMemo(() => rules, [rulesKey])
+  const baselineKey = baseline ? JSON.stringify(baseline) : undefined
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by value, as the rules are
+  const formBaseline = useMemo(() => (baseline ? toFormBaseline(baseline) : undefined), [baselineKey])
 
   useEffect(() => {
     // The transaction only describes the inputs it was built from, so any change drops it and any old error.
     setBuilt(undefined)
     setSafeTx(undefined)
     setSafeTxError(undefined)
+    // An edit only requests a change on the guard already holding the rules, never a first setup or a setter.
+    const isUnsupportedEdit =
+      formBaseline &&
+      state &&
+      (state.status !== 'known' || !baselineGuard || !sameAddress(state.guardAddress, baselineGuard))
+    if (isUnsupportedEdit) {
+      setSafeTxError(new Error(GUARD_NOT_SUPPORTED_ERROR))
+      return
+    }
     const configuredGuard = chainId ? getPolicyGuardAddress(chainId) : undefined
     const isUnavailable = state
       ? state.status === 'none' && !configuredGuard
@@ -67,10 +92,10 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
 
     let setup: AllowlistSetup
     try {
-      const configurations = [
-        ...clearGuardExitConfigurations(safeAddress),
-        ...buildAllowlistConfigurations(chainId, stableRules),
-      ]
+      const configurations = formBaseline
+        ? buildAllowlistChangeConfigurations(chainId, formBaseline, stableRules)
+        : [...clearGuardExitConfigurations(safeAddress), ...buildAllowlistConfigurations(chainId, stableRules)]
+      if (configurations.length === 0) throw new Error(EMPTY_ALLOWLIST_ERROR)
       setup = createAllowlistSetupTxs({ chainId, safeAddress, guardAddress, guardState: state, configurations })
     } catch (e) {
       setSafeTxError(asError(e))
@@ -96,11 +121,14 @@ export const useBuildAllowlistTransaction = (rules: AllowlistRule[]): Partial<Bu
     state,
     error,
     stableRules,
+    formBaseline,
+    baselineGuard,
     sdk,
     chainId,
     safeAddress,
     $isReady,
     buildAllowlistConfigurations,
+    buildAllowlistChangeConfigurations,
     clearGuardExitConfigurations,
     createAllowlistSetupTxs,
     setSafeTx,
