@@ -156,7 +156,8 @@ const Policies = ({
 
   const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
   const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
-  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow)
+  // The owner confirms there that every other action will be blocked, so it opens before every setup
+  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow, { everyTime: true })
 
   const handleSelect = useCallback(
     (id: AddPolicyId) => {
