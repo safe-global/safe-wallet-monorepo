@@ -1,34 +1,12 @@
 import type { PolicyAllowance } from '../types'
 import { formatTokenAmount, getResetPeriodLabel } from '../utils/policyLabel'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { formatUtcDateTime, formatUtcDayTime } from '@safe-global/utils/utils/date'
 
-// `hourCycle: 'h23'` rather than `hour12: false`, which renders midnight as 24:00 on some ICU builds.
-const UTC_PARTS = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'UTC',
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23',
-})
+const SECONDS_PER_MINUTE = 60
 
-const utcParts = (ms: number) => {
-  const parts = UTC_PARTS.formatToParts(new Date(ms))
-
-  return (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
-}
-
-const MS_PER_MINUTE = 60_000
-
-/** Takes unix MINUTES, as CGW returns. The reset instant is chain time; the viewer's zone would misstate it. */
-export const formatResetUtc = (resetsAtMinute: number): string => {
-  const part = utcParts(resetsAtMinute * MS_PER_MINUTE)
-
-  return `${part('month')} ${part('day')}, ${part('hour')}:${part('minute')} UTC`
-}
-
-const MS_PER_SECOND = 1_000
+/** Takes unix MINUTES, as CGW returns. */
+export const formatResetUtc = (resetsAtMinute: number): string => formatUtcDayTime(resetsAtMinute * SECONDS_PER_MINUTE)
 
 /** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
 export const formatLastUpdated = (
@@ -39,9 +17,7 @@ export const formatLastUpdated = (
   )
   if (createdAts.length === 0) return undefined
 
-  const part = utcParts(Math.max(...createdAts) * MS_PER_SECOND)
-
-  return `${part('month')} ${part('day')}, ${part('year')} · ${part('hour')}:${part('minute')} UTC`
+  return formatUtcDateTime(Math.max(...createdAts))
 }
 
 const PERCENT_SCALE = 10_000n

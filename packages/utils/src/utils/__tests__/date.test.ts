@@ -1,8 +1,77 @@
-import { formatDate, getCountdown, getDetailedPeriod, getPeriod, parseTimestamp } from '../date'
+import {
+  formatDate,
+  formatTimeUntil,
+  formatUtcDate,
+  formatUtcDateTime,
+  formatUtcDayTime,
+  getCountdown,
+  getDetailedPeriod,
+  getPeriod,
+  hoursUntil,
+  parseTimestamp,
+} from '../date'
 
 describe('formatDate', () => {
   it('formats a timestamp as an abbreviated date', () => {
     expect(formatDate(new Date('2026-04-22T12:00:00.000Z').getTime())).toBe('Apr 22, 2026')
+  })
+})
+
+/** 2026-10-21T12:00:00Z, in unix seconds. */
+const OCT_21_NOON_UTC = 1_792_584_000
+/** 2026-10-22T00:00:00Z, in unix seconds. */
+const OCT_22_MIDNIGHT_UTC = 1_792_627_200
+
+describe('formatUtcDate', () => {
+  it('should give the UTC calendar date, when given unix seconds', () => {
+    expect(formatUtcDate(OCT_21_NOON_UTC)).toBe('Oct 21, 2026')
+  })
+})
+
+describe('formatUtcDayTime', () => {
+  it('should give the UTC day and time without the year, when given unix seconds', () => {
+    expect(formatUtcDayTime(OCT_21_NOON_UTC + 2.5 * 3_600)).toBe('Oct 21, 14:30 UTC')
+  })
+
+  it('should write midnight as 00:00, when the time is a UTC midnight', () => {
+    expect(formatUtcDayTime(OCT_22_MIDNIGHT_UTC)).toBe('Oct 22, 00:00 UTC')
+  })
+})
+
+describe('formatUtcDateTime', () => {
+  it('should give the UTC date and time, when given unix seconds', () => {
+    expect(formatUtcDateTime(OCT_21_NOON_UTC + 2.5 * 3_600)).toBe('Oct 21, 2026 · 14:30 UTC')
+  })
+
+  it('should write midnight as 00:00, when the time is a UTC midnight', () => {
+    expect(formatUtcDateTime(OCT_22_MIDNIGHT_UTC)).toBe('Oct 22, 2026 · 00:00 UTC')
+  })
+})
+
+describe('formatTimeUntil', () => {
+  it('should give the hours and minutes left, when less than a day is left', () => {
+    expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 23 * 3_600 - 59 * 60) * 1_000)).toBe(
+      '23 hours 59 minutes',
+    )
+  })
+
+  it('should give the minutes left, when less than an hour is left', () => {
+    expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 9 * 60) * 1_000)).toBe('9 minutes')
+  })
+
+  it('should say less than a minute, when the time has passed', () => {
+    expect(formatTimeUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC + 60) * 1_000)).toBe('less than a minute')
+  })
+})
+
+describe('hoursUntil', () => {
+  it('should round up, when a part hour is left', () => {
+    expect(hoursUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 24 * 3_600 + 60) * 1_000)).toBe(24)
+    expect(hoursUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC - 2 * 3_600 - 1) * 1_000)).toBe(3)
+  })
+
+  it('should never go below one, when the time has passed', () => {
+    expect(hoursUntil(OCT_21_NOON_UTC, (OCT_21_NOON_UTC + 3_600) * 1_000)).toBe(1)
   })
 })
 
