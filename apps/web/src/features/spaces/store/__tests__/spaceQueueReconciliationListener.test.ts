@@ -5,11 +5,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { waitFor } from '@/tests/test-utils'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
-import {
-  cgwApi as spacesApi,
-  type SpaceQueuedItemPage,
-  type SpaceQueueSafeItems,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as spacesApi, type SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
 import type { RootState } from '@/store'
@@ -24,6 +20,7 @@ import {
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
+import { spaceQueueApi } from '../spaceQueueApi'
 import { spaceQueueReconciliationListener } from '../spaceQueueReconciliationListener'
 
 jest.mock('@/services/tx/txEvents', () => ({
@@ -69,17 +66,27 @@ const queuedTx = (txId: string, nonce: number, missingSigners: string[] = []): T
     .build(),
 })
 
-const page = (results: SpaceQueueSafeItems[], overrides: Partial<SpaceQueuedItemPage> = {}): SpaceQueuedItemPage => ({
-  count: results.length,
+type QueueResults = SpaceQueuedItemPage['results']
+
+const results = (items: TransactionQueuedItem[], chain = chainId, safe = safeAddress): QueueResults => ({
+  [safe]: { [chain]: items },
+})
+
+const page = (resultList: QueueResults[], overrides: Partial<SpaceQueuedItemPage> = {}): SpaceQueuedItemPage => ({
+  count: null,
   next: null,
   previous: null,
-  results,
+  results: resultList.reduce<QueueResults>((all, safes) => {
+    for (const [safe, chains] of Object.entries(safes)) all[safe] = { ...all[safe], ...chains }
+    return all
+  }, {}),
   unavailableSafes: [],
   ...overrides,
 })
 
-const respondWithQueue = (queue: SpaceQueuedItemPage) =>
-  server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => HttpResponse.json(queue)))
+const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
+
+const respondWithQueue = (queue: SpaceQueuedItemPage) => server.use(http.get(queueUrl, () => HttpResponse.json(queue)))
 
 const respondWithDetails = (
   txId: string,
@@ -100,8 +107,8 @@ const respondWithDetails = (
 const respondWithSpaceSafes = (safes: Record<string, string[]>) =>
   server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({ safes })))
 
-const pollQueue = async (store: TestStore, cursor?: string) => {
-  await store.dispatch(spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate({ spaceId, cursor }))
+const pollQueue = async (store: TestStore) => {
+  await store.dispatch(spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId }))
 }
 
 const processingTx = (nonce: number, safe = safeAddress): PendingProcessingTx => ({
@@ -131,7 +138,7 @@ describe('spaceQueueReconciliationListener', () => {
     store.dispatch(
       setPendingTx({ txId: id, chainId, safeAddress, nonce: 3, status: PendingStatus.SIGNING, signerAddress }),
     )
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(id, 3, [faker.finance.ethereumAddress()])] }]))
+    respondWithQueue(page([results([queuedTx(id, 3, [faker.finance.ethereumAddress()])])]))
 
     await pollQueue(store)
 
@@ -145,7 +152,7 @@ describe('spaceQueueReconciliationListener', () => {
     store.dispatch(
       setPendingTx({ txId: id, chainId, safeAddress, nonce: 3, status: PendingStatus.SIGNING, signerAddress }),
     )
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(id, 3, [signerAddress])] }]))
+    respondWithQueue(page([results([queuedTx(id, 3, [signerAddress])])]))
 
     await pollQueue(store)
 
@@ -158,7 +165,7 @@ describe('spaceQueueReconciliationListener', () => {
     const pendingTx = processingTx(4)
     const txHash = faker.string.hexadecimal({ length: 64 })
     store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(txId(), 5)] }]))
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
     respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS, txHash })
 
     await pollQueue(store)
@@ -197,7 +204,7 @@ describe('spaceQueueReconciliationListener', () => {
       const store = makeTestStore()
       const id = txId()
       store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
-      respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(txId(), 5)] }]))
+      respondWithQueue(page([results([queuedTx(txId(), 5)])]))
       respondWithDetails(id, { txStatus })
 
       await pollQueue(store)
@@ -212,7 +219,7 @@ describe('spaceQueueReconciliationListener', () => {
     const id = txId()
     let requested = false
     store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(txId(), 5)] }]))
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
     respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS }, () => {
       requested = true
       store.dispatch(clearPendingTx({ txId: id }))
@@ -230,7 +237,7 @@ describe('spaceQueueReconciliationListener', () => {
     const id = txId()
     const pendingTx = processingTx(4, faker.finance.ethereumAddress())
     store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(txId(), 5)] }]))
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
 
     await pollQueue(store)
 
@@ -243,23 +250,23 @@ describe('spaceQueueReconciliationListener', () => {
     const id = txId()
     const pendingTx = processingTx(4)
     store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
-    respondWithQueue(
-      page([{ chainId, safeAddress, items: [queuedTx(txId(), 5)] }], { unavailableSafes: [{ chainId, safeAddress }] }),
-    )
+    respondWithQueue(page([results([queuedTx(txId(), 5)])], { unavailableSafes: [{ chainId, safeAddress }] }))
 
     await pollQueue(store)
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
   })
 
-  it('should leave a pending tx untouched while a later page could still hold it', async () => {
+  it('should leave a pending tx of a listed Safe missing from the queue untouched when the gateway capped the queue', async () => {
     const store = makeTestStore()
     const id = txId()
     const pendingTx = processingTx(4)
     store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
     respondWithSpaceSafes({ [chainId]: [safeAddress] })
     await store.dispatch(spacesApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
-    respondWithQueue(page([], { next: `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued?cursor=abc` }))
+    const otherSafe = faker.finance.ethereumAddress()
+    const shown = [queuedTx(txId(), 0), queuedTx(txId(), 1)]
+    respondWithQueue(page([results(shown, chainId, otherSafe)], { count: shown.length + 1 }))
 
     await pollQueue(store)
 
@@ -267,26 +274,65 @@ describe('spaceQueueReconciliationListener', () => {
     expect(mockTxDispatch).not.toHaveBeenCalled()
   })
 
+  it('should settle a pending tx of a listed Safe from its own queue when another Safe comes first', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
+    respondWithSpaceSafes({ [chainId]: [safeAddress] })
+    await store.dispatch(spacesApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
+    respondWithQueue(
+      page([results([queuedTx(txId(), 1)], chainId, faker.finance.ethereumAddress()), results([queuedTx(txId(), 5)])]),
+    )
+    respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
+
+    await pollQueue(store)
+
+    await waitFor(() =>
+      expect(mockTxDispatch).toHaveBeenCalledWith(TxEvent.SUCCESS, expect.objectContaining({ txId: id })),
+    )
+  })
+
+  it('should leave a pending tx untouched when its Safe still queues its nonce after another Safe', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    const pendingTx = processingTx(4)
+    store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
+    respondWithSpaceSafes({ [chainId]: [safeAddress] })
+    await store.dispatch(spacesApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
+    respondWithQueue(
+      page([results([queuedTx(txId(), 1)], chainId, faker.finance.ethereumAddress()), results([queuedTx(txId(), 4)])]),
+    )
+
+    await pollQueue(store)
+
+    expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
+    expect(mockTxDispatch).not.toHaveBeenCalled()
+  })
+
+  it('should dispatch SUCCESS when a listed Safe queues only on another chain', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
+    respondWithSpaceSafes({ [chainId]: [safeAddress] })
+    await store.dispatch(spacesApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
+    respondWithQueue(page([results([queuedTx(txId(), 2)], faker.string.numeric(5))]))
+    respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
+
+    await pollQueue(store)
+
+    await waitFor(() =>
+      expect(mockTxDispatch).toHaveBeenCalledWith(TxEvent.SUCCESS, expect.objectContaining({ txId: id })),
+    )
+  })
+
   it('should leave a pending tx untouched while its nonce is still queued', async () => {
     const store = makeTestStore()
     const id = txId()
     const pendingTx = processingTx(4)
     store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(txId(), 4)] }]))
+    respondWithQueue(page([results([queuedTx(txId(), 4)])]))
 
     await pollQueue(store)
-
-    expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
-  })
-
-  it('should not settle executions from a later page', async () => {
-    const store = makeTestStore()
-    const id = txId()
-    const pendingTx = processingTx(4)
-    store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
-    respondWithQueue(page([{ chainId, safeAddress, items: [queuedTx(txId(), 9)] }]))
-
-    await pollQueue(store, 'abc')
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
   })

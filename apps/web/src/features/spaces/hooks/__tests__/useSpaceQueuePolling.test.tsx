@@ -2,8 +2,6 @@ import { faker } from '@faker-js/faker'
 import { renderHook, act } from '@testing-library/react'
 import { type ReactNode } from 'react'
 import { Provider } from 'react-redux'
-import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
 import { skipToken } from '@reduxjs/toolkit/query'
@@ -14,6 +12,8 @@ import { selectNotifications } from '@/store/notificationsSlice'
 import { PendingStatus, setPendingTx } from '@/store/pendingTxsSlice'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import * as spaceQueueApi from '../../store/spaceQueueApi'
+import type { SpaceQueue } from '../../store/spaceQueueApi'
 import { useSpaceQueuePolling } from '../useSpaceQueuePolling'
 
 const mockSpaceId = jest.fn<string | null, []>()
@@ -60,19 +60,20 @@ const queuedTx = (missingSigners: string[], txStatus = TransactionStatus.AWAITIN
   return item
 }
 
-const page = (items: TransactionQueuedItem[]): SpaceQueuedItemPage => ({
-  next: null,
-  previous: null,
-  results: [{ chainId, safeAddress, items }],
+const queue = (items: TransactionQueuedItem[]): SpaceQueue => ({
+  sections: [{ safeAddress, chains: [{ chainId, items }] }],
   unavailableSafes: [],
+  shownCount: items.length,
+  totalCount: items.length,
+  isComplete: true,
 })
 
 let queueSpy: jest.SpyInstance
-const mockQueue = (currentData: SpaceQueuedItemPage | undefined) => {
-  queueSpy = jest.spyOn(spacesQueries, 'useSpaceTransactionsGetTransactionQueueV1Query').mockReturnValue({
+const mockQueue = (currentData: SpaceQueue | undefined) => {
+  queueSpy = jest.spyOn(spaceQueueApi, 'useGetSpaceQueueQuery').mockReturnValue({
     currentData,
     refetch,
-  } as unknown as ReturnType<typeof spacesQueries.useSpaceTransactionsGetTransactionQueueV1Query>)
+  } as unknown as ReturnType<typeof spaceQueueApi.useGetSpaceQueueQuery>)
 }
 
 const renderPolling = (store = makeStore()) => {
@@ -95,7 +96,7 @@ describe('useSpaceQueuePolling', () => {
     mockQueue(undefined)
   })
 
-  it('should poll the first queue page of the Space', () => {
+  it('should poll the queue of the Space', () => {
     renderPolling()
 
     expect(queueSpy).toHaveBeenLastCalledWith(
@@ -147,7 +148,7 @@ describe('useSpaceQueuePolling', () => {
   })
 
   it('should toast once for a new tx the wallet can sign', () => {
-    mockQueue(page([queuedTx([wallet])]))
+    mockQueue(queue([queuedTx([wallet])]))
     const { store, rerender } = renderPolling()
 
     rerender()
@@ -160,7 +161,7 @@ describe('useSpaceQueuePolling', () => {
   })
 
   it('should not toast again for the same tx after a remount', () => {
-    mockQueue(page([queuedTx([wallet])]))
+    mockQueue(queue([queuedTx([wallet])]))
     const store = makeStore()
     renderPolling(store).unmount()
 
@@ -170,7 +171,7 @@ describe('useSpaceQueuePolling', () => {
   })
 
   it('should aggregate several new signable txs into one toast', () => {
-    mockQueue(page([queuedTx([wallet]), queuedTx([wallet])]))
+    mockQueue(queue([queuedTx([wallet]), queuedTx([wallet])]))
 
     const { store } = renderPolling()
 
@@ -178,7 +179,7 @@ describe('useSpaceQueuePolling', () => {
   })
 
   it('should not toast for a tx the wallet cannot sign', () => {
-    mockQueue(page([queuedTx([faker.finance.ethereumAddress()])]))
+    mockQueue(queue([queuedTx([faker.finance.ethereumAddress()])]))
 
     const { store } = renderPolling()
 
@@ -186,7 +187,7 @@ describe('useSpaceQueuePolling', () => {
   })
 
   it('should not toast for a tx awaiting execution', () => {
-    mockQueue(page([queuedTx([wallet], TransactionStatus.AWAITING_EXECUTION)]))
+    mockQueue(queue([queuedTx([wallet], TransactionStatus.AWAITING_EXECUTION)]))
 
     const { store } = renderPolling()
 
@@ -195,7 +196,7 @@ describe('useSpaceQueuePolling', () => {
 
   it('should not toast for a pending tx', () => {
     const tx = queuedTx([wallet])
-    mockQueue(page([tx]))
+    mockQueue(queue([tx]))
     const store = makeStore()
     store.dispatch(
       setPendingTx({

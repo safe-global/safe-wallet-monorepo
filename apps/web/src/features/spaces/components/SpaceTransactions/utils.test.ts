@@ -1,14 +1,9 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import type {
-  ConflictHeaderQueuedItem,
-  SpaceQueuedItemPage,
-  SpaceQueueSafeItems,
-  TransactionQueuedItem,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { ConflictHeaderQueuedItem, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
-import { getCounterparty, getNextCursor, getNextNonce, getQueueStatus, getSectionRows, groupQueueBySafe } from './utils'
+import { getCounterparty, getNextNonce, getQueueStatus, getSectionRows } from './utils'
 
 const transactionItem = (
   nonce = faker.number.int({ max: 1000 }),
@@ -26,20 +21,6 @@ const transactionItem = (
 
 const conflictHeader = (nonce: number): ConflictHeaderQueuedItem => ({ type: 'CONFLICT_HEADER', nonce })
 
-const run = (chainId: string, safeAddress: string, items: SpaceQueueSafeItems['items']): SpaceQueueSafeItems => ({
-  chainId,
-  safeAddress,
-  items,
-})
-
-const page = (results: SpaceQueueSafeItems[]): SpaceQueuedItemPage => ({
-  count: results.length,
-  next: null,
-  previous: null,
-  results,
-  unavailableSafes: [],
-})
-
 const multisigTx = (txStatus: Transaction['txStatus'], missingSigners: string[] = []): Transaction =>
   ({
     id: faker.string.uuid(),
@@ -51,56 +32,6 @@ const multisigTx = (txStatus: Transaction['txStatus'], missingSigners: string[] 
     },
   }) as Transaction
 
-describe('getNextCursor', () => {
-  it('returns the cursor of a next URL', () => {
-    expect(getNextCursor('https://cgw.test/v1/spaces/1/transactions/queued?cursor=limit%3D20%26offset%3D23')).toBe(
-      'limit=20&offset=23',
-    )
-  })
-
-  it('returns undefined without a next URL', () => {
-    expect(getNextCursor(null)).toBeUndefined()
-    expect(getNextCursor(undefined)).toBeUndefined()
-  })
-})
-
-describe('groupQueueBySafe', () => {
-  const chainId = faker.string.numeric(3)
-  const safeA = checksumAddress(faker.finance.ethereumAddress())
-  const safeB = checksumAddress(faker.finance.ethereumAddress())
-
-  it('keeps Safes apart, in order of first appearance', () => {
-    const a = run(chainId, safeA, [transactionItem()])
-    const b = run(chainId, safeB, [transactionItem()])
-
-    expect(groupQueueBySafe([page([a, b])])).toEqual([a, b])
-  })
-
-  it('joins every run of a Safe, across pages and between other Safes, and drops repeated labels', () => {
-    const first = transactionItem()
-    const second = transactionItem()
-    const third = transactionItem()
-    const other = run(chainId, safeB, [transactionItem()])
-    const pageOne = page([run(chainId, safeA, [{ type: 'LABEL', label: 'Queued' }, first]), other])
-    const pageTwo = page([
-      run(chainId, safeA.toLowerCase(), [{ type: 'LABEL', label: 'Queued' }, second]),
-      run(chainId, safeA, [third]),
-    ])
-
-    expect(groupQueueBySafe([pageOne, pageTwo])).toEqual([
-      run(chainId, safeA, [{ type: 'LABEL', label: 'Queued' }, first, second, third]),
-      other,
-    ])
-  })
-
-  it('does not join the same address on another chain', () => {
-    const a = run(chainId, safeA, [transactionItem()])
-    const otherChain = run(faker.string.numeric(4), safeA, [transactionItem()])
-
-    expect(groupQueueBySafe([page([a]), page([otherChain])])).toEqual([a, otherChain])
-  })
-})
-
 describe('getSectionRows', () => {
   it('marks the transactions under the "Next" label and drops the labels', () => {
     const next = transactionItem(4)
@@ -109,22 +40,23 @@ describe('getSectionRows', () => {
     expect(
       getSectionRows([{ type: 'LABEL', label: 'Next' }, next, { type: 'LABEL', label: 'Queued' }, queued]),
     ).toEqual([
-      { kind: 'transaction', item: next, isNext: true, inConflict: false },
-      { kind: 'transaction', item: queued, isNext: false, inConflict: false },
+      { kind: 'transaction', item: next, isNext: true },
+      { kind: 'transaction', item: queued, isNext: false },
     ])
   })
 
-  it('puts a header row with the nonce and size before transactions that share a nonce', () => {
+  it('puts a header row with the nonce and size before transactions that share a nonce, and numbers them', () => {
     const optionA = transactionItem(7, 'HasNext')
     const optionB = transactionItem(7, 'End')
     const rows = getSectionRows([{ type: 'LABEL', label: 'Next' }, conflictHeader(7), optionA, optionB])
 
     expect(rows[0]).toEqual({ kind: 'conflict', nonce: 7, size: 2 })
-    expect(rows.slice(1)).toEqual(
-      expect.arrayContaining([
-        { kind: 'transaction', item: optionA, isNext: true, inConflict: true },
-        { kind: 'transaction', item: optionB, isNext: true, inConflict: true },
-      ]),
+    expect(rows.slice(1).map((row) => (row.kind === 'transaction' ? row.conflict : undefined))).toEqual([
+      { option: 1, size: 2 },
+      { option: 2, size: 2 },
+    ])
+    expect(rows.slice(1).map((row) => (row.kind === 'transaction' ? row.item : undefined))).toEqual(
+      expect.arrayContaining([optionA, optionB]),
     )
   })
 })

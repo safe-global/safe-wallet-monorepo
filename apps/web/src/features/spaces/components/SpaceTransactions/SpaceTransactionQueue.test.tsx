@@ -1,112 +1,102 @@
 import { faker } from '@faker-js/faker'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import type {
-  SpaceQueuedItemPage,
-  SpaceQueueSafeItems,
-  TransactionQueuedItem,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import * as spacesApi from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import * as spaceQueueApi from '../../store/spaceQueueApi'
+import type { SpaceQueue, SpaceQueueSection } from '../../store/spaceQueueApi'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
-
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/spaces'),
-  useSpaceTransactionsGetTransactionQueueV1Query: jest.fn(),
-}))
 
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
-  default: ({ sections }: { sections: SpaceQueueSafeItems[] }) => (
+  default: ({ sections }: { sections: SpaceQueueSection[] }) => (
     <>
       {sections.map((section) => (
-        <div key={`${section.chainId}:${section.safeAddress}`} data-testid="space-queue-safe">
-          {section.items.length} items of {section.chainId}:{section.safeAddress}
+        <div key={section.safeAddress} data-testid="space-queue-safe">
+          {section.chains.length} chains of {section.safeAddress}
         </div>
       ))}
     </>
   ),
 }))
-jest.mock('@/components/common/InfiniteScroll', () => ({
-  __esModule: true,
-  default: ({ onLoadMore }: { onLoadMore: () => void }) => <button onClick={onLoadMore}>load more</button>,
-}))
 
-const mockQuery = spacesApi.useSpaceTransactionsGetTransactionQueueV1Query as jest.Mock
-
-const transactionItem = (): TransactionQueuedItem =>
-  ({ type: 'TRANSACTION', transaction: { id: faker.string.uuid() } }) as TransactionQueuedItem
-
-const run = (chainId: string, safeAddress: string, count: number): SpaceQueueSafeItems => ({
-  chainId,
+const section = (safeAddress: string, chainIds: string[]): SpaceQueueSection => ({
   safeAddress,
-  items: Array.from({ length: count }, transactionItem),
+  chains: chainIds.map((chainId) => ({ chainId, items: [] })),
 })
 
-const page = (results: SpaceQueueSafeItems[], overrides: Partial<SpaceQueuedItemPage> = {}): SpaceQueuedItemPage => ({
-  count: results.length,
-  next: null,
-  previous: null,
-  results,
+const queue = (sections: SpaceQueueSection[], overrides: Partial<SpaceQueue> = {}): SpaceQueue => ({
+  sections,
   unavailableSafes: [],
+  shownCount: 0,
+  totalCount: 0,
+  isComplete: true,
   ...overrides,
 })
 
 describe('SpaceTransactionQueue', () => {
   const spaceId = faker.string.uuid()
-  const chainId = faker.string.numeric(3)
   const safeA = checksumAddress(faker.finance.ethereumAddress())
   const safeB = checksumAddress(faker.finance.ethereumAddress())
+  let querySpy: jest.SpyInstance
 
-  const mockPages = (pagesByCursor: Record<string, SpaceQueuedItemPage>) => {
-    mockQuery.mockImplementation(({ cursor }: { cursor?: string }) => ({
-      currentData: pagesByCursor[cursor ?? ''],
-      isError: false,
-    }))
+  const refetch = jest.fn()
+
+  const mockQueue = (state: { currentData?: SpaceQueue; isError?: boolean; isLoading?: boolean }) => {
+    querySpy = jest.spyOn(spaceQueueApi, 'useGetSpaceQueueQuery').mockReturnValue({
+      currentData: state.currentData,
+      isError: state.isError ?? false,
+      isLoading: state.isLoading ?? false,
+      refetch,
+    } as unknown as ReturnType<typeof spaceQueueApi.useGetSpaceQueueQuery>)
   }
 
-  it('renders one section per Safe, joining the runs of a Safe that appears more than once', () => {
-    mockPages({ '': page([run(chainId, safeA, 2), run(chainId, safeB, 1), run(chainId, safeA, 1)]) })
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('requests the queue of the Space and renders one section per Safe', () => {
+    mockQueue({ currentData: queue([section(safeA, ['1', '10']), section(safeB, ['137'])]) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
+    expect(querySpy).toHaveBeenCalledWith({ spaceId })
     const sections = screen.getAllByTestId('space-queue-safe')
     expect(sections).toHaveLength(2)
-    expect(sections[0]).toHaveTextContent(`3 items of ${chainId}:${safeA}`)
-    expect(sections[1]).toHaveTextContent(`1 items of ${chainId}:${safeB}`)
+    expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
+    expect(sections[1]).toHaveTextContent(`1 chains of ${safeB}`)
   })
 
-  it('loads the next page by its cursor and joins a Safe that continues on it', () => {
-    const cursor = 'limit=20&offset=20'
-    mockPages({
-      '': page([run(chainId, safeA, 2)], {
-        next: `http://cgw.test/v1/spaces/${spaceId}/transactions/queued?cursor=${encodeURIComponent(cursor)}`,
-      }),
-      [cursor]: page([run(chainId, safeA, 3)]),
+  it('tells how many of the queued transactions are shown when the gateway capped the queue', () => {
+    mockQueue({
+      currentData: queue([section(safeA, ['1'])], { shownCount: 500, totalCount: 742, isComplete: false }),
     })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
-    fireEvent.click(screen.getByText('load more'))
 
-    expect(mockQuery).toHaveBeenCalledWith({ spaceId, cursor })
-    expect(screen.getAllByTestId('space-queue-safe')).toHaveLength(1)
-    expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(`5 items of ${chainId}:${safeA}`)
-    expect(screen.queryByText('load more')).not.toBeInTheDocument()
+    expect(screen.getByText('Showing 500 of 742 pending transactions.')).toBeInTheDocument()
+  })
+
+  it('does not mention a cap when the whole queue was returned', () => {
+    mockQueue({ currentData: queue([section(safeA, ['1'])], { shownCount: 3, totalCount: 3 }) })
+
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+    expect(screen.queryByText(/^Showing/)).not.toBeInTheDocument()
   })
 
   it('shows the empty state when no Safe has pending transactions', () => {
-    mockPages({ '': page([]) })
+    mockQueue({ currentData: queue([]) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
     expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
   })
 
-  it('tells how many Safes could not be loaded', () => {
-    mockPages({
-      '': page([], {
+  it('tells how many Safes could not be loaded next to the queue of the others', () => {
+    mockQueue({
+      currentData: queue([section(safeA, ['137'])], {
         unavailableSafes: [
-          { chainId, safeAddress: safeA },
-          { chainId, safeAddress: safeB },
+          { chainId: '1', safeAddress: safeA },
+          { chainId: '1', safeAddress: safeB },
         ],
       }),
     })
@@ -118,12 +108,33 @@ describe('SpaceTransactionQueue', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows an error when the queue fails to load', () => {
-    mockQuery.mockReturnValue({ currentData: undefined, isError: true })
+  it('shows skeletons while the first queue loads', () => {
+    mockQueue({ isLoading: true })
+
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+    expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+  })
+
+  it('shows an error with a retry when the queue fails to load', () => {
+    mockQueue({ isError: true })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
     expect(screen.getByText('Error loading transactions')).toBeInTheDocument()
     expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  it('shows an error instead of the empty state when no Safe could be loaded', () => {
+    mockQueue({ currentData: queue([], { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }) })
+
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+    expect(screen.getByText('Error loading transactions')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+    expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
   })
 })
