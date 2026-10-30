@@ -167,8 +167,11 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       expect(await permissionOf(journey, safe, recipient)).toBe(RECIPIENT_PERMISSION.ALWAYS)
 
       await registerAllowlist(safe, { allowlist: { token: SEPOLIA_USDC.address, recipients: [recipient.address] } })
-      await policies.goto(workspaceId)
-      await expect(allowlist.row(safe.address)).toContainText('1 recipient')
+      // CGW can still serve the policies it cached before the setup was registered, so reload until it doesn't.
+      await expect(async () => {
+        await policies.goto(workspaceId)
+        await expect(allowlist.row(safe.address)).toContainText('1 recipient', { timeout: 5_000 })
+      }).toPass({ timeout: 90_000 })
       await allowlist.openPanel(safe.address)
       await expect(allowlist.panel).toContainText('1 recipient')
       await expect(allowlist.panel.getByRole('button', { name: 'Edit' })).toBeEnabled()
