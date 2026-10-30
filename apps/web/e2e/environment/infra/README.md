@@ -6,7 +6,7 @@ CGW runs with `FF_SAFE_QUEUE_SERVICE` on, and the chains have the `QUEUE_SERVICE
 
 ## Requirements
 
-- Docker with Compose v2 and an ARM64 host. The pinned CGW image is ARM64-only.
+- Docker with Compose v2 and Buildx, and an ARM64 host. CGW images are ARM64-only.
 - Python 3.9 or later for `scripts/test_env.py`. The mocks in `mocks/` are TypeScript and run in the pinned Node image, so the host needs no Node.
 - A Sepolia RPC endpoint with archive access at the block pinned in `test-images.env`.
 - Read access to the private Queue Service image: `docker login ghcr.io` with a GitHub token that has `read:packages` and SSO for `safe-global`.
@@ -50,17 +50,22 @@ The CoW API mock answers unrecorded requests with 404 (`COW_API_OFFLINE: 'true'`
 
 ## Configuration
 
-`test-images.env` pins container images, chain IDs and fork blocks. The optional, ignored `.env.test` file overrides those defaults; exported environment variables take precedence over both files. Service settings are checked in under `container_env_files/` and referenced by Compose.
+`test-images.env` pins the infrastructure images, the Events Service image, chain IDs and fork blocks. The optional, ignored `.env.test` file overrides those defaults; exported environment variables take precedence over both files. Service settings are checked in under `container_env_files/` and referenced by Compose.
 
-| Variable               | Purpose                                                                             |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| `SEPOLIA_FORK_RPC_URL` | Required Sepolia archive RPC URL                                                    |
-| `SAFE_E2E_PROJECT`     | Exported project name; defaults to `safe-e2e-local` and must start with `safe-e2e-` |
-| `RPC_PORT`             | Local Anvil port; defaults to `8545`                                                |
-| `REVERSE_PROXY_PORT`   | Local API port; defaults to `8000`                                                  |
-| `AUTH0_MOCK_PORT`      | Local port of the Auth0 mock; defaults to `8443`                                    |
-| `LEDGER_EMULATOR_PORT` | Local port of the Ledger emulator's API; defaults to `9555`                         |
-| `FORK_RPC_URL_MAINNET` | Archive RPC URL for the optional mainnet profile                                    |
-| `FORK_RPC_URL_POLYGON` | Archive RPC URL for the optional Polygon profile                                    |
+`up` does not use pins for CGW, the Config Service, the Transaction Service, the Queue Service and the Decoder. It reads the version that staging (default) or production runs from each service's `/about` endpoint, pins the matching GHCR image by digest and writes the result to `.test-runs/<project>.images.env`. Later commands of the project use that file until `reset`. Print the images without starting anything with `python3 scripts/test_env.py versions [--backend production]`. To test one service at another version, export its variable (`CGW_IMAGE`, `CFG_IMAGE`, `TXS_IMAGE`, `QUEUE_IMAGE` or `DECODER_IMAGE`) before `up`.
+
+The Transaction Service, Queue Service and Decoder have no image tag per commit on staging: each `main` build overwrites the `staging` tag. `up` uses the current `staging` image and warns when its `BUILD_COMMIT` differs from the build that staging reports.
+
+| Variable               | Purpose                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `SEPOLIA_FORK_RPC_URL` | Required Sepolia archive RPC URL                                                     |
+| `SAFE_E2E_BACKEND`     | `staging` (default) or `production`: the deployment whose service versions `up` uses |
+| `SAFE_E2E_PROJECT`     | Exported project name; defaults to `safe-e2e-local` and must start with `safe-e2e-`  |
+| `RPC_PORT`             | Local Anvil port; defaults to `8545`                                                 |
+| `REVERSE_PROXY_PORT`   | Local API port; defaults to `8000`                                                   |
+| `AUTH0_MOCK_PORT`      | Local port of the Auth0 mock; defaults to `8443`                                     |
+| `LEDGER_EMULATOR_PORT` | Local port of the Ledger emulator's API; defaults to `9555`                          |
+| `FORK_RPC_URL_MAINNET` | Archive RPC URL for the optional mainnet profile                                     |
+| `FORK_RPC_URL_POLYGON` | Archive RPC URL for the optional Polygon profile                                     |
 
 After starting Sepolia, add an optional chain with `python3 scripts/test_env.py up --chain mainnet` or `--chain polygon`. Remove it with `reset --chain <name>`; other chains remain running.
