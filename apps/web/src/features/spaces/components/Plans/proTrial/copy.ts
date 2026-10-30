@@ -51,13 +51,13 @@ export const PRO_TRIAL_COPY = {
 
   trialStart: {
     title: (days: number | null) => (days === null ? 'Safe Pro free trial' : `Safe Pro ${days}-day free trial`),
-    /** Followed by the "see plans" link. */
+    /** Followed by the "see all features" link. */
     tagline: 'All Pro features unlocked,',
     migrated: "You've used Safe before, so your trial is 60 days instead of 30.",
     noCharge: 'No card. No charge. The trial ends on its own.',
     endsOn: (date: string) => `Trial ends ${date}.`,
     start: 'Start free trial',
-    seePlans: 'see plans',
+    seePlans: 'see all features',
     back: 'Go to My accounts',
     unavailable: 'There is no trial available for this Workspace.',
   },
