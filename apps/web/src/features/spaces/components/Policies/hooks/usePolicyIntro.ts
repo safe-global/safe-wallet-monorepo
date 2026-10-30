@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-/** A policy's intro dialog: shown before its flow until it has been seen once, then skipped. */
-export const usePolicyIntro = (seenKey: string, startFlow: () => void) => {
+/** A policy's intro dialog: shown before its flow until it has been seen once, then skipped, unless `everyTime` */
+export const usePolicyIntro = (seenKey: string, startFlow: () => void, { everyTime = false } = {}) => {
   const [hasSeen = false, setHasSeen] = useLocalStorage<boolean>(seenKey)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -13,12 +13,12 @@ export const usePolicyIntro = (seenKey: string, startFlow: () => void) => {
   }, [setHasSeen])
 
   const request = useCallback(() => {
-    if (hasSeen) {
+    if (hasSeen && !everyTime) {
       startFlow()
       return
     }
     setIsOpen(true)
-  }, [hasSeen, startFlow])
+  }, [hasSeen, everyTime, startFlow])
 
   const proceed = useCallback(() => {
     close()

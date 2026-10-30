@@ -43,6 +43,7 @@ describe('mapImmediateGuardPolicies', () => {
       type: 'allowlist',
       status: 'pending',
       operation: 'create',
+      appliesOnExecution: true,
       enforcement: { via: 'guard', guardAddress: setup.guard },
       safeTxHash: setup.transaction.safeTxHash,
       nonce: 4,

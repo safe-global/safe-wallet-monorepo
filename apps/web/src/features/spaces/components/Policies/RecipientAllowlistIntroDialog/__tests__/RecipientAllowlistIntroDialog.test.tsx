@@ -10,22 +10,21 @@ const StatefulIntro = ({ onProceed }: { onProceed: () => void }) => {
 }
 
 describe('RecipientAllowlistIntroDialog', () => {
-  it('names the policy and what it does', () => {
+  it('should name the allowlist, when it opens', () => {
     render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
 
-    expect(screen.getByRole('heading', { name: /Recipient allowlist/ })).toBeInTheDocument()
-    expect(screen.getByText('Only let funds go to addresses you approve.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Allowlist' })).toBeInTheDocument()
   })
 
-  it('explains who can receive funds, that other transfers are blocked, and the 3-minute wait', () => {
+  it('should explain who can receive funds, the onchain check and the 3-minute wait, when it opens', () => {
     render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
 
-    expect(screen.getByText('Only addresses on the list can receive funds from this Safe account.')).toBeInTheDocument()
-    expect(screen.getByText('Transfers to any other address are blocked.')).toBeInTheDocument()
+    expect(screen.getByText('You choose who can receive funds and which tokens.')).toBeInTheDocument()
     expect(
-      screen.getByText(
-        'Setting it up, changing it or removing it requires a transaction. Every change waits 3 minutes before it applies.',
-      ),
+      screen.getByText("It's checked onchain, so a blocked action fails even if every signer approves it."),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Every change needs a transaction and waits 3 minutes before it applies.'),
     ).toBeInTheDocument()
   })
 
@@ -43,22 +42,28 @@ describe('RecipientAllowlistIntroDialog', () => {
     expect(preview.querySelector('[data-slot="skeleton"]')).toBeNull()
   })
 
-  it('links the title icon to the policies article', () => {
+  it('should say every other action is blocked and link the policies article, when it opens', () => {
     render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
 
-    expect(screen.getByRole('link', { name: 'Learn more about recipient allowlists' })).toHaveAttribute(
-      'href',
-      HelpCenterArticle.POLICIES,
-    )
+    expect(screen.getByText('Every other action')).toBeInTheDocument()
+    expect(screen.getByText('Blocked')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 
-  it('proceeds to the flow on the primary action', async () => {
+  it('should not let the owner set up, when they have not confirmed that other actions are blocked', () => {
+    render(<RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={jest.fn()} />)
+
+    expect(screen.getByRole('button', { name: 'Set up allowlist' })).toBeDisabled()
+  })
+
+  it('should proceed to the flow, when the owner confirms and sets up', async () => {
     const onProceed = jest.fn()
     const { user } = renderWithUserEvent(
       <RecipientAllowlistIntroDialog open onOpenChange={jest.fn()} onProceed={onProceed} />,
     )
 
-    await user.click(screen.getByRole('button', { name: 'Set up recipient allowlist' }))
+    await user.click(screen.getByRole('checkbox', { name: /I understand that anything not allowed will be blocked/ }))
+    await user.click(screen.getByRole('button', { name: 'Set up allowlist' }))
 
     expect(onProceed).toHaveBeenCalledTimes(1)
   })

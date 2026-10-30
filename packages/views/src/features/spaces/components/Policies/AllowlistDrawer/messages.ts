@@ -24,6 +24,8 @@ const EXECUTED_LINE: Record<PendingPolicyOperation, (changeDelay: string) => str
   remove: (changeDelay) => `The allowlist is removed after a delay of ${changeDelay}.`,
 }
 
+export const APPLIED_ON_EXECUTION_LINE = 'The allowlist is active now. It can take a moment to show here.'
+
 export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
   ...PENDING_OUTCOME_TITLE,
   expired: 'Transaction expired',

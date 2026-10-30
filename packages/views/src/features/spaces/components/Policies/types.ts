@@ -173,6 +173,8 @@ export type PendingAllowlistPolicy = Omit<PendingPolicyBase, 'status'> & {
   // Placeholder: a draft CGW PR adds this timestamp to pending transactions; rename to match it once merged.
   /** Unix SECONDS after which the queued transaction can no longer be signed. */
   expiresAt?: number
+  /** A first setup (`configureImmediately`): its rules apply as it executes, without the guard's delay. */
+  appliesOnExecution?: boolean
 }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy | PendingAllowlistPolicy
 
