@@ -487,7 +487,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
   })
 
-  it('should say the allowlist is removed and offer to remove the guard, when an applied removal waits for it', async () => {
+  it('should say the allowlist is removed, show it as blocking and offer to remove the guard, when an applied removal waits for it', async () => {
     const onRemoveGuard = jest.fn()
     const { user } = renderWithUserEvent(
       <AllowlistDrawer
@@ -502,7 +502,7 @@ describe('AllowlistDrawer', () => {
     expect(
       screen.getByText("Remove the guard to finish. Until then, this Safe account can't send anything."),
     ).toBeInTheDocument()
-    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+    expect(screen.getByTestId('policy-status-blocking')).toHaveTextContent('Blocking')
     expect(screen.queryByText('Who can receive funds')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
 

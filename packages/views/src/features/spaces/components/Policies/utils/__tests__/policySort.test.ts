@@ -10,6 +10,7 @@ import {
 } from '@/features/spaces/components/Policies/mocks/policies'
 import {
   mockActiveAllowlist,
+  mockAllowlistAwaitingGuardRemoval,
   mockAllowlistChangePending,
   mockFailedAllowlist,
 } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
@@ -119,6 +120,10 @@ describe('getPolicyStatus', () => {
     expect(getPolicyStatus({ ...mockAllowlistChangePending(), enabled: false })).toBe('change-pending')
   })
 
+  it('should read an allowlist as blocking, when an applied removal left only the guard to take off', () => {
+    expect(getPolicyStatus(mockAllowlistAwaitingGuardRemoval())).toBe('blocking')
+  })
+
   it('should read a failed pending allowlist as failed', () => {
     expect(getPolicyStatus(mockFailedAllowlist())).toBe('failed')
   })
@@ -134,5 +139,15 @@ describe('sortPolicies with allowlist statuses', () => {
     const sorted = sortPolicies([active, failed, changePending, pending], 'status', context)
 
     expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'change-pending', 'failed', 'active'])
+  })
+
+  it('should, when sorting by status, put a blocking allowlist first with the pending rows', () => {
+    const sorted = sortPolicies(
+      [mockActiveAllowlist(), mockAllowlistAwaitingGuardRemoval(), mockAllowlistChangePending()],
+      'status',
+      context,
+    )
+
+    expect(sorted.map(getPolicyStatus)).toEqual(['blocking', 'change-pending', 'active'])
   })
 })
