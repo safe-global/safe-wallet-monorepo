@@ -184,7 +184,15 @@ export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending'
 export type FailedAllowlistPolicy = PendingAllowlistPolicy & { status: 'failed' }
 
 export type PolicyStatus =
-  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending' | 'expired'
+  | 'active'
+  | 'pending'
+  | 'activating'
+  | 'unenforced'
+  | 'not-activated'
+  | 'failed'
+  | 'change-pending'
+  | 'expired'
+  | 'blocking'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
@@ -213,7 +221,8 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
   if (isPendingPolicy(policy)) return policy.status
-  if (isAllowlistPolicy(policy) && (policy.scheduledChange || policy.awaitingGuardRemoval)) return 'change-pending'
+  if (isAllowlistPolicy(policy) && policy.awaitingGuardRemoval) return 'blocking'
+  if (isAllowlistPolicy(policy) && policy.scheduledChange) return 'change-pending'
   if (policy.enabled) return 'active'
 
   // A proposer grant has no module to switch on, so one that is not in force was never activated.
