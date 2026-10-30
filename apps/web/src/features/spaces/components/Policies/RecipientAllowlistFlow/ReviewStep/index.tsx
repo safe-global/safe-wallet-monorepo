@@ -30,6 +30,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { joinNames, spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
+import { useAllowlistAddressInfo } from '../hooks/useAllowlistAddressInfo'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useSaveAllowlistConfiguration } from '../hooks/useSaveAllowlistConfiguration'
 import AllowlistPolicyDetails from './AllowlistPolicyDetails'
@@ -111,17 +112,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
     return joinNames(names)
   }, [safe.owners, wallet, resolveName, chainId])
 
-  const getAddressInfo = useCallback(
-    (address: string) => {
-      const token = tokens.find((item) => sameAddress(item.address, address))
-      if (token) return { name: token.symbol, logoUri: token.logoUri }
-      if (selected && sameAddress(selected.address, address)) return { name: selected.name }
-      const recipient = recipients.find((item) => sameAddress(item.address, address))
-      if (recipient) return { name: recipient.name }
-      return { name: resolveName(address, chainId) || undefined }
-    },
-    [tokens, selected, recipients, chainId, resolveName],
-  )
+  const named = useMemo(() => (selected ? [selected, ...recipients] : recipients), [selected, recipients])
+  const getAddressInfo = useAllowlistAddressInfo(named)
 
   if (!guardState && !safeTxError) {
     return (
