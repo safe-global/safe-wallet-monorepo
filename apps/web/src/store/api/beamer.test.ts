@@ -84,4 +84,32 @@ describe('parseBeamerUpdates', () => {
 
     expect(updates.topBar).toBeUndefined()
   })
+
+  it('should, when the latest post is a corner card, return its id, title, text and image', () => {
+    const updates = parseBeamerUpdates({
+      lastPostId: 282323458,
+      lastPostBoostedAnnouncementType: 3,
+      lastPostTitle: 'Safenet checks now available in Safe Pro',
+      lastPostBody: 'Independent security checks on every transaction.',
+      lastPostImageUrl: 'https://app.getbeamer.com/pictures?id=1',
+    })
+
+    expect(updates.cornerCard).toEqual({
+      postId: 282323458,
+      title: 'Safenet checks now available in Safe Pro',
+      body: 'Independent security checks on every transaction.',
+      imageUrl: 'https://app.getbeamer.com/pictures?id=1',
+    })
+  })
+
+  it('should, when the corner card image is not https, return the corner card without an image', () => {
+    const updates = parseBeamerUpdates({
+      lastPostId: 282323458,
+      lastPostBoostedAnnouncementType: 3,
+      lastPostTitle: 'Safenet checks now available in Safe Pro',
+      lastPostImageUrl: 'http://app.getbeamer.com/pictures?id=1',
+    })
+
+    expect(updates.cornerCard).toEqual({ postId: 282323458, title: 'Safenet checks now available in Safe Pro' })
+  })
 })

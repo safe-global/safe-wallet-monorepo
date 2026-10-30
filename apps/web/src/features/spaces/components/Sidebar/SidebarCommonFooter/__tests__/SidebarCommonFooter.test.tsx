@@ -205,6 +205,12 @@ jest.mock('@/hooks/useBeamerUpdates', () => ({
   useBeamerUpdates: () => ({ unreadCount: mockUnreadCount, markAsSeen: mockMarkAsSeen }),
 }))
 
+jest.mock('../../WhatsNewCornerCard', () => ({
+  WhatsNewCornerCard: ({ onOpen }: { onOpen: () => void }) => (
+    <button data-testid="whats-new-corner-card" onClick={onOpen} />
+  ),
+}))
+
 jest.mock('../../WhatsNewDrawer', () => ({
   WhatsNewDrawer: ({ productId, open }: { productId: string; open: boolean }) =>
     open ? <div data-testid="whats-new-drawer" data-product-id={productId} /> : null,
@@ -510,6 +516,14 @@ describe('SidebarCommonFooter', () => {
     render(<SidebarCommonFooter />)
     fireEvent.click(screen.getByTestId('list-item-whats-new'))
 
+    expect(mockMarkAsSeen).toHaveBeenCalledTimes(1)
+  })
+
+  it("should, when the user clicks the corner card, open What's new and mark the posts as seen", () => {
+    render(<SidebarCommonFooter />)
+    fireEvent.click(screen.getByTestId('whats-new-corner-card'))
+
+    expect(screen.getByTestId('whats-new-drawer')).toBeInTheDocument()
     expect(mockMarkAsSeen).toHaveBeenCalledTimes(1)
   })
 

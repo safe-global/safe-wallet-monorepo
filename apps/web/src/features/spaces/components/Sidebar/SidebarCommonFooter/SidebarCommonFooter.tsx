@@ -22,6 +22,7 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
 import { WhatsNewDrawer } from '../WhatsNewDrawer'
+import { WhatsNewCornerCard } from '../WhatsNewCornerCard'
 import {
   SafeProFeature,
   useIsSafeProAnnouncementEnabled,
@@ -227,6 +228,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
 
       <HelpMenu anchorEl={helpMenuAnchor} onClose={handleHelpMenuClose} />
       {BEAMER_ID && <WhatsNewDrawer productId={BEAMER_ID} open={isWhatsNewOpen} onClose={handleWhatsNewClose} />}
+      <WhatsNewCornerCard onOpen={handleBeamerClick} />
     </SidebarFooter>
   )
 }
