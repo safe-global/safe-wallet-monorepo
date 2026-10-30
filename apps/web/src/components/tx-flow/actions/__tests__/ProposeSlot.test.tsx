@@ -1,5 +1,5 @@
 import { type PropsWithChildren, type ReactElement } from 'react'
-import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
@@ -126,52 +126,55 @@ describe('Propose slot', () => {
     return Wrapper
   }
 
-  const renderSlotIds = (wrapperProps?: Parameters<typeof createWrapper>[0]) =>
-    renderHook(
+  const renderSlotIds = async (wrapperProps?: Parameters<typeof createWrapper>[0]) => {
+    const rendered = renderHook(
       () => ({
         submit: useSlotIds(SlotName.Submit),
         comboSubmit: useSlotIds(SlotName.ComboSubmit),
       }),
       { wrapper: createWrapper(wrapperProps) },
     )
+    await act(async () => {})
+    return rendered
+  }
 
-  it('registers Propose for a proposer who is not a signer', () => {
+  it('registers Propose for a proposer who is not a signer', async () => {
     mockUseIsWalletProposer.mockReturnValue(true)
 
-    const { result } = renderSlotIds()
+    const { result } = await renderSlotIds()
 
     expect(result.current.submit).toContain('propose')
     expect(result.current.comboSubmit).not.toContain('sign')
   })
 
-  it('does not register Propose for a signer who is also a proposer', () => {
+  it('does not register Propose for a signer who is also a proposer', async () => {
     mockUseIsSafeOwner.mockReturnValue(true)
     mockUseIsWalletProposer.mockReturnValue(true)
 
-    const { result } = renderSlotIds()
+    const { result } = await renderSlotIds()
 
     expect(result.current.submit).not.toContain('propose')
     expect(result.current.comboSubmit).toContain('sign')
   })
 
-  it('does not register Propose for a wallet that is neither a signer nor a proposer', () => {
-    const { result } = renderSlotIds()
+  it('does not register Propose for a wallet that is neither a signer nor a proposer', async () => {
+    const { result } = await renderSlotIds()
 
     expect(result.current.submit).not.toContain('propose')
   })
 
-  it('does not register Propose when confirming an existing transaction', () => {
+  it('does not register Propose when confirming an existing transaction', async () => {
     mockUseIsWalletProposer.mockReturnValue(true)
 
-    const { result } = renderSlotIds({ txId: 'multisig_0x1_0x2' })
+    const { result } = await renderSlotIds({ txId: 'multisig_0x1_0x2' })
 
     expect(result.current.submit).not.toContain('propose')
   })
 
-  it('never offers Execute to a proposer, even for an executable transaction', () => {
+  it('never offers Execute to a proposer, even for an executable transaction', async () => {
     mockUseIsWalletProposer.mockReturnValue(true)
 
-    const { result } = renderSlotIds({ isExecutable: true })
+    const { result } = await renderSlotIds({ isExecutable: true })
 
     expect(result.current.submit).toContain('propose')
     expect(result.current.comboSubmit).not.toContain('execute')

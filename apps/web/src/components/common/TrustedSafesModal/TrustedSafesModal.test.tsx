@@ -210,13 +210,14 @@ describe('TrustedSafesModal', () => {
     expect(mockModal.toggleSelection).toHaveBeenCalledWith('0x1234567890abcdef1234567890abcdef12345678')
   })
 
-  it('should show similarity confirmation dialog when pendingConfirmation is set', () => {
+  it('should show similarity confirmation dialog when pendingConfirmation is set', async () => {
     const modalWithPending = {
       ...mockModal,
       pendingConfirmation: '0x1234567890abcdef1234567890abcdef12345678',
     }
     render(<TrustedSafesModal modal={modalWithPending} />)
     expect(screen.getByText('Similar address detected')).toBeInTheDocument()
+    await screen.findByText('Copy to clipboard')
   })
 
   it('shows the select-all control with the selection count', () => {
@@ -237,7 +238,7 @@ describe('TrustedSafesModal', () => {
     expect(allSelectedModal.deselectAll).toHaveBeenCalled()
   })
 
-  it('should show select all confirmation dialog when pendingSelectAllConfirmation is true', () => {
+  it('should show select all confirmation dialog when pendingSelectAllConfirmation is true', async () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -258,9 +259,10 @@ describe('TrustedSafesModal', () => {
     expect(screen.getByText('Similar addresses detected')).toBeInTheDocument()
     expect(screen.getByText('No, skip similar addresses')).toBeInTheDocument()
     expect(screen.getByText('Yes, include them anyway')).toBeInTheDocument()
+    await screen.findByText('Copy to clipboard')
   })
 
-  it('should call confirmSelectAll when confirm clicked in select all dialog', () => {
+  it('should call confirmSelectAll when confirm clicked in select all dialog', async () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -278,11 +280,12 @@ describe('TrustedSafesModal', () => {
       ],
     }
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
+    await screen.findByText('Copy to clipboard')
     fireEvent.click(screen.getByText('Yes, include them anyway'))
     expect(mockModal.confirmSelectAll).toHaveBeenCalled()
   })
 
-  it('should call skipSimilarSelectAll when skip clicked in select all dialog', () => {
+  it('should call skipSimilarSelectAll when skip clicked in select all dialog', async () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -300,6 +303,7 @@ describe('TrustedSafesModal', () => {
       ],
     }
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
+    await screen.findByText('Copy to clipboard')
     fireEvent.click(screen.getByText('No, skip similar addresses'))
     expect(mockModal.skipSimilarSelectAll).toHaveBeenCalled()
   })

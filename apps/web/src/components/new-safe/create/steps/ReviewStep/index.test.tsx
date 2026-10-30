@@ -4,7 +4,7 @@ import * as relay from '@/utils/relaying'
 import * as remainingRelays from '@/hooks/useRemainingRelays'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-import { fakerChecksummedAddress, render, within } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, renderSettled, within } from '@/tests/test-utils'
 import ReviewStep, { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep/index'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -71,7 +71,7 @@ describe('ReviewStep', () => {
     mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
   })
 
-  it('should display a pay now pay later option for counterfactual safe setups', () => {
+  it('should display a pay now pay later option for counterfactual safe setups', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
       networks: [mockChain],
@@ -82,14 +82,14 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    const { getByText } = render(
+    const { getByText } = await renderSettled(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(getByText('Pay now')).toBeInTheDocument()
   })
 
-  it('should display a pay later option as selected by default for counterfactual safe setups', () => {
+  it('should display a pay later option as selected by default for counterfactual safe setups', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
       networks: [mockChain],
@@ -100,7 +100,7 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: {
         auth: {
           sessionExpiresAt: Date.now() + 60000,
@@ -117,7 +117,7 @@ describe('ReviewStep', () => {
     expect(payLaterOption).toBeChecked()
   })
 
-  it('should not display the network fee for counterfactual safes', () => {
+  it('should not display the network fee for counterfactual safes', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
       networks: [mockChain],
@@ -128,14 +128,14 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    const { queryByText } = render(
+    const { queryByText } = await renderSettled(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(queryByText('You will have to confirm a transaction and pay an estimated fee')).not.toBeInTheDocument()
   })
 
-  it('should not display the execution method for counterfactual safes', () => {
+  it('should not display the execution method for counterfactual safes', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
       networks: [mockChain],
@@ -146,7 +146,7 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    const { queryByText } = render(
+    const { queryByText } = await renderSettled(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
@@ -164,7 +164,7 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    const { getByText } = render(
+    const { getByText } = await renderSettled(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
@@ -189,7 +189,7 @@ describe('ReviewStep', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
 
-    const { getByText } = render(
+    const { getByText } = await renderSettled(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
@@ -202,7 +202,7 @@ describe('ReviewStep', () => {
     expect(getByText(/Who will pay gas fees/)).toBeInTheDocument()
   })
 
-  it('shows the daily relay counter without a Pro upsell when Safe Pro is on, since a new Safe has no plan', () => {
+  it('shows the daily relay counter without a Pro upsell when Safe Pro is on, since a new Safe has no plan', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
       networks: [mockChain],
@@ -217,7 +217,7 @@ describe('ReviewStep', () => {
       .spyOn(remainingRelays, 'useLeastRemainingRelays')
       .mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
 
     act(() => {
       fireEvent.click(screen.getByText('Pay now'))
@@ -251,10 +251,10 @@ describe('ReviewStep', () => {
     }
   }
 
-  it('shows the selector with Pay now disabled for multichain creation', () => {
+  it('shows the selector with Pay now disabled for multichain creation', async () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText } = await renderSettled(
       <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
       { initialReduxState: authReduxState },
     )
@@ -276,7 +276,7 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -290,7 +290,7 @@ describe('ReviewStep', () => {
     expect(networkList.getByTestId('chain-1')).toBeInTheDocument()
   })
 
-  it('preselects the relay for a single-network Safe that is paid now', () => {
+  it('preselects the relay for a single-network Safe that is paid now', async () => {
     const mockData: NewSafeFormData = {
       name: 'Test',
       networks: [mockChain],
@@ -305,28 +305,28 @@ describe('ReviewStep', () => {
       .spyOn(remainingRelays, 'useLeastRemainingRelays')
       .mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
 
     const relayRadio = screen.getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')
     expect(relayRadio).toHaveAttribute('data-checked')
   })
 
-  it('disables creation for multichain until the user signs in (Pay later writes to the backend)', () => {
+  it('disables creation for multichain until the user signs in (Pay later writes to the backend)', async () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     // No auth state provided -> the user is not authenticated.
-    const { getByTestId } = render(
+    const { getByTestId } = await renderSettled(
       <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(getByTestId('review-step-next-btn')).toBeDisabled()
   })
 
-  it('does not block multichain creation when counterfactual is disabled', () => {
+  it('does not block multichain creation when counterfactual is disabled', async () => {
     // Counterfactual off -> no PayLater forcing, no sign-in gate (direct deployment path).
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
 
-    const { getByTestId } = render(
+    const { getByTestId } = await renderSettled(
       <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
@@ -348,7 +348,7 @@ describe('ReviewStep', () => {
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
     const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -378,7 +378,7 @@ describe('ReviewStep', () => {
     jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const eventSpy = jest.spyOn(cfServices, 'safeCreationDispatch')
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -405,7 +405,7 @@ describe('ReviewStep', () => {
     jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const trackSpy = jest.spyOn(analytics, 'trackEvent')
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -433,7 +433,7 @@ describe('ReviewStep', () => {
     jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -467,7 +467,7 @@ describe('ReviewStep', () => {
     jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -498,7 +498,7 @@ describe('ReviewStep', () => {
       .spyOn(cfServices, 'persistCounterfactualSafe')
       .mockResolvedValue({ ok: false, error: new Error(backendMessage) })
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+    await renderSettled(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
     })
 
@@ -548,7 +548,7 @@ describe('ReviewStep', () => {
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       const persistSpy = mockCreation()
 
-      render(
+      await renderSettled(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
         inSpace,
       )
@@ -566,13 +566,13 @@ describe('ReviewStep', () => {
       )
     })
 
-    it('shows no notice below the plan limit', () => {
+    it('shows no notice below the plan limit', async () => {
       mockUseIsAdmin.mockReturnValue(true)
       mockUseSpaceSafeCount.mockReturnValue(19)
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       mockCreation()
 
-      render(
+      await renderSettled(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
         inSpace,
       )
@@ -580,13 +580,13 @@ describe('ReviewStep', () => {
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
     })
 
-    it('shows no notice to a member who cannot add Safes to the Workspace anyway', () => {
+    it('shows no notice to a member who cannot add Safes to the Workspace anyway', async () => {
       mockUseIsAdmin.mockReturnValue(false)
       mockUseSpaceSafeCount.mockReturnValue(20)
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       mockCreation()
 
-      render(
+      await renderSettled(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
         inSpace,
       )
@@ -594,13 +594,13 @@ describe('ReviewStep', () => {
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
     })
 
-    it('hides the notice once Pay now is selected, since only Pay later adds the Safe to the Workspace', () => {
+    it('hides the notice once Pay now is selected, since only Pay later adds the Safe to the Workspace', async () => {
       mockUseIsAdmin.mockReturnValue(true)
       mockUseSpaceSafeCount.mockReturnValue(20)
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       mockCreation()
 
-      render(
+      await renderSettled(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
         inSpace,
       )
@@ -617,10 +617,13 @@ describe('ReviewStep', () => {
       mockCreation()
       const push = jest.fn(() => Promise.resolve(true))
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        ...inSpace,
-        routerProps: { ...inSpace.routerProps, push },
-      })
+      await renderSettled(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        {
+          ...inSpace,
+          routerProps: { ...inSpace.routerProps, push },
+        },
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -634,10 +637,13 @@ describe('ReviewStep', () => {
       mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
       const push = jest.fn(() => Promise.resolve(true))
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        ...inSpace,
-        routerProps: { ...inSpace.routerProps, push },
-      })
+      await renderSettled(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        {
+          ...inSpace,
+          routerProps: { ...inSpace.routerProps, push },
+        },
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -656,7 +662,7 @@ describe('ReviewStep', () => {
         return { ok: true }
       })
 
-      render(
+      await renderSettled(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
         inSpace,
       )
@@ -675,9 +681,12 @@ describe('ReviewStep', () => {
         return { ok: true }
       })
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: authReduxState,
-      })
+      await renderSettled(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        {
+          initialReduxState: authReduxState,
+        },
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -695,7 +704,7 @@ describe('ReviewStep', () => {
         returnUrlsDuringDeployment.push(getStoreInstance().getState().stepUp.returnUrl)
       })
 
-      render(
+      await renderSettled(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
         inSpace,
       )
@@ -718,7 +727,10 @@ describe('ReviewStep', () => {
       const data = buildMultiChainData()
       const [first, last] = data.networks
 
-      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, inSpace)
+      await renderSettled(
+        <ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -745,7 +757,10 @@ describe('ReviewStep', () => {
       persistSpy.mockResolvedValueOnce({ ok: true, skipped: 'already-deployed' })
       const data = buildMultiChainData()
 
-      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, inSpace)
+      await renderSettled(
+        <ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -764,10 +779,13 @@ describe('ReviewStep', () => {
         .mockResolvedValueOnce({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
       const push = jest.fn(() => Promise.resolve(true))
 
-      render(<ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        ...inSpace,
-        routerProps: { ...inSpace.routerProps, push },
-      })
+      await renderSettled(
+        <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        {
+          ...inSpace,
+          routerProps: { ...inSpace.routerProps, push },
+        },
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -783,10 +801,13 @@ describe('ReviewStep', () => {
       mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
       const push = jest.fn(() => Promise.resolve(true))
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        ...inSpace,
-        routerProps: { ...inSpace.routerProps, push },
-      })
+      await renderSettled(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        {
+          ...inSpace,
+          routerProps: { ...inSpace.routerProps, push },
+        },
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -804,9 +825,12 @@ describe('ReviewStep', () => {
       mockUseIsAdmin.mockReturnValue(true)
       const persistSpy = mockCreation()
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: { auth: { ...authReduxState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
-      })
+      await renderSettled(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        {
+          initialReduxState: { auth: { ...authReduxState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
+        },
+      )
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
@@ -818,8 +842,8 @@ describe('ReviewStep', () => {
 })
 
 describe('SafeSetupOverview', () => {
-  it('shows the name, signer names and threshold of the new Safe', () => {
-    render(
+  it('shows the name, signer names and threshold of the new Safe', async () => {
+    await renderSettled(
       <SafeSetupOverview
         name="Treasury"
         owners={[

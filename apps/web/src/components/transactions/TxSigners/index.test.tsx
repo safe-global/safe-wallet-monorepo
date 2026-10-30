@@ -1,5 +1,5 @@
-import { render } from '@/tests/test-utils'
-import { screen, within, fireEvent, waitFor } from '@testing-library/react'
+import { renderSettled } from '@/tests/test-utils'
+import { act, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import TxSigners from './index'
 import {
   transactionDetailsBuilder,
@@ -26,8 +26,9 @@ jest.mock('@/hooks/useTransactionStatus', () => jest.fn(() => 'Awaiting confirma
 jest.mock('@/hooks/useAddressBook', () => jest.fn(() => ({})))
 
 const mockGetTransaction = jest.fn()
+const mockReadOnlyProvider = { getTransaction: mockGetTransaction }
 jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
-  useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
+  useWeb3ReadOnly: jest.fn(() => mockReadOnlyProvider),
 }))
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => {
@@ -72,16 +73,18 @@ describe('TxSigners (Audit Log)', () => {
     mockCurrentChain()
   })
 
-  it('returns null for transactions without execution info or executedAt', () => {
+  it('returns null for transactions without execution info or executedAt', async () => {
     const txDetails = transactionDetailsBuilder().with({ detailedExecutionInfo: undefined, executedAt: null }).build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+    const { container } = await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />,
+    )
 
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders the "AUDIT LOG" header', () => {
+  it('renders the "AUDIT LOG" header', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -98,12 +101,14 @@ describe('TxSigners (Audit Log)', () => {
       })
       .build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText('Audit log')).toBeInTheDocument()
   })
 
-  it('displays the confirmation count chip', () => {
+  it('displays the confirmation count chip', async () => {
     const { confirmations } = buildConfirmations(2, 3)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -120,12 +125,14 @@ describe('TxSigners (Audit Log)', () => {
       })
       .build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText('2/3')).toBeInTheDocument()
   })
 
-  it('shows "Created" label for owner-initiated transactions', () => {
+  it('shows "Created" label for owner-initiated transactions', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -137,12 +144,14 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText('Created')).toBeInTheDocument()
   })
 
-  it('shows "Proposed" label for proposer-initiated transactions', () => {
+  it('shows "Proposed" label for proposer-initiated transactions', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const proposerAddr = checksumAddress(faker.finance.ethereumAddress())
     const txDetails = transactionDetailsBuilder()
@@ -155,7 +164,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />,
+    )
 
     expect(screen.getByText('Proposed')).toBeInTheDocument()
   })
@@ -168,7 +179,7 @@ describe('TxSigners (Audit Log)', () => {
       mockUseAddressBook.mockReturnValue({})
     })
 
-    const renderProposedTx = (proposedByDelegateName: string | null) => {
+    const renderProposedTx = async (proposedByDelegateName: string | null) => {
       const { confirmations } = buildConfirmations(0, 2)
       const txDetails = transactionDetailsBuilder()
         .with({
@@ -185,26 +196,28 @@ describe('TxSigners (Audit Log)', () => {
         .build()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />)
+      await renderSettled(
+        <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />,
+      )
     }
 
-    it('shows the name that the local address book gives the proposer', () => {
+    it('shows the name that the local address book gives the proposer', async () => {
       mockUseAddressBook.mockReturnValue({ [proposerAddr]: 'Treasury proposer' })
 
-      renderProposedTx('Name from the API')
+      await renderProposedTx('Name from the API')
 
       expect(screen.getByText('By Treasury proposer')).toBeInTheDocument()
       expect(screen.queryByText('By Name from the API')).not.toBeInTheDocument()
     })
 
-    it('falls back to the name that the gateway gives the delegate proposer', () => {
-      renderProposedTx('Name from the API')
+    it('falls back to the name that the gateway gives the delegate proposer', async () => {
+      await renderProposedTx('Name from the API')
 
       expect(screen.getByText('By Name from the API')).toBeInTheDocument()
     })
   })
 
-  it('renders "Signed (N/M)" labels for each confirmation', () => {
+  it('renders "Signed (N/M)" labels for each confirmation', async () => {
     const { confirmations } = buildConfirmations(2, 3)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -216,13 +229,15 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText('Signed (1/3)')).toBeInTheDocument()
     expect(screen.getByText('Signed (2/3)')).toBeInTheDocument()
   })
 
-  it('shows "Executed" label when executor is present', () => {
+  it('shows "Executed" label when executor is present', async () => {
     const executor = addressExBuilder().build()
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()
@@ -237,12 +252,14 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText('Executed')).toBeInTheDocument()
   })
 
-  it('shows info banner when below threshold', () => {
+  it('shows info banner when below threshold', async () => {
     const { confirmations } = buildConfirmations(1, 3)
     mockWallet(null) // No wallet connected so canExecute is false
     const txDetails = transactionDetailsBuilder()
@@ -255,7 +272,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText('Can be executed once the threshold is reached.')).toBeInTheDocument()
     const alert = screen.getByText('Can be executed once the threshold is reached.').closest('[role="alert"]')
@@ -263,7 +282,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(alert?.querySelector('svg.lucide-info')).toBeTruthy()
   })
 
-  it('shows proposer review banner when proposer-submitted and below threshold', () => {
+  it('shows proposer review banner when proposer-submitted and below threshold', async () => {
     const { confirmations } = buildConfirmations(1, 3)
     mockWallet(null)
     const txDetails = transactionDetailsBuilder()
@@ -276,7 +295,7 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(
+    await renderSettled(
       <TxSigners
         txDetails={txDetails}
         txSummary={txSummary}
@@ -290,7 +309,7 @@ describe('TxSigners (Audit Log)', () => {
     ).toBeInTheDocument()
   })
 
-  it('hides info banners once threshold is reached', () => {
+  it('hides info banners once threshold is reached', async () => {
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -302,12 +321,14 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
   })
 
-  it('shows the expired warning for a queued expired order', () => {
+  it('shows the expired warning for a queued expired order', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -319,7 +340,7 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(
+    await renderSettled(
       <TxSigners
         txDetails={txDetails}
         txSummary={txSummary}
@@ -332,7 +353,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.getByText('This order has expired. Reject this transaction and try again.')).toBeInTheDocument()
   })
 
-  it('hides the expired warning once the transaction has been executed', () => {
+  it('hides the expired warning once the transaction has been executed', async () => {
     const executor = addressExBuilder().build()
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()
@@ -347,7 +368,7 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-    render(
+    await renderSettled(
       <TxSigners
         txDetails={txDetails}
         txSummary={txSummary}
@@ -360,7 +381,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByText('This order has expired. Reject this transaction and try again.')).not.toBeInTheDocument()
   })
 
-  it('shows proposer banner even after threshold is reached but not executed', () => {
+  it('shows proposer banner even after threshold is reached but not executed', async () => {
     const { confirmations } = buildConfirmations(2, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -372,7 +393,7 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(
+    await renderSettled(
       <TxSigners
         txDetails={txDetails}
         txSummary={txSummary}
@@ -388,7 +409,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
   })
 
-  it('shows alerts for the last signer who can execute', () => {
+  it('shows alerts for the last signer who can execute', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     // Wallet is the last signer needed — canExecute would be true
     mockWallet({ address: ownerAddress })
@@ -402,7 +423,7 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(
+    await renderSettled(
       <TxSigners
         txDetails={txDetails}
         txSummary={txSummary}
@@ -417,7 +438,7 @@ describe('TxSigners (Audit Log)', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows disabled explorer button with tooltip for queued transactions', () => {
+  it('shows disabled explorer button with tooltip for queued transactions', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -430,7 +451,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     const actionsList = screen.getByTestId('transaction-actions-list')
     const disabledButtons = within(actionsList).getAllByRole('button')
@@ -438,7 +461,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(disabledExplorerBtn).toBeInTheDocument()
   })
 
-  it('offers to copy the transaction link for a queued transaction', () => {
+  it('offers to copy the transaction link for a queued transaction', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -451,12 +474,14 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
   })
 
-  it('uses consistent labels for cancellation transactions', () => {
+  it('uses consistent labels for cancellation transactions', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -476,7 +501,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     // Cancellation uses same labels as normal transactions
     expect(screen.getByText('Created')).toBeInTheDocument()
@@ -502,7 +529,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     fireEvent.click(screen.getByTestId('copy-tx-hash-btn'))
 
@@ -511,7 +540,7 @@ describe('TxSigners (Audit Log)', () => {
     })
   })
 
-  it('disables the hash button when the transaction has no hash yet', () => {
+  it('disables the hash button when the transaction has no hash yet', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -524,12 +553,14 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
   })
 
-  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', () => {
+  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -542,7 +573,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     const actionsList = screen.getByTestId('transaction-actions-list')
 
@@ -558,8 +591,9 @@ describe('TxSigners (Audit Log)', () => {
 
       const trigger = button.closest<HTMLElement>('[data-slot="tooltip-trigger"]')
       expect(trigger).not.toBe(button)
-      trigger?.focus()
+      act(() => trigger?.focus())
       expect(trigger).toHaveFocus()
+      expect(await screen.findByText('Available after execution')).toBeInTheDocument()
     }
   })
 
@@ -578,7 +612,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     const copyButtons = screen.getAllByRole('button', { name: /^Copy address / })
     fireEvent.click(copyButtons[0])
@@ -588,7 +624,7 @@ describe('TxSigners (Audit Log)', () => {
     })
   })
 
-  it('resolves address book names for actors', () => {
+  it('resolves address book names for actors', async () => {
     const namedAddress = checksumAddress(faker.finance.ethereumAddress())
     const mockUseAddressBook = jest.requireMock('@/hooks/useAddressBook') as jest.Mock
     mockUseAddressBook.mockReturnValue({ [namedAddress]: 'Alice' })
@@ -606,7 +642,9 @@ describe('TxSigners (Audit Log)', () => {
       .build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await renderSettled(
+      <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />,
+    )
 
     expect(screen.getByText(/Alice/)).toBeInTheDocument()
   })
@@ -639,7 +677,7 @@ describe('TxSigners (Audit Log)', () => {
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      await renderSettled(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(screen.getByText('Audit log')).toBeInTheDocument()
       expect(screen.getByText('Created')).toBeInTheDocument()
@@ -651,32 +689,32 @@ describe('TxSigners (Audit Log)', () => {
       })
     })
 
-    it('shows dash for Created row when RPC lookup has not resolved', () => {
+    it('shows dash for Created row when RPC lookup has not resolved', async () => {
       mockGetTransaction.mockReturnValue(new Promise(() => {})) // never resolves
 
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      await renderSettled(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(screen.getByText('Created')).toBeInTheDocument()
       expect(screen.getByText('—')).toBeInTheDocument()
     })
 
-    it('does not show confirmation chip for module transactions', () => {
+    it('does not show confirmation chip for module transactions', async () => {
       mockGetTransaction.mockResolvedValue({ from: checksumAddress(faker.finance.ethereumAddress()) })
 
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      await renderSettled(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(screen.queryByText(/\d\/\d/)).not.toBeInTheDocument()
     })
   })
 
   describe('Incoming/simple executed transactions', () => {
-    it('renders audit log with Executed row for incoming transactions', () => {
+    it('renders audit log with Executed row for incoming transactions', async () => {
       const txDetails = transactionDetailsBuilder()
         .with({
           detailedExecutionInfo: undefined,
@@ -687,14 +725,14 @@ describe('TxSigners (Audit Log)', () => {
         .build()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      await renderSettled(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(screen.getByText('Audit log')).toBeInTheDocument()
       expect(screen.getByText('Executed')).toBeInTheDocument()
       expect(screen.getByTestId('transaction-actions-list')).toBeInTheDocument()
     })
 
-    it('returns null for transactions without executedAt', () => {
+    it('returns null for transactions without executedAt', async () => {
       const txDetails = transactionDetailsBuilder()
         .with({
           detailedExecutionInfo: undefined,
@@ -704,7 +742,9 @@ describe('TxSigners (Audit Log)', () => {
         .build()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      const { container } = await renderSettled(
+        <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
@@ -780,7 +820,7 @@ describe('TxSigners (Audit Log)', () => {
       })
       const { txDetails, txSummary } = buildSafenetTx()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      await renderSettled(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       // The feature loads lazily — the step appears once the chunk resolves.
       // Cold CI runners can take seconds to transform the chunk's module graph.
@@ -800,11 +840,11 @@ describe('TxSigners (Audit Log)', () => {
       )
     }, 15_000)
 
-    it('renders nothing and never watches a hash with the flag off', () => {
+    it('renders nothing and never watches a hash with the flag off', async () => {
       useHasFeature.mockReturnValue(false)
       const { txDetails, txSummary } = buildSafenetTx()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      await renderSettled(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(screen.queryByText(/By Safenet|^Safenet$/)).not.toBeInTheDocument()
       // TxSigners still calls the hook (isLast math) but with no hash — the
@@ -854,7 +894,9 @@ describe('TxSigners (Audit Log)', () => {
       })
       const { txDetails, txSummary } = buildPendingSafenetTx()
 
-      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      const { container } = await renderSettled(
+        <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />,
+      )
 
       await waitFor(() => expect(screen.getByText('No issues found')).toBeInTheDocument(), { timeout: 10_000 })
       expect(screen.queryByText('Executed')).not.toBeInTheDocument()
@@ -878,7 +920,9 @@ describe('TxSigners (Audit Log)', () => {
       })
       const { txDetails, txSummary } = buildPendingSafenetTx()
 
-      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      const { container } = await renderSettled(
+        <TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />,
+      )
 
       await waitFor(() => expect(screen.getByText(/Signed/)).toBeInTheDocument())
       // Created connects to Signed; Signed is the last visible row.

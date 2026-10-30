@@ -1,5 +1,5 @@
 import type { RenderHookOptions } from '@testing-library/react'
-import { render, renderHook, within } from '@testing-library/react'
+import { act, render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
@@ -79,6 +79,12 @@ const customRender = (
   })
 
   return render(ui, { wrapper, ...options })
+}
+
+export const renderSettled = async (...args: Parameters<typeof customRender>) => {
+  const result = customRender(...args)
+  await act(async () => {})
+  return result
 }
 
 function customRenderHook<Result, Props>(

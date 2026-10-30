@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@/tests/test-utils'
+import { act, render, renderWithUserEvent } from '@/tests/test-utils'
 import TxData from '.'
 import { Operation, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { TransactionData, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -26,7 +26,7 @@ describe('TxData — MultiSend executing-Safe resolution', () => {
     ;(useChainId as jest.Mock).mockReturnValue('1')
   })
 
-  it("resolves a zero-address sub-action to the tx's own Safe (txDetails.safeAddress), not the connected Safe", () => {
+  it("resolves a zero-address sub-action to the tx's own Safe (txDetails.safeAddress), not the connected Safe", async () => {
     // Mirrors the nested approveHash/OnChainConfirmation case: the rendered batch belongs to a
     // child Safe (txDetails.safeAddress) that is NOT the connected (parent) Safe.
     const childSafe = faker.finance.ethereumAddress()
@@ -74,9 +74,11 @@ describe('TxData — MultiSend executing-Safe resolution', () => {
 
     const txDetails = { safeAddress: childSafe } as unknown as TransactionDetails
 
-    const result = render(<TxData txInfo={txInfo} txData={txData} txDetails={txDetails} trusted imitation={false} />)
+    const result = renderWithUserEvent(
+      <TxData txInfo={txInfo} txData={txData} txDetails={txDetails} trusted imitation={false} />,
+    )
 
-    fireEvent.click(result.getByTestId('expande-all-btn'))
+    await result.user.click(result.getByTestId('expande-all-btn'))
 
     // Resolves to the child Safe (the tx's own Safe), not "This Safe account" (connected parent) nor 0x0
     expect(result.getAllByText(/Child Safe/).length).toBeGreaterThan(0)
@@ -99,7 +101,7 @@ describe('TxData — spending limit batch', () => {
     dataDecoded: { method, parameters: values.map((value) => ({ name: '', type: 'address', value })) },
   })
 
-  const renderBatch = (actions: ReturnType<typeof moduleCall>[]) => {
+  const renderBatch = async (actions: ReturnType<typeof moduleCall>[]) => {
     const multisendLib = faker.finance.ethereumAddress()
     const txData = {
       to: { value: multisendLib },
@@ -123,7 +125,9 @@ describe('TxData — spending limit batch', () => {
       actionCount: actions.length,
     } as unknown as TransactionDetails['txInfo']
 
-    return render(<TxData txInfo={txInfo} txData={txData} trusted imitation={false} />)
+    const result = render(<TxData txInfo={txInfo} txData={txData} trusted imitation={false} />)
+    await act(async () => {})
+    return result
   }
 
   beforeEach(() => {
@@ -131,8 +135,8 @@ describe('TxData — spending limit batch', () => {
     ;(useChainId as jest.Mock).mockReturnValue(chainId)
   })
 
-  it('summarises a policy batch above its actions', () => {
-    const result = renderBatch([
+  it('summarises a policy batch above its actions', async () => {
+    const result = await renderBatch([
       moduleCall('addDelegate', [spender]),
       moduleCall('resetAllowance', [spender, token]),
       moduleCall('setAllowance', [spender, token, '1500000', '0', '0']),
@@ -145,7 +149,7 @@ describe('TxData — spending limit batch', () => {
     expect(result.getByTestId('all-actions')).toBeInTheDocument()
   })
 
-  it('summarises a policy batch when the details page passes its own decoded data', () => {
+  it('summarises a policy batch when the details page passes its own decoded data', async () => {
     const multisendLib = faker.finance.ethereumAddress()
     const txData = {
       to: { value: multisendLib },
@@ -173,13 +177,14 @@ describe('TxData — spending limit batch', () => {
         <div>decoded children</div>
       </TxData>,
     )
+    await act(async () => {})
 
     expect(result.getByTestId('spending-limit-batch-summary')).toBeInTheDocument()
     expect(result.getByText('decoded children')).toBeInTheDocument()
   })
 
-  it('summarises a deleted limit', () => {
-    const result = renderBatch([moduleCall('deleteAllowance', [spender, token])])
+  it('summarises a deleted limit', async () => {
+    const result = await renderBatch([moduleCall('deleteAllowance', [spender, token])])
 
     expect(result.getByText('Delete spending limit:')).toBeInTheDocument()
   })

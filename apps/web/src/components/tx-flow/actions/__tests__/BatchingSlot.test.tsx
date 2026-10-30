@@ -1,5 +1,5 @@
 import { type PropsWithChildren } from 'react'
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
@@ -67,7 +67,7 @@ const safeTxContext: SafeTxContextParams = {
   setGtfSelectedGasToken: jest.fn(),
 }
 
-const renderComboSubmitIds = ({ isBatch }: { isBatch: boolean }) => {
+const renderComboSubmitIds = async ({ isBatch }: { isBatch: boolean }) => {
   const Wrapper = ({ children }: PropsWithChildren) => (
     <SafeTxContext.Provider value={safeTxContext}>
       <TxFlowProvider step={0} data={undefined} prevStep={jest.fn()} nextStep={jest.fn()} isBatch={isBatch}>
@@ -79,7 +79,9 @@ const renderComboSubmitIds = ({ isBatch }: { isBatch: boolean }) => {
     </SafeTxContext.Provider>
   )
 
-  return renderHook(() => useSlotIds(SlotName.ComboSubmit), { wrapper: Wrapper })
+  const rendered = renderHook(() => useSlotIds(SlotName.ComboSubmit), { wrapper: Wrapper })
+  await act(async () => {})
+  return rendered
 }
 
 describe('Batching slot', () => {
@@ -95,14 +97,14 @@ describe('Batching slot', () => {
     jest.mocked(useIsSafeOwner).mockReturnValue(true)
   })
 
-  it('offers Add to batch to an owner creating a transaction', () => {
-    const { result } = renderComboSubmitIds({ isBatch: false })
+  it('offers Add to batch to an owner creating a transaction', async () => {
+    const { result } = await renderComboSubmitIds({ isBatch: false })
 
     expect(result.current).toContain('batching')
   })
 
-  it('does not offer Add to batch when reviewing a batch', () => {
-    const { result } = renderComboSubmitIds({ isBatch: true })
+  it('does not offer Add to batch when reviewing a batch', async () => {
+    const { result } = await renderComboSubmitIds({ isBatch: true })
 
     expect(result.current).not.toContain('batching')
   })

@@ -1,14 +1,19 @@
 import '../../../../../../tests/storybook-setup'
 import { composeStories } from '@storybook/react'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 
 import * as stories from './SecurityReportDrawer.stories'
 
 const { OpenWithContext } = composeStories(stories)
 
+const renderOpenDrawer = async () => {
+  render(<OpenWithContext />)
+  await act(async () => {})
+}
+
 describe('SecurityReportDrawer surface', () => {
-  it('renders the drawer on a recessed surface, not bg-card, so inner cards stay visible in both themes', () => {
-    render(<OpenWithContext />)
+  it('renders the drawer on a recessed surface, not bg-card, so inner cards stay visible in both themes', async () => {
+    await renderOpenDrawer()
 
     const content = screen.getByLabelText('Security report')
 
@@ -17,8 +22,8 @@ describe('SecurityReportDrawer surface', () => {
     expect(content).not.toHaveClass('bg-card')
   })
 
-  it('renders the Safe name, its shortened address and a close button in the header', () => {
-    render(<OpenWithContext />)
+  it('renders the Safe name, its shortened address and a close button in the header', async () => {
+    await renderOpenDrawer()
 
     expect(screen.getByText('Operations Vault')).toBeInTheDocument()
     expect(screen.getByText('0xA77D...98b6')).toBeInTheDocument()
