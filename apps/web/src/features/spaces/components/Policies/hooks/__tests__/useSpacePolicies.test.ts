@@ -24,15 +24,15 @@ const mockPendingQuery = jest.fn()
 const mockUseActivatingPolicies = jest.fn()
 let mockIsAuthenticated = true
 
-const mainnet = chainBuilder()
+const sepolia = chainBuilder()
   .with({
-    chainId: MOCK_SAFES.treasury.chainId,
+    chainId: MOCK_SAFES.grants.chainId,
     features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST],
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.png' },
   })
   .build()
 const polygonWithoutAllowlist = chainBuilder().with({ chainId: MOCK_SAFES.payroll.chainId, features: [] }).build()
-const mockChains = [mainnet, polygonWithoutAllowlist]
+const mockChains = [sepolia, polygonWithoutAllowlist]
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -295,7 +295,10 @@ describe('useSpacePolicies', () => {
     })
 
     it('should give the ETH entry the coin from the chain config', () => {
-      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockNativeTransferDto()] })
+      mockPoliciesQuery.mockReturnValue({
+        ...idle,
+        currentData: [mockNativeTransferDto(undefined, { safe: MOCK_SAFES.grants })],
+      })
 
       const { result } = renderHook(() => useSpacePolicies())
       const [policy] = result.current.policies.filter(isAllowlistPolicy)
@@ -309,7 +312,7 @@ describe('useSpacePolicies', () => {
     })
 
     it('should name the ERC-20 entries with the token metadata of the active policies', () => {
-      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockErc20TransferDto()] })
+      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockErc20TransferDto({ safe: MOCK_SAFES.grants })] })
 
       const { result } = renderHook(() => useSpacePolicies())
       const [policy] = result.current.policies.filter(isAllowlistPolicy)
@@ -320,12 +323,15 @@ describe('useSpacePolicies', () => {
     it('should drop allowlists on a chain without the allowlist feature', () => {
       mockPoliciesQuery.mockReturnValue({
         ...idle,
-        currentData: [mockErc20TransferDto(), mockErc20TransferDto({ safe: MOCK_SAFES.payroll })],
+        currentData: [
+          mockErc20TransferDto({ safe: MOCK_SAFES.grants }),
+          mockErc20TransferDto({ safe: MOCK_SAFES.payroll }),
+        ],
       })
 
       const { result } = renderHook(() => useSpacePolicies())
 
-      expect(result.current.policies.map((policy) => policy.safe)).toEqual([MOCK_SAFES.treasury])
+      expect(result.current.policies.map((policy) => policy.safe)).toEqual([MOCK_SAFES.grants])
     })
   })
 })

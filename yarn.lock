@@ -14153,6 +14153,7 @@ __metadata:
   resolution: "@safe-global/utils@workspace:packages/utils"
   dependencies:
     "@cowprotocol/sdk-app-data": "npm:5.3.2"
+    "@date-fns/tz": "npm:^1.4.1"
     "@eslint/js": "npm:^9.18.0"
     "@faker-js/faker": "npm:^9.0.3"
     "@noble/curves": "npm:1.9.7"
