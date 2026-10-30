@@ -1,4 +1,5 @@
 import {
+  buildAllowlistChangeConfigurations,
   buildAllowlistConfigurations,
   buildAllowlistRemovalConfigurations,
   clearGuardExitConfigurations,
@@ -22,6 +23,7 @@ export default {
   getConfigurationRoot,
   getCallConfigurations,
   describeSetupCall,
+  buildAllowlistChangeConfigurations,
   buildAllowlistConfigurations,
   decodeErc20TransferPolicyData,
   buildAllowlistRemovalConfigurations,

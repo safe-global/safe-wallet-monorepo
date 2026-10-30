@@ -1,4 +1,4 @@
-import { AbiCoder } from 'ethers'
+import { AbiCoder, getAddress } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -126,6 +126,105 @@ export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRu
       },
     ]
   })
+
+  if (configurations.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
+
+  return configurations
+}
+
+const pairKey = (tokenAddress: string, recipient: string): string =>
+  `${tokenAddress.toLowerCase()}:${recipient.toLowerCase()}`
+
+/** Case-insensitive `token:recipient` keys; the native token is the zero address. */
+export const getAllowlistPairKeys = (rules: AllowlistRule[]): Set<string> =>
+  new Set(
+    rules.flatMap(({ tokenAddress, recipients }) => recipients.map((recipient) => pairKey(tokenAddress, recipient))),
+  )
+
+const erc20TransferConfiguration = (
+  chainId: string,
+  token: string,
+  recipients: string[],
+  permission: number,
+): PolicyConfiguration => ({
+  target: getAddress(token),
+  selector: ERC20_TRANSFER_SELECTOR,
+  operation: OperationType.Call,
+  policy: requirePolicy(chainId, 'ERC20TransferPolicy'),
+  data: encodeErc20TransferPolicyData(
+    recipients.map((recipient) => getAddress(recipient)),
+    permission,
+  ),
+})
+
+const uniqueRecipients = (rules: AllowlistRule[], tokenAddress: string): string[] => {
+  const recipients = new Map<string, string>()
+  for (const rule of rules) {
+    if (!sameAddress(rule.tokenAddress, tokenAddress)) continue
+    for (const recipient of rule.recipients) recipients.set(recipient.toLowerCase(), recipient)
+  }
+  return [...recipients.values()]
+}
+
+/** Builds only what differs between the live allowlist and the desired one, each token compared against its own recipients. */
+export const buildAllowlistChangeConfigurations = (
+  chainId: string,
+  baseline: AllowlistRule[],
+  desired: AllowlistRule[],
+): PolicyConfiguration[] => {
+  if (desired.some(({ recipients }) => recipients.some((recipient) => sameAddress(recipient, ZERO_ADDRESS)))) {
+    throw new Error(ZERO_ADDRESS_RECIPIENT_ERROR)
+  }
+
+  const baselineKeys = getAllowlistPairKeys(baseline)
+  const desiredKeys = getAllowlistPairKeys(desired)
+  const isNative = (tokenAddress: string) => sameAddress(tokenAddress, ZERO_ADDRESS)
+  const tokens = (rules: AllowlistRule[]) => [
+    ...new Map(rules.map(({ tokenAddress }) => [tokenAddress.toLowerCase(), tokenAddress])).values(),
+  ]
+  const desiredTokens = tokens(desired).filter((token) => uniqueRecipients(desired, token).length > 0)
+  const desiredTokenKeys = new Set(desiredTokens.map((token) => token.toLowerCase()))
+
+  const erc20Changes = desiredTokens
+    .filter((token) => !isNative(token))
+    .flatMap((token): PolicyConfiguration[] => {
+      const added = uniqueRecipients(desired, token).filter((recipient) => !baselineKeys.has(pairKey(token, recipient)))
+      const revoked = uniqueRecipients(baseline, token).filter(
+        (recipient) => !desiredKeys.has(pairKey(token, recipient)),
+      )
+      return [
+        ...(added.length > 0 ? [erc20TransferConfiguration(chainId, token, added, PERMISSION_ALWAYS)] : []),
+        ...(revoked.length > 0 ? [erc20TransferConfiguration(chainId, token, revoked, PERMISSION_NONE)] : []),
+      ]
+    })
+
+  const removedTokens = tokens(baseline).filter(
+    (token) => !isNative(token) && !desiredTokenKeys.has(token.toLowerCase()),
+  )
+  const tokenRemovals = removedTokens.flatMap((token): PolicyConfiguration[] => {
+    const recipients = uniqueRecipients(baseline, token)
+    return recipients.length === 0
+      ? []
+      : [
+          erc20TransferConfiguration(chainId, token, recipients, PERMISSION_NONE),
+          unbind(getAddress(token), ERC20_TRANSFER_SELECTOR),
+        ]
+  })
+
+  const nativeAdds = uniqueRecipients(desired, ZERO_ADDRESS)
+    .filter((recipient) => !baselineKeys.has(pairKey(ZERO_ADDRESS, recipient)))
+    .map((recipient): PolicyConfiguration => ({
+      target: getAddress(recipient),
+      selector: NATIVE_TRANSFER_SELECTOR,
+      operation: OperationType.Call,
+      policy: requirePolicy(chainId, 'NativeTransferPolicy'),
+      data: '0x',
+    }))
+  const nativeRemovals = uniqueRecipients(baseline, ZERO_ADDRESS)
+    .filter((recipient) => !desiredKeys.has(pairKey(ZERO_ADDRESS, recipient)))
+    .map((recipient) => unbind(getAddress(recipient), NATIVE_TRANSFER_SELECTOR))
+
+  const configurations = [...erc20Changes, ...tokenRemovals, ...nativeAdds, ...nativeRemovals]
 
   if (configurations.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
 

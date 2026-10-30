@@ -9,6 +9,7 @@ import type {
 } from './services/policyGuardEncoders'
 
 import type {
+  buildAllowlistChangeConfigurations,
   buildAllowlistConfigurations,
   buildAllowlistRemovalConfigurations,
   clearGuardExitConfigurations,
@@ -23,6 +24,7 @@ export interface PolicyGuardContract {
   getConfigurationRoot: typeof getConfigurationRoot
   getCallConfigurations: typeof getCallConfigurations
   describeSetupCall: typeof describeSetupCall
+  buildAllowlistChangeConfigurations: typeof buildAllowlistChangeConfigurations
   buildAllowlistConfigurations: typeof buildAllowlistConfigurations
   decodeErc20TransferPolicyData: typeof decodeErc20TransferPolicyData
   buildAllowlistRemovalConfigurations: typeof buildAllowlistRemovalConfigurations
