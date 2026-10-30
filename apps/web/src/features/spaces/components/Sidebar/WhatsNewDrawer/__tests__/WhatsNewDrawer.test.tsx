@@ -20,6 +20,24 @@ describe('WhatsNewDrawer', () => {
     )
   })
 
+  it("closes when Beamer's feed asks to hide", () => {
+    const onClose = jest.fn()
+    render(<WhatsNewDrawer productId="product-id" open onClose={onClose} />)
+
+    window.dispatchEvent(new MessageEvent('message', { origin: 'https://app.getbeamer.com', data: 'hide' }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores hide messages from other origins', () => {
+    const onClose = jest.fn()
+    render(<WhatsNewDrawer productId="product-id" open onClose={onClose} />)
+
+    window.dispatchEvent(new MessageEvent('message', { origin: 'https://evil.example', data: 'hide' }))
+
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('does not load the feed while closed', () => {
     render(<WhatsNewDrawer productId="product-id" open={false} onClose={jest.fn()} />)
 
