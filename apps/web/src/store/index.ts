@@ -36,6 +36,7 @@ import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
+import { beamerApi } from './api/beamer'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
@@ -83,6 +84,7 @@ const rootReducer = combineReducers({
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
+  [beamerApi.reducerPath]: beamerApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
@@ -126,6 +128,7 @@ const middleware: Middleware<{}, RootState>[] = [
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
+  beamerApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,
   slices.gatewayApi.middleware,

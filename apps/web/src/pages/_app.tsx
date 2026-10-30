@@ -24,11 +24,11 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -82,6 +82,7 @@ const TargetedOutreachPopupLoader = () => {
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
+import { useBeamerLiveUpdates } from '@/hooks/useBeamerLiveUpdates'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -141,7 +142,7 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
+  useBeamerLiveUpdates()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
@@ -207,6 +208,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           </PageLayout>
 
           <CookieAndTermBanner />
+
+          <WhatsNewTopBar />
 
           <TargetedOutreachPopupLoader />
 

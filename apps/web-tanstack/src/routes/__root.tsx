@@ -18,12 +18,12 @@ import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
@@ -31,6 +31,7 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
+import { useBeamerLiveUpdates } from '@/hooks/useBeamerLiveUpdates'
 import LaunchScreen from '@/components/common/LaunchScreen'
 import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
@@ -93,7 +94,7 @@ const InitApp = (): ReactElement => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
+  useBeamerLiveUpdates()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
@@ -115,6 +116,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <CookieAndTermBanner />
+      <WhatsNewTopBar />
       <TargetedOutreachPopupLoader />
       <Notifications />
       <RecoveryLoader />
