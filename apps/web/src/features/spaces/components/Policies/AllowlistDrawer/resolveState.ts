@@ -30,6 +30,9 @@ import {
   EXPIRED_HELPER,
   GUARD_REMOVAL_BANNER_LINE,
   GUARD_REMOVAL_BANNER_TITLE,
+  GUARD_REMOVAL_EXECUTE_LINE,
+  GUARD_REMOVAL_SIGN_LINE,
+  GUARD_REMOVED_ON_EXECUTION_LINE,
   REMOVE_GUARD_CONNECT_HELPER,
   REMOVE_GUARD_NOT_A_SIGNER_HELPER,
   UNENFORCED_BANNER_LINE,
@@ -165,7 +168,7 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   const base = {
     kind: 'pending',
     operation: policy.operation,
-    bannerTitle: PENDING_BANNER_TITLE[policy.operation],
+    bannerTitle: policy.removesGuard ? GUARD_REMOVAL_BANNER_TITLE : PENDING_BANNER_TITLE[policy.operation],
     signed: policy.confirmationsSubmitted,
     required: policy.confirmationsRequired,
   } as const
@@ -176,7 +179,11 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
 
   // Anyone can execute a fully signed Safe transaction, so this outranks the signer checks below.
   if (policy.confirmationsSubmitted >= policy.confirmationsRequired) {
-    return { ...base, action: 'review', bannerLine2: executeLine(policy.operation) }
+    return {
+      ...base,
+      action: 'review',
+      bannerLine2: policy.removesGuard ? GUARD_REMOVAL_EXECUTE_LINE : executeLine(policy.operation),
+    }
   }
 
   if (!viewer.isSigner) return { ...base, action: 'copy-link' }
@@ -189,7 +196,18 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
     return { ...base, action: 'copy-link', bannerLine2: signedAndWaitingLine(missing) }
   }
 
-  return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
+  return {
+    ...base,
+    action: 'review',
+    bannerLine2: policy.removesGuard ? GUARD_REMOVAL_SIGN_LINE : signAndExecuteLine(policy.operation),
+  }
+}
+
+const closedLine = (policy: PendingAllowlistPolicy, outcome: AllowlistTxOutcome, changeDelay: string): string => {
+  if (outcome === 'executed' && policy.appliesOnExecution) return APPLIED_ON_EXECUTION_LINE
+  if (outcome === 'executed' && policy.removesGuard) return GUARD_REMOVED_ON_EXECUTION_LINE
+
+  return outcomeLine(outcome, policy.operation, changeDelay)
 }
 
 const resolveClosed = (
@@ -201,10 +219,7 @@ const resolveClosed = (
   operation: policy.operation,
   action: 'none',
   bannerTitle: OUTCOME_TITLE[outcome],
-  bannerLine2:
-    outcome === 'executed' && policy.appliesOnExecution
-      ? APPLIED_ON_EXECUTION_LINE
-      : outcomeLine(outcome, policy.operation, changeDelay),
+  bannerLine2: closedLine(policy, outcome, changeDelay),
 })
 
 export const resolveAllowlistDrawerState = (

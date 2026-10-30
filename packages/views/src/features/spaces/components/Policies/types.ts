@@ -175,6 +175,8 @@ export type PendingAllowlistPolicy = Omit<PendingPolicyBase, 'status'> & {
   expiresAt?: number
   /** A first setup (`configureImmediately`): its rules apply as it executes, without the guard's delay. */
   appliesOnExecution?: boolean
+  /** A queued batch that takes the guard off once a removal is applied; the allowlist itself is already gone. */
+  removesGuard?: boolean
 }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy | PendingAllowlistPolicy
 

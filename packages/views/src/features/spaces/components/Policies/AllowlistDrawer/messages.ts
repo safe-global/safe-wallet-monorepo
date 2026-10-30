@@ -183,6 +183,12 @@ export const GUARD_REMOVAL_BANNER_TITLE = 'Your allowlist is removed'
 export const GUARD_REMOVAL_BANNER_LINE =
   "Remove the guard to finish. Until then, this Safe account can't send anything."
 
+export const GUARD_REMOVAL_SIGN_LINE = 'Sign and execute the transaction to remove the guard.'
+
+export const GUARD_REMOVAL_EXECUTE_LINE = 'Execute the transaction to remove the guard.'
+
+export const GUARD_REMOVED_ON_EXECUTION_LINE = 'The guard is removed. It can take a moment to show here.'
+
 export const REMOVE_GUARD_LABEL = 'Remove guard'
 
 export const REMOVE_GUARD_CONNECT_HELPER = 'Connect a signer wallet to remove the guard.'

@@ -188,11 +188,11 @@ describe('useSpacePolicies', () => {
     expect(policy.data.spenders[0].allowances[0].token).toEqual(MOCK_TOKENS.usdc)
   })
 
-  it('should ask for the pending spending limits of the space', () => {
+  it('should ask for the pending spending limits of the space and the queued guard installations', () => {
     renderHook(() => useSpacePolicies())
 
     expect(mockPendingQuery).toHaveBeenCalledWith(
-      { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES },
+      { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES, includeGuardInstallation: true },
       { skip: false, ...SPACE_REFRESH_OPTIONS, pollingInterval: 0, skipPollingIfUnfocused: true },
     )
   })

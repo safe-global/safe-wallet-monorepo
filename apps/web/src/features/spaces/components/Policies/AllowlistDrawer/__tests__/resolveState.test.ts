@@ -96,6 +96,35 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
+  it('should say the allowlist is removed and ask a signer to sign, when a batch that takes the guard off is queued', () => {
+    const policy = mockPendingAllowlist({ operation: 'remove', removesGuard: true })
+
+    expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
+      kind: 'pending',
+      action: 'review',
+      bannerTitle: 'Your allowlist is removed',
+      bannerLine2: 'Sign and execute the transaction to remove the guard.',
+    })
+  })
+
+  it('should ask to execute the guard removal, when it has all its signatures', () => {
+    const policy = mockPendingAllowlist({ operation: 'remove', removesGuard: true, confirmationsSubmitted: 2 })
+
+    expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
+      action: 'review',
+      bannerLine2: 'Execute the transaction to remove the guard.',
+    })
+  })
+
+  it('should say the guard is removed, when the guard removal executed', () => {
+    const policy = mockPendingAllowlist({ operation: 'remove', removesGuard: true })
+
+    expect(resolveAllowlistDrawerState(policy, MOCK_VIEWERS.signer, 'Payroll', 'executed')).toMatchObject({
+      kind: 'closed',
+      bannerLine2: 'The guard is removed. It can take a moment to show here.',
+    })
+  })
+
   it('should send a signer to review the transaction while it is not known whether they have signed', () => {
     const signer = { ...MOCK_VIEWERS.signer, hasSigned: undefined }
 

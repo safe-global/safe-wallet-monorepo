@@ -68,7 +68,10 @@ const setup = (policy: AllowlistDrawerPolicy, viewer: Viewer = MOCK_VIEWERS.sign
       )
 
 describe('AllowlistDrawer', () => {
-  beforeEach(() => mockGuardDelay.mockReturnValue(POLICY_GUARD_DELAY_SECONDS))
+  beforeEach(() => {
+    mockGuardDelay.mockReturnValue(POLICY_GUARD_DELAY_SECONDS)
+    mockReviewTransaction.mockClear()
+  })
 
   it('summarises the distinct recipients and tokens', () => {
     setup(mockActiveAllowlist())
@@ -163,6 +166,19 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
     expect(screen.getByText('Only signers of this Safe account can remove this allowlist.')).toBeInTheDocument()
+  })
+
+  it('should show the queued guard removal as pending with its review instead of Remove guard, when the batch is queued', async () => {
+    const { user } = setup(mockPendingAllowlist({ operation: 'remove', removesGuard: true, data: { entries: [] } }))
+
+    expect(screen.getByText('Your allowlist is removed')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+    expect(screen.queryByText('Who can receive funds')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remove guard' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+
+    expect(mockReviewTransaction).toHaveBeenCalledTimes(1)
   })
 
   it('disables Review transaction until the transaction link has loaded', () => {

@@ -125,6 +125,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const scheduledChange = policy.status === 'active' ? policy.scheduledChange : undefined
   const applyStage = scheduledChange ? APPLY_STAGE[state.kind] : undefined
   const isRemoved = 'operation' in state && state.operation === 'remove'
+  const removesGuard = policy.status !== 'active' && !!policy.removesGuard
   const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction }
@@ -179,7 +180,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             ) : (
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ))}
-          {state.kind !== 'remove-guard' && (
+          {state.kind !== 'remove-guard' && !removesGuard && (
             <>
               <AllowlistRecipients recipients={recipients} names={names} isRemoved={isRemoved} />
               <AllowlistTokens tokens={getPolicyTokens(policy)} isRemoved={isRemoved} />

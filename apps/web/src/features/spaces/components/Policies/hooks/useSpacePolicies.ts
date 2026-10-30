@@ -8,6 +8,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type {
   ActivePolicyDto,
   PendingDelayedGuardPoliciesDto,
+  PendingGuardInstallationDto,
   PendingImmediateGuardPoliciesDto,
   PendingPolicyDto,
   SpacePoliciesGetActivePoliciesV1ApiArg,
@@ -27,6 +28,7 @@ import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { toPolicyToken } from '../utils/toPolicyToken'
 import { mergeDelayedGuardRequests } from '../utils/mapDelayedGuardRequests'
 import { mapImmediateGuardPolicies } from '../utils/mapImmediateGuardPolicies'
+import { mergeGuardRemovals } from '../utils/mergeGuardRemovals'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
@@ -64,6 +66,7 @@ const NO_POLICIES: ActivePolicyDto[] = []
 const NO_PENDING: PendingPolicyDto[] = []
 const NO_DELAYED: PendingDelayedGuardPoliciesDto[] = []
 const NO_IMMEDIATE: PendingImmediateGuardPoliciesDto[] = []
+const NO_GUARD_INSTALLATIONS: PendingGuardInstallationDto[] = []
 
 /** CGW sends no metadata with a native-transfer policy, so the coin comes from the chain config. */
 const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
@@ -114,7 +117,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
-    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },
+    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES, includeGuardInstallation: true },
     {
       skip,
       ...SPACE_REFRESH_OPTIONS,
@@ -154,12 +157,21 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     [pending.currentData],
   )
 
+  const guardInstallationDtos = useMemo(
+    () =>
+      pending.currentData?.filter(
+        (dto): dto is PendingGuardInstallationDto & { kind: 'guard-installation' } => dto.kind === 'guard-installation',
+      ) ?? NO_GUARD_INSTALLATIONS,
+    [pending.currentData],
+  )
+
   useEffect(() => {
     setHasExecutable(
       pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired) ||
-        immediateDtos.some((dto) => dto.status === 'ready'),
+        immediateDtos.some((dto) => dto.status === 'ready') ||
+        guardInstallationDtos.some((dto) => dto.status === 'ready'),
     )
-  }, [pendingDtos, immediateDtos])
+  }, [pendingDtos, immediateDtos, guardInstallationDtos])
 
   const activeRows = useMemo(() => toActiveRows(dtos, chains), [dtos, chains])
   const resolveGuardToken = useMemo(() => {
@@ -205,8 +217,14 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   })
 
   const policies = useMemo(
-    () => [...activeRows, ...delayed.added, ...setupRows, ...pendingRows, ...activatingRows],
-    [activeRows, delayed, setupRows, pendingRows, activatingRows],
+    () => [
+      ...mergeGuardRemovals(guardInstallationDtos, activeRows),
+      ...delayed.added,
+      ...setupRows,
+      ...pendingRows,
+      ...activatingRows,
+    ],
+    [guardInstallationDtos, activeRows, delayed, setupRows, pendingRows, activatingRows],
   )
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
