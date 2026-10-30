@@ -3250,6 +3250,35 @@ const PolicyReviewContent = ({
   )
 }
 
+/** C's enforcement review: the account's live policies, each allowed as it is, then everything else blocked. */
+const LiveEnforcementSummary = ({ policies }: { policies: LivePolicy[] }): ReactElement => (
+  <Card variant="muted" size="none" radius="lg" data-m2-new="New · Enforce live policies">
+    <div className="flex flex-col gap-3 p-4">
+      <Typography variant="paragraph-bold">Policies that will be enforced</Typography>
+      {policies.length > 0 ? (
+        <ItemList>
+          {policies.map(({ id, Icon, title, summary }) => (
+            <ReviewPolicyRow key={id} Icon={Icon} title={title} summary={summary} />
+          ))}
+        </ItemList>
+      ) : (
+        <MutedLine>Pick a Safe account to see its policies.</MutedLine>
+      )}
+      <div className="flex items-center gap-3 rounded-lg border border-dashed border-border p-[11px]">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+          <AccountProtectionIcon className="size-4" aria-hidden />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <Typography variant="paragraph-small-medium">Every other action</Typography>
+          <MutedLine>Anything these policies don’t allow, even with every signature</MutedLine>
+        </span>
+        <OutcomeBadge outcome="block" />
+        <span className="size-4 shrink-0" aria-hidden />
+      </div>
+    </div>
+  </Card>
+)
+
 const ReviewStep = ({
   account,
   choices,
@@ -3260,6 +3289,7 @@ const ReviewStep = ({
   protectionOnly,
   isSinglePolicy,
   onlyRule,
+  livePolicies,
 }: {
   account: M2Account
   choices: SetupChoices
@@ -3271,6 +3301,7 @@ const ReviewStep = ({
   isSinglePolicy?: boolean
   /** B: one rule added on its own; the review lists just that rule. */
   onlyRule?: 'limits' | 'proposers'
+  livePolicies?: LivePolicy[]
 }): ReactElement => {
   // Without decoded actions the app's Multisend renders nothing, so SetupActions takes its place below.
   const { txPreview } = useMemo(
@@ -3280,14 +3311,18 @@ const ReviewStep = ({
 
   return (
     <PolicyReviewContent txPreview={txPreview} onSubmit={onNext}>
-      <PolicySummary
-        choices={choices}
-        account={account}
-        initialChoices={initialChoices}
-        protectionOnly={protectionOnly}
-        isSinglePolicy={isSinglePolicy}
-        onlyRule={onlyRule}
-      />
+      {livePolicies ? (
+        <LiveEnforcementSummary policies={livePolicies} />
+      ) : (
+        <PolicySummary
+          choices={choices}
+          account={account}
+          initialChoices={initialChoices}
+          protectionOnly={protectionOnly}
+          isSinglePolicy={isSinglePolicy}
+          onlyRule={onlyRule}
+        />
+      )}
 
       <MutedLine>
         {otherSignerNames(viewer)} will be asked to sign next. Nothing changes until it&apos;s executed.
@@ -4269,13 +4304,21 @@ export type SetUpPoliciesFlowProps = ChoiceHandlers & {
   accountFromRow?: boolean
   /** `protection` sets up account protection only (how it works, settings, review); `policy` adds the allowlist. */
   kind?: 'protection' | 'protection-edit' | 'policy' | 'rule'
-  /** `rule` (B): which rule is added or edited on its own, once account policies are set up. */
-  ruleKind?: 'limits' | 'proposers'
+  /** `rule`: which policy is added or edited on its own (B once enforced, C always). */
+  ruleKind?: SingleRuleKind
   /** `rule`: changing the account's existing rule instead of adding one. */
   isRuleEdit?: boolean
   /** The setup started from a policy on an account with no protection: How it works says why protection comes first. */
   forPolicy?: boolean
+  /** C's enforcement: the account's live policies, reviewed and enforced as they are, nothing created. */
+  livePolicies?: LivePolicy[]
 }
+
+/** C: a policy already live on the account, listed on the enforcement review. */
+export type LivePolicy = { id: string; Icon: LucideIcon; title: string; summary: string }
+
+/** The policies that have a flow of their own, one at a time. */
+export type SingleRuleKind = 'allowlist' | 'settings' | 'limits' | 'proposers'
 
 export const SetUpPoliciesFlow = ({
   account,
@@ -4301,6 +4344,7 @@ export const SetUpPoliciesFlow = ({
   ruleKind = 'limits',
   isRuleEdit = false,
   forPolicy = false,
+  livePolicies,
 }: SetUpPoliciesFlowProps): ReactElement => {
   // "Change tokens" on Permissions: Create scrolls to its tokens once it shows, then clears this.
   const [isTokensScrollPending, setIsTokensScrollPending] = useState(false)
@@ -4323,23 +4367,44 @@ export const SetUpPoliciesFlow = ({
   const isRulesModel = usePrototypeModel() === 'policies'
   // B, once set up: one rule on its own, then Review, Confirm and Execute.
   const isRuleOnly = kind === 'rule'
-  const ruleStep = ruleKind === 'proposers' ? PROPOSERS_STEP : POLICIES_STEP
+  const isSimpleModel = usePrototypeModel() === 'simple'
+  const ruleStep = {
+    allowlist: CREATE_STEP,
+    settings: SETTINGS_STEP,
+    limits: POLICIES_STEP,
+    proposers: PROPOSERS_STEP,
+  }[ruleKind]
   const ruleTitle =
-    ruleKind === 'proposers'
+    ruleKind === 'allowlist'
       ? isRuleEdit
-        ? 'Edit proposers'
-        : 'Add proposer'
-      : isRuleEdit
-        ? 'Edit spending limits'
-        : 'Add spending limit'
+        ? 'Edit allowlist'
+        : 'Add allowlist'
+      : ruleKind === 'settings'
+        ? 'Settings lock'
+        : ruleKind === 'proposers'
+          ? isRuleEdit
+            ? 'Edit proposers'
+            : 'Add proposer'
+          : isRuleEdit
+            ? 'Edit spending limits'
+            : 'Add spending limit'
   const visibleSteps = WIZARD_STEP_NAMES.map((_, index) => index).filter((index) =>
     isRuleOnly
       ? [ruleStep, REVIEW_STEP, CONFIRM_STEP, EXECUTE_STEP].includes(index)
       : isProtectionEdit
-        ? ![INTRO_STEP, BASELINE_STEP, POLICIES_STEP, PROPOSERS_STEP, CREATE_STEP].includes(index)
+        ? ![INTRO_STEP, ...(isRulesModel ? [BASELINE_STEP] : []), POLICIES_STEP, PROPOSERS_STEP, CREATE_STEP].includes(
+            index,
+          )
         : isProtectionOnly
           ? // How it works is the intro modal before the flow; B adds spending limits and proposers as an optional step.
-            ![INTRO_STEP, BASELINE_STEP, ...(isRulesModel ? [] : [POLICIES_STEP, PROPOSERS_STEP])].includes(index)
+            ![
+              INTRO_STEP,
+              ...(isRulesModel
+                ? [BASELINE_STEP]
+                : isSimpleModel
+                  ? [SETTINGS_STEP, BASELINE_STEP, CREATE_STEP, POLICIES_STEP, PROPOSERS_STEP]
+                  : [POLICIES_STEP, PROPOSERS_STEP]),
+            ].includes(index)
           : isShortWizard
             ? ![INTRO_STEP, SETTINGS_STEP, BASELINE_STEP, POLICIES_STEP, PROPOSERS_STEP].includes(index)
             : ![BASELINE_STEP, POLICIES_STEP, PROPOSERS_STEP].includes(index),
@@ -4427,7 +4492,9 @@ export const SetUpPoliciesFlow = ({
   // Account protection can't pick an account that already has it.
   const accountEntries = useMemo(() => getAccountEntries(disabledAccountKeys, HAS_ALLOWLIST), [disabledAccountKeys])
   // Past Create the steps show reviewedAccount, so the summary does too.
-  const summaryAccount = currentStep > CREATE_STEP ? reviewedAccount : account
+  // C picks its account on the policy's own step, which can come after Create's.
+  const summaryAccount =
+    currentStep > CREATE_STEP && !(isSimpleModel && (isRuleOnly || isProtectionOnly)) ? reviewedAccount : account
   const isPreflightBlocked =
     currentStep === CREATE_STEP && !isEditMode && Boolean(account) && isBlockingPreflight(preflight)
   const setupSummary = useSetupSummary(
@@ -4441,22 +4508,29 @@ export const SetUpPoliciesFlow = ({
     isSinglePolicy,
   )
   const summary: SetupSummary =
-    isBlockFlow && currentStep === REVIEW_STEP
+    (isBlockFlow || (isSimpleModel && isProtectionOnly)) && currentStep === REVIEW_STEP
       ? {
           title: `Once executed, ${summaryAccount?.name ?? 'this account'} can only do what your policies allow.`,
           description: 'Everything else is blocked, even with every signature. Any change after that waits 24 hours.',
         }
       : !isRuleOnly
         ? setupSummary
-        : currentStep === REVIEW_STEP
-          ? {
-              title: 'Check the change before you sign.',
-              description: 'It applies 24 hours after it’s executed. Any signer can cancel it until then.',
-            }
-          : {
-              title: `${summaryAccount?.name ?? 'This account'}’s account protection checks it like every other transaction.`,
-              description: 'Once it’s executed, the change waits 24 hours before it applies.',
-            }
+        : isSimpleModel
+          ? currentStep === REVIEW_STEP
+            ? { title: 'Check the policy before you sign.', description: 'Nothing changes until it’s executed.' }
+            : {
+                title: summaryAccount ? `This policy applies to ${summaryAccount.name}.` : 'Pick a Safe account first.',
+                description: 'It works on its own. Anything it doesn’t cover keeps working as before.',
+              }
+          : currentStep === REVIEW_STEP
+            ? {
+                title: 'Check the change before you sign.',
+                description: 'It applies 24 hours after it’s executed. Any signer can cancel it until then.',
+              }
+            : {
+                title: `${summaryAccount?.name ?? 'This account'}’s account protection checks it like every other transaction.`,
+                description: 'Once it’s executed, the change waits 24 hours before it applies.',
+              }
 
   useEffect(() => {
     latestSetup.choices = choices
@@ -4516,7 +4590,10 @@ export const SetUpPoliciesFlow = ({
       stepGroup={isBlockFlow ? POLICY_STEP_GROUP : undefined}
       isStepSet={isBlockFlow ? (step: number) => step !== CREATE_STEP || isAllowlistSet : undefined}
       belowSummary={
-        (currentStep === CREATE_STEP || (isProtectionOnly && currentStep === SETTINGS_STEP)) && (
+        (currentStep === CREATE_STEP ||
+          (isProtectionOnly && currentStep === SETTINGS_STEP) ||
+          (isSimpleModel && isRuleOnly && currentStep === ruleStep) ||
+          (isSimpleModel && isProtectionOnly && currentStep === REVIEW_STEP)) && (
           // The card's own padding, which the field had inside Create's card.
           <div className="px-[var(--space-3)] pt-[var(--space-3)]">{accountField}</div>
         )
@@ -4588,9 +4665,10 @@ export const SetUpPoliciesFlow = ({
         onNext={next}
         mode={mode}
         initialChoices={editBaseline}
-        protectionOnly={(isProtectionOnly && !withAllowlist) || isRuleOnly}
+        protectionOnly={(isProtectionOnly && !withAllowlist) || (isRuleOnly && ruleKind !== 'allowlist')}
         isSinglePolicy={isSinglePolicy || isRuleOnly}
-        onlyRule={isRuleOnly ? ruleKind : undefined}
+        onlyRule={isRuleOnly && (ruleKind === 'limits' || ruleKind === 'proposers') ? ruleKind : undefined}
+        livePolicies={isSimpleModel && isProtectionOnly ? (account ? livePolicies : []) : undefined}
       />
       <ReceiptStep key="confirm" action="sign" safeTx={setupTx} onSubmit={onSign} />
       <ReceiptStep key="execute" action="execute" safeTx={setupTx} onSubmit={onExecute} />

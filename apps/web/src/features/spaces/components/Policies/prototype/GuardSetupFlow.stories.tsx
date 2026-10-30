@@ -12,7 +12,8 @@ import {
   type RefObject,
 } from 'react'
 import type { Decorator, Meta, StoryObj } from '@storybook/react'
-import { ArrowRight, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, ChevronUp, FileCode2, Settings2, Users, type LucideIcon } from 'lucide-react'
+import { POLICY_ICONS } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import { createPortal } from 'react-dom'
 import Notifications from '@/components/common/Notifications'
 import SafeLogo from '@/components/common/SafeLogo'
@@ -48,6 +49,8 @@ import {
   getAllowlistAccountKeys,
   getPanelOrder,
   getPolicyRows,
+  POLICY_ROW_LABELS,
+  POLICY_TYPES,
   PoliciesByPolicyPage,
   PoliciesOverviewPage,
   SETUP_ROW_ID,
@@ -58,6 +61,7 @@ import {
   type SpendingLimitState,
 } from './m2OverviewPage'
 import { AllowlistIntroDialog } from './m2AllowlistIntro'
+import { PolicyIntro, type IntroKind } from './m2PolicyIntros'
 import type { PanelNav } from './m2PanelParts'
 import {
   DEFAULT_PROTECTION_RULES,
@@ -67,6 +71,7 @@ import {
   type ProtectionRules,
 } from './m2PolicyDrawers'
 import {
+  AccountProtectionIcon,
   ADDRESS_BOOK,
   createPoliciesM2Story,
   getAccountKey,
@@ -102,6 +107,7 @@ import {
   type Preflight,
   type Recipient,
   type SetupChoices,
+  type SingleRuleKind,
   type WizardMode,
 } from './m2SetupFlow'
 
@@ -135,15 +141,15 @@ const PROTECTION_PARTS: { label: string; soon?: boolean }[] = [
 
 /** M1's AddPolicyOptionButton markup a size down (padding, icon, type), so the second level stays compact. */
 const CompactPolicyTile = ({
-  option: { id, title, description, Icon },
+  option: { title, description, Icon },
   onSelect,
 }: {
-  option: AddPolicyOption
-  onSelect: (id: AddPolicyOption['id']) => void
+  option: Pick<AddPolicyOption, 'title' | 'description' | 'Icon'>
+  onSelect: () => void
 }): ReactElement => (
   <button
     type="button"
-    onClick={() => onSelect(id)}
+    onClick={onSelect}
     className="group flex w-full cursor-pointer items-center gap-2.5 rounded-lg bg-muted p-3 text-left transition-colors hover:bg-secondary-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none [&_svg]:transition-colors hover:[&_svg]:text-green-500"
   >
     <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-card">
@@ -161,6 +167,125 @@ const CompactPolicyTile = ({
       </Typography>
     </span>
   </button>
+)
+
+const SIMPLE_POLICY_OPTIONS: { id: IntroKind; title: string; description: string; Icon: LucideIcon }[] = [
+  { id: 'allowlist', title: 'Allowlist', description: 'Which tokens can be sent, and to whom.', Icon: Users },
+  {
+    id: 'settings',
+    title: 'Settings lock',
+    description: 'Which changes to signers, threshold and policies are allowed.',
+    Icon: Settings2,
+  },
+  {
+    id: 'limits',
+    title: 'Spending limits',
+    description: 'Let spenders send tokens without collecting signatures.',
+    Icon: POLICY_ICONS['spending-limit'],
+  },
+  {
+    id: 'proposers',
+    title: 'Proposers',
+    description: 'Let teammates without signing rights propose transactions.',
+    Icon: POLICY_ICONS.proposer,
+  },
+  {
+    id: 'contracts',
+    title: 'Contract interactions',
+    description: 'Which apps and contracts the account can use.',
+    Icon: FileCode2,
+  },
+]
+
+/** C: every policy on its own, as tiles; picking one starts its flow. Contract interactions waits at the end. */
+/** One row of C's list: icon, name, what it does, and an arrow. */
+const PolicyListRow = ({
+  title,
+  description,
+  icon,
+  onSelect,
+  className,
+}: {
+  title: string
+  description: string
+  icon: ReactNode
+  onSelect: () => void
+  className?: string
+}): ReactElement => (
+  <button
+    type="button"
+    onClick={onSelect}
+    className={cn(
+      'group flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+      className ?? 'bg-muted hover:bg-secondary-hover',
+    )}
+  >
+    {icon}
+    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <Typography variant="paragraph-small-medium" as="span">
+        {title}
+      </Typography>
+      <Typography variant="paragraph-mini" color="muted" as="span">
+        {description}
+      </Typography>
+    </span>
+    <ArrowRight
+      className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+      aria-hidden
+    />
+  </button>
+)
+
+/** C: every policy in one list; policy enforcement comes last, set apart because it covers the whole account. */
+const SimplePolicyChooser = ({
+  open,
+  onOpenChange,
+  onEnforce,
+  onSelect,
+  onSuggest,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onEnforce: () => void
+  onSelect: (kind: IntroKind) => void
+  onSuggest: () => void
+}): ReactElement => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent size="sm" data-testid="simple-policy-dialog">
+      <DialogHeader>
+        <DialogTitle className="text-xl leading-6 font-semibold">Policies</DialogTitle>
+      </DialogHeader>
+      <div className="flex flex-col gap-4 px-4 pb-4" data-m2-new="New · One list of policies">
+        <div className="flex flex-col gap-2">
+          {SIMPLE_POLICY_OPTIONS.map(({ id, title, description, Icon }) => (
+            <PolicyListRow
+              key={id}
+              title={title}
+              description={description}
+              icon={
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-card">
+                  <Icon className="size-4" aria-hidden />
+                </span>
+              }
+              onSelect={() => onSelect(id)}
+            />
+          ))}
+          <PolicyListRow
+            title="Policy enforcement"
+            description="Blocks anything your policies don’t allow, even with every signature."
+            icon={
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+                <AccountProtectionIcon className="size-4" aria-hidden />
+              </span>
+            }
+            onSelect={onEnforce}
+            className="border border-border bg-card hover:bg-muted"
+          />
+        </div>
+        <SuggestPolicyFooter onSelect={onSuggest} />
+      </div>
+    </DialogContent>
+  </Dialog>
 )
 
 /** Contract interactions, on its way: the compact tile's shape, dashed and flat, with no arrow. */
@@ -228,7 +353,7 @@ const LevelsAddPolicyChooser = ({
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             {OTHER_POLICY_OPTIONS.map((option) => (
-              <CompactPolicyTile key={option.title} option={option} onSelect={onSelect} />
+              <CompactPolicyTile key={option.title} option={option} onSelect={() => onSelect(option.id)} />
             ))}
           </div>
         </section>
@@ -270,7 +395,7 @@ type PrototypeState = {
   /** Account protection on its own (New → Account protection, a row's Set up), or the allowlist (New → Allowlist). */
   setupKind?: 'protection' | 'protection-edit' | 'policy' | 'rule'
   /** B: the rule added or edited on its own (setupKind 'rule'). */
-  ruleKind?: 'limits' | 'proposers'
+  ruleKind?: SingleRuleKind
   ruleIsEdit?: boolean
   /** Where the rule flow goes back to: the panel it was opened from, or the table. */
   ruleReturnPolicyId?: string | null
@@ -1073,6 +1198,9 @@ const FullScreenFlow = ({ children }: { children: ReactNode }): ReactElement | n
 /** The M2 screens wired together with local state only: nothing is signed or sent. */
 const GuardSetupFlowPrototype = (): ReactElement => {
   const isRulesModel = usePrototypeModel() === 'policies'
+  const isSimpleModel = usePrototypeModel() === 'simple'
+  // C: the policy whose intro is open, and the account it was started from (null from New).
+  const [simpleIntro, setSimpleIntro] = useState<{ kind: IntroKind; accountKey: string | null } | null>(null)
   const dispatch = useAppDispatch()
   const { viewer, setViewer, view, setCurrentJump, handlers } = usePrototypeFrame()
   const [canvasFrame] = useState(getCanvasFrame)
@@ -1091,6 +1219,10 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     },
     [setCurrentJump],
   )
+  const updateFrom = (patch: (current: PrototypeState) => Partial<PrototypeState>) => {
+    setState((current) => ({ ...current, ...patch(current) }))
+    setCurrentJump(null)
+  }
 
   const toast = useCallback(
     (message: string) => dispatch(showNotification({ message, variant: 'success', groupKey: 'guard-setup-prototype' })),
@@ -1107,14 +1239,15 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   // Back to where the flow started: the policy table in By policy, the Payments panel in By account.
   // Back on the table with the new allowlist's side panel open, so its status is the first thing seen.
   // A protection set up on its own has no allowlist panel: its own panel opens instead.
-  const backToPaymentsPanel: Partial<PrototypeState> =
-    state.setupKind === 'protection' && state.setupAccountKey
+  // Read from the latest state when it runs: the flow's Sign can outlive the render that picked the account.
+  const getBackToPanel = (current: PrototypeState): Partial<PrototypeState> =>
+    current.setupKind === 'protection' && current.setupAccountKey
       ? {
           screen: 'overview',
           panelKey: null,
           policyId: null,
           panelScenario: null,
-          protectionKey: state.setupAccountKey,
+          protectionKey: current.setupAccountKey,
         }
       : view === 'by-policy'
         ? { screen: 'overview', panelKey: null, policyId: SETUP_ROW_ID, panelScenario: null }
@@ -1123,7 +1256,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   /** Execute: back on the overview with the panel open, Executing until the transaction is "mined", then Active. */
   const execute = () => {
     stopExecution()
-    update({ ...backToPaymentsPanel, account: 'executing', dialog: undefined, wizardStep: 0 })
+    updateFrom((current) => ({ ...getBackToPanel(current), account: 'executing', dialog: undefined, wizardStep: 0 }))
     executionTimer.current = setTimeout(() => {
       update({ account: 'enforcing', justActivated: true })
     }, EXECUTION_TIME_MS)
@@ -1200,7 +1333,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           ...EDIT_ENDED,
           ...(state.editRestore ?? {}),
         })
-      : update(backToPaymentsPanel)
+      : updateFrom(getBackToPanel)
 
   /** Edit in a live allowlist's panel: the create flow on that account, starting from the allowlist as it is. */
   /** A live allowlist's tokens and recipients as form choices: for Edit, and for Create on an account that has one. */
@@ -1218,7 +1351,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   /** Picking an account with an allowlist prefills its current rules; leaving it starts over with an empty form. */
   const pickSetupAccount = (account: M2Account) => {
     // Protection on its own: the field stays on How it works, and protected accounts can't be picked.
-    if (state.setupKind === 'protection') {
+    if (state.setupKind === 'protection' || state.setupKind === 'rule') {
       update({ setupAccountKey: getAccountKey(account) })
       return
     }
@@ -1247,7 +1380,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   }
 
   /** B: one rule on its own, added from the account's row or edited from its panel; the flow runs on that account. */
-  const startRuleChange = (account: M2Account, ruleKind: 'limits' | 'proposers', isEdit = false) =>
+  const startRuleChange = (account: M2Account | null, ruleKind: SingleRuleKind, isEdit = false) =>
     update({
       screen: 'wizard',
       setupKind: 'rule',
@@ -1255,12 +1388,16 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       ruleIsEdit: isEdit,
       ruleReturnPolicyId: isEdit ? state.policyId : null,
       wizardMode: 'create',
-      wizardStep: ruleKind === 'proposers' ? PROPOSERS_STEP : POLICIES_STEP,
-      setupAccountKey: getAccountKey(account),
-      setupFromRow: true,
+      wizardStep: { allowlist: CREATE_STEP, settings: SETTINGS_STEP, limits: POLICIES_STEP, proposers: PROPOSERS_STEP }[
+        ruleKind
+      ],
+      setupAccountKey: account ? getAccountKey(account) : null,
+      setupFromRow: Boolean(account),
+      ...(isSimpleModel && { choices: FRESH_CHOICES }),
       policyId: null,
       panelKey: null,
       protectionKey: null,
+      addPolicyOpen: false,
     })
 
   const endRuleChange = () =>
@@ -1311,7 +1448,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       return
     }
 
-    update({ ...backToPaymentsPanel, account: 'waiting', signedBy, wizardStep: 0 })
+    updateFrom((current) => ({ ...getBackToPanel(current), account: 'waiting', signedBy, wizardStep: 0 }))
   }
 
   const otherAccount = OTHER_ACCOUNTS.find(({ account }) => getAccountKey(account) === state.panelKey)
@@ -1329,13 +1466,14 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     account: setupTarget,
     recipients: selectedRecipients.map(({ name, address }) => ({ name, address })),
     spendingLimit: state.spendingLimitState,
-    // Protection always comes with its allowlist now, so the row is a real allowlist.
-    protectionOnly: false,
+    // Protection always comes with its allowlist now, so the row is a real allowlist; in C it's the enforcement alone.
+    protectionOnly: isSimpleModel,
     // An allowlist added from New on its own leaves the account not enforced.
     singlePolicy: state.setupKind === 'policy',
     // B's test set: five Safe accounts, none with policy enforcement until Jump to turns Trading desk's on.
-    testAccounts: isRulesModel,
-    tradingDeskEnforced: !isRulesModel || Boolean(state.tradingDeskEnforced),
+    testAccounts: isRulesModel || isSimpleModel,
+    simple: isSimpleModel,
+    tradingDeskEnforced: !(isRulesModel || isSimpleModel) || Boolean(state.tradingDeskEnforced),
     // The setup's own choices, then whatever an edit saved, so the account settings row says what's blocked.
     blockedSettings: {
       ...(state.setupAccountKey ? { [state.setupAccountKey]: state.choices.blockedSettings } : {}),
@@ -1498,7 +1636,8 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       introOpen: false,
       panelKey: null,
       policyId: null,
-      wizardStep: SETTINGS_STEP,
+      // C enforces the account's live policies as they are, so it goes straight to Review.
+      wizardStep: isSimpleModel ? REVIEW_STEP : SETTINGS_STEP,
       account: 'not-set-up',
       signedBy: [],
       pendingChange: false,
@@ -1528,6 +1667,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         <PoliciesByPolicyPage
           key={resetId}
           levels
+          simple={isSimpleModel}
           payments={payments}
           initialFilters={canvasFrame?.policyFilters}
           activeRowId={state.policyId ?? undefined}
@@ -1550,8 +1690,33 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         />
       )}
 
+      <SimplePolicyChooser
+        open={isSimpleModel && state.screen === 'overview' && state.addPolicyOpen}
+        onOpenChange={(addPolicyOpen) => update({ addPolicyOpen })}
+        onEnforce={() => openEnforceIntro(state.pendingAccountKey)}
+        onSelect={(kind) => {
+          setSimpleIntro({ kind, accountKey: state.pendingAccountKey })
+          update({ addPolicyOpen: false })
+        }}
+        onSuggest={() => update({ addPolicyOpen: false })}
+      />
+
+      {simpleIntro && (
+        <PolicyIntro
+          open
+          kind={simpleIntro.kind}
+          onOpenChange={(open) => (open ? undefined : setSimpleIntro(null))}
+          // Contract interactions has no flow yet: its intro is as far as it goes.
+          onProceed={() => {
+            const { kind, accountKey } = simpleIntro
+            setSimpleIntro(null)
+            if (kind !== 'contracts') startRuleChange(accountKey ? (findM2Account(accountKey) ?? null) : null, kind)
+          }}
+        />
+      )}
+
       <LevelsAddPolicyChooser
-        open={state.screen === 'overview' && state.addPolicyOpen}
+        open={!isSimpleModel && state.screen === 'overview' && state.addPolicyOpen}
         onOpenChange={(addPolicyOpen) => update({ addPolicyOpen })}
         // The same flow as a row's Set up, with the account picked inside it.
         onSetUpProtection={() => openEnforceIntro(state.pendingAccountKey)}
@@ -1707,12 +1872,24 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             accountFromRow={
               (state.setupFromRow && state.wizardMode === 'create') ||
               state.setupKind === 'protection-edit' ||
-              state.setupKind === 'rule'
+              (state.setupKind === 'rule' && state.setupFromRow)
             }
             kind={state.setupKind ?? 'policy'}
             ruleKind={state.ruleKind}
             isRuleEdit={state.ruleIsEdit}
             forPolicy={state.protectionForPolicy}
+            livePolicies={
+              setupAccount &&
+              getPolicyRows(payments)
+                .filter((row) => getAccountKey(row.account) === getAccountKey(setupAccount) && row.status !== 'failed')
+                .sort((a, b) => LIVE_POLICY_ORDER.indexOf(a.type) - LIVE_POLICY_ORDER.indexOf(b.type))
+                .map(({ id, type, summary }) => ({
+                  id,
+                  Icon: POLICY_TYPES[type].Icon,
+                  title: POLICY_ROW_LABELS[type],
+                  summary,
+                }))
+            }
             disabledAccountKeys={state.setupKind === 'protection' ? getAllowlistAccountKeys(payments) : undefined}
             initialChoices={state.editInitialChoices ?? undefined}
             topBar={<FlowTopBar />}
@@ -1766,7 +1943,7 @@ type Story = StoryObj<typeof meta>
 
 /** Overview → side panel → Create … Confirm → Change pending → second signer → Execute → Active, in local state only. */
 export const PoliciesM2FullFlow: Story = {
-  name: 'Policies M2 – full flow',
+  name: 'A · Account protection + other policies (29 Oct)',
 }
 
 // B's name for the one thing you set up, in place of A's "account protection".
@@ -1775,31 +1952,37 @@ const B_TERMS: [RegExp, string][] = [
   [/account protection/g, 'policy enforcement'],
 ]
 
-const renameTerms = (text: string): string =>
-  B_TERMS.reduce((next, [pattern, replacement]) => next.replace(pattern, replacement), text)
+const LIVE_POLICY_ORDER: PolicyRow['type'][] = ['account-settings', 'allowlist', 'spending-limit', 'proposer']
 
-const rewriteTerms = (root: Node): void => {
-  // React updates text in place, so a characterData mutation's target is the text node itself.
-  if (root.nodeType === Node.TEXT_NODE) {
-    if (/ccount protection/.test(root.nodeValue ?? '')) root.nodeValue = renameTerms(root.nodeValue ?? '')
-    return
-  }
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    const text = node.nodeValue ?? ''
-    if (!/ccount protection/.test(text)) continue
-    node.nodeValue = renameTerms(text)
-  }
+// C also names the account settings policy "Settings lock", wherever it's the policy's name on its own.
+const C_TERMS: [RegExp, string][] = [...B_TERMS, [/^Account settings$/, 'Settings lock']]
+
+const renameTerms = (text: string, terms: [RegExp, string][]): string =>
+  terms.reduce((next, [pattern, replacement]) => next.replace(pattern, replacement), text)
+
+const rewriteNode = (node: Node, terms: [RegExp, string][]): void => {
+  const text = node.nodeValue ?? ''
+  const renamed = renameTerms(text, terms)
+  if (renamed !== text) node.nodeValue = renamed
 }
 
-/** Renames account protection to account policies on screen, so B shares A's screens and only the model differs. */
-const BTerms = ({ children }: { children: ReactNode }): ReactElement => {
+const rewriteTerms = (root: Node, terms: [RegExp, string][]): void => {
+  // React updates text in place, so a characterData mutation's target is the text node itself.
+  if (root.nodeType === Node.TEXT_NODE) return rewriteNode(root, terms)
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) rewriteNode(node, terms)
+}
+
+/** Renames account protection to policy enforcement on screen, so B and C share A's screens and only the model differs. */
+const BTerms = ({ children, terms = B_TERMS }: { children: ReactNode; terms?: [RegExp, string][] }): ReactElement => {
   useEffect(() => {
-    rewriteTerms(document.body)
-    const observer = new MutationObserver((mutations) => mutations.forEach((mutation) => rewriteTerms(mutation.target)))
+    rewriteTerms(document.body, terms)
+    const observer = new MutationObserver((mutations) =>
+      mutations.forEach((mutation) => rewriteTerms(mutation.target, terms)),
+    )
     observer.observe(document.body, { subtree: true, childList: true, characterData: true })
     return () => observer.disconnect()
-  }, [])
+  }, [terms])
 
   return <>{children}</>
 }
@@ -1809,7 +1992,7 @@ const BTerms = ({ children }: { children: ReactNode }): ReactElement => {
  * allowlist is required, spending limits and proposers are an optional step, pre-filled when the account has some.
  */
 export const AccountPoliciesWithRules: Story = {
-  name: 'Policies M2 – account policies with rules',
+  name: 'B · Policy enforcement with policies inside (30 Oct)',
   decorators: [
     (Story) => (
       <PrototypeModelContext.Provider value="policies">
@@ -1819,4 +2002,86 @@ export const AccountPoliciesWithRules: Story = {
       </PrototypeModelContext.Provider>
     ),
   ],
+}
+
+/** C: no container, every policy on its own; New lists them all and each account shows its policies underneath. */
+export const SimplePolicies: Story = {
+  name: 'C · Simple policies, one at a time (30 Oct)',
+  decorators: [
+    (Story) => (
+      <PrototypeModelContext.Provider value="simple">
+        <BTerms terms={C_TERMS}>
+          <Story />
+        </BTerms>
+      </PrototypeModelContext.Provider>
+    ),
+  ],
+}
+
+const VERSIONS: { date: string; title: string; href: string; note: string }[] = [
+  {
+    date: '21 Oct',
+    title: 'Allowlist with account settings',
+    href: 'https://design-policies-m2--walletweb.review.5afe.dev/storybook/?path=/story/prototype-policies-m2-full-flow--policies-m-2-full-flow',
+    note: 'Frozen preview of that day’s branch.',
+  },
+  {
+    date: '29 Oct',
+    title: 'Edit panels and banners',
+    href: 'https://design-policies-m2-edit-panels--walletweb.review.5afe.dev/storybook/?path=/story/prototype-policies-m2-full-flow--policies-m-2-full-flow',
+    note: 'Frozen preview of that day’s branch.',
+  },
+  {
+    date: '29 Oct',
+    title: 'Single policies + policy enforcement (as presented at 13:30)',
+    href: '?path=/story/prototype-policies-archive-29-oct-13-30-policy-enforcement--policies-m-2-full-flow',
+    note: 'Frozen copy in this Storybook.',
+  },
+  {
+    date: '29 Oct',
+    title: 'A · Account protection + other policies, with the allow fallback',
+    href: '?path=/story/prototype-policies-m2-full-flow--policies-m-2-full-flow',
+    note: 'In this Storybook.',
+  },
+  {
+    date: '30 Oct',
+    title: 'B · Policy enforcement with policies inside',
+    href: '?path=/story/prototype-policies-m2-full-flow--account-policies-with-rules',
+    note: 'In this Storybook.',
+  },
+  {
+    date: '30 Oct',
+    title: 'C · Simple policies, one at a time',
+    href: '?path=/story/prototype-policies-m2-full-flow--simple-policies',
+    note: 'In this Storybook.',
+  },
+]
+
+/** Every version worth going back to, newest last, with where to open it. */
+export const VersionHistory: Story = {
+  name: 'Version history',
+  render: () => (
+    <div className="mx-auto flex max-w-2xl flex-col gap-3 p-8">
+      <Typography variant="h3">Policies prototype versions</Typography>
+      {VERSIONS.map(({ date, title, href, note }) => (
+        <a
+          key={title}
+          href={href}
+          target="_top"
+          className="flex items-center gap-4 rounded-lg bg-muted p-4 transition-colors hover:bg-secondary-hover"
+        >
+          <Badge variant="subtle" shape="tag" className="shrink-0">
+            {date}
+          </Badge>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <Typography variant="paragraph-small-medium">{title}</Typography>
+            <Typography variant="paragraph-mini" color="muted">
+              {note}
+            </Typography>
+          </span>
+          <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        </a>
+      ))}
+    </div>
+  ),
 }

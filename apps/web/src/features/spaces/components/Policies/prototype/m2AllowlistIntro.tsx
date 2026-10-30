@@ -15,6 +15,7 @@ import {
 } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { PROTECTION_FACTS } from './m2SetupFlow'
+import { cn } from '@safe-global/views/utils/cn'
 import { usePrototypeModel } from './m2Prototype'
 
 /** Illustrative only: the values are invented and the copy explains the check. */
@@ -33,47 +34,55 @@ const OUTCOMES = [
 const EnforcementPreview = (): ReactElement => (
   <div
     aria-hidden
-    className="flex h-[148px] w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-surface-sunken px-4"
+    className="flex h-[148px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken px-4"
     data-m2-new="New · Account protection preview"
   >
-    <div className="flex flex-col gap-2 rounded-xl bg-card p-3 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Identicon address={PREVIEW_SAFE} size={28} />
+    {/* C's narrower dialog: the same picture, scaled down to fit. */}
+    <div
+      className={cn(
+        'flex shrink-0 items-center gap-3 whitespace-nowrap',
+        usePrototypeModel() === 'simple' && 'origin-center scale-[0.82]',
+      )}
+    >
+      <div className="flex flex-col gap-2 rounded-xl bg-card p-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Identicon address={PREVIEW_SAFE} size={28} />
+          <div className="flex flex-col gap-1">
+            <Typography variant="paragraph-mini-medium">Safe account</Typography>
+            <PlaceholderBar className="w-14" />
+          </div>
+        </div>
+        <span className="inline-flex w-fit items-center gap-1 rounded-md bg-muted px-1.5 py-0.5">
+          <UsersRound className="size-3 text-muted-foreground" />
+          <Typography variant="paragraph-mini-medium">2/3</Typography>
+        </span>
+      </div>
+
+      <span className="w-4 shrink-0 border-t border-dashed border-border" />
+
+      <div className="flex items-center gap-2 rounded-xl bg-card p-3 shadow-sm">
+        <span className="flex size-7 items-center justify-center rounded-md bg-muted">
+          <Send className="size-3.5 text-muted-foreground" />
+        </span>
         <div className="flex flex-col gap-1">
-          <Typography variant="paragraph-mini-medium">Safe account</Typography>
-          <PlaceholderBar className="w-14" />
+          <Typography variant="paragraph-mini-medium">Transaction</Typography>
+          <PlaceholderBar className="w-12" />
         </div>
       </div>
-      <span className="inline-flex w-fit items-center gap-1 rounded-md bg-muted px-1.5 py-0.5">
-        <UsersRound className="size-3 text-muted-foreground" />
-        <Typography variant="paragraph-mini-medium">2/3</Typography>
-      </span>
-    </div>
 
-    <span className="w-4 shrink-0 border-t border-dashed border-border" />
+      {/* One line splits into the two outcomes. */}
+      <span className="h-[52px] w-4 shrink-0 rounded-l-md border-y border-l border-dashed border-border" />
 
-    <div className="flex items-center gap-2 rounded-xl bg-card p-3 shadow-sm">
-      <span className="flex size-7 items-center justify-center rounded-md bg-muted">
-        <Send className="size-3.5 text-muted-foreground" />
-      </span>
-      <div className="flex flex-col gap-1">
-        <Typography variant="paragraph-mini-medium">Transaction</Typography>
-        <PlaceholderBar className="w-12" />
+      <div className="flex flex-col gap-3">
+        {OUTCOMES.map(({ allowed, label, Icon }) => (
+          <div key={label} className="flex items-center rounded-xl bg-card p-2 shadow-sm">
+            <Badge variant={allowed ? 'success' : 'destructive'} size="status" shape="status">
+              <Icon aria-hidden />
+              {label}
+            </Badge>
+          </div>
+        ))}
       </div>
-    </div>
-
-    {/* One line splits into the two outcomes. */}
-    <span className="h-[52px] w-4 shrink-0 rounded-l-md border-y border-l border-dashed border-border" />
-
-    <div className="flex flex-col gap-3">
-      {OUTCOMES.map(({ allowed, label, Icon }) => (
-        <div key={label} className="flex items-center rounded-xl bg-card p-2 shadow-sm">
-          <Badge variant={allowed ? 'success' : 'destructive'} size="status" shape="status">
-            <Icon aria-hidden />
-            {label}
-          </Badge>
-        </div>
-      ))}
     </div>
   </div>
 )
@@ -88,6 +97,8 @@ export type AllowlistIntroDialogProps = {
 export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => {
   const [hasUnderstood, setHasUnderstood] = useState(false)
   const checkboxId = useId()
+  // C: the same width as the other policies' intros, and no "I understand" before Set up.
+  const isSimpleModel = usePrototypeModel() === 'simple'
   // B lists every rule it can hold, and which one is required.
   const facts =
     usePrototypeModel() === 'policies'
@@ -109,7 +120,7 @@ export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: Allowlis
         onOpenChange(next)
       }}
     >
-      <DialogContent size="sm" data-testid="account-protection-intro-dialog">
+      <DialogContent size={isSimpleModel ? 'xs' : 'sm'} data-testid="account-protection-intro-dialog">
         <DialogHeader>
           <DialogTitle className="text-xl leading-6 font-semibold">Account protection</DialogTitle>
         </DialogHeader>
@@ -143,25 +154,27 @@ export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: Allowlis
             ))}
           </ul>
 
-          <label
-            htmlFor={checkboxId}
-            className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3"
-            data-m2-new="New · I understand"
-          >
-            <Checkbox
-              id={checkboxId}
-              checked={hasUnderstood}
-              onCheckedChange={(checked) => setHasUnderstood(checked === true)}
-            />
-            <Typography variant="paragraph-small">
-              I understand that anything my policies don’t allow will be blocked, and that future changes take 24 hours
-              to apply.
-            </Typography>
-          </label>
+          {!isSimpleModel && (
+            <label
+              htmlFor={checkboxId}
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3"
+              data-m2-new="New · I understand"
+            >
+              <Checkbox
+                id={checkboxId}
+                checked={hasUnderstood}
+                onCheckedChange={(checked) => setHasUnderstood(checked === true)}
+              />
+              <Typography variant="paragraph-small">
+                I understand that anything my policies don’t allow will be blocked, and that future changes take 24
+                hours to apply.
+              </Typography>
+            </label>
+          )}
 
           <Button
             className="w-full gap-2"
-            disabled={!hasUnderstood}
+            disabled={!isSimpleModel && !hasUnderstood}
             onClick={() => {
               setHasUnderstood(false)
               onProceed()

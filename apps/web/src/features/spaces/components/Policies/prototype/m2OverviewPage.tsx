@@ -88,6 +88,8 @@ export type PaymentsSnapshot = {
   singlePolicy?: boolean
   /** B's test set: Payments and Vault 3 join the table, so it shows five Safe accounts. */
   testAccounts?: boolean
+  /** C: Payments has a live settings lock, and enforcing creates no policies, it only enforces the live ones. */
+  simple?: boolean
   /** Trading desk's live policy enforcement; off in B's starting state. */
   tradingDeskEnforced?: boolean
   /** Account settings each account blocks, keyed like getAccountKey; missing means none. */
@@ -897,6 +899,19 @@ export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): Po
     ...(payments.testAccounts
       ? [
           { ...toSpendingLimitRow(PAYMENTS_LIMIT), id: 'payments-test-limit' },
+          ...(payments.simple
+            ? [
+                {
+                  id: 'payments-settings-lock',
+                  type: 'account-settings' as const,
+                  account: toSpendingLimitRow(PAYMENTS_LIMIT).account,
+                  summary: getAccountSettingsSummary(['add-signer', 'remove-signer', 'change-threshold']),
+                  status: 'active' as const,
+                  people: [],
+                  lastUpdated: 'Oct 2, 2026 · 09:12 UTC',
+                },
+              ]
+            : []),
           // A failed setup lists Vault 3 with no policies, like Operations.
           {
             id: 'vault-allowlist',
@@ -922,7 +937,7 @@ export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): Po
 
   // Enforcement creates the account settings policy with its allowlist, so it shares the setup's status.
   const accountSettings = rows
-    .filter((row) => isEnforcingRow(row) && row.status !== 'failed')
+    .filter((row) => !payments.simple && isEnforcingRow(row) && row.status !== 'failed')
     .map(({ id, account, status, signatures, viewer, lastUpdated }): PolicyRow => ({
       id: `${id}:account-settings`,
       type: 'account-settings',
@@ -960,11 +975,14 @@ const COVERAGE_TAGS: Record<Coverage, { label: string; variant: 'subtle' }> = {
 }
 
 /** On a spending limit or proposer: whether the account's protection checks it; a click opens that protection. */
-const CoverageTag = ({ coverage, account }: { coverage: Coverage; account: M2Account }): ReactElement => {
+const CoverageTag = ({ coverage, account }: { coverage: Coverage; account: M2Account }): ReactElement | null => {
   const { label, variant } = COVERAGE_TAGS[coverage]
   const openProtection = useContext(OpenProtectionContext)
   // Named, so the link to the protection holds in the flat list too, where it isn't the row above.
   const tooltip = `Its transactions are checked by ${account.name}’s account protection, like every other transaction.`
+  const isSimpleModel = usePrototypeModel() === 'simple'
+
+  if (isSimpleModel) return null
 
   return (
     <Tooltip>
@@ -1133,6 +1151,7 @@ const ProtectionRowCell = ({
   const isPending = source?.status === 'pending' || source?.status === 'activating'
   // B tests "Policy enforcement" with Enforce and "No policy"; A keeps Set up and "No policies".
   const isRulesModel = usePrototypeModel() === 'policies'
+  const isSimpleModel = usePrototypeModel() === 'simple'
   const enforceLabel = isRulesModel ? 'Enforce' : 'Set up'
 
   // Nothing to enforce yet, so the account's first step is adding policies.
@@ -1168,7 +1187,7 @@ const ProtectionRowCell = ({
               onAddPolicies()
             }}
           >
-            Add policies
+            {isSimpleModel ? 'Set up policies' : 'Add policies'}
           </Button>
         </span>
       </RowCell>
@@ -1496,6 +1515,8 @@ const toTableRows = (
   isExpanded: (groupId: string) => boolean,
   /** Two levels: each account's protection, from every row, so a filter or a protection-only setup doesn't hide it. */
   protections?: Map<string, PolicyRow>,
+  /** C: policies only, no protection; a failed setup never became one. */
+  simple = false,
 ): ByPolicyTableRow[] => {
   // Ungrouped, each account's protection still comes first with its policies right after, so they read together.
   if (!grouping)
@@ -1525,7 +1546,7 @@ const toTableRows = (
       // Two levels: a failed setup never became a policy, so the open account doesn't list it.
       const ordered = byAccount
         ? [...group]
-            .filter(({ status }) => !protections || status !== 'failed')
+            .filter(({ status }) => (!protections && !simple) || status !== 'failed')
             .sort((a, b) => rank(ACCOUNT_GROUP_TYPE_ORDER, a.type) - rank(ACCOUNT_GROUP_TYPE_ORDER, b.type))
         : group
       const id = `group:${getKey(group[0])}`
@@ -1536,7 +1557,11 @@ const toTableRows = (
       // The tree joins policies to enforcement only once it's active.
       const tree = protection === 'protected'
       const protectionRows: ByPolicyTableRow[] =
-        byAccount && expanded && protections
+        // C: only an enforced account, or one with nothing yet, gets the row above its policies.
+        byAccount &&
+        expanded &&
+        protections &&
+        (!simple || ordered.length === 0 || (protectionSource !== undefined && protectionSource.status !== 'failed'))
           ? [
               {
                 kind: 'protection',
@@ -2161,6 +2186,8 @@ export type PoliciesByPolicyPageProps = Pick<
   onAddPolicies?: (account: M2Account) => void
   /** B: one rule added to account policies that are already set up. */
   onAddRule?: (account: M2Account, rule: RuleKind) => void
+  /** C: no account protection; every account starts open with its policies listed under it. */
+  simple?: boolean
 }
 
 /** M1's policy list (PoliciesList + PoliciesTable), one row per policy, with the M2 types and the account view's filter pills. */
@@ -2177,6 +2204,7 @@ export const PoliciesByPolicyPage = ({
   levels = false,
   onAddPolicies,
   onAddRule,
+  simple = false,
 }: PoliciesByPolicyPageProps): ReactElement => {
   const [filters, setFilters] = useState<PolicyFilters>({ ...NO_POLICY_FILTERS, ...initialFilters })
   const allRows = useMemo(() => getPolicyRows(payments), [payments])
@@ -2203,8 +2231,9 @@ export const PoliciesByPolicyPage = ({
         grouping,
         (id) => isFiltering || id === activeGroupId || expandedGroups.includes(id),
         protections,
+        simple,
       ),
-    [rows, grouping, isFiltering, activeGroupId, expandedGroups, protections],
+    [rows, grouping, isFiltering, activeGroupId, expandedGroups, protections, simple],
   )
   const toggleGroup = (id: string) =>
     setExpandedGroups((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))

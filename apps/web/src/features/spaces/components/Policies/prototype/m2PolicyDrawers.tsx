@@ -1079,27 +1079,33 @@ const EnforcedListSection = ({
   const pendingChip = <RowStatusChip status="pending" />
   // Set up with enforcement first (the allowlist), then the policies that work on their own.
   const ordered = [...policies].sort((a, b) => Number(b.type === 'allowlist') - Number(a.type === 'allowlist'))
+  // C: the account's own settings lock is listed like any other policy, so there are no fixed account rows.
+  const isSimpleModel = usePrototypeModel() === 'simple'
 
   return (
     <DrawerSection title="Policies">
       <Card variant="muted" size="none" radius="lg" data-m2-new="New · Enforced policies list">
         <div className="flex flex-col divide-y divide-border">
-          <VerdictRow
-            Icon={Settings}
-            title="Account changes"
-            description="Signers, threshold, advanced"
-            verdict={
-              isPending ? pendingChip : VERDICTS[getSettingsVerdict(['Signers', 'Advanced'], rules.blockedSettings)]
-            }
-            onClick={openSettings}
-          />
-          <VerdictRow
-            Icon={Settings}
-            title="Policy changes"
-            description="Creating and changing policies"
-            verdict={isPending ? pendingChip : VERDICTS[getSettingsVerdict(['Policies'], rules.blockedSettings)]}
-            onClick={openSettings}
-          />
+          {!isSimpleModel && (
+            <>
+              <VerdictRow
+                Icon={Settings}
+                title="Account changes"
+                description="Signers, threshold, advanced"
+                verdict={
+                  isPending ? pendingChip : VERDICTS[getSettingsVerdict(['Signers', 'Advanced'], rules.blockedSettings)]
+                }
+                onClick={openSettings}
+              />
+              <VerdictRow
+                Icon={Settings}
+                title="Policy changes"
+                description="Creating and changing policies"
+                verdict={isPending ? pendingChip : VERDICTS[getSettingsVerdict(['Policies'], rules.blockedSettings)]}
+                onClick={openSettings}
+              />
+            </>
+          )}
           {ordered.map((row) => (
             <PolicyListItem key={row.id} row={row} onSelect={onSelect} tag={getPolicyVerdict(row)} />
           ))}
@@ -1156,6 +1162,7 @@ export const ProtectionDrawer = ({
   onEditProtection,
   onEnforce,
 }: ProtectionDrawerProps): ReactElement | null => {
+  const isSimpleModel = usePrototypeModel() === 'simple'
   if (!account) return null
 
   const accountRows = allRows.filter((row) => getAccountKey(row.account) === getAccountKey(account))
@@ -1250,7 +1257,9 @@ export const ProtectionDrawer = ({
               </Typography>
               <EnforcedListSection
                 rules={rules}
-                policies={rows.filter(({ protectionOnly, type }) => !protectionOnly && type !== 'account-settings')}
+                policies={rows.filter(
+                  ({ protectionOnly, type }) => !protectionOnly && (isSimpleModel || type !== 'account-settings'),
+                )}
                 accountSettings={rows.find(({ type }) => type === 'account-settings')}
                 onSelect={onSelectPolicy}
                 isPending={!isActive}

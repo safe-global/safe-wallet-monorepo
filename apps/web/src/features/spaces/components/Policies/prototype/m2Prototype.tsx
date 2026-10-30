@@ -131,7 +131,7 @@ const ACCOUNT_SPENDING_LIMITS: Record<string, AccountSpendingLimit[]> = {
 }
 
 /** A: account protection next to other policies. B: account policies, with every module a rule inside them. */
-export type PrototypeModel = 'protection' | 'policies'
+export type PrototypeModel = 'protection' | 'policies' | 'simple'
 
 export const PrototypeModelContext = createContext<PrototypeModel>('protection')
 
