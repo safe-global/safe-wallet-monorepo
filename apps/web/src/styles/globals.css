@@ -157,11 +157,3 @@ svg.CRITICAL .shield-lines {
     background: var(--color-background-paper);
   }
 }
-
-body.beamerAnnouncementBarTopActive {
-  padding-top: 0 !important;
-}
-
-#beamerLastPostTitle {
-  left: 120px !important;
-}

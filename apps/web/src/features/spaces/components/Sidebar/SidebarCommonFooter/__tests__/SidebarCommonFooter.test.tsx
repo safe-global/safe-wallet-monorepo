@@ -109,6 +109,7 @@ jest.mock('@/config/constants', () => ({
   get IS_PRODUCTION() {
     return isProductionMock
   },
+  BEAMER_ID: 'beamer-product-id',
 }))
 
 // Mock icons
@@ -198,8 +199,9 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: mockPathname }),
 }))
 
-jest.mock('@/services/beamer', () => ({
-  BEAMER_SELECTOR: 'whats-new-button',
+jest.mock('../../WhatsNewDrawer', () => ({
+  WhatsNewDrawer: ({ productId, open }: { productId: string; open: boolean }) =>
+    open ? <div data-testid="whats-new-drawer" data-product-id={productId} /> : null,
 }))
 
 describe('SidebarCommonFooter', () => {
@@ -471,6 +473,16 @@ describe('SidebarCommonFooter', () => {
         payload: { warningKey: 'updates' },
       }),
     )
+    expect(screen.queryByTestId('whats-new-drawer')).not.toBeInTheDocument()
+  })
+
+  it("opens the What's new drawer with the Beamer product when clicked with Beamer consent", () => {
+    render(<SidebarCommonFooter />)
+
+    expect(screen.queryByTestId('whats-new-drawer')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('list-item-whats-new'))
+
+    expect(screen.getByTestId('whats-new-drawer')).toHaveAttribute('data-product-id', 'beamer-product-id')
   })
 
   it('renders footer and help entry', () => {

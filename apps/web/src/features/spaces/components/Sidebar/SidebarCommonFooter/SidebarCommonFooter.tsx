@@ -9,7 +9,7 @@ import {
 import { cn } from '@safe-global/views/utils/cn'
 import { icons } from '../config'
 import css from '../styles.module.css'
-import { IS_PRODUCTION } from '@/config/constants'
+import { BEAMER_ID, IS_PRODUCTION } from '@/config/constants'
 import { OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import Track from '@/components/common/Track'
 import { Switch } from '@safe-global/views/components/ui/switch'
@@ -19,8 +19,8 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
-import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { WhatsNewDrawer } from '../WhatsNewDrawer'
 import {
   SafeProFeature,
   useIsSafeProAnnouncementEnabled,
@@ -47,6 +47,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false)
   const { SafeProSidebarBanner, $isReady: isSafeProLoaded, $error: safeProError } = useLoadFeature(SafeProFeature)
   const {
     WorkspaceTwoFactorAwarenessCard,
@@ -95,8 +96,14 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const handleBeamerClick = useCallback(() => {
     if (!hasBeamerConsent) {
       dispatch(openCookieBanner({ warningKey: CookieAndTermType.UPDATES }))
+      return
     }
+    setIsWhatsNewOpen(true)
   }, [dispatch, hasBeamerConsent])
+
+  const handleWhatsNewClose = useCallback(() => {
+    setIsWhatsNewOpen(false)
+  }, [])
 
   return (
     <SidebarFooter data-testid="sidebar-common-footer">
@@ -182,14 +189,12 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
                 render={
                   <SidebarMenuButton
                     type="button"
-                    id={BEAMER_SELECTOR}
                     data-testid="list-item-whats-new"
                     aria-label="What's new"
                     className={cn(
                       'h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
                       '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.25]',
                       css.sidebarInteractive,
-                      css.footerBeamerButton,
                     )}
                     onClick={handleBeamerClick}
                   />
@@ -207,6 +212,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       </SidebarMenu>
 
       <HelpMenu anchorEl={helpMenuAnchor} onClose={handleHelpMenuClose} />
+      {BEAMER_ID && <WhatsNewDrawer productId={BEAMER_ID} open={isWhatsNewOpen} onClose={handleWhatsNewClose} />}
     </SidebarFooter>
   )
 }

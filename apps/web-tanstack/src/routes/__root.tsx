@@ -23,7 +23,6 @@ import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
@@ -93,7 +92,6 @@ const InitApp = (): ReactElement => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
