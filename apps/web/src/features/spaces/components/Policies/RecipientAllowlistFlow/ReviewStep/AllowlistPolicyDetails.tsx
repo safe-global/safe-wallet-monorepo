@@ -40,6 +40,7 @@ type AllowlistPolicyDetailsProps = {
   recipients: Changed<AllowlistRecipientDisplay>[]
   fallback?: InstalledFallback
   hasNativeRule: boolean
+  isEdit?: boolean
 }
 
 const ChangeBadge = ({ change }: { change: ListChange }): ReactElement => (
@@ -55,6 +56,7 @@ const AllowlistPolicyDetails = ({
   recipients,
   fallback,
   hasNativeRule,
+  isEdit = false,
 }: AllowlistPolicyDetailsProps): ReactElement => (
   <div className="flex flex-col gap-3" data-testid="allowlist-review-summary">
     <Card variant="muted" size="none" radius="lg">
@@ -89,13 +91,23 @@ const AllowlistPolicyDetails = ({
         <Separator className="my-3" />
 
         <SummaryRow label={getReviewRecipientsLabel(recipients.filter(({ change }) => change !== 'removed').length)}>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+          <div
+            className={cn(
+              'grid gap-y-3',
+              isEdit ? 'grid-cols-[max-content_minmax(0,1fr)] gap-x-8' : 'grid-cols-2 gap-x-4',
+            )}
+            data-testid="allowlist-review-recipients"
+          >
             {recipients.map(({ address, name, isInAddressBook, change }) => (
               <div key={address} className={ADDRESS_CLASS} data-testid={`allowlist-review-recipient-${address}`}>
                 <span className={cn('flex min-w-0 flex-1 items-center gap-2', change === 'removed' && 'opacity-50')}>
                   <RecipientIdentity address={address} name={name} isInAddressBook={isInAddressBook} />
                 </span>
-                {change && <ChangeBadge change={change} />}
+                {change && (
+                  <span className="ml-2 flex shrink-0">
+                    <ChangeBadge change={change} />
+                  </span>
+                )}
               </div>
             ))}
           </div>

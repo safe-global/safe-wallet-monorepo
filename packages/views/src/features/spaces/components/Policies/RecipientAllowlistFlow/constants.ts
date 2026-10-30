@@ -8,6 +8,10 @@ import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatt
 export const formatPolicyChangeDelay = (delaySeconds: number): string =>
   formatDurationFromMilliseconds(delaySeconds * 1_000, ['days', 'hours', 'minutes'])
 
+/** The same delay as an adjective, e.g. `3-minute`, for "a 3-minute wait". */
+export const formatPolicyChangeDelayAdjective = (delaySeconds: number): string =>
+  formatPolicyChangeDelay(delaySeconds).replace(/(\d+) (day|hour|minute)s?/g, '$1-$2')
+
 /** The delay of the guard the setup installs */
 export const POLICY_CHANGE_DELAY = formatPolicyChangeDelay(POLICY_GUARD_DELAY_SECONDS)
 

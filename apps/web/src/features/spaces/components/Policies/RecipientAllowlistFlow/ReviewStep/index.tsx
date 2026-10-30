@@ -11,6 +11,7 @@ import {
   getEditReviewDescription,
   getNextSignersText,
   formatPolicyChangeDelay,
+  formatPolicyChangeDelayAdjective,
   REVIEW_SUMMARY_DESCRIPTION,
   reviewConsentLabel,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -68,7 +69,8 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const installedGuard =
     guardState?.status === 'known' || guardState?.status === 'partial' ? guardState.guardAddress : undefined
-  const changeDelay = formatPolicyChangeDelay(usePolicyGuardDelay(chainId ?? '', installedGuard))
+  const delaySeconds = usePolicyGuardDelay(chainId ?? '', installedGuard)
+  const changeDelay = formatPolicyChangeDelay(delaySeconds)
 
   const request = useMemo(() => (configurations && root ? { configurations, root } : undefined), [configurations, root])
   const handleSubmit = useSaveBeforeSubmit(request, onSubmit)
@@ -162,7 +164,11 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           tokenSymbols={tokens.map(({ symbol }) => symbol)}
           recipientNames={recipients.map(spenderDisplayName)}
           isGuardEnabled={isAllowlistGuardEnabled(guardState)}
-          description={baseline ? getEditReviewDescription(changeDelay) : REVIEW_SUMMARY_DESCRIPTION}
+          description={
+            baseline
+              ? getEditReviewDescription(formatPolicyChangeDelayAdjective(delaySeconds))
+              : REVIEW_SUMMARY_DESCRIPTION
+          }
           details={baseline ? EDIT_SUMMARY_DETAILS : undefined}
           tone="error"
         />
@@ -175,6 +181,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           recipients={markedRecipients}
           fallback={chainId && configurations ? getInstalledFallback(chainId, configurations) : undefined}
           hasNativeRule={Boolean(rules?.some(({ tokenAddress }) => sameAddress(tokenAddress, ZERO_ADDRESS)))}
+          isEdit={Boolean(baseline)}
         />
       )}
 

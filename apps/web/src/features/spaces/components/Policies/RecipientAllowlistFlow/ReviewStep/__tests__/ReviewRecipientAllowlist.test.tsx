@@ -13,7 +13,6 @@ import { TxFlowContext, initialContext, type TxFlowContextType } from '@/compone
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
 import {
-  getEditReviewDescription,
   POLICY_LABELS,
   RULE_REVOKED_RECIPIENTS_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -21,7 +20,7 @@ import type { AllowlistFormRecipient, RecipientAllowlistFlowData } from '../../t
 import type { PolicyGuardState } from '@/features/policy-guard'
 import type { PolicyGuardContract } from '@/features/policy-guard'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
-import * as guardDelayApi from '@/features/policy-guard/store/guardDelayApi'
+import { POLICY_GUARD_DELAY_SECONDS } from '@safe-global/utils/features/policy-guard/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { groupSafeAccounts } from '../../../SafeAccountSelector/utils'
@@ -100,6 +99,11 @@ jest.mock('@/features/__core__', () => {
         : actual.useLoadFeature(handle),
   }
 })
+const mockPolicyGuardDelay = jest.fn()
+jest.mock('@/features/policy-guard', () => ({
+  ...jest.requireActual('@/features/policy-guard'),
+  usePolicyGuardDelay: (...args: unknown[]) => mockPolicyGuardDelay(...args),
+}))
 jest.mock('../../hooks/useSaveAllowlistConfiguration', () => ({ useSaveAllowlistConfiguration: jest.fn() }))
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
@@ -275,9 +279,7 @@ const mockOwners = (owners: string[], threshold = 2) =>
     safeLoading: false,
   })
 
-type GuardDelayQuery = ReturnType<typeof guardDelayApi.useGetGuardDelayQuery>
-const mockGuardDelay = (currentData?: number) =>
-  jest.spyOn(guardDelayApi, 'useGetGuardDelayQuery').mockReturnValue({ currentData } as unknown as GuardDelayQuery)
+const mockGuardDelay = (delay = POLICY_GUARD_DELAY_SECONDS) => mockPolicyGuardDelay.mockReturnValue(delay)
 
 const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
 
@@ -368,6 +370,13 @@ describe('ReviewRecipientAllowlist', () => {
     expect(summary.getByLabelText('In your address book')).toBeInTheDocument()
     expect(summary.getByText(shortenAddress(OTHER))).toBeInTheDocument()
     expect(screen.getByTestId('flow-children')).toBeInTheDocument()
+  })
+
+  it('keeps the two equal recipient columns of a first setup', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(screen.getByTestId('allowlist-review-recipients')).toHaveClass('grid-cols-2', 'gap-x-4')
   })
 
   it('names the other owners who sign next', () => {
@@ -607,9 +616,7 @@ describe('ReviewRecipientAllowlist', () => {
     built({ status: 'known', guardAddress: installed })
     renderReview()
 
-    expect(guardDelayApi.useGetGuardDelayQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ chainId: SEPOLIA, guardAddress: installed }),
-    )
+    expect(mockPolicyGuardDelay).toHaveBeenCalledWith(SEPOLIA, installed)
     expect(
       screen.getByRole('checkbox', {
         name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 10 minutes to apply.',
@@ -761,6 +768,15 @@ describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
     ).toBeInTheDocument()
   })
 
+  it('lays the recipients out in content-sized columns, so a badge never overlaps the next address', () => {
+    renderEdit()
+
+    expect(screen.getByTestId('allowlist-review-recipients')).toHaveClass(
+      'grid-cols-[max-content_minmax(0,1fr)]',
+      'gap-x-8',
+    )
+  })
+
   it('shows a removed token the Safe no longer holds by its live symbol and logo', () => {
     renderEdit()
 
@@ -775,10 +791,8 @@ describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
     mockGuardDelay(600)
     renderEdit()
 
-    expect(guardDelayApi.useGetGuardDelayQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ chainId: SEPOLIA, guardAddress: INSTALLED_GUARD }),
-    )
-    expect(screen.getByText(getEditReviewDescription('10 minutes'))).toBeInTheDocument()
+    expect(mockPolicyGuardDelay).toHaveBeenCalledWith(SEPOLIA, INSTALLED_GUARD)
+    expect(screen.getByText(/This starts a 10-minute wait/)).toBeInTheDocument()
     expect(screen.getByText('Any signer can cancel the change before it applies.')).toBeInTheDocument()
     expect(
       screen.getByRole('checkbox', {
