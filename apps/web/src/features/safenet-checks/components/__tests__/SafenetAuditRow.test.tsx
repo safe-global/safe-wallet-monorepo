@@ -64,11 +64,11 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByText('Simulating')).toBeInTheDocument()
     expect(screen.getByText('By Safenet')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-explorer-link')).not.toBeInTheDocument()
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument()
   })
 
-  it('links the attestation transaction on the Safenet chain block explorer once FROST-verified', () => {
+  it('links a verified check to the Safenet explorer, not to the attestation transaction', () => {
     const attested = attestedEvent({ safeTxHash: HASH as `0x${string}` })
     const snapshot = buildBenignSnapshot({
       safeTxHash: HASH as `0x${string}`,
@@ -79,6 +79,7 @@ describe('SafenetAuditRow', () => {
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
+    // A configured block explorer must not replace the Safenet explorer link.
     mockUseChain.mockReturnValue({
       blockExplorerUriTemplate: {
         txHash: 'https://gnosisscan.io/tx/{{txHash}}',
@@ -90,33 +91,11 @@ describe('SafenetAuditRow', () => {
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
     expect(screen.getByText('No issues found')).toBeInTheDocument()
-    // "By Safenet" with "Safenet" as the link — the actor line IS the proof link.
     expect(screen.getByText(/^By/)).toBeInTheDocument()
-    expect(screen.getByTestId('safenet-attestation-link')).toHaveTextContent('Safenet')
-    expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
-      'href',
-      `https://gnosisscan.io/tx/${attested.transactionHash}`,
-    )
-  })
-
-  it('links the explorer, labelled as such, when the attestation link cannot be built', () => {
-    const attested = attestedEvent({ safeTxHash: HASH as `0x${string}` })
-    const snapshot = buildBenignSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      events: [attested],
-      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
-    })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
-    )
-    mockUseChain.mockReturnValue(undefined)
-
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
-
-    // The explorer page is not proof, so it never stands in for the attestation link.
-    expect(screen.getByText('No issues found')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
-    expect(screen.getByTestId('safenet-explorer-link')).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
+    const link = screen.getByTestId('safenet-explorer-link')
+    expect(link).toHaveTextContent('Safenet')
+    expect(link).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
+    expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
   })
 
   it('dates the No-issues step from the attested block', () => {
@@ -170,44 +149,6 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByText('No issues found')).toBeInTheDocument()
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument()
-  })
-
-  it('drops the proof link when a pinned BENIGN outlives a refetch that lost the attestation', () => {
-    // Reorg / flaky-RPC refetch: merged status stays BENIGN (monotonic pin) but
-    // the fresh snapshot no longer carries the attestation. The generic explorer
-    // route is not proof, so the row must not present one.
-    const snapshot = buildSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      status: CheckStatus.BENIGN,
-      attestation: { status: AttestationVerificationStatus.UNVERIFIED, signatureId: null, message: null },
-    })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
-    )
-
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
-
-    expect(screen.getByText('No issues found')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
-  })
-
-  it.each([
-    ['INVALID', AttestationVerificationStatus.INVALID],
-    ['VERIFIED', AttestationVerificationStatus.VERIFIED],
-  ])('renders Risk detected without a link when MALICIOUS (attestation %s)', (_name, attestationStatus) => {
-    const snapshot = buildSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      status: CheckStatus.MALICIOUS,
-      attestation: { status: attestationStatus, signatureId: null, message: null },
-    })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
-    )
-
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
-
-    expect(screen.getByText('Risk detected')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
   })
 
   it('links a MALICIOUS step to the Safenet explorer', () => {
