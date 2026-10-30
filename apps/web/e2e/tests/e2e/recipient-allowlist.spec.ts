@@ -249,8 +249,12 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       expect(await permissionOf(journey, safe, added)).toBe(RECIPIENT_PERMISSION.ALWAYS)
 
       await registerAllowlist(safe, { allowlist: changed, roots: [{ root: request.root, readyAt, status: 'APPLIED' }] })
-      await policies.goto(workspaceId)
-      await expect(allowlist.row(safe.address)).toContainText('2 recipients')
+      // The applied request keeps its own row until CGW drops what it cached, so reload until only the allowlist is left.
+      await expect(async () => {
+        await policies.goto(workspaceId)
+        await expect(allowlist.row(safe.address)).toHaveCount(1, { timeout: 5_000 })
+        await expect(allowlist.row(safe.address)).toContainText('2 recipients', { timeout: 5_000 })
+      }).toPass({ timeout: 90_000 })
       await allowlist.openPanel(safe.address)
       await expect(allowlist.panel).toContainText('2 recipients')
     })
