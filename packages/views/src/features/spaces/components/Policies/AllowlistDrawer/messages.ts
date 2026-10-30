@@ -19,9 +19,9 @@ export const CONNECT_TO_REMOVE_HELPER = 'Connect a signer wallet to remove this 
 
 // Every change to the allowlist waits out the guard's delay after execution.
 const EXECUTED_LINE: Record<PendingPolicyOperation, (changeDelay: string) => string> = {
-  create: (changeDelay) => `The allowlist becomes active after a delay of ${changeDelay}.`,
-  update: (changeDelay) => `The new rules apply after a delay of ${changeDelay}.`,
-  remove: (changeDelay) => `The allowlist is removed after a delay of ${changeDelay}.`,
+  create: (changeDelay) => `After ${changeDelay}, a second transaction needs to be executed to activate the allowlist.`,
+  update: (changeDelay) => `After ${changeDelay}, a second transaction needs to be executed to apply the new rules.`,
+  remove: (changeDelay) => `After ${changeDelay}, a second transaction needs to be executed to remove the allowlist.`,
 }
 
 export const APPLIED_ON_EXECUTION_LINE = 'The allowlist is active now. It can take a moment to show here.'
