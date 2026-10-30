@@ -2,7 +2,6 @@ import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Input } from '@safe-global/views/components/ui/input'
 import { Link } from '@safe-global/views/components/ui/link'
 import { List, ListItem } from '@safe-global/views/components/ui/list'
 import { Separator } from '@safe-global/views/components/ui/separator'
@@ -62,28 +61,30 @@ const Seats = ({
   label?: string
 }) =>
   options.length > 1 ? (
-    <div className="flex flex-col gap-1.5">
-      <Typography variant="paragraph-small" color="muted">
-        {PRO_TRIAL_COPY.seatsLabel}
-      </Typography>
-      <Tabs
-        value={value ? optionKey(value) : null}
-        onValueChange={(key) => {
-          const next = options.find((option) => optionKey(option) === key)
-          if (next) onChange(next)
-        }}
-      >
-        <TabsList aria-label={label} className="w-full" data-testid="plan-seats-switch">
-          {options.map((option) => (
-            <TabsTrigger key={optionKey(option)} value={optionKey(option)} aria-label={option.label}>
-              {option.seats ?? option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-    </div>
+    <Tabs
+      value={value ? optionKey(value) : null}
+      onValueChange={(key) => {
+        const next = options.find((option) => optionKey(option) === key)
+        if (next) onChange(next)
+      }}
+    >
+      <TabsList aria-label={label} className="w-full" data-testid="plan-seats-switch">
+        {options.map((option) => (
+          <TabsTrigger key={optionKey(option)} value={optionKey(option)} aria-label={option.label}>
+            {option.seats ? PRO_TRIAL_COPY.seatsShort(option.seats) : option.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   ) : (
-    <Input readOnly value={value?.label ?? options[0]?.label ?? ''} aria-label={label} />
+    // Same track as the size switch, without a field or a pill, so a fixed size reads as a fact, not an input.
+    <div
+      className="flex h-9 items-center justify-center rounded-md bg-muted text-sm font-medium text-muted-foreground"
+      aria-label={label}
+      data-testid="plan-seats-fixed"
+    >
+      {PRO_TRIAL_COPY.seatsFixed((value ?? options[0])?.label ?? '')}
+    </div>
   )
 
 export type PlanCardActions = {
@@ -232,23 +233,26 @@ export const PlanCard = ({
     )
   const features = option?.features?.length ? option.features : tier.features
 
+  // Business takes the current card's look whenever no paid plan is current, as it does today during a trial.
+  const isFeatured = isCurrentPlan || (isPrimary && (!actions.currentPlan || actions.currentPlan.isTrialing))
+
   // Always render all five rows so the subgrid lines up across cards.
   return (
     <Card
-      variant={isCurrentPlan ? 'default' : 'muted-secondary'}
-      bordered={!isCurrentPlan && !isPrimary}
-      selected={isCurrentPlan || isPrimary || undefined}
-      shadowOnHover={isCurrentPlan}
-      highlightOnHover={!isCurrentPlan}
+      variant={isFeatured ? 'default' : 'muted-secondary'}
+      bordered={!isFeatured}
+      selected={isFeatured || undefined}
+      shadowOnHover={isFeatured}
+      highlightOnHover={!isFeatured}
       size="offer"
       radius="lg-xl"
       className={cn(
         'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
-        // The current card goes grey while another card is hovered.
-        isCurrentPlan && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
+        // The featured card goes grey while another card is hovered.
+        isFeatured && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
       )}
       data-testid={tier.isCurrent ? 'current-plan-card' : 'plan-card'}
-      data-hover-plan={!isCurrentPlan || undefined}
+      data-hover-plan={!isFeatured || undefined}
     >
       <CardContent className="flex min-w-0 flex-col @2xl:@max-4xl:grid @2xl:@max-4xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @2xl:@max-4xl:grid-rows-[auto_1fr_auto_auto_auto] @2xl:@max-4xl:gap-x-10 @4xl:row-span-5 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)] @4xl:grid-rows-subgrid">
         <div className="flex flex-col gap-1.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-1">

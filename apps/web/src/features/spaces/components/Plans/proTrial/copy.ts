@@ -10,7 +10,9 @@ export const PRO_TRIAL_COPY = {
   /** A multi-size plan before a size is picked. */
   unpickedPrice: { headline: 'Custom', suffix: 'price per Safe' },
   fromPrice: (price: string) => `from ${price}`,
-  seatsLabel: 'Safe accounts',
+  seatsShort: (seats: number) => `${seats} Safes`,
+  /** A plan with one size, e.g. "2 Safe accounts" → "2 Safes". */
+  seatsFixed: (label: string) => label.replace(/Safe accounts$/, 'Safes'),
   trialTitle: 'Pro trial',
   trialStatus: (until: string) => `Your trial includes every Pro feature until ${until}.`,
   planName: (plan: string, seats: number | null | undefined) => (seats ? `${plan} ${seats}` : plan),
