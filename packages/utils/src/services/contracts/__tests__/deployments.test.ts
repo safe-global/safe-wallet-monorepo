@@ -2,6 +2,7 @@ import type { DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-
 import {
   getCanonicalOrFirstAddress,
   getChainAgnosticAddress,
+  getDeploymentAddresses,
   getDeploymentTypeForMasterCopy,
   getSafeToL2SetupVersion,
   getSafeToL2SetupVersionByAddress,
@@ -192,6 +193,34 @@ describe('deployments utils', () => {
       })
       expect(hasMatchingDeployment(getDeployments, contractAddress, chainId, ['1.3.0', '1.4.1'])).toBe(true)
       expect(hasMatchingDeployment(getDeployments, contractAddress, chainId, ['1.4.1'])).toBe(false)
+    })
+  })
+
+  describe('getDeploymentAddresses', () => {
+    it('lists every network address of each version, skipping versions without a deployment', () => {
+      const getDeployments = jest.fn((filter?: DeploymentFilter) => {
+        if (filter?.version === '1.3.0') {
+          return makeDeployment({ canonical: { address: '0x1', codeHash: '0xhash' } }, { [chainId]: ['0x1', '0x2'] })
+        }
+        if (filter?.version === '1.4.1') {
+          return makeDeployment({ canonical: { address: '0x3', codeHash: '0xhash' } }, { [chainId]: '0x3' })
+        }
+        return undefined
+      })
+
+      expect(getDeploymentAddresses(getDeployments, chainId, ['1.3.0', '1.4.1', '1.5.0'])).toEqual([
+        '0x1',
+        '0x2',
+        '0x3',
+      ])
+    })
+
+    it('is empty when no version is deployed on the network', () => {
+      const getDeployments = jest.fn(() =>
+        makeDeployment({ canonical: { address: '0x1', codeHash: '0xhash' } }, { other: ['0x1'] }),
+      )
+
+      expect(getDeploymentAddresses(getDeployments, chainId, ['1.4.1'])).toEqual([])
     })
   })
 

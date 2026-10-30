@@ -3,7 +3,13 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
 
 export type PolicyEngineContract =
-  'SafePolicyGuard' | 'ERC20ApprovePolicy' | 'ERC20TransferPolicy' | 'NativeTransferPolicy'
+  | 'SafePolicyGuard'
+  | 'ERC20ApprovePolicy'
+  | 'ERC20TransferPolicy'
+  | 'NativeTransferPolicy'
+  | 'AllowPolicy'
+  | 'DenyPolicy'
+  | 'MultiSendPolicy'
 
 type Deployment = { networkAddresses: Record<string, string> }
 
@@ -31,6 +37,9 @@ const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
   ERC20ApprovePolicy: onIndexedChains('0xfF86DD4caf79672E55e0C3e3A5410746600d60F4'),
   ERC20TransferPolicy: onIndexedChains('0x25DDa3b8974a10E93ca188F9C149A42F938Bd187'),
   NativeTransferPolicy: onIndexedChains('0x2868C263EBF3672211E4C32e0B21689FF0584ca3'),
+  AllowPolicy: onIndexedChains('0x92e94Af03982C2486dffa8DcBc5d069D33996eF2'),
+  DenyPolicy: onIndexedChains('0x348d9F0B2fECb0bF88655C74Ed3eFD5052A9E436'),
+  MultiSendPolicy: onIndexedChains('0xF933Ec646F9cd6Dd27Ae2f808D133D3f5847210c'),
 }
 
 export const getPolicyEngineAddress = (chainId: string, contract: PolicyEngineContract): string | undefined =>

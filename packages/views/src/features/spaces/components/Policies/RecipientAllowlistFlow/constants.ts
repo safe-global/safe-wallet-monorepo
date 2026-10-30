@@ -14,15 +14,15 @@ export const RECIPIENT_RESERVED_ERROR = 'This recipient address is not valid'
 
 export const SUMMARY_NO_ACCOUNT_TITLE = 'Pick a Safe account to start.'
 export const SUMMARY_NO_ACCOUNT_DESCRIPTION = 'Then choose which tokens it can send and who can receive them.'
-export const SUMMARY_DESCRIPTION = 'Anything you leave out will be blocked.'
+export const SUMMARY_DESCRIPTION = 'Transfers of these tokens to anyone else will be blocked.'
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
 export const SUMMARY_DETAILS_GUARD_ENABLED = `The Safe policy guard is already enabled, so these changes wait ${POLICY_CHANGE_DELAY} after execution, then need an activation step before they apply.`
 export const SUMMARY_DETAILS = `These changes take effect as soon as this transaction is executed. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
 
 export const TOKENS_SECTION_TITLE = 'Which tokens can be sent'
 export const TOKENS_NO_ACCOUNT_DESCRIPTION = 'Pick a Safe account to choose from its tokens.'
-export const TOKENS_CALLOUT_TITLE = 'Only transactions of the tokens selected below will be allowed.'
-export const TOKENS_CALLOUT_DESCRIPTION = 'Every other transaction will be blocked.'
+export const TOKENS_CALLOUT_TITLE = 'The tokens selected below can only be sent to the recipients on this allowlist.'
+export const TOKENS_CALLOUT_DESCRIPTION = 'Sending them to anyone else will be blocked.'
 export const TOKENS_EMPTY_TEXT = 'Tokens in this account will show here.'
 export const TOKENS_LOAD_ERROR_TEXT = 'Could not load the tokens in this account.'
 export const SELECT_ALL_LABEL = 'Select all'
@@ -33,8 +33,8 @@ export const CONFIRM_TOKEN_LABEL = 'Add matching token'
 export const ADD_TOKEN_PLACEHOLDER = 'Search by name or address'
 
 export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
-export const RECIPIENTS_CALLOUT_TITLE = 'Only transactions to the recipients selected below will be allowed.'
-export const RECIPIENTS_CALLOUT_DESCRIPTION = 'Every other transaction will be blocked.'
+export const RECIPIENTS_CALLOUT_TITLE = 'Only the recipients selected below can receive the tokens on this allowlist.'
+export const RECIPIENTS_CALLOUT_DESCRIPTION = 'Sending those tokens to anyone else will be blocked.'
 export const RECIPIENTS_EMPTY_TEXT = 'Recipients will show here.'
 export const ADD_RECIPIENT_LABEL = 'Add a recipient'
 export const IN_ADDRESS_BOOK_LABEL = 'In your address book'
@@ -78,8 +78,28 @@ export const getRuleTitle = (index: number, count: number): string => `Rule ${in
 export const RULE_POLICY_LABEL = 'Policy'
 export const RULE_TARGET_LABEL = 'Applies to'
 export const RULE_RECIPIENTS_LABEL = 'Allowed recipients'
+export const RULE_DELEGATE_CALL_LABEL = 'Delegate call'
 export const POLICY_LABELS = {
   erc20: 'Token withdraw allowlist',
   native: 'Native transfers',
+  allow: 'Allow everything else',
+  deny: 'Block everything else',
+  multiSend: 'Batched transactions',
+  unknown: 'Other policy',
 } as const
+export const FALLBACK_TARGET_NAME = 'Any address'
+
+export const REVIEW_FALLBACK_LABEL = 'Everything else'
+export const REVIEW_FALLBACK_ALLOW =
+  'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.'
+export const REVIEW_FALLBACK_DENY = 'Blocked. Only the transfers on this allowlist can be made.'
+
+export const ALLOWLIST_GAPS_TITLE = "What this allowlist doesn't cover"
+export const ALLOWLIST_GAP_APPROVALS =
+  'Token approvals are not restricted. An address you approve can still move the selected tokens with transferFrom.'
+export const ALLOWLIST_GAP_NATIVE =
+  'Native token transfers to recipients not on the list stay allowed, because everything else stays allowed.'
+export const ALLOWLIST_GAP_DELEGATE_CALLS =
+  'Delegate calls are not restricted, except Safe batches, whose transactions are each checked against the allowlist.'
+
 export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."
