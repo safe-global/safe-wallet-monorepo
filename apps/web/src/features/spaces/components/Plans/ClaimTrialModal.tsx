@@ -1,5 +1,7 @@
-import { useMemo, useState, type CSSProperties } from 'react'
-import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import { ArrowRight, Eye, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { AppRoutes } from '@/config/routes'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
@@ -7,9 +9,6 @@ import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/component
 import { Link } from '@safe-global/views/components/ui/link'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { cn } from '@safe-global/views/utils/cn'
-import { SAFE_PRO_PRICING_URL } from '@/config/constants'
-import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
@@ -19,10 +18,11 @@ import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
+import { FeatureCheck } from './FeatureCheck'
+import { claimTiers } from './planTiers'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
 import SelectAccountsStep from './SelectAccountsStep'
-import { InfoTip } from './PlanStatusCard'
-import type { PlanTier, SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
+import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
 
 // The CGW grants the 60-day grace only to Workspaces that predate enforcement; anything else is a new Workspace.
 const MIGRATED_TRIAL_DAYS = 60
@@ -43,7 +43,7 @@ export const _freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVa
 export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
   if (variant === 'new') {
     return {
-      title: 'Workspaces run on Safe Pro',
+      title: PRO_TRIAL_COPY.trialStart.title,
       subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
       note: "No payment method required. We'll remind you 7 days before your free access ends.",
       back: 'Go to My accounts',
@@ -58,88 +58,18 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
   return trialPeriodDays === MIGRATED_TRIAL_DAYS
     ? {
         ...existing,
-        title: 'Your Workspace moved to Safe Pro',
+        title: PRO_TRIAL_COPY.trialStart.title,
         subtitle:
           'You’ve used Safe before, so your free access is 60 days instead of 30.\nYour Safe accounts remain available in My accounts.',
       }
     : {
         ...existing,
-        title:
-          trialPeriodDays === null
-            ? 'Start your free access to Safe Pro'
-            : `Start your ${trialPeriodDays}-day free access to Safe Pro`,
+        title: PRO_TRIAL_COPY.trialStart.title,
         subtitle: 'All Pro features unlocked. No billing details needed upfront.',
       }
 }
 
-const TrialOfferCard = ({
-  tier,
-  availableUntil,
-  freeText,
-  selectable,
-  selected,
-  onSelect,
-}: {
-  tier: PlanTier
-  availableUntil: string | null
-  freeText: string
-  selectable: boolean
-  selected: boolean
-  onSelect: () => void
-}) => {
-  const option = tier.options[0]
-  const features = tier.features.filter((feature) => feature !== 'Unlimited Workspace members')
-
-  return (
-    <Card
-      variant="muted-secondary"
-      radius="lg-xl"
-      className={cn('flex-1', selectable && 'cursor-pointer')}
-      selected={selectable ? selected : undefined}
-      role={selectable ? 'radio' : undefined}
-      aria-checked={selectable ? selected : undefined}
-      tabIndex={selectable ? 0 : undefined}
-      onClick={selectable ? onSelect : undefined}
-      onKeyDown={selectable ? (e) => (e.key === 'Enter' || e.key === ' ') && onSelect() : undefined}
-      data-testid={`trial-offer-${tier.name}`}
-    >
-      <CardContent className="flex flex-col">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <Typography variant="paragraph-large-medium">{tier.name}</Typography>
-            <div className="flex items-baseline gap-1">
-              <Typography variant="h4" className="line-through">
-                {option.price === null ? 'Custom' : formatPlanPrice(option.price, tier.currency)}
-              </Typography>
-              <Typography color="muted">{priceSuffix(tier.billingCycle)}</Typography>
-              <Typography variant="paragraph-large-bold" color="success">
-                {freeText}
-              </Typography>
-            </div>
-            {availableUntil && (
-              <Typography variant="paragraph-small" color="muted">
-                Available until {availableUntil}. You can subscribe any time after that.
-              </Typography>
-            )}
-          </div>
-
-          {/* Column-major like the design: the first half of the list on the left, the rest on the right. */}
-          <ul
-            className="grid gap-x-6 gap-y-2 sm:grid-flow-col sm:grid-rows-[repeat(var(--rows),auto)]"
-            style={{ '--rows': Math.ceil(features.length / 2) } as CSSProperties}
-          >
-            {features.map((feature) => (
-              <li key={feature} className="flex items-center gap-2">
-                <Check className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
-                <Typography variant="paragraph-small">{feature}</Typography>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+const GROUP_ICONS = { control: SlidersHorizontal, visibility: Eye, security: ShieldCheck } as const
 
 /** The Safes left out are removed from the Workspace, not from the user's accounts. */
 export default function ClaimTrialModal({
@@ -157,17 +87,14 @@ export default function ClaimTrialModal({
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
-  const [pickedTierId, setPickedTierId] = useState<string>()
   const [step, setStep] = useState<'offer' | 'accounts'>('offer')
 
-  const tier =
-    tiers.find((candidate) => candidate.id === pickedTierId) ??
-    tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN) ??
-    tiers[0]
+  // The trial runs on the plan the CGW offers it on; the modal no longer shows which.
+  const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN) ?? tiers[0]
   const option = tier?.options[0]
   const seats = option?.seats ?? null
-  const copy = claimCopy(trialPeriodDays, variant)
-  const availableUntil = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
+  const router = useRouter()
+  const endsOn = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
   const entry = {
     [MixpanelEventParams.ENTRY_POINT]:
       variant === 'new' ? FreeAccessEntryPoint.CREATE_WORKSPACE : FreeAccessEntryPoint.WORKSPACE_LOGIN,
@@ -205,54 +132,59 @@ export default function ClaimTrialModal({
             <>
               <div className="flex flex-col gap-1">
                 <Typography variant="h3" as={DialogTitle}>
-                  {highlightSafePro(copy.title)}
+                  {PRO_TRIAL_COPY.trialStart.title}
                 </Typography>
-                <Typography color="muted" className="whitespace-pre-line">
-                  {copy.subtitle}
-                </Typography>
+                <Typography color="muted">{PRO_TRIAL_COPY.safesStayFree}</Typography>
+                {trialPeriodDays === MIGRATED_TRIAL_DAYS && (
+                  <Typography variant="paragraph-small" color="muted">
+                    {PRO_TRIAL_COPY.trialStart.migrated}
+                  </Typography>
+                )}
               </div>
 
-              <Link
-                href={SAFE_PRO_PRICING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="muted"
-                className="self-start"
-              >
-                Compare all features <ArrowUpRight />
-              </Link>
-
               {isLoading ? (
-                <Skeleton className="h-65 w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />
+                <Skeleton className="h-40 w-full rounded-lg-xl" data-testid="claim-trial-skeleton" />
               ) : tiers.length === 0 ? (
                 <Alert variant="info">
                   <AlertSeverityIcon variant="info" />
-                  <AlertDescription>There is no free access available for this Workspace.</AlertDescription>
+                  <AlertDescription>{PRO_TRIAL_COPY.trialStart.unavailable}</AlertDescription>
                 </Alert>
               ) : (
-                <div
-                  role={tiers.length > 1 ? 'radiogroup' : undefined}
-                  aria-label={tiers.length > 1 ? 'Plan' : undefined}
-                  className="flex flex-col gap-4 md:flex-row"
-                >
-                  {tiers.map((candidate) => (
-                    <TrialOfferCard
-                      key={candidate.id}
-                      tier={candidate}
-                      availableUntil={availableUntil}
-                      freeText={_freeLabel(trialPeriodDays, variant)}
-                      selectable={tiers.length > 1}
-                      selected={candidate.id === tier?.id}
-                      onSelect={() => setPickedTierId(candidate.id)}
-                    />
-                  ))}
+                <div className="grid gap-3 sm:grid-cols-3" data-testid="trial-outcome-groups">
+                  {PRO_TRIAL_COPY.trialStart.groups.map((group) => {
+                    const Icon = GROUP_ICONS[group.id]
+                    return (
+                      <Card key={group.id} variant="muted-secondary" radius="lg-xl" size="sm">
+                        <CardContent>
+                          <div className="flex flex-col gap-3">
+                            <span className="flex items-center gap-2">
+                              <Icon aria-hidden className="size-4 shrink-0" />
+                              <Typography variant="paragraph-small-bold">{group.title}</Typography>
+                            </span>
+                            <ul className="flex flex-col gap-2">
+                              {group.items.map((item) => (
+                                <li key={item} className="flex items-start gap-2">
+                                  <FeatureCheck />
+                                  <Typography variant="paragraph-small">{item}</Typography>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               )}
 
-              <Typography variant="paragraph-small" align="center" className="flex items-center justify-center gap-1.5">
-                {copy.note}
-                <InfoTip text={TRIAL_END_TOOLTIP} data-testid="trial-end-tooltip" />
-              </Typography>
+              <div className="flex flex-col items-center gap-0.5 text-center">
+                <Typography variant="paragraph-small-medium">{PRO_TRIAL_COPY.trialStart.noCharge}</Typography>
+                {endsOn && (
+                  <Typography variant="paragraph-small" color="muted">
+                    {PRO_TRIAL_COPY.trialStart.endsOn(endsOn)}
+                  </Typography>
+                )}
+              </div>
 
               {error && (
                 <Alert variant="destructive">
@@ -269,7 +201,7 @@ export default function ClaimTrialModal({
                   className="flex-1"
                 >
                   <Button variant="secondary" size="lg" className="w-full" onClick={onBack} disabled={isBusy}>
-                    {copy.back}
+                    {PRO_TRIAL_COPY.trialStart.back}
                   </Button>
                 </Track>
                 <Track
@@ -285,11 +217,21 @@ export default function ClaimTrialModal({
                     disabled={!option?.paymentLinkId || isBusy}
                     onClick={claim}
                   >
-                    {copy.claim}
+                    {PRO_TRIAL_COPY.trialStart.start}
                     <ArrowRight />
                   </Button>
                 </Track>
               </div>
+
+              <Link
+                render={<button type="button" />}
+                variant="muted"
+                className="self-center"
+                onClick={() => void router.push({ pathname: AppRoutes.spaces.plans, query: { spaceId } })}
+                data-testid="trial-see-plans"
+              >
+                {PRO_TRIAL_COPY.trialStart.seePlans}
+              </Link>
             </>
           )}
         </div>
