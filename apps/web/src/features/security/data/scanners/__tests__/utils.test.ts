@@ -57,6 +57,10 @@ describe('formatTimestamp', () => {
     const result = formatTimestamp(Date.now() - 2 * 86_400_000)
     expect(result).toMatch(/\d+\/\d+\/\d+/)
   })
+
+  it('should, when the timestamp is more than a day old, return its date in the default locale', () => {
+    expect(formatTimestamp(new Date(2026, 3, 22, 12).getTime())).toBe('4/22/2026')
+  })
 })
 
 describe('computeSummary', () => {

@@ -3,6 +3,8 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { useCSVDownloader } from 'react-papaparse'
 import type { SyntheticEvent } from 'react'
 import { useMemo, type ReactElement } from 'react'
+import { format } from 'date-fns'
+import { tz } from '@date-fns/tz'
 
 import ModalDialog from '@/components/common/ModalDialog'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -44,7 +46,7 @@ function ExportDialog({
   const length = Object.values(allAddressBooks).reduce<number>((acc, entries) => acc + Object.keys(entries).length, 0)
   const { CSVDownloader } = useCSVDownloader()
   // safe-address-book-1970-01-01
-  const filename = `safe-address-book-${new Date().toISOString().slice(0, 10)}`
+  const filename = `safe-address-book-${format(Date.now(), 'yyyy-MM-dd', { in: tz('UTC') })}`
 
   const csvData = useMemo(() => _getCsvData(allAddressBooks), [allAddressBooks])
 

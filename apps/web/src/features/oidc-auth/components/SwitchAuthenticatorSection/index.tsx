@@ -1,5 +1,6 @@
 import { Plus, Smartphone } from 'lucide-react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { formatDateTime, parseTimestamp } from '@safe-global/utils/utils/date'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
@@ -7,16 +8,10 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { useAuthenticators } from '../../hooks/useAuthenticators'
 
-const formatDate = (iso?: string): string =>
-  iso
-    ? new Date(iso).toLocaleString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : ''
+const formatDate = (iso?: string): string => {
+  const timestamp = parseTimestamp(iso)
+  return timestamp === null ? '' : formatDateTime(timestamp)
+}
 
 /**
  * Two-factor authentication section for the spaces account settings page.

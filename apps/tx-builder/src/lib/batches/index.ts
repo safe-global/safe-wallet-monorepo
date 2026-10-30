@@ -1,7 +1,9 @@
+import { format } from 'date-fns'
+import { tz } from '@date-fns/tz'
 import StorageManager from '../../lib/storage'
 
 const getExportFileName = () => {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = format(Date.now(), 'yyyy-MM-dd', { in: tz('UTC') })
   return `tx-builder-batches-${today}.json`
 }
 

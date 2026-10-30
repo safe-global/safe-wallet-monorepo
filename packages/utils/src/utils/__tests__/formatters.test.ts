@@ -146,4 +146,10 @@ describe('formatters', () => {
       expect(formatters.formatPercentage(0.69)).toEqual('69.00%')
     })
   })
+
+  describe('dateString', () => {
+    it('should, when given a timestamp, return the numeric date and time in the default locale and zone', () => {
+      expect(formatters.dateString(new Date(2024, 9, 21, 10, 21, 56).getTime())).toBe('10/21/2024, 10:21:56 AM')
+    })
+  })
 })

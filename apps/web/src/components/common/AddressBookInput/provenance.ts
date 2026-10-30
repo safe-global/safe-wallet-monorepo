@@ -1,4 +1,5 @@
 import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
+import { intlFormat } from 'date-fns'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
 
 export type RecipientContact = ExtendedContact
@@ -16,9 +17,7 @@ export const formatRelativeTime = (timestamp: string): string | undefined => {
 
 export const formatExactTime = (timestamp: string): string | undefined => {
   const time = parseTimestamp(timestamp)
-  return time === undefined
-    ? undefined
-    : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(time)
+  return time === undefined ? undefined : intlFormat(time, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 export type ProvenanceLine = {
