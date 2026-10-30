@@ -31,7 +31,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { BalanceChanges, FeesPreview, TxNote } from '@/components/tx-flow/features'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { SlotProvider } from '@/components/tx-flow/slots'
+import { SlotName, SlotProvider } from '@/components/tx-flow/slots'
 import TxFlowProvider, { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
@@ -710,27 +710,20 @@ const PolicyDetailsCard = ({
             </div>
           </CollapsibleContent>
         </Collapsible>
+
+        <Separator className="my-3" />
+
+        <div className="flex min-h-10 items-center gap-3" data-m2-new="New · Every other action row">
+          <Typography variant="paragraph-small" className="flex-1">
+            Every other action
+          </Typography>
+          <Badge variant="destructive" size="status" shape="status">
+            <X aria-hidden />
+            Blocked
+          </Badge>
+        </div>
       </div>
     </Card>
-
-    <div
-      className="flex items-center gap-3 rounded-lg border border-dashed border-border p-4"
-      data-m2-new="New · Every other action row"
-    >
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-destructive/10" aria-hidden>
-        <X className="size-4 text-destructive" />
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <Typography variant="paragraph-small-medium">Every other action</Typography>
-        <Typography variant="paragraph-small" color="muted">
-          Anything this allowlist doesn&apos;t allow, even with every signature
-        </Typography>
-      </div>
-      <Badge variant="destructive" size="status" shape="status">
-        <X aria-hidden />
-        Blocked
-      </Badge>
-    </div>
   </div>
 )
 
@@ -2624,6 +2617,53 @@ const PolicyReviewContent = ({
   )
 }
 
+/** Sits under the summary; Continue scrolls back here until it's ticked. */
+const ReviewConsentBox = ({
+  boxRef,
+  accountName,
+  isEdit,
+  checked,
+  hasError,
+  onChange,
+}: {
+  boxRef: RefObject<HTMLDivElement | null>
+  accountName: string
+  isEdit: boolean
+  checked: boolean
+  hasError: boolean
+  onChange: (checked: boolean) => void
+}): ReactElement => {
+  const checkboxId = useId()
+
+  return (
+    <div
+      ref={boxRef}
+      className="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-3"
+      data-m2-new="New · Every other action checkbox"
+    >
+      <label htmlFor={checkboxId} className="flex cursor-pointer items-start gap-3 px-1">
+        <Checkbox
+          id={checkboxId}
+          checked={checked}
+          aria-invalid={hasError && !checked}
+          onCheckedChange={(next) => onChange(next === true)}
+          className="mt-0.5 bg-card"
+        />
+        <Typography variant="paragraph-small">
+          {isEdit
+            ? `I understand that ${accountName} will only be able to do what this allowlist allows, and that this change and every later one take 24 hours to apply.`
+            : `I understand that ${accountName} will only be able to do what this allowlist allows, and that every later change takes 24 hours to apply.`}
+        </Typography>
+      </label>
+      {hasError && !checked && (
+        <Typography variant="paragraph-small" className="px-1 text-destructive">
+          Tick the box to continue.
+        </Typography>
+      )}
+    </div>
+  )
+}
+
 const ReviewStep = ({
   account,
   choices,
@@ -2645,9 +2685,28 @@ const ReviewStep = ({
     [choices, mode, account],
   )
 
+  const [isUnderstood, setIsUnderstood] = useState(false)
+  const [hasConsentError, setHasConsentError] = useState(false)
+  const consentRef = useRef<HTMLDivElement>(null)
+
+  const submit = () => {
+    if (isUnderstood) return onNext()
+    setHasConsentError(true)
+    consentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
   return (
-    <PolicyReviewContent txPreview={txPreview} onSubmit={onNext}>
+    <PolicyReviewContent txPreview={txPreview} onSubmit={submit}>
       <PolicySummary choices={choices} account={account} initialChoices={initialChoices} />
+
+      <ReviewConsentBox
+        boxRef={consentRef}
+        accountName={account.name}
+        isEdit={mode === 'edit'}
+        checked={isUnderstood}
+        hasError={hasConsentError}
+        onChange={setIsUnderstood}
+      />
 
       <MutedLine>
         {otherSignerNames(viewer)} will be asked to sign next. Nothing changes until it&apos;s executed.
@@ -2957,20 +3016,21 @@ const useSetupSummary = (
             description:
               'Only the account changes you select below can still be made. Every other change will be blocked.',
           },
-    // Spending limits left out turn it yellow; in edit mode it points at the Added/Removed marks instead.
+    // Always red: once signed, everything outside the allowlist is blocked.
     [REVIEW_STEP]: isEditMode
       ? {
           title: allowedRule,
           description:
             'Check the details below before you sign. This starts a 24-hour wait, and a second transaction will be needed to apply the changes to the policy.',
+          tone: 'error',
         }
       : limitCount > 0 && !choices.applyToSpendingLimits
         ? {
             title: allowedRule,
             description: `${limits} won't follow these rules, so your Safe account could be exposed.`,
-            tone: 'warning',
+            tone: 'error',
           }
-        : { title: allowedRule, description: 'Check the details below before you sign.' },
+        : { title: allowedRule, description: 'Check the details below before you sign.', tone: 'error' },
     [CONFIRM_STEP]: {
       title: `Sign to add the ${isEditMode ? 'change' : 'allowlist'} to the queue.`,
       description:
