@@ -195,6 +195,19 @@ describe('AllowlistDrawer', () => {
     expect(screen.getAllByText('Removed')).toHaveLength(7)
   })
 
+  it('should strike through each recipient and token, when a removal is pending', async () => {
+    const { user } = setup(mockPendingAllowlistRemoval())
+
+    await user.click(screen.getByRole('button', { name: 'Show recipient details' }))
+    await user.click(screen.getByRole('button', { name: 'Show token details' }))
+
+    const [recipient] = screen.getAllByTestId('allowlist-recipient')
+    const [token] = screen.getAllByTestId('allowlist-token')
+
+    expect(recipient.querySelector('.line-through')).toBeInTheDocument()
+    expect(token.querySelector('.line-through')).toBeInTheDocument()
+  })
+
   it('keeps the current recipients unmarked while an update is pending', () => {
     setup(mockPendingAllowlistUpdate())
 
