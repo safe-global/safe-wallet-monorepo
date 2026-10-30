@@ -10,6 +10,7 @@ import {
   useState,
   type ContextType,
   type FormEvent,
+  type RefObject,
   type ReactElement,
   type ReactNode,
   type Ref,
@@ -78,8 +79,7 @@ import { InputGroupAddon } from '@safe-global/views/components/ui/input-group'
 import { BelowComboboxContent } from './m2SpendingLimitForm'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressInput from '@/components/common/AddressInput'
-import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
-import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Popover, PopoverContent } from '@safe-global/views/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import Identicon from '@/components/common/Identicon'
@@ -585,9 +585,9 @@ const SummaryLine = ({ children, className }: { children: ReactNode; className?:
   <div className={classnames('flex min-h-10 items-center', className)}>{children}</div>
 )
 
-/** M1's change badge (CHANGE_BADGE), at the side panel's fixed width so a column of them lines up. */
+/** CHANGE_BADGE in the status badge colors, at the side panel's fixed width so a column of them lines up. */
 const ChangeBadge = ({ change }: { change: ListChange }): ReactElement => (
-  <Badge variant={CHANGE_BADGE[change].variant} className="w-20 shrink-0 justify-center">
+  <Badge variant={CHANGE_BADGE[change].variant} size="status" shape="status" className="w-20 shrink-0 justify-center">
     {CHANGE_BADGE[change].label}
   </Badge>
 )
@@ -640,7 +640,7 @@ const PolicyDetailsCard = ({
                 </span>
                 <Typography
                   variant="paragraph-small-medium"
-                  className={classnames(change === 'removed' && 'text-muted-foreground line-through')}
+                  className={classnames(change === 'removed' && 'text-muted-foreground opacity-50')}
                 >
                   {symbol}
                 </Typography>
@@ -653,8 +653,8 @@ const PolicyDetailsCard = ({
         <Separator className="my-3" />
 
         <SummaryRow label={`Allowed recipients (${recipients.filter(({ change }) => change !== 'removed').length})`}>
-          {/* The Create step's address layout without the pill; a removed one is dimmed and struck through, as M1's removed limit row. */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+          {/* Columns sized to their content, so a badge never overlaps the address next to it. */}
+          <div className="grid grid-cols-[max-content_minmax(0,1fr)] gap-x-8 gap-y-3">
             {recipients.map(({ name, address, source, change }) => (
               <AddressHoverTooltip key={address} address={address} className="flex min-w-0">
                 <AddressPill
@@ -710,6 +710,18 @@ const PolicyDetailsCard = ({
             </div>
           </CollapsibleContent>
         </Collapsible>
+
+        <Separator className="my-3" />
+
+        <div className="flex min-h-10 items-center gap-3" data-m2-new="New · Every other action row">
+          <Typography variant="paragraph-small" className="flex-1">
+            Every other action
+          </Typography>
+          <Badge variant="destructive" size="status" shape="status">
+            <X aria-hidden />
+            Blocked
+          </Badge>
+        </div>
       </div>
     </Card>
   </div>
@@ -751,12 +763,19 @@ type DraftFields = { address: string; name: string }
 const RecipientDraftRow = ({
   listedAddresses,
   onConfirm,
+  onAddContacts,
   onRemove,
+  isBookOpen,
+  onBookOpenChange,
 }: {
   listedAddresses: string[]
   onConfirm: (recipient: Contact) => void
+  onAddContacts: (contacts: Contact[]) => void
   onRemove: () => void
+  isBookOpen: boolean
+  onBookOpenChange: (open: boolean) => void
 }): ReactElement => {
+  const rowRef = useRef<HTMLDivElement>(null)
   const methods = useForm<DraftFields>({ mode: 'onChange', defaultValues: { address: '', name: '' } })
   const address = methods.watch('address') ?? ''
   const isDuplicate = listedAddresses.includes(address.toLowerCase())
@@ -776,72 +795,83 @@ const RecipientDraftRow = ({
 
   return (
     // The whole item takes the focus ring, since the fields inside it have no box of their own.
-    <ItemSurface
-      className="has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
-      markNew="New · Add a recipient row"
-    >
-      <FormProvider {...methods}>
-        <form
-          onSubmit={confirm}
-          onKeyDown={(event) => {
-            if (event.key !== 'Escape') return
-            event.preventDefault()
-            event.stopPropagation()
-            onRemove()
-          }}
-          className="flex items-center gap-2"
-        >
-          {/* SafeAddress's layout: a 24px identicon, an empty circle until the address is valid. */}
-          {isValid ? (
-            <Identicon address={address} size={24} />
-          ) : (
-            <span className="size-6 shrink-0 rounded-full bg-muted" aria-hidden />
-          )}
-
-          {/* Two steps in one row: the name first, then the address under it, where the short address sits above. */}
-          {step === 'name' ? (
-            <Input
-              autoFocus
-              // eslint-disable-next-line no-restricted-syntax -- borderless inline name field inside a row; no Input variant renders it bare
-              className="min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-              placeholder="Name (optional)"
-              aria-label="Name (optional)"
-              {...methods.register('name')}
-            />
-          ) : (
-            <div className="flex min-w-0 flex-1 flex-col">
-              <Typography variant="paragraph-small-medium" className="truncate">
-                {name || 'New recipient'}
-              </Typography>
-              <div className={classnames('min-w-0', INLINE_ADDRESS_INPUT)}>
-                <AddressInput
-                  name="address"
-                  label="Address or ENS"
-                  placeholder="Address or ENS"
-                  showPrefix={false}
-                  focused
-                  validate={(value: string) =>
-                    listedAddresses.includes(value.toLowerCase()) ? 'Already in the list' : undefined
-                  }
-                />
-              </div>
-            </div>
-          )}
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon"
-            aria-label={step === 'name' ? 'Next' : 'Add recipient'}
-            disabled={step === 'address' && !isValid}
+    <div ref={rowRef}>
+      <ItemSurface
+        className="has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+        markNew="New · Add a recipient row"
+      >
+        <AddFromAddressBook
+          open={isBookOpen}
+          onOpenChange={onBookOpenChange}
+          anchor={rowRef}
+          query={step === 'name' ? name : address}
+          listedAddresses={listedAddresses}
+          onAdd={onAddContacts}
+        />
+        <FormProvider {...methods}>
+          <form
+            onSubmit={confirm}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return
+              event.preventDefault()
+              event.stopPropagation()
+              onRemove()
+            }}
+            className="flex items-center gap-2"
           >
-            <Check />
-          </Button>
-          <Button type="button" variant="ghost-muted" size="icon" aria-label="Remove" onClick={onRemove}>
-            <X />
-          </Button>
-        </form>
-      </FormProvider>
-    </ItemSurface>
+            {/* SafeAddress's layout: a 24px identicon, an empty circle until the address is valid. */}
+            {isValid ? (
+              <Identicon address={address} size={24} />
+            ) : (
+              <span className="size-6 shrink-0 rounded-full bg-muted" aria-hidden />
+            )}
+
+            {/* Two steps in one row: the name first, then the address under it, where the short address sits above. */}
+            {step === 'name' ? (
+              <Input
+                autoFocus
+                // eslint-disable-next-line no-restricted-syntax -- borderless inline name field inside a row; no Input variant renders it bare
+                className="min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+                placeholder="Name (optional)"
+                aria-label="Name (optional)"
+                onClick={() => onBookOpenChange(true)}
+                {...methods.register('name')}
+              />
+            ) : (
+              <div className="flex min-w-0 flex-1 flex-col">
+                <Typography variant="paragraph-small-medium" className="truncate">
+                  {name || 'New recipient'}
+                </Typography>
+                <div className={classnames('min-w-0', INLINE_ADDRESS_INPUT)} onClick={() => onBookOpenChange(true)}>
+                  <AddressInput
+                    name="address"
+                    label="Address or ENS"
+                    placeholder="Address or ENS"
+                    showPrefix={false}
+                    focused
+                    validate={(value: string) =>
+                      listedAddresses.includes(value.toLowerCase()) ? 'Already in the list' : undefined
+                    }
+                  />
+                </div>
+              </div>
+            )}
+            <Button
+              type="submit"
+              variant="ghost"
+              size="icon"
+              aria-label={step === 'name' ? 'Next' : 'Add recipient'}
+              disabled={step === 'address' && !isValid}
+            >
+              <Check />
+            </Button>
+            <Button type="button" variant="ghost-muted" size="icon" aria-label="Remove" onClick={onRemove}>
+              <X />
+            </Button>
+          </form>
+        </FormProvider>
+      </ItemSurface>
+    </div>
   )
 }
 
@@ -918,17 +948,21 @@ const ALL_CONTACTS = CONTACT_GROUPS.flatMap(({ contacts }) => contacts)
 const AddFromAddressBook = ({
   open,
   onOpenChange,
+  anchor,
+  query,
   listedAddresses,
   onAdd,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** The new recipient row, which the list opens under. */
+  anchor: RefObject<HTMLElement | null>
+  /** What's typed in the row, which filters the list. */
+  query: string
   listedAddresses: string[]
   onAdd: (contacts: Contact[]) => void
 }): ReactElement => {
-  const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<string[]>([])
-  const triggerRef = useRef<HTMLButtonElement>(null)
   const search = query.trim().toLowerCase()
   const groups = CONTACT_GROUPS.map((group) => ({
     ...group,
@@ -937,20 +971,15 @@ const AddFromAddressBook = ({
     ),
   })).filter(({ contacts }) => contacts.length > 0)
 
-  // Opening scrolls the button towards the middle of the screen, so the list has room below it and Add stays in view.
+  // Opening scrolls the row towards the middle of the screen, so the list has room below it and Add stays in view.
   useEffect(() => {
     if (!open) return
-    const frame = requestAnimationFrame(() =>
-      triggerRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }),
-    )
+    const frame = requestAnimationFrame(() => anchor.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }))
     return () => cancelAnimationFrame(frame)
-  }, [open])
+  }, [open, anchor])
 
   const changeOpen = (next: boolean) => {
-    if (!next) {
-      setQuery('')
-      setPicked([])
-    }
+    if (!next) setPicked([])
     onOpenChange(next)
   }
 
@@ -966,34 +995,22 @@ const AddFromAddressBook = ({
 
   return (
     <Popover open={open} onOpenChange={changeOpen}>
-      <PopoverTrigger ref={triggerRef} render={<Button variant="outline" size="sm" />}>
-        Add from address book
-      </PopoverTrigger>
-      {/* Capped at the room below the button: search and Add stay put, only the contact list scrolls. */}
+      {/* Capped at the room below the row: Add stays put, only the contact list scrolls. Focus stays in the field. */}
       <PopoverContent
-        align="end"
+        anchor={anchor}
+        initialFocus={false}
+        finalFocus={false}
+        align="start"
         side="bottom"
         sideOffset={4}
         collisionAvoidance={{ side: 'none' }}
-        className="flex max-h-(--available-height) w-[480px] max-w-[calc(100vw-32px)] flex-col gap-0 overflow-hidden rounded-lg p-0 shadow-lg ring-1 ring-foreground/10"
+        className="flex max-h-(--available-height) w-(--anchor-width) max-w-[calc(100vw-32px)] flex-col gap-0 overflow-hidden rounded-lg p-0 pt-1 shadow-lg ring-1 ring-foreground/10"
         data-m2-new="New · Address book popover"
         data-m2-new-corner="end"
       >
-        <div className="shrink-0 p-2">
-          <SearchInput
-            inputSize="sm"
-            className="w-full"
-            placeholder="Search contacts"
-            aria-label="Search contacts"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onClear={() => setQuery('')}
-          />
-        </div>
-
         {groups.length === 0 ? (
           <div className="px-4 pb-3">
-            <MutedLine>No contacts found.</MutedLine>
+            <MutedLine>No contacts match.</MutedLine>
           </div>
         ) : (
           <div className={CONTACT_LIST_CLASSES}>
@@ -1245,7 +1262,7 @@ const AddressPill = ({
       name={name}
       address={address}
       nameSuffix={nameSuffix}
-      className={classnames(isRemoved && 'line-through opacity-50')}
+      className={classnames(isRemoved && 'opacity-50')}
     />
     {endSlot && <span className="ml-2 flex shrink-0">{endSlot}</span>}
   </div>
@@ -1519,23 +1536,23 @@ const RecipientsGroup = ({
             <RecipientDraftRow
               listedAddresses={listedAddresses}
               onConfirm={addTyped}
+              onAddContacts={(contacts) => {
+                addFromBook(contacts)
+                setIsDrafting(false)
+              }}
               onRemove={() => setIsDrafting(false)}
+              isBookOpen={isBookOpen}
+              onBookOpenChange={setIsBookOpen}
             />
           )}
         </div>
       )}
 
-      <div className="flex justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={() => setIsDrafting(true)}>
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => setIsDrafting(true)}>
           <Plus data-icon="inline-start" />
           Add a recipient
         </Button>
-        <AddFromAddressBook
-          open={isBookOpen}
-          onOpenChange={setIsBookOpen}
-          listedAddresses={listedAddresses}
-          onAdd={addFromBook}
-        />
       </div>
     </GroupSurface>
   )
@@ -2600,6 +2617,53 @@ const PolicyReviewContent = ({
   )
 }
 
+/** Sits under the summary; Continue scrolls back here until it's ticked. */
+const ReviewConsentBox = ({
+  boxRef,
+  accountName,
+  isEdit,
+  checked,
+  hasError,
+  onChange,
+}: {
+  boxRef: RefObject<HTMLDivElement | null>
+  accountName: string
+  isEdit: boolean
+  checked: boolean
+  hasError: boolean
+  onChange: (checked: boolean) => void
+}): ReactElement => {
+  const checkboxId = useId()
+
+  return (
+    <div
+      ref={boxRef}
+      className="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-3"
+      data-m2-new="New · Every other action checkbox"
+    >
+      <label htmlFor={checkboxId} className="flex cursor-pointer items-start gap-3 px-1">
+        <Checkbox
+          id={checkboxId}
+          checked={checked}
+          aria-invalid={hasError && !checked}
+          onCheckedChange={(next) => onChange(next === true)}
+          className="mt-0.5 bg-card"
+        />
+        <Typography variant="paragraph-small">
+          {isEdit
+            ? `I understand that ${accountName} will only be able to do what this allowlist allows, and that this change and every later one take 24 hours to apply.`
+            : `I understand that ${accountName} will only be able to do what this allowlist allows, and that every later change takes 24 hours to apply.`}
+        </Typography>
+      </label>
+      {hasError && !checked && (
+        <Typography variant="paragraph-small" className="px-1 text-destructive">
+          Tick the box to continue.
+        </Typography>
+      )}
+    </div>
+  )
+}
+
 const ReviewStep = ({
   account,
   choices,
@@ -2621,9 +2685,28 @@ const ReviewStep = ({
     [choices, mode, account],
   )
 
+  const [isUnderstood, setIsUnderstood] = useState(false)
+  const [hasConsentError, setHasConsentError] = useState(false)
+  const consentRef = useRef<HTMLDivElement>(null)
+
+  const submit = () => {
+    if (isUnderstood) return onNext()
+    setHasConsentError(true)
+    consentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
   return (
-    <PolicyReviewContent txPreview={txPreview} onSubmit={onNext}>
+    <PolicyReviewContent txPreview={txPreview} onSubmit={submit}>
       <PolicySummary choices={choices} account={account} initialChoices={initialChoices} />
+
+      <ReviewConsentBox
+        boxRef={consentRef}
+        accountName={account.name}
+        isEdit={mode === 'edit'}
+        checked={isUnderstood}
+        hasError={hasConsentError}
+        onChange={setIsUnderstood}
+      />
 
       <MutedLine>
         {otherSignerNames(viewer)} will be asked to sign next. Nothing changes until it&apos;s executed.
@@ -2856,8 +2939,8 @@ type SetupSummary = {
   description?: string
   /** Behind the info icon at the end of the description. */
   details?: string
-  /** Yellow when the choice leaves funds exposed; blue otherwise. */
-  tone?: 'info' | 'warning'
+  /** Red on the review step, yellow when the choice leaves funds exposed, blue otherwise. */
+  tone?: 'info' | 'warning' | 'error'
 }
 
 const useSetupSummary = (
@@ -2883,6 +2966,10 @@ const useSetupSummary = (
       : `To create an allowlist policy on ${who}, select at least one token and one recipient.`
   const limitCount = account ? getExistingPermissions(account).length : 0
   const limits = limitCount === 1 ? 'Your spending limit' : `Your ${limitCount} spending limits`
+  const blockedLimits = account
+    ? getExistingPermissions(account).filter(({ token }) => choices.excludedTokens.includes(token))
+    : []
+  const onceActive = isEditMode ? 'Once the change applies' : 'Once this allowlist is active'
   const allowedSettingCount = getAllowedSettings(choices).length
   // Each step's own title and line; the timing sits behind the ⓘ on every step.
   const STEP_BANNERS: Record<number, SetupSummary> = {
@@ -2894,16 +2981,28 @@ const useSetupSummary = (
           description: 'Anything you deselect will be blocked once the change applies.',
         }
       : { title: allowedRule, description: 'Anything you leave out will be blocked.' },
-    [PERMISSIONS_STEP]: choices.applyToSpendingLimits
+    [PERMISSIONS_STEP]: !choices.applyToSpendingLimits
       ? {
-          title: `${limits} will follow this allowlist's rules.`,
-          description: 'They can only send allowed tokens to allowed recipients.',
-        }
-      : {
           title: `${limits} won't follow this allowlist's rules.`,
           description: 'They can still send any token to any address, so your Safe account could be exposed.',
           tone: 'warning',
-        },
+        }
+      : blockedLimits.length === 1
+        ? {
+            title: '1 spending limit will be blocked by this allowlist.',
+            description: `${blockedLimits[0].holder} can send up to ${blockedLimits[0].detail} to any address today. ${onceActive}, it can't send ${blockedLimits[0].token} anymore.`,
+            tone: 'warning',
+          }
+        : blockedLimits.length > 1
+          ? {
+              title: `${blockedLimits.length} spending limits will be blocked by this allowlist.`,
+              description: `They can send their tokens to any address today. ${onceActive}, they can't send them anymore.`,
+              tone: 'warning',
+            }
+          : {
+              title: `${limits} will follow this allowlist's rules.`,
+              description: 'They can only send allowed tokens to allowed recipients.',
+            },
     // Nothing selected locks the Safe account, so it turns yellow and says what that means.
     [SETTINGS_STEP]:
       allowedSettingCount === 0
@@ -2917,19 +3016,21 @@ const useSetupSummary = (
             description:
               'Only the account changes you select below can still be made. Every other change will be blocked.',
           },
-    // Spending limits left out turn it yellow; in edit mode it points at the Added/Removed marks instead.
+    // Always red: once signed, everything outside the allowlist is blocked.
     [REVIEW_STEP]: isEditMode
       ? {
-          title: `You're changing the allowlist on ${who}.`,
-          description: "Check what's added and removed below before you sign.",
+          title: allowedRule,
+          description:
+            'Check the details below before you sign. This starts a 24-hour wait, and a second transaction will be needed to apply the changes to the policy.',
+          tone: 'error',
         }
       : limitCount > 0 && !choices.applyToSpendingLimits
         ? {
             title: allowedRule,
             description: `${limits} won't follow these rules, so your Safe account could be exposed.`,
-            tone: 'warning',
+            tone: 'error',
           }
-        : { title: allowedRule, description: 'Check the details below before you sign.' },
+        : { title: allowedRule, description: 'Check the details below before you sign.', tone: 'error' },
     [CONFIRM_STEP]: {
       title: `Sign to add the ${isEditMode ? 'change' : 'allowlist'} to the queue.`,
       description:
@@ -2938,7 +3039,10 @@ const useSetupSummary = (
           : 'Your signature is the only one needed. It can be executed right after.',
     },
     [EXECUTE_STEP]: isEditMode
-      ? { title: 'Execute to start the 24-hour wait.', description: 'The change applies after that.' }
+      ? {
+          title: 'Execute to start the 24-hour wait.',
+          description: 'After that, a second transaction will be needed to apply the changes to the policy.',
+        }
       : { title: 'Execute to turn the allowlist on.', description: 'It applies right away.' },
   }
   const banner: SetupSummary = who
@@ -2954,9 +3058,7 @@ const useSetupSummary = (
   const timing = !who
     ? undefined
     : isEditMode
-      ? step === EXECUTE_STEP
-        ? 'Any signer can cancel the change before then.'
-        : 'Changes apply 24 hours after this transaction is executed. Any signer can cancel them before then.'
+      ? 'Any signer can cancel the change before it applies.'
       : step === EXECUTE_STEP
         ? 'Further changes will take 24 hours to apply.'
         : 'These changes take effect as soon as this transaction is executed. Further changes will take 24 hours to apply.'

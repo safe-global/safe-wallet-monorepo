@@ -13,7 +13,7 @@ import {
   DrawerSection,
   DrawerTitle,
 } from '@/components/common/Drawer'
-import { Badge } from '@safe-global/views/components/ui/badge'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Link } from '@safe-global/views/components/ui/link'
@@ -64,7 +64,7 @@ const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
 const ENFORCED_BY = 'Safe policy contract'
 
 /** M1's PolicyDrawerHeader markup; its chip only knows M1's statuses, so this one also shows "Change pending". */
-const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | null }): ReactElement => {
+const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | 'expired' | null }): ReactElement => {
   const { Icon } = POLICY_TYPES[row.type]
 
   return (
@@ -73,7 +73,16 @@ const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | n
         <Icon className="size-4 text-muted-foreground" />
       </div>
       <DrawerTitle size="lg">{POLICY_ROW_LABELS[row.type]}</DrawerTitle>
-      <div className="ml-auto">{status && <RowStatusChip status={status} />}</div>
+      <div className="ml-auto">
+        {status === 'expired' ? (
+          <Badge variant="destructive" size="status" shape="status">
+            <BadgeDot />
+            Expired
+          </Badge>
+        ) : (
+          status && <RowStatusChip status={status} />
+        )}
+      </div>
     </DrawerHeader>
   )
 }
@@ -326,7 +335,13 @@ const ExistingPoliciesSection = ({ count, isApplied }: { count: number; isApplie
 export type PanelOutcome = 'executed' | 'failed' | 'replaced' | 'deleted'
 
 /** A side panel state picked from the prototype bar. Without one, the panel follows the prototype's own state. */
-export type AllowlistPanelScenario = { viewer: PanelViewer; operation?: PanelOperation; outcome?: PanelOutcome }
+export type AllowlistPanelScenario = {
+  viewer: PanelViewer
+  operation?: PanelOperation
+  outcome?: PanelOutcome
+  /** An executed edit before its second transaction applies it: in the 24-hour wait, ready, or expired. */
+  applyStage?: ApplyStage
+}
 
 // M1's SpendingLimitDrawer copy (SpendingLimitDrawer/messages.ts), worded for the allowlist.
 const PENDING_TITLE: Record<PanelOperation, string> = {
@@ -354,11 +369,72 @@ const EXECUTED_LINE: Record<PanelOperation, (at: string) => string> = {
   remove: (at) => `The allowlist is removed after the 24‑hour delay, on ${at}.`,
 }
 
+const APPLY_WINDOW_MS = 7 * DELAY_MS
+
+export type ApplyStage = 'waiting' | 'ready' | 'expired'
+
+const APPLY_STAGE: Record<
+  ApplyStage,
+  {
+    tone: 'warning' | 'error'
+    title: string
+    section: string
+    timeLeft?: string
+    readyLabel: string
+    endLabel: string
+    /** How long ago the request was made, so the dates and time left read right. */
+    requestedAgoMs: number
+  }
+> = {
+  waiting: {
+    tone: 'warning',
+    title: 'Your changes can be applied in 24 hours',
+    section: 'Waiting period',
+    timeLeft: '23h 59m left',
+    readyLabel: 'Can be applied from',
+    endLabel: 'Apply by',
+    requestedAgoMs: 60_000,
+  },
+  ready: {
+    tone: 'warning',
+    title: 'Your changes are ready to apply',
+    section: 'Apply window',
+    timeLeft: '6 days left',
+    readyLabel: 'Ready since',
+    endLabel: 'Apply by',
+    requestedAgoMs: DELAY_MS + 60 * 60_000,
+  },
+  expired: {
+    tone: 'error',
+    title: 'Your changes expired',
+    section: 'Request',
+    readyLabel: 'Ready since',
+    endLabel: 'Expired',
+    requestedAgoMs: DELAY_MS + APPLY_WINDOW_MS + 60 * 60_000,
+  },
+}
+
+const getApplyDescription = (
+  stage: ApplyStage,
+  { threshold, owners }: M2Account,
+  { readyAt, endAt }: { readyAt: string; endAt: string },
+): string => {
+  switch (stage) {
+    case 'waiting':
+      return `From ${readyAt}, a second transaction will need to be executed to apply them. Until then, the current rules apply.`
+    case 'ready':
+      return `They take effect once a second transaction is executed. It needs ${threshold} of ${owners} signatures and must be executed by ${endAt}.`
+    case 'expired':
+      return `They weren't applied by ${endAt}, so they can't take effect anymore. The current rules stay in place.`
+  }
+}
+
 const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this allowlist.'
 
 type PanelState =
   | { kind: 'live'; action: 'manage' | 'connect' | 'not-signer' }
   | { kind: 'change-pending' }
+  | { kind: 'apply'; stage: ApplyStage }
   | { kind: 'activating' }
   | {
       kind: 'pending'
@@ -374,8 +450,9 @@ type PanelState =
 /** M1's resolveSpendingLimitDrawerState, step for step: the row's status, then the viewer, decides what the panel shows. */
 const resolvePanelState = (
   row: PolicyRow,
-  { viewer, operation = 'create', outcome }: AllowlistPanelScenario,
+  { viewer, operation = 'create', outcome, applyStage }: AllowlistPanelScenario,
 ): PanelState => {
+  if (applyStage) return { kind: 'apply', stage: applyStage }
   if (row.status === 'failed') {
     return { kind: 'closed', operation, outcome: outcome && isFailure(outcome) ? outcome : 'failed' }
   }
@@ -417,7 +494,8 @@ function isFailure(outcome: PanelOutcome): boolean {
 }
 
 /** An executed transaction is still in its delay, so the header's chip reads Pending. */
-const getPanelStatus = (row: PolicyRow, state: PanelState): RowStatus | null => {
+const getPanelStatus = (row: PolicyRow, state: PanelState): RowStatus | 'expired' | null => {
+  if (state.kind === 'apply') return state.stage === 'expired' ? 'expired' : 'change-pending'
   if (state.kind !== 'closed') return row.status
   if (state.outcome === 'executed') return 'activating'
   return isFailure(state.outcome) ? 'failed' : null
@@ -488,6 +566,35 @@ const StatusSection = ({ row, state }: { row: PolicyRow; state: PanelState }): R
           }
         />
       )
+
+    case 'apply': {
+      const { tone, title, section, timeLeft, readyLabel, endLabel, requestedAgoMs } = APPLY_STAGE[state.stage]
+      const requestedAt = Date.now() - requestedAgoMs
+      const readyAt = formatUtc(new Date(requestedAt + DELAY_MS))
+      const endAt = formatUtc(new Date(requestedAt + DELAY_MS + APPLY_WINDOW_MS))
+      return (
+        <div className="flex flex-col gap-6">
+          <M2Alert
+            tone={tone}
+            title={title}
+            description={getApplyDescription(state.stage, row.account, { readyAt, endAt })}
+          />
+          <DrawerSection title={section} rightNode={timeLeft}>
+            <DrawerList
+              items={[
+                { label: 'Requested', content: formatUtc(new Date(requestedAt)) },
+                { label: readyLabel, content: readyAt },
+                { label: endLabel, content: endAt },
+                {
+                  label: 'Safe account',
+                  content: <SafeAddress name={row.account.name} address={row.account.address} />,
+                },
+              ]}
+            />
+          </DrawerSection>
+        </div>
+      )
+    }
 
     case 'change-pending':
       return (
@@ -566,6 +673,17 @@ const M2DrawerActions = ({
     case 'change-pending':
       return <PolicyDrawerActions actionLabel="Cancel change" variant="secondary" onClick={onCancelChange} />
 
+    case 'apply':
+      switch (state.stage) {
+        case 'waiting':
+          return <PolicyDrawerActions actionLabel="Apply in 23h 59m" disabled />
+        case 'ready':
+          return <PolicyDrawerActions actionLabel="Review transaction" hint="Any signer can start this transaction." />
+        case 'expired':
+          return <PolicyDrawerActions actionLabel="Discard" hint="To make these changes, edit the allowlist again." />
+      }
+      return null
+
     case 'activating':
     case 'closed':
       return null
@@ -622,11 +740,11 @@ const AllowlistDrawer = ({
           <StatusSection row={row} state={state} />
           <RecipientList recipients={row.people} isRemoved={isRemoved} />
           <TokenList tokens={tokens} isRemoved={isRemoved} />
-          {spendingLimitCount > 0 && !isRemoved && (
+          {spendingLimitCount > 0 && !isRemoved && state.kind !== 'apply' && (
             <ExistingPoliciesSection count={spendingLimitCount} isApplied={appliesToSpendingLimits} />
           )}
           {/* Last in every state, as in SpendingLimitDrawer. */}
-          <PolicyOverviewSection account={row.account} lastUpdated={row.lastUpdated} />
+          {state.kind !== 'apply' && <PolicyOverviewSection account={row.account} lastUpdated={row.lastUpdated} />}
         </div>
       </DrawerBody>
 

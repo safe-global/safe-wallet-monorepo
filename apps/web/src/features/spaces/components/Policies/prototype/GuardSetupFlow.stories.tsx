@@ -382,6 +382,9 @@ const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
         view: 'by-policy',
         state: { ...EDIT, wizardStep: EXECUTE_STEP, choices: EDIT_TWO_CHANGES },
       },
+      allowlistPanel('Side panel · waiting to apply', LIVE_SETUP, { viewer: 'signer', applyStage: 'waiting' }),
+      allowlistPanel('Side panel · ready to apply', LIVE_SETUP, { viewer: 'signer', applyStage: 'ready' }),
+      allowlistPanel('Side panel · expired', LIVE_SETUP, { viewer: 'signer', applyStage: 'expired' }),
     ],
   },
   {
@@ -669,6 +672,21 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
         id: 'edit-review',
         label: 'Edit · Review (2 changes)',
         jump: { view: BY_POLICY, state: { ...EDIT, wizardStep: REVIEW_STEP, choices: EDIT_TWO_CHANGES } },
+      },
+      {
+        id: 'edit-waiting-to-apply',
+        label: 'Edit · Side panel, waiting to apply',
+        jump: allowlistPanel('', LIVE_SETUP, { viewer: 'signer', applyStage: 'waiting' }),
+      },
+      {
+        id: 'edit-ready-to-apply',
+        label: 'Edit · Side panel, ready to apply',
+        jump: allowlistPanel('', LIVE_SETUP, { viewer: 'signer', applyStage: 'ready' }),
+      },
+      {
+        id: 'edit-expired',
+        label: 'Edit · Side panel, expired',
+        jump: allowlistPanel('', LIVE_SETUP, { viewer: 'signer', applyStage: 'expired' }),
       },
     ],
   },
