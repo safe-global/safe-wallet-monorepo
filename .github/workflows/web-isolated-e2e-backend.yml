@@ -11,15 +11,23 @@ on:
         description: Number of parallel Playwright jobs, each with its own backend
         required: false
         default: '3'
+      backend:
+        description: Deployment whose service versions the backend runs
+        type: choice
+        options: [staging, production]
+        default: staging
   # No paths filter: the required result check must report on every pull request, so the plan job detects changes.
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches: [dev]
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Each merge to dev gets its own group, so a later merge cannot cancel the run of an earlier one.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -29,9 +37,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      packages: read
     outputs:
       run: ${{ steps.changes.outputs.relevant }}
       matrix: ${{ steps.plan.outputs.matrix }}
+      images: ${{ steps.images.outputs.images }}
     steps:
       - name: Detect changes that the isolated E2E covers
         id: changes
@@ -73,6 +83,30 @@ jobs:
           SAFE_E2E_SPECS: ${{ inputs.specs }}
           SAFE_E2E_SHARDS: ${{ inputs.shards || '3' }}
         run: echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
+
+      # The Queue Service image is a private package.
+      - name: Log in to GitHub Container Registry
+        if: steps.changes.outputs.relevant == 'true'
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      # Resolved once, so that every shard tests the same images even when staging deploys during the run.
+      - name: Resolve backend images
+        id: images
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          REQUESTED_BACKEND: ${{ inputs.backend }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          backend="${REQUESTED_BACKEND:-staging}"
+          # A release must work with the backend that production runs today.
+          if [ "$HEAD_REF" = release ] && [ "$BASE_REF" = main ]; then backend=production; fi
+          images=$(python3 apps/web/e2e/environment/infra/scripts/test_env.py versions --backend "$backend")
+          { echo 'images<<IMAGES'; echo "$images"; echo IMAGES; } >> "$GITHUB_OUTPUT"
+          { echo "### Backend: $backend"; echo '```'; echo "$images"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
   build:
     needs: plan
@@ -159,6 +193,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
+
+      - name: Use the planned backend images
+        env:
+          IMAGES: ${{ needs.plan.outputs.images }}
+        run: printf '%s\n' "$IMAGES" >> "$GITHUB_ENV"
 
       - name: Start and validate backend
         id: backend
