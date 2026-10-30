@@ -24,8 +24,8 @@ export type RecipientAllowlistFormProps = {
   account?: { chainId: string; address: string; label: string }
   /** False when the picked Safe cannot take an allowlist: only `children` show. */
   showSections: boolean
-  /** The policy guard is already installed, so changes wait out the delay before they apply. */
-  isGuardEnabled?: boolean
+  /** The delay of the policy guard the Safe already has, which changes wait out before they apply. */
+  installedGuardDelay?: string
   dismissedCallouts: Record<CalloutSection, boolean>
   onDismissCallout: (section: CalloutSection) => void
   /** Between the summary and the sections: the account field and its banners. */
@@ -38,7 +38,7 @@ const RecipientAllowlistForm = ({
   heldTokens,
   account,
   showSections,
-  isGuardEnabled,
+  installedGuardDelay,
   dismissedCallouts,
   onDismissCallout,
   children,
@@ -64,7 +64,7 @@ const RecipientAllowlistForm = ({
           accountLabel={account?.label}
           tokenSymbols={tokenSymbols}
           recipientNames={recipientNames}
-          isGuardEnabled={isGuardEnabled}
+          installedGuardDelay={installedGuardDelay}
           {...(isEditMode &&
             account && {
               title: getEditSummaryTitle(account.label),

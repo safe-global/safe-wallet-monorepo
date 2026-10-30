@@ -1,6 +1,7 @@
 import {
   getPolicyEngineAddress,
   getPolicyGuardAddress,
+  getPolicyGuardDelay,
   isPolicyGuard,
   isPolicyGuardOnChain,
   hasPolicyGuardOnChain,
@@ -111,6 +112,25 @@ describe('isPolicyGuard', () => {
     [undefined, false],
   ])('%s → %s', (address, expected) => {
     expect(isPolicyGuard(address)).toBe(expected)
+  })
+})
+
+describe('getPolicyGuardDelay', () => {
+  it.each([
+    ['0x55c241591E12CE3c58491D02b737F12D3199ae95', 0],
+    ['0x46d22e0b3dc367b48bc2d64b789ae154b3177a57', 600],
+    ['0x2d4527fD0E79ca1e533E3C7BBEF7e0668b700aED', 86400],
+  ])('should return the delay of the guard deployed at %s on Sepolia', (address, delay) => {
+    expect(getPolicyGuardDelay('11155111', address)).toBe(delay)
+  })
+
+  it('should return undefined, when the guard is not deployed on the chain', () => {
+    expect(getPolicyGuardDelay('1', '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f')).toBeUndefined()
+  })
+
+  it('should return undefined, when the address is not a policy guard or missing', () => {
+    expect(getPolicyGuardDelay('11155111', '0x0000000000000000000000000000000000000001')).toBeUndefined()
+    expect(getPolicyGuardDelay('11155111', undefined)).toBeUndefined()
   })
 })
 

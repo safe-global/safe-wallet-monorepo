@@ -44,6 +44,15 @@ describe('useGuardStatus', () => {
     })
   })
 
+  it('should return the installed guard address, when the read found the policy guard', () => {
+    const guardAddress = faker.finance.ethereumAddress()
+    read({ state: { status: 'known', guardAddress } })
+
+    const { result } = renderHook(() => useGuardStatus(TARGET))
+
+    expect(result.current.guardAddress).toBe(guardAddress)
+  })
+
   it('reports a failed read, with a retry that re-reads', () => {
     const refetch = read({ error: new Error('rpc down') })
 

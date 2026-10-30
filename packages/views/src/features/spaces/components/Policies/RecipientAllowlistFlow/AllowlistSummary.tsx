@@ -4,8 +4,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import {
   SUMMARY_DESCRIPTION,
   SUMMARY_DETAILS,
-  SUMMARY_DETAILS_GUARD_ENABLED,
   SUMMARY_DETAILS_LABEL,
+  getSummaryDetailsGuardEnabled,
   SUMMARY_NO_ACCOUNT_DESCRIPTION,
   SUMMARY_NO_ACCOUNT_TITLE,
 } from './constants'
@@ -15,7 +15,8 @@ type AllowlistSummaryProps = {
   accountLabel?: string
   tokenSymbols: string[]
   recipientNames: string[]
-  isGuardEnabled?: boolean
+  /** The delay of the policy guard the Safe already has; unset when it has none yet. */
+  installedGuardDelay?: string
   title?: string
   description?: string
   /** Behind the info icon; defaults to when the setup takes effect. */
@@ -39,10 +40,10 @@ const AllowlistSummary = ({
   accountLabel,
   tokenSymbols,
   recipientNames,
-  isGuardEnabled = false,
+  installedGuardDelay,
   title: titleOverride,
   description = SUMMARY_DESCRIPTION,
-  details = isGuardEnabled ? SUMMARY_DETAILS_GUARD_ENABLED : SUMMARY_DETAILS,
+  details = installedGuardDelay ? getSummaryDetailsGuardEnabled(installedGuardDelay) : SUMMARY_DETAILS,
   tone = 'info',
 }: AllowlistSummaryProps): ReactElement => {
   const isComplete = tokenSymbols.length > 0 && recipientNames.length > 0

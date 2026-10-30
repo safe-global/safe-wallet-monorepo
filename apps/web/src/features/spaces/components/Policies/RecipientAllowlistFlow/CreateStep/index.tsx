@@ -4,6 +4,7 @@ import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-glo
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { usePolicyGuardDelay } from '@/features/policy-guard'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
@@ -36,6 +37,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
+  formatPolicyChangeDelay,
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -76,7 +78,8 @@ const CreateRecipientAllowlistPolicy = ({
     selectedSafe && !selectedSafe.ineligibleReason
       ? { chainId: selectedSafe.chainId, safeAddress: selectedSafe.address }
       : undefined
-  const { guard, retry } = useGuardStatus(target)
+  const { guard, guardAddress, retry } = useGuardStatus(target)
+  const guardDelay = formatPolicyChangeDelay(usePolicyGuardDelay(target?.chainId ?? '', guardAddress))
 
   const heldTokens = useHeldTokenAddresses()
 
@@ -131,7 +134,7 @@ const CreateRecipientAllowlistPolicy = ({
               : undefined
           }
           showSections={!selectedSafe || canContinue}
-          isGuardEnabled={isAllowlistGuardEnabled(guard)}
+          installedGuardDelay={isAllowlistGuardEnabled(guard) ? guardDelay : undefined}
           dismissedCallouts={dismissedCallouts}
           onDismissCallout={onDismissCallout}
         >

@@ -163,7 +163,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           accountLabel={getAllowlistSafeLabel(selected)}
           tokenSymbols={tokens.map(({ symbol }) => symbol)}
           recipientNames={recipients.map(spenderDisplayName)}
-          isGuardEnabled={isAllowlistGuardEnabled(guardState)}
+          installedGuardDelay={isAllowlistGuardEnabled(guardState) ? changeDelay : undefined}
           description={
             baseline
               ? getEditReviewDescription(formatPolicyChangeDelayAdjective(delaySeconds))

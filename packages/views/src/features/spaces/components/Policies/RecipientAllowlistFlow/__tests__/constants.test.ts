@@ -1,7 +1,8 @@
-import { formatPolicyChangeDelayAdjective } from '../constants'
+import { formatPolicyChangeDelay, formatPolicyChangeDelayAdjective } from '../constants'
 
 describe('formatPolicyChangeDelayAdjective', () => {
   it.each([
+    [0, '0-second'],
     [60, '1-minute'],
     [180, '3-minute'],
     [600, '10-minute'],
@@ -12,5 +13,16 @@ describe('formatPolicyChangeDelayAdjective', () => {
     [5_400, '1-hour 30-minute'],
   ])('should say %i seconds as %s', (seconds, adjective) => {
     expect(formatPolicyChangeDelayAdjective(seconds)).toBe(adjective)
+  })
+})
+
+describe('formatPolicyChangeDelay', () => {
+  it.each([
+    [0, '0 seconds'],
+    [60, '1 minute'],
+    [600, '10 minutes'],
+    [86_400, '1 day'],
+  ])('should say %i seconds as %s', (seconds, delay) => {
+    expect(formatPolicyChangeDelay(seconds)).toBe(delay)
   })
 })

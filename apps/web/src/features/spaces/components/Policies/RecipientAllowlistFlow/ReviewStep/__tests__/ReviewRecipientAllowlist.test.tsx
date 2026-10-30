@@ -444,6 +444,14 @@ describe('ReviewRecipientAllowlist', () => {
     expect(screen.getByText(/wait 3 minutes after execution/)).toBeInTheDocument()
   })
 
+  it('should say the changes wait the installed guard delay, when the guard has another delay than the configured one', () => {
+    mockGuardDelay(600)
+    built({ status: 'known', guardAddress })
+    renderReview()
+
+    expect(screen.getByText(/wait 10 minutes after execution/)).toBeInTheDocument()
+  })
+
   it('says the changes apply on execution when no guard is set yet', () => {
     built({ status: 'none' })
     renderReview()

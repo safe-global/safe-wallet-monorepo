@@ -65,6 +65,13 @@ export const isPolicyGuardOnChain = (chainId: string, address?: string | null): 
     sameAddress(networkAddresses[chainId], address ?? undefined),
   )
 
+export const getPolicyGuardDelay = (chainId: string, address?: string | null): number | undefined => {
+  const match = Object.entries(POLICY_GUARD_BY_DELAY).find(([, { networkAddresses }]) =>
+    sameAddress(networkAddresses[chainId], address ?? undefined),
+  )
+  return match ? Number.parseInt(match[0], 10) : undefined
+}
+
 export const hasPolicyGuardOnChain = (chainId: string): boolean =>
   Object.values(POLICY_GUARD_BY_DELAY).some(({ networkAddresses }) => !!networkAddresses[chainId])
 

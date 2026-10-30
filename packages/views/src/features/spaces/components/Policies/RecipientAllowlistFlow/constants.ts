@@ -6,11 +6,11 @@ import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatt
 
 /** How long a policy change waits before it applies, e.g. `3 minutes`. */
 export const formatPolicyChangeDelay = (delaySeconds: number): string =>
-  formatDurationFromMilliseconds(delaySeconds * 1_000, ['days', 'hours', 'minutes'])
+  formatDurationFromMilliseconds(delaySeconds * 1_000, ['days', 'hours', 'minutes', 'seconds']) || '0 seconds'
 
 /** The same delay as an adjective, e.g. `3-minute`, for "a 3-minute wait". */
 export const formatPolicyChangeDelayAdjective = (delaySeconds: number): string =>
-  formatPolicyChangeDelay(delaySeconds).replace(/(\d+) (day|hour|minute)s?/g, '$1-$2')
+  formatPolicyChangeDelay(delaySeconds).replace(/(\d+) (day|hour|minute|second)s?/g, '$1-$2')
 
 /** The delay of the guard the setup installs */
 export const POLICY_CHANGE_DELAY = formatPolicyChangeDelay(POLICY_GUARD_DELAY_SECONDS)
@@ -28,7 +28,8 @@ export const SUMMARY_NO_ACCOUNT_TITLE = 'Pick a Safe account to start.'
 export const SUMMARY_NO_ACCOUNT_DESCRIPTION = 'Then choose which tokens it can send and who can receive them.'
 export const SUMMARY_DESCRIPTION = 'Transfers of these tokens to anyone else will be blocked.'
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
-export const SUMMARY_DETAILS_GUARD_ENABLED = `The Safe policy guard is already enabled, so these changes wait ${POLICY_CHANGE_DELAY} after execution, then need an activation step before they apply.`
+export const getSummaryDetailsGuardEnabled = (changeDelay: string): string =>
+  `The Safe policy guard is already enabled, so these changes wait ${changeDelay} after execution, then need an activation step before they apply.`
 export const SUMMARY_DETAILS = `These changes take effect as soon as this transaction is executed. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
 
 export const TOKENS_SECTION_TITLE = 'Which tokens can be sent'

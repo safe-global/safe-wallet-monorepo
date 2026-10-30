@@ -33,6 +33,10 @@ const mockPush = jest.fn()
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
+jest.mock('@/features/policy-guard/store/guardDelayApi', () => ({
+  ...jest.requireActual('@/features/policy-guard/store/guardDelayApi'),
+  useGetGuardDelayQuery: () => ({ currentData: undefined }),
+}))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
@@ -464,6 +468,20 @@ describe('CreateRecipientAllowlistPolicy', () => {
     await userEvent.hover(screen.getByRole('button', { name: 'When this takes effect' }))
 
     expect(await screen.findByText(new RegExp(copy))).toBeInTheDocument()
+  })
+
+  it('should say the changes wait the installed guard delay, when the Safe runs a guard with another delay than the configured one', async () => {
+    accounts([option(SAFE_A)])
+    mockUseGuardStatus.mockReturnValue({
+      guard: { status: 'known' },
+      guardAddress: '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57',
+      retry: jest.fn(),
+    })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    await userEvent.hover(screen.getByRole('button', { name: 'When this takes effect' }))
+
+    expect(await screen.findByText(/these changes wait 10 minutes after execution/)).toBeInTheDocument()
   })
 
   it('retries a failed guard check', () => {

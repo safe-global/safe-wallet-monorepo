@@ -24,10 +24,19 @@ describe('usePolicyGuardDelay', () => {
     expect(query).toHaveBeenCalledWith({ chainId: '11155111', guardAddress: INSTALLED_GUARD, customRpc: undefined })
   })
 
-  it('should return the configured delay, when the read has not answered', () => {
+  it('should return the deployed guard delay, not the configured one, when the read has not answered', () => {
     mockGuardDelay(undefined)
 
     const { result } = renderHook(() => usePolicyGuardDelay('11155111', INSTALLED_GUARD))
+
+    expect(result.current).toBe(600)
+    expect(result.current).not.toBe(POLICY_GUARD_DELAY_SECONDS)
+  })
+
+  it('should return the configured delay, when the read has not answered and the guard is not a known deployment', () => {
+    mockGuardDelay(undefined)
+
+    const { result } = renderHook(() => usePolicyGuardDelay('11155111', '0x0000000000000000000000000000000000000001'))
 
     expect(result.current).toBe(POLICY_GUARD_DELAY_SECONDS)
   })

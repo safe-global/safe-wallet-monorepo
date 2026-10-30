@@ -84,6 +84,10 @@ jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
+jest.mock('@/features/policy-guard/store/guardDelayApi', () => ({
+  ...jest.requireActual('@/features/policy-guard/store/guardDelayApi'),
+  useGetGuardDelayQuery: () => ({ currentData: undefined }),
+}))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: () => ({ has: () => false, get: () => undefined, list: [] }),
