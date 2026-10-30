@@ -70,7 +70,7 @@ async function seedAllowlistSafe(
   return { safe, workspaceId: id }
 }
 
-/** Picks the Safe in the open setup flow, allows USDC to `recipients` and continues to the review */
+/** Picks the Safe in the open setup flow, allows USDC to `recipients`, continues to the review and confirms what it blocks */
 async function fillAllowlist(allowlist: RecipientAllowlistPage, recipients: Recipient[]): Promise<void> {
   await allowlist.selectSafe(SAFE_NAME)
   // The native transfer policy the wallet names is not one the indexer serves, so the allowlist covers USDC only.
@@ -78,6 +78,7 @@ async function fillAllowlist(allowlist: RecipientAllowlistPage, recipients: Reci
   await expect(allowlist.allowChip(SEPOLIA_USDC.symbol)).toHaveAttribute('aria-pressed', 'true')
   for (const recipient of recipients) await allowlist.addRecipient(recipient)
   await allowlist.nextButton.click()
+  await allowlist.confirmBlockedActions()
 }
 
 /** The open review lists the transaction's calls, and its configuring call, the first, rule by rule */

@@ -15,10 +15,10 @@ import {
   getReviewRecipientsLabel,
   REVIEW_ACCOUNT_LABEL,
   REVIEW_FALLBACK_ALLOW,
-  REVIEW_FALLBACK_DENY,
   REVIEW_FALLBACK_LABEL,
   REVIEW_TOKENS_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { BlockedBadge } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/BlockedBadge'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import TokenIcon from '@/components/common/TokenIcon'
 import { SafeAccountSummary } from '../../SafeAccountSelector/components/SafeAccountRow'
@@ -85,10 +85,14 @@ const AllowlistPolicyDetails = ({
             <Separator className="my-3" />
 
             <SummaryRow label={REVIEW_FALLBACK_LABEL}>
-              <SummaryLine>
-                <Typography variant="paragraph-small" data-testid="allowlist-fallback">
-                  {fallback === 'allow' ? REVIEW_FALLBACK_ALLOW : REVIEW_FALLBACK_DENY}
-                </Typography>
+              <SummaryLine className={fallback === 'deny' ? 'justify-end' : undefined}>
+                {fallback === 'allow' ? (
+                  <Typography variant="paragraph-small" data-testid="allowlist-fallback">
+                    {REVIEW_FALLBACK_ALLOW}
+                  </Typography>
+                ) : (
+                  <BlockedBadge data-testid="allowlist-fallback" />
+                )}
               </SummaryLine>
             </SummaryRow>
           </>

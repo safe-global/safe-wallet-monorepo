@@ -17,6 +17,8 @@ type AllowlistSummaryProps = {
   recipientNames: string[]
   isGuardEnabled?: boolean
   description?: string
+  /** Red on the review, where signing locks the Safe to what the allowlist allows */
+  tone?: 'info' | 'error'
 }
 
 const MAX_LISTED_TOKENS = 3
@@ -36,6 +38,7 @@ const AllowlistSummary = ({
   recipientNames,
   isGuardEnabled = false,
   description = SUMMARY_DESCRIPTION,
+  tone = 'info',
 }: AllowlistSummaryProps): ReactElement => {
   const isComplete = tokenSymbols.length > 0 && recipientNames.length > 0
 
@@ -47,7 +50,7 @@ const AllowlistSummary = ({
 
   return (
     <StatusAlert
-      tone="info"
+      tone={tone}
       title={title}
       description={
         accountLabel ? (
