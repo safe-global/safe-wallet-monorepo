@@ -1,15 +1,15 @@
 import { faker } from '@faker-js/faker'
-import { AbiCoder } from 'ethers'
+import { AbiCoder, getAddress } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { PendingDelayedGuardPoliciesDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getApplyAllowlistRequest, mapDelayedGuardRequest } from '../mapDelayedGuardRequests'
 
+const encodePolicyData = (entries: Array<[string, number]>): string =>
+  AbiCoder.defaultAbiCoder().encode(['tuple(address recipient, uint8 permission)[]'], [entries])
+
 const encodeErc20TransferPolicyData = (recipients: string[]): string =>
-  AbiCoder.defaultAbiCoder().encode(
-    ['tuple(address recipient, uint8 permission)[]'],
-    [recipients.map((recipient) => [recipient, 2])],
-  )
+  encodePolicyData(recipients.map((recipient) => [recipient, 2]))
 
 const resolveToken = (address: string): PolicyTokenInfo => ({ address, symbol: 'TKN', decimals: 18, logoUri: null })
 
@@ -47,7 +47,7 @@ const makeRequest = (overrides: Partial<PendingDelayedGuardPoliciesDto> = {}): P
 })
 
 describe('mapDelayedGuardRequest removals', () => {
-  it("should skip the unbound token rule, the guard's catch-all and the exit rules, when the request removes the allowlist", () => {
+  it("should skip the unbound token and native rules, the guard's catch-all and the exit rules, when the request removes the allowlist", () => {
     const safe = { chainId: '11155111', address: faker.finance.ethereumAddress() }
     const policy = mapDelayedGuardRequest(
       makeRequest({
@@ -83,7 +83,6 @@ describe('mapDelayedGuardRequest removals', () => {
 
     expect(policy?.data.entries.map(({ token, recipients }) => [token.address, recipients.length])).toEqual([
       [token, 2],
-      [ZERO_ADDRESS, 1],
     ])
   })
 
@@ -104,6 +103,51 @@ describe('mapDelayedGuardRequest removals', () => {
     )
 
     expect(policy?.data.entries).toEqual([{ token: resolveToken(token), recipients: [] }])
+  })
+})
+
+describe('mapDelayedGuardRequest edits', () => {
+  const [kept, revoked] = recipients
+  const erc20Config = (entries: Array<[string, number]>) => ({
+    target: token,
+    selector: '0xa9059cbb',
+    operation: 0,
+    policy: faker.finance.ethereumAddress(),
+    data: encodePolicyData(entries),
+  })
+  const entriesOf = (configurations: PendingDelayedGuardPoliciesDto['configurations']) =>
+    mapDelayedGuardRequest(makeRequest({ configurations }), { operation: 'update', resolveToken })?.data.entries
+
+  it('should list no recipient for an ERC-20 revoke', () => {
+    const [entry] = entriesOf([erc20Config([[revoked, 0]])]) ?? []
+
+    expect(entry.recipients).toEqual([])
+  })
+
+  it('should list only the added recipient, when a config adds one and revokes another', () => {
+    const [entry] = entriesOf([erc20Config([[kept, 2]]), erc20Config([[revoked, 0]])]) ?? []
+
+    expect(entry.recipients).toEqual([{ account: getAddress(kept), permission: 'ALWAYS' }])
+  })
+
+  it('should list only the permitted recipient, when one config mixes permissions', () => {
+    const [entry] =
+      entriesOf([
+        erc20Config([
+          [kept, 2],
+          [revoked, 0],
+        ]),
+      ]) ?? []
+
+    expect(entry.recipients).toEqual([{ account: getAddress(kept), permission: 'ALWAYS' }])
+  })
+
+  it('should list no recipient for a native unbind', () => {
+    const entries = entriesOf([
+      { target: nativeRecipient, selector: '0x00000000', operation: 0, policy: ZERO_ADDRESS, data: '0x' },
+    ])
+
+    expect(entries).toEqual([])
   })
 })
 

@@ -20,6 +20,7 @@ import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 
 const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
 const NATIVE_TRANSFER_SELECTOR = '0x00000000'
+const PERMISSION_NONE = 0
 const PERMISSIONS: Record<number, AllowlistRecipient['permission']> = { 1: 'ONCE', 2: 'ALWAYS' }
 
 type MapOptions = {
@@ -28,7 +29,7 @@ type MapOptions = {
   resolveToken: (address: string) => PolicyTokenInfo
 }
 
-/** Recipients a token rule names; none for data that isn't a recipient list, which CGW passes on as stored. */
+/** Recipients a token rule allows; none for revoked entries or data that is not a recipient list. */
 const decodeRecipients = (data: string): AllowlistRecipient[] => {
   let entries: Array<[string, bigint]>
   try {
@@ -37,15 +38,14 @@ const decodeRecipients = (data: string): AllowlistRecipient[] => {
     return []
   }
 
-  return entries.map(([account, permission]) => ({
-    account,
-    permission: PERMISSIONS[Number(permission)] ?? 'ALWAYS',
-  }))
+  return entries
+    .filter(([, permission]) => Number(permission) !== PERMISSION_NONE)
+    .map(([account, permission]) => ({ account, permission: PERMISSIONS[Number(permission)] ?? 'ALWAYS' }))
 }
 
 /**
  * One entry per token, the way the drawer lists them. Accesses other than token and native transfers are skipped,
- * as are the guard's catch-all rules and a token rule being unbound, which names no recipient.
+ * as are the guard's catch-all rules and unbound token or native rules, which name no recipient.
  */
 export const toAllowlistData = (
   configurations: readonly PolicyConfigurationDto[],
@@ -63,7 +63,11 @@ export const toAllowlistData = (
   for (const { target, selector, policy, data } of configurations) {
     if (selector === ERC20_TRANSFER_SELECTOR && !sameAddress(policy, ZERO_ADDRESS)) {
       entryFor(target).recipients.push(...decodeRecipients(data))
-    } else if (selector === NATIVE_TRANSFER_SELECTOR && !sameAddress(target, ZERO_ADDRESS)) {
+    } else if (
+      selector === NATIVE_TRANSFER_SELECTOR &&
+      !sameAddress(target, ZERO_ADDRESS) &&
+      !sameAddress(policy, ZERO_ADDRESS)
+    ) {
       entryFor(ZERO_ADDRESS).recipients.push({ account: target, permission: 'ALWAYS' })
     }
   }
