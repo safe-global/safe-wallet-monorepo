@@ -177,6 +177,8 @@ export const APPLY_SUMMARY_DESCRIPTION =
 export const EDIT_LABEL = 'Edit'
 export const getEditSummaryTitle = (account: string): string => `You're editing the allowlist on ${account}.`
 export const EDIT_SUMMARY_DESCRIPTION = 'Anything you deselect will be blocked once the change applies.'
+export const EDIT_SUMMARY_DESCRIPTION_ALLOW_FALLBACK =
+  'Deselected recipients will be blocked once the change applies. Deselected tokens will no longer be limited by this allowlist.'
 export const EDIT_SUMMARY_DETAILS = 'Any signer can cancel the change before it applies.'
 export const EDIT_TOKENS_DESCRIPTION =
   'These are the tokens the allowlist allows today. Add a token or deselect one to change it.'

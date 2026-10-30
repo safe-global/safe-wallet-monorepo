@@ -3,9 +3,11 @@ import AllowlistSummary from '@safe-global/views/features/spaces/components/Poli
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import {
   EDIT_SUMMARY_DESCRIPTION,
+  EDIT_SUMMARY_DESCRIPTION_ALLOW_FALLBACK,
   EDIT_SUMMARY_DETAILS,
   getEditSummaryTitle,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { POLICY_DEFAULT_FALLBACK } from '@/config/constants'
 import type { RecipientAllowlistFormValues } from '../types'
 import { getAllowedTokenAddresses } from '../utils/allowlistForm'
 import { toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
@@ -68,7 +70,8 @@ const RecipientAllowlistForm = ({
           {...(isEditMode &&
             account && {
               title: getEditSummaryTitle(account.label),
-              description: EDIT_SUMMARY_DESCRIPTION,
+              description:
+                POLICY_DEFAULT_FALLBACK === 'deny' ? EDIT_SUMMARY_DESCRIPTION : EDIT_SUMMARY_DESCRIPTION_ALLOW_FALLBACK,
               details: EDIT_SUMMARY_DETAILS,
             })}
         />

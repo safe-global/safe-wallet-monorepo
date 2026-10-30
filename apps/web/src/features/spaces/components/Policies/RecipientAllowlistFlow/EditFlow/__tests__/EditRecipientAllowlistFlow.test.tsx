@@ -88,6 +88,13 @@ jest.mock('@/features/policy-guard/store/guardDelayApi', () => ({
   ...jest.requireActual('@/features/policy-guard/store/guardDelayApi'),
   useGetGuardDelayQuery: () => ({ currentData: undefined }),
 }))
+let mockDefaultFallback: 'allow' | 'deny' = 'deny'
+jest.mock('@/config/constants', () => ({
+  ...jest.requireActual('@/config/constants'),
+  get POLICY_DEFAULT_FALLBACK() {
+    return mockDefaultFallback
+  },
+}))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: () => ({ has: () => false, get: () => undefined, list: [] }),
@@ -141,6 +148,7 @@ const renderFlow = () => render(<EditRecipientAllowlistFlow policy={policy} />)
 describe('EditRecipientAllowlistFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockDefaultFallback = 'deny'
     mockScope.safeLoaded = true
     mockScope.safeError = undefined
     holdTokens()
@@ -226,6 +234,18 @@ describe('EditRecipientAllowlistFlow', () => {
     ).toBeInTheDocument()
     expect(screen.queryByTestId('allowlist-tokens-callout')).not.toBeInTheDocument()
     expect(screen.queryByTestId('allowlist-recipients-callout')).not.toBeInTheDocument()
+  })
+
+  it('should say deselected tokens are no longer limited, when the policy fallback allows everything else', () => {
+    mockDefaultFallback = 'allow'
+    renderFlow()
+
+    expect(
+      screen.getByText(
+        'Deselected recipients will be blocked once the change applies. Deselected tokens will no longer be limited by this allowlist.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Anything you deselect will be blocked once the change applies.')).not.toBeInTheDocument()
   })
 
   it('should say the Safe could not be loaded and retry loading it, when the Safe read fails', () => {
