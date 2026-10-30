@@ -17,11 +17,10 @@ import {
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { type ReactNode, useContext, useMemo, useRef, useState, useEffect } from 'react'
-import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
 import BatchTransactions from './BatchTransactions'
 import { TxModalContext } from '@/components/tx-flow'
-import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView, isManageSignersView } from './utils'
+import { isChangeThresholdView, isConfirmBatchView, isManageSignersView } from './utils'
 import { OnChainConfirmation } from '@/components/transactions/TxDetails/TxData/NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from '@/components/transactions/TxDetails/TxData/NestedTransaction/ExecTransaction'
 import { type ReactElement } from 'react'
@@ -70,8 +69,6 @@ const getConfirmationViewComponent = ({
   if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} />
 
   if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} isPreview={true} />
-
-  if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
 
   if (isOnChainConfirmationTxData(txData)) return <OnChainConfirmation data={txData} isConfirmationView />
 

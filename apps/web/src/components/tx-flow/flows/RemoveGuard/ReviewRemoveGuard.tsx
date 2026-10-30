@@ -24,7 +24,7 @@ export const ReviewRemoveGuard = ({
   }, [onSubmit])
 
   return (
-    <ReviewTransaction onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
       <Typography className="text-[var(--color-primary-light)]">Transaction guard</Typography>
 
       <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
