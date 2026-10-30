@@ -24,6 +24,8 @@ import {
   type RecipientAllowlistFormValues,
 } from '../types'
 import { buildAllowlistRules, isAllowlistComplete } from '../utils/allowlistForm'
+import { hasAllowlistChanges, toAllowlistRules } from '../utils/allowlistEdit'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -58,6 +60,8 @@ const CreateRecipientAllowlistPolicy = ({
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
+  const isEditMode = useIsEditMode()
+  const baseline = data?.baseline
   const [values, setValues] = useState<RecipientAllowlistFormValues>(() => {
     const { excludedTokens, addedTokens, recipients } = data ?? createDefaultAllowlistValues()
     return { excludedTokens, addedTokens, recipients }
@@ -80,13 +84,17 @@ const CreateRecipientAllowlistPolicy = ({
 
   // Reset during render, not in an effect, so the remounted recipients section never sees the old Safe's values.
   const [trackedScopeKey, setTrackedScopeKey] = useState(scopeKey)
-  if (trackedScopeKey !== scopeKey) {
+  if (!isEditMode && trackedScopeKey !== scopeKey) {
     setTrackedScopeKey(scopeKey)
     setValues(createDefaultAllowlistValues())
   }
 
   const rules = useMemo(() => buildAllowlistRules(heldTokens.addresses, values), [heldTokens.addresses, values])
   const spendingLimits = useSpendingLimitImpacts(rules)
+  const isUnchangedEdit = useMemo(
+    () => baseline !== undefined && !hasAllowlistChanges(toAllowlistRules(baseline), rules),
+    [baseline, rules],
+  )
 
   const canContinue = guard !== undefined && READY_GUARD_STATES.includes(guard.status)
   const canGoNext =
@@ -94,7 +102,8 @@ const CreateRecipientAllowlistPolicy = ({
     !heldTokens.isLoading &&
     !heldTokens.isError &&
     !spendingLimits.isLoading &&
-    isAllowlistComplete(heldTokens.addresses, values)
+    isAllowlistComplete(heldTokens.addresses, values) &&
+    !isUnchangedEdit
 
   const isSettled = !isLoading && !isError
   const settingsHref = selectedSafe?.chain
@@ -141,6 +150,7 @@ const CreateRecipientAllowlistPolicy = ({
               title: NESTED_SAFES_NOTICE_TITLE,
               description: getNestedSafesNoticeText('recipient allowlists'),
             }}
+            readOnly={isEditMode}
             id="recipient-allowlist-safe-account"
           />
 
@@ -184,7 +194,7 @@ const CreateRecipientAllowlistPolicy = ({
             onClick={() => {
               // A failed load shows the step with its error rather than skipping the warning.
               onSpendingLimitImpact?.(spendingLimits.isError || spendingLimits.impacts.length > 0)
-              onNext({ ...values, rules })
+              onNext({ ...values, rules, baseline })
             }}
             data-testid="next-btn"
           >

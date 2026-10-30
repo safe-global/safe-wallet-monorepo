@@ -162,3 +162,14 @@ export const APPLY_REVIEW_STEP_TITLE = 'Apply allowlist'
 export const APPLY_SUMMARY_TITLE = 'Apply the allowlist to turn it on.'
 export const APPLY_SUMMARY_DESCRIPTION =
   'The waiting period is over. Once this transaction is executed, every transfer of an allowlisted token is checked against it.'
+
+export const EDIT_LABEL = 'Edit'
+export const getEditSummaryTitle = (account: string): string => `You're editing the allowlist on ${account}.`
+export const EDIT_SUMMARY_DESCRIPTION = 'Anything you deselect will be blocked once the change applies.'
+export const EDIT_SUMMARY_DETAILS = 'Any signer can cancel the change before it applies.'
+export const EDIT_TOKENS_CALLOUT_TITLE =
+  'These are the tokens the allowlist allows today. Add a token or deselect one to change it.'
+export const EDIT_RECIPIENTS_CALLOUT_TITLE =
+  'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.'
+export const getEditReviewDescription = (delay: string): string =>
+  `Check the details below before you sign. This starts a ${delay} wait, and a second transaction will be needed to apply the changes to the policy.`

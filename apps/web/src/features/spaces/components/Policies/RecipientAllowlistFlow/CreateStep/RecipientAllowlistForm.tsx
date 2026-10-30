@@ -1,5 +1,13 @@
 import { useMemo, type ReactElement, type ReactNode } from 'react'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import {
+  EDIT_RECIPIENTS_CALLOUT_TITLE,
+  EDIT_SUMMARY_DESCRIPTION,
+  EDIT_SUMMARY_DETAILS,
+  EDIT_TOKENS_CALLOUT_TITLE,
+  getEditSummaryTitle,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { RecipientAllowlistFormValues } from '../types'
 import { getAllowedTokenAddresses } from '../utils/allowlistForm'
 import { toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
@@ -40,6 +48,7 @@ const RecipientAllowlistForm = ({
   const { addresses, options } = heldTokens
   const chainId = account?.chainId
   const resolveName = useSafeNameResolver()
+  const isEditMode = useIsEditMode()
 
   const tokenSymbols = useMemo(
     () => toAllowlistTokens(getAllowedTokenAddresses(addresses, values), options).map(({ symbol }) => symbol),
@@ -58,6 +67,12 @@ const RecipientAllowlistForm = ({
           tokenSymbols={tokenSymbols}
           recipientNames={recipientNames}
           isGuardEnabled={isGuardEnabled}
+          {...(isEditMode &&
+            account && {
+              title: getEditSummaryTitle(account.label),
+              description: EDIT_SUMMARY_DESCRIPTION,
+              details: EDIT_SUMMARY_DETAILS,
+            })}
         />
       )}
 
@@ -72,6 +87,7 @@ const RecipientAllowlistForm = ({
             hasAccount={Boolean(account)}
             isCalloutDismissed={dismissedCallouts.tokens}
             onDismissCallout={() => onDismissCallout('tokens')}
+            calloutTitle={isEditMode ? EDIT_TOKENS_CALLOUT_TITLE : undefined}
           />
           <RecipientsSection
             key={account ? `${account.chainId}:${account.address}` : 'none'}
@@ -81,6 +97,7 @@ const RecipientAllowlistForm = ({
             chainId={account?.chainId}
             isCalloutDismissed={dismissedCallouts.recipients}
             onDismissCallout={() => onDismissCallout('recipients')}
+            calloutTitle={isEditMode ? EDIT_RECIPIENTS_CALLOUT_TITLE : undefined}
           />
         </div>
       )}

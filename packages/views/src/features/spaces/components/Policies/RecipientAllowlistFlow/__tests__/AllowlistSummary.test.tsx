@@ -116,4 +116,21 @@ describe('AllowlistSummary', () => {
     expect(screen.getByText('Check the details below before you sign.')).toBeInTheDocument()
     expect(screen.queryByText('Transfers of these tokens to anyone else will be blocked.')).not.toBeInTheDocument()
   })
+
+  it('should show the given title and details, when they are passed in', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        title="You're editing the allowlist on Payments."
+        details="Any signer can cancel the change before it applies."
+      />,
+    )
+
+    expect(screen.getByText("You're editing the allowlist on Payments.")).toBeInTheDocument()
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+      'Any signer can cancel the change before it applies.',
+    )
+  })
 })

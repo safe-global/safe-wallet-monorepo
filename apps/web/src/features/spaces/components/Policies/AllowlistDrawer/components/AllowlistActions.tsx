@@ -1,4 +1,8 @@
 import type { ReactElement } from 'react'
+import { DrawerFooter } from '@/components/common/Drawer'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { EDIT_LABEL } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import {
   DISCARD_LABEL,
   REMOVE_GUARD_LABEL,
@@ -10,6 +14,8 @@ import { CopyTransactionLink } from '../../SpendingLimitDrawer/components/CopyTr
 export type AllowlistActionsProps = {
   state: AllowlistDrawerState
   onConnectWallet: () => void
+  /** Opens the edit flow; without it the button stays disabled. */
+  onEdit?: () => void
   /** Requests the removal; without it the button stays disabled. */
   onRemove?: () => void
   /** Takes the guard off once a removal is applied; without it the button stays disabled. */
@@ -28,6 +34,7 @@ export type AllowlistActionsProps = {
 const AllowlistActions = ({
   state,
   onConnectWallet,
+  onEdit,
   onRemove,
   onRemoveGuard,
   onApply,
@@ -40,15 +47,23 @@ const AllowlistActions = ({
     case 'connect':
       return <PolicyDrawerActions actionLabel="Connect wallet" onClick={onConnectWallet} hint={state.helper} />
 
-    // Editing is out: a locked Safe only gets out of the lock by removing it.
     case 'manage':
       return (
-        <PolicyDrawerActions
-          actionLabel="Remove"
-          onClick={onRemove}
-          hint={state.helper}
-          disabled={state.disabled || !onRemove}
-        />
+        <DrawerFooter>
+          <div className="flex flex-col gap-2">
+            {state.helper && (
+              <Typography variant="paragraph-mini" color="muted" align="center">
+                {state.helper}
+              </Typography>
+            )}
+            <Button className="w-full" onClick={onEdit} disabled={state.disabled || !onEdit}>
+              {EDIT_LABEL}
+            </Button>
+            <Button variant="secondary" className="w-full" onClick={onRemove} disabled={state.disabled || !onRemove}>
+              Remove
+            </Button>
+          </div>
+        </DrawerFooter>
       )
 
     case 'remove-guard':

@@ -31,6 +31,7 @@ type RecipientsSectionProps = {
   chainId?: string
   isCalloutDismissed: boolean
   onDismissCallout: () => void
+  calloutTitle?: string
 }
 
 const RecipientsSection = ({
@@ -40,6 +41,7 @@ const RecipientsSection = ({
   chainId,
   isCalloutDismissed,
   onDismissCallout,
+  calloutTitle = RECIPIENTS_CALLOUT_TITLE,
 }: RecipientsSectionProps): ReactElement => {
   const { recipients } = values
   const account = safeAddress && chainId ? { safeAddress, chainId } : undefined
@@ -74,7 +76,7 @@ const RecipientsSection = ({
       {hasAccount && !isCalloutDismissed && (
         <DismissibleCallout
           className="mb-1"
-          title={RECIPIENTS_CALLOUT_TITLE}
+          title={calloutTitle}
           description={RECIPIENTS_CALLOUT_DESCRIPTION}
           onDismiss={onDismissCallout}
           data-testid="allowlist-recipients-callout"

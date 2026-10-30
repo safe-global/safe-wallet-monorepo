@@ -43,6 +43,7 @@ type TokensSectionProps = {
   hasAccount: boolean
   isCalloutDismissed: boolean
   onDismissCallout: () => void
+  calloutTitle?: string
 }
 
 const LoadErrorAlert = ({
@@ -73,6 +74,7 @@ const TokensSection = ({
   hasAccount,
   isCalloutDismissed,
   onDismissCallout,
+  calloutTitle = TOKENS_CALLOUT_TITLE,
 }: TokensSectionProps): ReactElement => {
   const {
     addresses,
@@ -172,7 +174,7 @@ const TokensSection = ({
       {hasAccount && !isCalloutDismissed && (
         <DismissibleCallout
           className="mb-1"
-          title={TOKENS_CALLOUT_TITLE}
+          title={calloutTitle}
           description={TOKENS_CALLOUT_DESCRIPTION}
           onDismiss={onDismissCallout}
           data-testid="allowlist-tokens-callout"

@@ -3,6 +3,9 @@ import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
 import {
   mockActiveAllowlist,
+  mockActivatingAllowlist,
+  mockAllowlistAwaitingGuardRemoval,
+  mockAllowlistChangePending,
   mockAllowlistPolicy,
   mockExpiredPendingAllowlist,
   mockExpiredRequestAllowlist,
@@ -33,6 +36,7 @@ jest.mock('@/features/policy-guard', () => ({
 }))
 
 const mockReviewTransaction = jest.fn()
+const mockEdit = jest.fn()
 
 const mockAllowlistPolicyWithChange = (scheduledChange: AllowlistScheduledChange) =>
   asActivePolicy(mockAllowlistPolicy({ scheduledChange }))
@@ -62,6 +66,7 @@ const setup = (policy: AllowlistDrawerPolicy, viewer: Viewer = MOCK_VIEWERS.sign
           policy={policy}
           viewer={viewer}
           names={{ [MOCK_ADDRESSES.alice]: 'Alice Contractor' }}
+          onEdit={mockEdit}
           onRemove={jest.fn()}
           onRemoveGuard={jest.fn()}
         />,
@@ -114,12 +119,42 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('button', { name: 'Show recipient details' })).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('should offer a signer only Remove, when the allowlist is active', () => {
-    setup(mockActiveAllowlist())
+  it('should offer a signer Edit above Remove, when the allowlist is active', async () => {
+    const { user } = setup(mockActiveAllowlist())
+
+    const edit = screen.getByRole('button', { name: 'Edit' })
+    const remove = screen.getByRole('button', { name: 'Remove' })
+    expect(edit).toBeEnabled()
+    expect(remove).toBeEnabled()
+    expect(edit.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+
+    await user.click(edit)
+
+    expect(mockEdit).toHaveBeenCalledTimes(1)
+  })
+
+  it('should disable Edit, when no edit flow is passed in', () => {
+    render(
+      <AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} onRemove={jest.fn()} />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Remove' })).toBeEnabled()
+  })
+
+  it.each([
+    ['scheduled', mockAllowlistChangePending()],
+    ['activating', mockActivatingAllowlist()],
+    ['ready to apply', mockReadyToApplyAllowlist()],
+    ['expired request', mockExpiredRequestAllowlist()],
+    ['awaiting guard removal', mockAllowlistAwaitingGuardRemoval()],
+    ['unenforced', mockUnenforcedAllowlist()],
+    ['pending', mockPendingAllowlist()],
+  ])('should offer no Edit, when the allowlist is %s', (_, policy) => {
+    setup(policy)
 
     expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Remove' })).toBeEnabled()
-    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
   })
 
   it('shows the pending banner, the signature count and the review action while awaiting signatures', async () => {
@@ -158,9 +193,10 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByText('Connect a signer wallet to remove this allowlist.')).toBeInTheDocument()
   })
 
-  it('should disable Remove and say why, when the wallet is not a signer', () => {
+  it('should disable Edit and Remove and say why, when the wallet is not a signer', () => {
     setup(mockActiveAllowlist(), MOCK_VIEWERS.nonSigner)
 
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
     expect(screen.getByText('Only signers of this Safe account can remove this allowlist.')).toBeInTheDocument()
   })

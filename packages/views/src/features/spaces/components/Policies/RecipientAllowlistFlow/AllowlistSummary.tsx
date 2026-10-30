@@ -16,7 +16,10 @@ type AllowlistSummaryProps = {
   tokenSymbols: string[]
   recipientNames: string[]
   isGuardEnabled?: boolean
+  title?: string
   description?: string
+  /** Behind the info icon; defaults to when the setup takes effect. */
+  details?: string
   /** Red on the review, where signing locks the Safe to what the allowlist allows */
   tone?: 'info' | 'error'
 }
@@ -37,16 +40,20 @@ const AllowlistSummary = ({
   tokenSymbols,
   recipientNames,
   isGuardEnabled = false,
+  title: titleOverride,
   description = SUMMARY_DESCRIPTION,
+  details = isGuardEnabled ? SUMMARY_DETAILS_GUARD_ENABLED : SUMMARY_DETAILS,
   tone = 'info',
 }: AllowlistSummaryProps): ReactElement => {
   const isComplete = tokenSymbols.length > 0 && recipientNames.length > 0
 
   const title = !accountLabel
     ? SUMMARY_NO_ACCOUNT_TITLE
-    : isComplete
-      ? `${accountLabel} will be able to send ${describeTokens(tokenSymbols)} only to ${describeRecipients(recipientNames)}.`
-      : `To create an allowlist policy on ${accountLabel}, select at least one token and one recipient.`
+    : titleOverride
+      ? titleOverride
+      : isComplete
+        ? `${accountLabel} will be able to send ${describeTokens(tokenSymbols)} only to ${describeRecipients(recipientNames)}.`
+        : `To create an allowlist policy on ${accountLabel}, select at least one token and one recipient.`
 
   return (
     <StatusAlert
@@ -68,9 +75,7 @@ const AllowlistSummary = ({
               >
                 <InfoIcon className="size-3.5" aria-hidden />
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                {isGuardEnabled ? SUMMARY_DETAILS_GUARD_ENABLED : SUMMARY_DETAILS}
-              </TooltipContent>
+              <TooltipContent className="max-w-xs">{details}</TooltipContent>
             </Tooltip>
           </>
         ) : (

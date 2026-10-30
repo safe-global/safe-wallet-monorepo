@@ -64,6 +64,7 @@ export enum TxFlowType {
   REMOVE_SPACE_RECIPIENT_ALLOWLIST = 'remove-space-recipient-allowlist',
   REMOVE_SPACE_POLICY_GUARD = 'remove-space-policy-guard',
   EDIT_SPACE_SPENDING_LIMIT = 'edit-space-spending-limit',
+  EDIT_SPACE_RECIPIENT_ALLOWLIST = 'edit-space-recipient-allowlist',
   ENABLE_SPACE_SPENDING_LIMIT_MODULE = 'enable-space-spending-limit-module',
   SIGN_MESSAGE_ON_CHAIN = 'sign-message-on-chain',
   SIGNERS_STRUCTURE = 'signers-structure',

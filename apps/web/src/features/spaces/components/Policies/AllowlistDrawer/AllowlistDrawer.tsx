@@ -59,6 +59,8 @@ type AllowlistDrawerBaseProps = {
 
 type ActiveAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   policy: ActiveAllowlistPolicy
+  /** Opens the edit flow. */
+  onEdit?: () => void
   /** Requests the removal, which deletes every rule once the guard's delay is over. */
   onRemove?: () => void
   /** Takes the guard off once the removal is applied. */
@@ -129,6 +131,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction }
     : {
+        onEdit: props.onEdit,
         onRemove: props.onRemove,
         onRemoveGuard: props.onRemoveGuard,
         onApply: props.onApply,

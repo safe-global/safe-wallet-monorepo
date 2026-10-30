@@ -5,6 +5,7 @@ import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import { AllowlistDrawer } from '../AllowlistDrawer'
 import RemoveAllowlistFlow from '../RemoveAllowlistFlow'
 import RemoveGuardFlow from '../RemoveGuardFlow'
+import EditRecipientAllowlistFlow from '../RecipientAllowlistFlow/EditFlow'
 import { toAllowlistRules } from '../RecipientAllowlistFlow/utils/allowlistEdit'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
 
@@ -52,6 +53,7 @@ const AllowlistDetails = ({
       {...content}
       justActivated={justActivated}
       onApply={onApply}
+      onEdit={() => setTxFlow(<EditRecipientAllowlistFlow policy={policy} />)}
       onRemove={onRemove}
       onRemoveGuard={() => setTxFlow(<RemoveGuardFlow chainId={chainId} safeAddress={safeAddress} />)}
     />
