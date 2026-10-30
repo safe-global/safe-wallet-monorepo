@@ -368,7 +368,8 @@ describe('Policies', () => {
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
-      await user.click(await screen.findByRole('button', { name: 'Set up recipient allowlist' }))
+      await user.click(await screen.findByRole('checkbox', { name: /I understand that anything not allowed/ }))
+      await user.click(screen.getByRole('button', { name: 'Set up allowlist' }))
 
       expect(setTxFlow).toHaveBeenCalledTimes(1)
       expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: RecipientAllowlistFlow })
