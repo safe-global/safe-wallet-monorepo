@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { AuditRow, type ActionType } from '@/components/common/AuditLog'
+import { AuditRow, type ActionType } from '@safe-global/views/components/common/AuditLog'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import {

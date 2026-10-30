@@ -14,7 +14,7 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import { cn } from '@safe-global/views/utils/cn'
-import HelpTooltip from './HelpTooltip'
+import HelpTooltip from '@safe-global/views/components/tx/ColorCodedTxAccordion/HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
 

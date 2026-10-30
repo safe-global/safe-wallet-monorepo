@@ -16,7 +16,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
-import SafeSearch from './SafeSearch'
+import SafeSearch from '@safe-global/views/features/spaces/components/SelectSafeModal/SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'

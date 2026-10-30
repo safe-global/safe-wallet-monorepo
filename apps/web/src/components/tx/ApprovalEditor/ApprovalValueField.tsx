@@ -1,4 +1,4 @@
-import { _formatNumber } from '@/components/common/NumberField'
+import { _formatNumber } from '@safe-global/views/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'

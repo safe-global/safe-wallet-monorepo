@@ -5,7 +5,7 @@ import { RotateCcw } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 import { BASE_TX_GAS } from '@/config/constants'
 import { AdvancedField } from '@safe-global/views/components/tx/AdvancedParams/types'
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/views/components/common/NumberField'
 
 const GasLimitInput = ({ recommendedGasLimit }: { recommendedGasLimit?: string }) => {
   const { safe } = useSafeInfo()

@@ -7,7 +7,7 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import { createMockStory } from '@/stories/mocks'
 import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
-import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
+import { AuditLog, AuditLogHeader, AuditRow } from '@safe-global/views/components/common/AuditLog'
 import { SafenetAuditRowView } from './SafenetAuditRow'
 import {
   SAFENET_EXAMPLE_VOTES,

@@ -14236,6 +14236,7 @@ __metadata:
     ethers: "npm:6.17.0"
     input-otp: "npm:^1.4.2"
     lucide-react: "npm:^0.563.0"
+    motion: "npm:^12.34.0"
     react-day-picker: "npm:^9.13.0"
     react-dropzone: "npm:^14.2.3"
     react-resizable-panels: "npm:^4.5.3"
