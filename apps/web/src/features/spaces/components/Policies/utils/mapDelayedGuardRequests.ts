@@ -159,13 +159,11 @@ export const mergeDelayedGuardRequests = (
     })
     if (!row) continue
 
-    // A removal's configurations name no recipients, so its row lists the live ones it takes away.
-    const data =
-      live && dto.configurations
-        ? isRemoval
-          ? live.data
-          : applyAllowlistRequest(live.data, dto.configurations, resolveRequestToken)
-        : row.data
+    let data = row.data
+    if (live && dto.configurations) {
+      // A removal's configurations name no recipients, so its row lists the live ones it takes away.
+      data = isRemoval ? live.data : applyAllowlistRequest(live.data, dto.configurations, resolveRequestToken)
+    }
     added.push({ ...row, data })
     const request = getApplyAllowlistRequest(dto)
     if (request) applyRequests.set(row.id, request)

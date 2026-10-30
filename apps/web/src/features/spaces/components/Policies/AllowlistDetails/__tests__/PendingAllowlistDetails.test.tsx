@@ -4,8 +4,9 @@ import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
 import type { PolicyConfiguration } from '@/features/policy-guard'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { MOCK_VIEWERS } from '../../mocks/policies'
-import { mockPendingAllowlist } from '../../mocks/allowlistPolicies'
+import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
+import { mockPendingAllowlist, mockPendingAllowlistEdit } from '../../mocks/allowlistPolicies'
+import type { QueuedAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { usePendingTransactionLinks } from '../../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
 import ConfirmAllowlistFlow from '../../ConfirmAllowlistFlow'
 import PendingAllowlistDetails from '../PendingAllowlistDetails'
@@ -14,10 +15,10 @@ jest.mock('../../SpendingLimitDetails/hooks/usePendingSpendingLimitActions', () 
   usePendingTransactionLinks: jest.fn(),
 }))
 jest.mock('../../hooks/usePolicyDetailsBase', () => ({
-  usePolicyDetailsBase: () => ({
+  usePolicyDetailsBase: (_: unknown, addresses: string[]) => ({
     viewer: { isSigner: true },
     safe: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: 'Payroll' },
-    names: {},
+    names: Object.fromEntries(addresses.map((address) => [address, `Book ${address.slice(-4)}`])),
     onConnectWallet: jest.fn(),
   }),
 }))
@@ -39,9 +40,8 @@ const requestedConfigurations: PolicyConfiguration[] = [
   },
 ]
 
-const renderDetails = (isUnlisted = false) => {
+const renderDetails = (isUnlisted = false, policy: QueuedAllowlistPolicy = mockPendingAllowlist()) => {
   const setTxFlow = jest.fn()
-  const policy = mockPendingAllowlist()
   const view = renderWithUserEvent(
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
       <PendingAllowlistDetails
@@ -76,6 +76,14 @@ describe('PendingAllowlistDetails', () => {
       txSummary,
       requestedConfigurations,
     })
+  })
+
+  it('should show the address book name of a recipient a pending edit removes', () => {
+    renderDetails(false, mockPendingAllowlistEdit())
+
+    const removed = screen.getAllByTestId('allowlist-recipient')[3]
+    expect(removed).toHaveTextContent(`Book ${MOCK_ADDRESSES.unresolved.slice(-4)}`)
+    expect(removed).toHaveTextContent('Removed')
   })
 
   it('should keep Review transaction disabled, when the queued transaction has not loaded yet', () => {

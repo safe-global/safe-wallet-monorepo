@@ -36,7 +36,7 @@ const AllowlistRecipients = ({ recipients, names, isRemoved = false }: Allowlist
         summary={
           <>
             <span className="flex shrink-0 -space-x-2">
-              {recipients.slice(0, PREVIEW_COUNT).map(({ address }) => (
+              {(isRemoved ? recipients : remaining).slice(0, PREVIEW_COUNT).map(({ address }) => (
                 <Avatar key={address} size="xs" className="ring-2 ring-muted">
                   <AvatarImage src={blo(address as `0x${string}`)} alt="" />
                 </Avatar>

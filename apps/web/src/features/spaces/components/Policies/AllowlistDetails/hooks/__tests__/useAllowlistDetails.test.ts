@@ -2,7 +2,12 @@ import { renderHook } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { usePolicyDetailsBase } from '../../../hooks/usePolicyDetailsBase'
-import { mockActiveAllowlist, mockAllowlistChangePending, mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
+import {
+  mockActiveAllowlist,
+  mockAllowlistChangePending,
+  mockAllowlistPolicy,
+  mockPendingAllowlistEdit,
+} from '../../../mocks/allowlistPolicies'
 import {
   MOCK_ADDRESSES,
   MOCK_SAFES,
@@ -44,6 +49,18 @@ describe('useAllowlistDetails', () => {
       MOCK_ADDRESSES.unresolved,
     ])
     expect(result.current).toMatchObject(base)
+  })
+
+  it('should name the recipients an edit removes too, when a change set is present', () => {
+    const edit = asActivePolicy(mockAllowlistPolicy({ data: mockPendingAllowlistEdit().data }))
+
+    renderHook(() => useAllowlistDetails(edit, []))
+
+    expect(mockUsePolicyDetailsBase).toHaveBeenCalledWith(
+      edit.safe,
+      edit.data.changes?.recipients.map(({ address }) => address),
+    )
+    expect(mockUsePolicyDetailsBase.mock.calls[0][1]).toContain(MOCK_ADDRESSES.unresolved)
   })
 
   it('says the Safe policy contract enforces it, with no last updated time', () => {

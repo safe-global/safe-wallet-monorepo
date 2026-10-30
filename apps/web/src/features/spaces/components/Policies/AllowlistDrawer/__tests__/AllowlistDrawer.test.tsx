@@ -1,6 +1,6 @@
 import { POLICY_GUARD_DELAY_SECONDS } from '@safe-global/utils/features/policy-guard/constants'
 import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
-import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_TOKENS, MOCK_VIEWERS } from '../../mocks/policies'
 import {
   mockActiveAllowlist,
   mockActivatingAllowlist,
@@ -279,6 +279,44 @@ describe('AllowlistDrawer', () => {
     expect(tokens.map((row) => row.textContent)).toEqual(['USDC', 'UNKNOWNAdded', 'USDTRemoved'])
     expect(within(tokens[2]).getByText('USDT')).toHaveClass('line-through')
     expect(within(tokens[0]).getByText('USDC')).not.toHaveClass('line-through')
+  })
+
+  it('should preview only the remaining recipients and tokens, when an edit removes some', () => {
+    const edit = mockPendingAllowlistEdit()
+    setup({
+      ...edit,
+      data: {
+        entries: [{ token: MOCK_TOKENS.usdc, recipients: [{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }] }],
+        changes: {
+          recipients: [
+            { address: MOCK_ADDRESSES.alice },
+            { address: MOCK_ADDRESSES.bob, change: 'removed' },
+            { address: MOCK_ADDRESSES.unresolved, change: 'removed' },
+          ],
+          tokens: [MOCK_TOKENS.usdc, { ...MOCK_TOKENS.usdt, change: 'removed' }],
+        },
+      },
+    })
+
+    const recipientSummary = screen.getByRole('button', { name: 'Hide recipient details' })
+    const tokenSummary = screen.getByRole('button', { name: 'Hide token details' })
+
+    expect(recipientSummary.querySelectorAll('[data-slot="avatar"]')).toHaveLength(1)
+    expect(
+      within(tokenSummary)
+        .getAllByTitle(/^USD/)
+        .map((icon) => icon.getAttribute('title')),
+    ).toEqual(['USDC'])
+  })
+
+  it('should preview every recipient and token, when a removal is pending', () => {
+    setup(mockPendingAllowlistRemoval())
+
+    const recipientSummary = screen.getByRole('button', { name: 'Show recipient details' })
+    const tokenSummary = screen.getByRole('button', { name: 'Show token details' })
+
+    expect(recipientSummary.querySelectorAll('[data-slot="avatar"]')).toHaveLength(3)
+    expect(within(tokenSummary).getAllByTitle(/^USD/)).toHaveLength(2)
   })
 
   it('should mark no recipient or token, when the allowlist is active', async () => {

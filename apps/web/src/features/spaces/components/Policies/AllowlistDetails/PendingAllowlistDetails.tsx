@@ -30,7 +30,11 @@ const PendingAllowlistDetails = ({
   requestedConfigurations,
   onClose,
 }: PendingAllowlistDetailsProps): ReactElement => {
-  const recipients = useMemo(() => getAllowlistRecipients(policy.data), [policy.data])
+  // An edit's removed recipients are listed too, so they need names as well.
+  const recipients = useMemo(
+    () => policy.data.changes?.recipients.map(({ address }) => address) ?? getAllowlistRecipients(policy.data),
+    [policy.data],
+  )
   const base = usePolicyDetailsBase(policy.safe, recipients)
   const { confirmationsSubmitted, viewer, transactionLink, txSummary, outcome } = usePendingTransactionLinks(
     policy,

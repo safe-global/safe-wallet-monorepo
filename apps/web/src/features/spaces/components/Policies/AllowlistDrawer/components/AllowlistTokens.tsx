@@ -28,7 +28,7 @@ const AllowlistTokens = ({ tokens, isRemoved = false }: AllowlistTokensProps): R
         summary={
           <>
             <span className="flex shrink-0 -space-x-2">
-              {tokens.slice(0, PREVIEW_COUNT).map((token) => (
+              {(isRemoved ? tokens : remaining).slice(0, PREVIEW_COUNT).map((token) => (
                 <span key={token.address} className="rounded-full ring-2 ring-muted">
                   <TokenIcon logoUri={token.logoUri ?? undefined} tokenSymbol={token.symbol} size={24} />
                 </span>
