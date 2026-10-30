@@ -23,6 +23,8 @@ import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
 import AllowlistDetails from './AllowlistDetails'
+import PendingAllowlistDetails from './AllowlistDetails/PendingAllowlistDetails'
+import ApplyAllowlistFlow, { type ApplyAllowlistFlowData } from './ApplyAllowlistFlow'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -38,6 +40,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
   isActiveAllowlistPolicy,
+  isAllowlistPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -49,6 +52,8 @@ import {
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
   policies?: Policy[]
+  /** What the apply flow replays for an allowlist whose guard delay has passed, keyed by row id. */
+  allowlistApplyRequests?: ReadonlyMap<string, ApplyAllowlistFlowData>
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
@@ -79,6 +84,7 @@ const openRequestPolicyForm = () => {
  */
 const Policies = ({
   policies = [],
+  allowlistApplyRequests,
   isLoading = false,
   isError = false,
   onRetry,
@@ -96,8 +102,7 @@ const Policies = ({
   const { newIds: newAllowlistIds, dismiss: dismissNewAllowlist } = useNewAllowlistIds(policies, isSettled)
 
   const selectPolicy = useCallback((policy: Policy) => {
-    // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isActiveAllowlistPolicy(policy)) {
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isAllowlistPolicy(policy)) {
       setOpenPolicy(policy)
     }
   }, [])
@@ -143,6 +148,11 @@ const Policies = ({
   }, [setTxFlow])
 
   const startAllowlistFlow = useCallback(() => setTxFlow(<RecipientAllowlistFlow />), [setTxFlow])
+
+  const applyAllowlist = (policyId: string): (() => void) | undefined => {
+    const request = allowlistApplyRequests?.get(policyId)
+    return request ? () => setTxFlow(<ApplyAllowlistFlow {...request} />) : undefined
+  }
 
   const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
   const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
@@ -277,6 +287,16 @@ const Policies = ({
           policies={policies}
           onClose={closeDetails}
           justActivated={newAllowlistIds.has(openedPolicy.id)}
+          onApply={applyAllowlist(openedPolicy.id)}
+        />
+      )}
+
+      {openedPolicy && isAllowlistPolicy(openedPolicy) && isPendingPolicy(openedPolicy) && (
+        <PendingAllowlistDetails
+          policy={openedPolicy}
+          isUnlisted={!listedPolicy}
+          requestedConfigurations={allowlistApplyRequests?.get(openedPolicy.id)?.configurations}
+          onClose={closeDetails}
         />
       )}
 
