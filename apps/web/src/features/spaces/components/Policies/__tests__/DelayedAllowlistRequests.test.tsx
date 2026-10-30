@@ -43,6 +43,20 @@ const openOnlyRow = async ({ user }: ReturnType<typeof renderPage>) => {
   return screen.findByRole('dialog')
 }
 
+const openRowWithStatus = async ({ user }: ReturnType<typeof renderPage>, status: string) => {
+  const statusCell = (await screen.findAllByTestId('policy-cell-status')).find((cell) => cell.textContent === status)
+  const row = statusCell?.closest('tr')
+  if (!row) throw new Error(`No row with status ${status}`)
+  await user.click(within(row).getByTestId('policy-open-button'))
+  return screen.findByRole('dialog')
+}
+
+const liveAllowlistDto = (workspace: AllowlistWorkspace, recipient: string) =>
+  mockErc20TransferDto({
+    safe: { chainId: workspace.safe.chainId, address: workspace.safe.address.value },
+    data: { tokenAddress: fakerChecksummedAddress(), recipients: [{ account: recipient, permission: 'ALWAYS' }] },
+  })
+
 describe('Policies page with delayed allowlist requests', () => {
   let workspace: AllowlistWorkspace
 
@@ -132,28 +146,52 @@ describe('Policies page with delayed allowlist requests', () => {
     expect(within(drawer).getByText('1 of 2 signatures')).toBeInTheDocument()
   })
 
-  it("folds a request on a Safe with an active allowlist into that Safe's row as a scheduled change", async () => {
-    const safe = { chainId: workspace.safe.chainId, address: workspace.safe.address.value }
+  it("should keep the Safe's allowlist active and list the request as its own pending row, when the Safe already has an allowlist", async () => {
     serveAllowlistWorkspace(workspace, {
-      active: [
-        mockErc20TransferDto({
-          safe,
-          data: {
-            tokenAddress: fakerChecksummedAddress(),
-            recipients: [{ account: fakerChecksummedAddress(), permission: 'ALWAYS' }],
-          },
-        }),
-      ],
+      active: [liveAllowlistDto(workspace, fakerChecksummedAddress())],
       pending: [
         delayedGuardRequest(workspace, { readyAt: nowSeconds() + TEN_MINUTES, expiresAt: nowSeconds() + 7 * DAY }),
       ],
     })
     const view = renderPage(workspace)
 
-    const drawer = await openOnlyRow(view)
+    const drawer = await openRowWithStatus(view, 'Pending')
 
+    expect(screen.getAllByTestId('policy-cell-status').map((cell) => cell.textContent)).toEqual(
+      expect.arrayContaining(['Active', 'Pending']),
+    )
     expect(within(drawer).getByText(/^Your changes can be applied in (9|10) minutes$/)).toBeInTheDocument()
-    expect(within(drawer).getByText('Waiting period')).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: /^Apply in (9|10) minutes$/ })).toBeDisabled()
+  })
+
+  it('should strike through the live recipients on the pending row, when the request removes the allowlist', async () => {
+    const recipient = fakerChecksummedAddress()
+    serveAllowlistWorkspace(workspace, {
+      active: [liveAllowlistDto(workspace, recipient)],
+      pending: [
+        delayedGuardRequest(workspace, {
+          readyAt: nowSeconds() + TEN_MINUTES,
+          expiresAt: nowSeconds() + 7 * DAY,
+          configurations: [
+            {
+              target: workspace.safe.address.value,
+              selector: '0xe19a9dd9',
+              operation: 0,
+              policy: fakerChecksummedAddress(),
+              data: '0x',
+            },
+          ],
+        }),
+      ],
+    })
+    const view = renderPage(workspace)
+
+    const drawer = await openRowWithStatus(view, 'Pending')
+    await view.user.click(within(drawer).getByRole('button', { name: 'Show recipient details' }))
+    const [listed, ...others] = within(drawer).getAllByTestId('allowlist-recipient')
+
+    expect(others).toHaveLength(0)
+    expect(listed).toHaveTextContent(recipient.slice(0, 6))
+    expect(within(listed).getByText('Removed')).toBeInTheDocument()
   })
 })

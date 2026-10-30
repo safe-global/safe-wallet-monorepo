@@ -15,6 +15,7 @@ import {
 } from './mocks/policies'
 import {
   mockActivatingAllowlist,
+  mockActiveAllowlist,
   mockAllowlistChangePending,
   mockCgwAllowlist,
   mockCgwUnenforcedAllowlist,
@@ -90,8 +91,9 @@ export const AllowlistActivating: Story = {
   args: { policies: [mockActivatingAllowlist()] },
 }
 
+/** The live allowlist stays active; the executed change waits out the delay on a row of its own. */
 export const AllowlistChangePending: Story = {
-  args: { policies: [mockAllowlistChangePending()] },
+  args: { policies: [mockActiveAllowlist(), mockAllowlistChangePending()] },
 }
 
 export const AllowlistFailed: Story = {
