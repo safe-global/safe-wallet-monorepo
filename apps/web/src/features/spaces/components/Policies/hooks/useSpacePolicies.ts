@@ -30,6 +30,7 @@ import { mapImmediateGuardPolicies } from '../utils/mapImmediateGuardPolicies'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
+import { usePollAfterTx } from './usePollAfterTx'
 import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders, plus `allow`, whose rule on `setGuard` marks an allowlist waiting for its guard to come off. */
@@ -53,11 +54,11 @@ const PENDING_REFETCH_EVENTS = [
   TxEvent.SIGNATURE_PROPOSED,
   TxEvent.ONCHAIN_SIGNATURE_SUCCESS,
   TxEvent.DELETED,
-  // SUCCESS comes from the Safe-level history slice, which a Space route does not load.
   TxEvent.PROCESSED,
   TxEvent.SUCCESS,
 ]
 const ACTIVE_REFETCH_EVENTS = [TxEvent.SUCCESS]
+const POLL_EVENTS = [TxEvent.PROCESSED, TxEvent.SUCCESS]
 
 const NO_POLICIES: ActivePolicyDto[] = []
 const NO_PENDING: PendingPolicyDto[] = []
@@ -100,9 +101,15 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const skip = !isUserSignedIn || !spaceId
   const { configs: chains } = useChains()
 
+  const isPollingAfterTx = usePollAfterTx(POLL_EVENTS, !skip)
   const active = useSpacePoliciesGetActivePoliciesV1Query(
     { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
-    { skip, ...SPACE_REFRESH_OPTIONS },
+    {
+      skip,
+      ...SPACE_REFRESH_OPTIONS,
+      pollingInterval: isPollingAfterTx ? POLLING_INTERVAL : 0,
+      skipPollingIfUnfocused: true,
+    },
   )
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
@@ -111,7 +118,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     {
       skip,
       ...SPACE_REFRESH_OPTIONS,
-      pollingInterval: hasExecutable ? POLLING_INTERVAL : 0,
+      pollingInterval: hasExecutable || isPollingAfterTx ? POLLING_INTERVAL : 0,
       skipPollingIfUnfocused: true,
     },
   )
