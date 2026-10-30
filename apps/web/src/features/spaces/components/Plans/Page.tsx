@@ -13,9 +13,9 @@ import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpane
 import AuthState from '../AuthState'
 import Plans from './index'
 import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, pickSeatOption, toCurrentPlan, withRecommendation } from './planTiers'
+import { buildPlanTiers, pickSeatOption, toCurrentPlan } from './planTiers'
+import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
-import { useSpaceSafeCount } from '../../hooks/useIsCurrentSpaceAtSafeLimit'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -34,7 +34,7 @@ const PlansSkeleton = () => (
 
 /** The seats the recommended card opens on, the same option its card picks first. */
 const defaultSeats = (tiers: PlanTier[], currentPlan: CurrentPlan | undefined): number | undefined => {
-  const tier = tiers.find((candidate) => candidate.isRecommended && candidate.billingCycle !== 'year')
+  const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN && candidate.billingCycle !== 'year')
   return (tier && pickSeatOption(tier, currentPlan)?.seats) ?? undefined
 }
 
@@ -62,18 +62,14 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
     () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
     [canChange, subscription, plan, isTrialing, seats?.quota],
   )
-  const safeCount = useSpaceSafeCount(spaceId)
   // A trial is not a plan the user chose, so it gets no "Current" card.
   const tiers = useMemo(
     () =>
-      withRecommendation(
-        buildPlanTiers(
-          paidPlans,
-          currentPlan && subscription && !isTrialing ? { subscription, seatsQuota: seats?.quota } : undefined,
-        ),
-        safeCount,
+      buildPlanTiers(
+        paidPlans,
+        currentPlan && subscription && !isTrialing ? { subscription, seatsQuota: seats?.quota } : undefined,
       ),
-    [paidPlans, currentPlan, subscription, isTrialing, seats?.quota, safeCount],
+    [paidPlans, currentPlan, subscription, isTrialing, seats?.quota],
   )
   const [entry] = useState(takePlansEntry)
   const isReady = isSafePro && !isPlanLoading && !isOffersLoading && !isUninitialized

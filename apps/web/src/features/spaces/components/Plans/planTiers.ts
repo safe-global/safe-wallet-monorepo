@@ -10,7 +10,7 @@ import {
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
-import { isSalesLed, recommendSeats } from './proTrial/recommendPlan'
+import { isSalesLed } from './proTrial/recommendPlan'
 import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
@@ -260,7 +260,6 @@ export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsL
     tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options.find((candidate) => isCurrentPlan && candidate.label === currentPlan?.seatsLabel) ??
-    tier.options.find((candidate) => candidate.seats === tier.recommendedSeats) ??
     tier.options[0]
   )
 }
@@ -323,14 +322,3 @@ export const getCardSaving = (
 /** A seat size above the self-serve threshold: "from" pricing and a sales conversation instead of checkout. */
 export const isSalesLedOption = (option: Pick<PlanSeatOption, 'paymentLinkId' | 'seats'>): boolean =>
   option.paymentLinkId !== null && option.seats != null && isSalesLed(option.seats)
-
-/** Opens the multi-size card on the size that fits `safeCount` Safes and marks it recommended. */
-export const withRecommendation = (tiers: PlanTier[], safeCount: number | undefined): PlanTier[] => {
-  if (safeCount === undefined) return tiers
-  const seats = recommendSeats(safeCount)
-  return tiers.map((tier) =>
-    tier.options.some((option) => option.seats === seats)
-      ? { ...tier, isRecommended: true, recommendedSeats: seats }
-      : tier,
-  )
-}

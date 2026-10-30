@@ -7,7 +7,8 @@ export const PRO_TRIAL_COPY = {
   safesStayFree: 'Your Safe Accounts stay free and fully yours.',
   upgradeTo: (planName: string) => `Upgrade to ${planName}`,
   talkToUs: 'Talk to us',
-  recommended: 'Recommended for you',
+  /** A multi-size plan before a size is picked. */
+  unpickedPrice: { headline: 'Custom', suffix: 'price per Safe' },
   fromPrice: (price: string) => `from ${price}`,
   seatsLabel: 'Safe accounts',
   trialTitle: 'Pro trial',

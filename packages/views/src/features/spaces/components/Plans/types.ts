@@ -32,10 +32,6 @@ export type PlanTier = {
   /** On the current plan's card, the price the subscription is on; the other options are seat changes. */
   currentPriceId?: string | null
   trialPeriodDays?: number | null
-  /** Has the size that fits the Workspace's Safes; leads the catalog. */
-  isRecommended?: boolean
-  /** The seat size the card opens on, so a trial never opens on its own (largest) size. */
-  recommendedSeats?: number
 }
 
 /** What the user picked on a plan card: the tier and the seat option (one payment link) within it. */
