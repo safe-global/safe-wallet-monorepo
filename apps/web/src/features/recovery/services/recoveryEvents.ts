@@ -1,4 +1,5 @@
 import EventBus from '../../../services/EventBus'
+import { IS_DEV } from '@/config/constants'
 
 export enum RecoveryEvent {
   PROCESSING_BY_SMART_CONTRACT_WALLET = 'PROCESSING_BY_SMART_CONTRACT_WALLET',
@@ -60,9 +61,10 @@ export const recoveryDispatch = recoveryEventBus.dispatch.bind(recoveryEventBus)
 
 export const recoverySubscribe = recoveryEventBus.subscribe.bind(recoveryEventBus)
 
-// Log all events
-Object.values(RecoveryEvent).forEach((event: RecoveryEvent) => {
-  recoverySubscribe<RecoveryEvent>(event, (detail) => {
-    console.info(`Recovery ${event} event received`, detail)
+if (IS_DEV) {
+  Object.values(RecoveryEvent).forEach((event: RecoveryEvent) => {
+    recoverySubscribe<RecoveryEvent>(event, (detail) => {
+      console.info(`Recovery ${event} event received`, detail)
+    })
   })
-})
+}
