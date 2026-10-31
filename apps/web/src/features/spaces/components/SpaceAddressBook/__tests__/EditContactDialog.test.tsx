@@ -67,6 +67,7 @@ const entry: SpaceAddressBookItemDto = {
   name: 'Alice',
   address: '0xabc',
   chainIds: ['1'],
+  tagIds: [],
   createdBy: '0xabc',
   createdByUserId: 1,
   lastUpdatedBy: '0xabc',

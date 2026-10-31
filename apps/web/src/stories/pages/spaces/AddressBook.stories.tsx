@@ -41,6 +41,7 @@ const contact = (name: string, address: string, chainIds: string[]) => ({
   name,
   address,
   chainIds,
+  tagIds: [],
   createdBy: 'alice@example.com',
   createdByUserId: 1,
   lastUpdatedBy: 'alice@example.com',
@@ -51,6 +52,7 @@ const contact = (name: string, address: string, chainIds: string[]) => ({
 
 const addressBook: SpaceAddressBookDto = {
   spaceUuid: MOCK_SPACE_ID,
+  tags: [],
   data: [
     contact('Treasury', '0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01', ['1', '137']),
     contact('Payroll', '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867', ['1']),

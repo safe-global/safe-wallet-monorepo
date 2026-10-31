@@ -31,6 +31,7 @@ const workspaceContact = (chainIds: string[]): SpaceAddressBookItemDto => ({
   ...CONTACT,
   chainIds,
   createdBy: '',
+  tagIds: [],
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,
@@ -61,6 +62,7 @@ const setup = ({
   jest.mocked(useUpsertWorkspaceSafeNames).mockReturnValue(upsert)
   jest.mocked(useSpaceAddressBookState).mockReturnValue({
     items: addressBook,
+    tags: [],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),

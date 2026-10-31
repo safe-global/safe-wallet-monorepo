@@ -93,7 +93,11 @@ export interface ColorPalette {
     textSecondary: string
     textBrand: string
   }
+  /** Address book tag colours, by the name CGW stores: chip text, chip fill and the dot */
+  tag: Record<TagColorName, { fg: string; bg: string; dot: string }>
 }
+
+export type TagColorName = 'slate' | 'clay' | 'rose' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon'
 
 /**
  * Static colors that don't change with theme mode.
