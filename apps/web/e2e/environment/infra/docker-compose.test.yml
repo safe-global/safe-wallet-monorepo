@@ -65,7 +65,7 @@ x-fork-rpc: &fork-rpc
     - /mocks/fork-rpc.ts
   healthcheck: *fork-proxy-healthcheck
 x-txs-init: &txs-init
-  image: ${TXS_IMAGE:?Load test-images.env}
+  image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
   env_file:
     - container_env_files/txs.test.env
   volumes:
@@ -87,7 +87,7 @@ x-celery-healthcheck: &celery-healthcheck
 x-txs-mainnet: &txs-mainnet
   profiles:
     - mainnet
-  image: ${TXS_IMAGE:?Load test-images.env}
+  image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
   env_file:
     - container_env_files/txs.test.env
   environment:
@@ -104,7 +104,7 @@ x-txs-mainnet: &txs-mainnet
 x-txs-polygon: &txs-polygon
   profiles:
     - polygon
-  image: ${TXS_IMAGE:?Load test-images.env}
+  image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
   env_file:
     - container_env_files/txs.test.env
   environment:
@@ -119,7 +119,7 @@ x-txs-polygon: &txs-polygon
     WORKER_QUEUES: default,indexing,processing,contracts,tokens,notifications,webhooks
     CELERYD_CONCURRENCY: '20'
 x-cfg-job: &cfg-job
-  image: ${CFG_IMAGE:?Load test-images.env}
+  image: ${CFG_IMAGE:?Run scripts/test_env.py up, or export CFG_IMAGE}
   entrypoint: []
   env_file:
     - container_env_files/cfg.env
@@ -137,7 +137,7 @@ x-decoder-env: &decoder-env
   REDIS_URL: redis://redis:6379/2
   RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
 x-decoder-chain: &decoder-chain
-  image: ${DECODER_IMAGE:?Load test-images.env}
+  image: ${DECODER_IMAGE:?Run scripts/test_env.py up, or export DECODER_IMAGE}
   volumes:
     - ./scripts/setup_decoder.py:/app/setup_decoder.py:ro
   depends_on:
@@ -149,7 +149,7 @@ x-auth0-client: &auth0-client
   AUTH0_CLIENT_ID: safe-e2e-local
   AUTH0_CLIENT_SECRET: local-test-only-auth0-secret
 x-queue: &queue
-  image: ${QUEUE_IMAGE:?Load test-images.env}
+  image: ${QUEUE_IMAGE:?Run scripts/test_env.py up, or export QUEUE_IMAGE}
   environment:
     DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/queue
     RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
@@ -180,7 +180,7 @@ services:
   # One self-signed certificate for the mocks that answer as HTTPS hosts, which the gateway trusts, and the
   # local Auth0's token signing key.
   mock-keys:
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     user: root
     entrypoint:
       - sh
@@ -440,7 +440,7 @@ services:
       fork-rpc:
         condition: service_healthy
   txs-worker-indexer: &txs-worker
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     env_file:
       - container_env_files/txs.test.env
     environment:
@@ -462,7 +462,7 @@ services:
   txs-checks:
     profiles:
       - checks
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     entrypoint:
       - python
     command:
@@ -482,7 +482,7 @@ services:
       - ./tests/txs:/fork-tests:ro
       - *fork-indexing-mount
   txs-web:
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     env_file:
       - container_env_files/txs.test.env
     environment:
@@ -527,7 +527,7 @@ services:
         python src/manage.py migrate --noinput &&
         python src/manage.py setup_test_chain
   cfg-web:
-    image: ${CFG_IMAGE:?Load test-images.env}
+    image: ${CFG_IMAGE:?Run scripts/test_env.py up, or export CFG_IMAGE}
     tty: true
     volumes:
       - nginx-shared-cfg:/nginx
@@ -542,7 +542,7 @@ services:
       postgres:
         condition: service_healthy
   decoder-init:
-    image: ${DECODER_IMAGE:?Load test-images.env}
+    image: ${DECODER_IMAGE:?Run scripts/test_env.py up, or export DECODER_IMAGE}
     environment:
       <<: *decoder-env
       FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
@@ -553,7 +553,7 @@ services:
         condition: service_healthy
     command: sh -c "alembic upgrade head && python setup_decoder.py"
   decoder-web:
-    image: ${DECODER_IMAGE:?Load test-images.env}
+    image: ${DECODER_IMAGE:?Run scripts/test_env.py up, or export DECODER_IMAGE}
     environment:
       <<: *decoder-env
       FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
@@ -605,7 +605,7 @@ services:
         condition: service_healthy
     command: docker/workers/run_tx_service_sync.sh
   cgw-web:
-    image: ${CGW_IMAGE:?Load test-images.env}
+    image: ${CGW_IMAGE:?Run scripts/test_env.py up, or export CGW_IMAGE}
     env_file:
       - container_env_files/cgw.env
     environment:

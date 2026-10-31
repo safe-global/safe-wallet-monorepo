@@ -12,6 +12,11 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+try:
+    from scripts.backend_versions import BACKENDS, SERVICES, resolve_images
+except ModuleNotFoundError:  # Run as a script, so the scripts folder is the import root.
+    from backend_versions import BACKENDS, SERVICES, resolve_images
+
 
 ROOT = Path(__file__).resolve().parent.parent
 # Fork-block state that Anvil fetched from the archive RPCs, committed so that runs start with it.
@@ -46,6 +51,7 @@ REDACTED = "<fork-provider>"
 STDERR_LINES = 20
 # Compose interpolates the whole file, so commands that start no fork still need a provider URL.
 UNUSED_PROVIDER = {"SEPOLIA_FORK_RPC_URL": "https://unused.invalid"}
+UNUSED_IMAGES = {variable: "unused.invalid/image" for variable in SERVICES}
 RETRYABLE = (
     urllib.error.URLError, TimeoutError, socket.timeout, KeyError, TypeError, json.JSONDecodeError,
 )
@@ -62,6 +68,9 @@ def compose_command(project, env_file, profiles=()):
         "docker", "compose", "--project-name", project,
         "--env-file", str(ROOT / "test-images.env"),
     ]
+    images = images_path(project)
+    if images.exists():
+        command.extend(["--env-file", str(images)])
     if env_file.exists():
         command.extend(["--env-file", str(env_file)])
     for profile in profiles:
@@ -381,6 +390,32 @@ def state_path(project):
     return ROOT / ".test-runs" / f"{project}.json"
 
 
+def images_path(project):
+    return ROOT / ".test-runs" / f"{project}.images.env"
+
+
+def warn(message):
+    prefix = "::warning::" if os.environ.get("GITHUB_ACTIONS") == "true" else "Warning: "
+    print(f"{prefix}{message}", file=sys.stderr)
+
+
+def resolve_backend(backend):
+    images, warnings = resolve_images(backend)
+    for warning in warnings:
+        warn(warning)
+    return images
+
+
+def write_images(project, backend):
+    """Pins the project's images, so every later command of the project uses the backend it started with."""
+    images = resolve_backend(backend)
+    path = images_path(project)
+    path.parent.mkdir(exist_ok=True)
+    path.write_text("".join(f"{variable}={image}\n" for variable, image in images.items()))
+    for variable, image in images.items():
+        print(f"{variable}={image}", flush=True)
+
+
 def load_config(compose):
     return json.loads(run(compose + ["config", "--format", "json"]))
 
@@ -390,15 +425,17 @@ def load_manifest(args):
     return compose, public_config(load_config(compose))
 
 
-def teardown_env():
-    return {**UNUSED_PROVIDER, **os.environ}
+def teardown_env(project):
+    unused_images = {} if images_path(project).exists() else UNUSED_IMAGES
+    return {**UNUSED_PROVIDER, **unused_images, **os.environ}
 
 
 def start(args):
-    compose, manifest = load_manifest(args)
     label = f"label=com.docker.compose.project={args.project}"
     if run(["docker", "volume", "ls", "--quiet", "--filter", label]).strip():
         raise RuntimeError("Project already has state; use status/logs, or reset before a fresh up")
+    write_images(args.project, args.backend)
+    compose, manifest = load_manifest(args)
     check_ports(manifest)
     print(f'Starting {args.project} at block {manifest["forkBlock"]}', flush=True)
     seed_fork_cache(anvil_cache_dir())
@@ -426,18 +463,24 @@ def show_logs(args):
     print(redact(logs, secrets))
 
 
+def show_images(args):
+    for variable, image in resolve_backend(args.backend).items():
+        print(f"{variable}={image}")
+
+
 def show_status(args):
-    print(run(project_compose(args, CHAINS) + ["ps", "--all"], env=teardown_env()))
+    print(run(project_compose(args, CHAINS) + ["ps", "--all"], env=teardown_env(args.project)))
 
 
 def stop(args):
-    run(project_compose(args, CHAINS) + ["down"], env=teardown_env())
+    run(project_compose(args, CHAINS) + ["down"], env=teardown_env(args.project))
     print("Environment stopped; reset before starting a new fork")
 
 
 def reset(args):
-    run(project_compose(args, CHAINS) + ["down", "--volumes"], env=teardown_env())
+    run(project_compose(args, CHAINS) + ["down", "--volumes"], env=teardown_env(args.project))
     state_path(args.project).unlink(missing_ok=True)
+    images_path(args.project).unlink(missing_ok=True)
     print("Environment stopped and owned volumes removed")
 
 
@@ -452,7 +495,8 @@ def reset_chain(args):
 
 ACTIONS = {
     "up": start, "down": stop, "reset": reset, "status": show_status, "logs": show_logs,
-    "config": show_config, **{action: run_txs_checks for action in TXS_CHECKS},
+    "config": show_config, "versions": show_images,
+    **{action: run_txs_checks for action in TXS_CHECKS},
 }
 CHAIN_ACTIONS = {"up": start_chain, "reset": reset_chain}
 
@@ -466,6 +510,10 @@ def parse_args(argv=None):
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--tail", default="200", help="Log lines per service, or all")
     parser.add_argument("--chain", choices=tuple(CHAINS), help="Add or remove an optional fork")
+    parser.add_argument(
+        "--backend", choices=BACKENDS, default=os.environ.get("SAFE_E2E_BACKEND", "staging"),
+        help="Deployment whose service versions up and versions use; exported *_IMAGE variables win",
+    )
     args = parser.parse_intermixed_args(argv)
     if args.services and args.action != "logs":
         parser.error("Service names are supported only by logs")
