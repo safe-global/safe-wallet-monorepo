@@ -7,18 +7,34 @@ export type DrawerListItem = {
   content: ReactNode
 }
 
-export const DrawerList = ({ items }: { items: DrawerListItem[] }): ReactElement => (
+export const DrawerList = ({
+  items,
+  mobileStack = false,
+}: {
+  items: DrawerListItem[]
+  mobileStack?: boolean
+}): ReactElement => (
   <dl className="flex w-full flex-col gap-3 rounded-lg bg-muted p-3">
     {items.map((item, index) => (
       <Fragment key={item.label}>
         {index > 0 && <Separator />}
 
-        <div className="flex min-h-8 items-center justify-between gap-2">
+        <div
+          className={
+            mobileStack
+              ? 'flex min-h-8 flex-col items-start gap-1 md:flex-row md:items-center md:justify-between md:gap-2'
+              : 'flex min-h-8 items-center justify-between gap-2'
+          }
+        >
           <dt className="shrink-0">
             <Typography variant="paragraph-small-medium">{item.label}</Typography>
           </dt>
-          <dd className="min-w-0">
-            <Typography as="div" variant="paragraph-small" className="text-right">
+          <dd className={mobileStack ? 'min-w-0 w-full break-words md:w-auto' : 'min-w-0'}>
+            <Typography
+              as="div"
+              variant="paragraph-small"
+              className={mobileStack ? 'text-left md:text-right' : 'text-right'}
+            >
               {item.content}
             </Typography>
           </dd>
