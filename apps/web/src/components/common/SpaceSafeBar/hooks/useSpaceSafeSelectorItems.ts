@@ -168,7 +168,7 @@ function buildSingleChainItem(
 export type DropdownTab = 'workspace' | 'local'
 
 export function useSpaceSafeSelectorItems() {
-  const { workspaceSafes, localSafes, isInSpaceContext } = useSafeBarSafes()
+  const { workspaceSafes, localSafes, isInSpaceContext, isPrototype } = useSafeBarSafes()
   // Union feeds the overview query once; the two lists are mapped to items separately for the tabs.
   const allSafes = useMemo(() => [...workspaceSafes, ...localSafes], [workspaceSafes, localSafes])
   const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
@@ -278,5 +278,6 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
     isInSpaceContext,
     hasWallet: Boolean(walletAddress),
+    isPrototype,
   }
 }

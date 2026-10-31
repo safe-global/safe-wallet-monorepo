@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { Settings } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -35,12 +35,21 @@ import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 const MAIN_NAV_SKELETON_COUNT = 5
 const DEFI_GROUP_SKELETON_COUNT = 4
 
+type Props = SafeSidebarVariantProps & {
+  /** Replaces the Workspace header group. */
+  header?: ReactNode
+  /** Rendered after the Defi group. */
+  after?: ReactNode
+}
+
 export const SafeSidebarVariant = ({
   workspaceHeader,
   mainNavItems,
   defiGroup,
   isLoading = false,
-}: SafeSidebarVariantProps): ReactElement => {
+  header,
+  after,
+}: Props): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -82,7 +91,8 @@ export const SafeSidebarVariant = ({
   return (
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        {shouldRenderWorkspaceHeaderGroup && (
+        {header}
+        {!header && shouldRenderWorkspaceHeaderGroup && (
           <motion.div variants={itemVariants} className="mb-4">
             <SidebarGroup className={css.sidebarGroup}>
               <SidebarMenu>
@@ -135,6 +145,8 @@ export const SafeSidebarVariant = ({
             </SidebarGroup>
           </motion.div>
         )}
+
+        {after}
 
         <SidebarDeveloperGroup isLoading={isLoading} />
       </motion.div>

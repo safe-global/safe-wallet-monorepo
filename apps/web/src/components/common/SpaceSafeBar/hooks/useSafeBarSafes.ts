@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useIsQualifiedSafe, useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useIsQualifiedSafe, useSpaceSafes, useCurrentSpaceId, useUnifiedSidebarSafes } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, useSafeOrderComparator, type AllSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { getSpaceOrderScope, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
@@ -44,8 +44,12 @@ const orderDropdownSafes = (
 export function useSafeBarSafes() {
   const isQualifiedSafe = useIsQualifiedSafe()
   const isSpaceRoute = useIsSpaceRoute()
-  const isInSpaceContext = isQualifiedSafe || isSpaceRoute
-  const { allSafes: spaceSafes } = useSpaceSafes()
+  // Unified sidebar prototype (off in production, never on /spaces pages): its switcher picks the list.
+  const prototypeSafes = useUnifiedSidebarSafes()
+  const prototype = isSpaceRoute ? null : prototypeSafes
+  const isInSpaceContext = prototype ? prototype.isWorkspace : isQualifiedSafe || isSpaceRoute
+  const { allSafes: realSpaceSafes } = useSpaceSafes()
+  const spaceSafes = prototype?.isWorkspace ? prototype.safes : realSpaceSafes
   const urlSafeAddress = useSafeAddressFromUrl()
   const { safeAddress: reduxSafeAddress } = useSafeInfo()
   const safeAddress = urlSafeAddress || reduxSafeAddress
@@ -61,7 +65,10 @@ export function useSafeBarSafes() {
   const trustedComparator = useSafeOrderComparator(TRUSTED_ORDER_SCOPE)
   const spaceComparator = useSafeOrderComparator(spaceId ? getSpaceOrderScope(spaceId) : undefined)
 
-  const pinnedItems = useMemo(() => allSafeItems?.filter((s) => s.isPinned) ?? [], [allSafeItems])
+  const pinnedItems = useMemo(
+    () => (prototype && !prototype.isWorkspace ? prototype.safes : (allSafeItems?.filter((s) => s.isPinned) ?? [])),
+    [allSafeItems, prototype],
+  )
 
   // Pass fetchOwnedSafes=false too: useAllSafesGrouped still calls useAllSafes internally even when
   // customSafes is supplied, so without this it would re-trigger the owners endpoint.
@@ -140,5 +147,7 @@ export function useSafeBarSafes() {
     localSafes,
     // Expose so the header label stays in sync with which list is shown
     isInSpaceContext,
+    /** The unified sidebar prototype picks the list, so the dropdown drops its tabs. */
+    isPrototype: prototype !== null,
   }
 }

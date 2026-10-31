@@ -162,6 +162,7 @@ function SpaceSafeBar() {
     refetch,
     isInSpaceContext,
     hasWallet,
+    isPrototype,
   } = useSpaceSafeSelectorItems()
   // Skeleton on the first render: the contents derive from the URL address, which is empty until mounted.
   const showSelectorSkeleton = isLoading || !isHydrated
@@ -210,7 +211,8 @@ function SpaceSafeBar() {
   // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
   if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
-  const activeTab: DropdownTab = selectedTab ?? (isInSpaceContext ? 'workspace' : 'local')
+  // In the unified sidebar prototype the sidebar switcher picks the list, so the tabs are dropped.
+  const activeTab: DropdownTab = (isPrototype ? null : selectedTab) ?? (isInSpaceContext ? 'workspace' : 'local')
 
   // The Workspace tab lists the space's safes only when the current safe is part of a space;
   // otherwise it shows the sign-in CTA. The Local tab always lists the trusted safes.
@@ -233,7 +235,7 @@ function SpaceSafeBar() {
     : 'Workspace'
   const localLabel = `My accounts (${countMatches(localItems)})`
 
-  const dropdownHeader = (
+  const dropdownHeader = isPrototype ? undefined : (
     <DropdownTabs
       activeTab={activeTab}
       onSelect={setSelectedTab}

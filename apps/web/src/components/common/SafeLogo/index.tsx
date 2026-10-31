@@ -5,7 +5,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import css from './SafeLogo.module.css'
 
-const LogoMark = (): ReactElement => (
+export const LogoMark = (): ReactElement => (
   <>
     <img
       src="/images/logo-no-text.svg"

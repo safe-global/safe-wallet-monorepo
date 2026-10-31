@@ -8,11 +8,13 @@ import type { AllSafeItems } from '@/hooks/safes'
 const mockUseIsQualifiedSafe = jest.fn(() => false)
 const mockSpaceSafes: AllSafeItems = []
 const mockUseSpaceSafes = jest.fn(() => ({ allSafes: mockSpaceSafes }))
+const mockPrototypeSafes = jest.fn<{ isWorkspace: boolean; safes: SafeItem[] } | null, []>(() => null)
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: () => mockUseIsQualifiedSafe(),
   useSpaceSafes: () => mockUseSpaceSafes(),
   useCurrentSpaceId: () => null,
+  useUnifiedSidebarSafes: () => mockPrototypeSafes(),
 }))
 
 const mockSafeAddress = jest.fn(() => '0xCurrentSafe')
@@ -79,6 +81,7 @@ describe('useSafeBarSafes', () => {
     mockReduxSafeAddress.mockReturnValue('')
     mockChainId.mockReturnValue('1')
     mockOrderBy.mockReturnValue('name')
+    mockPrototypeSafes.mockReturnValue(null)
     mockAllSafes.mockReturnValue(undefined)
     // Default: pass-through. Tests needing multi-chain grouping override per-case.
     mockGrouped.mockImplementation((items: SafeItem[]) => ({
@@ -120,6 +123,41 @@ describe('useSafeBarSafes', () => {
 
     expect(result.current.dropdownSafes).toEqual([spaceSafe])
     expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
+  })
+
+  it('lists the mock Workspace Safes while the prototype has its Workspace open', () => {
+    const mockSafe = createSafe('0xMockSafe', true, '11155111')
+    mockPrototypeSafes.mockReturnValue({ isWorkspace: true, safes: [mockSafe] })
+    mockSafeAddress.mockReturnValue('0xMockSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.isPrototype).toBe(true)
+    expect(result.current.isInSpaceContext).toBe(true)
+    expect(result.current.workspaceSafes).toEqual([mockSafe])
+    expect(result.current.dropdownSafes).toEqual([mockSafe])
+  })
+
+  it('lists the mock personal Safes while the prototype has My accounts open', () => {
+    const mockSafe = createSafe('0xMockSafe', true, '11155111')
+    mockPrototypeSafes.mockReturnValue({ isWorkspace: false, safes: [mockSafe] })
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockSafeAddress.mockReturnValue('0xMockSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.isInSpaceContext).toBe(false)
+    expect(result.current.localSafes).toEqual([mockSafe])
+  })
+
+  it('ignores the prototype on Workspace pages', () => {
+    mockPrototypeSafes.mockReturnValue({ isWorkspace: false, safes: [] })
+    mockIsSpaceRoute.mockReturnValue(true)
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.isPrototype).toBe(false)
+    expect(result.current.isInSpaceContext).toBe(true)
   })
 
   it('returns pinned safes for dropdown in non-space context', () => {
