@@ -1,10 +1,25 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import WcSessionManager from '../index'
 import { WalletConnectContext } from '../../WalletConnectContext'
-import { trackEvent } from '@/services/analytics'
+import { trackEvent, trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS } from '@/services/analytics/events/safeApps'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams, SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
+import { AppRoutes } from '@/config/routes'
+import { safeAppBuilder } from '@/tests/builders/walletConnect'
+import type { SafeAppSuggestion } from '../../../hooks/useSafeAppSuggestion'
 import type { WalletKitTypes } from '@reown/walletkit'
+
+const mockRouterPush = jest.fn(() => Promise.resolve(true))
+jest.mock('next/router', () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+    query: { safe: 'eth:0x1234567890123456789012345678901234567890' },
+    asPath: '/',
+    pathname: '/',
+    isReady: true,
+  }),
+}))
 
 // Mock analytics
 jest.mock('@/services/analytics', () => {
@@ -13,6 +28,7 @@ jest.mock('@/services/analytics', () => {
   return {
     ...actual,
     trackEvent: jest.fn(),
+    trackSafeAppEvent: jest.fn(),
   }
 })
 
@@ -97,6 +113,14 @@ const mockContextValue = {
   setLoading: jest.fn(),
   approveSession: mockApproveSession,
   rejectSession: mockRejectSession,
+  safeAppSuggestion: {
+    status: 'off',
+    safeApp: undefined,
+    optOut: false,
+    setOptOut: jest.fn(),
+    resolve: jest.fn(),
+    decline: jest.fn(),
+  } satisfies SafeAppSuggestion,
 }
 
 const WcSessionManagerWithContext = ({ uri = 'test-uri' }) => (
@@ -230,5 +254,112 @@ describe('WcSessionManager tracking', () => {
     // Should not render approval form without session proposal
     expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
     expect(mockTrackEvent).not.toHaveBeenCalled()
+  })
+})
+
+describe('WcSessionManager Safe App suggestion', () => {
+  const safeApp = safeAppBuilder().with({ url: 'https://test-dapp.com' }).build()
+  const mockResolve = jest.fn()
+  const mockDecline = jest.fn()
+  const mockSetOpen = jest.fn()
+
+  const renderWithSuggestion = (status: SafeAppSuggestion['status']) =>
+    render(
+      <WalletConnectContext.Provider
+        value={{
+          ...mockContextValue,
+          setOpen: mockSetOpen,
+          safeAppSuggestion: {
+            ...mockContextValue.safeAppSuggestion,
+            status,
+            safeApp,
+            resolve: mockResolve,
+            decline: mockDecline,
+          },
+        }}
+      >
+        <WcSessionManager uri="test-uri" />
+      </WalletConnectContext.Provider>,
+    )
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockApproveSession.mockResolvedValue(undefined)
+    mockRejectSession.mockResolvedValue(undefined)
+  })
+
+  it('shows a spinner, not an approvable form, while the Safe App lookup is in flight', () => {
+    renderWithSuggestion('loading')
+
+    expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
+  })
+
+  it('shows the suggestion instead of the connection form', () => {
+    renderWithSuggestion('shown')
+
+    expect(screen.getByRole('button', { name: 'Open in Safe App Store' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument()
+  })
+
+  it.each(['none', 'resolved'] as const)('shows the connection form when the suggestion is %s', (status) => {
+    renderWithSuggestion(status)
+
+    expect(screen.getByRole('button', { name: /approve/i })).toBeInTheDocument()
+  })
+
+  it('connects from the suggestion and declines it only after the approval settles', async () => {
+    let finishApproving: () => void = () => {}
+    mockApproveSession.mockReturnValue(new Promise<void>((resolve) => (finishApproving = resolve)))
+    renderWithSuggestion('shown')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with WalletConnect' }))
+    expect(mockApproveSession).toHaveBeenCalled()
+    expect(mockDecline).not.toHaveBeenCalled()
+
+    finishApproving()
+    await waitFor(() => expect(mockDecline).toHaveBeenCalled())
+    expect(mockResolve).not.toHaveBeenCalled()
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { ...WALLETCONNECT_EVENTS.CONNECTED, label: 'https://test-dapp.com' },
+      { [MixpanelEventParams.APP_URL]: 'https://test-dapp.com', [MixpanelEventParams.SAFE_APP_AVAILABLE]: true },
+    )
+  })
+
+  it('rejects the proposal and opens the Safe App', async () => {
+    renderWithSuggestion('shown')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open in Safe App Store' }))
+
+    await waitFor(() => expect(trackSafeAppEvent).toHaveBeenCalled())
+    expect(mockRejectSession).toHaveBeenCalled()
+    expect(mockResolve).toHaveBeenCalled()
+    expect(mockDecline).not.toHaveBeenCalled()
+    expect(mockSetOpen).toHaveBeenCalledWith(false)
+    expect(mockRouterPush).toHaveBeenCalledWith(expect.stringContaining(encodeURIComponent(safeApp.url)))
+    expect(trackSafeAppEvent).toHaveBeenCalledWith({ ...SAFE_APPS_EVENTS.OPEN_APP, label: safeApp.name }, safeApp, {
+      launchLocation: SafeAppLaunchLocation.WC_PROPOSAL,
+    })
+  })
+
+  it('still opens the Safe App, and reports the error, when rejecting fails', async () => {
+    const error = new Error('Relay unavailable')
+    mockRejectSession.mockRejectedValue(error)
+    renderWithSuggestion('shown')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open in Safe App Store' }))
+
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalled())
+    expect(mockSetError).toHaveBeenCalledWith(error)
+  })
+
+  it('rejects the proposal and opens the Safe App Store', async () => {
+    renderWithSuggestion('shown')
+
+    fireEvent.click(screen.getByRole('button', { name: 'all reviewed apps' }))
+
+    await waitFor(() => expect(mockRouterPush).toHaveBeenCalled())
+    expect(mockRejectSession).toHaveBeenCalled()
+    expect(mockResolve).toHaveBeenCalled()
+    expect(mockRouterPush).toHaveBeenCalledWith(expect.objectContaining({ pathname: AppRoutes.apps.index }))
   })
 })

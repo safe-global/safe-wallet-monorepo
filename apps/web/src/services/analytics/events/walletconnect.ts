@@ -64,4 +64,21 @@ export const WALLETCONNECT_EVENTS = {
     category: WALLETCONNECT_CATEGORY,
     event: EventType.META,
   },
+  SAFE_APP_SUGGESTED: {
+    action: 'WC Safe App suggested',
+    category: WALLETCONNECT_CATEGORY,
+    event: EventType.META,
+  },
+  SAFE_APP_SUGGESTION_RESULT: {
+    action: 'WC Safe App suggestion result',
+    category: WALLETCONNECT_CATEGORY,
+    event: EventType.META,
+  },
+}
+
+export enum WcSafeAppSuggestionResult {
+  OPENED_SAFE_APP = 'Opened Safe App',
+  CONTINUED_WITH_WALLETCONNECT = 'Continued with WalletConnect',
+  BROWSED_STORE = 'Browsed Safe App Store',
+  DISMISSED = 'Dismissed',
 }
