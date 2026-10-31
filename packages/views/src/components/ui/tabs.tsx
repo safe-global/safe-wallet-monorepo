@@ -27,12 +27,13 @@ import { cn } from '@safe-global/views/utils/cn'
  * - Tabs (Root): `defaultValue`, `value`, `onValueChange`
  * - Tabs (Root): `orientation` ('horizontal' | 'vertical')
  * - TabsList: `variant` ('underline' | 'toggle'); on `underline`, `tone` ('brand' | 'neutral');
- *   on `toggle`, `size` ('default' | 'lg')
+ *   `size` ('default' | 'lg') on `toggle` and on `underline` + `brand`
  * - TabsTrigger: `value`, `disabled`
  *
  * Changelog:
  * - 2026-09-02: `toggle` default track restyled to the Figma DS Tabs (rounded-md, shadow-xs)
  * - 2026-09-02: Active `toggle` default trigger is `font-semibold` with shadow-xs
+ * - 2026-10-20: `underline` + `brand` + `size="lg"`: text-width nav tabs (`nav-lg` look)
  */
 
 function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive.Root.Props) {
@@ -48,8 +49,8 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
 
 // Two public tab families:
 //  - `underline` — flush-underline tabs. `tone="brand"` is the bold, primary-coloured page nav
-//    (NavTabs: Assets/Settings/Transactions); `tone="neutral"` (default) is the lighter in-content
-//    look (Spaces address book, members).
+//    (NavTabs: Assets/Settings/Transactions); add `size="lg"` for text-width, medium-weight tabs.
+//    `tone="neutral"` (default) is the lighter in-content look (Spaces address book, members).
 //  - `toggle` — pill-on-track switch. `size="default"` is the compact muted-track switch (SecurityHub
 //    drawer); `size="lg"` is the large muted-track welcome switch (Accounts/Workspaces).
 // Each (variant, tone|size) pair maps to one internal `look`, emitted as data-variant so TabsTrigger
@@ -64,6 +65,9 @@ const tabsListVariants = cva(
         // No gap: the triggers carry their 24px spacing as padding. `w-full min-w-0 justify-start`
         // gives the list a width to scroll inside — under `w-fit`, nowrap triggers grow it instead.
         nav: 'h-auto w-full min-w-0 justify-start overflow-x-auto overflow-y-hidden rounded-none bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        // Same prefix as the base's horizontal h-9 so twMerge replaces it (see segmented).
+        'nav-lg':
+          'group-data-horizontal/tabs:h-11 w-auto min-w-0 justify-start gap-8 overflow-x-auto overflow-y-hidden rounded-none bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         // group-data-horizontal:h-auto overrides the base's horizontal h-9 (same variant prefix so
         // twMerge collapses them) — the track must grow around the h-9 pills plus the p-1 gutter.
         //
@@ -86,8 +90,11 @@ type TabsListVariant = 'underline' | 'toggle'
 type TabsListTone = 'brand' | 'neutral'
 type TabsListSize = 'default' | 'lg'
 
-const resolveLook = (variant: TabsListVariant, tone: TabsListTone, size: TabsListSize) =>
-  variant === 'underline' ? (tone === 'brand' ? 'nav' : 'line') : size === 'lg' ? 'segmented' : 'default'
+const resolveLook = (variant: TabsListVariant, tone: TabsListTone, size: TabsListSize) => {
+  if (variant === 'toggle') return size === 'lg' ? 'segmented' : 'default'
+  if (tone === 'neutral') return 'line'
+  return size === 'lg' ? 'nav-lg' : 'nav'
+}
 
 function TabsList({
   className,
@@ -129,6 +136,10 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5',
         'group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
         'group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100',
+        // nav-lg: nav colours with no side padding, so the underline spans just the label.
+        'group-data-[variant=nav-lg]/tabs-list:h-11 group-data-[variant=nav-lg]/tabs-list:flex-none group-data-[variant=nav-lg]/tabs-list:items-end group-data-[variant=nav-lg]/tabs-list:border-0 group-data-[variant=nav-lg]/tabs-list:px-0 group-data-[variant=nav-lg]/tabs-list:pt-0 group-data-[variant=nav-lg]/tabs-list:pb-2.5 group-data-[variant=nav-lg]/tabs-list:bg-transparent group-data-[variant=nav-lg]/tabs-list:focus-visible:-outline-offset-1',
+        'group-data-[variant=nav-lg]/tabs-list:text-[var(--color-primary-light)] group-data-[variant=nav-lg]/tabs-list:hover:text-[var(--color-primary-main)] group-data-[variant=nav-lg]/tabs-list:data-active:text-[var(--color-primary-main)] group-data-[variant=nav-lg]/tabs-list:data-active:bg-transparent group-data-[variant=nav-lg]/tabs-list:data-active:shadow-none',
+        'group-data-[variant=nav-lg]/tabs-list:after:bottom-0 group-data-[variant=nav-lg]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav-lg]/tabs-list:data-active:after:opacity-100',
         // segmented pill: large rounded pills on a muted track; the active pill is a raised paper surface.
         // Geometry and type scale follow the welcome switch as redesigned in dev#8366 (rounded-lg pills,
         // text-base), not the older pre-migration switch. Idle triggers are normal-weight muted text.

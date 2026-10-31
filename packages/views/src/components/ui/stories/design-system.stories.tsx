@@ -1123,6 +1123,16 @@ export const Tabs_: Story = {
         <StoryLink title="Pages/Core/Balances">Assets header</StoryLink>
       </Row>
 
+      <Row label="underline · tone=brand · size=lg" note="text-width page tabs — medium weight, 32px gap">
+        <Tabs defaultValue="a">
+          <TabsList variant="underline" tone="brand" size="lg">
+            <TabsTrigger value="a">Queue</TabsTrigger>
+            <TabsTrigger value="b">History</TabsTrigger>
+            <TabsTrigger value="c">Messages</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </Row>
+
       <Row label="underline (neutral)" note="lighter in-content tabs — Spaces address book & members">
         <Tabs defaultValue="a">
           <TabsList variant="underline">
