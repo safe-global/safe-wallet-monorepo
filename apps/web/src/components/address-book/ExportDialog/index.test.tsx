@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { _getCsvData } from '.'
-import ExportDialog from '.'
+import ExportDialog, { CsvExportDialog } from '.'
 import { fakerChecksummedAddress, render, screen, waitFor, fireEvent } from '@/tests/test-utils'
 
 jest.mock('@/services/analytics')
@@ -64,6 +64,28 @@ describe('ExportDialog', () => {
       ])
       const anchor = anchorClick.mock.contexts[0] as HTMLAnchorElement
       expect(anchor.getAttribute('download')).toMatch(/^safe-address-book-\d{4}-\d{2}-\d{2}/)
+
+      anchorClick.mockRestore()
+    })
+  })
+
+  describe('CsvExportDialog', () => {
+    it('downloads the rows it is given under its file name and reports the export', async () => {
+      const rows = [{ address: fakerChecksummedAddress(), name: faker.person.firstName(), chainId: '1', tags: 'Ops' }]
+      const onExport = jest.fn()
+      const createObjectURL = jest.fn<string, [Blob]>(() => 'blob:address-book')
+      window.URL.createObjectURL = createObjectURL
+      const anchorClick = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+      render(<CsvExportDialog csvData={rows} filename="workspace-7" onExport={onExport} handleClose={jest.fn()} />)
+
+      expect(screen.getByTestId('export-summary')).toHaveTextContent('1 address book entry')
+      fireEvent.click(screen.getByTestId('export-modal-btn'))
+
+      await waitFor(() => expect(anchorClick).toHaveBeenCalled())
+      const csv = (await createObjectURL.mock.calls[0][0].text()).trim()
+      expect(csv.split(/\r?\n/)).toEqual(['address,name,chainId,tags', `${rows[0].address},${rows[0].name},1,Ops`])
+      expect((anchorClick.mock.contexts[0] as HTMLAnchorElement).getAttribute('download')).toMatch(/^workspace-7/)
+      expect(onExport).toHaveBeenCalled()
 
       anchorClick.mockRestore()
     })
