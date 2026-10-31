@@ -1,5 +1,7 @@
 import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import EditContactDialog from '../EditContactDialog'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -29,6 +31,14 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: { EDIT_ADDRESS_SUBMIT: { action: 'Edit address submit', category: 'spaces' } },
+}))
+
+const mockCreateTag = jest.fn()
+jest.mock('../../SpaceAddressBookV2/useTagActions', () => ({
+  __esModule: true,
+  default: () => ({
+    tagActions: { onCreate: mockCreateTag, onRename: jest.fn(), onDelete: jest.fn() },
+  }),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -67,7 +77,7 @@ const entry: SpaceAddressBookItemDto = {
   name: 'Alice',
   address: '0xabc',
   chainIds: ['1'],
-  tagIds: [],
+  tagIds: [1],
   createdBy: '0xabc',
   createdByUserId: 1,
   lastUpdatedBy: '0xabc',
@@ -148,5 +158,58 @@ describe('EditContactDialog', () => {
 
     fireEvent.click(submitButton)
     expect(mockUpsertAddressBook).not.toHaveBeenCalled()
+  })
+
+  describe('tags', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1, name: 'Vendor' }).build()
+    const internal = spaceAddressBookTagBuilder().with({ id: 2, name: 'Internal' }).build()
+
+    const sentItem = () => mockUpsertAddressBook.mock.lastCall?.[0].upsertAddressBookItemsDto.items[0]
+
+    it('has no Tags field and sends no tags outside the v2 address book', async () => {
+      mockUpsertAddressBook.mockResolvedValue({ data: {} })
+      render(<EditContactDialog entry={entry} onClose={jest.fn()} />)
+
+      expect(screen.queryByTestId('tag-picker')).not.toBeInTheDocument()
+      await submitForm()
+
+      await waitFor(() => expect(mockUpsertAddressBook).toHaveBeenCalled())
+      expect(sentItem()).not.toHaveProperty('tags')
+    })
+
+    it('opens outside the v2 address book when the backend sends no tagIds', () => {
+      const { tagIds: _tagIds, ...withoutTagIds } = entry
+
+      render(<EditContactDialog entry={withoutTagIds as SpaceAddressBookItemDto} onClose={jest.fn()} />)
+
+      expect(screen.getByLabelText('Name')).toHaveValue(entry.name)
+    })
+
+    it('leaves the tags alone when only the name changes', async () => {
+      mockUpsertAddressBook.mockResolvedValue({ data: {} })
+      render(<EditContactDialog entry={entry} onClose={jest.fn()} workspaceTags={[vendor, internal]} />)
+
+      expect(screen.getByTestId('tag-chip')).toHaveTextContent('Vendor')
+      await submitForm()
+
+      await waitFor(() => expect(mockUpsertAddressBook).toHaveBeenCalled())
+      expect(sentItem()).not.toHaveProperty('tags')
+    })
+
+    it('sends the full set of tags once they change', async () => {
+      mockUpsertAddressBook.mockResolvedValue({ data: {} })
+      render(<EditContactDialog entry={entry} onClose={jest.fn()} workspaceTags={[vendor, internal]} />)
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.click(screen.getByRole('option', { name: /Internal/ }))
+      await userEvent.keyboard('{Escape}')
+      const submitButton = screen.getByRole('button', { name: 'Save' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() => expect(mockUpsertAddressBook).toHaveBeenCalled())
+      expect(sentItem()).toEqual(expect.objectContaining({ tags: ['Vendor', 'Internal'] }))
+    })
   })
 })
