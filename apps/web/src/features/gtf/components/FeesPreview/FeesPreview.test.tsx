@@ -1,4 +1,5 @@
 import { screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { render } from '@/tests/test-utils'
 import FeesPreview from './index'
 import type { FeesPreviewData } from '../../hooks/useFeesPreview'
@@ -81,6 +82,17 @@ describe('FeesPreview', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Signer' }))
 
     expect(screen.getByText('Total outgoing')).toBeInTheDocument()
+  })
+
+  it('opens the payment source menu from the keyboard', async () => {
+    render(<FeesPreview {...defaultProps} />)
+
+    const selector = screen.getByTestId('payment-source-selector')
+    expect(selector).toHaveAttribute('role', 'button')
+    selector.focus()
+    await userEvent.keyboard('{Enter}')
+
+    expect(await screen.findByRole('menuitem', { name: 'Signer' })).toBeInTheDocument()
   })
 
   it('renders total outgoing with 2 currencies', () => {

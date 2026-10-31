@@ -191,7 +191,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
                   name: acceptedFile.name,
                   additionalInfo: formatFileSize(acceptedFile.size),
                   summary: [
-                    <Typography data-testid="summary-message" key="abSummary">
+                    <Typography as="span" data-testid="summary-message" key="abSummary">
                       {`Found ${entryCount} entries on ${chainCount} ${chainCount > 1 ? 'chains' : 'chain'}`}
                     </Typography>,
                   ],
