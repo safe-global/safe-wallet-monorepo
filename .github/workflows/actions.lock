@@ -27,12 +27,12 @@ workflows:
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'mishakav/jest-coverage-comment@v1.0.37'
+        - 'mishakav/jest-coverage-comment@v1.0.38'
     '.github/workflows/package-utils-unit-tests.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'mishakav/jest-coverage-comment@v1.0.37'
+        - 'mishakav/jest-coverage-comment@v1.0.38'
     '.github/workflows/store-codegen-check.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -294,9 +294,9 @@ dependencies:
         commit: 'sha1-5770ad5eb8f42dd2c4f34da00c94c5381e49af88'
         owner_id: 128431
         repo_id: 223043916
-    'mishakav/jest-coverage-comment@v1.0.37':
-        ref: 'v1.0.37'
-        commit: 'sha1-1b5d15445c8afba0c13bd00167bd31130b812d0a'
+    'mishakav/jest-coverage-comment@v1.0.38':
+        ref: 'v1.0.38'
+        commit: 'sha1-7032bf8e71aa2b267b6b143be3c4480b625c2b12'
         owner_id: 289035
         repo_id: 470772431
     'mshick/add-pr-comment@v3.12.0':
