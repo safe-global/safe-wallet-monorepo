@@ -24,9 +24,7 @@ export const hasSpacePlan = (
 }
 
 export type SafeWorkspacePick =
-  | { kind: 'none' }
-  | { kind: 'one'; spaceId: string }
-  | { kind: 'choose'; spaceIds: string[] }
+  { kind: 'none' } | { kind: 'one'; spaceId: string } | { kind: 'choose'; spaceIds: string[] }
 
 /**
  * The Workspace to open a Safe in: its only Workspace, else its only Workspace with a plan,

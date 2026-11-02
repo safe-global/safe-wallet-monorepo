@@ -75,8 +75,7 @@ const variantElementMap = {
 } as const
 
 interface TypographyProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, 'color'>,
-    VariantProps<typeof typographyVariants> {
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'color'>, VariantProps<typeof typographyVariants> {
   /** Override the rendered element (e.g. `as="div"` when wrapping block-level content to avoid invalid `<p>` nesting). */
   as?: React.ElementType
 }
