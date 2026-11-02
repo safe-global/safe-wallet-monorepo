@@ -124,7 +124,7 @@ Object.defineProperty = (obj, prop, desc) => {
 }
 
 beforeAll(() => {
-  server.listen()
+  server.listen({ onUnhandledRequest: 'error' })
 })
 
 afterEach(() => server.resetHandlers())

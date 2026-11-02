@@ -1,15 +1,11 @@
 import { Interface } from 'ethers'
 import { getSafeL2SingletonDeployment } from '@safe-global/safe-deployments'
 import { registerContract } from './contracts.mjs'
-import { rebuildStagingSafe } from './staging.mjs'
-import { rebuildStagingSafes, stagingSafeAppSafes } from './staging-safes.mjs'
 import { localProvider } from './provider.mjs'
 import { SEPOLIA } from './chain.mjs'
 
 const chainId = SEPOLIA
 export const basicTypesTestContract = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
-// The staging recipient Safe is only typed into the builder as an address, and the fork holds its contract.
-const stagingRecipientSafe = '0x4DD4cB2299E491E1B469245DB589ccB2B16d7bde'
 
 async function assertForkContract(env, address) {
   const provider = localProvider(env.SAFE_RPC_URL)
@@ -43,23 +39,4 @@ export async function registerBuilderContracts(env) {
       abi: singleton.abi,
     })
   }
-}
-
-/** The staging Safe App Safes, used by Transaction Builder and Drain Account. */
-export async function prepareSafeAppSafesScenario(env, owners) {
-  await registerBuilderContracts(env)
-  await assertForkContract(env, stagingRecipientSafe)
-  const safe = await rebuildStagingSafe(env, owners, stagingSafeAppSafes.SEP_SAFEAPP_SAFE_1)
-  return {
-    safes: { safeapps: { SEP_SAFEAPP_SAFE_1: `sep:${safe}`, SEP_SAFEAPP_SAFE_2: `sep:${stagingRecipientSafe}` } },
-  }
-}
-
-async function prepareFallbackHandlerScenario(env, owners, safeName) {
-  await registerBuilderContracts(env)
-  return { safes: { static: await rebuildStagingSafes(env, owners, [safeName]) } }
-}
-
-export function prepareCowFallbackScenario(env, owners) {
-  return prepareFallbackHandlerScenario(env, owners, 'SEP_STATIC_SAFE_43')
 }

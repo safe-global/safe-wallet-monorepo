@@ -16,7 +16,6 @@
 // Import commands.js using ES2015 syntax:
 import '@testing-library/cypress/add-commands'
 import './commands'
-import './safes/isolated'
 import * as constants from './constants'
 import * as ls from './localstorage_data'
 import { setWalletCredentials } from './credentials'
@@ -52,15 +51,12 @@ before(() => {
   )
 })
 
-// Isolated runs receive their generated owners with the scenario instead.
-if (!Cypress.expose('SAFE_E2E_ISOLATED')) {
-  before(() => {
-    cy.env(['CYPRESS_WALLET_CREDENTIALS']).then(({ CYPRESS_WALLET_CREDENTIALS }) => {
-      if (!CYPRESS_WALLET_CREDENTIALS) throw new Error('Set CYPRESS_WALLET_CREDENTIALS to run the staging specs')
-      setWalletCredentials(JSON.parse(CYPRESS_WALLET_CREDENTIALS))
-    })
+before(() => {
+  cy.env(['CYPRESS_WALLET_CREDENTIALS']).then(({ CYPRESS_WALLET_CREDENTIALS }) => {
+    if (!CYPRESS_WALLET_CREDENTIALS) throw new Error('Set CYPRESS_WALLET_CREDENTIALS to run the staging specs')
+    setWalletCredentials(JSON.parse(CYPRESS_WALLET_CREDENTIALS))
   })
-}
+})
 
 before(() => {
   Cypress.on('uncaught:exception', (err, runnable) => {

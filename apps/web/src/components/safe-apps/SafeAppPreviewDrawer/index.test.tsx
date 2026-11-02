@@ -125,10 +125,10 @@ describe('SafeAppPreviewDrawer', () => {
     expect(logos).toHaveAttribute('data-networks', '')
   })
 
-  it('shows the description of the app', async () => {
+  it('describes the drawer with the app description', async () => {
     render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
 
-    expect(await screen.findByText(safeAppMock.description)).toBeInTheDocument()
+    expect(await screen.findByRole('dialog')).toHaveAccessibleDescription(safeAppMock.description)
   })
 
   it('calls onClose when the close button is clicked', async () => {
