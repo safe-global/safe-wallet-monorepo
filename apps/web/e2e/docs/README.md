@@ -14,14 +14,7 @@ This framework follows three principles in strict order:
 # From apps/web/
 yarn pw:test              # Run all tests
 yarn pw:test:smoke        # Run @smoke tagged tests only
-yarn pw:test:api          # Run @api tagged tests only
 yarn pw:report            # Open last HTML report
-```
-
-### CI mode
-
-```bash
-CI=true yarn pw:ci        # Smoke tests with retries, JUnit output
 ```
 
 ### Isolated mode (local backend)
@@ -35,8 +28,7 @@ e2e/
 ├── playwright.config.ts       # Chromium-only, traces on failure
 ├── tsconfig.json              # TypeScript config for e2e
 ├── tests/                     # Tests describe business behavior, not implementation
-│   ├── smoke/                 # Critical path — run on every PR
-│   ├── api/                   # Pure API tests (no browser)
+│   ├── smoke/                 # Critical path
 │   ├── e2e/                   # Full user flows
 │   └── regression/            # Bug-specific regression tests
 ├── src/                       # Framework code (not tests)
@@ -91,20 +83,20 @@ test.describe('Feature name', { tag: '@smoke' }, () => { ... })
 
 Use categories intentionally:
 
-| Tag            | Purpose                           | Rules                                                                                       |
-| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `@smoke`       | Critical path — runs every PR     | Must be small and stable. If it flakes, fix immediately or demote.                          |
-| `@regression`  | Feature-specific — runs on-demand | Can be broader but must still provide clear value.                                          |
-| `@api`         | Pure API tests — no browser       | Fast, stable, run every PR alongside smoke.                                                 |
-| `@ui`          | UI-specific rendering checks      | Only for things that require visual/browser verification.                                   |
-| `@critical`    | High-risk business flows          | Transaction creation, signing, owner changes — financial impact.                            |
-| `@permissions` | Role-based access tests           | Owner vs non-owner, proposer, threshold-dependent flows.                                    |
-| `@flaky`       | Quarantined flaky tests           | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently. |
-| `@migration`   | Migrated from Cypress             | Tracks migration progress. Remove tag once test is stable in Playwright.                    |
+| Tag            | Purpose                      | Rules                                                                                       |
+| -------------- | ---------------------------- | ------------------------------------------------------------------------------------------- |
+| `@smoke`       | Critical path                | Must be small and stable. If it flakes, fix immediately or demote.                          |
+| `@regression`  | Feature-specific             | Can be broader but must still provide clear value.                                          |
+| `@api`         | Pure API tests — no browser  | Fast and stable.                                                                            |
+| `@ui`          | UI-specific rendering checks | Only for things that require visual/browser verification.                                   |
+| `@critical`    | High-risk business flows     | Transaction creation, signing, owner changes — financial impact.                            |
+| `@permissions` | Role-based access tests      | Owner vs non-owner, proposer, threshold-dependent flows.                                    |
+| `@flaky`       | Quarantined flaky tests      | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently. |
+| `@migration`   | Migrated from Cypress        | Tracks migration progress. Remove tag once test is stable in Playwright.                    |
 
-**Tag must match directory.** A `@smoke` test lives in `tests/smoke/`, a `@api` test in `tests/api/`, etc. If unsure, default to `tests/regression/` — promotion to `tests/smoke/` is a deliberate decision after the test proves stable.
+**Tag must match directory.** A `@smoke` test lives in `tests/smoke/`, etc. If unsure, default to `tests/regression/` — promotion to `tests/smoke/` is a deliberate decision after the test proves stable.
 
-**Flaky test policy**: A test tagged `@flaky` is excluded from CI smoke runs. It must have an owner and a deadline to fix. If not fixed within 2 weeks, it gets deleted. Flaky tests that are silently skipped erode trust in the entire suite.
+**Flaky test policy**: A test tagged `@flaky` must have an owner and a deadline to fix. If not fixed within 2 weeks, it gets deleted. Flaky tests that are silently skipped erode trust in the entire suite.
 
 ### Page Objects — thin
 
@@ -275,14 +267,14 @@ PWDEBUG=1 yarn pw:test --grep "should display token balances"
 
 ### Common failure patterns
 
-| You see                                    | Likely cause                                 | Action                                                                |
-| ------------------------------------------ | -------------------------------------------- | --------------------------------------------------------------------- |
-| `console-errors` with `TypeError`          | App bug — component received unexpected data | File a bug, not a test issue                                          |
-| `failed-network-requests` with 502/503     | CGW staging is down or flaky                 | Re-run the test — if it passes, it's transient                        |
-| `page-url` shows wrong page                | Navigation failed or redirected              | Check if the Safe address is valid, check for redirects               |
-| `TimeoutError: waiting for getByRole(...)` | Element didn't render in time                | Check if the locator is correct, check for loading states             |
-| Test passes locally, fails in CI           | Timing difference or missing env var         | Check `environment-info` attachment, try `CI=true yarn pw:ci` locally |
-| `console-warnings` with hydration mismatch | Server/client render mismatch                | Developer issue — flag to the team                                    |
+| You see                                    | Likely cause                                 | Action                                                                  |
+| ------------------------------------------ | -------------------------------------------- | ----------------------------------------------------------------------- |
+| `console-errors` with `TypeError`          | App bug — component received unexpected data | File a bug, not a test issue                                            |
+| `failed-network-requests` with 502/503     | CGW staging is down or flaky                 | Re-run the test — if it passes, it's transient                          |
+| `page-url` shows wrong page                | Navigation failed or redirected              | Check if the Safe address is valid, check for redirects                 |
+| `TimeoutError: waiting for getByRole(...)` | Element didn't render in time                | Check if the locator is correct, check for loading states               |
+| Test passes locally, fails in CI           | Timing difference or missing env var         | Check `environment-info` attachment, try `CI=true yarn pw:test` locally |
+| `console-warnings` with hydration mismatch | Server/client render mismatch                | Developer issue — flag to the team                                      |
 
 ### Failure artifact locations
 
