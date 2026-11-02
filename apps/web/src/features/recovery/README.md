@@ -204,16 +204,14 @@ Malicious proposals are flagged with a warning icon and message.
 
 ## Hooks
 
-### Public Hooks (Exported from `index.ts`)
+### Public Hooks
 
 ```typescript
-import {
-  useIsRecoverer,
-  useIsRecoverySupported,
-  useIsValidRecoveryExecTransactionFromModule,
-  useRecovery,
-  useRecoveryQueue,
-} from '@/features/recovery'
+import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
+import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
+import { useIsValidRecoveryExecTransactionFromModule } from '@/features/recovery/hooks/useIsValidRecoveryExecution'
+import useRecovery from '@/features/recovery/hooks/useRecovery'
+import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 
 // Check if current wallet is a recoverer
 const isRecoverer = useIsRecoverer()
@@ -246,7 +244,7 @@ const queue = useRecoveryQueue()
 
 ```typescript
 import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const recovery = useLoadFeature(RecoveryFeature)
 
@@ -340,8 +338,9 @@ interface RecoveryStateItem {
 ### Display Recovery Status
 
 ```typescript
-import { RecoveryFeature, useRecoveryQueue } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { RecoveryFeature } from '@/features/recovery'
+import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 function RecoveryStatus() {
   const recovery = useLoadFeature(RecoveryFeature)
@@ -371,7 +370,7 @@ function RecoveryStatus() {
 
 ```typescript
 import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 function SetupRecovery() {
   const recovery = useLoadFeature(RecoveryFeature)
@@ -398,7 +397,8 @@ function SetupRecovery() {
 ### Check if Recoverer
 
 ```typescript
-import { useIsRecoverer, useIsRecoverySupported } from '@/features/recovery'
+import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
+import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 
 function RecoveryActions() {
   const isRecoverer = useIsRecoverer()

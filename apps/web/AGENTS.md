@@ -37,23 +37,25 @@ add a variant or a preset instead of pasting the classes again. The **`UI/Button
 
 ## Feature Architecture Import Rules
 
-Features are lazy-loaded to keep the bundle small. ESLint enforces the import boundaries as **errors** (CI-failing):
+Import every name from the file that declares it, never through a barrel (an `index.ts` or any file that only re-exports it). Barrel imports bloat Jest's related-test graph and cause module-init cycles. ESLint enforces both rules below as **errors** (CI-failing):
 
 ```typescript
 // ✅ Allowed
-import { MyFeature, useMyHook } from '@/features/myfeature' // barrel: handle + hooks
-import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
-import type { MyType } from '@/features/myfeature/types' // public types
-import { lightUtil } from '@/features/myfeature/services' // services barrel only — lightweight utils
+import { MyFeature } from '@/features/myfeature' // the feature handle, declared in index.ts
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
+import { someSlice, selectSomething } from '@/features/myfeature/store/mySlice'
+import type { MyType } from '@/features/myfeature/types'
 
-// ❌ Forbidden: ANY deep import (components, hooks/*, services/* files) — it defeats
-// lazy loading. Components and heavy services are reached via useLoadFeature() instead.
+// ❌ Forbidden: another feature's components (use useLoadFeature) — no-restricted-imports
+import { MyComponent } from '@/features/myfeature/components/MyComponent'
+// ❌ Forbidden: a name the target only re-exports — local/no-barrel-imports
+import { useMyHook } from '@/features/myfeature/hooks'
 ```
 
 **Using a feature:**
 
 ```typescript
-const { MyComponent, myService, $isReady, $isDisabled } = useLoadFeature(MyFeature) // from '@/features/__core__'
+const { MyComponent, myService, $isReady, $isDisabled } = useLoadFeature(MyFeature) // from '@/features/__core__/useLoadFeature'
 // Always returns an object: components render null until ready (proxy stub);
 // services are undefined until ready — check $isReady before calling.
 ```
@@ -66,10 +68,9 @@ const { MyComponent, myService, $isReady, $isDisabled } = useLoadFeature(MyFeatu
 // NO lazy()/dynamic(), NO nested categories, NO hooks here (Rules of Hooks).
 export default { MyComponent, myService }
 
-// index.ts — hooks are exported directly (always loaded — keep them lightweight,
-// heavy logic goes in services):
+// index.ts — the feature handle only. Hooks stay in hooks/ (always loaded — keep them
+// lightweight, heavy logic goes in services):
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook'
 ```
 
 Full guide (folder structure, proxy stubs, `$error`, feature flags): [docs/feature-architecture.md](docs/feature-architecture.md).
@@ -172,7 +173,7 @@ Choosing a setup:
 
 1. **No store/API needs** → plain `Meta`/`StoryObj`.
 2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
-3. **Pages/widgets needing API mocks** → `createMockStory` from `@/stories/mocks` — do NOT hand-roll `StoreDecorator`/provider stacks/MSW handlers.
+3. **Pages/widgets needing API mocks** → `createMockStory` from `@/stories/mocks/createMockStory` — do NOT hand-roll `StoreDecorator`/provider stacks/MSW handlers.
 
 ```typescript
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', layout: 'fullPage' })

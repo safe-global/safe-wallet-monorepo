@@ -7,7 +7,7 @@ This feature provides functionality to detect if a Safe has a HypernativeGuard i
 ### Hook
 
 ```typescript
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
 
 function MyComponent() {
   const { isHypernativeGuard, loading } = useIsHypernativeGuard()
@@ -79,7 +79,7 @@ When a new version of HypernativeGuard is deployed with different function signa
 ### Badge Component
 
 ```typescript
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
 import { Box, Chip, CircularProgress } from '@mui/material'
 
 export const HypernativeGuardBadge = () => {
