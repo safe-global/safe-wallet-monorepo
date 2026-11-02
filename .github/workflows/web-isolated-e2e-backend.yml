@@ -97,6 +97,8 @@ jobs:
         id: images
         if: steps.changes.outputs.relevant == 'true'
         env:
+          # The Events Service version comes from its GitHub deployments; the token lifts the API rate limit.
+          GITHUB_TOKEN: ${{ github.token }}
           REQUESTED_BACKEND: ${{ inputs.backend }}
           HEAD_REF: ${{ github.head_ref }}
           BASE_REF: ${{ github.base_ref }}

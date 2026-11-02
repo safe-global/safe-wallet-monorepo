@@ -6,18 +6,28 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import Mock, patch
 
 from scripts.backend_versions import (
-    SERVICES, USER_AGENT, Image, inspect_image, read_about, resolve_images, resolve_service,
+    SERVICES, USER_AGENT, Image, inspect_image, read_json, resolve_images, resolve_service,
 )
 
 CGW = SERVICES["CGW_IMAGE"]
 TXS = SERVICES["TXS_IMAGE"]
 QUEUE = SERVICES["QUEUE_IMAGE"]
+EVENTS = SERVICES["EVENTS_IMAGE"]
 DIGEST = "sha256:" + "a" * 64
 COMMIT = "6e0e964a7612a5a6708418262c5a518a9b6f27c4"
+DEPLOYMENTS = "https://api.github.com/repos/safe-global/safe-events-service/deployments"
 
 
 def inspected(build_commit=COMMIT):
     return Mock(return_value=Image(DIGEST, build_commit))
+
+
+def github(environment, *deployments):
+    """Answers the newest-first deployments of `environment`, given as (deployment, newest status) pairs."""
+    answers = {f"{DEPLOYMENTS}?environment={environment}&per_page=10": [deployment for deployment, _ in deployments]}
+    for deployment, state in deployments:
+        answers[f"{DEPLOYMENTS}/{deployment['id']}/statuses?per_page=1"] = [{"state": state}] if state else []
+    return Mock(side_effect=answers.__getitem__)
 
 
 class AboutServer:
@@ -96,6 +106,39 @@ class ResolveServiceTests(unittest.TestCase):
                 self.assertIn(service.about[backend], str(error.exception))
 
 
+class ResolveDeployedServiceTests(unittest.TestCase):
+    def test_staging_uses_the_main_build_of_the_newest_successful_devstaging_deployment(self):
+        read = github(
+            "devstaging",
+            ({"id": 3, "ref": "main", "sha": "d74988997375"}, "failure"),
+            ({"id": 2, "ref": "main", "sha": COMMIT}, "success"),
+            ({"id": 1, "ref": "main", "sha": "af8164e00000"}, "success"),
+        )
+        inspect = inspected()
+        image, warning = resolve_service(EVENTS, "staging", read, inspect)
+        inspect.assert_called_once_with(f"{EVENTS.repository}:main-6e0e964")
+        self.assertEqual(image, f"{EVENTS.repository}:main-6e0e964@{DIGEST}")
+        self.assertIsNone(warning)
+        self.assertEqual(read.call_count, 3)
+
+    def test_production_uses_the_release_tag_of_the_deployment(self):
+        read = github("production", ({"id": 1, "ref": "v1.8.0", "sha": COMMIT}, "success"))
+        image, _ = resolve_service(EVENTS, "production", read, inspected())
+        self.assertEqual(image, f"{EVENTS.repository}:v1.8.0@{DIGEST}")
+
+    def test_production_refuses_a_deployment_without_a_release_tag(self):
+        read = github("production", ({"id": 1, "ref": "main", "sha": COMMIT}, "success"))
+        inspect = inspected()
+        with self.assertRaisesRegex(RuntimeError, "Events Service.*'main', not a release tag"):
+            resolve_service(EVENTS, "production", read, inspect)
+        inspect.assert_not_called()
+
+    def test_fails_when_no_recent_deployment_succeeded(self):
+        read = github("devstaging", ({"id": 2, "sha": COMMIT}, "in_progress"), ({"id": 1, "sha": COMMIT}, None))
+        with self.assertRaisesRegex(RuntimeError, "no successful devstaging deployment.*github.com/safe-global/"):
+            resolve_service(EVENTS, "staging", read, inspected())
+
+
 class ResolveImagesTests(unittest.TestCase):
     def test_resolves_every_service_that_is_not_exported(self):
         resolve = Mock(side_effect=lambda service, backend: (f"{service.repository}:x", None))
@@ -116,7 +159,7 @@ class ResolveImagesTests(unittest.TestCase):
         resolve.assert_not_called()
 
 
-class ReadAboutTests(unittest.TestCase):
+class ReadJsonTests(unittest.TestCase):
     def serve(self, **kwargs):
         server = AboutServer(**kwargs)
         self.addCleanup(server.close)
@@ -124,20 +167,29 @@ class ReadAboutTests(unittest.TestCase):
 
     def test_sends_a_browser_user_agent_that_cloudfront_accepts(self):
         server = self.serve(body=json.dumps({"version": "v1.129.0"}).encode())
-        self.assertEqual(read_about(server.url), {"version": "v1.129.0"})
+        self.assertEqual(read_json(server.url), {"version": "v1.129.0"})
         self.assertEqual(server.headers["User-Agent"], USER_AGENT)
+
+    def test_sends_the_github_token_to_the_github_api_only(self):
+        server = self.serve()
+        token = {"GITHUB_TOKEN": "ghs_test"}
+        read_json(server.url, token)
+        self.assertNotIn("Authorization", server.headers)
+        with patch("scripts.backend_versions.GITHUB_API", server.url.removesuffix("/about")):
+            read_json(server.url, token)
+        self.assertEqual(server.headers["Authorization"], "Bearer ghs_test")
 
     def test_http_errors_name_the_status(self):
         server = self.serve(status=403)
         with self.assertRaisesRegex(RuntimeError, f"{server.url} answered HTTP 403"):
-            read_about(server.url)
+            read_json(server.url)
 
     def test_invalid_json_and_unreachable_hosts_fail_with_the_url(self):
         server = self.serve(body=b"<html>")
         with self.assertRaisesRegex(RuntimeError, f"Cannot read {server.url}"):
-            read_about(server.url)
+            read_json(server.url)
         with self.assertRaisesRegex(RuntimeError, "Cannot read http://127.0.0.1:9/about"):
-            read_about("http://127.0.0.1:9/about")
+            read_json("http://127.0.0.1:9/about")
 
 
 def docker_result(details, returncode=0, stderr=""):

@@ -740,7 +740,7 @@ services:
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
   events-web:
-    image: ${EVENTS_IMAGE:?Load test-images.env}
+    image: ${EVENTS_IMAGE:?Run scripts/test_env.py up, or export EVENTS_IMAGE}
     env_file:
       - container_env_files/events.env
     depends_on:

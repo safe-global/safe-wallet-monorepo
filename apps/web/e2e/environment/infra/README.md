@@ -51,11 +51,13 @@ The CoW API mock answers unrecorded requests with 404 (`COW_API_OFFLINE: 'true'`
 
 ## Configuration
 
-`test-images.env` pins the infrastructure images, the Events Service image, chain IDs and fork blocks. The optional, ignored `.env.test` file overrides those defaults; exported environment variables take precedence over both files. Service settings are checked in under `container_env_files/` and referenced by Compose.
+`test-images.env` pins the infrastructure images, chain IDs and fork blocks. The optional, ignored `.env.test` file overrides those defaults; exported environment variables take precedence over both files. Service settings are checked in under `container_env_files/` and referenced by Compose.
 
-`up` does not use pins for CGW, the Config Service, the Transaction Service, the Queue Service and the Decoder. It reads the version that staging (default) or production runs from each service's `/about` endpoint, pins the matching GHCR image by digest and writes the result to `.test-runs/<project>.images.env`. Later commands of the project use that file until `reset`. Print the images without starting anything with `python3 scripts/test_env.py versions [--backend production]`. To test one service at another version, export its variable (`CGW_IMAGE`, `CFG_IMAGE`, `TXS_IMAGE`, `QUEUE_IMAGE` or `DECODER_IMAGE`) before `up`.
+`up` does not use pins for CGW, the Config Service, the Transaction Service, the Queue Service and the Decoder. It reads the version that staging (default) or production runs from each service's `/about` endpoint, pins the matching GHCR image by digest and writes the result to `.test-runs/<project>.images.env`. Later commands of the project use that file until `reset`. Print the images without starting anything with `python3 scripts/test_env.py versions [--backend production]`. To test one service at another version, export its variable (`CGW_IMAGE`, `CFG_IMAGE`, `TXS_IMAGE`, `QUEUE_IMAGE`, `DECODER_IMAGE` or `EVENTS_IMAGE`) before `up`.
 
 The Transaction Service, Queue Service and Decoder have no image tag per commit on staging: each `main` build overwrites the `staging` tag. `up` uses the current `staging` image and warns when its `BUILD_COMMIT` differs from the build that staging reports.
+
+The Events Service `/about` is behind a login, so `up` reads the [GitHub deployments](https://github.com/safe-global/safe-events-service/deployments) of the Events Service instead: the newest successful `devstaging` deployment for staging (image `main-<sha7>`) or `production` deployment (its `vX.Y.Z` tag). A production deployment from a manual redeploy records no release tag; then `up` stops, and `EVENTS_IMAGE` selects the image. Set `GITHUB_TOKEN` when the unauthenticated GitHub rate limit runs out.
 
 | Variable               | Purpose                                                                              |
 | ---------------------- | ------------------------------------------------------------------------------------ |
