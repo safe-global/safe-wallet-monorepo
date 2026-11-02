@@ -10,6 +10,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Build UI from the shadcn/ui primitives in `@safe-global/views/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Put as much markup as possible in `packages/views`.** New UI is a view in `packages/views/src/features/<feature>/components/` that only turns props into markup. The component in `apps/web` calls the hooks, the store and the router, and renders that view with the results. This holds even when the code around it is still in `apps/web`: that code has not been moved yet and is not an example to follow. What may go in a view: [packages/views/AGENTS.md](../../packages/views/AGENTS.md).
 - **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@safe-global/views/components/ui/overlay`](../../packages/views/src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
@@ -72,10 +73,10 @@ Report an error where it is caught, imperatively — never from the render layer
 
 ## Web Testing
 
-Before writing or changing any test, read [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md) (cross-cutting) and [docs/TESTING.md](docs/TESTING.md) (web): the test decision matrix, what not to test, the developer-owned-tests-first rule, mock patterns and templates, including how to set or assert `window.location` (non-configurable in jsdom 26).
+Before writing or changing any test, read [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md) (cross-cutting) and [docs/TESTING.md](docs/TESTING.md) (web): choosing the test level, the test decision matrix, what not to test, mock patterns and templates, including how to set or assert `window.location` (non-configurable in jsdom 26).
 
 - **E2E:** all new E2E tests are Playwright — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md), whose 12-step output format comes before writing any test). Cypress is legacy, no new tests: [cypress/AGENTS.md](cypress/AGENTS.md).
-- Suggest developer-owned unit/component/integration tests before QA automation; a Playwright test does not compensate for missing ones.
+- **Write each test at the lowest level that can show the behaviour.** Playwright only for what needs a real browser or several real services together; everything else goes in Jest. A Playwright test does not make up for missing unit and component tests. Levels, examples and when to mock: [docs/TESTING.md](docs/TESTING.md#choose-the-test-level).
 
 ## Storybook
 
