@@ -3,7 +3,7 @@ import React from 'react'
 import { YStack } from 'tamagui'
 import { IconName } from '@/src/types/iconTypes'
 import { BadgeThemeTypes } from '@/src/components/Logo/Logo'
-import { formatWithSchema } from '@/src/utils/date'
+import { formatWithSchema } from '@safe-global/utils/utils/date'
 import { useDappOrigin } from '../DappOriginContext'
 import { TransactionHeaderLogo } from './TransactionHeaderLogo'
 

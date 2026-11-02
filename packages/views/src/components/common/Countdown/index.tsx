@@ -1,18 +1,5 @@
 import type { ReactElement } from 'react'
-
-export function _getCountdown(seconds: number): { days: number; hours: number; minutes: number } {
-  const MINUTE_IN_SECONDS = 60
-  const HOUR_IN_SECONDS = 60 * MINUTE_IN_SECONDS
-  const DAY_IN_SECONDS = 24 * HOUR_IN_SECONDS
-
-  const days = Math.floor(seconds / DAY_IN_SECONDS)
-
-  const remainingSeconds = seconds % DAY_IN_SECONDS
-  const hours = Math.floor(remainingSeconds / HOUR_IN_SECONDS)
-  const minutes = Math.floor((remainingSeconds % HOUR_IN_SECONDS) / MINUTE_IN_SECONDS)
-
-  return { days, hours, minutes }
-}
+import { getCountdown } from '@safe-global/utils/utils/date'
 
 export function Countdown({ seconds }: { seconds: number }): ReactElement | null {
   if (seconds <= 0) {
@@ -23,7 +10,7 @@ export function Countdown({ seconds }: { seconds: number }): ReactElement | null
     return <span className="font-bold">{'< 1 min'}</span>
   }
 
-  const { days, hours, minutes } = _getCountdown(seconds)
+  const { days, hours, minutes } = getCountdown(seconds)
 
   return (
     <div className="flex gap-2">

@@ -1,5 +1,6 @@
 import { type ComponentProps, type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
 import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
+import { intlFormat } from 'date-fns'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -19,16 +20,15 @@ export const ACTION_ICONS: Record<ActionType, LucideIcon> = {
   expired: CircleAlert,
 }
 
-const auditDateFormatter = new Intl.DateTimeFormat(undefined, {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-})
-
-export const formatAuditDateTime = (ts: number): string => auditDateFormatter.format(new Date(ts))
+export const formatAuditDateTime = (ts: number): string =>
+  intlFormat(ts, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
 
 const COPIED_TOOLTIP_MS = 750
 

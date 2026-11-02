@@ -1,3 +1,4 @@
+import { differenceInHours, differenceInMinutes, intlFormat } from 'date-fns'
 import type { SafeGrade, ScanResult } from './types'
 import type { SecurityGrade } from '../securityTypes'
 import { getGrade } from '../securityScoring'
@@ -19,11 +20,12 @@ export const withScannerTimeout = <T>(promise: Promise<T>): Promise<T> =>
 export const formatTimestamp = (ts?: number): string => {
   if (!ts) return '—'
   const now = Date.now()
-  const diff = now - ts
-  if (diff < 60_000) return 'Just now'
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`
-  return new Date(ts).toLocaleDateString()
+  const minutes = differenceInMinutes(now, ts)
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = differenceInHours(now, ts)
+  if (hours < 24) return `${hours}h ago`
+  return intlFormat(ts)
 }
 
 export type GradeSummary = {

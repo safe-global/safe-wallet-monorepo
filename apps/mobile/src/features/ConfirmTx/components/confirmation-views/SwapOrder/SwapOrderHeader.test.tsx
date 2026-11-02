@@ -6,7 +6,7 @@ import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERA
 import { TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Mock the date utils
-jest.mock('@/src/utils/date', () => ({
+jest.mock('@safe-global/utils/utils/date', () => ({
   formatWithSchema: jest.fn((timestamp: number, format: string) => {
     const date = new Date(timestamp)
     if (format === 'MMM d yyyy') {
@@ -223,7 +223,7 @@ describe('SwapOrderHeader', () => {
 
     it('should call formatWithSchema with correct parameters', () => {
       const sellOrderTxInfo = createMockTxInfo('sell')
-      const { formatWithSchema } = require('@/src/utils/date')
+      const { formatWithSchema } = require('@safe-global/utils/utils/date')
 
       render(<SwapOrderHeader txInfo={sellOrderTxInfo} executionInfo={mockExecutionInfo} />)
 

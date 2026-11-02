@@ -1,4 +1,14 @@
-import { formatDate, getCountdown, getDetailedPeriod, getPeriod, parseTimestamp } from '../date'
+import {
+  currentMinutes,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  getCountdown,
+  getDetailedPeriod,
+  getPeriod,
+  parseTimestamp,
+  relativeTime,
+} from '../date'
 
 describe('formatDate', () => {
   it('formats a timestamp as an abbreviated date', () => {
@@ -69,6 +79,10 @@ describe('getPeriod', () => {
     expect(getPeriod(86400 + 3600)).toBe('1 day')
     expect(getPeriod(86400 + 3600 + 60)).toBe('1 day')
   })
+
+  it('should, when the seconds are negative, return undefined', () => {
+    expect(getPeriod(-86400)).toBeUndefined()
+  })
 })
 
 describe('getDetailedPeriod', () => {
@@ -82,5 +96,55 @@ describe('getDetailedPeriod', () => {
     [45, '45 seconds'],
   ])('formats %d seconds as "%s"', (seconds, expected) => {
     expect(getDetailedPeriod(seconds)).toBe(expected)
+  })
+
+  it('should, when the seconds have a fraction, keep it on the seconds', () => {
+    expect(getDetailedPeriod(90.5)).toBe('1 minute, 30.5 seconds')
+  })
+
+  it('should, when the seconds are negative, return an empty string', () => {
+    expect(getDetailedPeriod(-3661)).toBe('')
+  })
+})
+
+describe('relativeTime', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('should, when the reset time is 0, return One-time', () => {
+    expect(relativeTime('29000000', '0')).toBe('One-time')
+  })
+
+  it('should, when the next reset is more than a week away, return its date', () => {
+    const lastReset = new Date(2026, 3, 1, 12).getTime()
+    jest.spyOn(Date, 'now').mockReturnValue(lastReset)
+    const lastResetMin = lastReset / 60_000
+
+    expect(relativeTime(`${lastResetMin}`, `${21 * 24 * 60}`)).toBe('04/22/2026')
+  })
+})
+
+describe('currentMinutes', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('should, when called, return the whole minutes since the epoch', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1729506116962)
+
+    expect(currentMinutes()).toBe(28825101)
+  })
+})
+
+describe('formatTime', () => {
+  it('should, when given a timestamp, return the local time with AM or PM', () => {
+    expect(formatTime(new Date(2024, 9, 21, 12, 21, 56).getTime())).toBe('12:21 PM')
+  })
+})
+
+describe('formatDateTime', () => {
+  it('should, when given a timestamp, return the local date and time with seconds', () => {
+    expect(formatDateTime(new Date(2024, 9, 21, 12, 21, 56).getTime())).toBe('Oct 21, 2024 - 12:21:56 PM')
   })
 })

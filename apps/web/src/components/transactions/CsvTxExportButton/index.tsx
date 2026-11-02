@@ -4,6 +4,8 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useCsvExportGetExportStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import type { ReactElement } from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { format } from 'date-fns'
+import { tz } from '@date-fns/tz'
 import ExportIcon from '@/public/images/common/export.svg'
 import CsvTxExportModal from '../CsvTxExportModal'
 import { useAppDispatch } from '@/store'
@@ -16,7 +18,7 @@ import Track from '@/components/common/Track'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 
 const getCsvExportFileName = () => {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = format(Date.now(), 'yyyy-MM-dd', { in: tz('UTC') })
   return `transaction-export-${today}.csv`
 }
 

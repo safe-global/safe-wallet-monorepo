@@ -62,6 +62,7 @@
     "@base-ui/react": "^1.1.0",
     "@cowprotocol/widget-react": "3.2.2",
     "@datadog/browser-rum": "^7.9.0",
+    "@date-fns/tz": "^1.4.1",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@gnosis.pm/zodiac": "^4.0.3",
     "@hello-pangea/dnd": "^18.0.1",

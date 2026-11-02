@@ -1,7 +1,8 @@
 import chains from '@safe-global/utils/config/chains'
+import { secondsInDay, secondsInHour, secondsInMinute } from 'date-fns/constants'
 import { useCurrentChain } from '@/hooks/useChains'
 
-export const DAY_IN_SECONDS = 60 * 60 * 24
+export const DAY_IN_SECONDS = secondsInDay
 
 type Periods = Array<{ label: string; value: string | number }>
 
@@ -31,15 +32,15 @@ const ExpirationPeriods: Periods = [
 const TestPeriods: Periods = [
   {
     label: '1 minute',
-    value: '60',
+    value: `${secondsInMinute}`,
   },
   {
     label: '5 minutes',
-    value: `${60 * 5}`,
+    value: `${secondsInMinute * 5}`,
   },
   {
     label: '1 hour',
-    value: `${60 * 60}`,
+    value: `${secondsInHour}`,
   },
 ]
 

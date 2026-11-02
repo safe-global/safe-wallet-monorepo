@@ -47,6 +47,19 @@ describe('SwitchAuthenticatorSection', () => {
     expect(screen.getByTestId('authenticator-row')).toBeInTheDocument()
   })
 
+  it('should, when an authenticator is enrolled, show when it was added in the app-wide date and time format', () => {
+    mockUseAuthenticators.mockReturnValue({
+      isOidcSession: true,
+      authenticators: [{ id: '1', type: 'totp', createdAt: '2026-09-05T00:05:00' }],
+      error: undefined,
+      enrollNewAuthenticator: jest.fn(),
+    })
+
+    render(<SwitchAuthenticatorSection />)
+
+    expect(screen.getByText('Added Sep 5, 2026 - 12:05:00 AM')).toBeInTheDocument()
+  })
+
   it('offers to add an authenticator when none is enrolled', () => {
     mockUseAuthenticators.mockReturnValue({
       isOidcSession: true,

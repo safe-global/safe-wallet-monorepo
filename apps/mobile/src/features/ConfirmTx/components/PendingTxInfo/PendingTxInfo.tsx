@@ -1,7 +1,7 @@
 import React from 'react'
 import { Text, View } from 'tamagui'
 import { Container } from '@/src/components/Container'
-import { formatWithSchema } from '@/src/utils/date'
+import { formatWithSchema } from '@safe-global/utils/utils/date'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { Badge } from '@/src/components/Badge'
 import { PendingTx } from '@/src/store/pendingTxsSlice'
