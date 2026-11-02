@@ -234,7 +234,7 @@ export const _ExecutionMethodSelector = ({
               className="flex flex-1 cursor-pointer items-center gap-2"
             >
               <RadioGroupItem value={ExecutionMethod.WALLET} />
-              <Typography className={css.radioLabel}>
+              <Typography as="span" className={css.radioLabel}>
                 <WalletIcon provider={wallet?.label || ''} width={20} height={20} icon={wallet?.icon} /> Connected
                 wallet
               </Typography>

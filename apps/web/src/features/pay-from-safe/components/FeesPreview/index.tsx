@@ -78,7 +78,8 @@ const PaymentSourceSelector = ({
   <DropdownMenu>
     <DropdownMenuTrigger
       data-testid="payment-source-selector"
-      render={<div role="button" tabIndex={0} className={css.paymentSourceSelector} />}
+      nativeButton={false}
+      render={<div className={css.paymentSourceSelector} />}
     >
       <Typography variant="paragraph-small-bold" className="tracking-[0.1px]">
         {paymentSourceLabel(value)}
@@ -151,7 +152,8 @@ export const GasTokenSelector = ({
     <DropdownMenu>
       <DropdownMenuTrigger
         data-testid="gas-token-selector"
-        render={<div role="button" tabIndex={0} className={css.gasTokenSelector} />}
+        nativeButton={false}
+        render={<div className={css.gasTokenSelector} />}
       >
         {display}
         <ChevronDown className={css.selectorCaret} />

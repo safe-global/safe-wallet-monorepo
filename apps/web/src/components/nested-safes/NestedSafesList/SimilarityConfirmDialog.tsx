@@ -31,7 +31,7 @@ export function SimilarityConfirmDialog({
         if (!open) onCancel()
       }}
     >
-      <DialogContent data-testid="similarity-confirm-dialog" showCloseButton={false}>
+      <DialogContent data-testid="similarity-confirm-dialog" showCloseButton={false} size="sm">
         <DialogHeader>
           <DialogTitle className="font-bold">Similar address detected</DialogTitle>
         </DialogHeader>
@@ -45,7 +45,15 @@ export function SimilarityConfirmDialog({
             <Typography variant="paragraph-small-medium" className="mb-2 block">
               Selected address:
             </Typography>
-            <EthHashInfo address={address} chainId={chainId} showCopyButton hasExplorer shortAddress={false} />
+            <EthHashInfo
+              address={address}
+              chainId={chainId}
+              showCopyButton
+              hasExplorer
+              shortAddress={false}
+              showPrefix={false}
+              highlight4bytes
+            />
           </div>
 
           {similarAddresses.length > 0 && (
@@ -55,7 +63,15 @@ export function SimilarityConfirmDialog({
               </Typography>
               {similarAddresses.map((addr) => (
                 <div key={addr} className="mb-2">
-                  <EthHashInfo address={addr} chainId={chainId} showCopyButton hasExplorer shortAddress={false} />
+                  <EthHashInfo
+                    address={addr}
+                    chainId={chainId}
+                    showCopyButton
+                    hasExplorer
+                    shortAddress={false}
+                    showPrefix={false}
+                    highlight4bytes
+                  />
                 </div>
               ))}
             </div>

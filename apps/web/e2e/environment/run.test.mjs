@@ -6,8 +6,6 @@ import { join } from 'node:path'
 import {
   checkEnvironment,
   configuration,
-  cypressOpenArguments,
-  cypressRunArguments,
   missingChainCommands,
   planMatrix,
   selectPlaywrightSpecs,
@@ -19,45 +17,6 @@ import {
 import { fileURLToPath } from 'node:url'
 
 const manifest = { gatewayUrl: 'http://localhost:8000/cgw', chainId: 11155111, forkBlock: 10008682 }
-
-test('runs CI specs in the selected browser and retains artifacts between specs', () => {
-  const args = cypressRunArguments(['cypress/e2e/regression/assets.cy.js'], {
-    SAFE_E2E_BROWSER: '/opt/chromium/chrome',
-    SAFE_E2E_WEB_URL: 'http://localhost:8080',
-  })
-  assert.equal(args[args.indexOf('--browser') + 1], '/opt/chromium/chrome')
-  const config = JSON.parse(args[args.indexOf('--config') + 1])
-  assert.equal(config.baseUrl, 'http://localhost:8080')
-  assert.equal(config.trashAssetsBeforeRuns, false)
-  assert.equal(config.video, true)
-  assert.equal(config.videosFolder, 'e2e/environment/artifacts/cypress/videos')
-  assert.equal(args[args.indexOf('--record') + 1], 'false')
-  assert.equal(args[args.indexOf('--reporter') + 1], 'junit')
-  assert.equal(
-    args[args.indexOf('--reporter-options') + 1],
-    'mochaFile=e2e/environment/artifacts/cypress/reports/[hash].xml,toConsole=true',
-  )
-})
-
-test('never records to Cypress Cloud, even with a record key', () => {
-  const args = cypressRunArguments(['cypress/e2e/regression/assets.cy.js'], {
-    CYPRESS_RECORD_KEY: 'key',
-    SAFE_E2E_RECORD_BUILD_ID: 'run-1',
-  })
-  assert.equal(args[args.indexOf('--record') + 1], 'false')
-  assert.equal(args.includes('--ci-build-id'), false)
-})
-
-test('keeps local Chrome defaults and passes the selected specs to interactive Cypress', () => {
-  const specs = ['cypress/e2e/regression/assets.cy.js']
-  const args = cypressOpenArguments(specs, {})
-  assert.equal(args[0], 'cypress:open')
-  assert.equal(args[args.indexOf('--browser') + 1], 'chrome')
-  const config = JSON.parse(args[args.indexOf('--config') + 1])
-  assert.equal(config.baseUrl, 'http://localhost:3080')
-  assert.deepEqual(config.specPattern, specs)
-  assert.equal(args.includes('--record'), false)
-})
 
 test('uses the checked-in backend by default and permits an explicit comparison checkout', () => {
   assert.equal(configuration(['status'], {}).infrastructure, fileURLToPath(new URL('./infra', import.meta.url)))
@@ -140,38 +99,38 @@ test('runs both backend gates and fails if cleanup fails', async () => {
 
 test('names the fork start command for every selected spec whose chain is not running', () => {
   const registry = {
-    'cypress/e2e/test/a.cy.js': { chains: [1] },
-    'cypress/e2e/test/b.cy.js': { chains: [1, 137] },
-    'cypress/e2e/test/sepolia.cy.js': {},
+    'e2e/a.spec.ts': { chains: [1] },
+    'e2e/b.spec.ts': { chains: [1, 137] },
+    'e2e/sepolia.spec.ts': {},
   }
   assert.deepEqual(missingChainCommands(Object.keys(registry), { chains: { 1: {} } }, '/infra', registry), [
     'python3 /infra/scripts/test_env.py up --chain polygon',
   ])
-  assert.deepEqual(missingChainCommands(['cypress/e2e/test/sepolia.cy.js'], {}, '/infra', registry), [])
+  assert.deepEqual(missingChainCommands(['e2e/sepolia.spec.ts'], {}, '/infra', registry), [])
 })
 
-test('plans a GitHub Actions matrix with short spec names and the forks of each shard', () => {
+test('plans one matrix entry per Playwright shard, each with the forks that any spec needs', () => {
   const registry = {
-    'cypress/e2e/regression/a.cy.js': { scenario: 'a' },
-    'cypress/e2e/regression/b.cy.js': { scenario: 'b', chains: [137] },
-  }
-  assert.deepEqual(planMatrix(undefined, 2, registry, {}), {
-    include: [
-      { shard: 1, runner: 'cypress', specs: 'regression/a', chains: '' },
-      { shard: 2, runner: 'cypress', specs: 'regression/b', chains: 'polygon' },
-      { shard: 3, runner: 'playwright', specs: '', chains: '' },
-    ],
-  })
-})
-
-test('starts the forks that any Playwright spec needs on the Playwright job', () => {
-  const playwrightRegistry = {
     'e2e/sepolia.spec.ts': {},
     'e2e/multichain.spec.ts': { chains: [1, 137] },
     'e2e/mainnet.spec.ts': { chains: [1] },
   }
-  const { include } = planMatrix(undefined, 1, { 'cypress/e2e/regression/a.cy.js': {} }, playwrightRegistry)
-  assert.deepEqual(include.at(-1), { shard: 2, runner: 'playwright', specs: '', chains: 'mainnet polygon' })
+  assert.deepEqual(planMatrix(2, {}, registry), {
+    include: [
+      { shard: 1, chains: 'mainnet polygon' },
+      { shard: 2, chains: 'mainnet polygon' },
+    ],
+  })
+  assert.deepEqual(planMatrix(1, {}, { 'e2e/sepolia.spec.ts': {} }), { include: [{ shard: 1, chains: '' }] })
+  for (const count of [0, -1, 1.5, NaN]) {
+    assert.throws(() => planMatrix(count, {}, registry), /positive integer/)
+  }
+})
+
+test('refuses to plan a run whose SAFE_E2E_SPECS filter matches no registered spec', () => {
+  const registry = { 'e2e/batch.spec.ts': {} }
+  assert.deepEqual(planMatrix(3, { SAFE_E2E_SPECS: 'batch' }, registry).include.length, 3)
+  assert.throws(() => planMatrix(3, { SAFE_E2E_SPECS: 'no-such-spec' }, registry), /matches no registered/)
 })
 
 test('selects the Playwright specs that SAFE_E2E_SPECS matches, as Playwright does', () => {
@@ -194,7 +153,18 @@ test('runs every isolated Playwright spec unless SAFE_E2E_SPECS names some', () 
   assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: 'dashboard, owners' }), [...config, 'dashboard', 'owners'])
 })
 
-test('gives both runners the local service URLs and the running forks', () => {
+test('runs one Playwright shard when SAFE_E2E_SHARD names it', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SHARD: '2/3' }), [...config, '--shard', '2/3'])
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SHARD: '1/3', SAFE_E2E_SPECS: 'batch' }), [
+    ...config,
+    '--shard',
+    '1/3',
+    'batch',
+  ])
+})
+
+test('gives the Playwright run the local service URLs and the running forks', () => {
   const stack = { ...manifest, transactionServiceUrl: 'http://localhost:8000/txs', rpcUrl: 'http://localhost:8545' }
   const chains = { 137: { rpcUrl: 'http://localhost:8548' } }
   const env = stackEnvironment('safe-e2e-local', { ...stack, chains }, { PATH: '/bin' })

@@ -438,6 +438,24 @@ describe('TxSigners (Audit Log)', () => {
     expect(disabledExplorerBtn).toBeInTheDocument()
   })
 
+  it('offers to copy the transaction link for a queued transaction', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2 })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        txHash: null,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
+  })
+
   it('uses consistent labels for cancellation transactions', () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()

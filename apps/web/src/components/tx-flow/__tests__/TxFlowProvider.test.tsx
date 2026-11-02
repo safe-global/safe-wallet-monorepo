@@ -73,11 +73,13 @@ describe('TxFlowProvider', () => {
     txId,
     onContinueToExecute,
     isExecutable,
+    isBatchable,
     safeTx,
   }: {
     txId?: string
     onContinueToExecute?: (txId: string) => void
     isExecutable?: boolean
+    isBatchable?: boolean
     safeTx?: SafeTransaction
   }) => {
     const Wrapper = ({ children }: PropsWithChildren) => (
@@ -90,6 +92,7 @@ describe('TxFlowProvider', () => {
           txId={txId}
           onContinueToExecute={onContinueToExecute}
           isExecutable={isExecutable}
+          isBatchable={isBatchable}
         >
           {children}
         </TxFlowProvider>
@@ -112,6 +115,12 @@ describe('TxFlowProvider', () => {
     expect(result.current.txId).toBe(signedTxId)
     expect(result.current.isCreation).toBe(true)
     expect(result.current.canExecute).toBe(true)
+  })
+
+  it.each([true, false])('exposes isBatchable=%s from the flow to the context', (isBatchable) => {
+    const { result } = renderContext({ isBatchable })
+
+    expect(result.current.isBatchable).toBe(isBatchable)
   })
 
   it('keeps the id of an existing transaction when continuing to execute', () => {

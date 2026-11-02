@@ -87,6 +87,8 @@ export class RecoveryPage {
 
   /** Expand the "Action required" panel, which keeps its cards mounted while closed; Enter avoids toasts on top */
   async openActionRequiredPanel(): Promise<void> {
+    // The panel stays hidden until it has a warning, and a key press on the hidden toggle does nothing
+    await this.actionRequiredToggle.waitFor()
     if ((await this.actionRequiredToggle.getAttribute('aria-expanded')) !== 'true') {
       await this.actionRequiredToggle.press('Enter')
     }
@@ -101,6 +103,10 @@ export class RecoveryPage {
   /** Open the queued recovery and start its cancellation; the review opens */
   async cancel(): Promise<void> {
     await this.queuedRecoveries.click()
+    // A click while the panel still opens can land off the moving button, and nothing happens
+    await this.queuedRecoveries.getByTestId('accordion-details').evaluate(async (panel) => {
+      await Promise.all(panel.getAnimations().map((animation) => animation.finished))
+    })
     await this.cancelButton.click()
     await this.confirmCancelButton.click()
   }

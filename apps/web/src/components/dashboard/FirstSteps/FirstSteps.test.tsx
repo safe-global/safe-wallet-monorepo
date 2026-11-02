@@ -47,6 +47,8 @@ const CHAIN = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build
 describe('FirstSteps', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // The QR prefix setting is persisted, so the switch test would leak into later tests
+    window.localStorage.clear()
 
     mockUseLoadFeature.mockReturnValue({})
 
@@ -262,9 +264,10 @@ describe('FirstSteps', () => {
     const qrCode = await screen.findByRole('img', { name: 'QR code' })
     expect(qrCode).toHaveAttribute('data-value', SAFE_ADDRESS)
 
-    await userEvent.click(screen.getByTestId('qr-code-switch'))
+    const prefixSwitch = screen.getByRole('switch', { name: /^QR code with chain prefix/ })
+    await userEvent.click(prefixSwitch)
 
     expect(qrCode).toHaveAttribute('data-value', `${CHAIN.shortName}:${SAFE_ADDRESS}`)
-    expect(screen.getByTestId('qr-code-switch')).toBeChecked()
+    expect(prefixSwitch).toBeChecked()
   })
 })

@@ -1,6 +1,7 @@
 import { bandGroupsForList, buildSimilarWarnings } from '../crossListClusters'
 
-const item = (address: string) => ({ address })
+const item = (address: string, chainId = '1') => ({ address, chainId })
+const peer = (address: string, chainIds = ['1']) => ({ address, chainIds })
 
 describe('bandGroupsForList', () => {
   it('maps only the addresses that belong to a cluster, lowercased', () => {
@@ -37,8 +38,8 @@ describe('buildSimilarWarnings', () => {
     ])
     const result = buildSimilarWarnings([item('0xTrusted')], [item('0xOwned')], groups)
 
-    expect(result.get('0xtrusted')).toEqual({ trusted: [], owned: ['0xowned'] })
-    expect(result.get('0xowned')).toEqual({ trusted: ['0xtrusted'], owned: [] })
+    expect(result.get('0xtrusted')).toEqual({ trusted: [], owned: [peer('0xowned')] })
+    expect(result.get('0xowned')).toEqual({ trusted: [peer('0xtrusted')], owned: [] })
   })
 
   it('ignores a cluster living entirely in one list (no cross-list warning)', () => {
@@ -60,7 +61,22 @@ describe('buildSimilarWarnings', () => {
     ])
     const result = buildSimilarWarnings([item('0xT1')], [item('0xO1'), item('0xO2')], groups)
 
-    expect(result.get('0xo1')).toEqual({ trusted: ['0xt1'], owned: ['0xo2'] })
-    expect(result.get('0xt1')).toEqual({ trusted: [], owned: ['0xo1', '0xo2'] })
+    expect(result.get('0xo1')).toEqual({ trusted: [peer('0xt1')], owned: [peer('0xo2')] })
+    expect(result.get('0xt1')).toEqual({ trusted: [], owned: [peer('0xo1'), peer('0xo2')] })
+  })
+
+  it('gives each peer every chain it is listed on', () => {
+    const groups = new Map([
+      ['0xtrusted', 'g1'],
+      ['0xowned', 'g1'],
+    ])
+    const result = buildSimilarWarnings(
+      [item('0xTrusted', '1'), item('0xTrusted', '137')],
+      [item('0xOwned', '10')],
+      groups,
+    )
+
+    expect(result.get('0xowned')).toEqual({ trusted: [peer('0xtrusted', ['1', '137'])], owned: [] })
+    expect(result.get('0xtrusted')).toEqual({ trusted: [], owned: [peer('0xowned', ['10'])] })
   })
 })

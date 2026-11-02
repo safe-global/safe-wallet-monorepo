@@ -1,5 +1,5 @@
-import { Interface, Wallet, parseEther } from 'ethers'
-import { createSafe, createSafeAddress, executeTransaction, proposeTransaction } from './safe.mjs'
+import { Interface, parseEther } from 'ethers'
+import { createSafe, executeTransaction, proposeTransaction } from './safe.mjs'
 import { waitForQueued, waitUntil } from './indexing.mjs'
 
 const SAFE_L2_SINGLETON_141 = '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762'
@@ -77,35 +77,10 @@ async function prepareUnofficialSingletonSafe(env, owners) {
   }
 }
 
-async function prepareQueuedBatchesSafe(env, owners) {
-  const context = await createSafe(env, owners)
-  try {
-    const transfer = { to: owners.owner1.address, value: '1', data: '0x' }
-    const transactions = [
-      await context.safe.createTransaction({ transactions: [transfer, transfer, transfer], options: { nonce: 0 } }),
-      await context.safe.createAddOwnerTx({ ownerAddress: Wallet.createRandom().address }, { nonce: 1 }),
-      await context.safe.createTransaction({ transactions: [transfer, transfer], options: { nonce: 2 } }),
-    ]
-    const hashes = []
-    for (const transaction of transactions) hashes.push((await proposeTransaction(context, transaction)).hash)
-    await waitForQueued(env, context, hashes)
-    return context.safeAddress
-  } finally {
-    context.provider.destroy()
-  }
-}
-
-const prepareEmptyQueueSafe = (env, owners) =>
-  createSafeAddress(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
-
-export async function prepareDashboardRegressionScenario(env, owners) {
-  const { safes } = await prepareDashboardScenario(env, owners)
+export async function prepareMastercopyScenario(env, owners) {
   return {
     safes: {
       static: {
-        ...safes.static,
-        SEP_STATIC_SAFE_12: `sep:${await prepareQueuedBatchesSafe(env, owners)}`,
-        SEP_STATIC_SAFE_14: `sep:${await prepareEmptyQueueSafe(env, owners)}`,
         // The hosted suite uses Polygon Safes; only their unsupported singletons matter here.
         MATIC_STATIC_SAFE_31: `sep:${await prepareMigratableSafe(env, owners)}`,
         MATIC_STATIC_SAFE_32: `sep:${await prepareUnofficialSingletonSafe(env, owners)}`,
