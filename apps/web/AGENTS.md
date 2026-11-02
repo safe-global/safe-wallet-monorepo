@@ -128,6 +128,22 @@ Before writing or changing any test, read the cross-cutting conventions in [docs
 
 **Cypress is legacy — no new tests.** Maintenance conventions for the existing suite: [cypress/AGENTS.md](cypress/AGENTS.md).
 
+### Choose the test level
+
+Write each test at the lowest level that can show the behaviour. **A Playwright test is only for behaviour that needs a real browser or several real services together**: a user action that a wallet signs, the chain executes, and the Transaction Service and CGW then show; a Safe App in an iframe; WalletConnect; a session or storage across a redirect or a reload. Everything else goes in Jest.
+
+| The behaviour                                     | Test                                         | Example                                                                                                                                       |
+| ------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| A rule or a calculation                           | Unit test                                    | [UntrustedFallbackHandlerTxAlert.test.ts](src/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert.test.ts)        |
+| A component shows a CGW response                  | Component test with an MSW fixture           | [ExpandableTransactionItem.swaps.fixtures.test.tsx](src/components/transactions/TxListItem/ExpandableTransactionItem.swaps.fixtures.test.tsx) |
+| A component reacts to the user                    | Component test                               | [TxShareLink.test.tsx](src/components/transactions/TxShareLink/TxShareLink.test.tsx)                                                          |
+| A user action changes state on chain and in CGW   | Playwright journey on the isolated stack     | [multisig-confirm.spec.ts](e2e/tests/e2e/multisig-confirm.spec.ts)                                                                            |
+| A browser flow has paths the stack cannot produce | Playwright with `page.route` for those paths | [step-up-auth.spec.ts](e2e/tests/regression/step-up-auth.spec.ts)                                                                             |
+
+Mock in Playwright only when the flow needs the browser (a redirect, a session, a reload) and the isolated stack cannot produce the path: an error, an expired session, a third-party answer. When the browser adds nothing to a spec that mocks every call, write the test in Jest.
+
+A Playwright test does not make up for missing unit and component tests: if a feature lacks them, add them. Developers own the Jest tests. QA owns the Playwright suite and advises on it, and developers add and change Playwright tests too. Full agreement: [Developer Testability Contract](e2e/docs/developer-testability-contract.md).
+
 ### Test Decision Matrix
 
 | What you changed             | Required tests                 | Test type                                      | Example                                                            |
@@ -146,16 +162,6 @@ Before writing or changing any test, read the cross-cutting conventions in [docs
 - Type-only files, barrel re-exports, constants
 - Auto-generated files (`AUTO_GENERATED/`, contract types)
 - Storybook stories themselves (covered by snapshot workflow)
-
-### Developer-owned tests rule
-
-Always consider what developers should test before QA automation. For every changed feature, suggest developer-owned tests first:
-
-- **Unit tests** — pure functions, parsers, validators, formatters, hooks
-- **Component tests** — React components render correctly with props
-- **Integration tests** — hooks + stores + API mocks wired together
-
-If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation. Full QA-developer agreement: [Developer Testability Contract](e2e/docs/developer-testability-contract.md).
 
 ## Storybook
 
