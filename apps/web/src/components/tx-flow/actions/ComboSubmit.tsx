@@ -24,7 +24,7 @@ const resolveSlotId = (slotIds: string[], storedAction: string | undefined): str
 }
 
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
-  const { txId, willSignBeforeExecute } = useContext(TxFlowContext)
+  const { txId, isLastSignature } = useContext(TxFlowContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const slotIds = useSlotIds(SlotName.ComboSubmit)
 
@@ -39,7 +39,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
   const slotId = useMemo(() => resolveSlotId(slotIds, submitAction), [slotIds, submitAction])
 
-  const showLastSignerWarning = willSignBeforeExecute && slotId === SIGN_ACTION
+  const showLastSignerWarning = isLastSignature && slotId === SIGN_ACTION
 
   if (slotIds.length === 0) {
     return false

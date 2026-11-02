@@ -5,7 +5,7 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/claude-code-review.yml':
         - 'actions/checkout@v7.0.1'
-        - 'anthropics/claude-code-action@v1.0.248'
+        - 'anthropics/claude-code-action@v1.0.262'
     '.github/workflows/mobile-checks.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -14,37 +14,25 @@ workflows:
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'expo/expo-github-action@9.0.0'
+        - 'expo/expo-github-action@9.0.1'
     '.github/workflows/mobile-e2e.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'expo/expo-github-action@9.0.0'
+        - 'expo/expo-github-action@9.0.1'
     '.github/workflows/mobile-linear-release.yml':
         - 'actions/checkout@v7.0.1'
         - 'linear/linear-release-action@v0.18.1'
-    '.github/workflows/mobile-storybook-screenshots.yml':
-        - 'actions/cache@v5.0.5'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/github-script@v9.0.0'
-        - 'actions/setup-node@v6.4.0'
-        - 'actions/upload-artifact@v7.0.2'
     '.github/workflows/mobile-unit-tests.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'mishakav/jest-coverage-comment@v1.0.37'
+        - 'mishakav/jest-coverage-comment@v1.0.38'
     '.github/workflows/package-utils-unit-tests.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'mishakav/jest-coverage-comment@v1.0.37'
-    '.github/workflows/page-screenshots-build.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/upload-artifact@v7.0.2'
-    '.github/workflows/page-screenshots-publish.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/github-script@v9.0.0'
+        - 'mishakav/jest-coverage-comment@v1.0.38'
     '.github/workflows/store-codegen-check.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -64,7 +52,7 @@ workflows:
         - 'actions/attest@v4.2.2'
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
-        - 'actions/create-github-app-token@v3.2.0'
+        - 'actions/create-github-app-token@v3.3.0'
         - 'actions/setup-node@v6.4.0'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'mshick/add-pr-comment@v3.12.0'
@@ -84,7 +72,7 @@ workflows:
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v6.4.0'
-        - 'catchen/eslint-suggestion-action@v4.1.36'
+        - 'catchen/eslint-suggestion-action@v4.1.37'
         - 'slackapi/slack-github-action@v4.0.0'
     '.github/workflows/web-deploy-dev.yml':
         - 'actions/cache@v5.0.5'
@@ -108,21 +96,12 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'browser-actions/setup-chrome@v1.7.3'
         - 'cypress-io/github-action@v7.4.6'
-    '.github/workflows/web-e2e-smoke.yml':
-        - 'actions/cache@v5.0.5'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/setup-node@v6.4.0'
-        - 'actions/upload-artifact@v7.0.2'
-        - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v7.4.6'
-        - 'slackapi/slack-github-action@v4.0.0'
     '.github/workflows/web-isolated-e2e-backend.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
         - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@v6.4.0'
         - 'actions/upload-artifact@v7.0.2'
-        - 'cypress-io/github-action@v7.4.6'
         - 'docker/login-action@v4.6.0'
     '.github/workflows/web-linear-release.yml':
         - 'actions/checkout@v7.0.1'
@@ -148,12 +127,6 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'crazy-max/ghaction-import-gpg@v7.0.0'
         - 'linear/linear-release-action@v0.18.1'
-    '.github/workflows/web-storybook-screenshots-build.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/upload-artifact@v7.0.2'
-    '.github/workflows/web-storybook-screenshots-publish.yml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/github-script@v9.0.0'
     '.github/workflows/web-storybook-tests.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -163,7 +136,7 @@ workflows:
         - 'actions/attest@v4.2.2'
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
-        - 'actions/create-github-app-token@v3.2.0'
+        - 'actions/create-github-app-token@v3.3.0'
         - 'actions/setup-node@v6.4.0'
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'crazy-max/ghaction-import-gpg@v7.0.0'
@@ -182,6 +155,10 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'artiomtr/jest-coverage-report-action@v2.3.1'
         - 'slackapi/slack-github-action@v4.0.0'
+    '.github/workflows/yarn-cache.yml':
+        - 'actions/cache@v5.0.5'
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-node@v6.4.0'
 dependencies:
     'actions/attest@v4.2.2':
         ref: 'v4.2.2'
@@ -198,9 +175,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/create-github-app-token@v3.2.0':
-        ref: 'v3.2.0'
-        commit: 'sha1-bcd2ba49218906704ab6c1aa796996da409d3eb1'
+    'actions/create-github-app-token@v3.3.0':
+        ref: 'v3.3.0'
+        commit: 'sha1-64ab729a6294000f5aa4a4bc0b73d1f32bc45510'
         owner_id: 44036562
         repo_id: 642580244
     'actions/download-artifact@v8.0.2':
@@ -238,9 +215,9 @@ dependencies:
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
-    'anthropics/claude-code-action@v1.0.248':
-        ref: 'v1.0.248'
-        commit: 'sha1-1d6de8cb0c237e7c15e9e1bdf973826ebae490cc'
+    'anthropics/claude-code-action@v1.0.262':
+        ref: 'v1.0.262'
+        commit: 'sha1-925afb53776cf1a2b738c6bdbed37b4d4000ef13'
         owner_id: 76263028
         repo_id: 986421638
         uses:
@@ -260,9 +237,9 @@ dependencies:
         commit: 'sha1-c785b87e244131f27c9f19c1a33e2ead956ab7ce'
         owner_id: 77263318
         repo_id: 327321858
-    'catchen/eslint-suggestion-action@v4.1.36':
-        ref: 'v4.1.36'
-        commit: 'sha1-aecb87aaa6d425dc2ac23c49fffbcbad7d5ce3b2'
+    'catchen/eslint-suggestion-action@v4.1.37':
+        ref: 'v4.1.37'
+        commit: 'sha1-c16f1e40a5cd43506b9c9ea61ba66b0fd0016738'
         owner_id: 112175
         repo_id: 481763131
     'codecov/codecov-action@v7.1.1':
@@ -302,9 +279,9 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
-    'expo/expo-github-action@9.0.0':
-        ref: '9.0.0'
-        commit: 'sha1-eab7a230208c952974db8c3245cfd78402c7b385'
+    'expo/expo-github-action@9.0.1':
+        ref: '9.0.1'
+        commit: 'sha1-9da89d3617bb88139671bad31b09c65714c2ee06'
         owner_id: 12504344
         repo_id: 161909611
     'linear/linear-release-action@v0.18.1':
@@ -317,9 +294,9 @@ dependencies:
         commit: 'sha1-5770ad5eb8f42dd2c4f34da00c94c5381e49af88'
         owner_id: 128431
         repo_id: 223043916
-    'mishakav/jest-coverage-comment@v1.0.37':
-        ref: 'v1.0.37'
-        commit: 'sha1-1b5d15445c8afba0c13bd00167bd31130b812d0a'
+    'mishakav/jest-coverage-comment@v1.0.38':
+        ref: 'v1.0.38'
+        commit: 'sha1-7032bf8e71aa2b267b6b143be3c4480b625c2b12'
         owner_id: 289035
         repo_id: 470772431
     'mshick/add-pr-comment@v3.12.0':

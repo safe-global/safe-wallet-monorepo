@@ -1,14 +1,5 @@
 import { createSafe, executeTransaction } from './safe.mjs'
-import { ensFixtureFiles } from './ens.mjs'
-import { rebuildStagingSafes } from './staging-safes.mjs'
 import { waitUntil } from './indexing.mjs'
-
-// The create transaction specs sign and execute on these staging Safes as OWNER_4.
-export async function prepareTransactionCreationScenario(env, owners) {
-  return {
-    safes: { static: await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_6', 'MATIC_STATIC_SAFE_28']) },
-  }
-}
 
 export async function prepareTransferFormScenario(env, owners) {
   const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
@@ -28,7 +19,6 @@ export async function prepareTransferFormScenario(env, owners) {
           SEP_STATIC_SAFE_10: `sep:${context.safeAddress}`,
         },
       },
-      files: await ensFixtureFiles(context.safeAddress),
     }
   } finally {
     context.provider.destroy()

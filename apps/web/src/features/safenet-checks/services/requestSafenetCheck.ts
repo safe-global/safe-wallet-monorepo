@@ -6,6 +6,7 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
 import { getLocationSpaceId, isLegacySpaceId, parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { getStoreInstance, type RootState } from '@/store'
+import { MixpanelEventParams, SAFENET_EVENTS, trackEvent } from '@/services/analytics'
 import { isAuthenticated } from '@/store/authSlice'
 
 // Refusals, not faults: 403 Workspace refused, 429 daily limit, 501 chain off
@@ -23,10 +24,12 @@ export const requestSafenetCheck = async ({
   chainId,
   safeAddress,
   safeTxHash,
+  isFirstSignature,
 }: {
   chainId: string
   safeAddress: string
   safeTxHash: string
+  isFirstSignature: boolean
 }): Promise<void> => {
   try {
     const store = getStoreInstance()
@@ -38,6 +41,7 @@ export const requestSafenetCheck = async ({
 
     const check = { spaceId, chainId, safeAddress, createSafenetCheckDto: { safeTxHash } }
     await store.dispatch(safenetApi.endpoints.safenetChecksRequestCheckV1.initiate(check)).unwrap()
+    if (isFirstSignature) trackEvent(SAFENET_EVENTS.SUBMITTED, { [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash })
   } catch (error) {
     if (!EXPECTED_REFUSALS.includes(getHttpStatusFromError(error))) logError(Errors._652, error)
   }

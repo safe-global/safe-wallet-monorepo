@@ -28,6 +28,7 @@ import AddLocalContact from './AddLocalContact'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import PendingRequestsTable from './PendingRequestsTable'
 import ImportAddressBook from './Import'
+import LocalContactsCsvActions from './LocalContactsCsvActions'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
@@ -162,7 +163,7 @@ const SpaceAddressBook = () => {
                   item when empty, so the row's gap-2 pushed the search 8px right of the table card
                   it sits above — three different left edges for viewers without admin rights. */}
               {(isAdmin && activeTab === 'workspace') || (isPrivateAddressBookEnabled && activeTab === 'mine') ? (
-                <div className="flex shrink-0 gap-2">
+                <div className="flex max-w-full shrink-0 flex-wrap gap-2">
                   {isAdmin && activeTab === 'workspace' && (
                     <>
                       <Track {...SPACE_EVENTS.ADD_ADDRESS}>
@@ -171,7 +172,12 @@ const SpaceAddressBook = () => {
                       <ImportAddressBook />
                     </>
                   )}
-                  {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
+                  {isPrivateAddressBookEnabled && activeTab === 'mine' && (
+                    <>
+                      <AddLocalContact />
+                      <LocalContactsCsvActions hasContacts={sortedLocalContacts.length > 0} />
+                    </>
+                  )}
                 </div>
               ) : null}
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (

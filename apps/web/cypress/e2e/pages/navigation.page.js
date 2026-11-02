@@ -6,15 +6,10 @@ export const newTxBtn = '[data-testid="new-tx-btn"]'
 const modalCloseBtn = '[role="dialog"] button[aria-label="close"]'
 const discardTxBtnStr = 'Discard'
 export const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
-const expandWalletBtn = '[data-testid="open-account-center"]'
-const popoverContent = '[data-slot="popover-content"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
 
-export function verifyTxBtnStatus(status) {
-  cy.get(newTxBtn).should(status)
-}
 export function clickOnSideNavigation(option) {
   cy.get(option).should('exist').click()
 }
@@ -35,11 +30,6 @@ export function clickOnNewTxBtn() {
 
 export function clickOnWalletExpandMoreIcon() {
   cy.get('[data-testid="open-account-center"]').click()
-}
-
-export function clickOnExpandWalletBtn() {
-  cy.get(expandWalletBtn).should('be.visible').click()
-  cy.get(popoverContent).should('be.visible')
 }
 
 export function clickOnDisconnectBtn() {

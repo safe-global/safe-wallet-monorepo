@@ -1,7 +1,50 @@
-import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import {
+  fakerChecksummedAddress,
+  fakerLookalikeAddress,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@/tests/test-utils'
+import * as useChains from '@/hooks/useChains'
+import * as analytics from '@/services/analytics'
+import { ADDRESS_POISONING_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import type { RootState } from '@/store'
 import EntryDialog from './index'
 import { useUpsertWorkspaceSafeName } from '@/features/spaces'
 import * as addressBookSlice from '@/store/addressBookSlice'
+import { getStoreInstance } from '@/store'
+import { chainBuilder } from '@/tests/builders/chains'
+import { mockChainId } from '@/tests/mocks/hooks'
+import { FEATURES } from '@safe-global/store/gateway/types'
+
+const SEPOLIA = '11155111'
+const mockSepolia = chainBuilder()
+  .with({ chainId: SEPOLIA, isTestnet: true, features: [FEATURES.DOMAIN_LOOKUP] })
+  .build()
+const mockEnsAddress = fakerChecksummedAddress()
+
+jest.mock('@/hooks/useChainId')
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [mockSepolia], loading: false, error: undefined }),
+  useChain: () => mockSepolia,
+  useCurrentChain: () => mockSepolia,
+  useHasFeature: () => false,
+}))
+
+jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
+  __esModule: true,
+  getEnsNotAvailableError: () => 'ENS name not available',
+  default: (value: string) => ({
+    address: value === 'treasury.eth' ? mockEnsAddress : undefined,
+    name: value === 'treasury.eth' ? value : undefined,
+    resolving: false,
+  }),
+}))
 
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
@@ -14,6 +57,22 @@ jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
+
+const typeName = (name: string) => {
+  const field = screen.getByTestId('name-input')
+  const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
+  fireEvent.change(input, { target: { value: name } })
+}
+
+const save = async (name = 'Treasury') => {
+  typeName(name)
+  await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
+  fireEvent.click(screen.getByTestId('save-btn'))
+}
+
+beforeEach(() => {
+  mockChainId(SEPOLIA)
+})
 
 describe('EntryDialog', () => {
   it('renders a create-entry dialog', () => {
@@ -41,6 +100,16 @@ describe('EntryDialog', () => {
     expect(overlay).toHaveClass('overlay-marker')
     expect(overlay).not.toHaveClass('popup-marker')
   })
+
+  it('saves the address an ENS name resolves to', async () => {
+    const name = faker.person.firstName()
+    render(<EntryDialog handleClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByRole('textbox', { name: /address/i }), { target: { value: 'treasury.eth' } })
+    await save(name)
+
+    await waitFor(() => expect(getStoreInstance().getState().addressBook[SEPOLIA]?.[mockEnsAddress]).toBe(name))
+  })
 })
 
 describe('EntryDialog scope', () => {
@@ -53,28 +122,16 @@ describe('EntryDialog scope', () => {
     ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(upsertWorkspaceName)
   })
 
-  const renderDialog = (scope?: 'local' | 'workspace') =>
+  const renderDialog = (scope?: 'local' | 'workspace', chainIds = ['1']) =>
     render(
       <EntryDialog
         handleClose={jest.fn()}
         scope={scope}
-        chainIds={['1']}
+        chainIds={chainIds}
         defaultValues={{ name: 'Old name', address: ADDRESS }}
         disableAddressInput
       />,
     )
-
-  const typeName = (name: string) => {
-    const field = screen.getByTestId('name-input')
-    const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
-    fireEvent.change(input, { target: { value: name } })
-  }
-
-  const save = async (name = 'Treasury') => {
-    typeName(name)
-    await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
-    fireEvent.click(screen.getByTestId('save-btn'))
-  }
 
   it('blocks Save and marks the name invalid when the name is cleared', async () => {
     renderDialog()
@@ -100,6 +157,16 @@ describe('EntryDialog scope', () => {
 
     await waitFor(() => expect(spy).toHaveBeenCalled())
     expect(upsertWorkspaceName).not.toHaveBeenCalled()
+  })
+
+  it('names the Safe on every given network in the local address book', async () => {
+    renderDialog(undefined, ['1', '137'])
+    await save('Treasury')
+
+    await waitFor(() => {
+      const { addressBook } = getStoreInstance().getState()
+      expect([addressBook['1']?.[ADDRESS], addressBook['137']?.[ADDRESS]]).toEqual(['Treasury', 'Treasury'])
+    })
   })
 
   it('names the workspace it is about to write to, and stays silent for a local write', () => {
@@ -139,5 +206,156 @@ describe('EntryDialog scope', () => {
     await save('  Treasury  ')
 
     await waitFor(() => expect(spy).toHaveBeenCalledWith(expect.objectContaining({ name: 'Treasury' })))
+  })
+})
+
+describe('EntryDialog look-alike warning', () => {
+  const contact = fakerChecksummedAddress()
+  const contactName = faker.person.fullName()
+  const lookalike = fakerLookalikeAddress(contact)
+  const initialReduxState = { addressBook: { '1': { [contact]: contactName } } } as Partial<RootState>
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // A saved look-alike is persisted and would be hydrated back as a saved address in the next test.
+    localStorage.clear()
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+  })
+
+  const renderDialog = (defaultValues: { name: string; address: string }) =>
+    render(<EntryDialog handleClose={jest.fn()} chainIds={['1']} defaultValues={defaultValues} disableAddressInput />, {
+      initialReduxState,
+    })
+
+  const save = async () => {
+    const field = screen.getByTestId('name-input')
+    const input = (field.tagName === 'INPUT' ? field : field.querySelector('input')) as HTMLInputElement
+    fireEvent.change(input, { target: { value: faker.company.name() } })
+    await waitFor(() => expect(screen.getByTestId('save-btn')).not.toBeDisabled())
+    fireEvent.click(screen.getByTestId('save-btn'))
+  }
+
+  const confirmDialog = () => screen.findByRole('dialog', { name: 'Similar address detected' })
+
+  it('says which saved contact the address looks like', () => {
+    renderDialog({ name: '', address: lookalike })
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      `This address is similar to ${contactName} in your address book.`,
+    )
+  })
+
+  it('saves a look-alike address only after the user confirms it', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    const dialog = await confirmDialog()
+    expect(spy).not.toHaveBeenCalled()
+
+    fireEvent.click(within(dialog).getByText(/I understand, continue anyway/))
+
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(expect.objectContaining({ address: lookalike })))
+  })
+
+  it('does not save when the user cancels the confirmation', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText('Cancel'))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Similar address detected' })).not.toBeInTheDocument(),
+    )
+    expect(spy).not.toHaveBeenCalled()
+    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
+  })
+
+  it('does not warn when renaming a saved contact', async () => {
+    const spy = jest.spyOn(addressBookSlice, 'upsertAddressBookEntries')
+    renderDialog({ name: contactName, address: contact })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    await save()
+    await waitFor(() => expect(spy).toHaveBeenCalled())
+  })
+
+  it('does not warn when renaming a Workspace Safe', () => {
+    ;(useUpsertWorkspaceSafeName as jest.Mock).mockReturnValue(jest.fn().mockResolvedValue({}))
+
+    render(
+      <EntryDialog
+        handleClose={jest.fn()}
+        chainIds={['1']}
+        defaultValues={{ name: faker.company.name(), address: lookalike }}
+        scope="workspace"
+        disableAddressInput
+      />,
+      { initialReduxState },
+    )
+
+    expect(screen.queryByText(/is similar to/)).not.toBeInTheDocument()
+  })
+
+  it('does not warn when the ADDRESS_POISONING_PROTECTION flag is off', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+
+    renderDialog({ name: '', address: lookalike })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('tracks the warning and the decision to continue', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    const params = { [MixpanelEventParams.LOCATION]: 'address_book_entry' }
+    renderDialog({ name: '', address: lookalike })
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, params))
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText(/I understand, continue anyway/))
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
+  })
+
+  it('tracks the decision to cancel the confirmation', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText('Cancel'))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_entry',
+        [MixpanelEventParams.DISMISS_ACTION]: 'cancel',
+      }),
+    )
+  })
+
+  it('does not track a cancel when the user continues', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderDialog({ name: '', address: lookalike })
+
+    await save()
+    fireEvent.click(within(await confirmDialog()).getByText(/I understand, continue anyway/))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, expect.anything()),
+    )
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
+
+  it('does not track a cancel when the entry dialog itself is closed', async () => {
+    const trackEvent = jest.spyOn(analytics, 'trackEvent')
+    renderDialog({ name: '', address: lookalike })
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, expect.anything()),
+    )
+    fireEvent.click(screen.getByTestId('cancel-btn'))
+
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
   })
 })

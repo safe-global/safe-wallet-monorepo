@@ -385,6 +385,25 @@ describe('AddProposer signing logic', () => {
       expect(addDelegateV3).not.toHaveBeenCalled()
     })
 
+    it('rejects the Safe itself as its own proposer', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+      const safe = extendedSafeInfoBuilder().build()
+
+      const { getByLabelText, getByTestId, findByText } = render(
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+        { initialReduxState: { safeInfo: { data: safe, loaded: true, loading: false } } },
+      )
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: safe.address.value } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'The Safe' } })
+      })
+
+      expect(await findByText('Cannot add Safe account itself as proposer')).toBeInTheDocument()
+      expect(getByTestId('submit-proposer-btn')).toBeDisabled()
+      expect(addDelegateV3).not.toHaveBeenCalled()
+    })
+
     it('shows an error and keeps submit disabled when the address is a smart contract', async () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
 

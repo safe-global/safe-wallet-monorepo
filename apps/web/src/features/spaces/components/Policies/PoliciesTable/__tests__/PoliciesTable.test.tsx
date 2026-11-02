@@ -1,3 +1,5 @@
+import { act } from 'react'
+import userEvent from '@testing-library/user-event'
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import {
   MOCK_SAFES,
@@ -12,6 +14,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../../mocks/policies'
+import { mockActiveAllowlist, mockAllowlistChangePending, mockFailedAllowlist } from '../../mocks/allowlistPolicies'
 import PoliciesTable from '../index'
 
 const mockResolveSafeName = jest.fn()
@@ -30,6 +33,10 @@ jest.mock('@/hooks/useChains', () => ({
 describe('PoliciesTable', () => {
   beforeEach(() => {
     mockResolveSafeName.mockReturnValue('')
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
@@ -129,6 +136,39 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 
     expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when hovering a pending status, say how many signatures are in', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+    render(<PoliciesTable policies={[mockPendingPolicy()]} />)
+
+    await user.hover(screen.getByTestId('policy-status-pending'))
+    act(() => jest.runOnlyPendingTimers())
+
+    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signatures')
+  })
+
+  it('should, when an allowlist change waits out the delay, show it as pending', () => {
+    render(<PoliciesTable policies={[mockAllowlistChangePending()]} />)
+
+    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when an allowlist setup failed, show it as failed', () => {
+    render(<PoliciesTable policies={[mockFailedAllowlist()]} />)
+
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
+  })
+
+  it('should, when the policy is an allowlist, show its label, recipient count and tokens', () => {
+    render(<PoliciesTable policies={[mockActiveAllowlist()]} />)
+
+    const rule = screen.getByTestId('policy-cell-rule')
+    expect(within(rule).getByText('Allowlist')).toBeInTheDocument()
+    expect(within(rule).getByText('3 recipients')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-tokens')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
   })
 
   it('should, when an executed change is not yet indexed, show it as activating', () => {

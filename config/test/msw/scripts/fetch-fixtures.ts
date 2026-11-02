@@ -10,6 +10,8 @@
  *   node config/test/msw/scripts/fetch-fixtures.ts
  *   node config/test/msw/scripts/fetch-fixtures.ts --safe=ef-safe
  *   node config/test/msw/scripts/fetch-fixtures.ts --group=transactions
+ *   node config/test/msw/scripts/fetch-fixtures.ts --group=swaps
+ *   node config/test/msw/scripts/fetch-fixtures.ts --group=staking
  */
 
 import * as fs from 'fs'
@@ -61,6 +63,101 @@ const HISTORY_TRANSACTION_IDS = {
   'receive-qtrust': `transfer_${TX_HISTORY_SAFE.address}_ed89d768d24991bca3a9eed93f369a3fa10727accc3d02aacb5c38794ba5b9136119`,
 } as const
 
+type TransactionList = 'history' | 'queued'
+
+type RecordedTransaction = {
+  chainId: string
+  safe: string
+  safeTxHash: string
+  list: TransactionList
+}
+
+type TransactionSet = {
+  dir: string
+  /** The recording fails unless every details response has one of these txInfo types */
+  txInfoTypes: string[]
+  transactions: Record<string, RecordedTransaction>
+}
+
+const SWAP_SAFE = '0x03042B890b99552b60A073F808100517fb148F60'
+const LIMIT_ORDER_SAFE = '0x8f4A19C85b39032A37f7a6dCc65234f966F72551'
+const QUEUED_ORDER_SAFE = '0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2'
+const STAKING_SAFE = '0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B'
+
+const sepolia = (safe: string, safeTxHash: string, list: TransactionList = 'history'): RecordedTransaction => ({
+  chainId: '11155111',
+  safe,
+  safeTxHash,
+  list,
+})
+
+const SWAP_TRANSACTIONS: TransactionSet = {
+  dir: 'swaps',
+  txInfoTypes: ['SwapOrder', 'TwapOrder'],
+  transactions: {
+    sell1Action: sepolia(SWAP_SAFE, '0xd033466000a40227fba7a7deb1a668371c213fec90bac9f2583096be2e0fd959'),
+    buy2actions: sepolia(SWAP_SAFE, '0x135ff0282653d4c2a62c76cd247764b1abd4c0daa9201a72964feac2acaa7b44'),
+    safeAppSwapOrder: sepolia(SWAP_SAFE, '0x5f08e05edb210a8990791e9df2f287a5311a8137815ec85856a2477a36552f1e'),
+    sellLimitOrder: sepolia(SWAP_SAFE, '0xf7093c3e87e3b703a0df4d9360cd38254ed69d0dc4f7ff5399a194bd92e9014c'),
+    wrapSwap: sepolia(
+      '0xF184a243925Bf7fb1D64487339FF4F177Fb75644',
+      '0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
+    ),
+    sell3Actions: sepolia(
+      '0x140663Cb76e4c4e97621395fc118912fa674150B',
+      '0x9f3d2c9c9879fb7eee7005d57b2b5c9006d7c8b98241aa49a0b9e769411c58ef',
+    ),
+    sellCancelled: sepolia(
+      '0x2a73e61bd15b25B6958b4DA3bfc759ca4db249b9',
+      '0xbe159adaa7fb0f7e80ad4bab33a2bb341043818478c96916cfa3877303d22a3d',
+    ),
+    sellLimitOrderFilled: sepolia(
+      LIMIT_ORDER_SAFE,
+      '0xd3d13db9fc438d0674819f81be62fcd9c74a8ed7c101a8249b8895e55ee80d76',
+    ),
+    partiallyFilledLimit: sepolia(
+      LIMIT_ORDER_SAFE,
+      '0x3faf510142c9ade7ac2a701fb697b95f321fd51f5eb9b17e7e534a8abe472b07',
+    ),
+    twapPartial: sepolia(LIMIT_ORDER_SAFE, '0x2fdf5e5d94306de5f7285fd74ca014067b090338b3ff15e3f66d6c02ef81e4a4'),
+    twapFilled: sepolia(LIMIT_ORDER_SAFE, '0xc8a9399afbba45e82a0645770db38386cbe10bec77dd8b6395f7d24e19a45c9a'),
+    sellQLimitOrder: sepolia(
+      QUEUED_ORDER_SAFE,
+      '0x4a699a1a0fe8dcf0bb2f1ccd550bd403dad6b93ca9b1f146aeed90f0a6de6c0c',
+      'queued',
+    ),
+    sellSwapQLimitOrder: sepolia(
+      QUEUED_ORDER_SAFE,
+      '0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
+      'queued',
+    ),
+    sellTwapQLimitOrder: sepolia(
+      QUEUED_ORDER_SAFE,
+      '0x0f9fb46e5d85bdb11f85bdf356078bb2caaf5508504b5ddb8aba2ce5e3aa58ae',
+      'queued',
+    ),
+  },
+}
+
+const STAKING_TRANSACTIONS: TransactionSet = {
+  dir: 'staking',
+  txInfoTypes: ['NativeStakingDeposit', 'NativeStakingValidatorsExit'],
+  transactions: {
+    stake: {
+      chainId: '1',
+      safe: STAKING_SAFE,
+      safeTxHash: '0xd1699838071a472d26963f2b823a4c835e9acd449d0376ca1d468a666903130d',
+      list: 'history',
+    },
+    withdrawal: {
+      chainId: '1',
+      safe: STAKING_SAFE,
+      safeTxHash: '0x84f2ec635b73eaaea60ba813b12deaa370f413651ba08861cc0e9f080bffbecc',
+      list: 'history',
+    },
+  },
+}
+
 // Endpoints to fetch
 const ENDPOINTS = {
   portfolio: (address: string) => `/v1/portfolio/${address}?fiatCode=USD`,
@@ -71,6 +168,7 @@ const ENDPOINTS = {
   chains: (serviceKey: string) => `/v2/chains?serviceKey=${serviceKey}`,
   txHistory: (address: string, chainId: string) =>
     `/v1/chains/${chainId}/safes/${address}/transactions/history?trusted=false&imitation=true`,
+  txQueue: (address: string, chainId: string) => `/v1/chains/${chainId}/safes/${address}/transactions/queued`,
   txDetails: (txId: string, chainId: string) => `/v1/chains/${chainId}/transactions/${txId}`,
 }
 
@@ -155,8 +253,51 @@ async function fetchTransactionFixtures(): Promise<void> {
   }
 }
 
+type TransactionListPage = {
+  next?: string | null
+  results: Array<{ type: string; transaction?: { id: string } }>
+}
+
+/** Pages through a Safe's history or queue until it finds the list item of the transaction */
+async function findListItem({ chainId, safe, list }: RecordedTransaction, txId: string): Promise<unknown> {
+  const firstPage = list === 'history' ? ENDPOINTS.txHistory(safe, chainId) : ENDPOINTS.txQueue(safe, chainId)
+  let pageUrl: string | null | undefined = `${GATEWAY_URL}${firstPage}`
+
+  while (pageUrl) {
+    const page = (await fetchJson(pageUrl)) as TransactionListPage
+    const item = page.results.find(({ transaction }) => transaction?.id === txId)
+    if (item) {
+      return item
+    }
+    pageUrl = page.next
+  }
+
+  throw new Error(`No ${list} item with id ${txId} for Safe ${safe} on chain ${chainId}`)
+}
+
+async function fetchTransactionSet({ dir, txInfoTypes, transactions }: TransactionSet): Promise<void> {
+  console.log(`\nFetching the ${dir} transactions...`)
+
+  for (const [name, transaction] of Object.entries(transactions)) {
+    const txId = `multisig_${transaction.safe}_${transaction.safeTxHash}`
+    const details = (await fetchJson(`${GATEWAY_URL}${ENDPOINTS.txDetails(txId, transaction.chainId)}`)) as {
+      txInfo: { type: string }
+    }
+    if (!txInfoTypes.includes(details.txInfo.type)) {
+      throw new Error(
+        `${name} decodes as ${details.txInfo.type}, expected one of ${txInfoTypes.join(', ')}. ` +
+          'The gateway did not decode it; record again when it does.',
+      )
+    }
+    const item = await findListItem(transaction, txId)
+    await saveFixture(`transactions/${dir}/${name}.json`, { item, details })
+  }
+}
+
 const FIXTURE_GROUPS: Record<string, () => Promise<void>> = {
   transactions: fetchTransactionFixtures,
+  swaps: () => fetchTransactionSet(SWAP_TRANSACTIONS),
+  staking: () => fetchTransactionSet(STAKING_TRANSACTIONS),
 }
 
 async function createEmptyFixtures(): Promise<void> {

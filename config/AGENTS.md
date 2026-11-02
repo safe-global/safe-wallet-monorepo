@@ -17,10 +17,12 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. To refresh or add one:
 
 ```bash
-node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions]
+node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions | --group=swaps | --group=staking]
 ```
 
 Without `--safe=<key>` or `--group=<name>` it re-fetches and overwrites **all** fixtures. Both flags only accept the `=` form. The `transactions` group records the history of the Sepolia Safe `SEP_STATIC_SAFE_7` and the details of selected rows under `test/msw/fixtures/transactions/`; `createTransactionHandlersFromFixture` serves them and is not part of any default handler set.
+
+The `swaps` and `staking` groups save the list item and the details of each named transaction (CoW orders on Sepolia, native staking on mainnet) under `transactions/swaps/` and `transactions/staking/`, exported as `swapOrderFixtures` and `stakingFixtures`. A group fails when the gateway returns a `txInfo.type` other than the one it expects — staging decodes CoW orders only while the CoW API answers, so a `Custom` swap means record again later, not edit the JSON.
 
 ## Scenario names are a cross-workspace contract
 

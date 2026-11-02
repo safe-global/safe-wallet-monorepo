@@ -5,7 +5,7 @@ import { waitUntil } from './indexing.mjs'
 import { createSafe } from './safe.mjs'
 
 /** The staging owner wallets that staging Safes and histories name. */
-export const stagingOwners = {
+const stagingOwners = {
   owner1: '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b',
   owner3: '0x4fe7164d7cA511Ab35520bb14065F1693240dC90',
   owner4: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
@@ -83,14 +83,8 @@ async function advanceNonce(provider, safeAddress, signers, nonce) {
 /**
  * Deploys a Safe with the owners, threshold, nonce, spending limits and balances of a staging Safe.
  * Staging wallets that sign in tests map to the generated owners; other addresses stay as on staging.
+ * `indexed()` waits until CGW serves it as the snapshot describes.
  */
-export async function rebuildStagingSafe(env, owners, snapshot) {
-  const built = await buildStagingSafe(env, owners, snapshot)
-  await built.indexed()
-  return built.safeAddress
-}
-
-/** Rebuilds the Safe on chain; `indexed()` waits until CGW serves it as the snapshot describes. */
 export async function buildStagingSafe(env, owners, snapshot) {
   const { owners: stagingOwners, threshold, nonce = 0, allowances = [], ether = 0n, tokens = [] } = snapshot
   const ownerAddresses = stagingOwners.map((address) => localAddress(owners, address))

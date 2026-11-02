@@ -22,7 +22,7 @@ export type ExplorerButtonProps = {
 }
 
 const ExplorerButton = ({
-  title = '',
+  title = 'View on explorer',
   href = '',
   icon: Icon = ExplorerLinkIcon,
   className,

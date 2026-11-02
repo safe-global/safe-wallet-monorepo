@@ -3,7 +3,7 @@ import { createSafe } from './safe.mjs'
 import { waitUntil } from './indexing.mjs'
 import { erc20Artifact } from './chain.mjs'
 
-export async function prepareAssetsScenario(env, owners, count = 6) {
+export async function prepareAssetsScenario(env, owners) {
   const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
   try {
     const signer = new NonceManager(context.signer)
@@ -14,10 +14,9 @@ export async function prepareAssetsScenario(env, owners, count = 6) {
       ['USDC', 'USDC', '73'],
       ['LINK', 'LINK', '35.94'],
       ['DAI', 'DAI', '82'],
-      ...Array.from({ length: count - 6 }, (_, i) => [`Pagination token ${i}`, `PAGE${i}`, `${i + 1}`]),
     ]
     const tokens = []
-    for (const [name, symbol, amount] of definitions.slice(0, count)) {
+    for (const [name, symbol, amount] of definitions) {
       const token = await new ContractFactory(erc20Artifact.abi, erc20Artifact.bytecode, signer).deploy(
         name,
         symbol,

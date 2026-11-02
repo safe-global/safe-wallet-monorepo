@@ -87,8 +87,8 @@ describe('formatRemaining', () => {
 
 describe('formatSignedCount', () => {
   it.each([
-    [1, 3, '1 of 3 signed'],
-    [2, 2, '2 of 2 signed'],
+    [1, 3, '1 of 3 signatures'],
+    [2, 2, '2 of 2 signatures'],
   ])('renders %i of %i', (signed, required, expected) => {
     expect(formatSignedCount(signed, required)).toBe(expected)
   })

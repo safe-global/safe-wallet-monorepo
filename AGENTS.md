@@ -156,6 +156,10 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 - When you open the PR, carry the relevant lines into the "Affected flows", "Blast radius", and "Risks / not checked" fields of the PR template.
 - If the checklist reveals that a shared abstraction has many unknown consumers, slow down and investigate before coding — that is the signal this process is designed to surface.
 
+### Required CI checks
+
+A workflow that branch protection requires has no `pull_request` `paths` filter; it detects changes with the `pr-changes` action and reports one result job with `required-result`. See [docs/ci-required-checks.md](docs/ci-required-checks.md).
+
 ### Commit and PR conventions
 
 Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Do not commit or open a PR without having read it.
