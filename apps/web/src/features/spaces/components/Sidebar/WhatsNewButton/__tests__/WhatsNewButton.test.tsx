@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import React, { type ReactNode } from 'react'
 import { WhatsNewButton } from '../WhatsNewButton'
 
-const mockUseAppDispatch = jest.fn()
 const mockTrackEvent = jest.fn()
 
 let mockHasBeamerConsent = true
@@ -16,7 +15,6 @@ jest.mock('@/services/analytics', () => ({
 }))
 
 jest.mock('@/store', () => ({
-  useAppDispatch: () => mockUseAppDispatch(),
   useAppSelector: () => mockHasBeamerConsent,
 }))
 
@@ -80,7 +78,6 @@ describe('WhatsNewButton', () => {
     jest.clearAllMocks()
     mockHasBeamerConsent = true
     mockUnreadCount = 0
-    mockUseAppDispatch.mockReturnValue(jest.fn())
   })
 
   it("fires WHATS_NEW tracking event when clicking What's new", () => {
@@ -93,21 +90,14 @@ describe('WhatsNewButton', () => {
     )
   })
 
-  it("dispatches open cookie banner when What's new is clicked without Beamer consent", () => {
+  it("should, when the user has not accepted the Beamer cookies, show no What's new button, panel or corner card", () => {
     mockHasBeamerConsent = false
-    const mockDispatch = jest.fn()
-    mockUseAppDispatch.mockReturnValue(mockDispatch)
 
     render(<WhatsNewButton />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: expect.stringMatching(/openCookieBanner/),
-        payload: { warningKey: 'updates' },
-      }),
-    )
+    expect(screen.queryByTestId('list-item-whats-new')).not.toBeInTheDocument()
     expect(screen.queryByTestId('whats-new-drawer')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('whats-new-corner-card')).not.toBeInTheDocument()
   })
 
   it("opens the What's new drawer with the Beamer product when clicked with Beamer consent", () => {
@@ -146,13 +136,5 @@ describe('WhatsNewButton', () => {
 
     expect(screen.getByTestId('whats-new-drawer')).toBeInTheDocument()
     expect(mockMarkAsSeen).toHaveBeenCalledTimes(1)
-  })
-
-  it("should, when What's new is clicked without updates consent, leave the posts unseen", () => {
-    mockHasBeamerConsent = false
-    render(<WhatsNewButton />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockMarkAsSeen).not.toHaveBeenCalled()
   })
 })

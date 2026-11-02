@@ -9,30 +9,26 @@ import Track from '@/components/common/Track'
 import { BEAMER_ID } from '@/config/constants'
 import { useWhatsNewUpdates } from '@/hooks/useWhatsNewUpdates'
 import { OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
-import { useAppDispatch, useAppSelector } from '@/store'
+import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
-import { openCookieBanner } from '@/store/popupSlice'
 import { WhatsNewDrawer } from '../WhatsNewDrawer'
 import { WhatsNewCornerCard } from '../WhatsNewCornerCard'
 
-export const WhatsNewButton = (): ReactElement => {
-  const dispatch = useAppDispatch()
+export const WhatsNewButton = (): ReactElement | null => {
   const hasUpdatesConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))
   const [isOpen, setIsOpen] = useState(false)
   const { unreadCount, markAsSeen } = useWhatsNewUpdates()
 
   const openWhatsNew = useCallback(() => {
-    if (!hasUpdatesConsent) {
-      dispatch(openCookieBanner({ warningKey: CookieAndTermType.UPDATES }))
-      return
-    }
     setIsOpen(true)
     markAsSeen()
-  }, [dispatch, hasUpdatesConsent, markAsSeen])
+  }, [markAsSeen])
 
   const closeWhatsNew = useCallback(() => {
     setIsOpen(false)
   }, [])
+
+  if (!hasUpdatesConsent) return null
 
   return (
     <>
