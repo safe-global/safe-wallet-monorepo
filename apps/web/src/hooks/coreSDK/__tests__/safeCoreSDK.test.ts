@@ -5,10 +5,8 @@ import Safe, { getSafeContract, getSafeProxyFactoryContract } from '@safe-global
 import { initSafeSDK } from '../safeCoreSDK'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { faker } from '@faker-js/faker'
-import { http, HttpResponse } from 'msw'
-import { server } from '@/tests/server'
 
-type RpcRequest = { id: number; method: string }
+const NON_SAFE_BYTECODE = '0x6080'
 
 jest.mock('@/services/contracts/safeContracts', () => {
   return {
@@ -49,6 +47,10 @@ jest.mock('@safe-global/utils/types/contracts', () => {
 describe('safeCoreSDK', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   describe('isValidSafeVersion', () => {
@@ -274,15 +276,8 @@ describe('safeCoreSDK', () => {
 
         const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        mockProvider.getCode = jest.fn().mockResolvedValue(NON_SAFE_BYTECODE)
         const unknownMasterCopy = faker.finance.ethereumAddress()
-        const results: Record<string, string> = { eth_chainId: toBeHex(chainId), eth_getCode: '0x6080' }
-        const respond = ({ id, method }: RpcRequest) => ({ jsonrpc: '2.0', id, result: results[method] })
-        server.use(
-          http.post<never, RpcRequest | RpcRequest[]>(mockProvider._getConnection().url, async ({ request }) => {
-            const body = await request.json()
-            return HttpResponse.json(Array.isArray(body) ? body.map(respond) : respond(body))
-          }),
-        )
         const warn = jest.spyOn(console, 'warn')
 
         const sdk = await initSafeSDK({
@@ -298,7 +293,6 @@ describe('safeCoreSDK', () => {
         expect(warn).toHaveBeenCalledWith(
           `[SafeSDK] Mastercopy at ${unknownMasterCopy} is not a recognized L2 mastercopy`,
         )
-        warn.mockRestore()
       })
     })
 
