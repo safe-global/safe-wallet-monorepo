@@ -136,15 +136,25 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
-    const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
+    // A proposer's proposal carries no fee params: the first signer picks who pays. Signing it with the
+    // Safe paying merges the fee params in, which is a different payload with its own hash, so it is
+    // proposed as a new transaction instead of being attached to the proposal's txId.
+    const confirmableTxId = (txId: string | undefined, original: SafeTransaction, merged: SafeTransaction) =>
+      merged === original ? txId : undefined
+
+    const signRelayedTx = async (
+      safeTx: SafeTransaction,
+      txId?: string,
+    ): Promise<{ signedTx: SafeTransaction; txId?: string }> => {
       assertProvider(signer?.provider)
 
-      safeTx = await withPayFromSafeFeeParams(safeTx)
+      const merged = await withPayFromSafeFeeParams(safeTx)
+      txId = confirmableTxId(txId, safeTx, merged)
 
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return await dispatchTxSigning(safeTx, signer.provider, txId, scope)
+      return { signedTx: await dispatchTxSigning(merged, signer.provider, txId, scope), txId }
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -152,7 +162,9 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      safeTx = await withPayFromSafeFeeParams(safeTx)
+      const merged = await withPayFromSafeFeeParams(safeTx)
+      txId = confirmableTxId(txId, safeTx, merged)
+      safeTx = merged
 
       // Smart contract wallets can't sign off-chain
       const viaSafe = isSafeSigner(signer)
@@ -235,7 +247,7 @@ export const useTxActions = (): TxActions => {
         // The relayer has no implicit approval, so the last signer of an m/n Safe signs before relaying
         const needsSignature = safeTx.signatures.size < safe.threshold
         if (needsSignature) {
-          safeTx = await signRelayedTx(safeTx, txId)
+          ;({ signedTx: safeTx, txId } = await signRelayedTx(safeTx, txId))
         }
 
         // Relayed txs must be known to the service

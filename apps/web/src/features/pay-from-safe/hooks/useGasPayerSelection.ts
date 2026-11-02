@@ -8,6 +8,7 @@ import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeSponsoredTxs } from '@/features/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -71,6 +72,7 @@ export const useGasPayerSelection = ({
   const { safe, safeAddress } = useSafeInfo()
   const fees = useFeesPreview({ isExecution: step === 'execute' })
   const { feePaymentMode, setFeePaymentMode, feeGasToken } = useContext(SafeTxContext)
+  const { isProposing } = useContext(TxFlowContext)
   const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()
   const dispatch = useAppDispatch()
@@ -106,8 +108,9 @@ export const useGasPayerSelection = ({
     feePaymentMode === 'safe' && !isLocked ? { note: 'Calculated at execution' } : currentFee
 
   // Spec: a Pro Workspace with sponsored transactions left decides at execution, so Pay from Safe is not
-  // offered to it at the sign step; the executor gets the sponsored toggle instead.
-  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT'
+  // offered to it at the sign step; the executor gets the sponsored toggle instead. A proposer does not
+  // pick either: the first signer does, when they sign the proposal.
+  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT' && !isProposing
   // At execution a sponsored offer replaces the Safe toggle (Pro plan / Signer wallet).
   const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
 
@@ -173,6 +176,9 @@ export const useGasPayerSelection = ({
             value: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
             options: ['PAY_FROM_SAFE', 'WALLET'],
           }
+        }
+        if (isProposing) {
+          return { kind: 'locked', value: 'WALLET', reason: 'Whoever signs first picks who pays the gas fee.' }
         }
         return { kind: 'locked', value: 'WALLET' }
       }
@@ -287,6 +293,7 @@ export const useGasPayerSelection = ({
     step,
     planState,
     offersSafeToggle,
+    isProposing,
     choice,
     safeFee,
     hasSponsoredOffer,

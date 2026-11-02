@@ -1,3 +1,5 @@
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+
 export const PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY = 'gtfFeesBannerDismissed' // storage key kept so dismissed banners stay dismissed
 
 /**
@@ -12,5 +14,8 @@ export const FEE_COLLECTORS: ReadonlyArray<string> = [
   // Rhinestone refund receiver (same address on every chain)
   '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD',
 ]
+
+/** Whether a `refundReceiver` quoted by the CGW is one of the known fee collectors. */
+export const isFeeCollector = (address: string): boolean => FEE_COLLECTORS.some((addr) => sameAddress(addr, address))
 
 export * from './gasTokenAllowlist'

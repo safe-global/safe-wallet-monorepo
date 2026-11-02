@@ -2,6 +2,7 @@ import { useContext, useState, type ReactNode } from 'react'
 import { act, renderHook } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import { getStoreInstance } from '@/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -287,6 +288,30 @@ describe('useGasPayerSelection', () => {
     expect(currentMode).toBe('safe')
     expect(mockUsePayFromSafeFeePreview.mock.calls.every(([args]) => args.enabled)).toBe(true)
   })
+  describe('as a proposer', () => {
+    const ProposingWrapper = ({ children }: { children: ReactNode }) => (
+      <TxFlowContext.Provider value={{ ...initialContext, isProposing: true }}>
+        <ModeProvider>{children}</ModeProvider>
+      </TxFlowContext.Provider>
+    )
+
+    it('locks the Signer wallet and leaves the pick to the first signer', () => {
+      const { result } = renderHook(() => useGasPayerSelection({ safeTx: unsignedTx, offer: null, step: 'sign' }), {
+        wrapper: ProposingWrapper,
+        ...preference('safe'),
+      })
+
+      expect(result.current.choice).toBe('WALLET')
+      expect(result.current.view?.payer).toEqual({
+        kind: 'locked',
+        value: 'WALLET',
+        reason: 'Whoever signs first picks who pays the gas fee.',
+      })
+      expect(quoteRequested()).toBe(false)
+      expect(currentMode).toBe('signer')
+    })
+  })
+
   describe('footer', () => {
     it('is the Pro upsell for a Safe outside a Workspace where the chain sponsors plans', () => {
       const { result } = renderSelection()

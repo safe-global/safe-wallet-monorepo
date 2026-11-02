@@ -28,7 +28,8 @@ export type OutgoingLine = { amount: string; currency: string }
  * (a later signer, the executor of a Safe-pays payload, or a plan with nothing to choose).
  */
 export type FeePayerControl =
-  { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] } | { kind: 'locked'; value: GasPayerChoice }
+  | { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] }
+  | { kind: 'locked'; value: GasPayerChoice; reason?: string }
 
 /**
  * The strip under the fee rows: the Pro upsell on the free plan, the sponsored counter on Pro or on a

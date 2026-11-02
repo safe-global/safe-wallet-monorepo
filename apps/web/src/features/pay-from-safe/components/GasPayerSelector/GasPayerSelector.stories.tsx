@@ -332,3 +332,17 @@ export const SignNoPayFromSafeChain: Story = {
     },
   },
 }
+
+export const SignAsProposer: Story = {
+  name: 'Sign · Proposer (the first signer picks)',
+  args: {
+    view: {
+      ...base,
+      payer: { kind: 'locked', value: 'WALLET', reason: 'Whoever signs first picks who pays the gas fee.' },
+      gasToken: nativeLocked,
+      gasFee: { note: 'Calculated at execution' },
+      totalOutgoing: outgoing(false),
+      footer: free,
+    },
+  },
+}

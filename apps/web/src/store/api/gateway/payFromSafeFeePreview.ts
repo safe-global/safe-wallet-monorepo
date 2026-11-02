@@ -4,6 +4,7 @@ import type { OperationType } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { isFeeCollector } from '@/features/pay-from-safe/constants'
 
 type GatewayEndpointBuilder = EndpointBuilder<
   ReturnType<typeof fakeBaseQuery<Error>>,
@@ -84,6 +85,12 @@ export const payFromSafeFeePreviewEndpoints = (builder: GatewayEndpointBuilder) 
         const body: unknown = await response.json()
         if (!isFeePreviewResponse(body)) {
           return { error: new Error('Fee preview response did not match expected shape') }
+        }
+        // The CGW answers 200 with an empty quote (zero gas, zero refund receiver) for a payload it does
+        // not relay for a fee, such as `approveHash` on another Safe. That is no quote: the card shows
+        // "Cannot estimate" and nothing is ever signed against a receiver that is not a fee collector.
+        if (!isFeeCollector(body.txData.refundReceiver)) {
+          return { error: new Error(`Fee preview returned an untrusted refundReceiver ${body.txData.refundReceiver}`) }
         }
         return { data: body }
       } catch (error) {

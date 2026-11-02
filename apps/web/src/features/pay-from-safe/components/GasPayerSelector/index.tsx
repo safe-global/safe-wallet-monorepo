@@ -142,7 +142,7 @@ const PayerControl = ({
   control.kind === 'choice' ? (
     <PayerChoice value={control.value} options={control.options} sponsorKind={sponsorKind} onChange={onChange} />
   ) : (
-    <LockedPill tooltip={LOCKED_TOOLTIP[control.value]}>
+    <LockedPill tooltip={control.reason ?? LOCKED_TOOLTIP[control.value]}>
       <PillLabel>{payerLabel(control.value, sponsorKind)}</PillLabel>
     </LockedPill>
   )
