@@ -40,6 +40,9 @@ test.describe('Execute a batch', { tag: '@e2e' }, () => {
     await sendTokens.nextButton.click()
     await review.addToBatch()
     await batch.confirmBatch()
+    await expect(review.batchedTransactions).toHaveCount(2)
+    await expect(review.batchedTransactions.nth(0)).toContainText(FIRST_AMOUNT)
+    await expect(review.batchedTransactions.nth(1)).toContainText(SECOND_AMOUNT)
     await review.signAndExecute()
 
     await expect

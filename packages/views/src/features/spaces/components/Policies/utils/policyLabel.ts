@@ -1,6 +1,8 @@
 import { formatVisualAmount, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
+import { getAllowlistRecipients } from './allowlistRecipients'
 import {
   hasRecoveryData,
+  isAllowlistPolicy,
   isPendingPolicy,
   isSpendingLimitPolicy,
   type Policy,
@@ -36,6 +38,7 @@ export const POLICY_TYPE_LABELS = {
   'spending-limit': 'Spending limit',
   recovery: 'Account recovery',
   proposer: 'Proposer',
+  allowlist: 'Allowlist',
 } as const
 
 export const formatTokenAmount = (amount: string, token: PolicyTokenInfo): string =>
@@ -83,6 +86,11 @@ export const getPolicySummary = (policy: Policy): string => {
 
     const { spenders } = policy.data
     return `Removing ${spenders.length} spender${maybePlural(spenders)}`
+  }
+
+  if (isAllowlistPolicy(policy)) {
+    const count = getAllowlistRecipients(policy.data).length
+    return `${count} recipient${maybePlural(count)}`
   }
 
   if (hasRecoveryData(policy)) {

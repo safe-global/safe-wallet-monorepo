@@ -1,5 +1,5 @@
 import { useRef, useState, type ComponentProps, type ReactNode } from 'react'
-import { blo } from 'blo'
+import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
 import NextLink, { type LinkProps } from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -68,7 +68,7 @@ const SafeInfoDisplay = ({
       <div className="relative shrink-0">
         {leading ?? (
           <Avatar size="sm">
-            <AvatarImage src={blo(address as `0x${string}`)} alt={displayName} />
+            <AvatarImage src={getIdenticonSrc(address)} alt={displayName} />
             <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
           </Avatar>
         )}

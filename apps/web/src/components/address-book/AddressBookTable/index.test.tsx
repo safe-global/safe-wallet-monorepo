@@ -14,12 +14,14 @@ const mockAddressBook: Record<string, string> = Object.fromEntries(
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
-jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => mockAddressBook }))
+const mockUseAddressBook = jest.fn(() => mockAddressBook)
+jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => mockUseAddressBook() }))
 jest.mock('@/hooks/useChains', () => ({ useCurrentChain: () => undefined }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 
+const mockSetTxFlow = jest.fn()
 jest.mock('@/components/tx-flow', () => ({
-  TxModalContext: createContext({ setTxFlow: jest.fn() }),
+  TxModalContext: createContext({ setTxFlow: (flow: ReactNode) => mockSetTxFlow(flow) }),
 }))
 jest.mock('@/components/tx-flow/flows', () => ({ TokenTransferFlow: () => null }))
 
@@ -64,7 +66,9 @@ const goToSecondPage = () => {
 
 describe('AddressBookTable', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     mockUseIsMobile.mockReturnValue(false)
+    mockUseAddressBook.mockReturnValue(mockAddressBook)
   })
 
   it('shows the name and the address of each entry in its row', () => {
@@ -105,5 +109,35 @@ describe('AddressBookTable', () => {
 
     expect(screen.getByText('1–25 of 111')).toBeInTheDocument()
     expect(screen.getByText('Contact 1')).toBeInTheDocument()
+  })
+
+  it("opens a token transfer to the row's address when Send is clicked", () => {
+    render(<AddressBookTable />)
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Send' })[0])
+
+    expect(mockSetTxFlow).toHaveBeenCalledWith(
+      expect.objectContaining({ props: { recipients: [{ recipient: `0x${'1'.padStart(40, '0')}` }] } }),
+    )
+  })
+
+  it('sorts the rows ascending, then descending, by name and by address when the headers are clicked', () => {
+    const [lowAddress, midAddress, highAddress] = ['0x1', '0x2', '0x3'].map((prefix) => prefix.padEnd(42, '0'))
+    mockUseAddressBook.mockReturnValue({ [highAddress]: 'Bob', [midAddress]: 'Alice', [lowAddress]: 'Carol' })
+    render(<AddressBookTable />)
+    const firstRowName = () => within(screen.getAllByTestId('table-row')[0]).getByTestId('table-cell-name')
+    expect(firstRowName()).toHaveTextContent('Bob')
+
+    const nameHeader = screen.getByRole('button', { name: /^Name/ })
+    fireEvent.click(nameHeader)
+    expect(firstRowName()).toHaveTextContent('Alice')
+    fireEvent.click(nameHeader)
+    expect(firstRowName()).toHaveTextContent('Carol')
+
+    const addressHeader = screen.getByRole('button', { name: /^Address/ })
+    fireEvent.click(addressHeader)
+    expect(firstRowName()).toHaveTextContent('Carol')
+    fireEvent.click(addressHeader)
+    expect(firstRowName()).toHaveTextContent('Bob')
   })
 })

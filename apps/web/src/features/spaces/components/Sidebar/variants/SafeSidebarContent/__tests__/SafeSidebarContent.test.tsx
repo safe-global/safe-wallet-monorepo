@@ -248,7 +248,7 @@ describe('SafeSidebarContent', () => {
       mockUseSafeInfo.mockReturnValue({ safe: { deployed: false } })
     })
 
-    it('isItemDisabled returns true for all DeFi routes', () => {
+    it('isItemDisabled returns true for all DeFi routes and Apps', () => {
       render(<SafeSidebarContent {...defaultProps} />)
 
       const [, , options] = getCallArgs()
@@ -256,6 +256,7 @@ describe('SafeSidebarContent', () => {
       expect(options.isItemDisabled({ href: AppRoutes.bridge } as SidebarItemConfig)).toBe(true)
       expect(options.isItemDisabled({ href: AppRoutes.earn } as SidebarItemConfig)).toBe(true)
       expect(options.isItemDisabled({ href: AppRoutes.stake } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.apps.index } as SidebarItemConfig)).toBe(true)
     })
 
     it('isItemDisabled returns false for non-DeFi routes', () => {

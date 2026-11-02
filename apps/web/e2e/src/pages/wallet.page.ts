@@ -10,6 +10,7 @@
  * test file, never here. Waiting (waitFor / waitForResponse) is allowed.
  */
 import { type Page, type Locator } from '@playwright/test'
+import { CHAIN_IDS } from '../data/constants'
 
 export class WalletPage {
   // Locators
@@ -80,12 +81,15 @@ export class WalletPage {
   }
 
   /**
-   * Connect the Ledger on its first Ledger Live account, `address`. Deriving
-   * addresses needs no confirmation on the device.
+   * Connect the Ledger on Sepolia with its first Ledger Live account, `address`.
+   * Deriving addresses needs no confirmation on the device.
    */
   async connectLedger(address: string): Promise<void> {
     await this.openWalletOption(this.ledgerOption)
 
+    // The picker opens on the first configured chain, which is not Sepolia once the stack runs other forks
+    const sepolia = `0x${Number(CHAIN_IDS.sepolia).toString(16)}`
+    await this.ledgerAccountSelect.locator('select.network-select').selectOption(sepolia)
     await this.ledgerAccountSelect.getByRole('button', { name: 'Scan Accounts' }).click()
     await this.ledgerAccountSelect.getByRole('row').filter({ hasText: address }).click()
     await this.ledgerAccountSelect.getByRole('button', { name: 'Connect' }).click()

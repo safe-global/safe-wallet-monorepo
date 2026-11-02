@@ -25,7 +25,10 @@ const Overview = (): ReactElement => {
   if (isLoading) return <OverviewSkeleton />
 
   return (
-    <section className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
+    <section
+      className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5"
+      data-testid="overview-widget"
+    >
       {/* Refresh hint pinned to the top, actions to the bottom so they line up with the balance,
           which keeps the hint from overlapping them when they wrap onto a second row. */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-stretch">

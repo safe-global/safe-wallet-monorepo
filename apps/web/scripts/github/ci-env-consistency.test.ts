@@ -9,7 +9,6 @@ const WORKFLOWS = [
   'web-deploy-dev.yml',
   'web-tag-release.yml',
   'web-nextjs-bundle-analysis.yml',
-  'web-e2e-smoke.yml',
   'web-e2e-full-ondemand.yml',
   'web-argos-e2e.yml',
 ]
