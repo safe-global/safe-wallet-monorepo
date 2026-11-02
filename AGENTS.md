@@ -84,7 +84,7 @@ In Claude Code a `PreToolUse` hook (`.claude/hooks/verify-before-commit.mjs`) ru
 **Rules for agents:**
 
 - Run the scoped check for the workspace you changed, fix every error before moving on, and don't commit without a clean pass.
-- Run verify, type-check, lint and test in a sub-agent, not the main context: the runs are long. Wait for the result only when you need the pass (before committing). `verify` snapshots the changed files when it starts, so if the worktree changes during a run, stop it and start a fresh one — only a run started after the last edit counts.
+- Run verify, type-check, lint and test in a sub-agent, not the main context: the runs are long (Claude Code: the `verify-runner` agent). Wait for the result only when you need the pass (before committing). `verify` snapshots the changed files when it starts, so if the worktree changes during a run, stop it and start a fresh one — only a run started after the last edit counts.
 - If a significant code change has no colocated unit test, write one before committing.
 - Don't run type-check, lint, prettier and test separately — `verify` runs them all. It only checks formatting; on formatting errors run `yarn prettier:fix` once and re-check. CI rejects unformatted code.
 
