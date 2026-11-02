@@ -1,95 +1,12 @@
 import { parseEther, parseUnits } from 'ethers'
-import { buildStagingSafe, stagingOwners } from './staging.mjs'
+import { buildStagingSafe } from './staging.mjs'
 import { onChain } from './safe.mjs'
 import { SEPOLIA } from './chain.mjs'
-import { COW, DAI } from './cow-protocol.mjs'
-
-const { owner1, owner3, owner4, sepoliaOwner2 } = stagingOwners
-const beneficiary = '0x4c8bF5541D21288836F5B7AdE01E102F074c5F4a'
-const automationOwner = '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
-const sharedOwner = '0xb43470d6913f548Bf90E299De2fe3f94140aaf7c'
 
 const shortNames = { [SEPOLIA]: 'sep', 1: 'eth', 137: 'matic' }
 
 // On-chain state of the staging static Safes at the fork block; `chainId` defaults to Sepolia.
-export const stagingSafes = {
-  SEP_STATIC_SAFE_1: {
-    owners: [
-      owner1,
-      owner4,
-      '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f',
-      '0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E',
-      '0x9c7a96d86BC4f5a6DeC9664C67CC02E3d4591e24',
-    ],
-    threshold: 2,
-    nonce: 27,
-    ether: parseEther('4.0002198'),
-    tokens: [
-      { address: COW, amount: parseEther('7981') },
-      { address: DAI, amount: 4576302406975958516181n },
-      { address: '0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De', amount: parseEther('1000') },
-    ],
-  },
-  SEP_STATIC_SAFE_3: { owners: [sepoliaOwner2], threshold: 1, ether: parseEther('0.001') },
-  SEP_STATIC_SAFE_4: { owners: [owner4], threshold: 1, nonce: 3, ether: parseEther('0.000001') },
-  SEP_STATIC_SAFE_6: { owners: [owner3, owner4], threshold: 1, nonce: 5, ether: parseEther('0.00998') },
-  SEP_STATIC_SAFE_8: {
-    owners: [beneficiary, owner4, sepoliaOwner2],
-    threshold: 1,
-    nonce: 7,
-    ether: parseEther('0.12999'),
-    allowances: [
-      { delegate: owner4, amount: parseEther('0.17'), spent: parseEther('0.02') },
-      {
-        delegate: '0x52835f11E348605E9D791Ec09380a3224526d538',
-        amount: parseEther('0.05'),
-        spent: parseEther('0.00001'),
-      },
-      { delegate: beneficiary, amount: parseEther('0.01') },
-    ],
-    tokens: [{ address: '0x8Eacc9DCa0b92C360D7896Aa5907b949C2A846f6', amount: parseEther('5') }],
-  },
-  SEP_STATIC_SAFE_10: {
-    owners: [sepoliaOwner2, automationOwner, owner4],
-    threshold: 2,
-    nonce: 5,
-    ether: parseEther('0.00948'),
-  },
-  SEP_STATIC_SAFE_13: { owners: [sepoliaOwner2, owner4], threshold: 1, nonce: 1 },
-  SEP_STATIC_SAFE_23: {
-    owners: [owner4],
-    threshold: 1,
-    nonce: 1,
-    ether: parseEther('0.0002'),
-    allowances: [{ delegate: owner4, amount: parseEther('0.0001') }],
-  },
-  SEP_STATIC_SAFE_34: {
-    owners: [owner4, sepoliaOwner2],
-    threshold: 2,
-    tokens: [{ address: COW, amount: parseEther('800') }],
-  },
-  SEP_STATIC_SAFE_35: { owners: [owner4, owner3], threshold: 1, nonce: 1, ether: parseEther('0.003') },
-  // The Sepolia Safe at the address of the Polygon static Safe.
-  MATIC_STATIC_SAFE_28: {
-    owners: [owner1, owner4],
-    threshold: 1,
-    nonce: 3,
-    ether: parseEther('0.000114'),
-    tokens: [{ address: COW, amount: parseEther('500') }],
-  },
-  SEP_STATIC_SAFE_31: { owners: [owner3, owner4], threshold: 1, nonce: 1, ether: parseEther('0.000001') },
-  SEP_STATIC_SAFE_43: {
-    owners: [automationOwner, owner4, sharedOwner],
-    threshold: 1,
-    ether: parseEther('0.001'),
-    tokens: [
-      { address: DAI, amount: parseEther('5') },
-      { address: '0x58Eb19eF91e8A6327FEd391b51aE1887b833cc91', amount: 6_000_000n },
-      { address: '0xEbCC972B6B3eB15C0592BE1871838963d0B94278', amount: 7_000_000n },
-      { address: '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', amount: parseEther('0.002') },
-    ],
-  },
-  SEP_STATIC_SAFE_42: { owners: [owner4], threshold: 1, ether: parseEther('0.0003') },
+const stagingSafes = {
   ETH_STATIC_SAFE_15: {
     chainId: 1,
     owners: [
@@ -113,11 +30,6 @@ export const stagingSafes = {
       { address: '0x7701996420A116F25bD414c02381f6DB698bF2EB', amount: parseEther('5') }, // BUN
     ],
   },
-}
-
-// On-chain state of the staging Safe App Safes at the fork block.
-export const stagingSafeAppSafes = {
-  SEP_SAFEAPP_SAFE_1: { owners: [owner1, sepoliaOwner2, owner4], threshold: 2, nonce: 2 },
 }
 
 /** Rebuilds the named staging Safes, each on its own chain, and returns them as the static Safe category. */
