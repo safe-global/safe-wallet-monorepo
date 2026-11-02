@@ -9,7 +9,7 @@ import {
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 import { useEffect } from 'react'
 import merge from 'lodash/merge'
-import { IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
+import { APP_ENV, IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
 import {
@@ -211,7 +211,11 @@ export const makeStore = (initialState?: Partial<RootState>) => {
     reducer: _hydrationReducer,
     middleware: (getDefaultMiddleware) => {
       listeners.forEach((listener) => listener(listenerMiddlewareInstance))
-      return getDefaultMiddleware({ serializableCheck: false }).concat(cgwClient.middleware).concat(middleware)
+      // Parallel Jest workers push the check past its 32 ms timing warning; the mutation check itself stays on
+      const immutableCheck = APP_ENV === 'test' ? { warnAfter: 1000 } : true
+      return getDefaultMiddleware({ serializableCheck: false, immutableCheck })
+        .concat(cgwClient.middleware)
+        .concat(middleware)
     },
     devTools: !IS_PRODUCTION,
     preloadedState: initialState,
