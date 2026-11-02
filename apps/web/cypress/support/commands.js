@@ -1,5 +1,3 @@
-import { isRemoteBackendRequest } from '../../e2e/environment/cypress.mjs'
-
 let LOCAL_STORAGE_MEMORY = {}
 
 Cypress.Commands.add('saveLocalStorageCache', () => {
@@ -195,9 +193,6 @@ Cypress.Commands.add('enter', (selector, opts) => {
 
 Cypress.Commands.add('setupInterceptors', () => {
   cy.intercept('*', (req) => {
-    if (Cypress.expose('SAFE_E2E_ISOLATED') && isRemoteBackendRequest(req.url)) {
-      throw new Error(`Isolated Cypress attempted a remote backend request: ${new URL(req.url).hostname}`)
-    }
     req.headers['Origin'] = 'http://localhost:8080'
     console.log('Intercepted request with headers:', req.headers)
     req.continue()

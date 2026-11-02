@@ -1,5 +1,4 @@
 import { createSafe, executeTransaction } from './safe.mjs'
-import { ensFixtureFiles } from './ens.mjs'
 import { waitUntil } from './indexing.mjs'
 
 export async function prepareTransferFormScenario(env, owners) {
@@ -20,7 +19,6 @@ export async function prepareTransferFormScenario(env, owners) {
           SEP_STATIC_SAFE_10: `sep:${context.safeAddress}`,
         },
       },
-      files: await ensFixtureFiles(context.safeAddress),
     }
   } finally {
     context.provider.destroy()
