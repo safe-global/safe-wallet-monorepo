@@ -40,6 +40,8 @@ export default [
   prettier,
   ...storybook.configs['flat/recommended'],
   {
+    // Same files as eslint-config-next, which registers the react-hooks plugin only for these.
+    files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],
     plugins: {
       'unused-imports': unusedImports,
       '@typescript-eslint': typescriptEslint,
