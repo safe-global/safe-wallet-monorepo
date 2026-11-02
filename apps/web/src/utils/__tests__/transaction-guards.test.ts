@@ -1,14 +1,21 @@
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import {
   getOwnerAwaitingConfirmations,
+  isCancellationTxInfo,
+  isConflictHeaderQueuedItem,
+  isDeleteAllowance,
   isExecTxData,
   isExecTxInfo,
   isMigrateToL2TxData,
+  isNoneConflictType,
   isOneSignatureShort,
   isOnChainConfirmationTxData,
   isOnChainConfirmationTxInfo,
   isOnChainSignMessageTxData,
   isSafeUpdateTxData,
+  isSetAllowance,
+  isSpendingLimitMethod,
+  isSupportedSpendingLimitAddress,
 } from '../transaction-guards'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { faker } from '@faker-js/faker'
@@ -20,7 +27,9 @@ import {
 import { Multi_send__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
 import { TransactionTokenType, TransferDirection } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { txDataBuilder } from '@/tests/builders/safeTx'
+import { safeTxSummaryBuilder, txDataBuilder, txInfoBuilder } from '@/tests/builders/safeTx'
+import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
   getMultiSendDeployment,
   getSafeL2SingletonDeployment,
@@ -540,6 +549,106 @@ describe('transaction-guards', () => {
 
     it('returns false when the threshold is already reached', () => {
       expect(isOneSignatureShort(threshold, threshold)).toBe(false)
+    })
+  })
+
+  describe('isCancellationTxInfo', () => {
+    it('returns true for a custom transaction marked as a cancellation', () => {
+      expect(isCancellationTxInfo(txInfoBuilder().with({ isCancellation: true }).build())).toBe(true)
+    })
+
+    it('returns false for a custom transaction that is not a cancellation', () => {
+      expect(isCancellationTxInfo(txInfoBuilder().with({ isCancellation: false }).build())).toBe(false)
+    })
+
+    it('returns false for a transfer', () => {
+      expect(
+        isCancellationTxInfo({
+          type: TransactionInfoType.TRANSFER,
+          sender: { value: faker.finance.ethereumAddress() },
+          recipient: { value: faker.finance.ethereumAddress() },
+          direction: TransferDirection.OUTGOING,
+          transferInfo: { type: TransactionTokenType.NATIVE_COIN, value: '1' },
+        }),
+      ).toBe(false)
+    })
+  })
+
+  describe('queued item guards', () => {
+    const queuedTx = (conflictType: TransactionQueuedItem['conflictType']): TransactionQueuedItem => ({
+      type: 'TRANSACTION',
+      transaction: safeTxSummaryBuilder().build(),
+      conflictType,
+    })
+    const conflictHeader = { type: 'CONFLICT_HEADER' as const, nonce: faker.number.int() }
+    const label = { type: 'LABEL' as const, label: 'Next' }
+
+    it('recognises a conflict header and nothing else as one', () => {
+      expect(isConflictHeaderQueuedItem(conflictHeader)).toBe(true)
+      expect(isConflictHeaderQueuedItem(label)).toBe(false)
+      expect(isConflictHeaderQueuedItem(queuedTx('None'))).toBe(false)
+    })
+
+    it('treats only a transaction without conflicts as conflict-free', () => {
+      expect(isNoneConflictType(queuedTx('None'))).toBe(true)
+      expect(isNoneConflictType(queuedTx('HasNext'))).toBe(false)
+      expect(isNoneConflictType(queuedTx('End'))).toBe(false)
+      expect(isNoneConflictType(conflictHeader)).toBe(false)
+    })
+  })
+
+  describe('spending limit method guards', () => {
+    it('matches setAllowance and deleteAllowance as spending limit changes', () => {
+      expect(isSetAllowance('setAllowance')).toBe(true)
+      expect(isDeleteAllowance('deleteAllowance')).toBe(true)
+      expect(isSpendingLimitMethod('setAllowance')).toBe(true)
+      expect(isSpendingLimitMethod('deleteAllowance')).toBe(true)
+    })
+
+    it('does not mix up setAllowance and deleteAllowance', () => {
+      expect(isSetAllowance('deleteAllowance')).toBe(false)
+      expect(isDeleteAllowance('setAllowance')).toBe(false)
+    })
+
+    it.each(['addDelegate', 'executeAllowanceTransfer', 'transfer', undefined])(
+      'does not treat %s as a spending limit change',
+      (method) => {
+        expect(isSetAllowance(method)).toBe(false)
+        expect(isDeleteAllowance(method)).toBe(false)
+        expect(isSpendingLimitMethod(method)).toBe(false)
+      },
+    )
+  })
+
+  describe('isSupportedSpendingLimitAddress', () => {
+    const chainId = '11155111'
+    const allowanceModule = getLatestSpendingLimitAddress(chainId)!
+    const callTo = (address: string) =>
+      txInfoBuilder()
+        .with({ to: { value: address } })
+        .build()
+
+    it('returns true for a call to the allowance module of the chain', () => {
+      expect(isSupportedSpendingLimitAddress(callTo(allowanceModule), chainId)).toBe(true)
+    })
+
+    it('returns false for a call to any other contract', () => {
+      expect(isSupportedSpendingLimitAddress(callTo(faker.finance.ethereumAddress()), chainId)).toBe(false)
+    })
+
+    it('returns false for a transaction that is not a contract call', () => {
+      expect(
+        isSupportedSpendingLimitAddress(
+          {
+            type: TransactionInfoType.TRANSFER,
+            sender: { value: faker.finance.ethereumAddress() },
+            recipient: { value: allowanceModule },
+            direction: TransferDirection.OUTGOING,
+            transferInfo: { type: TransactionTokenType.NATIVE_COIN, value: '1' },
+          },
+          chainId,
+        ),
+      ).toBe(false)
     })
   })
 })

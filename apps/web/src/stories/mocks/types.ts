@@ -51,6 +51,8 @@ export interface FeatureFlags {
   policyRecipientAllowlist?: boolean
   /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
   spaceAuditLog?: boolean
+  /** MY_ACCOUNTS - the accounts list widgets, e.g. on the Workspace dashboard (default: false) */
+  myAccounts?: boolean
 }
 
 /**

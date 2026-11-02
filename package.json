@@ -57,7 +57,7 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
     "prettier": "^3.9.9",
-    "storybook": "^10.6.0",
+    "storybook": "^10.6.2",
     "turbo": "^2.11.3"
   },
   "dependenciesMeta": {

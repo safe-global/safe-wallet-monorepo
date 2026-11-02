@@ -4,7 +4,7 @@ import {
   TransactionTokenType,
   TransferDirection,
 } from '@safe-global/store/gateway/types'
-import { renderWithUserEvent, screen } from '@/tests/test-utils'
+import { mockClipboard, renderWithUserEvent, screen } from '@/tests/test-utils'
 import TransferTxInfo from '.'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
@@ -148,6 +148,17 @@ describe('TransferTxInfo', () => {
           selector: '[data-slot="tooltip-content"]',
         }),
       ).toBeInTheDocument()
+    })
+
+    it('asks for confirmation before copying the sender of an untrusted transfer', async () => {
+      const { user } = renderTransferTxInfo({ direction: TransferDirection.INCOMING, trusted: false })
+      const writeText = mockClipboard()
+
+      await user.click(screen.getByRole('button', { name: 'Copy to clipboard' }))
+
+      expect(await screen.findByTestId('untrusted-token-warning')).toBeVisible()
+      expect(screen.getByText('Before you copy')).toBeInTheDocument()
+      expect(writeText).not.toHaveBeenCalled()
     })
   })
 

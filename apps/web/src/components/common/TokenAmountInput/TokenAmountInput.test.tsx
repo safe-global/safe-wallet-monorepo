@@ -313,6 +313,20 @@ describe('TokenAmountInput', () => {
       await waitFor(() => expect(onSubmit).toHaveBeenCalled())
       expect(onSubmit.mock.calls[0][0]).toMatchObject({ [TokenAmountFields.tokenAddress]: USDC_ADDRESS })
     })
+
+    it('offers the native token in the selector and submits it once picked', async () => {
+      const onSubmit = jest.fn()
+      render(<SubmitTestWrapper defaultTokenAddress={USDC_ADDRESS} onSubmit={onSubmit} />)
+
+      await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+      await userEvent.click(await screen.findByRole('option', { name: /Ether/ }))
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '0.1')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+      expect(onSubmit.mock.calls[0][0]).toMatchObject({ [TokenAmountFields.tokenAddress]: ZERO_ADDRESS })
+    })
   })
 
   describe('Token preselection without fieldArray', () => {

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Ban, Check } from 'lucide-react'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { Typography } from '@safe-global/views/components/ui/typography'
 
 /** Illustrative values: the intro is shown before any allowlist exists, so nothing here is real. */

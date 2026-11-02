@@ -1,11 +1,12 @@
-import { cypressEnvironment } from '../../environment/cypress.mjs'
+import { isolatedEnvironment } from '../../environment/isolated-environment.mjs'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { createOwners } from '../../environment/scenarios/safe.mjs'
 import { WalletPage } from '../pages/wallet.page'
+import { addSafeToAccounts } from './seed-added-safes'
 import { seedSwitchableWallet } from './seed-wallet'
 import { test as base } from './test.fixture'
 
-export type JourneyEnvironment = ReturnType<typeof cypressEnvironment> & { SAFE_RPC_URL: string }
+export type JourneyEnvironment = ReturnType<typeof isolatedEnvironment> & { SAFE_RPC_URL: string }
 
 export type Owners = ReturnType<typeof createOwners>
 export type OwnerName = 'owner1' | 'owner2' | 'owner3' | 'owner4'
@@ -21,10 +22,12 @@ export type Journey = {
   connectAs: (owner: OwnerName) => Promise<void>
   /** Names the Safe in the report of the test */
   recordSafe: (safe: { prefixedAddress: string }) => void
+  /** Puts the Safe in the accounts of `safePage` from its next page load */
+  addToAccounts: (safe: { prefixedAddress: string }) => Promise<void>
 }
 
 function journeyEnvironment(): JourneyEnvironment {
-  const env = cypressEnvironment(process.env)
+  const env = isolatedEnvironment(process.env)
   if (!('SAFE_RPC_URL' in env) || typeof env.SAFE_RPC_URL !== 'string') {
     throw new Error(
       'Journeys need the isolated stack: run them with `yarn workspace @safe-global/web e2e:env playwright`',
@@ -57,6 +60,7 @@ export const test = base.extend<{ journey: Journey }>({
         await wallet.accountCenter.filter({ hasText: short(owners[owner].address) }).waitFor()
       },
       recordSafe: (safe) => testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress }),
+      addToAccounts: (safe) => addSafeToAccounts(safePage, safe.prefixedAddress),
     })
   },
 })

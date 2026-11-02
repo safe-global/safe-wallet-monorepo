@@ -13,7 +13,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 
 jest.mock('@/components/common/EthHashInfo', () => ({
   __esModule: true,
-  default: () => null,
+  default: ({ address }: { address: string }) => <span>{address}</span>,
 }))
 
 jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
@@ -47,6 +47,22 @@ const renderReview = (data: Partial<UpsertRecoveryFlowProps>) => {
 }
 
 describe('UpsertRecoveryFlowReview', () => {
+  it('shows the trusted recoverer of a new setup and says it enables recovery', () => {
+    const recoverer = faker.finance.ethereumAddress()
+
+    const { getByText } = renderReview({ recoverer })
+
+    expect(getByText('This transaction will enable the Account recovery feature once executed.')).toBeInTheDocument()
+    expect(getByText('Trusted Recoverer')).toBeInTheDocument()
+    expect(getByText(recoverer)).toBeInTheDocument()
+  })
+
+  it('says it updates recovery when the Safe already has a Delay module', () => {
+    const { getByText } = renderReview({ moduleAddress: faker.finance.ethereumAddress() })
+
+    expect(getByText('This transaction will update the Account recovery feature once executed.')).toBeInTheDocument()
+  })
+
   it('renders a non-standard delay and expiry read back from an existing Delay module', () => {
     const delay = `${DAY_IN_SECONDS * 3 + 60 * 60 * 5}`
     const expiry = `${DAY_IN_SECONDS * 10}`

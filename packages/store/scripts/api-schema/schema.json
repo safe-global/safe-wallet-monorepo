@@ -4107,7 +4107,7 @@
     },
     "/v1/spaces/{spaceId}/policies/pending": {
       "get": {
-        "description": "Returns the spending-limit changes in the transaction queue of every Safe in the Space. Detects only direct AllowanceModule calls and calls found one level inside a MultiSend batch, and only against known AllowanceModule deployments (@safe-global/safe-modules-deployments) - a change made through a nested MultiSend, a custom batching contract, a Safe module bypassing the owner queue, or an unofficial AllowanceModule fork is not detected.",
+        "description": "Returns the pending policy changes of every Safe in the Space. Queued calls are detected only when made directly or one level inside a MultiSend batch, and only against known AllowanceModule and SafePolicyGuard deployments - a change made through a nested MultiSend, a custom batching contract, or a Safe module bypassing the owner queue is not detected.",
         "operationId": "spacePoliciesGetPendingPoliciesV1",
         "parameters": [
           {
@@ -4124,7 +4124,7 @@
             "name": "types",
             "required": true,
             "in": "query",
-            "description": "The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none.",
+            "description": "The policy types to report, comma-separated. `spending-limit` returns queued AllowanceModule changes. A guard type (`allow`, `deny`, `cosigner`, `erc20-transfer`, `multisend`, `native-transfer`) returns the delayed `SafePolicyGuard` configurations that may set a policy of that type. `proposer` and `recovery` return none.",
             "schema": {
               "type": "array",
               "items": {
@@ -4143,6 +4143,17 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "include_guard_installation",
+            "required": false,
+            "in": "query",
+            "description": "Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items.",
+            "schema": {
+              "default": false,
+              "example": true,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -4153,7 +4164,29 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PendingPolicyDto"
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PendingPolicyDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingGuardInstallationDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingImmediateGuardPoliciesDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingDelayedGuardPoliciesDto"
+                      }
+                    ],
+                    "discriminator": {
+                      "propertyName": "kind",
+                      "mapping": {
+                        "queued-transaction": "#/components/schemas/PendingPolicyDto",
+                        "guard-installation": "#/components/schemas/PendingGuardInstallationDto",
+                        "immediate-guard-policies": "#/components/schemas/PendingImmediateGuardPoliciesDto",
+                        "delayed-guard-policies": "#/components/schemas/PendingDelayedGuardPoliciesDto"
+                      }
+                    }
                   }
                 }
               }
@@ -4166,7 +4199,7 @@
             "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
           },
           "422": {
-            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+            "description": "Invalid CAIP-10 address, a Safe outside this space, a missing or unknown policy type, or an `include_guard_installation` value other than `true` or `false`"
           },
           "503": {
             "description": "The policy api is unavailable"
@@ -7476,7 +7509,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-d9280df",
+    "version": "main-97f5b80",
     "contact": {}
   },
   "tags": [],
@@ -7772,17 +7805,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -7792,19 +7818,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "type": "string",
@@ -7960,17 +7977,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -7980,19 +7990,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "$ref": "#/components/schemas/Product"
@@ -12883,6 +12884,25 @@
             "type": "string",
             "description": "The ERC20 token the allowlist applies to"
           },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
+          },
           "recipients": {
             "description": "The recipients of the token transfers the policy permits",
             "type": "array",
@@ -12893,6 +12913,7 @@
         },
         "required": [
           "tokenAddress",
+          "tokenMetadata",
           "recipients"
         ]
       },
@@ -13284,6 +13305,11 @@
             "type": "number",
             "description": "Unix seconds the transaction was proposed at"
           },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          },
           "data": {
             "$ref": "#/components/schemas/PendingSpendingLimitDataDto"
           },
@@ -13305,8 +13331,285 @@
           "confirmations",
           "confirmationsRequired",
           "proposedAt",
+          "proposer",
           "data",
           "safe"
+        ]
+      },
+      "SetGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "SetModuleGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-module-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "PendingTransactionDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          }
+        },
+        "required": [
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "proposer"
+        ]
+      },
+      "PendingGuardInstallationDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "guard-installation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetGuardChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "set-guard": "#/components/schemas/SetGuardChangeDto",
+                  "set-module-guard": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              }
+            },
+            "description": "The guard installation calls of the transaction, in calldata order"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "changes",
+          "transaction"
+        ]
+      },
+      "PendingImmediateGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "immediate-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "description": "The SafePolicyGuard the policies are bound on"
+          },
+          "configurations": {
+            "description": "The configurations configureImmediately binds",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "configurations",
+          "transaction"
+        ]
+      },
+      "PendingDelayedGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delayed-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "configuration-in-signing",
+              "pending-application",
+              "application-in-signing",
+              "application-ready",
+              "expired"
+            ],
+            "description": "draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed."
+          },
+          "safe": {
+            "description": "The Safe the configuration belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "nullable": true,
+            "description": "The SafePolicyGuard of the root; null for a draft"
+          },
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[]))"
+          },
+          "configurations": {
+            "nullable": true,
+            "description": "The configurations behind the root; null when CGW does not know them",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "readyAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds applyConfiguration is valid from; null until the root is requested on-chain"
+          },
+          "expiresAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the application window closes; null until the root is requested on-chain"
+          },
+          "transaction": {
+            "nullable": true,
+            "description": "The queued request or apply transaction, if any",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PendingTransactionDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet."
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "root",
+          "configurations",
+          "readyAt",
+          "expiresAt",
+          "transaction",
+          "createdAt"
         ]
       },
       "SurveyOptionDto": {
