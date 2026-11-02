@@ -14,6 +14,8 @@ import { claimCopy } from './ClaimTrialModal'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal, { chooserCopy } from './PlanChooserModal'
 import TrialEndedModal from './proTrial/TrialEndedModal'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
+import { PRO_FEATURE_ROUTES, useIsWorkspaceFirst } from './proTrial/trialFlow'
 
 export const _memberCopy = (
   reason: WorkspaceLockReason,
@@ -76,6 +78,7 @@ const MemberLockedNotice = ({
 /** Mounted on every Workspace page; none of the modals it shows can be dismissed. */
 export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const router = useRouter()
+  const isWorkspaceFirst = useIsWorkspaceFirst()
   const { isLocked, isError, retry, reason, endedAt, trialPeriodDays } = useWorkspaceLock(spaceId)
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
@@ -111,7 +114,20 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
     return <MemberLockedNotice reason={reason} title={highlightSafePro(title)} body={body} onBack={goBack} />
   }
 
-  if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
+  if (reason === 'trial-offered') {
+    if (!isWorkspaceFirst) return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
+    // Variant B: the Workspace stays open; only a Pro feature asks for the trial, straight on the details form.
+    const feature = PRO_FEATURE_ROUTES[router.pathname]
+    if (!feature) return null
+    return (
+      <ClaimTrialModal
+        spaceId={spaceId}
+        startOnDetails
+        detailsTitle={PRO_TRIAL_COPY.trialDetails.featureTitle(feature)}
+        onBack={() => void router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })}
+      />
+    )
+  }
 
   // A lapsed plan opens on "Your Safes still work"; the chooser is one click away inside it.
   if (reason === 'lapsed') return <TrialEndedModal spaceId={spaceId} endedAt={endedAt} onContinue={goBack} />
