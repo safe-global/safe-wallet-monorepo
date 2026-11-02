@@ -18,4 +18,34 @@ export const PRO_TRIAL_COPY = {
   trialTitle: 'Pro trial',
   trialStatus: (until: string) => `Your trial includes every Pro feature until ${until}.`,
   planName: (plan: string, seats: number | null | undefined) => (seats ? `${plan} ${seats}` : plan),
+
+  handoff: {
+    price: (price: string) => `${price}/mo for this Workspace, billed monthly.`,
+    noCharge: "You'll confirm the payment on Stripe. Nothing is charged until you do.",
+    continue: 'Continue to Stripe',
+    opening: 'Opening Stripe Checkout…',
+    back: 'Back',
+    error: 'We couldn’t start the checkout. Please try again.',
+  },
+
+  banner: {
+    regionLabel: 'Safe Pro trial',
+    normal: (endsOn: string) => `Pro trial · ends ${endsOn}`,
+    urgent: (daysLeft: number, endsOn: string) =>
+      daysLeft <= 0
+        ? `Your Pro trial ends today (${endsOn})`
+        : daysLeft === 1
+          ? `Your Pro trial ends tomorrow (${endsOn})`
+          : `Your Pro trial ends in ${daysLeft} days (${endsOn})`,
+    seePlans: 'See plans',
+  },
+
+  trialEnded: {
+    title: 'Your Safes still work',
+    body: (endedOn: string | null) =>
+      `Your Pro trial ended${endedOn ? ` on ${endedOn}` : ''}. Nothing was charged. Policies, the activity log and other Pro features are paused until you pick a plan.`,
+    fit: (planName: string, safes: number) => `${planName} fits your ${safes} Safe${safes === 1 ? '' : 's'}`,
+    continue: 'Continue to my Safes',
+    seePlans: 'See all plans',
+  },
 } as const
