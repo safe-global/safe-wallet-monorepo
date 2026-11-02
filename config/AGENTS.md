@@ -14,7 +14,7 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 
 ## MSW fixtures are generated (never edit by hand)
 
-The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. To refresh or add one:
+The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. To refresh or add one:
 
 ```bash
 node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions | --group=swaps | --group=staking]
