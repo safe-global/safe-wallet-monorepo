@@ -2,19 +2,10 @@ import unusedImports from 'eslint-plugin-unused-imports'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import noOnlyTests from 'eslint-plugin-no-only-tests'
 import tsParser from '@typescript-eslint/parser'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
+import next from 'eslint-config-next'
+import prettier from 'eslint-config-prettier'
+import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -45,7 +36,9 @@ export default [
       '**/public/mockServiceWorker.js',
     ],
   },
-  ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
+  ...next,
+  prettier,
+  ...storybook.configs['flat/recommended'],
   {
     plugins: {
       'unused-imports': unusedImports,
@@ -78,6 +71,7 @@ export default [
         {
           varsIgnorePattern: '^_',
           ignoreRestSiblings: true,
+          caughtErrors: 'none',
         },
       ],
 
@@ -87,6 +81,21 @@ export default [
           additionalHooks: 'useAsync',
         },
       ],
+      // React Compiler rules from eslint-plugin-react-hooks 7. The app does not use the compiler yet.
+      'react-hooks/config': 'off',
+      'react-hooks/error-boundaries': 'off',
+      'react-hooks/gating': 'off',
+      'react-hooks/globals': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/incompatible-library': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/set-state-in-render': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/unsupported-syntax': 'off',
+      'react-hooks/use-memo': 'off',
 
       'no-only-tests/no-only-tests': 'error',
       'object-shorthand': ['error', 'properties'],
