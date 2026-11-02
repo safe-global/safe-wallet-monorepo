@@ -44,6 +44,7 @@ import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
 import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+import { TxLinkFeature } from '@/features/tx-link'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
@@ -51,6 +52,11 @@ import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 const RecoveryLoader = () => {
   const { Recovery } = useLoadFeature(RecoveryFeature)
   return <Recovery />
+}
+
+const TxLinkLoader = () => {
+  const { TxLinkOpener } = useLoadFeature(TxLinkFeature)
+  return <TxLinkOpener />
 }
 
 /**
@@ -213,6 +219,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <Notifications />
 
           <RecoveryLoader />
+
+          <TxLinkLoader />
 
           <CounterfactualHooksLoader />
 
