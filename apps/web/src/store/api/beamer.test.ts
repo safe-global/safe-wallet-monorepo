@@ -3,6 +3,10 @@ import { recordBeamerRequests } from '@/tests/whatsNew'
 import { parseBeamerUpdates, useGetBeamerUpdatesQuery } from './beamer'
 
 describe('useGetBeamerUpdatesQuery', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('should, when given a last-seen date, send it with the product and host and return the unread count', async () => {
     const requests = recordBeamerRequests(() => ({ number: 3 }))
 
@@ -15,6 +19,16 @@ describe('useGetBeamerUpdatesQuery', () => {
     expect(requests[0].searchParams.get('product')).toBe('product-id')
     expect(requests[0].searchParams.get('url')).toBe(window.location.host)
     expect(requests[0].searchParams.get('date')).toBe('2026-06-01T00:00:00.000Z')
+  })
+
+  it('should, when asking Beamer, send the current time so that no cached answer is used', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1793640000000)
+    const requests = recordBeamerRequests(() => ({ number: 0 }))
+
+    const { result } = renderHook(() => useGetBeamerUpdatesQuery({ productId: 'product-id' }))
+
+    await waitFor(() => expect(result.current.data).toEqual({ unreadCount: 0 }))
+    expect(requests[0].searchParams.get('t')).toBe('1793640000000')
   })
 
   it('should, when no last-seen date is given, leave the date out of the request', async () => {

@@ -7,8 +7,8 @@ import local from '@/services/local-storage/local'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const LAST_SEEN_KEY = 'whatsNewLastSeen'
-// Beamer marks its response as cacheable for 20 minutes, so asking more often returns the same answer.
-const POLLING_INTERVAL = 20 * 60 * 1000
+// Only matters while Beamer's live connection is down; otherwise a new post is fetched as soon as Beamer announces it.
+const POLLING_INTERVAL = 5 * 60 * 1000
 
 export const useWhatsNewUpdates = () => {
   const hasConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))

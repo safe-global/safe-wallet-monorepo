@@ -79,10 +79,9 @@ export const beamerApi = createApi({
     getBeamerUpdates: builder.query<WhatsNewUpdates, { productId: string; lastSeen?: string }>({
       query: ({ productId, lastSeen }) => ({
         url: 'numberFeatures',
-        // v=1 is what Beamer's own embed script sends with this request.
-        params: { product: productId, url: window.location.host, v: 1, date: lastSeen },
-        // Beamer lets browsers cache this answer for 20 minutes, which would hide a post announced in the meantime.
-        cache: 'no-cache',
+        // v=1 is what Beamer's own embed script sends with this request. Beamer's CDN keeps the answer for each URL
+        // for 20 minutes, so t, which is new on every request, makes it ask Beamer for a fresh answer each time.
+        params: { product: productId, url: window.location.host, v: 1, date: lastSeen, t: Date.now() },
       }),
       transformResponse: parseBeamerUpdates,
       providesTags: ['BeamerUpdates'],

@@ -3,9 +3,9 @@ import { useAppDispatch } from '@/store'
 import { BEAMER_ORIGIN, beamerApi } from '@/store/api/beamer'
 
 const UPDATES_AVAILABLE = 'updatesAvailable'
-// Our Beamer settings ("updatesDelay"): after a new post, each browser waits a random time up to this long before
-// asking for it, so that not every open tab asks Beamer at the same moment.
-export const MAX_UPDATE_DELAY = 10 * 60 * 1000
+// After a new post, each open tab waits a random time up to this long before asking Beamer for it, so that they do
+// not all ask at the same moment.
+export const MAX_UPDATE_DELAY = 60 * 1000
 const MIN_UPDATE_DELAY = 100
 
 // Beamer's updates page posts "updatesAvailable" or "updatesAvailable:" followed by a JSON object.
