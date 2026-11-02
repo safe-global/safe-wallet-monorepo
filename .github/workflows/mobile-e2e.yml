@@ -32,7 +32,7 @@ jobs:
         run: yarn workspace @safe-global/notification-service-ios build
 
       - name: Setup Expo and EAS
-        uses: expo/expo-github-action@9.0.0
+        uses: expo/expo-github-action@9.0.1
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
