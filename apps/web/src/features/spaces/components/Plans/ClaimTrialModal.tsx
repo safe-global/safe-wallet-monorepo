@@ -15,7 +15,13 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
+import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { SafeProTrialActivatedModal } from '@safe-global/views/features/spaces/components/SafeProModals'
+import { useAppDispatch } from '@/store'
+import { useBillingStartTrialV1Mutation } from './proTrial/startTrialApi'
+import TrialDetailsStep from './proTrial/TrialDetailsStep'
+import type { TrialDetails } from './proTrial/trialDetails'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { FeatureCheck } from './FeatureCheck'
 import { _offersToTiers, claimTiers } from './planTiers'
@@ -72,19 +78,27 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
 export default function ClaimTrialModal({
   spaceId,
   onBack,
-  returnPathname,
   variant = 'existing',
+  startOnDetails = false,
+  detailsTitle,
 }: {
   spaceId: string
   onBack: () => void
-  /** Where Stripe sends the user back; defaults to the Workspace Home. */
+  /** Kept for the callers; the trial no longer goes through Stripe, so nothing returns to it. */
   returnPathname?: string
   variant?: ClaimTrialVariant
+  /** Workspace first (variant B): the user is already inside, so the modal opens on the details form. */
+  startOnDetails?: boolean
+  detailsTitle?: string
 }) {
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
-  const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
-  const [step, setStep] = useState<'offer' | 'accounts'>('offer')
+  const dispatch = useAppDispatch()
+  const { needsTrim, trim, isTrimming, error } = useSeatTrim(spaceId)
+  const [startTrial, { isLoading: isStarting, isError: isStartError }] = useBillingStartTrialV1Mutation()
+  const [step, setStep] = useState<'offer' | 'details' | 'accounts' | 'activated'>(startOnDetails ? 'details' : 'offer')
+  const [details, setDetails] = useState<TrialDetails>()
+  const isBusy = isTrimming || isStarting
 
   // The trial runs on the plan the CGW offers it on; the modal no longer shows which.
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN) ?? tiers[0]
@@ -109,20 +123,50 @@ export default function ClaimTrialModal({
     !isLoading,
   )
 
-  const claim = () => {
-    if (!tier || !option?.paymentLinkId) return
-    if (needsTrim(seats)) setStep('accounts')
-    else void checkout(option.paymentLinkId)
+  const claim = () => setStep('details')
+
+  // The billing service creates the Stripe customer and a trial with no card; no Stripe page is shown.
+  const start = async (submitted: TrialDetails) => {
+    const result = await startTrial({
+      spaceId,
+      body: {
+        email: submitted.email.trim(),
+        name: submitted.name.trim(),
+        company: submitted.company.trim() || undefined,
+        acceptsTerms: true,
+      },
+    })
+    if (!('error' in result)) setStep('activated')
   }
 
-  const continueToCheckout = (removed: SafeRef[]) => {
-    if (tier && option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
+  const submitDetails = (submitted: TrialDetails) => {
+    setDetails(submitted)
+    if (needsTrim(seats)) setStep('accounts')
+    else void start(submitted)
+  }
+
+  const continueAfterTrim = async (removed: SafeRef[]) => {
+    if (details && (await trim(removed))) void start(details)
+  }
+
+  // Refetching the plan clears the lock, which closes this modal and shows the trial banner.
+  const enterWorkspace = () => dispatch(cgwClient.util.invalidateTags(['billing', 'entitlements'] as never[]))
+
+  if (step === 'activated') {
+    return (
+      <SafeProTrialActivatedModal
+        open
+        onOpenChange={(open) => !open && enterWorkspace()}
+        trialEndsAt={trialPeriodDays === null ? null : Date.now() + trialPeriodDays * DAY_MS}
+      />
+    )
   }
 
   return (
     <Dialog open onOpenChange={() => undefined}>
       <DialogContent
         size={step === 'accounts' ? 'sm-md' : 'xs'}
+        data-testid="claim-trial-modal"
         surface="card"
         padding="sm"
         showCloseButton={false}
@@ -134,10 +178,19 @@ export default function ClaimTrialModal({
             <SelectAccountsStep
               limit={seats}
               planName={tier.name}
-              onBack={() => setStep('offer')}
-              onContinue={continueToCheckout}
+              onBack={() => setStep('details')}
+              onContinue={(removed) => void continueAfterTrim(removed)}
               isSubmitting={isBusy}
               error={error}
+            />
+          ) : step === 'details' ? (
+            <TrialDetailsStep
+              title={detailsTitle}
+              backLabel={startOnDetails ? PRO_TRIAL_COPY.trialDetails.notNow : PRO_TRIAL_COPY.trialDetails.back}
+              isSubmitting={isBusy}
+              error={isStartError}
+              onBack={() => (startOnDetails ? onBack() : setStep('offer'))}
+              onSubmit={submitDetails}
             />
           ) : (
             <>
