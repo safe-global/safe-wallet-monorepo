@@ -14,7 +14,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { isPayFromSafeAvailable, usePayFromSafeFeePreview } from '@/features/pay-from-safe'
+import { isPayFromSafeAvailable, usePayFromSafeFeePreview } from '@/features/fee-payment'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import {

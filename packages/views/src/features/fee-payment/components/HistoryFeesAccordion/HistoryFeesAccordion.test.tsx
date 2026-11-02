@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import HistoryFeesAccordion from './index'
-import type { HistoryFeesData } from '@/features/pay-from-safe/hooks/useHistoryFeesBreakdown'
+import type { HistoryFeesData } from '@/features/fee-payment/hooks/useHistoryFeesBreakdown'
 
 const defaultData: HistoryFeesData = {
   totalFee: { amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },

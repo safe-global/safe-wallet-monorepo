@@ -34,7 +34,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { useLoadFeature } from '@/features/__core__'
-import { PayFromSafeFeature, useGasPayerSelection } from '@/features/pay-from-safe'
+import { FeePaymentFeature, useGasPayerSelection } from '@/features/fee-payment'
 import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 
@@ -87,7 +87,7 @@ export const ExecuteForm = ({
   const { offer, exclude } = useGasPaymentOptions({ safeTx })
 
   // The fee card of the fee payment spec decides who pays on every chain: a sponsor, the Safe or the wallet.
-  const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(PayFromSafeFeature)
+  const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(FeePaymentFeature)
   const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
   const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
   const isPayFromSafe = selection.isPayFromSafe

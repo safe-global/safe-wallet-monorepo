@@ -74,7 +74,7 @@ const Harness = ({ view }: { view: FeePayerView }) => {
 }
 
 const meta = {
-  title: 'Features/PayFromSafe/GasPayerSelector',
+  title: 'Features/FeePayment/GasPayerSelector',
   component: Harness,
   parameters: { layout: 'centered' },
   decorators: [

@@ -1,6 +1,6 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { PayFromSafeFeature, useGasPayerSelection, useIsFeeCardSlotVisible } from '@/features/pay-from-safe'
+import { FeePaymentFeature, useGasPayerSelection, useIsFeeCardSlotVisible } from '@/features/fee-payment'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
@@ -11,7 +11,7 @@ import { SlotName, withSlot } from '../slots'
  * the one choice made at signing); later signers see the locked line, or nothing.
  */
 const FeePayerSignStep = (): ReactElement | null => {
-  const { GasPayerSelector, $isReady } = useLoadFeature(PayFromSafeFeature)
+  const { GasPayerSelector, $isReady } = useLoadFeature(FeePaymentFeature)
   const { safeTx } = useContext(SafeTxContext)
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
   const selection = useGasPayerSelection({ safeTx, offer: null, step: 'sign' })

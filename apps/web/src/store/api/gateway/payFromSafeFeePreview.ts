@@ -4,7 +4,7 @@ import type { OperationType } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { isFeeCollector } from '@/features/pay-from-safe/constants'
+import { isFeeCollector } from '@/features/fee-payment/constants'
 
 type GatewayEndpointBuilder = EndpointBuilder<
   ReturnType<typeof fakeBaseQuery<Error>>,

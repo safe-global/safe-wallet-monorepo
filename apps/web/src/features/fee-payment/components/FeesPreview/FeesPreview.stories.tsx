@@ -3,7 +3,7 @@ import { useContext, useState } from 'react'
 import FeesPreview from './index'
 import type { FeesPreviewData } from '../../hooks/useFeesPreview'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import type { FeePaymentMode } from '@/features/pay-from-safe/types'
+import type { FeePaymentMode } from '@/features/fee-payment/types'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { createInitialState } from '@/stories/mocks/defaults'
@@ -28,7 +28,7 @@ const PaymentModeHarness = (props: FeesPreviewData) => {
 }
 
 const meta = {
-  title: 'Features/PayFromSafe/FeesPreview',
+  title: 'Features/FeePayment/FeesPreview',
   component: PaymentModeHarness,
   parameters: { layout: 'centered' },
   decorators: [

@@ -3,7 +3,7 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import FeeInfoBanner from './index'
 
 const meta = {
-  title: 'Features/PayFromSafe/FeeInfoBanner',
+  title: 'Features/FeePayment/FeeInfoBanner',
   component: FeeInfoBanner,
   tags: ['autodocs'],
   decorators: [

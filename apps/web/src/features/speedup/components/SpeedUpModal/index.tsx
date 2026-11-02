@@ -30,7 +30,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useIsPayFromSafeEnabled } from '@/features/pay-from-safe'
+import { useIsPayFromSafeEnabled } from '@/features/fee-payment'
 
 type Props = {
   open: boolean

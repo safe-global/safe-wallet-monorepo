@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
-import type { FeeRow } from '@safe-global/views/features/pay-from-safe/types'
+import type { FeeRow } from '@safe-global/views/features/fee-payment/types'
 import css from './FeeBreakdownRow.module.css'
 
 export type FeeBreakdownRowProps = FeeRow & {

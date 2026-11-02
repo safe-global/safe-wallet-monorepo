@@ -1,5 +1,5 @@
 import type { FeatureHandle } from '@/features/__core__'
-import type { PayFromSafeContract } from './contract'
+import type { FeePaymentContract } from './contract'
 import { useCurrentChain } from '@/hooks/useChains'
 
 /**
@@ -7,17 +7,17 @@ import { useCurrentChain } from '@/hooks/useChains'
  * chain once it is known, because the history shows the breakdown of a Safe-paid transaction even
  * where the relayer no longer offers Pay from Safe; callers check `useIsPayFromSafeEnabled` for the rest.
  */
-const useIsPayFromSafeModuleEnabled = (): boolean | undefined => (useCurrentChain() ? true : undefined)
+const useIsFeePaymentModuleEnabled = (): boolean | undefined => (useCurrentChain() ? true : undefined)
 
-export const PayFromSafeFeature: FeatureHandle<PayFromSafeContract> = {
-  name: 'pay-from-safe',
-  useIsEnabled: useIsPayFromSafeModuleEnabled,
+export const FeePaymentFeature: FeatureHandle<FeePaymentContract> = {
+  name: 'fee-payment',
+  useIsEnabled: useIsFeePaymentModuleEnabled,
   load: () => import(/* webpackMode: "lazy" */ './feature'),
 }
 
 export { useIsPayFromSafeEnabled } from './hooks/useIsPayFromSafeEnabled'
 
-export type { PayFromSafeContract } from './contract'
+export type { FeePaymentContract } from './contract'
 export { useFeesPreview } from './hooks/useFeesPreview'
 export { usePayFromSafeFeePreview } from './hooks/usePayFromSafeFeePreview'
 export { useIsFeeCardSlotVisible } from './hooks/useIsFeeCardSlotVisible'

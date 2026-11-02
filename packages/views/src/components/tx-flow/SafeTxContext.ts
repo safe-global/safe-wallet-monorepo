@@ -2,7 +2,7 @@ import { createContext } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { FeePaymentMode } from '@safe-global/views/features/pay-from-safe/types'
+import type { FeePaymentMode } from '@safe-global/views/features/fee-payment/types'
 
 /**
  * Kept apart from `SafeTxProvider`, whose imports reach `features/spaces` and

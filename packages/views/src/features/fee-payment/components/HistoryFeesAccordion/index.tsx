@@ -8,7 +8,7 @@ import {
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { HistoryFeesData } from '@safe-global/views/features/pay-from-safe/types'
+import type { HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
 import { GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'

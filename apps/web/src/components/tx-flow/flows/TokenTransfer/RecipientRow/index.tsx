@@ -27,7 +27,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { X } from 'lucide-react'
-import { useResolvedGasToken, useIsPayFromSafeEnabled, type FeePreviewTx } from '@/features/pay-from-safe'
+import { useResolvedGasToken, useIsPayFromSafeEnabled, type FeePreviewTx } from '@/features/fee-payment'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
 

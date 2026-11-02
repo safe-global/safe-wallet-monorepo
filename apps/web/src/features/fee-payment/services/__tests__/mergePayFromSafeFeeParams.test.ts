@@ -40,7 +40,7 @@ describe('mergePayFromSafeFeeParams', () => {
     safeTx.signatures.set('0xowner', { signer: '0xowner', data: '0xsig' } as any)
     const feature = buildFeature()
 
-    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), payFromSafeFeature: feature })
+    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
     expect(result).toBe(safeTx)
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
@@ -53,7 +53,7 @@ describe('mergePayFromSafeFeeParams', () => {
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
       chain: buildChain(['GTF', 'PAY_FROM_SAFE'], { ...RELAY_FEE_RELAYER, gasPaymentOptions: ['SUBSCRIPTION'] }),
-      payFromSafeFeature: feature,
+      feePaymentFeature: feature,
     })
 
     expect(result).toBe(safeTx)
@@ -67,7 +67,7 @@ describe('mergePayFromSafeFeeParams', () => {
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
       chain: buildChain(['GTF'], null),
-      payFromSafeFeature: feature,
+      feePaymentFeature: feature,
     })
 
     expect(result).toBe(safeTx)
@@ -81,7 +81,7 @@ describe('mergePayFromSafeFeeParams', () => {
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
       feePaymentMode: 'signer',
-      payFromSafeFeature: feature,
+      feePaymentFeature: feature,
     })
 
     expect(result).toBe(safeTx)
@@ -95,7 +95,7 @@ describe('mergePayFromSafeFeeParams', () => {
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
       feeGasToken: undefined,
-      payFromSafeFeature: feature,
+      feePaymentFeature: feature,
     })
 
     expect(result).toBe(safeTx)
@@ -106,7 +106,7 @@ describe('mergePayFromSafeFeeParams', () => {
     const safeTx = createSafeTx()
     const feature = buildFeature({ $isReady: false })
 
-    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), payFromSafeFeature: feature })
+    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
     expect(result).toBe(safeTx)
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
@@ -118,7 +118,7 @@ describe('mergePayFromSafeFeeParams', () => {
     const resolveFeeParams = jest.fn().mockResolvedValue(merged)
     const feature = buildFeature({ resolveFeeParams })
 
-    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), payFromSafeFeature: feature })
+    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
     expect(result).toBe(merged)
     expect(resolveFeeParams).toHaveBeenCalledWith({

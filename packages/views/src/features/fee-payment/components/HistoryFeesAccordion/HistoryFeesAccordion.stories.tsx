@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import HistoryFeesAccordion from './index'
-import type { HistoryFeesData } from '@/features/pay-from-safe/hooks/useHistoryFeesBreakdown'
+import type { HistoryFeesData } from '@/features/fee-payment/hooks/useHistoryFeesBreakdown'
 
 const meta = {
-  title: 'Features/PayFromSafe/HistoryFeesAccordion',
+  title: 'Features/FeePayment/HistoryFeesAccordion',
   component: HistoryFeesAccordion,
   tags: ['autodocs'],
 } satisfies Meta<typeof HistoryFeesAccordion>

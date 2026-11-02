@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { PayFromSafeFeature, useIsPayFromSafeEnabled, useIsFeeCardSlotVisible } from '@/features/pay-from-safe'
+import { FeePaymentFeature, useIsPayFromSafeEnabled, useIsFeeCardSlotVisible } from '@/features/fee-payment'
 import { SlotName, withSlot } from '../slots'
 
 const FeeInfoBanner = (): ReactElement => {
-  const { FeeInfoBanner: FeeInfoBannerComponent } = useLoadFeature(PayFromSafeFeature)
+  const { FeeInfoBanner: FeeInfoBannerComponent } = useLoadFeature(FeePaymentFeature)
 
   return <FeeInfoBannerComponent />
 }

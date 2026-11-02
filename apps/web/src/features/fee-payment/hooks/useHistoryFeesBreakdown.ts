@@ -15,10 +15,10 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { isRateLimitError } from '@/utils/transaction-errors'
-import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/pay-from-safe/types'
+import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 
-export type { HistoryFeesData } from '@safe-global/views/features/pay-from-safe/types'
+export type { HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 

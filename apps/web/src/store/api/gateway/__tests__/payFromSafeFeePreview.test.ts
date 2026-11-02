@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { FEE_COLLECTORS } from '@/features/pay-from-safe/constants'
+import { FEE_COLLECTORS } from '@/features/fee-payment/constants'
 import { useGetPayFromSafeFeePreviewQuery } from '../index'
 
 const SAFE = '0x8675B754342754A30A2AeF474D114d8460bca19b'

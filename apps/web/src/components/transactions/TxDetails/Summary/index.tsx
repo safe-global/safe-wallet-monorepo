@@ -14,7 +14,7 @@ import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { useLoadFeature } from '@/features/__core__'
-import { PayFromSafeFeature, useHistoryFeesBreakdown } from '@/features/pay-from-safe'
+import { FeePaymentFeature, useHistoryFeesBreakdown } from '@/features/fee-payment'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -29,7 +29,7 @@ interface Props {
 // Fee breakdown for executed multisig txs on any chain: "Paid from the Safe" from the signed
 // payload, or "Paid from the signer" from the on-chain receipt.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
-  const { HistoryFeesAccordion } = useLoadFeature(PayFromSafeFeature)
+  const { HistoryFeesAccordion } = useLoadFeature(FeePaymentFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)
 
   if (!feesData) return null

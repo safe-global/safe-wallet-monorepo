@@ -18,7 +18,7 @@ import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import {
   EXECUTION_FEE_TOOLTIP,
   GAS_FEE_TOOLTIP,
-} from '@safe-global/views/features/pay-from-safe/components/shared/tooltips'
+} from '@safe-global/views/features/fee-payment/components/shared/tooltips'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import SponsoredTxsCounter from '@/components/tx/SponsoredTxsCounter'

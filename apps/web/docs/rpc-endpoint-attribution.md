@@ -94,7 +94,7 @@ widened by this PR:
 - `apps/web/src/hooks/useGasLimit.ts:73` — `Errors._612`
 - `apps/web/src/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks.ts:335` —
   `Errors._612`
-- `apps/web/src/features/gtf/hooks/useHistoryFeesBreakdown.ts:124` — `Errors._623`
+- `apps/web/src/features/fee-payment/hooks/useHistoryFeesBreakdown.ts:118` — `Errors._623`
 - `apps/web/src/features/spending-limits/hooks/useSpendingLimits.ts:38` — `Errors._609`
 - `apps/web/src/hooks/coreSDK/useInitSafeCoreSDK.ts:70` — `ErrorCodes._105`
 

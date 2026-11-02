@@ -33,7 +33,7 @@ jest.mock('@/hooks/useBalances', () => ({
 }))
 
 const mockUsePayFromSafeFeePreview = jest.fn()
-jest.mock('@/features/pay-from-safe/hooks/usePayFromSafeFeePreview', () => ({
+jest.mock('@/features/fee-payment/hooks/usePayFromSafeFeePreview', () => ({
   usePayFromSafeFeePreview: () => mockUsePayFromSafeFeePreview(),
 }))
 
@@ -222,8 +222,8 @@ describe('Receipt To row', () => {
 describe('Receipt Operation row', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRelayer = { type: 'RELAY_FEE' }
-    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+    mockRelayer = { type: 'RELAY_FEE', gasPaymentOptions: ['PAY_FROM_SAFE'] }
+    mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
 
   it.each([

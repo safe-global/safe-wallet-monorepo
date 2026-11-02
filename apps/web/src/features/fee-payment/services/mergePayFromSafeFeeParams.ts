@@ -2,17 +2,17 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import type { AppDispatch } from '@/store'
-import type { PayFromSafeContract } from '../contract'
+import type { FeePaymentContract } from '../contract'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 
-type PayFromSafeFeatureSurface = Pick<PayFromSafeContract, 'resolveFeeParams'> & { $isReady: boolean }
+type FeePaymentFeatureSurface = Pick<FeePaymentContract, 'resolveFeeParams'> & { $isReady: boolean }
 
 export type PayFromSafeMergeContext = {
   safeTx: SafeTransaction
   chain: Chain | undefined
   feePaymentMode: 'safe' | 'signer' | undefined
   feeGasToken: string | undefined
-  payFromSafeFeature: PayFromSafeFeatureSurface
+  feePaymentFeature: FeePaymentFeatureSurface
   chainId: string
   safeAddress: string
   numberSignatures: number
@@ -29,7 +29,7 @@ export const mergePayFromSafeFeeParams = async ({
   chain,
   feePaymentMode,
   feeGasToken,
-  payFromSafeFeature,
+  feePaymentFeature,
   chainId,
   safeAddress,
   numberSignatures,
@@ -39,9 +39,9 @@ export const mergePayFromSafeFeeParams = async ({
   if (safeTx.signatures.size > 0) return safeTx
   if (!isPayFromSafeAvailable(chain)) return safeTx
   if (feePaymentMode !== 'safe' || !feeGasToken) return safeTx
-  if (!payFromSafeFeature.$isReady || !payFromSafeFeature.resolveFeeParams) return safeTx
+  if (!feePaymentFeature.$isReady || !feePaymentFeature.resolveFeeParams) return safeTx
 
-  return payFromSafeFeature.resolveFeeParams({
+  return feePaymentFeature.resolveFeeParams({
     chainId,
     safeAddress,
     safeTx,

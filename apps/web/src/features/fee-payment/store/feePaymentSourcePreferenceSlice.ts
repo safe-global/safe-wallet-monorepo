@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
-import type { FeePaymentMode } from '@/features/pay-from-safe/types'
+import type { FeePaymentMode } from '@/features/fee-payment/types'
 
 export type FeePaymentSourcePreferenceState = Record<string, FeePaymentMode>
 
