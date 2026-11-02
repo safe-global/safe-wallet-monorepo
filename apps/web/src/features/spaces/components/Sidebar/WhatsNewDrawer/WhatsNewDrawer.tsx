@@ -1,8 +1,22 @@
 import { useEffect, type ReactElement } from 'react'
 import { Sheet, SheetContent, SheetTitle } from '@safe-global/views/components/ui/sheet'
-import { BEAMER_ORIGIN } from '@/store/api/beamer'
+import { BEAMER_ORIGIN, httpsOnly } from '@/store/api/beamer'
 
 const BEAMER_FEED_URL = `${BEAMER_ORIGIN}/news`
+const OPEN_URL = 'openUrl:'
+
+// Beamer's feed does not follow its links itself: it posts "openUrl:" followed by a JSON object with the url.
+const parseOpenUrl = (data: unknown): string | undefined => {
+  if (typeof data !== 'string' || !data.startsWith(OPEN_URL)) return undefined
+
+  let payload: { url?: unknown } | null
+  try {
+    payload = JSON.parse(data.slice(OPEN_URL.length))
+  } catch {
+    return undefined
+  }
+  return typeof payload?.url === 'string' ? httpsOnly(payload.url) : undefined
+}
 
 type WhatsNewDrawerProps = {
   productId: string
@@ -17,7 +31,11 @@ export const WhatsNewDrawer = ({ productId, open, onClose }: WhatsNewDrawerProps
     if (!open) return
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin === BEAMER_ORIGIN && event.data === 'hide') onClose()
+      if (event.origin !== BEAMER_ORIGIN) return
+      if (event.data === 'hide') onClose()
+
+      const url = parseOpenUrl(event.data)
+      if (url) window.open(url, '_blank', 'noopener,noreferrer')
     }
 
     window.addEventListener('message', handleMessage)

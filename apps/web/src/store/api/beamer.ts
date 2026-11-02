@@ -39,7 +39,7 @@ export type WhatsNewUpdates = {
 const TOP_BAR_ANNOUNCEMENT_TYPE = 1
 const CORNER_CARD_ANNOUNCEMENT_TYPE = 3
 
-const httpsOnly = (url?: string): string | undefined => (url?.startsWith('https://') ? url : undefined)
+export const httpsOnly = (url?: string): string | undefined => (url?.startsWith('https://') ? url : undefined)
 
 const parseTopBar = (post: Post, response: NumberFeaturesResponse): WhatsNewTopBarPost => {
   const linkText = response.lastPostLinkText
