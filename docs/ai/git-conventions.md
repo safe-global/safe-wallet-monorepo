@@ -17,6 +17,16 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
 - **CI/CD changes always use `chore:`** — CI, workflows, build configs (not `feat:` or `fix:`).
 - **Test changes always use `tests:`** — changes in unit or e2e tests (not `feat:` or `fix:`).
 
+## Before you open a PR
+
+1. A scoped verify pass on the current head, started after your last edit (see the Fast Feedback Loop in [AGENTS.md](../../AGENTS.md)).
+2. A test for every behavior change ([TESTING.md](../../apps/web/docs/TESTING.md) for web).
+3. The regression checklist lines ready for the template's Affected flows, Blast radius and Risks fields ([regression-checklist.md](regression-checklist.md)).
+4. The nearest AGENTS.md updated if a workspace, script, generated path or test framework changed.
+5. A self-review of the diff against AGENTS.md: run `/safe-code-review` if you have the safe-engineering plugin, otherwise re-read the diff yourself.
+6. No secrets, real user addresses or private links (Slack, Notion, Linear, Google Docs) anywhere in the diff.
+7. A diagram or screenshot for the Visual summary.
+
 ## Pull requests
 
 - **Fill the GitHub PR template completely.** [.github/PULL_REQUEST_TEMPLATE.md](../../.github/PULL_REQUEST_TEMPLATE.md) owns the section skeleton — every PR uses its structure, no sections skipped, and all checks must pass. How to fill each section:

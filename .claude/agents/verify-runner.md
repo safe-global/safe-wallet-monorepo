@@ -11,9 +11,11 @@ Run the checks, report the result, and change nothing. Never edit files, stage, 
 2. For each workspace with changes, run its check from the repo root:
    - `apps/web/`: `node scripts/verify.mjs --changed --compact --workspace=web`
    - `apps/mobile/`, `apps/web-tanstack/`, `apps/tx-builder/`: the same with `--workspace=<name>`
-   - `packages/<pkg>/`: `yarn workspace @safe-global/<pkg> type-check`, `lint` and `test`
+   - `packages/store/`, `packages/theme/`, `packages/utils/`: `yarn workspace @safe-global/<pkg> type-check`, `lint` and `test`
+   - `packages/views/`: `yarn workspace @safe-global/views type-check` and `lint`, then `yarn workspace @safe-global/web type-check` and `yarn workspace @safe-global/web test packages/views`
    - `config/test/`: `yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --force`
-3. Do not set `SKIP_VERIFY`.
+3. If the workspace's own AGENTS.md gives different commands, follow it.
+4. Do not set `SKIP_VERIFY`.
 
 Reply with:
 

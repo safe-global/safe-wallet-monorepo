@@ -88,7 +88,7 @@ Run the repo's `verify` scripts before committing — they type-check, lint, pre
 
 ### Pre-implementation regression checklist
 
-Before writing code for any non-trivial change (beyond a typo, doc tweak or single-line local fix), produce a regression checklist in your reply: surfaces touched, neighbouring flows, tests, and what you won't verify. Order, format and rules: [docs/ai/regression-checklist.md](docs/ai/regression-checklist.md) (Claude Code skill: `regression-checklist`).
+Before writing code for any non-trivial change (beyond a typo, doc tweak or single-line local fix), produce a regression checklist in your reply: surfaces touched, neighbouring flows, tests, and what you won't verify. Don't start editing until it is in your reply. Order, format and rules: [docs/ai/regression-checklist.md](docs/ai/regression-checklist.md) (Claude Code skill: `regression-checklist`).
 
 ### Required CI checks
 
@@ -96,7 +96,7 @@ A workflow that branch protection requires has no `pull_request` `paths` filter;
 
 ### Commit and PR conventions
 
-Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Read it before you commit or open a PR.
+Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Read it before you commit or open a PR, and work through its "Before you open a PR" list (Claude Code skill: `pre-pr`).
 
 ## Security & Safe Wallet Patterns
 

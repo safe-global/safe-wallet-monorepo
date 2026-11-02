@@ -11,4 +11,4 @@ paths:
 - For Redux, assert the resulting state, not which actions were dispatched.
 - No `any` or `as any`; write typed helpers instead.
 - No comments above test cases; the `it(...)` name carries the intent.
-- Never name an ordinary unit test `*.integration.test.ts` (those run against a live devnet).
+- In `packages/utils`, `*.integration.test.ts` runs against a live devnet; don't use that suffix there for ordinary unit tests (see `packages/AGENTS.md`).
