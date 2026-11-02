@@ -292,7 +292,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # The gateway reads Workspace spending limits from a policy indexer; this one has no indexed state.
+  # The gateway reads Workspace spending limits and guard policies from a policy indexer; this one has no indexed state.
   policy-indexer:
     <<: *mock
     command:
