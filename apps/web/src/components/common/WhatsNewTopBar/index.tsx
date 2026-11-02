@@ -2,17 +2,17 @@ import type { ReactElement } from 'react'
 import { X } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import { useBeamerUpdates } from '@/hooks/useBeamerUpdates'
+import { useWhatsNewUpdates } from '@/hooks/useWhatsNewUpdates'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import type { BeamerTopBar } from '@/store/api/beamer'
+import type { WhatsNewTopBarPost } from '@/store/api/beamer'
 
-const DISMISSED_POST_KEY = 'beamerDismissedTopBar'
+const DISMISSED_POST_KEY = 'whatsNewDismissedTopBar'
 
 export const WhatsNewTopBarContent = ({
   topBar,
   onClose,
 }: {
-  topBar: BeamerTopBar
+  topBar: WhatsNewTopBarPost
   onClose: () => void
 }): ReactElement => (
   <div
@@ -42,7 +42,7 @@ export const WhatsNewTopBarContent = ({
 )
 
 const WhatsNewTopBar = (): ReactElement | null => {
-  const { topBar } = useBeamerUpdates()
+  const { topBar } = useWhatsNewUpdates()
   const [dismissedPostId, setDismissedPostId] = useLocalStorage<number>(DISMISSED_POST_KEY)
 
   if (!topBar || topBar.postId === dismissedPostId) return null

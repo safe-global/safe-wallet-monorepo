@@ -1,19 +1,10 @@
-import { http, HttpResponse } from 'msw'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { server } from '@/tests/server'
+import { recordBeamerRequests } from '@/tests/whatsNew'
 import { parseBeamerUpdates, useGetBeamerUpdatesQuery } from './beamer'
-
-const NUMBER_FEATURES_URL = 'https://backend.getbeamer.com/numberFeatures'
 
 describe('useGetBeamerUpdatesQuery', () => {
   it('should, when given a last-seen date, send it with the product and host and return the unread count', async () => {
-    const requests: URL[] = []
-    server.use(
-      http.get(NUMBER_FEATURES_URL, ({ request }) => {
-        requests.push(new URL(request.url))
-        return HttpResponse.json({ number: 3 })
-      }),
-    )
+    const requests = recordBeamerRequests(() => ({ number: 3 }))
 
     const { result } = renderHook(() =>
       useGetBeamerUpdatesQuery({ productId: 'product-id', lastSeen: '2026-06-01T00:00:00.000Z' }),
@@ -27,13 +18,7 @@ describe('useGetBeamerUpdatesQuery', () => {
   })
 
   it('should, when no last-seen date is given, leave the date out of the request', async () => {
-    const requests: URL[] = []
-    server.use(
-      http.get(NUMBER_FEATURES_URL, ({ request }) => {
-        requests.push(new URL(request.url))
-        return HttpResponse.json({ number: 0 })
-      }),
-    )
+    const requests = recordBeamerRequests(() => ({ number: 0 }))
 
     const { result } = renderHook(() => useGetBeamerUpdatesQuery({ productId: 'product-id' }))
 

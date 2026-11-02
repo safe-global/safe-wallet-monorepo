@@ -1,19 +1,17 @@
-import { act, fireEvent, render, renderHook, screen } from '@testing-library/react'
-import type { BeamerCornerCard } from '@/store/api/beamer'
+import { fireEvent, render, screen } from '@testing-library/react'
+import type { WhatsNewCornerCardPost } from '@/store/api/beamer'
 import local from '@/services/local-storage/local'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { clearLocalStorageKey } from '@/tests/test-utils'
 import { WhatsNewCornerCard } from '../WhatsNewCornerCard'
 
-let mockCornerCard: BeamerCornerCard | undefined
-jest.mock('@/hooks/useBeamerUpdates', () => ({
-  useBeamerUpdates: () => ({ unreadCount: 0, cornerCard: mockCornerCard, markAsSeen: jest.fn() }),
+let mockCornerCard: WhatsNewCornerCardPost | undefined
+jest.mock('@/hooks/useWhatsNewUpdates', () => ({
+  useWhatsNewUpdates: () => ({ unreadCount: 0, cornerCard: mockCornerCard, markAsSeen: jest.fn() }),
 }))
 
 describe('WhatsNewCornerCard', () => {
   afterEach(() => {
-    // Clears the in-memory copy that useLocalStorage keeps per key as well as localStorage itself.
-    const { result } = renderHook(() => useLocalStorage<number>('beamerDismissedCornerCard'))
-    act(() => result.current[1](() => undefined))
+    clearLocalStorageKey('whatsNewDismissedCornerCard')
   })
 
   it('should, when Beamer sends a corner card post, show its title, text and image', () => {
@@ -63,6 +61,6 @@ describe('WhatsNewCornerCard', () => {
 
     expect(screen.queryByTestId('whats-new-corner-card')).not.toBeInTheDocument()
     expect(onOpen).not.toHaveBeenCalled()
-    expect(local.getItem('beamerDismissedCornerCard')).toBe(3)
+    expect(local.getItem('whatsNewDismissedCornerCard')).toBe(3)
   })
 })

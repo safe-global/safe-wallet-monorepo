@@ -19,6 +19,7 @@ import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
 import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
+import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -31,7 +32,6 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
-import { useBeamerLiveUpdates } from '@/hooks/useBeamerLiveUpdates'
 import LaunchScreen from '@/components/common/LaunchScreen'
 import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
@@ -94,7 +94,6 @@ const InitApp = (): ReactElement => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamerLiveUpdates()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
@@ -117,6 +116,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <CookieAndTermBanner />
       <WhatsNewTopBar />
+      <WhatsNewUpdatesFrame />
       <TargetedOutreachPopupLoader />
       <Notifications />
       <RecoveryLoader />

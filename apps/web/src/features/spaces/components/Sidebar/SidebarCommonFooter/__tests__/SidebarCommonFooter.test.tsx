@@ -7,20 +7,16 @@ const mockUseAppDispatch = jest.fn()
 const mockUseDarkMode = jest.fn()
 const mockTrackEvent = jest.fn()
 
-let mockHasBeamerConsent = true
-
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
   OVERVIEW_EVENTS: {
     HELP_CENTER: { action: 'Open Help Center' },
-    WHATS_NEW: { action: "Open What's New" },
   },
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockUseAppDispatch(),
-  useAppSelector: () => mockHasBeamerConsent,
 }))
 
 jest.mock('@/hooks/useDarkMode', () => ({
@@ -109,7 +105,6 @@ jest.mock('@/config/constants', () => ({
   get IS_PRODUCTION() {
     return isProductionMock
   },
-  BEAMER_ID: 'beamer-product-id',
 }))
 
 // Mock icons
@@ -199,29 +194,14 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: mockPathname }),
 }))
 
-let mockUnreadCount = 0
-const mockMarkAsSeen = jest.fn()
-jest.mock('@/hooks/useBeamerUpdates', () => ({
-  useBeamerUpdates: () => ({ unreadCount: mockUnreadCount, markAsSeen: mockMarkAsSeen }),
-}))
-
-jest.mock('../../WhatsNewCornerCard', () => ({
-  WhatsNewCornerCard: ({ onOpen }: { onOpen: () => void }) => (
-    <button data-testid="whats-new-corner-card" onClick={onOpen} />
-  ),
-}))
-
-jest.mock('../../WhatsNewDrawer', () => ({
-  WhatsNewDrawer: ({ productId, open }: { productId: string; open: boolean }) =>
-    open ? <div data-testid="whats-new-drawer" data-product-id={productId} /> : null,
+jest.mock('../../WhatsNewButton', () => ({
+  WhatsNewButton: () => <button data-testid="list-item-whats-new" />,
 }))
 
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     isProductionMock = true
-    mockHasBeamerConsent = true
-    mockUnreadCount = 0
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProAnnouncementEnabled = false
@@ -460,79 +440,6 @@ describe('SidebarCommonFooter', () => {
       expect.objectContaining({ action: 'Open Help Center' }),
       expect.objectContaining({ sidebarElement: 'Help Center' }),
     )
-  })
-
-  it("fires WHATS_NEW tracking event when clicking What's new", () => {
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockTrackEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: "Open What's New" }),
-      expect.objectContaining({ sidebarElement: "What's New" }),
-    )
-  })
-
-  it("dispatches open cookie banner when What's new is clicked without Beamer consent", () => {
-    mockHasBeamerConsent = false
-    const mockDispatch = jest.fn()
-    mockUseAppDispatch.mockReturnValue(mockDispatch)
-
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: expect.stringMatching(/openCookieBanner/),
-        payload: { warningKey: 'updates' },
-      }),
-    )
-    expect(screen.queryByTestId('whats-new-drawer')).not.toBeInTheDocument()
-  })
-
-  it("opens the What's new drawer with the Beamer product when clicked with Beamer consent", () => {
-    render(<SidebarCommonFooter />)
-
-    expect(screen.queryByTestId('whats-new-drawer')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(screen.getByTestId('whats-new-drawer')).toHaveAttribute('data-product-id', 'beamer-product-id')
-  })
-
-  it("should, when Beamer reports unread posts, show their number on the What's new button", () => {
-    mockUnreadCount = 6
-    render(<SidebarCommonFooter />)
-
-    expect(screen.getByTestId('list-item-whats-new')).toContainElement(screen.getByTestId('whats-new-unread-count'))
-    expect(screen.getByTestId('whats-new-unread-count')).toHaveTextContent('6')
-  })
-
-  it("should, when there are no unread posts, show no number on the What's new button", () => {
-    render(<SidebarCommonFooter />)
-
-    expect(screen.queryByTestId('whats-new-unread-count')).not.toBeInTheDocument()
-  })
-
-  it("should, when the user opens What's new, mark the posts as seen", () => {
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockMarkAsSeen).toHaveBeenCalledTimes(1)
-  })
-
-  it("should, when the user clicks the corner card, open What's new and mark the posts as seen", () => {
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('whats-new-corner-card'))
-
-    expect(screen.getByTestId('whats-new-drawer')).toBeInTheDocument()
-    expect(mockMarkAsSeen).toHaveBeenCalledTimes(1)
-  })
-
-  it("should, when What's new is clicked without updates consent, leave the posts unseen", () => {
-    mockHasBeamerConsent = false
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockMarkAsSeen).not.toHaveBeenCalled()
   })
 
   it('renders footer and help entry', () => {

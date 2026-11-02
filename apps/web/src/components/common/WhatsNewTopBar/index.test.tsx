@@ -1,19 +1,17 @@
-import { act, fireEvent, render, renderHook, screen } from '@testing-library/react'
-import type { BeamerTopBar } from '@/store/api/beamer'
+import { fireEvent, render, screen } from '@testing-library/react'
+import type { WhatsNewTopBarPost } from '@/store/api/beamer'
 import local from '@/services/local-storage/local'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { clearLocalStorageKey } from '@/tests/test-utils'
 import WhatsNewTopBar from './index'
 
-let mockTopBar: BeamerTopBar | undefined
-jest.mock('@/hooks/useBeamerUpdates', () => ({
-  useBeamerUpdates: () => ({ unreadCount: 0, topBar: mockTopBar, markAsSeen: jest.fn() }),
+let mockTopBar: WhatsNewTopBarPost | undefined
+jest.mock('@/hooks/useWhatsNewUpdates', () => ({
+  useWhatsNewUpdates: () => ({ unreadCount: 0, topBar: mockTopBar, markAsSeen: jest.fn() }),
 }))
 
 describe('WhatsNewTopBar', () => {
   afterEach(() => {
-    // Clears the in-memory copy that useLocalStorage keeps per key as well as localStorage itself.
-    const { result } = renderHook(() => useLocalStorage<number>('beamerDismissedTopBar'))
-    act(() => result.current[1](() => undefined))
+    clearLocalStorageKey('whatsNewDismissedTopBar')
   })
 
   it('should, when Beamer sends a top bar post, show its category, text and link', () => {
@@ -48,7 +46,7 @@ describe('WhatsNewTopBar', () => {
     render(<WhatsNewTopBar />)
 
     expect(screen.queryByTestId('whats-new-top-bar')).not.toBeInTheDocument()
-    expect(local.getItem('beamerDismissedTopBar')).toBe(2)
+    expect(local.getItem('whatsNewDismissedTopBar')).toBe(2)
   })
 
   it('should, when a new top bar post arrives after the old one was closed, show the new post', () => {

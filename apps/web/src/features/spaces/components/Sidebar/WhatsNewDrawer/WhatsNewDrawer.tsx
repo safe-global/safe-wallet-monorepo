@@ -1,7 +1,7 @@
 import { useEffect, type ReactElement } from 'react'
 import { Sheet, SheetContent, SheetTitle } from '@safe-global/views/components/ui/sheet'
+import { BEAMER_ORIGIN } from '@/store/api/beamer'
 
-const BEAMER_ORIGIN = 'https://app.getbeamer.com'
 const BEAMER_FEED_URL = `${BEAMER_ORIGIN}/news`
 
 type WhatsNewDrawerProps = {

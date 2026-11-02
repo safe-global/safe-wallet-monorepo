@@ -2,18 +2,18 @@ import type { ReactElement } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
-import { useBeamerUpdates } from '@/hooks/useBeamerUpdates'
+import { useWhatsNewUpdates } from '@/hooks/useWhatsNewUpdates'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import type { BeamerCornerCard } from '@/store/api/beamer'
+import type { WhatsNewCornerCardPost } from '@/store/api/beamer'
 
-const DISMISSED_POST_KEY = 'beamerDismissedCornerCard'
+const DISMISSED_POST_KEY = 'whatsNewDismissedCornerCard'
 
 export const WhatsNewCornerCardContent = ({
   cornerCard,
   onOpen,
   onClose,
 }: {
-  cornerCard: BeamerCornerCard
+  cornerCard: WhatsNewCornerCardPost
   onOpen: () => void
   onClose: () => void
 }): ReactElement => (
@@ -38,7 +38,7 @@ export const WhatsNewCornerCardContent = ({
 )
 
 export const WhatsNewCornerCard = ({ onOpen }: { onOpen: () => void }): ReactElement | null => {
-  const { cornerCard } = useBeamerUpdates()
+  const { cornerCard } = useWhatsNewUpdates()
   const [dismissedPostId, setDismissedPostId] = useLocalStorage<number>(DISMISSED_POST_KEY)
 
   if (!cornerCard || cornerCard.postId === dismissedPostId) return null
