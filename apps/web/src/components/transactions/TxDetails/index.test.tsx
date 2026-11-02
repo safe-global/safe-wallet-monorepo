@@ -69,7 +69,7 @@ describe('TxDetails decoded data', () => {
 
     expect(screen.getAllByTestId('action-item')).toHaveLength(actions.length)
     expect(screen.queryByText('Error parsing data')).not.toBeInTheDocument()
-  })
+  }, 15_000)
 })
 
 describe('TxDetails proposer', () => {

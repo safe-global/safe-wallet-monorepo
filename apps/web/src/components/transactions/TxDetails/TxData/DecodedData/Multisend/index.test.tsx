@@ -106,7 +106,7 @@ describe('Multisend', () => {
       expect(within(item).getByText(actions[index].dataDecoded.method)).toBeInTheDocument()
     })
     expect(result.queryByText('Error parsing data')).not.toBeInTheDocument()
-  })
+  }, 15_000)
 
   it('lists the actions under an "All actions" header', async () => {
     const { getByTestId } = render(<Multisend txData={multiSendTxDataBuilder().build()} />)

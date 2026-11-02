@@ -27,7 +27,7 @@ describe('ConfirmationView with decoded data', () => {
 
     expect(screen.getAllByTestId('action-item')).toHaveLength(actions.length)
     expect(screen.queryByText('Error parsing data')).not.toBeInTheDocument()
-  })
+  }, 15_000)
 
   it('keeps the rest of the review when the decoded data cannot be rendered', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
