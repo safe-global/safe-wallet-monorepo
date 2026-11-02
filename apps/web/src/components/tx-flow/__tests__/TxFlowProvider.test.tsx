@@ -12,6 +12,11 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import * as walletUtils from '@/utils/wallets'
 import { trackTxEvents } from '@/components/tx/shared/tracking'
 
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),

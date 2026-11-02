@@ -1,6 +1,6 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type Safe from '@safe-global/protocol-kit'
-import { act } from 'react'
+import { act, useState } from 'react'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -39,6 +39,40 @@ import { AppRoutes } from '@/config/routes'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
 import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
+
+jest.mock('@/components/tx/ApprovalEditor/hooks/useApprovalInfos', () => ({
+  useApprovalInfos: jest.fn(() => [[], undefined, false]),
+}))
+
+jest.mock('@/components/common/NamedAddressInfo', () => ({
+  __esModule: true,
+  get useAddressName() {
+    return jest.requireActual('@/components/common/NamedAddressInfo').useAddressName
+  },
+  get default() {
+    return jest.requireActual('@/components/common/EthHashInfo').default
+  },
+}))
+
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
+  useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
+  useCounterpartyAnalysis: jest.fn(() => ({
+    recipient: [undefined, undefined, false],
+    contract: [undefined, undefined, false],
+    deadlock: [undefined, undefined, false],
+  })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
+  useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
+}))
 
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
@@ -427,13 +461,11 @@ describe('SignMessage', () => {
       }),
     )
 
-    // Use a mutable object to control the return value
-    let currentMessage = msg
-    const mockSetMessage = jest.fn((newVal) => {
-      currentMessage = newVal
-    })
-
-    jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [currentMessage, mockSetMessage, undefined])
+    const useStatefulSafeMessage = () => {
+      const [safeMessage, setSafeMessage] = useState<MessageItem | undefined>(msg)
+      return [safeMessage, setSafeMessage, undefined] as const
+    }
+    jest.spyOn(useSafeMessage, 'default').mockImplementation(useStatefulSafeMessage)
 
     const { getByText } = renderWithSafeShield(
       <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,

@@ -6,7 +6,7 @@ import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hook
 import { buildBenignSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
 import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { basicTypesActions, multiSendTxDataBuilder, multiSendTxInfo } from '@/tests/builders/dataDecoded'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -66,12 +66,12 @@ describe('TxDetails decoded data', () => {
       ),
     )
 
-    render(<TxDetails txSummary={safeTxSummaryBuilder().build()} />)
-    fireEvent.click(await screen.findByTestId('expande-all-btn'))
+    const { user } = renderWithUserEvent(<TxDetails txSummary={safeTxSummaryBuilder().build()} />)
+    await user.click(await screen.findByTestId('expande-all-btn'))
 
     expect(screen.getAllByTestId('action-item')).toHaveLength(actions.length)
     expect(screen.queryByText('Error parsing data')).not.toBeInTheDocument()
-  })
+  }, 15_000)
 })
 
 describe('TxDetails proposer', () => {
