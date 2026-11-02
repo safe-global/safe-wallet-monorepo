@@ -5,7 +5,6 @@
  */
 import { randomUUID } from 'node:crypto'
 import { SignClient } from '@walletconnect/sign-client'
-import type { SessionTypes } from '@walletconnect/types'
 import { getSdkError } from '@walletconnect/utils'
 
 export const DAPP_NAME = 'Safe E2E dApp'
@@ -22,6 +21,9 @@ const METHODS = ['eth_sendTransaction', 'eth_getTransactionReceipt', 'personal_s
 const EVENTS = ['chainChanged', 'accountsChanged']
 
 type SignClientInstance = Awaited<ReturnType<typeof SignClient.init>>
+// Taken from sign-client, not @walletconnect/types: the app pins an older types copy that sign-client does not share.
+type Approval = Awaited<ReturnType<SignClientInstance['connect']>>['approval']
+type Session = Awaited<ReturnType<Approval>>
 
 export type RpcError = { code: number; message: string }
 
@@ -62,8 +64,8 @@ function projectId(): string {
 export class WalletConnectDapp {
   /** Each request and response, one per line, for the test report. */
   readonly log: string[] = []
-  private session: SessionTypes.Struct | undefined
-  private approval: (() => Promise<SessionTypes.Struct>) | undefined
+  private session: Session | undefined
+  private approval: Approval | undefined
   private deleted: Promise<void> | undefined
 
   private constructor(
@@ -96,7 +98,7 @@ export class WalletConnectDapp {
   }
 
   /** Resolves with the session once the wallet approves the proposal. */
-  async waitForSession(): Promise<SessionTypes.Struct> {
+  async waitForSession(): Promise<Session> {
     if (!this.approval) throw new Error('Call connect() before waitForSession()')
     const session = await this.approval()
     this.session = session
