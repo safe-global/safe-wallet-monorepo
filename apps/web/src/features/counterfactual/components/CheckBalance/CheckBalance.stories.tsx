@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SAFE_ADDRESSES } from '../../../../../../../config/test/msw/fixtures'
 import CheckBalance from './index'
 

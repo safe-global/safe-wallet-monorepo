@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { hasMultiChainAddNetworkFeature } from '../utils'
+import { hasMultiChainAddNetworkFeature } from '../utils/utils'
 import { useSafeCreationData } from './useSafeCreationData'
 
 export type AddNetworkUnavailableReason = 'safe-specific' | 'outdated-mastercopy'

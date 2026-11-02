@@ -10,7 +10,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import TransactionsIcon from '@/public/images/transactions/transactions.svg'
 import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '@/components/common/Track'
 
 type OrderByButtonProps = {

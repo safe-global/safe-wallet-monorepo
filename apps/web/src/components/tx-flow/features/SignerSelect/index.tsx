@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { SlotName, withSlot } from '../../slots'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '../../slots/withSlot'
 import { SignerForm } from './SignerForm'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'

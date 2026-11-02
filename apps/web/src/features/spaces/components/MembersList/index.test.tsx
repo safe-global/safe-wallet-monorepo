@@ -46,7 +46,7 @@ jest.mock('@/components/common/Track', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: () => true,
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
   isAdmin: (member: { role: string }) => member.role === 'ADMIN',
@@ -60,6 +60,8 @@ jest.mock('@/features/spaces', () => ({
     ACTIVE: 'ACTIVE',
     DECLINED: 'DECLINED',
   },
+}))
+jest.mock('@/features/spaces/hooks/useIsLastActiveAdmin', () => ({
   useAdminCount: () => 2,
 }))
 

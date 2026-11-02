@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { Fragment, useEffect, useRef } from 'react'
-import { trackEvent, type EventLabel } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { type EventLabel } from '@/services/analytics/types'
 
 type Props = {
   children: ReactElement

@@ -1,9 +1,6 @@
 import type { BigNumberish, BytesLike } from 'ethers'
 import { TokenAmountFields } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 
-// Re-export the type from the slice (where it's defined to avoid pulling deps into main bundle)
-export type { SpendingLimitState } from './store/spendingLimitsSlice'
-
 // Form fields for creating spending limits
 enum SpendingLimitFormFields {
   beneficiary = 'beneficiary',

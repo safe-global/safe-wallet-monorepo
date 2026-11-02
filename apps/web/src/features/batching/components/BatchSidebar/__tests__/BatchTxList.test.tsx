@@ -6,14 +6,14 @@ import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 
 jest.mock('@/hooks/coreSDK/safeCoreSDK', () => ({
   useSafeSDK: jest.fn(),
 }))
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createTx: jest.fn(),
   createMultiSendCallOnlyTx: jest.fn(),
 }))

@@ -10,6 +10,9 @@ jest.mock('@/services/analytics', () => ({
   ...(
     jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
   ).createAnalyticsMock(),
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: {
     DATE_RANGE: 'Date Range',
   },

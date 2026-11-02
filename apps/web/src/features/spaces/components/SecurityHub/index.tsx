@@ -5,16 +5,8 @@ import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo
 import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import SecurityHubContent from './SecurityHubContent'
-
-export type {
-  BalanceMap,
-  OverviewMap,
-  SelectedSafe,
-  SpaceSafeEntry,
-  ChainEntry,
-} from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 // Hover treatment for the Safe Shield logo — recolours the SVG's named layers on hover,
 // mirroring the Safe Shield widget (SafeShieldDisplay).

@@ -27,13 +27,13 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => ({
     SurveyOnboarding: () => <div data-testid="survey-onboarding" />,
   }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: { name: 'spaces' },
 }))
 

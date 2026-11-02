@@ -15,7 +15,7 @@ import PositionsUnavailable from '@safe-global/views/features/positions/componen
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@safe-global/views/features/positions/components/PositionsSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 export { default as useIsPositionsFeatureEnabled } from './hooks/useIsPositionsFeatureEnabled'
 

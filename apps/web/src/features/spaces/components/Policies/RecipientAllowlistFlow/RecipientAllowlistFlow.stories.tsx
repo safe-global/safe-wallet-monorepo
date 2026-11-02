@@ -8,8 +8,9 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import { MOCK_SPACE_ID, createChainData, createChainsPageData, createMockStory } from '@/stories/mocks'
-import { createChainsPageDataV2 } from '@/stories/mocks/chains'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createChainsPageDataV2, createChainData, createChainsPageData } from '@/stories/mocks/chains'
 import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/constants'
 import {
   ADDRESS_BOOK_TRIGGER_LABEL,

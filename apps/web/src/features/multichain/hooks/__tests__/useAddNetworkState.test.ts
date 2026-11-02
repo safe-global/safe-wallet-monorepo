@@ -12,14 +12,14 @@ jest.mock('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks', 
 jest.mock('../useSafeCreationData', () => ({
   useSafeCreationData: jest.fn(),
 }))
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/utils', () => ({
   hasMultiChainAddNetworkFeature: jest.fn(),
 }))
 
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { useSafeCreationData } from '../useSafeCreationData'
-import { hasMultiChainAddNetworkFeature } from '../../utils'
+import { hasMultiChainAddNetworkFeature } from '../../utils/utils'
 import { useAddNetworkState } from '../useAddNetworkState'
 
 const asChain = (chainId: string, overrides: Partial<Chain> = {}): Chain =>

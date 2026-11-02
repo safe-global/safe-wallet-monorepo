@@ -4,7 +4,7 @@ import type { SimilarityIndex } from '@safe-global/utils/utils/addressSimilarity
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllCuratedNestedSafes } from '@/store/settingsSlice'
-import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { RootState } from '@/store'
 
 // Wrapped selectors resolve at call time: their slices can still be mid-evaluation via the store barrel.

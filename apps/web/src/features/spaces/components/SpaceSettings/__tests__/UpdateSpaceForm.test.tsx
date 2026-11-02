@@ -5,7 +5,8 @@ import UpdateSpaceForm from '../UpdateSpaceForm'
 
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { spaceBuilder } from '@/tests/builders/space'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
+
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUnwrap = jest.fn()

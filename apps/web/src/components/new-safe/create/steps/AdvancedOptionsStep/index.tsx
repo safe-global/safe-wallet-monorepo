@@ -1,4 +1,4 @@
-import { predictAddressBasedOnReplayData } from '@/features/multichain'
+import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'

@@ -1,7 +1,7 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { renderHook } from '@/tests/test-utils'
 import { Interface, zeroPadValue } from 'ethers'
-import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
+import { useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { waitFor } from '@testing-library/react'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
@@ -10,7 +10,10 @@ import * as balances from '@/hooks/useBalances'
 import { TokenType } from '@safe-global/store/gateway/types'
 import * as getTokenInfo from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
-import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
+import {
+  PSEUDO_APPROVAL_VALUES,
+  type ApprovalInfo,
+} from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'

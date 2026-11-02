@@ -7,7 +7,12 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import {
+  MixpanelEventParams,
+  PlanSelectionEntryPoint,
+  UpgradeFeature,
+  UpgradeLocation,
+} from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'

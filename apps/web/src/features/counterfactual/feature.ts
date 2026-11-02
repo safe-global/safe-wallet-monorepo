@@ -30,8 +30,8 @@ import {
   getUndeployedSafeInfo,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-  getCounterfactualBalance,
 } from './services/safeDeployment'
+import { getCounterfactualBalance } from './services/getCounterfactualBalance'
 
 // Flat structure - naming conventions determine stub behavior:
 // - PascalCase → component (stub renders null)

@@ -1,5 +1,6 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { countSeats, isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
+import { countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
+import { type SafeLimit } from '@safe-global/views/features/spaces/components/SelectedCounter/types'
 
 export const truncateSpaceName = (name: string, maxLength: number): string =>
   name.length > maxLength ? `${name.slice(0, maxLength)}...` : name

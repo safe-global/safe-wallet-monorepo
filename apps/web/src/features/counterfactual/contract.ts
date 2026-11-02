@@ -15,7 +15,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { SignOrExecuteProps } from '@safe-global/views/components/tx/shared/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { PayMethod } from './types'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 // Component imports for typeof pattern (enables IDE navigation)
 import type ActivateAccountButton from './components/ActivateAccountButton'
@@ -35,8 +35,8 @@ import type {
   getUndeployedSafeInfo,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-  getCounterfactualBalance,
 } from './services/safeDeployment'
+import type { getCounterfactualBalance } from './services/getCounterfactualBalance'
 
 // Component prop types (for components with external props)
 export interface PayNowPayLaterProps {

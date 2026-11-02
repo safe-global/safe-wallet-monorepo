@@ -1,12 +1,13 @@
 import { useContext } from 'react'
-import { SlotName, withSlot } from '../slots'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '../slots/withSlot'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
-import { SafeTxContext } from '../SafeTxProvider'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 type RiskConfirmationProps = {

@@ -7,7 +7,8 @@ import { useAppsFilterByCategory } from './useAppsFilterByCategory'
 import { useAppsSearch } from './useAppsSearch'
 import { useAppsFilterByOptimizedForBatch } from './useAppsFilterByOptimizedForBatch'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
+import { trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS } from '@/services/analytics/events/safeApps'
 
 type ReturnType = {
   query: string

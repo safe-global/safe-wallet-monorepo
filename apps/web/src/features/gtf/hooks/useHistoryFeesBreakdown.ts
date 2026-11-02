@@ -12,14 +12,12 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { isRateLimitError } from '@/utils/transaction-errors'
 import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/gtf/types'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
-
-export type { HistoryFeesData } from '@safe-global/views/features/gtf/types'
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 

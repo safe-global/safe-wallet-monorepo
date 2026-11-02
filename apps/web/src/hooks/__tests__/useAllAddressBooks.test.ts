@@ -24,9 +24,12 @@ jest.mock('@/store', () => ({
     typeof selector === 'function' ? selector({}) : undefined,
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
-  useGetSpaceAddressBook: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/store/authSlice', () => ({
@@ -47,7 +50,8 @@ jest.mock('@/components/common/AddressBookSourceProvider', () => ({
 }))
 
 // Import the mocked hooks
-import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 describe('useAllAddressBooks', () => {
   describe('useAllMergedAddressBooks', () => {

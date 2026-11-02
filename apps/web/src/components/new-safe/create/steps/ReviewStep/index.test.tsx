@@ -11,15 +11,18 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
-import * as cfServices from '@/features/counterfactual/services'
-import * as multichain from '@/features/multichain'
+import * as persistCfSafe from '@/features/counterfactual/services/persistCounterfactualSafe'
+import * as safeCreationEvents from '@/features/counterfactual/services/safeCreationEvents'
+import * as multichainUtils from '@/features/multichain/utils/utils'
 import * as createLogic from '@/components/new-safe/create/logic'
 import * as web3 from '@/hooks/wallets/web3'
 import * as analytics from '@/services/analytics'
 import * as notificationsSlice from '@/store/notificationsSlice'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
 import { getStoreInstance } from '@/store'
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
@@ -344,9 +347,9 @@ describe('ReviewStep', () => {
       .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
     jest
-      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    const persistSpy = jest.spyOn(persistCfSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
@@ -373,10 +376,10 @@ describe('ReviewStep', () => {
       .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
     jest
-      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
-    const eventSpy = jest.spyOn(cfServices, 'safeCreationDispatch')
+    jest.spyOn(persistCfSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    const eventSpy = jest.spyOn(safeCreationEvents, 'safeCreationDispatch')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
@@ -386,7 +389,10 @@ describe('ReviewStep', () => {
       fireEvent.click(screen.getByTestId('review-step-next-btn'))
     })
 
-    expect(eventSpy).not.toHaveBeenCalledWith(cfServices.SafeCreationEvent.AWAITING_EXECUTION, expect.anything())
+    expect(eventSpy).not.toHaveBeenCalledWith(
+      safeCreationEvents.SafeCreationEvent.AWAITING_EXECUTION,
+      expect.anything(),
+    )
   })
 
   it('does not track a counterfactual creation for already-deployed safes', async () => {
@@ -400,9 +406,9 @@ describe('ReviewStep', () => {
       .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
     jest
-      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest.spyOn(persistCfSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const trackSpy = jest.spyOn(analytics, 'trackEvent')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -428,9 +434,9 @@ describe('ReviewStep', () => {
       .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
     jest
-      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest.spyOn(persistCfSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -462,9 +468,9 @@ describe('ReviewStep', () => {
       .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
     jest
-      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    jest.spyOn(persistCfSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -492,10 +498,10 @@ describe('ReviewStep', () => {
       .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
     jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
     jest
-      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
     jest
-      .spyOn(cfServices, 'persistCounterfactualSafe')
+      .spyOn(persistCfSafe, 'persistCounterfactualSafe')
       .mockResolvedValue({ ok: false, error: new Error(backendMessage) })
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -526,9 +532,9 @@ describe('ReviewStep', () => {
         .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
       jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
       jest
-        .spyOn(multichain, 'predictAddressBasedOnReplayData')
+        .spyOn(multichainUtils, 'predictAddressBasedOnReplayData')
         .mockResolvedValue('0x0000000000000000000000000000000000000001')
-      return jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+      return jest.spyOn(persistCfSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
     }
 
     const newSafeHomeUrl = `/home?safe=${chainWithFeatures.shortName}%3A0x0000000000000000000000000000000000000001&spaceId=${MOCK_SPACE_UUID}`
@@ -683,7 +689,7 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(cfServices.persistCounterfactualSafe).toHaveBeenCalledTimes(1)
+      expect(persistCfSafe.persistCounterfactualSafe).toHaveBeenCalledTimes(1)
       expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
     })
 

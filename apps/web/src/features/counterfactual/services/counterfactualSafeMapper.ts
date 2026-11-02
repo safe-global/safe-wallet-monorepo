@@ -1,6 +1,6 @@
 import type { SafeVersion } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { ReplayedSafeProps } from '../types'
+import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 /**
  * Flat DTO matching the backend counterfactual-safes API schema. Nullable

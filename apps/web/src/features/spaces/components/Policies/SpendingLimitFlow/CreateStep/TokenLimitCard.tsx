@@ -3,8 +3,8 @@ import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
-import { getResetTimeOptions } from '@/features/spending-limits'
-import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
+import { getResetTimeOptions } from '@/features/spending-limits/constants'
+import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services/spendingLimitValidation'
 import useChainId from '@/hooks/useChainId'
 import { computeFiatValue } from '@/utils/fiat'
 import FiatValue from '@/components/common/FiatValue'
@@ -18,7 +18,7 @@ import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, tokenOptionLabel } from '../utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
   existingTokensForSpender,
@@ -31,6 +31,7 @@ import {
   limitsPath,
   spenderAddressPath,
   type SpendingLimitPolicyFormValues,
+  type TokenOption,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   EXISTING_LIMIT_TOOLTIP,

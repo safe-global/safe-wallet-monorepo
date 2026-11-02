@@ -4,7 +4,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { detectAnchorMatches } from '@safe-global/utils/utils/addressSimilarity'
 import type { ListAnnotation } from '@safe-global/utils/utils/addressSimilarity.types'
-import { selectAnchorIndex } from '../store'
+import { selectAnchorIndex } from '../store/anchorIndex'
 
 /**
  * Annotate each list address with the trusted anchor it resembles. Anchors come from local trust

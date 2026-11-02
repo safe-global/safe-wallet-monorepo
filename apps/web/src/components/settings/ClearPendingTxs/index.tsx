@@ -1,5 +1,5 @@
 import { usePendingTxIds } from '@/hooks/usePendingTxs'
-import { SETTINGS_EVENTS } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import Track from '@/components/common/Track'
 import { useAppDispatch } from '@/store'
 import { clearPendingTx } from '@/store/pendingTxsSlice'

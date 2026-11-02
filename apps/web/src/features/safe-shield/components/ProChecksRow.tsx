@@ -3,8 +3,14 @@ import NextLink from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
-import { trackPlanSelectionStarted, useSafeProAccess } from '@/features/spaces'
-import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import { trackPlanSelectionStarted } from '@/features/spaces'
+import { useSafeProAccess } from '@/features/spaces/hooks/useSafeProAccess'
+import {
+  MixpanelEventParams,
+  PlanSelectionEntryPoint,
+  UpgradeFeature,
+  UpgradeLocation,
+} from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'

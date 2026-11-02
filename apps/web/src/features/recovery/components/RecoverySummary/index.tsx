@@ -9,7 +9,7 @@ import type { RecoveryQueueItem } from '../../services/recovery-state'
 import classNames from 'classnames'
 import css from '@/components/transactions/TxSummary/styles.module.css'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
-import DateTime from '@/components/common/DateTime'
+import DateTime from '@/components/common/DateTime/DateTimeContainer'
 
 export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): ReactElement {
   const wallet = useWallet()

@@ -3,11 +3,13 @@ import { useBytecodeComparison, _resetBytecodeComparisonCache } from '../useByte
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/hooks/wallets/web3', () => ({ useWeb3ReadOnly: jest.fn() }))
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  useWeb3ReadOnly: jest.fn(),
+}))
 jest.mock('@/hooks/useChains', () => ({ useCurrentChain: jest.fn(() => undefined) }))
 
 const mockUseSafeInfo = jest.requireMock('@/hooks/useSafeInfo').default as jest.Mock
-const mockUseWeb3ReadOnly = jest.requireMock('@/hooks/wallets/web3').useWeb3ReadOnly as jest.Mock
+const mockUseWeb3ReadOnly = jest.requireMock('@/hooks/wallets/web3ReadOnly').useWeb3ReadOnly as jest.Mock
 
 const IMPLEMENTATION = '0x0000000000000000000000000000000000000abc'
 

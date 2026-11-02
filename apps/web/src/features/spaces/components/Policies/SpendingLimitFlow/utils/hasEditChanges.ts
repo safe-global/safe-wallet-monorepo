@@ -1,5 +1,5 @@
-import type { SpendingLimitState } from '@/features/spending-limits'
-import { isSameAllowance, isSpendingLimitFor } from '@/features/spending-limits/services'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
+import { isSameAllowance, isSpendingLimitFor } from '@/features/spending-limits/services/spendingLimitMatching'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   filledLimits,

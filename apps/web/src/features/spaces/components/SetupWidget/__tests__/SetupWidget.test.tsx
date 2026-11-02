@@ -1,11 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
-import type * as SpacesModule from '@/features/spaces'
 import SetupWidget from '../index'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   useSpaceSafes: jest.fn(() => ({ allSafes: [] })),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useSpaceMembersByStatus: jest.fn(() => ({ activeMembers: [], invitedMembers: [] })),
-  useGetSpaceAddressBook: jest.fn(() => []),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: jest.fn(() => []),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => '1'),
 }))
 
@@ -22,8 +28,10 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   }),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: jest.fn(() => false),
 }))
 
@@ -57,6 +65,13 @@ jest.mock(
     },
 )
 
+const spacesMocks = () => ({
+  useSpaceSafes: jest.requireMock('@/features/spaces/hooks/useSpaceSafes').useSpaceSafes as jest.Mock,
+  useSpaceMembersByStatus: jest.requireMock('@/features/spaces/hooks/useSpaceMembers')
+    .useSpaceMembersByStatus as jest.Mock,
+  useGetSpaceAddressBook: jest.requireMock('@/features/spaces/hooks/useGetSpaceAddressBook').default as jest.Mock,
+})
+
 describe('SetupWidget', () => {
   beforeEach(() => {
     mockSetDismissedSpaces.mockClear()
@@ -70,8 +85,7 @@ describe('SetupWidget', () => {
       return [{}, mockSetDismissedSpaces]
     })
 
-    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof SpacesModule>('@/features/spaces')
+    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } = spacesMocks()
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [] })
@@ -127,8 +141,7 @@ describe('SetupWidget', () => {
   })
 
   it('sorts completed steps before incomplete ones', () => {
-    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof SpacesModule>('@/features/spaces')
+    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } = spacesMocks()
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
@@ -162,8 +175,7 @@ describe('SetupWidget', () => {
   })
 
   it('marks the space as completed when Explore Spaces modal is closed and all steps are done', () => {
-    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof SpacesModule>('@/features/spaces')
+    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } = spacesMocks()
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
@@ -213,7 +225,7 @@ describe('SetupWidget', () => {
   })
 
   it('disables click on completed steps', () => {
-    const { useSpaceSafes, useGetSpaceAddressBook } = jest.requireMock<typeof SpacesModule>('@/features/spaces')
+    const { useSpaceSafes, useGetSpaceAddressBook } = spacesMocks()
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })

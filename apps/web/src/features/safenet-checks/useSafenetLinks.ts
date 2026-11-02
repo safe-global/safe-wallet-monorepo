@@ -1,11 +1,8 @@
 import { useChain } from '@/hooks/useChains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import {
-  CheckStatus,
-  verdictAttestation,
-  type PublicCheckStatus,
-  type SafenetCheckSnapshot,
-} from '@safe-global/utils/features/safenet-checks'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { verdictAttestation } from '@safe-global/utils/features/safenet-checks/utils/attestations'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
 import { getSafenetExplorerUrl } from './statusPresentation'
 
 export type SafenetLinks = {

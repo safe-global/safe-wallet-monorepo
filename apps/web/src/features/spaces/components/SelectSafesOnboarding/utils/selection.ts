@@ -1,6 +1,8 @@
 import type { UseFormSetValue } from 'react-hook-form'
-import { isMultiChainSafeItem, type AllSafeItems, type MultiChainSafeItem } from '@/hooks/safes'
-import type { AccountLine } from '@/features/myAccounts'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { type MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import {
   getSafeId,

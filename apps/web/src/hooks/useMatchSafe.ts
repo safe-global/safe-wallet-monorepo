@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import useChains from '@/hooks/useChains'

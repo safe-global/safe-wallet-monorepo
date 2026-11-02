@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import useKeyboardObserver from '../useKeyboardObserver'
-import * as globalSearchSlice from '@/features/global-search/store'
+import * as globalSearchSlice from '@/features/global-search/store/globalSearchSlice'
 
 describe('useKeyboardObserver', () => {
   beforeEach(() => {

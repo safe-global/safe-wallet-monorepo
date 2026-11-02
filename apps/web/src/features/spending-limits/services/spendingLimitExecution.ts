@@ -1,10 +1,8 @@
 import uniqWith from 'lodash/uniqWith'
-import type { SpendingLimitState, NewSpendingLimitData, SpendingLimitTxParams } from '../types'
-import {
-  getLatestSpendingLimitAddress,
-  getDeployedSpendingLimitModuleAddress,
-  getSpendingLimitContract,
-} from './spendingLimitContracts'
+import type { NewSpendingLimitData, SpendingLimitTxParams } from '../types'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
+import { getSpendingLimitContract } from './spendingLimitContracts'
+import { getLatestSpendingLimitAddress, getDeployedSpendingLimitModuleAddress } from './spendingLimitDeployments'
 import { isSpendingLimitFor } from './spendingLimitMatching'
 import type { SpendingLimitEdit } from './spendingLimitEdit'
 import type { MetaTransactionData, SafeTransaction, TransactionOptions } from '@safe-global/types-kit'

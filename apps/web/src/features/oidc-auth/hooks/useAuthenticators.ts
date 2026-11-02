@@ -2,12 +2,9 @@ import { useCallback, useMemo } from 'react'
 import {
   useAuthGetMeV1Query,
   useOidcAuthListAuthenticatorsV1Query,
-  type Authenticator,
 } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { gatewayUrl } from '@/config/gateway'
 import { navigateTo } from '@/utils/navigation'
-
-export type { Authenticator }
 
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 

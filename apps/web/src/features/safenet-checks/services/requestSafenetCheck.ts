@@ -1,4 +1,4 @@
-import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
+import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway/chains'
 import { getHttpStatusFromError } from '@safe-global/utils/services/exceptions/utils'
 import { cgwApi as safenetApi } from '@safe-global/store/gateway/AUTO_GENERATED/safenet'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
@@ -6,7 +6,9 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
 import { getLocationSpaceId, isLegacySpaceId, parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { getStoreInstance, type RootState } from '@/store'
-import { MixpanelEventParams, SAFENET_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { isAuthenticated } from '@/store/authSlice'
 
 // Refusals, not faults: 403 Workspace refused, 429 daily limit, 501 chain off

@@ -5,15 +5,15 @@ import {
   type GroupedAnalysisResults,
   StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
-import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
-import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils/sliceTopBySeverity'
+import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import isEmpty from 'lodash/isEmpty'
-import { HypernativeFeature, type HypernativeAuthStatus, HnViewMoreOnHypernativeRow } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature, HnViewMoreOnHypernativeRow } from '@/features/hypernative'
+import { type HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
-// eslint-disable-next-line no-restricted-imports -- re-exporting this hook from the hypernative barrel closes a hypernative<->safe-shield<->tx-flow module-init cycle (TDZ)
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 
 const VISIBLE_CAP = 3

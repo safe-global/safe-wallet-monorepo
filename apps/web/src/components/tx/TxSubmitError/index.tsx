@@ -1,11 +1,10 @@
 import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getGs026Message, isRevertError } from '@safe-global/utils/services/exceptions/contractErrors'
 import {
   getGasLimitTooLowMessage,
   isNonceTooLowError,
   isRateLimitError,
-  isRevertError,
   RATE_LIMIT_USER_MESSAGE,
 } from '@/utils/transaction-errors'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'

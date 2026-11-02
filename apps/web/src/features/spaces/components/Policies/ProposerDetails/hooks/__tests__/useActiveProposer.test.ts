@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../mocks/policies'
-import { ProposerStatus } from '../../../ProposerDrawer'
+import { ProposerStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 import { REMOVE_NESTED_PROPOSER_HINT, useActiveProposer } from '../useActiveProposer'
 
 const mockUseWallet = jest.fn()

@@ -2,9 +2,10 @@ import { type ReactElement } from 'react'
 import { render as renderTestUtils } from '@/tests/test-utils'
 import { ComboSubmit } from '../ComboSubmit'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import * as slotsHooks from '@/components/tx-flow/slots/hooks'
-import { SlotProvider } from '@/components/tx-flow/slots'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import * as useSlotModule from '@/components/tx-flow/slots/hooks/useSlot'
+import * as useSlotIdsModule from '@/components/tx-flow/slots/hooks/useSlotIds'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -51,14 +52,14 @@ describe('ComboSubmit', () => {
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
 
     // Mock useSlot to return sign and execute options
-    jest.spyOn(slotsHooks, 'useSlot').mockReturnValue([
+    jest.spyOn(useSlotModule, 'useSlot').mockReturnValue([
       { id: 'sign', label: 'Sign', Component: () => null },
       { id: 'execute', label: 'Execute', Component: () => null },
     ] as any)
   })
 
   it('auto-selects Execute when available and no stored preference', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'execute'])
 
     // Mock localStorage to return undefined (no stored preference)
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
@@ -75,7 +76,7 @@ describe('ComboSubmit', () => {
   })
 
   it('shows the last signature notice when the signature completes the threshold', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign'])
 
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
@@ -90,7 +91,7 @@ describe('ComboSubmit', () => {
   })
 
   it('shows the last signature notice when the last signer of an m/n Safe picks Sign over Execute', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'execute'])
 
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     mockUseLocalStorage.mockReturnValue(['sign', jest.fn()])
@@ -105,7 +106,7 @@ describe('ComboSubmit', () => {
   })
 
   it('does not show the last signature notice when the signature does not complete the threshold', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'execute'])
 
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     mockUseLocalStorage.mockReturnValue(['sign', jest.fn()])
@@ -120,7 +121,7 @@ describe('ComboSubmit', () => {
   })
 
   it('does not show the last signature notice when another action is selected', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'executeThroughRole'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'executeThroughRole'])
 
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
@@ -135,7 +136,7 @@ describe('ComboSubmit', () => {
   })
 
   it('falls back to first option when stored action is not available', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign'])
 
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     // Stored action is 'execute' but it's not available in current slots
@@ -152,7 +153,7 @@ describe('ComboSubmit', () => {
   })
 
   it('does not auto-select Execute when validation is loading', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'execute'])
 
     // Mock validation loading state (third parameter is loading)
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, true])
@@ -175,7 +176,7 @@ describe('ComboSubmit', () => {
   })
 
   it('shows the execution error', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'execute'])
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
 
@@ -189,7 +190,7 @@ describe('ComboSubmit', () => {
   })
 
   it('shows a wallet rejection', () => {
-    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+    jest.spyOn(useSlotIdsModule, 'useSlotIds').mockReturnValue(['sign', 'execute'])
     const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
     mockUseLocalStorage.mockReturnValue([undefined, jest.fn()])
 

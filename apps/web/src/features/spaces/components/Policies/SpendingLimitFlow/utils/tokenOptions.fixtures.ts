@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { Builder, type IBuilder } from '@/tests/Builder'
-import type { TokenOption } from './tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export const tokenOptionBuilder = (): IBuilder<TokenOption> => {
   return Builder.new<TokenOption>().with({

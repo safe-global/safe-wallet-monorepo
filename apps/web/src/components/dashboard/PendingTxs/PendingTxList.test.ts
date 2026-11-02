@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { MultisigExecutionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { RecoveryQueueItem } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import {
   multisigExecutionInfoBuilder,

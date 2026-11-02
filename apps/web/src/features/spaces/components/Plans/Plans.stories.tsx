@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import type { PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PAID_PLANS, subscription } from './plans.fixtures'

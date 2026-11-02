@@ -3,8 +3,7 @@ import { formatUnits } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -20,16 +19,8 @@ import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCand
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isGtfFeePreviewAvailable } from '../utils/isGtfFeePreviewAvailable'
 import { IS_RELAYING_LIVE } from '../constants'
-import {
-  computeTotalOutgoing,
-  getSendInGasToken,
-  type TotalOutgoing,
-  type TotalOutgoingLine,
-} from '../services/totalOutgoing'
+import { computeTotalOutgoing, getSendInGasToken, type TotalOutgoing } from '../services/totalOutgoing'
 import type { FeeRow } from '@safe-global/views/features/gtf/types'
-
-export type { TotalOutgoing, TotalOutgoingLine }
-export type { FeeRow } from '@safe-global/views/features/gtf/types'
 
 export type FeesPreviewData = {
   canCoverFees: boolean

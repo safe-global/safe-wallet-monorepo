@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { gtmTrack } from '@/services/analytics/gtm'
-import { TX_LIST_EVENTS, ASSETS_EVENTS } from './events'
+import { TX_LIST_EVENTS } from './events/txList'
+import { ASSETS_EVENTS } from './events/assets'
 import { selectQueuedTransactions } from '@/store/txQueueSlice'
 import { useAppSelector } from '@/store'
 import useChainId from '@/hooks/useChainId'

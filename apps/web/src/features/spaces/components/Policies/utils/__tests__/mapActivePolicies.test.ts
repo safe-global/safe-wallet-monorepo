@@ -5,7 +5,7 @@ import {
   type AllowlistRecipient,
   type PolicyTokenInfo,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import { getPolicyGuardAddress } from '@/features/policy-guard/services/policyEngineDeployments'
 import {
   mockErc20TransferDto,
   mockNativeTransferDto,
@@ -14,7 +14,8 @@ import {
   mockTreasuryAllowlistDtos,
 } from '../../mocks/activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
-import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../mapActivePolicies'
+import { mapActivePolicies } from '../mapActivePolicies'
+import { type Erc20TokenResolver, type NativeTokenResolver } from '../mapAllowlists'
 
 describe('mapActivePolicies', () => {
   it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {

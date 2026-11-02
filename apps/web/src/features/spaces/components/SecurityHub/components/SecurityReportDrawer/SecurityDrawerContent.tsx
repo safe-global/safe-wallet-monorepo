@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { SCROLL_AREA } from '@/utils/styles'
-import type { ScanContext, ScanResult } from '@/features/security/types'
+import type { ScanContext } from '@/features/security/data/scanners/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 import SecurityDrawerChecks from './tabs/SecurityDrawerChecks'
 import SecurityDrawerDetails from './tabs/SecurityDrawerDetails'
 

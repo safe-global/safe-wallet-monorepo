@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Check, Copy } from 'lucide-react'
-import { HighlightedAddress } from '@safe-global/views/features/safe-shield/components/HighlightedAddress'
+import { HighlightedAddress } from '@safe-global/views/features/safe-shield/components/HighlightedAddress/HighlightedAddress'
 import { ExternalLinkIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import LinkIcon from '@safe-global/views/assets/images/common/link.svg'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'

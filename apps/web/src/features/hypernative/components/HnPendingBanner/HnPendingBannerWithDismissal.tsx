@@ -2,7 +2,7 @@ import { useAppDispatch } from '@/store'
 import { setPendingBannerDismissed } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
+import type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'
 import { HnPendingBanner } from '@safe-global/views/features/hypernative/components/HnPendingBanner/HnPendingBanner'
 import type { ReactElement } from 'react'
 

@@ -1,9 +1,11 @@
 import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { DrawerList, DrawerSection, type DrawerListItem } from '@/components/common/Drawer'
+import { DrawerList, type DrawerListItem } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Link } from '@safe-global/views/components/ui/link'
-import { AccountIdentity, type AccountIdentityProps } from '../../../components/AccountIdentity'
+import AccountIdentity from '../../../components/AccountIdentity/AccountIdentity'
+import { type AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
 
 export type PolicyOverviewProps = {
   appliesTo: AccountIdentityProps

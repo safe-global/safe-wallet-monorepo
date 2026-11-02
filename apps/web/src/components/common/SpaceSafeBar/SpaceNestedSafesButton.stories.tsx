@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { GitMerge } from 'lucide-react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',

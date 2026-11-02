@@ -11,18 +11,27 @@ const mockUseIsCounterfactualSafe = jest.fn()
 const mockUseLoadFeature = jest.fn()
 
 jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
   CounterfactualFeature: 'counterfactual-feature',
 }))
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: () => mockUseIsCounterfactualSafe(),
+}))
 
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: () => mockUseLoadFeature(),
 }))
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: { NEW_TRANSACTION: { action: 'New transaction' } },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
@@ -34,9 +43,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'),
+  default: jest.fn(),
 }))
 
 jest.mock('@/components/tx-flow/flows', () => ({

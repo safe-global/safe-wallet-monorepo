@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { TokenOption } from '../../utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import TokenOptionRow from '../TokenOptionRow'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 

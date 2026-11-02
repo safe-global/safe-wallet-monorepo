@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useHasFeature } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { selectAnchorIndex } from '../store'
+import { selectAnchorIndex } from '../store/anchorIndex'
 import useSimilarityClusters from './useSimilarityClusters'
 
 const NO_ADDRESSES: string[] = []

@@ -5,7 +5,8 @@ import { ChainSelectorBlock } from '@/features/spaces'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 
 function SpaceChainSelectorSkeleton() {
   return (

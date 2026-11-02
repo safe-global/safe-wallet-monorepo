@@ -11,9 +11,9 @@ import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 import LockIcon from '@safe-global/views/assets/images/common/lock-small.svg'
 // eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { HYPERNATIVE_SOURCE, HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 type AlertVariant = 'default' | 'warning' | 'destructive'
 

@@ -1,12 +1,10 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import {
-  SafeProNoticeModal,
-  SafeProPendingModal,
-  SafeProSubscriptionActivatedModal,
-  SafeProTrialActivatedModal,
-} from '@safe-global/views/features/spaces/components/SafeProModals'
+import SafeProNoticeModal from '@safe-global/views/features/spaces/components/SafeProModals/SafeProNoticeModal'
+import SafeProPendingModal from '@safe-global/views/features/spaces/components/SafeProModals/SafeProPendingModal'
+import SafeProSubscriptionActivatedModal from '@safe-global/views/features/spaces/components/SafeProModals/SafeProSubscriptionActivatedModal'
+import SafeProTrialActivatedModal from '@safe-global/views/features/spaces/components/SafeProModals/SafeProTrialActivatedModal'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'

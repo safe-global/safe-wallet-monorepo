@@ -1,1 +1,0 @@
-export { TotalValueElement } from './TotalValueElement'

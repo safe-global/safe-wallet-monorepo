@@ -7,7 +7,9 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import SpaceAddressBookActions from '../SpaceAddressBookActions'
 
 const mockUseIsAdmin = jest.fn(() => true)
-jest.mock('@/features/spaces', () => ({ useIsAdmin: () => mockUseIsAdmin() }))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  useIsAdmin: () => mockUseIsAdmin(),
+}))
 
 jest.mock('../EditContactDialog', () => ({
   __esModule: true,

@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setDarkMode } from '@/store/settingsSlice'
-import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Typography } from '@safe-global/views/components/ui/typography'

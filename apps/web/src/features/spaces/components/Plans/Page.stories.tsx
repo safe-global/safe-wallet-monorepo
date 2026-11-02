@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpacePlansPage from './Page'
 import { DAY, billingHandlers, now, subscription } from './plans.fixtures'
 

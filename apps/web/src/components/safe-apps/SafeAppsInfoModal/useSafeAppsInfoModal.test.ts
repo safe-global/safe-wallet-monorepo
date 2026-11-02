@@ -1,6 +1,6 @@
 import { act, renderHook } from '@/tests/test-utils'
 import useSafeAppsInfoModal from './useSafeAppsInfoModal'
-import { useBrowserPermissions } from '@/hooks/safe-apps/permissions'
+import { useBrowserPermissions } from '@/hooks/safe-apps/permissions/useBrowserPermissions'
 import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
 

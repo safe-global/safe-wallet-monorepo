@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
+import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 
 export const SWAPS_APP_CARD_STORAGE_KEY = 'showSwapsAppCard'
 

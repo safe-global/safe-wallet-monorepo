@@ -1,4 +1,4 @@
-import { useAllSafesGrouped } from '@/hooks/safes'
+import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'

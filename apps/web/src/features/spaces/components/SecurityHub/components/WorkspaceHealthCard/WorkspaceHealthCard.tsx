@@ -5,9 +5,10 @@ import { Card } from '@safe-global/views/components/ui/card'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/types'
+import type { ScanResult, SafeGrade } from '@safe-global/views/features/security/types'
+import type { ScoreBandDef } from '@/features/security/data/scoreBands'
 import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'

@@ -2,8 +2,8 @@ import { render, waitFor } from '@testing-library/react'
 import SpacePage from '../../pages/spaces/index'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as featureModule from '@/features/__core__'
-import * as spacesFeature from '@/features/spaces'
+import * as featureModule from '@/features/__core__/useLoadFeature'
+import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
 
 const mockReplace = jest.fn()
 
@@ -11,14 +11,19 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: jest.fn(),
 }))
 
 let mockLanding: { spaceId: string | null; isLoading: boolean } = { spaceId: null, isLoading: false }
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: 'SpacesFeature',
-  useFeatureFlagRedirect: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useFeatureFlagRedirect', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useLandingSpaceId', () => ({
   useLandingSpaceId: () => mockLanding,
 }))
 
@@ -39,7 +44,7 @@ const setup = ({
     replace: mockReplace,
   })
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceDashboardPage: SpaceDashboardPageMock })
-  ;(spacesFeature.useFeatureFlagRedirect as jest.Mock).mockReturnValue(undefined)
+  ;(useFeatureFlagRedirect as jest.Mock).mockReturnValue(undefined)
 }
 
 describe('SpacePage (/spaces)', () => {

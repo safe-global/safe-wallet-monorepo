@@ -4,9 +4,10 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
-import { useLoadFeature } from '@/features/__core__'
-import { type SafeItem } from '@/hooks/safes'
-import { MyAccountsFeature, useSafeItemData } from '@/features/myAccounts'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
+import { MyAccountsFeature } from '@/features/myAccounts'
+import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo

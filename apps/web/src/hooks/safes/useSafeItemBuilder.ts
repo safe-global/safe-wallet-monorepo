@@ -4,10 +4,13 @@ import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 const EMPTY_OWNED: AllOwnedSafes = {}
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { selectAllVisitedSafes } from '@/store/visitedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from './useAllOwnedSafes'
-import { _buildSafeItem, type SafeItem } from './useAllSafes'
+import { _buildSafeItem } from './useAllSafes'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
 
 export type SafeItemBuilder = (chainId: string, address: string) => SafeItem
 

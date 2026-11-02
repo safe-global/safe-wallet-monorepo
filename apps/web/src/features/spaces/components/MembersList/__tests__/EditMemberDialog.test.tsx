@@ -27,9 +27,13 @@ jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
+}))
+jest.mock('@/features/spaces/hooks/useIsLastActiveAdmin', () => ({
   useAdminCount: () => mockAdminCount(),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: () => mockIsAdmin(),
   isActiveAdmin: (member: { role: string; status: string }) => member.role === 'ADMIN' && member.status === 'ACTIVE',
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,

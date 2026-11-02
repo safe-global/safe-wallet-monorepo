@@ -1,5 +1,6 @@
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { AllSafeItems, SafeItem } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, nameFieldKey, withWorkspaceNames } from '../utils'
 
 const ADDRESS_A = '0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA'

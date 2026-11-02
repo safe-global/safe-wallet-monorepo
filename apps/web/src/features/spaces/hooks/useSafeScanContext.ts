@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { type SafeItem } from '@/hooks/safes'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useTransactionsGetCreationTransactionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -8,13 +8,15 @@ import useChains, { useChain } from '@/hooks/useChains'
 import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/store'
-import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
-import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
-import type { ScanContext } from '@/features/security/types'
-import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
-import type { OverviewData } from '@safe-global/views/features/spaces/components/SecurityHub/types'
-
-export type { OverviewData } from '@safe-global/views/features/spaces/components/SecurityHub/types'
+import { selectCurrency } from '@/store/settingsSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils/utils'
+import type { ScanContext } from '@/features/security/data/scanners/types'
+import type {
+  OverviewData,
+  SpaceSafeEntry,
+  SelectedSafe,
+} from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 const useSafeScanContext = (
   selected: SelectedSafe | null,

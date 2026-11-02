@@ -1,7 +1,7 @@
 import uniqWith from 'lodash/uniqWith'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import type {
   RemovalCopy,
   SpendingLimitPolicyFormValues,
@@ -44,9 +44,6 @@ export const findPendingRemovals = (
 
   return { spenders: onChainSpenders.filter((spender) => !carded.some((kept) => sameAddress(kept, spender))), limits }
 }
-
-/** The notice's two lines: what goes, and what that means before the transaction executes. */
-export type { RemovalCopy } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 const STAYS_IN_FORCE = 'They can still be spent until this transaction is executed.'
 const POLICY_GOES = 'Executing it removes the spending limit from this Safe account entirely.'

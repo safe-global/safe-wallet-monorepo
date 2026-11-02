@@ -6,16 +6,13 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import {
-  type AllSafeItems,
-  type MultiChainSafeItem,
-  type SafeItem,
-  isMultiChainSafeItem,
-  useGetHref,
-} from '@/hooks/safes'
-import { selectUndeployedSafes } from '@/features/counterfactual/store'
-import { isPredictedSafeProps } from '@/features/counterfactual/services'
-import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { type MultiChainSafeItem, type SafeItem } from '@safe-global/views/hooks/safes/types'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { useGetHref } from '@/hooks/safes/useGetHref'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { isPredictedSafeProps } from '@/features/counterfactual/services/typeGuards'
+import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import { useSafeSpaces, type SafeSpacesMap } from '@/hooks/useSafeSpaces'
 import { useAppSelector } from '@/store'
 import useChains from '@/hooks/useChains'

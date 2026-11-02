@@ -5,7 +5,8 @@ import { addOrUpdateSafe, unpinSafe } from '@/store/addedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, PIN_SAFE_LABELS } from '@/services/analytics/events/overview'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 export interface UseSingleChainPinActionsProps {

@@ -1,7 +1,7 @@
 import { getAddress } from 'ethers'
 import { renderHook } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { ExistingSpendingLimitsContext } from '../../ExistingSpendingLimitsProvider'
 import { useExistingLimitTokens } from '../useExistingLimitTokens'

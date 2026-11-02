@@ -1,6 +1,6 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import * as gateway from '@safe-global/store/gateway'
+import * as gateway from '@safe-global/store/gateway/chains'
 import { renderHook } from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
 import * as useChainId from '@/hooks/useChainId'

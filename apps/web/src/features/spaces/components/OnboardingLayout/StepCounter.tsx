@@ -1,5 +1,5 @@
 import { cn } from '@safe-global/views/utils/cn'
-import { MixpanelEventParams, WorkspaceCreateStep } from '@/services/analytics'
+import { MixpanelEventParams, WorkspaceCreateStep } from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 

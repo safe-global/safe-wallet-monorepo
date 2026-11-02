@@ -1,18 +1,16 @@
 import { memo, useEffect, useMemo } from 'react'
-import {
-  type AllSafeItems,
-  type AllSafeItemsGrouped,
-  useSafeOrderComparator,
-  useSafesSearch,
-  useSaveManualOrder,
-} from '@/hooks/safes'
+import { type AllSafeItems, type AllSafeItemsGrouped } from '@/hooks/safes/useAllSafesGrouped'
+import { useSafeOrderComparator } from '@/hooks/safes/useSafeOrderComparator'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
+import { useSaveManualOrder } from '@/hooks/safes/useSaveManualOrder'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useAppSelector } from '@/store'
 import { OrderByOption, selectOrderByPreference, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { Typography } from '@safe-global/views/components/ui/typography'
 
 import SafeAccountsTable from '../../../SafeAccountsTable'

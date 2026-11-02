@@ -28,7 +28,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
-jest.mock('../../SidebarTopBar', () => ({
+jest.mock('../../SidebarTopBar/SidebarTopBar', () => ({
   SidebarTopBar: () => <div data-testid="sidebar-top-bar" />,
 }))
 

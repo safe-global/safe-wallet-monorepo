@@ -1,9 +1,10 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
+import type { EvidenceItem, SafeGrade, ScanResult, SecurityGrade } from '@safe-global/views/features/security/types'
+import type { ScanContext } from '@/features/security/data/scanners/types'
 import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import {
   EvidenceList,
   Row,

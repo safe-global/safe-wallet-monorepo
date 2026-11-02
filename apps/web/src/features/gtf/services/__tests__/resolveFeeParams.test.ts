@@ -1,13 +1,13 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 import { resolveFeeParams } from '../resolveFeeParams'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
 import { FEE_COLLECTORS } from '../../constants'
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createTx: jest.fn(),
 }))
 

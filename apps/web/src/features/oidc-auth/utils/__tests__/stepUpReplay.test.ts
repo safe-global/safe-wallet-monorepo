@@ -6,7 +6,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
-import { stepUpReturning } from '../../store'
+import { stepUpReturning } from '../../store/stepUpSlice'
 import { navigateTo } from '@/utils/navigation'
 import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
 

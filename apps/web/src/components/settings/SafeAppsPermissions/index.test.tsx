@@ -1,23 +1,22 @@
 import { render, screen } from '@/tests/test-utils'
 import SafeAppsPermissions from '.'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
-import { useBrowserPermissions, useSafePermissions } from '@/hooks/safe-apps/permissions'
-import type * as SafeAppsPermissionHooks from '@/hooks/safe-apps/permissions'
+import { useBrowserPermissions } from '@/hooks/safe-apps/permissions/useBrowserPermissions'
+import { useSafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
 import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 jest.mock('@/hooks/safe-apps/useSafeApps')
 
-jest.mock('@/hooks/safe-apps/permissions', () => {
-  const actual = jest.requireActual<typeof SafeAppsPermissionHooks>('@/hooks/safe-apps/permissions')
+jest.mock('@/hooks/safe-apps/permissions/useBrowserPermissions', () => ({
+  ...jest.requireActual('@/hooks/safe-apps/permissions/useBrowserPermissions'),
+  useBrowserPermissions: jest.fn(),
+}))
 
-  return {
-    __esModule: true,
-    ...actual,
-    useBrowserPermissions: jest.fn(),
-    useSafePermissions: jest.fn(),
-  }
-})
+jest.mock('@/hooks/safe-apps/permissions/useSafePermissions', () => ({
+  ...jest.requireActual('@/hooks/safe-apps/permissions/useSafePermissions'),
+  useSafePermissions: jest.fn(),
+}))
 
 const safeAppUrl = 'https://app.safe.global'
 

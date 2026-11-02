@@ -1,23 +1,5 @@
 import dynamic from '@/utils/dynamic'
 
-export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from './types'
-
-export { MIN_SAFE_VERSION_FOR_MULTICHAIN } from './constants'
-
-export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState, useMastercopyMigration } from './hooks'
-export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork, MastercopyMigration } from './hooks'
-
-export {
-  isMultiChainSafeItem,
-  getSafeSetups,
-  getSharedSetup,
-  getDeviatingSetups,
-  predictSafeAddress,
-  predictAddressBasedOnReplayData,
-  hasMultiChainCreationFeatures,
-  hasMultiChainAddNetworkFeature,
-} from './utils'
-
 // Static export — the pill is tiny and always visible in its consumers' first paint
 export { default as NetworkLogosPill } from './components/NetworkLogosPill'
 

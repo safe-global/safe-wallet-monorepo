@@ -6,7 +6,7 @@ const mockUseIsAdmin = jest.fn()
 const mockUseIsInvited = jest.fn()
 const mockUseSpaceMembersByStatus = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: () => mockUseIsAdmin(),
   useIsInvited: () => mockUseIsInvited(),
   useSpaceMembersByStatus: () => mockUseSpaceMembersByStatus(),

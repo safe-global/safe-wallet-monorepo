@@ -1,11 +1,9 @@
 import { renderHook, act } from '@testing-library/react'
 import { useSpaceChainSelector } from '../useSpaceChainSelector'
-import type { SafeItem } from '@/hooks/safes/useAllSafes'
-import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
-
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 // ── mocks ──────────────────────────────────────────────────────────────
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => '42'),
 }))
 
@@ -29,7 +27,7 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
     CHAIN_ID: 'Chain ID',
   },
 }))
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: jest.fn(),
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({
@@ -53,8 +51,7 @@ jest.mock('next/router', () => ({
 jest.mock('@/config/routes', () => ({
   AppRoutes: { home: '/home' },
 }))
-
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSafeBarSafes } from '../useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -64,7 +61,7 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useRouter } from 'next/router'
-import { isMultiChainSafeItem } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 
 // ── helpers ────────────────────────────────────────────────────────────
 

@@ -2,10 +2,10 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SEVERITY_TO_TITLE } from '@safe-global/utils/features/safe-shield/constants'
 import {
   CheckStatus,
-  SAFENET_EXPLORER_URL,
   type PublicCheckStatus,
   type UnavailableReason,
-} from '@safe-global/utils/features/safenet-checks'
+} from '@safe-global/utils/features/safenet-checks/types/status'
+import { SAFENET_EXPLORER_URL } from '@safe-global/utils/features/safenet-checks/constants'
 
 export type SafenetStatusPresentation = {
   /** Safe Shield severity vocabulary — drives SeverityIcon and its colors. */

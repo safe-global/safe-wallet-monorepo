@@ -7,13 +7,13 @@ import {
   type MaliciousOrModerateThreatAnalysisResult,
   ThreatStatus,
 } from '@safe-global/utils/features/safe-shield/types'
-import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
+import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils/mapVisibleAnalysisResults'
 import { SEVERITY_COLORS } from '../../constants'
-import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
-import { AddressChanges } from '@safe-global/views/features/safe-shield/components/AddressChanges'
+import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay/AnalysisIssuesDisplay'
+import { AddressChanges } from '@safe-global/views/features/safe-shield/components/AddressChanges/AddressChanges'
 import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
-import { ReportFalseResultModal } from '../ReportFalseResultModal'
-import { AnalysisDetailsDropdown } from '@safe-global/views/features/safe-shield/components/AnalysisDetailsDropdown'
+import { ReportFalseResultModal } from '../ReportFalseResultModal/ReportFalseResultModal'
+import { AnalysisDetailsDropdown } from '@safe-global/views/features/safe-shield/components/AnalysisDetailsDropdown/AnalysisDetailsDropdown'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult

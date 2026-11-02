@@ -1,8 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useOnboardingSubmit from '../useOnboardingSubmit'
-import type { SafeItem } from '@/hooks/safes'
-import type { MultiChainSafeItem } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 
@@ -55,12 +54,16 @@ jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
 
 // The grouping helpers are resolved lazily: requiring the real barrel while it is being mocked
 // trips its import cycle before initialization.
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
   flattenSafeItems: (items: Array<SafeItem | MultiChainSafeItem>) =>
     items.flatMap((item) => ('safes' in item ? item.safes : [item])),
+  _getMultiChainAccounts: (...args: unknown[]) =>
+    jest.requireActual('@/hooks/safes/useAllSafesGrouped')._getMultiChainAccounts(...args),
+  _getSingleChainAccounts: (...args: unknown[]) =>
+    jest.requireActual('@/hooks/safes/useAllSafesGrouped')._getSingleChainAccounts(...args),
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: (safe: SafeItem | MultiChainSafeItem) => 'safes' in safe,
-  _getMultiChainAccounts: (...args: unknown[]) => jest.requireActual('@/hooks/safes')._getMultiChainAccounts(...args),
-  _getSingleChainAccounts: (...args: unknown[]) => jest.requireActual('@/hooks/safes')._getSingleChainAccounts(...args),
 }))
 
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []

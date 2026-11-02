@@ -1,9 +1,9 @@
 import { type PropsWithChildren, type ReactElement } from 'react'
 import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
-import { useSlotIds } from '@/components/tx-flow/slots/hooks'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import ProposeSlot from '../Propose'
 import ProposerForm from '../Propose/ProposerForm'
 import SignSlot from '../Sign'
@@ -30,7 +30,10 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009' })),
 }))
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
 
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
   __esModule: true,

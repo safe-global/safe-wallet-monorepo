@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import type { GradeSummary } from '@/features/security/types'
+import type { GradeSummary } from '@/features/security/data/scanners/utils'
 import type { SafeHref } from '@/features/spaces/utils/safeHref'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'

@@ -1,5 +1,5 @@
 import SafesList from '../SafesList'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import css from '../../styles.module.css'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import { Button } from '@safe-global/views/components/ui/button'

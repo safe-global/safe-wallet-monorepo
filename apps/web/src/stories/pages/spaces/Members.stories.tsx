@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { http, HttpResponse } from 'msw'
 import { userEvent, within } from 'storybook/test'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpaceMembers from '@/pages/spaces/members'
 
 /**

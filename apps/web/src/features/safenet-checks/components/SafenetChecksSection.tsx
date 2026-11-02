@@ -8,9 +8,13 @@ import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
+import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
-import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
+import {
+  CheckStatus,
+  type PublicCheckStatus,
+  type UnavailableReason,
+} from '@safe-global/utils/features/safenet-checks/types/status'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {

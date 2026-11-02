@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { AppRoutes } from '@/config/routes'
-import type { SecurityContract } from '@/features/security'
-import type { ScanResult } from '@/features/security/types'
+import type { SecurityContract } from '@/features/security/contract'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 import { EvidenceList, makeBuildCta } from '../primitives'
 
 const ADDRESS = '0x1234567890AbcdEF1234567890aBcdef12345678'

@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactElement } from 'react'
-import { type SlotComponentProps, type SlotName, useSlot } from '@/components/tx-flow/slots'
+import { type SlotComponentProps, type SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlot } from '@/components/tx-flow/slots/hooks/useSlot'
 
 export type SlotProps<T extends SlotName> = PropsWithChildren<
   {

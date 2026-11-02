@@ -1,7 +1,7 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
-import type { SpendingLimitState } from '@/features/spending-limits'
-import { isSameAllowance } from '@/features/spending-limits/services'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
+import { isSameAllowance } from '@/features/spending-limits/services/spendingLimitMatching'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { toPolicySummaryModel, type PolicySummarySources } from './toPolicySummaryModel'
 import type {

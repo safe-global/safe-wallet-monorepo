@@ -1,13 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
-import {
-  ContractAnalysisBuilder,
-  DeadlockAnalysisBuilder,
-  RecipientAnalysisBuilder,
-} from '@safe-global/utils/features/safe-shield/builders'
+import { ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/contract-analysis.builder'
+import { DeadlockAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/deadlock-analysis.builder'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis.builder'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { HypernativeAuthStatus } from '@/features/hypernative'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { SafeShieldContent } from '../SafeShieldContent'
 
@@ -25,7 +23,7 @@ jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
 }))
 jest.mock('../useNestedTransaction', () => ({ useNestedTransaction: () => ({ isNested: false }) }))
 let mockProSpaceId: string | null = null
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockProSpaceId }),
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({

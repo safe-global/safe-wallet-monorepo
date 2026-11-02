@@ -1,7 +1,7 @@
 import { _formatNumber } from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { useController, useFormContext } from 'react-hook-form'
-import type { ApprovalInfo } from './hooks/useApprovalInfos'
+import type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import css from './styles.module.css'
 import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { approvalMethodDescription } from './ApprovalItem'

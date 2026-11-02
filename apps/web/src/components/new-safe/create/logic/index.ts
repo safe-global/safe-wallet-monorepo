@@ -8,7 +8,8 @@ import { getStoreInstance } from '@/store'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
 import { withSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
-import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS } from '@/services/analytics/events/safeApps'
 import Safe from '@safe-global/protocol-kit'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 
@@ -25,7 +26,7 @@ import {
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { isPredictedSafeProps } from '@/features/counterfactual/services'
+import { isPredictedSafeProps } from '@/features/counterfactual/services/typeGuards'
 import {
   getSafeContractDeployment,
   getChainAgnosticAddress,
@@ -37,7 +38,7 @@ import {
   Safe_to_l2_setup__factory,
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
-import { hasMultiChainCreationFeatures } from '@/features/multichain'
+import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
 
 // Type for the lazy-loaded activateReplayedSafe function
 export type ActivateReplayedSafeFn = (

@@ -40,7 +40,7 @@ jest.mock('next/router', () => ({
   }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
@@ -107,7 +107,7 @@ jest.mock('../../../config', () => ({
   },
 }))
 
-jest.mock('../../SpaceSelectorDropdown', () => ({
+jest.mock('../../SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: (props: {
     triggerVariant?: 'default' | 'addToWorkspace'
     selectedSpace?: unknown

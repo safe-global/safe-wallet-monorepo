@@ -33,7 +33,7 @@ jest.mock('@/store/authSlice', () => ({
   selectIsSessionCheckPending: 'selectIsSessionCheckPending',
 }))
 
-jest.mock('@/features/spaces/store', () => ({
+jest.mock('@/features/spaces/store/spaceNavigationSlice', () => ({
   setLastUsedSpaceOrigin: (origin: { path: string; spaceId: string } | null) => ({
     type: 'setLastUsedSpaceOrigin',
     payload: origin,
@@ -70,7 +70,7 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { welcome: { spaces: '/welcome/spaces' }, spaces: { index: '/spaces', plans: '/spaces/plans' } },
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 

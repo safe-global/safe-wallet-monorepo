@@ -6,7 +6,8 @@ import css from './styles.module.css'
 
 import { type DraftBatchItem } from '../../store/batchSlice'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { BATCH_EVENTS } from '@/services/analytics/events/batching'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
 import { Operation } from '@safe-global/store/gateway/types'
 

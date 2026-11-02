@@ -1,6 +1,6 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getSafeDisplayInfo } from '@/components/common/AccountRow'
+import { getSafeDisplayInfo } from '@safe-global/views/components/common/AccountRow/utils'
 import { TxModalContext } from '@/components/tx-flow'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { AppRoutes } from '@/config/routes'

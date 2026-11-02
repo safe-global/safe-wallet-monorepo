@@ -3,7 +3,10 @@ import { faker } from '@faker-js/faker'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
 import { initialContext, TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { type MultiTokenTransferParams, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import {
+  type MultiTokenTransferParams,
+  TokenTransferType,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import ReviewTokenTx from '../ReviewTokenTx'
 
 jest.mock('@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer', () => ({
@@ -11,8 +14,8 @@ jest.mock('@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer', () => 
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(() => ({
     ReviewSpendingLimitTx: () => <div>Spending limit review</div>,
   })),

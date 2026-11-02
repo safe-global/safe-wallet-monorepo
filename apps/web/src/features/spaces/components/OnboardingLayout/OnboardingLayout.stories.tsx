@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
-import { OnboardingLayout, StepCounter, SafeAppMockup } from '.'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import OnboardingLayout from './OnboardingLayout'
+import StepCounter from './StepCounter'
+import SafeAppMockup from './mockup/SafeAppMockup'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 

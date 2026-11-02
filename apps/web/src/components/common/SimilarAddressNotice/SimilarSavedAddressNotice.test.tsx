@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { SimilarSavedAddressNotice } from '.'
+import { SimilarSavedAddressNotice } from './SimilarSavedAddressNotice'
 
 describe('SimilarSavedAddressNotice', () => {
   const enteredAddress = fakerChecksummedAddress()

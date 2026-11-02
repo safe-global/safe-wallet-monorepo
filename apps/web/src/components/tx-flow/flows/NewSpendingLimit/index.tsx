@@ -1,10 +1,11 @@
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import { useLoadFeature } from '@/features/__core__'
-import { SpendingLimitsFeature, type NewSpendingLimitFlowProps } from '@/features/spending-limits'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
+import { type NewSpendingLimitFlowProps } from '@/features/spending-limits/types'
 
 const defaultValues: NewSpendingLimitFlowProps = {
   beneficiary: '',

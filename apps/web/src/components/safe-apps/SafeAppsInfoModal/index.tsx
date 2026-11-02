@@ -3,7 +3,7 @@ import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 
 import { cn } from '@safe-global/views/utils/cn'
 import { ProgressTrack, ProgressIndicator } from '@safe-global/views/components/ui/progress'
-import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
+import type { BrowserPermission } from '@/hooks/safe-apps/permissions/useBrowserPermissions'
 import Slider from './Slider'
 import AllowedFeaturesList from './AllowedFeaturesList'
 import type { AllowedFeatures, AllowedFeatureSelection } from '@safe-global/views/components/safe-apps/types'

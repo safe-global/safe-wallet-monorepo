@@ -260,4 +260,3 @@ function SafeSelectorDropdown({
 }
 
 export default SafeSelectorDropdown
-export type { SafeSelectorDropdownProps }

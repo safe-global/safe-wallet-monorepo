@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
-import {
-  CheckStatus,
-  type PublicCheckStatus,
-  type SafenetCheckSnapshot,
-} from '@safe-global/utils/features/safenet-checks'
-import { createMockStory } from '@/stories/mocks'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
 import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
 import { SafenetAuditRowView } from './SafenetAuditRow'

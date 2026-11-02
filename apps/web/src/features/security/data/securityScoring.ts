@@ -1,4 +1,4 @@
-import type { SecurityGrade } from './securityTypes'
+import type { SecurityGrade } from '@safe-global/views/features/security/types'
 
 /**
  * Per-check severity grade thresholds (clear-ratio → SecurityGrade).

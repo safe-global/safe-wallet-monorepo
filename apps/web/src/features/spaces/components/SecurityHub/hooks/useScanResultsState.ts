@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { ScanResult } from '@/features/security/types'
-import type { useLoadFeature } from '@/features/__core__'
-import type { SecurityContract } from '@/features/security'
+import type { ScanResult } from '@safe-global/views/features/security/types'
+import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import type { SecurityContract } from '@/features/security/contract'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>

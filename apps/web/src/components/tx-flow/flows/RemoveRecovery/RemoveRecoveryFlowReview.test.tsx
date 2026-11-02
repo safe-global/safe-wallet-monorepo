@@ -4,14 +4,16 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { renderWithUserEvent, waitFor } from '@/tests/test-utils'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import type { RecoveryStateItem } from '@/features/recovery'
-import { createRemoveModuleTx } from '@/services/tx/tx-sender'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+import { createRemoveModuleTx } from '@/services/tx/tx-sender/create'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { RemoveRecoveryFlowReview } from './RemoveRecoveryFlowReview'
 
-jest.mock('@/services/tx/tx-sender', () => ({ createRemoveModuleTx: jest.fn() }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  createRemoveModuleTx: jest.fn(),
+}))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),

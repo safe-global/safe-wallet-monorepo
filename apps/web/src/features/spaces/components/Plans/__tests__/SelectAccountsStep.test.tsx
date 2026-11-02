@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import type { AccountLine } from '@/features/myAccounts'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
 import SelectAccountsStep, { _initialSelection } from '../SelectAccountsStep'
 import { trackEvent } from '@/services/analytics'
@@ -36,8 +36,9 @@ jest.mock('@/hooks/safes/useSafesSearch', () => ({
     query ? items.filter((item) => (item as { name: string }).name.toLowerCase().includes(query.toLowerCase())) : items,
 }))
 
-jest.mock('@/features/myAccounts', () => ({
-  SafeAccountsTable: ({
+jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+  __esModule: true,
+  default: ({
     items,
     selection,
   }: {

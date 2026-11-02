@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory, createChainData } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createChainData } from '@/stories/mocks/chains'
 import { SAFE_ADDRESSES, chainFixtures, safeFixtures } from '../../../../../../config/test/msw/fixtures'
 import PendingTxsList from './PendingTxsList'
 

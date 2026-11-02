@@ -2,13 +2,13 @@ import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
 import { multisigExecutionDetailsBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'),
   useSafenetCheck: jest.fn(),
 }))
 

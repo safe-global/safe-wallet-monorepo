@@ -1,4 +1,4 @@
-import type { ScanResult, SecurityGrade } from '@/features/security/types'
+import type { ScanResult, SecurityGrade } from '@safe-global/views/features/security/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 import {
   buildSafeSecurityHref,

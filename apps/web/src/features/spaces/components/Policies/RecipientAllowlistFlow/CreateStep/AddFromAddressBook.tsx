@@ -25,7 +25,7 @@ import type { AllowlistFormRecipient } from '../types'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
 import { ContactSource, type ExtendedContact } from '@/hooks/useAllAddressBooks'
-import { useAddressBookSearch } from '@/features/spaces'
+import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
 
 type AddFromAddressBookProps = {
   chainId: string

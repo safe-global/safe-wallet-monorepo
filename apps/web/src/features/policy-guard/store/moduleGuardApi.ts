@@ -1,4 +1,4 @@
-import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
+import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway/chains'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'

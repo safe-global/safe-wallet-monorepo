@@ -1,9 +1,10 @@
 import { type ReactElement } from 'react'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import { useSafeShield } from './SafeShieldContext'
-import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
-import { useHypernativeOAuth, useIsHypernativeEligible } from '@/features/hypernative'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 
 const SafeShieldWidget = (): ReactElement => {
   const {
@@ -47,9 +48,5 @@ const SafeShieldWidget = (): ReactElement => {
 
 export default SafeShieldWidget
 
-// Recipient analysis hook (used by tx-flow)
-export { useRecipientAnalysis } from './hooks/useRecipientAnalysis'
-
 // Analysis card components (used by hypernative)
 export { AnalysisGroupCard, type AnalysisGroupCardProps } from './components/AnalysisGroupCard'
-export { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'

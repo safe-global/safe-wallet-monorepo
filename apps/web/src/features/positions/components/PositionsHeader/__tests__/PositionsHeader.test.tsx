@@ -1,5 +1,6 @@
 import { positionsFixtures } from '@safe-global/test/msw/fixtures'
-import { calculatePositionsFiatTotal, calculateProtocolPercentage } from '@safe-global/utils/features/positions'
+import { calculatePositionsFiatTotal } from '@safe-global/utils/features/positions/utils/calculatePositionsFiatTotal'
+import { calculateProtocolPercentage } from '@safe-global/utils/features/positions/utils/calculateProtocolPercentage'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
-import type { ScanResult } from '@/features/security/types'
-import type { useLoadFeature } from '@/features/__core__'
-import type { SecurityContract } from '@/features/security'
+import type { ScanResult } from '@safe-global/views/features/security/types'
+import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import type { SecurityContract } from '@/features/security/contract'
 import useAutoScan, { type AutoScanServices, type AutoScanState } from '../../../hooks/useAutoScan'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import type {

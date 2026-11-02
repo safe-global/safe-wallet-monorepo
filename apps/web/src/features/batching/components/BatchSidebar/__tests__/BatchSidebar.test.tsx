@@ -4,13 +4,13 @@ import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
 import { ConfirmBatchFlow, NewTxFlow } from '@/components/tx-flow/flows'
-import { useDraftBatch } from '@/features/batching'
-import type { DraftBatchItem } from '@/features/batching/store'
+import { useDraftBatch } from '@/features/batching/hooks/useDraftBatch'
+import type { DraftBatchItem } from '@/features/batching/store/batchSlice'
 import BatchSidebar from '..'
 
 const mockDeleteTx = jest.fn()
 
-jest.mock('@/features/batching', () => ({
+jest.mock('@/features/batching/hooks/useDraftBatch', () => ({
   useDraftBatch: jest.fn(),
   useUpdateBatch: () => [jest.fn(), mockDeleteTx],
 }))

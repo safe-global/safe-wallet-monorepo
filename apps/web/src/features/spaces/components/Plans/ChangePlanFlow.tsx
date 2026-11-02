@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
-import {
-  SafeProPlanSwitchedModal,
-  SafeProSubscriptionActivatedModal,
-} from '@safe-global/views/features/spaces/components/SafeProModals'
+import SafeProPlanSwitchedModal from '@safe-global/views/features/spaces/components/SafeProModals/SafeProPlanSwitchedModal'
+import SafeProSubscriptionActivatedModal from '@safe-global/views/features/spaces/components/SafeProModals/SafeProSubscriptionActivatedModal'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import ChangePlanDialog from './ChangePlanDialog'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'

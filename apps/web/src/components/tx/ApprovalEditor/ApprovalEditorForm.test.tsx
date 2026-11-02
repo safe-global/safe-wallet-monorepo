@@ -3,7 +3,7 @@ import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import { ApprovalEditorForm } from '@/components/tx/ApprovalEditor/ApprovalEditorForm'
 import { getAllByTestId, getAllByTitle } from '@testing-library/dom'
-import type { ApprovalInfo } from './hooks/useApprovalInfos'
+import type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { faker } from '@faker-js/faker'
 
 describe('ApprovalEditorForm', () => {

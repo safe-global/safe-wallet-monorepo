@@ -1,7 +1,5 @@
 import type { CheckStatus, SecurityGrade } from '@safe-global/views/features/security/types'
 
-export type { SecurityGrade, CheckStatus } from '@safe-global/views/features/security/types'
-
 export type CheckResult = {
   id: string
   title: string

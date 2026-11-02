@@ -3,20 +3,22 @@ import { getStoreInstance } from '@/store'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnSpecificChain } from './index'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { persistCounterfactualSafe } from '@/features/counterfactual/services/persistCounterfactualSafe'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { predictAddressBasedOnReplayData } from '../../utils'
+import { predictAddressBasedOnReplayData } from '../../utils/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { NextRouter } from 'next/router'
 
-jest.mock('@/features/counterfactual/services', () => ({
+jest.mock('@/features/counterfactual/services/persistCounterfactualSafe', () => ({
   persistCounterfactualSafe: jest.fn(),
 }))
 
-jest.mock('../../utils', () => ({
+jest.mock('../../utils/utils', () => ({
   predictAddressBasedOnReplayData: jest.fn(),
   hasMultiChainAddNetworkFeature: jest.fn(() => true),
 }))

@@ -15,7 +15,7 @@ import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { act, renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import type { JsonRpcProvider } from 'ethers'
 
 const TEST_CHAIN_ID = '11155111'

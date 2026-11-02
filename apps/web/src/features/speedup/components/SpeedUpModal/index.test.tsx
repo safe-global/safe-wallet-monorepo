@@ -8,7 +8,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import * as useChains from '@/hooks/useChains'
-import { createExistingTx } from '@/services/tx/tx-sender'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import SpeedUpModal from '.'
 
@@ -42,8 +42,10 @@ jest.mock('@/hooks/useGasPrice', () => ({
   default: jest.fn(() => [{ maxFeePerGas: BigInt(1e9), maxPriorityFeePerGas: BigInt(1e8) }, undefined, false]),
 }))
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createExistingTx: jest.fn(),
+}))
+jest.mock('@/services/tx/tx-sender/dispatch', () => ({
   dispatchSafeTxSpeedUp: jest.fn(),
   dispatchCustomTxSpeedUp: jest.fn(),
 }))

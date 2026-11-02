@@ -20,7 +20,9 @@ jest.mock('@/store', () => ({
 }))
 
 jest.mock('@/store/settingsSlice', () => ({ selectCurrency: 'selectCurrency' }))
-jest.mock('@/store/slices', () => ({ selectUndeployedSafes: 'selectUndeployedSafes' }))
+jest.mock('@/features/counterfactual/store/undeployedSafesSlice', () => ({
+  selectUndeployedSafes: 'selectUndeployedSafes',
+}))
 
 jest.mock('@/store/api/gateway', () => ({
   useGetMultipleSafeOverviewsQuery: (...args: unknown[]) => mockUseGetMultipleSafeOverviewsQuery(...args),

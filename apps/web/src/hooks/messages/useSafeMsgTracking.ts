@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
-import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { WALLET_EVENTS } from '@/services/analytics/events/wallet'
 import { SafeMsgEvent, safeMsgSubscribe } from '@/services/safe-messages/safeMsgEvents'
 
 const safeMsgEvents = {

@@ -1,4 +1,4 @@
-import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
+import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway/chains'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'

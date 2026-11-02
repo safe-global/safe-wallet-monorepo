@@ -1,6 +1,6 @@
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import { ArrowRight as ArrowForwardIcon } from 'lucide-react'
-import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
+import type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'
 import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { HYPERNATIVE_EVENTS, HYPERNATIVE_CATEGORY } from '@/services/analytics/events/hypernative'
 

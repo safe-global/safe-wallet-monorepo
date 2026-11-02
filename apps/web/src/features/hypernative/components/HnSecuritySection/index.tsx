@@ -4,7 +4,7 @@ import { useHnQueueAssessmentResult } from '../../hooks/useHnQueueAssessmentResu
 import { useShowHypernativeAssessment } from '../../hooks/useShowHypernativeAssessment'
 import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import { useIsHypernativeQueueScanFeature } from '../../hooks/useIsHypernativeQueueScanFeature'
-import { HnQueueAssessmentBanner } from '../HnQueueAssessmentBanner'
+import { HnQueueAssessmentBanner } from '../HnQueueAssessmentBanner/HnQueueAssessmentBanner'
 import HnSecurityReportBtnForTxDetails from '../HnSecurityReportBtn/HnSecurityReportBtnForTxDetails'
 
 interface HnSecuritySectionProps {

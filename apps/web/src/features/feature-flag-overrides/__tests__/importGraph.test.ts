@@ -5,11 +5,11 @@ import path from 'path'
 // editor's module graph, the whole dev-only editor UI ships in the production bundle. This is the
 // guard for that, and it covers the entire sidebar tree, not just the entry component.
 const SIDEBAR_DIR = path.resolve(__dirname, '../../spaces/components/Sidebar')
-const BARREL = path.resolve(__dirname, '../index.ts')
+const USE_CHAINS = path.resolve(__dirname, '../../../hooks/useChains.ts')
 
 const ALLOWED_SPECIFIERS = [
   '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader',
-  '@/features/feature-flag-overrides/store',
+  '@/features/feature-flag-overrides/store/featureFlagOverridesSlice',
 ]
 
 const collectSourceFiles = (dir: string): Array<string> =>
@@ -51,16 +51,11 @@ describe('feature-flag editor static import graph', () => {
   })
 })
 
-// `useChains` imports the barrel, which puts it on the static import path of ~300 files including
-// the sidebar. Anything the barrel re-exports ships on every route, so a component export here
-// would defeat the guarded dynamic import and ship the whole dev-only editor UI to production.
-//
-// A barrel can only pull in a module by naming it in a `from '…'` clause, so — unlike the sidebar
-// scan above — the specifier list is exhaustive here and needs no identifier fallback. Asserted as
-// an exact list rather than a components/ denylist so that widening the barrel at all has to be a
-// deliberate edit to this test.
-describe('feature-flag overrides barrel', () => {
-  it('re-exports nothing but the override hooks', () => {
-    expect(readSpecifiers(BARREL)).toEqual(['./hooks/useChainOverrides'])
+// `useChains` is on the static import path of ~300 files including the sidebar, so it may only
+// reach the override hooks: anything else it names from this feature ships on every route.
+describe('feature-flag overrides from useChains', () => {
+  it('imports nothing but the override hooks', () => {
+    const specifiers = readSpecifiers(USE_CHAINS).filter((s) => s.includes('features/feature-flag-overrides'))
+    expect(specifiers).toEqual(['@/features/feature-flag-overrides/hooks/useChainOverrides'])
   })
 })

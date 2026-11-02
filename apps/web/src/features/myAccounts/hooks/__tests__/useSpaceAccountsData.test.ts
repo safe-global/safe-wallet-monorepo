@@ -1,6 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import useSpaceAccountsData from '../useSpaceAccountsData'
-import type { SafeItem, AllSafeItems } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import * as gatewayApi from '@/store/api/gateway'
 
 jest.mock('@/hooks/wallets/useWallet', () => ({

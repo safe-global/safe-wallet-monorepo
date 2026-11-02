@@ -30,8 +30,8 @@ jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
   useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
 }))
 
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => {
-  const actual = jest.requireActual('@safe-global/utils/features/safenet-checks/hooks')
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => {
+  const actual = jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck')
   const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
   return {
     ...actual,
@@ -715,7 +715,9 @@ describe('TxSigners (Audit Log)', () => {
       useHasFeature: jest.Mock
       useChain: jest.Mock
     }
-    const { useSafenetCheck } = jest.requireMock('@safe-global/utils/features/safenet-checks/hooks') as {
+    const { useSafenetCheck } = jest.requireMock(
+      '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck',
+    ) as {
       useSafenetCheck: jest.Mock
     }
     const safenetTxHash = `0x${'ab'.repeat(32)}`

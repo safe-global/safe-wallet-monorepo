@@ -1,5 +1,5 @@
 import { useCallback, useContext } from 'react'
-import { getSafeDisplayInfo } from '@/components/common/AccountRow'
+import { getSafeDisplayInfo } from '@safe-global/views/components/common/AccountRow/utils'
 import { TxModalContext } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'

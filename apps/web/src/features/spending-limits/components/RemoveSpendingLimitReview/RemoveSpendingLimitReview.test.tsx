@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import { render, waitFor } from '@/tests/test-utils'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import * as useChainId from '@/hooks/useChainId'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
@@ -15,7 +15,9 @@ import RemoveSpendingLimitReview from '.'
 
 const SEPOLIA = '11155111'
 
-jest.mock('@/services/tx/tx-sender', () => ({ createTx: jest.fn() }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  createTx: jest.fn(),
+}))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,

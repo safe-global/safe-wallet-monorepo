@@ -1,6 +1,7 @@
 import GasParams from '@/components/tx/GasParams'
 import { useHasFeature } from '@/hooks/useChains'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { useState } from 'react'
 import AdvancedParamsForm from './AdvancedParamsForm'
 import { type AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'

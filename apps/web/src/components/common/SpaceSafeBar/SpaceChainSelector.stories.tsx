@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { SAFE_ADDRESSES } from '@safe-global/test/msw/fixtures'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { ChainSelectorBlock } from '@/features/spaces'
 
 const deployedChains = {

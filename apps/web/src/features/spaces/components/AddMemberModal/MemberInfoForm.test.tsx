@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { FormProvider, useForm } from 'react-hook-form'
 import MemberInfoForm from './MemberInfoForm'
-import { MemberRole } from '@/features/spaces'
+import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 
 const Wrapper = () => {
   const methods = useForm({ defaultValues: { name: '', role: MemberRole.MEMBER } })

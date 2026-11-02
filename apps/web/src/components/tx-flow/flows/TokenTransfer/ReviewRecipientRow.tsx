@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SendToBlock from '@/components/tx/SendToBlock'
-import type { TokenTransferParams } from '.'
+import type { TokenTransferParams } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 

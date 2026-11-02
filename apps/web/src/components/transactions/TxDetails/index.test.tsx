@@ -1,8 +1,10 @@
 import { http, HttpResponse } from 'msw'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
-import { CheckStatus, type Hex } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
+import type { Hex } from '@safe-global/utils/features/safenet-checks/types/events'
+import { CheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
+import { buildBenignSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { basicTypesActions, multiSendTxDataBuilder, multiSendTxInfo } from '@/tests/builders/dataDecoded'
@@ -16,8 +18,8 @@ import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import TxDetails from './index'
 
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'),
   useSafenetCheck: jest.fn(),
 }))
 

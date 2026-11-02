@@ -10,10 +10,10 @@ import {
   isNonceTooLowError,
   isRateLimitError,
   getGasLimitTooLowMessage,
-  isRevertError,
   isExpectedEstimationError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
+import { isRevertError } from '@safe-global/utils/services/exceptions/contractErrors'
 
 /** The error ethers itself throws for a non-2xx RPC response, rather than a hand-built stand-in. */
 const ethersHttpError = (statusCode: number, statusMessage: string, exhaustRetries = false): unknown => {

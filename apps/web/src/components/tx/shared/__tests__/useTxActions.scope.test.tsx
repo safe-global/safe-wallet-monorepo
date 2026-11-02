@@ -6,22 +6,18 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
-import * as txSender from '@/services/tx/tx-sender'
+import * as txSender from '@/services/tx/tx-sender/dispatch'
 import * as useWalletHooks from '@/hooks/wallets/useWallet'
 import * as useOnboardHooks from '@/hooks/wallets/useOnboard'
 import * as useChains from '@/hooks/useChains'
+import * as walletUtils from '@/utils/wallets'
 import { useTxActions } from '../hooks'
 
-jest.mock('@/services/tx/tx-sender', () => ({
-  ...jest.requireActual('@/services/tx/tx-sender'),
+jest.mock('@/services/tx/tx-sender/dispatch', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/dispatch'),
   dispatchTxProposal: jest.fn(),
   dispatchTxSigning: jest.fn(),
   dispatchTxRelay: jest.fn(),
-}))
-
-jest.mock('@/utils/wallets', () => ({
-  ...jest.requireActual('@/utils/wallets'),
-  isSmartContractWallet: jest.fn().mockResolvedValue(false),
 }))
 
 jest.mock('@/services/tx/executionPreChecks', () => ({
@@ -65,6 +61,7 @@ const relayWrapper = ({ children }: { children: ReactNode }) => (
 
 describe('useTxActions under a SafeScope', () => {
   beforeEach(() => {
+    jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
     const provider = { request: jest.fn() }
     jest.spyOn(useWalletHooks, 'default').mockReturnValue({
       address: '0x0000000000000000000000000000000000000001',

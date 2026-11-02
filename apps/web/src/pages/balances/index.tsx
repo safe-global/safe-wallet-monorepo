@@ -13,10 +13,14 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { BRAND_NAME } from '@/config/constants'
-import { NoFeeCampaignFeature, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
+import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import { PortfolioFeature } from '@/features/portfolio'
-import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__'
+import { StakeFeature } from '@/features/stake'
+import useIsStakingPromoBannerVisible, {
+  STAKING_PROMO_BANNER_HIDE_KEY,
+} from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {

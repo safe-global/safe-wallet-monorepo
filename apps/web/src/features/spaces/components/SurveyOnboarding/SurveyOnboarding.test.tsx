@@ -69,21 +69,34 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/components/OnboardingLayout', () => ({
-  OnboardingLayout: ({ main, footer }: { main: React.ReactNode; footer?: React.ReactNode }) => (
+jest.mock('@/features/spaces/components/OnboardingLayout/OnboardingLayout', () => ({
+  __esModule: true,
+  default: ({ main, footer }: { main: React.ReactNode; footer?: React.ReactNode }) => (
     <div>
       {main}
       {footer}
     </div>
   ),
-  StepCounter: () => <div data-testid="step-counter" />,
-  SafeAppMockup: () => <div data-testid="safe-app-mockup" />,
+}))
+jest.mock('@/features/spaces/components/OnboardingLayout/StepCounter', () => ({
+  __esModule: true,
+  default: () => <div data-testid="step-counter" />,
+}))
+jest.mock('@/features/spaces/components/OnboardingLayout/mockup/SafeAppMockup', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-app-mockup" />,
+}))
+jest.mock('@/features/spaces/components/OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace', () => ({
   deriveSidePanelAccountsFromSpace: () => [],
+}))
+jest.mock('@/features/spaces/components/OnboardingLayout/mockup/useSafeNameLookup', () => ({
   useSafeNameLookup: () => new Map<string, string>(),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
   flattenSafeItems: () => [],
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: () => false,
 }))
 

@@ -1,10 +1,10 @@
 import dynamic from '@/utils/dynamic'
-import { useIsRecoverySupported } from '@/features/recovery'
+import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
 import { HnBannerForSettings, HypernativeFeature } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 const RecoverySettings = dynamic(() => import('@/features/recovery/components/RecoverySettings'))
 

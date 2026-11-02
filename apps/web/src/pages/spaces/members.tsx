@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature, useFeatureFlagRedirect } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 export default function SpaceMembersPage() {
   const router = useRouter()

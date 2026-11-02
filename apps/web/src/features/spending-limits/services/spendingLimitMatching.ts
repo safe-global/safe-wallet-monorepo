@@ -1,6 +1,6 @@
 import { parseUnits } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpendingLimitState } from '../types'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 
 /**
  * Tells whether an on-chain limit belongs to a given spender and token.

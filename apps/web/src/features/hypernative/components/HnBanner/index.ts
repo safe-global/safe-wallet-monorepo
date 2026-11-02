@@ -5,10 +5,6 @@ import { withHnSignupFlow } from '../withHnSignupFlow'
 import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
 
-// Export the original pure component for tests and stories
-export { HnBanner } from './HnBanner'
-export type { HnBannerProps } from './HnBanner'
-
 // Export the carousel-compatible version
 export { HnBannerForCarousel } from './HnBannerForCarousel'
 

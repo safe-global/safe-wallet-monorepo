@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import HistoryFeesAccordion from './index'
-import type { HistoryFeesData } from '@/features/gtf/hooks/useHistoryFeesBreakdown'
+import type { HistoryFeesData } from '@safe-global/views/features/gtf/types'
 
 const meta = {
   title: 'Features/GTF/HistoryFeesAccordion',

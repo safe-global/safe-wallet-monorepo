@@ -15,12 +15,5 @@ const SafeWidget = Object.assign(SafeWidgetRoot, {
   ErrorState: WidgetErrorState,
 })
 
-export { SafeWidget, WidgetItem, WidgetFooter, WidgetViewAll, WidgetItemSkeleton, WidgetEmptyState, WidgetErrorState }
-export type { SafeWidgetProps } from '@safe-global/views/features/spaces/components/SafeWidget/SafeWidgetRoot'
-export type { WidgetItemProps } from './WidgetItem'
-export type { WidgetFooterProps } from '@safe-global/views/features/spaces/components/SafeWidget/WidgetFooter'
-export type { WidgetViewAllProps } from '@safe-global/views/features/spaces/components/SafeWidget/WidgetViewAll'
-export type { WidgetItemSkeletonProps } from '@safe-global/views/features/spaces/components/SafeWidget/WidgetItemSkeleton'
-export type { WidgetEmptyStateProps } from './WidgetEmptyState'
-export type { WidgetErrorStateProps } from './WidgetErrorState'
+export { SafeWidget }
 export default SafeWidget

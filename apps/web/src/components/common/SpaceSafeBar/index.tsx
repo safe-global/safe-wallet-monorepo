@@ -3,9 +3,13 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { ChevronRight, Settings2, UserRoundPlus, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import { SafeSelectorDropdown, useCurrentSpaceId } from '@/features/spaces'
-import type { SafeItemData, SafeRenameTarget } from '@/features/spaces'
-import { matchesSafeSearch } from '@/features/spaces'
+import { SafeSelectorDropdown } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import type {
+  SafeItemData,
+  SafeRenameTarget,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+import { matchesSafeSearch } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   getSpaceOrderScope,
@@ -15,7 +19,7 @@ import {
   TRUSTED_ORDER_SCOPE,
 } from '@/store/orderByPreferenceSlice'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { useAddressBookWriteScope } from '@/features/spaces'
+import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import { Button } from '@safe-global/views/components/ui/button'

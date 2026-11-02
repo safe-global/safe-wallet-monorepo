@@ -6,7 +6,7 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils/getOverallStatus'
 
 export type ChecksCount = { passed: number; total: number }
 

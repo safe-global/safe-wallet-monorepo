@@ -12,26 +12,22 @@ import merge from 'lodash/merge'
 import { IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
-import {
-  cookiesAndTermsSlice,
-  cookiesAndTermsInitialState,
-  safeMessagesListener,
-  safeInfoListener,
-  swapOrderListener,
-  swapOrderStatusListener,
-  txHistoryListener,
-  txQueueListener,
-  authListener,
-  counterfactualSyncListener,
-  addressBookListener,
-  elevationListener,
-  spaceSafesEntitlementsListener,
-  planChangeSyncListener,
-  checkoutTrackingListener,
-  workspaceTrackingListener,
-  spaceSafesCacheListener,
-  trialReminderListener,
-} from './slices'
+import { cookiesAndTermsSlice, cookiesAndTermsInitialState } from './cookiesAndTermsSlice'
+import { safeMessagesListener } from './safeMessagesSlice'
+import { safeInfoListener } from './safeInfoSlice'
+import { swapOrderListener, swapOrderStatusListener } from './swapOrderSlice'
+import { txHistoryListener } from './txHistorySlice'
+import { txQueueListener } from './txQueueSlice'
+import { authListener } from './authSlice'
+import { counterfactualSyncListener } from '../features/counterfactual/store/counterfactualSyncListener'
+import { addressBookListener } from './addressBookSlice'
+import { elevationListener } from '../features/oidc-auth/store/elevationListener'
+import { spaceSafesEntitlementsListener } from '../features/spaces/store/spaceSafesEntitlementsListener'
+import { planChangeSyncListener } from '../features/spaces/store/planChangeSyncListener'
+import { checkoutTrackingListener } from '../features/spaces/store/checkoutTrackingListener'
+import { workspaceTrackingListener } from '../features/spaces/store/workspaceTrackingListener'
+import { spaceSafesCacheListener } from '../features/spaces/store/spaceSafesCacheListener'
+import { trialReminderListener } from '../features/spaces/store/trialReminder'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
@@ -44,7 +40,7 @@ import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
-import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 

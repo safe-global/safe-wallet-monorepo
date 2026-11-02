@@ -4,7 +4,7 @@ import type {
   SidebarDeveloperItemConfig,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { getSidebarActionItemTestId } from '../../utils'
-import { NavItem } from '../NavItem'
+import { NavItem } from '../NavItem/NavItem'
 
 interface SidebarDeveloperItemProps {
   config: SidebarDeveloperItemConfig

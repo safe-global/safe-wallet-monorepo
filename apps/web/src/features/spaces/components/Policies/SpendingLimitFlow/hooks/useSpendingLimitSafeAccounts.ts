@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChains from '@/hooks/useChains'
-import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { markSafeAccountsOffChains } from '../utils/safeAccounts'
 

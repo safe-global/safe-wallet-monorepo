@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
-import { SimilarAddressNotice, SimilarAddressTooltip } from '.'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { SimilarAddressNotice } from './SimilarAddressNotice'
+import { SimilarAddressTooltip } from './SimilarAddressTooltip'
 
 const SAVED_ADDRESS = '0x7a3F9effb3CBa71e009951eDcA8008bFb52B9C2E'
 const ENTERED_ADDRESS = '0x7A3F2aaF834BE71EcD2d5180e017218939e49C2E'

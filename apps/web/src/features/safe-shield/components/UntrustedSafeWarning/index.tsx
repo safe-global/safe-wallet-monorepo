@@ -3,12 +3,14 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '../SeverityIcon'
-import { AddTrustedSafeDialog, useSimilarAddressDetection } from '@/features/myAccounts'
+import { AddTrustedSafeDialog } from '@/features/myAccounts'
+import useSimilarAddressDetection from '@/features/myAccounts/hooks/useSimilarAddressDetection'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
-import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS } from '@/services/analytics/events/overview'
 
 type UntrustedSafeWarningProps = {
   safeAnalysis: SafeAnalysisResult

@@ -2,10 +2,10 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { fn } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SafeAccountSelector from './index'
 import { buildSafeAccountId, groupSafeAccounts } from './utils'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import type {
   SafeAccountEntry,
   SafeAccountOption,

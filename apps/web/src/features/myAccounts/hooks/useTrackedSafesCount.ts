@@ -1,9 +1,12 @@
 import { AppRoutes } from '@/config/routes'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { type SafeItem, type MultiChainSafeItem, type AllSafeItemsGrouped, isMultiChainSafeItem } from '@/hooks/safes'
+import { type SafeItem, type MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import { type AllSafeItemsGrouped } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 
 let isOwnedSafesTracked = false
 let isPinnedSafesTracked = false

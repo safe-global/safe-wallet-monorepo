@@ -24,7 +24,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import type { ReactElement } from 'react'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 interface ContentProps {

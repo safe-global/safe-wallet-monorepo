@@ -3,15 +3,19 @@ import AccountPage from '../AccountPage'
 
 const mockUseCurrentMemberProfile = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useCurrentMemberProfile: () => mockUseCurrentMemberProfile(),
   MemberStatus: { INVITED: 'INVITED', ACTIVE: 'ACTIVE', DECLINED: 'DECLINED' },
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
 }))
 
-jest.mock('@/features/oidc-auth', () => ({
-  SwitchAuthenticatorSection: () => <div data-testid="switch-authenticator-section" />,
-  WalletTwoFactorSection: () => <div data-testid="wallet-2fa-section" />,
+jest.mock('@/features/oidc-auth/components/SwitchAuthenticatorSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="switch-authenticator-section" />,
+}))
+jest.mock('@/features/oidc-auth/components/WalletTwoFactorSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="wallet-2fa-section" />,
 }))
 
 jest.mock('@/hooks/useLogout', () => ({

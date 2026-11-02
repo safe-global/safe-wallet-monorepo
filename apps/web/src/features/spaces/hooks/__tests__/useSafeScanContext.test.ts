@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useSafeScanContext from '../useSafeScanContext'
-import type { SelectedSafe, SpaceSafeEntry } from '../../components/SecurityHub'
+import type { SelectedSafe, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
@@ -38,8 +38,13 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: jest.fn(),
 }))
 jest.mock('@/store', () => ({ useAppSelector: jest.fn() }))
-jest.mock('@/store/slices', () => ({ selectCurrency: jest.fn(), selectUndeployedSafes: jest.fn() }))
-jest.mock('@/features/multichain/utils', () => ({
+jest.mock('@/store/settingsSlice', () => ({
+  selectCurrency: jest.fn(),
+}))
+jest.mock('@/features/counterfactual/store/undeployedSafesSlice', () => ({
+  selectUndeployedSafes: jest.fn(),
+}))
+jest.mock('@/features/multichain/utils/utils', () => ({
   getSafeSetups: jest.fn(),
   getSharedSetup: jest.fn(),
   getDeviatingSetups: jest.fn(),

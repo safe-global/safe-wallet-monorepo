@@ -1,11 +1,10 @@
+import { CheckEventType, type InconclusiveEvent } from '@safe-global/utils/features/safenet-checks/types/events'
 import {
-  CheckEventType,
   CheckStatus,
-  type InconclusiveEvent,
   type PublicCheckStatus,
   type UnavailableReason,
-} from '@safe-global/utils/features/safenet-checks'
-import { arbitrationTimedOutEvent } from '@safe-global/utils/features/safenet-checks/builders'
+} from '@safe-global/utils/features/safenet-checks/types/status'
+import { arbitrationTimedOutEvent } from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
 import { SafenetCheckResult as Result } from '@/services/analytics/mixpanel-events'
 import { toSafenetCheckResult } from '../safenetCheckResult'
 

@@ -7,8 +7,9 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@safe-global/views/utils/cn'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
-import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
-import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import type { EvidenceItem, ScanResult, SecurityGrade } from '@safe-global/views/features/security/types'
+import { SEVERITY_RANK } from '@/features/security/data/scanners/constants'
+import { type SecurityContract } from '@/features/security/contract'
 import {
   resolveStatusTone,
   SeverityIcon,
@@ -21,8 +22,6 @@ import type { Cta } from '@safe-global/views/features/spaces/components/Security
 const toneToCssVar = (color: string): string => `var(--color-${color.replace('.', '-')})`
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
-
-export type { Cta } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/types'
 
 /**
  * A row is considered "passing" (bucketed into the accordion) when the user has no action to take.

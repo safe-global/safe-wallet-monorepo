@@ -2,29 +2,20 @@ import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
-import {
-  CheckStatus,
-  type Hex,
-  type PublicCheckStatus,
-  type SafenetCheckSnapshot,
-} from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import {
-  buildCheckView,
-  buildSnapshot,
-  sentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks/builders'
+import type { Hex } from '@safe-global/utils/features/safenet-checks/types/events'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
+import { buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
+import { sentinelRevealedEvent } from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
 import { SafenetChecksSection } from '../SafenetChecksSection'
-import {
-  MixpanelEventParams,
-  SAFENET_EVENTS,
-  SafenetCheckResult,
-  SafenetSignerRole,
-  trackEvent,
-} from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, SafenetCheckResult, SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'),
   useSafenetCheck: jest.fn(),
 }))
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))

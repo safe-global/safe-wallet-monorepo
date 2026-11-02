@@ -4,8 +4,9 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import Link, { type LinkProps } from 'next/link'
 import { X as CloseIcon } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
-import type { AnalyticsEvent } from '@/services/analytics'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import type { AnalyticsEvent } from '@/services/analytics/types'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const DEFAULT_BACKGROUND = 'linear-gradient(90deg, #b0ffc9, #d7f6ff)'
 

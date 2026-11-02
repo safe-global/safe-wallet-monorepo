@@ -1,6 +1,6 @@
 import { useState, type ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import type { SponsoredOffer } from '@/utils/gasPayment'

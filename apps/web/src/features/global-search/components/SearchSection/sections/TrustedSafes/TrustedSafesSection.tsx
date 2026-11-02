@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { isMultiChainSafeItem, useAllSafesGrouped, flattenSafeItems } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { useAllSafesGrouped, flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { SafeCardReadOnly } from '@/features/spaces'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'

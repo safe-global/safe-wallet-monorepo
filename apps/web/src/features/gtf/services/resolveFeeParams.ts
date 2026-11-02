@@ -1,7 +1,6 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
 import type { AppDispatch } from '@/store'

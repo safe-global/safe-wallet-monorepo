@@ -1,5 +1,5 @@
 import type { JsonRpcProvider } from 'ethers'
-import type { SpendingLimitState } from '../types'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { getSpendingLimitContract } from './spendingLimitContracts'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'

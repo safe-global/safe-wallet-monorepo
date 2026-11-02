@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
-import DateTime from '@/components/common/DateTime'
+import DateTime from '@/components/common/DateTime/DateTimeContainer'
 import MsgType from '@/components/safe-messages/MsgType'
 import SignMsgButton from '@/components/safe-messages/SignMsgButton'
 import useSafeMessageStatus from '@/hooks/messages/useSafeMessageStatus'

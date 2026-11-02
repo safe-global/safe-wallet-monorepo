@@ -1,7 +1,7 @@
 import { render, screen, fakerChecksummedAddress } from '@/tests/test-utils'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole, type TestRole } from '@/tests/mocks/roles'
-import type { RecoveryStateItem } from '@/features/recovery'
+import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
 import { DelayModifierRow } from '../DelayModifierRow'
 
 jest.mock('@/hooks/wallets/useWallet')
@@ -12,9 +12,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'),
+  default: jest.fn(),
 }))
 
 const delayModifierBuilder = (recoverers: string[]): RecoveryStateItem => ({

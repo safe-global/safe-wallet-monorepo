@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import TxStatusWidget from '.'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'

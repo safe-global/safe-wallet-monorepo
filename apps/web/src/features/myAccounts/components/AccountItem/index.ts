@@ -12,20 +12,6 @@ import AccountItemStatusChip from './AccountItemStatusChip'
 import AccountItemQueueActions from './AccountItemQueueActions'
 import AccountItemContent from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemContent'
 
-export type { AccountItemButtonProps } from './AccountItemButton'
-export type { AccountItemLinkProps } from './AccountItemLink'
-export type { AccountItemCheckboxProps } from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemCheckbox'
-export type { AccountItemIconProps } from './AccountItemIcon'
-export type { AccountItemInfoProps } from './AccountItemInfo'
-export type { AccountItemChainBadgeProps } from './AccountItemChainBadge'
-export type { AccountItemBalanceProps } from './AccountItemBalance'
-export type { AccountItemPinButtonProps } from './AccountItemPinButton'
-export type { AccountItemContextMenuProps } from './AccountItemContextMenu'
-export type { AccountItemGroupProps } from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemGroup'
-export type { AccountItemStatusChipProps } from './AccountItemStatusChip'
-export type { AccountItemQueueActionsProps } from './AccountItemQueueActions'
-export type { AccountItemContentProps } from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemContent'
-
 /**
  * Compound component namespace for account items.
  *

@@ -1,6 +1,7 @@
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useCurrentSpaceId, useIsAdmin, useSpaceMembersByStatus } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useIsAdmin, useSpaceMembersByStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { WorkspaceTwoFactorSection } from '@/features/oidc-auth'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import IdentitySection from '../sections/IdentitySection'

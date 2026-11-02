@@ -8,8 +8,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 import { HypernativeFeature } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
-
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import css from './styles.module.css'
 
 const NewTxFlow = () => {

@@ -1,13 +1,13 @@
 import { render } from '@/tests/test-utils'
 import SafeSelectorTriggerContent from '../components/SafeSelectorTriggerContent'
-import * as useIsHypernativeGuard from '@/features/hypernative'
-import * as coreFeatures from '@/features/__core__'
+import * as useIsHypernativeGuard from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import * as coreFeatures from '@/features/__core__/useLoadFeature'
 import { SafeHeaderHnTooltip } from '@/features/hypernative'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 

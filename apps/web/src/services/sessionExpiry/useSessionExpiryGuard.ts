@@ -7,8 +7,6 @@ import { closeByGroupKey } from '@/store/notificationsSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import { expireSession, isForbidden, SESSION_EXPIRED_GROUP_KEY } from './expireSession'
 
-export { SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from './expireSession'
-
 // Mirrors apps/web/src/features/oidc-auth/constants.ts. The constant is not
 // exported from the feature's public API; duplicating the literal here avoids
 // pulling the (lazy-loaded) feature module into the boot path.

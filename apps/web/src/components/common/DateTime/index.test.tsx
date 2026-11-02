@@ -1,6 +1,5 @@
 import { render } from '@/tests/test-utils'
-
-import DateTime from '.'
+import DateTime from './DateTimeContainer'
 import { formatDateTime, formatTime } from '@safe-global/utils/utils/date'
 import { useTxFilter } from '@/utils/tx-history-filter'
 

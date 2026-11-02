@@ -1,6 +1,0 @@
-export { default as SafeProModalFrame } from './SafeProModalFrame'
-export { default as SafeProNoticeModal } from './SafeProNoticeModal'
-export { default as SafeProPendingModal } from './SafeProPendingModal'
-export { default as SafeProPlanSwitchedModal } from './SafeProPlanSwitchedModal'
-export { default as SafeProTrialActivatedModal } from './SafeProTrialActivatedModal'
-export { default as SafeProSubscriptionActivatedModal } from './SafeProSubscriptionActivatedModal'

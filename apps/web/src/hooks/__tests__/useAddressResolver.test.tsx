@@ -2,7 +2,11 @@ import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { renderHook, waitFor } from '@testing-library/react'
 import { zeroPadValue, type JsonRpcProvider } from 'ethers'
-import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
+import {
+  apiSliceWithChainsConfig,
+  chainsAdapter,
+  initialState as chainsInitialState,
+} from '@safe-global/store/gateway/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'

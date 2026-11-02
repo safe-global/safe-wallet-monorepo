@@ -5,22 +5,18 @@ import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
 import DialogActions from '@/components/common/DialogActions'
-import { SimilarAddressNotice } from '@/components/common/SimilarAddressNotice'
+import { SimilarAddressNotice } from '@/components/common/SimilarAddressNotice/SimilarAddressNotice'
 import SelectAllConfirmDialog from '@/components/common/TrustedSafesModal/SelectAllConfirmDialog'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 
 import css from './styles.module.css'
-import {
-  trackEvent,
-  ADDRESS_BOOK_EVENTS,
-  ADDRESS_POISONING_EVENTS,
-  DismissAction,
-  LookalikeWarningLocation,
-  MixpanelEventParams,
-} from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { DismissAction, LookalikeWarningLocation, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
-import { useAddressPoisoningBatchCheck } from '@/features/address-poisoning'
+import useAddressPoisoningBatchCheck from '@/features/address-poisoning/hooks/useAddressPoisoningBatchCheck'
 import { abCsvReaderValidator, abOnUploadValidator } from './validation'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'

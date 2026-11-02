@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { dispatchRecoveryProposal } from '../../../services/recovery-sender'
 import RecoverAccountReview from '../index'
 
@@ -21,7 +21,7 @@ jest.mock('../../../hooks/useIsValidRecoveryExecution', () => ({
 }))
 jest.mock('../../../services/recovery-sender', () => ({ dispatchRecoveryProposal: jest.fn() }))
 jest.mock('../../../services/transaction', () => ({ getRecoveryProposalTransactions: () => [] }))
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createTx: jest.fn(() => new Promise(() => {})),
   createMultiSendCallOnlyTx: jest.fn(() => new Promise(() => {})),
 }))

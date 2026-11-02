@@ -1,4 +1,5 @@
-import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type SafeItem, type MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import type { SpaceSafeEntry, SelectedSafe } from '@safe-global/views/features/spaces/components/SecurityHub/types'

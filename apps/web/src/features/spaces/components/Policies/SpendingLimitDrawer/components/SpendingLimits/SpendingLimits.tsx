@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { DrawerSection } from '@/components/common/Drawer'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import type { PolicySpender } from '@safe-global/views/features/spaces/components/Policies/types'
 import SpenderCard from './SpenderCard'
 

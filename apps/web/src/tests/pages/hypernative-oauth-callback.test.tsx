@@ -6,7 +6,8 @@ import { render } from '@/tests/test-utils'
 import { useRouter } from 'next/router'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -14,8 +15,10 @@ jest.mock('next/router', () => ({
 }))
 
 // Mock @/features/__core__ to prevent circular dependency issues
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/createFeatureHandle', () => ({
   createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
+}))
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
     $isLoading: false,
@@ -24,8 +27,8 @@ jest.mock('@/features/__core__', () => ({
 }))
 
 // Mock PKCE utilities
-jest.mock('@/features/hypernative', () => {
-  const actual = jest.requireActual('@/features/hypernative')
+jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
+  const actual = jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth')
   return {
     ...actual,
     readPkce: jest.fn(),
@@ -49,10 +52,8 @@ jest.mock('@/features/hypernative/config/oauth', () => {
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics').HYPERNATIVE_EVENTS,
 }))
-
-import { readPkce, clearPkce } from '@/features/hypernative'
+import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { getRedirectUri } from '@/features/hypernative/config/oauth'
 
 describe('HypernativeOAuthCallback', () => {

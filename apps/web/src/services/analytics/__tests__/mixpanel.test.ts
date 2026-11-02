@@ -7,7 +7,8 @@ jest.mock('@/config/constants', () => ({
   IS_PRODUCTION: false,
 }))
 
-import { trackEvent, trackMixpanelEvent, MixpanelEvent } from '../index'
+import { trackEvent, trackMixpanelEvent } from '../index'
+import { MixpanelEvent } from '../mixpanel-events'
 import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
 import { APP_VERSION } from '@/config/version'
 

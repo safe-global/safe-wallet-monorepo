@@ -19,8 +19,7 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
 import { TOOLTIP_TITLES } from '@safe-global/views/components/tx-flow/common/constants'
 import Track from '@/components/common/Track'
-import type { RecoveryStateItem } from '@/features/recovery'
-
+import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import {

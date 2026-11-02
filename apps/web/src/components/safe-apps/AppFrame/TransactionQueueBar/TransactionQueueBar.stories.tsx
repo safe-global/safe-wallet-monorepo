@@ -9,7 +9,7 @@ import {
   TransactionListItemType,
   TransactionStatus,
 } from '@safe-global/store/gateway/types'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { AppRoutes } from '@/config/routes'
 import TransactionQueueBar from './index'

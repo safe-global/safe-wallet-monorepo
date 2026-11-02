@@ -7,7 +7,7 @@ import { isExecutable, isMultisigExecutionInfo, isSignableBy } from '@/utils/tra
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { TxFlow } from '../../TxFlow'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
   const { text } = useTransactionType(txSummary)

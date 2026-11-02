@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { StakeFeature } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const StakePage: NextPage = () => {
   const stake = useLoadFeature(StakeFeature)

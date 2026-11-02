@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import {
-  buildCheckView,
-  buildSnapshot,
-  sentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks/builders'
+import { CheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
+import { buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
+import { sentinelRevealedEvent } from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 import { useSafenetShieldState } from '../useSafenetShieldState'
 

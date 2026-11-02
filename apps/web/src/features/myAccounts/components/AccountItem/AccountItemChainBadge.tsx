@@ -1,6 +1,6 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosTooltip } from '@/features/multichain'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { cn } from '@safe-global/views/utils/cn'
 
 /** Logo size inside the badge — matches the 22px logos of the safe-selector dropdown's SafeRowStats. */

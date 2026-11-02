@@ -2,7 +2,7 @@ import { useContext, type ReactElement } from 'react'
 import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { TxModalContext } from '@/components/tx-flow'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
-import { AllowlistDrawer } from '../AllowlistDrawer'
+import AllowlistDrawer from '../AllowlistDrawer/AllowlistDrawer'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
 
 export type AllowlistDetailsProps = {

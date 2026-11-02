@@ -8,7 +8,7 @@ import { buildChainSwitchHref } from '@/components/common/NetworkSelector'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
 import { getSafeToL2SetupVersion, hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
-import { hasMultiChainCreationFeatures } from '../../utils'
+import { hasMultiChainCreationFeatures } from '../../utils/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 

@@ -55,8 +55,9 @@ jest.mock('../ChangePlanDialog', () => ({
 
 const ENTRY = { 'Entry Point': 'sidebar' }
 
-jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => ({
-  SafeProPlanSwitchedModal: ({
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProPlanSwitchedModal', () => ({
+  __esModule: true,
+  default: ({
     planName,
     trialEndsAt,
     price,
@@ -79,13 +80,10 @@ jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => (
       <button onClick={() => onOpenChange(false)}>Get started</button>
     </div>
   ),
-  SafeProSubscriptionActivatedModal: ({
-    planName,
-    onOpenChange,
-  }: {
-    planName: string
-    onOpenChange: (open: boolean) => void
-  }) => (
+}))
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProSubscriptionActivatedModal', () => ({
+  __esModule: true,
+  default: ({ planName, onOpenChange }: { planName: string; onOpenChange: (open: boolean) => void }) => (
     <div data-testid="activated-modal" data-plan={planName}>
       <button onClick={() => onOpenChange(false)}>Get started</button>
     </div>

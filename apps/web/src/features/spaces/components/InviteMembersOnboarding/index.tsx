@@ -4,16 +4,14 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import OnboardingFooter from '@safe-global/views/components/common/OnboardingFooter'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-  useSafeNameLookup,
-} from '../OnboardingLayout'
+import OnboardingLayout from '../OnboardingLayout/OnboardingLayout'
+import StepCounter from '../OnboardingLayout/StepCounter'
+import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
+import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace'
+import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'

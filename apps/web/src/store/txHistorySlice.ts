@@ -11,7 +11,7 @@ import {
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { clearPendingTx, selectPendingTxIdsBySafe, selectPendingTxs } from './pendingTxsSlice'
 import { makeLoadableSlice } from './common'
-import { selectSafeInfo } from './slices'
+import { selectSafeInfo } from './safeInfoSlice'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionItemPage | undefined)

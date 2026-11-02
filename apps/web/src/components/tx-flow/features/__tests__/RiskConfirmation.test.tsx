@@ -1,9 +1,9 @@
 import { render, renderHook, screen } from '@/tests/test-utils'
 import { type PropsWithChildren } from 'react'
-import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
-import { useSlotIds } from '@/components/tx-flow/slots/hooks'
+import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import RiskConfirmationSlot, { RiskConfirmation } from '../RiskConfirmation'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 

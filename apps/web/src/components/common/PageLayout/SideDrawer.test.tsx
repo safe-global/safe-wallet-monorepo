@@ -1,7 +1,7 @@
 import { act, render } from '@/tests/test-utils'
 import SideDrawer from './SideDrawer'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/components/Sidebar/SpacesEnhancedSidebar/SpacesEnhancedSidebar', () => ({
   SpacesEnhancedSidebar: () => <div data-testid="sidebar" />,
 }))
 

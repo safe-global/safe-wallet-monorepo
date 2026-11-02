@@ -3,9 +3,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { createDefaultAllowlistValues, type AllowlistFormRecipient, type RecipientAllowlistFormValues } from '../types'
 import GuardStatusBanner, {
   type GuardStatus,

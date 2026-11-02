@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { RecoveryQueueItem, RecoveryState } from '../../services/recovery-state'
 import { RecoveryEvent, RecoveryTxType } from '../../services/recoveryEvents'
 import recoveryStore, { type RecoveryContextType } from '../RecoveryContext'

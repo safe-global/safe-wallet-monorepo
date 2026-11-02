@@ -14,15 +14,13 @@ import OnboardingFooter from '@safe-global/views/components/common/OnboardingFoo
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-  useSafeNameLookup,
-} from '../OnboardingLayout'
+import OnboardingLayout from '../OnboardingLayout/OnboardingLayout'
+import StepCounter from '../OnboardingLayout/StepCounter'
+import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
+import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace'
+import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import SurveyOptionCard from '@safe-global/views/features/spaces/components/SurveyOnboarding/SurveyOptionCard'
 
 const ONBOARDING_STEP = 4

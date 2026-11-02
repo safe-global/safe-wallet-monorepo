@@ -11,7 +11,7 @@
 
 // Component imports
 import type GlobalSearchInput from './components/GlobalSearchInput'
-import type GlobalSearchModal from './components/GlobalSearchModal'
+import type GlobalSearchModal from './components/GlobalSearchModal/GlobalSearchModal'
 
 /**
  * GlobalSearch Feature Implementation - flat structure (NO hooks)

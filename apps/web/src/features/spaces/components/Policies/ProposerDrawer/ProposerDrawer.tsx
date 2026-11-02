@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import { UserRoundPen } from 'lucide-react'
-import { Drawer, DrawerBody } from '@/components/common/Drawer'
-import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
-import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import {
-  NestedSafeGrantNotice,
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+import PolicyDrawerActions, { PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions/PolicyDrawerActions'
+import PolicyDrawerHeader from '../components/PolicyDrawerHeader/PolicyDrawerHeader'
+import NestedSafeGrantNotice, {
   type NestedSafeGrantNoticeProps,
-} from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/NestedSafeGrantNotice'
-import { ProposerOverviewSkeleton } from './components/ProposerOverview'
+} from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/NestedSafeGrantNotice/NestedSafeGrantNotice'
+import { ProposerOverviewSkeleton } from './components/ProposerOverview/ProposerOverview'
 import { toPolicyStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/utils'
 import { ProposerVariantContent } from './variants'
 import type { ProposerVariantContentProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'

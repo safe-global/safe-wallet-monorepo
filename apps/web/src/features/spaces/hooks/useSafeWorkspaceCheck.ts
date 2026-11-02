@@ -15,7 +15,7 @@ import {
   selectIsStoreHydrated,
 } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { selectStepUpPhase } from '@/features/oidc-auth/store'
+import { selectStepUpPhase } from '@/features/oidc-auth/store/stepUpSlice'
 import useChainId from '@/hooks/useChainId'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { parseSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'

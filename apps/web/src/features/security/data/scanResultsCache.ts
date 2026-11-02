@@ -6,7 +6,8 @@
  * The Map is intentionally private — consumers go through `getCachedScan` /
  * `setCachedScan` so the map can't be mutated by reference from outside.
  */
-import type { ScanResult, ScannerId } from './scanners/types'
+import type { ScannerId } from './scanners/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 
 const CACHE_TTL_MS = 3_600_000
 const MAX_CACHE_SIZE = 50

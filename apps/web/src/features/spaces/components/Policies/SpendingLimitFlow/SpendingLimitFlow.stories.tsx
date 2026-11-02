@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpendingLimitFlow from '.'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */

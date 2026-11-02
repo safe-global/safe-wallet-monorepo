@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope'
+import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import {
   getNestedSafesNoticeText,

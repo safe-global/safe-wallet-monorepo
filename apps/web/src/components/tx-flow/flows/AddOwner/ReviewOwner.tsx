@@ -2,13 +2,16 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useContext, useEffect, type PropsWithChildren } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-import { createSwapOwnerTx, createAddOwnerTx } from '@/services/tx/tx-sender'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
+import { createSwapOwnerTx, createAddOwnerTx } from '@/services/tx/tx-sender/create'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
-import { SafeTxContext } from '../../SafeTxProvider'
-import type { AddOwnerFlowProps } from '.'
-import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type {
+  AddOwnerFlowProps,
+  ReplaceOwnerFlowProps,
+} from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 import { SettingsChangeContext } from '@safe-global/views/components/tx-flow/flows/AddOwner/context'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 

@@ -5,7 +5,7 @@ import { createTransactionHandlersFromFixture } from '@safe-global/test/msw/hand
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
 import { userEvent, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from './ExpandableTransactionItem'
 

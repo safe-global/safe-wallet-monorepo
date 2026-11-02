@@ -9,10 +9,15 @@ const mockUseAuthGetMeV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseAddressBook = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockSpaceId,
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
-  useAddressBookSearch: (contacts: { name: string; address: string }[], query: string) =>
+}))
+jest.mock('@/features/spaces/hooks/useAddressBookSearch', () => ({
+  __esModule: true,
+  default: (contacts: { name: string; address: string }[], query: string) =>
     query
       ? contacts.filter(
           ({ name, address }) =>

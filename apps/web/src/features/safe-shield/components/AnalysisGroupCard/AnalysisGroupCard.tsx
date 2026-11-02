@@ -9,14 +9,16 @@ import {
   type Severity,
   type StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
-import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
+import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils/mapVisibleAnalysisResults'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { AddressPoisoningCardItem } from './AddressPoisoningCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
-import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { type AnalyticsEvent } from '@/services/analytics/types'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import isEmpty from 'lodash/isEmpty'
 
 export interface AnalysisGroupCardProps {

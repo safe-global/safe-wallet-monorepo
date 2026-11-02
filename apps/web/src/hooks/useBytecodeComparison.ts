@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useWeb3ReadOnly } from './wallets/web3'
+import { useWeb3ReadOnly } from './wallets/web3ReadOnly'
 import useSafeInfo from './useSafeInfo'
 import { useCurrentChain } from './useChains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'

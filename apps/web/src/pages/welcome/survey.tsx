@@ -4,8 +4,8 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
 const SurveyPage: NextPage = () => {

@@ -5,10 +5,9 @@ import { ChevronRight } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { AppRoutes } from '@/config/routes'
-import type { RecoveryQueueItem } from '@/features/recovery'
-
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import css from '@safe-global/views/components/dashboard/PendingTxs/styles.module.css'
 import classnames from 'classnames'
 

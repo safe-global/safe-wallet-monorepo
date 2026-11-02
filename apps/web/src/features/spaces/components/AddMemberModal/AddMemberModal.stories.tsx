@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { userEvent, within } from 'storybook/test'
 import { NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import AddMemberModal from '.'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',

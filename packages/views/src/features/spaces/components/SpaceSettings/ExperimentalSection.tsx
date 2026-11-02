@@ -3,7 +3,7 @@ import { SpaceExperimentalFeature } from '@safe-global/store/gateway/types'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Switch } from '@safe-global/views/components/ui/switch'
-import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip/AdminOnlyWorkspaceTooltip'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'

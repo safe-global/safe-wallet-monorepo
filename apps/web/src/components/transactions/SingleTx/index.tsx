@@ -18,7 +18,7 @@ import GroupLabel from '../GroupLabel'
 import TransactionDetailsError from '@safe-global/views/components/transactions/SingleTx/TransactionDetailsError'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useHnQueueAssessment } from '@/features/hypernative'
+import { useHnQueueAssessment } from '@/features/hypernative/hooks/useHnQueueAssessment'
 import { reloadPage } from '@/utils/navigation'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {

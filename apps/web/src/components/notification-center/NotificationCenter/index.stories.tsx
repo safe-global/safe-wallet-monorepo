@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { userEvent, within } from 'storybook/test'
 import type { NotificationState } from '@/store/notificationsSlice'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import NotificationCenter from './index'
 
 const now = Date.now()

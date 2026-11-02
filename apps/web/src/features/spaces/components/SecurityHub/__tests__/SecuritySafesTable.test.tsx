@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SecuritySafesTable from '../components/SecuritySafesTable/SecuritySafesTable'
 import type { SpaceSafeEntry, SelectedSafe } from '@safe-global/views/features/spaces/components/SecurityHub/types'
-import type { ScanResult } from '@/features/security/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 import { AppRoutes } from '@/config/routes'
 // Helper: mirrors security.scanKey exactly (address.toLowerCase() + chainId). Inlined to
 // avoid a feature-handle mock setup in tests that don't exercise the security feature directly.
@@ -40,8 +40,8 @@ jest.mock('@safe-global/views/components/common/Identicon', () => {
 })
 
 // Mock only the query hook, not the entire gateway module (avoids breaking Redux store bootstrap)
-jest.mock('@safe-global/store/gateway', () => ({
-  ...jest.requireActual('@safe-global/store/gateway'),
+jest.mock('@safe-global/store/gateway/chains', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/chains'),
   useGetChainsConfigV2Query: () => ({
     data: {
       ids: ['1', '137'],
@@ -62,10 +62,10 @@ jest.mock('@/store', () => ({
 }))
 
 // useLoadFeature needs Redux/chain context; return the resolved feature synchronously.
-jest.mock('@/features/__core__', () => {
+jest.mock('@/features/__core__/useLoadFeature', () => {
   const securityFeatureImpl = require('@/features/security/feature').default
   return {
-    ...jest.requireActual('@/features/__core__'),
+    ...jest.requireActual('@/features/__core__/useLoadFeature'),
     useLoadFeature: () => ({
       ...securityFeatureImpl,
       $isReady: true,

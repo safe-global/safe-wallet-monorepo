@@ -25,7 +25,7 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAllOwnedSafes } from '@/hooks/safes'
+import useAllOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences'
 import { useNotificationRegistrations } from '../hooks/useNotificationRegistrations'
 import { useNotificationsRenewal } from '../hooks/useNotificationsRenewal'
@@ -34,7 +34,17 @@ jest.mock('@/hooks/useChains')
 
 jest.mock('@/hooks/wallets/useWallet')
 
-jest.mock('@/hooks/safes')
+jest.mock('@/hooks/safes/useAllOwnedSafes')
+jest.mock('@/hooks/safes/useAllSafes')
+jest.mock('@/hooks/safes/useSafeItemBuilder')
+jest.mock('@/hooks/safes/useAllSafesGrouped')
+jest.mock('@/hooks/safes/isMultiChainSafeItem')
+jest.mock('@/hooks/safes/useSafesSearch')
+jest.mock('@/hooks/safes/useGetHref')
+jest.mock('@/hooks/safes/comparators')
+jest.mock('@/hooks/safes/useSafeOrderComparator')
+jest.mock('@/hooks/safes/useSaveManualOrder')
+jest.mock('@safe-global/views/hooks/safes/types')
 
 jest.mock('../hooks/useNotificationPreferences')
 

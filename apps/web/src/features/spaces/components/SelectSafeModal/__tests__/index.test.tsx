@@ -1,8 +1,8 @@
 import { render } from '@/tests/test-utils'
 import SelectSafeModal from '../index'
-import { ESafeAction } from '@/features/spaces/store'
+import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
 const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
@@ -41,7 +41,7 @@ jest.mock('../useSafeActionMapper', () => ({
 }))
 
 const mockUseSpaceSafes = jest.fn()
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   __esModule: true,
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))

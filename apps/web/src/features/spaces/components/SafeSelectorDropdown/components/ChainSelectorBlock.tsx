@@ -5,7 +5,7 @@ import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import AllNetworksSection from './AllNetworksSection'
 import ChainLogo from './ChainLogo'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 
 export interface ChainSelectorBlockProps {
   deployedChains: ChainInfo[]

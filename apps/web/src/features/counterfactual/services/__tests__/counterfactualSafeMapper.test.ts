@@ -1,4 +1,4 @@
-import type { ReplayedSafeProps } from '../../types'
+import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { toBackendDto, fromBackendDto } from '../counterfactualSafeMapper'
 
 const mockReplayedSafeProps: ReplayedSafeProps = {

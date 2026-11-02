@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import { useHasUntrustedFallbackHandler } from '../useHasUntrustedFallbackHandler'
-import { useTWAPFallbackHandlerAddress } from '@/features/swap'
+import { useTWAPFallbackHandlerAddress } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { faker } from '@faker-js/faker'
 import {
@@ -12,7 +12,7 @@ import { safeInfoBuilder } from '@/tests/builders/safe'
 import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/features/swap', () => ({
+jest.mock('@/features/swap/hooks/useIsTWAPFallbackHandler', () => ({
   useTWAPFallbackHandlerAddress: jest.fn(),
 }))
 

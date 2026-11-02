@@ -3,13 +3,14 @@ import type { Erc20Token, NativeToken } from '@safe-global/store/gateway/AUTO_GE
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
-import { useLoadFeature } from '@/features/__core__'
-import { SpendingLimitsFeature, type SpendingLimitState } from '@/features/spending-limits'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
+import { type SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import useSpendingLimitTokenOptions from './hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from './utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type ExistingSpendingLimits = {
   /** Undefined until loaded for the selected Safe, or while no Safe is selected. */

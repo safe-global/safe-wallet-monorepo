@@ -2,7 +2,7 @@ import { render, screen } from '@/tests/test-utils'
 import { FeeTokenPreference } from '.'
 import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 
 jest.mock('@/hooks/useChains', () => ({
@@ -14,6 +14,7 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/hooks/wallets/useWallet')
 
 jest.mock('@/hooks/wallets/web3')
+jest.mock('@/hooks/wallets/web3ReadOnly')
 
 jest.mock('@safe-global/utils/hooks/useAsync')
 

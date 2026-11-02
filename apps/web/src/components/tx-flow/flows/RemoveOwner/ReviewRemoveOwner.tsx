@@ -2,9 +2,10 @@ import { useCallback, useContext, useEffect } from 'react'
 import type { ReactElement, PropsWithChildren } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-import { createRemoveOwnerTx } from '@/services/tx/tx-sender'
-import { SafeTxContext } from '../../SafeTxProvider'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
+import { createRemoveOwnerTx } from '@/services/tx/tx-sender/create'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { RemoveOwnerFlowProps } from '.'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 

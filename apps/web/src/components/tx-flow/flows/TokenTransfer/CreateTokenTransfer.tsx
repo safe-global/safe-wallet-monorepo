@@ -27,7 +27,7 @@ import {
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -38,15 +38,13 @@ import CSVAirdropAppModal from './CSVAirdropAppModal'
 import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
 import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import {
-  NoFeeCampaignFeature,
-  useNoFeeCampaignEligibility,
-  useIsNoFeeCampaignEnabled,
-} from '@/features/no-fee-campaign'
-import { useLoadFeature } from '@/features/__core__'
+import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
+import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
 

@@ -3,9 +3,11 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import { useCustomSafeApps } from '@/hooks/safe-apps/useCustomSafeApps'
 import { usePinnedSafeApps } from '@/hooks/safe-apps/usePinnedSafeApps'
-import { useBrowserPermissions, useSafePermissions } from './permissions'
+import { useBrowserPermissions } from './permissions/useBrowserPermissions'
+import { useSafePermissions } from './permissions/useSafePermissions'
 import { useRankedSafeApps } from '@/hooks/safe-apps/useRankedSafeApps'
-import { SAFE_APPS_EVENTS, type SAFE_APPS_LABELS, trackSafeAppEvent } from '@/services/analytics'
+import { trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS, type SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
 import { getOrigin } from '@/components/safe-apps/utils'
 import { useSafeAppUrl } from './useSafeAppUrl'
 

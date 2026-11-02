@@ -1,9 +1,12 @@
 import { useContext, useEffect, type ReactElement } from 'react'
-import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useFeesPreview, useIsGtfSlotVisible } from '@/features/gtf'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { GTFFeature } from '@/features/gtf'
+import { useFeesPreview } from '@/features/gtf/hooks/useFeesPreview'
+import { useIsGtfSlotVisible } from '@/features/gtf/hooks/useIsGtfSlotVisible'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { TxFlowContext } from '../TxFlowProvider'
-import { SlotName, withSlot } from '../slots'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '../slots/withSlot'
 
 const FeesPreview = (): ReactElement => {
   const { FeesPreview: FeesPreviewComponent } = useLoadFeature(GTFFeature)

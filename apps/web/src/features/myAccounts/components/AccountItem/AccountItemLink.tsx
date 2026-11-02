@@ -3,7 +3,7 @@ import Link from 'next/link'
 import type { UrlObject } from 'url'
 import classnames from 'classnames'
 import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
 import AccountItemContent from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemContent'
 

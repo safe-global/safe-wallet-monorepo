@@ -1,1 +1,0 @@
-export { HypernativeTooltip } from './HypernativeTooltip'

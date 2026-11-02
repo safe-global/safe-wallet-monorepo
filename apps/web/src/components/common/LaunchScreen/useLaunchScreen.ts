@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
+import { useGetChainsConfigV2Query } from '@safe-global/store/gateway/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 
 /** Minimum time the launch screen stays up, so it doesn't flicker on fast/cached loads. */

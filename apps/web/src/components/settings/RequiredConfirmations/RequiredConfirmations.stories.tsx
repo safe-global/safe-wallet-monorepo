@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMinimalDecorator } from '@/stories/mocks'
+import { createMinimalDecorator } from '@/stories/mocks/createMockStory'
 import { RequiredConfirmation } from './index'
 
 const MOCK_WALLET_ADDRESS = '0x1234567890123456789012345678901234567890'

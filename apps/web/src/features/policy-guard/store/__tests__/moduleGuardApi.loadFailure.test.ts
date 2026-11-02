@@ -1,5 +1,9 @@
 import type { JsonRpcProvider } from 'ethers'
-import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
+import {
+  apiSliceWithChainsConfig,
+  chainsAdapter,
+  initialState as chainsInitialState,
+} from '@safe-global/store/gateway/chains'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { logError } from '@/services/exceptions'

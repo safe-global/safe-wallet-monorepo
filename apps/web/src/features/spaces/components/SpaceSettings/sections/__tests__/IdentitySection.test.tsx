@@ -3,16 +3,14 @@ import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
 import IdentitySection from '../IdentitySection'
 import { spaceBuilder } from '@/tests/builders/space'
-import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
-
+import { DISALLOWED_CHARACTER_MESSAGE, SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUnwrap = jest.fn()
 const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(() => mockUseIsAdmin()),
 }))
 

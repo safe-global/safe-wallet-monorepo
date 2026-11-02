@@ -1,7 +1,7 @@
 import { getTxStatus, formatTxDate, getActionableTransactions, _getTransactionsToDisplay } from './utils'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { RecoveryQueueItem } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import * as guards from '@/utils/transaction-guards'
 
 jest.mock('@/utils/transaction-guards')

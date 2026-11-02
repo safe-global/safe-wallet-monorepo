@@ -1,4 +1,5 @@
-import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { WALLET_EVENTS } from '@/services/analytics/events/wallet'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useEffect } from 'react'
 import useChainId from './useChainId'
