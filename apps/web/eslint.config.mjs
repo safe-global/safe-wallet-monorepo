@@ -119,6 +119,10 @@ export default [
         {
           paths: [
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+            {
+              name: 'next/image',
+              message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
+            },
           ],
           patterns: [
             // Block deep imports into feature components (defeats lazy loading)

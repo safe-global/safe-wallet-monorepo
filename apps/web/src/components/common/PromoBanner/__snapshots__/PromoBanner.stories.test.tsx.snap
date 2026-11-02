@@ -17,13 +17,8 @@ exports[`./PromoBanner.stories Default 1`] = `
         <img
           alt="Promo image"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -164,13 +159,8 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
         <img
           alt="Special offer"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -248,13 +238,8 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
         <img
           alt="Action required"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -332,13 +317,8 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
         <img
           alt="Welcome"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
