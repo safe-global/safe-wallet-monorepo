@@ -1,7 +1,17 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactElement, type ReactNode } from 'react'
+import {
+  createContext,
+  forwardRef,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactElement,
+  type ReactNode,
+} from 'react'
 import type { Decorator } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { ChevronDown, Copy } from 'lucide-react'
+import { ChevronDown, CircleCheck, Copy, Landmark, type LucideIcon, type LucideProps } from 'lucide-react'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -113,29 +123,35 @@ const ACCOUNT_SPENDING_LIMITS: Record<string, AccountSpendingLimit[]> = {
     { spender: 'Ops bot', token: 'USDC', label: 'Ops bot · 500 USDC per day' },
     { spender: 'Payroll bot', token: 'ETH', label: 'Payroll bot · 1 ETH per week' },
   ],
+  [getAccountKey(TREASURY)]: [{ spender: 'Ops bot', token: 'USDC', label: 'Ops bot · 500 USDC per day' }],
   [getAccountKey(TRADING_DESK)]: [
     { spender: 'Market maker bot', token: 'USDC', label: 'Market maker bot · 250 USDC per day' },
     { spender: 'Rebalancer', token: 'ETH', label: 'Rebalancer · 2 ETH per week' },
   ],
 }
 
+/** A: account protection next to other policies. B: account policies, with every module a rule inside them. */
+export type PrototypeModel = 'protection' | 'policies' | 'simple'
+
+export const PrototypeModelContext = createContext<PrototypeModel>('protection')
+
+export const usePrototypeModel = (): PrototypeModel => useContext(PrototypeModelContext)
+
 /** Every other account has none. */
 export const getAccountSpendingLimits = (account?: M2Account): AccountSpendingLimit[] =>
   account ? (ACCOUNT_SPENDING_LIMITS[getAccountKey(account)] ?? []) : []
 
-/** A live allowlist's token and existing-permissions choices, as its Create form left them. */
+/** A live allowlist's token choices, as its Create form left them. */
 export type AllowlistSettings = {
   /** Symbols of the account's tokens the allowlist leaves out. */
   excludedTokens: string[]
-  /** Whether it also checks the account's existing spending limits. */
-  applyToSpendingLimits: boolean
 }
 
-const DEFAULT_ALLOWLIST_SETTINGS: AllowlistSettings = { excludedTokens: [], applyToSpendingLimits: true }
+const DEFAULT_ALLOWLIST_SETTINGS: AllowlistSettings = { excludedTokens: [] }
 
 // Payments' setup follows the prototype's own choices, so it isn't listed here.
 const ALLOWLIST_SETTINGS: Record<string, AllowlistSettings> = {
-  [getAccountKey(TRADING_DESK)]: { excludedTokens: ['USDC'], applyToSpendingLimits: true },
+  [getAccountKey(TRADING_DESK)]: { excludedTokens: ['USDC'] },
 }
 
 /** Every other allowlist allows all its account's tokens and applies to existing permissions. */
@@ -771,10 +787,18 @@ export const FullAddress = ({ address, chainId }: { address: string; chainId: st
   </span>
 )
 
-const NameLine = ({ name, nameSuffix }: { name?: string; nameSuffix?: ReactNode }): ReactElement | null =>
+const NameLine = ({
+  name,
+  nameSuffix,
+  variant = 'paragraph-small-medium',
+}: {
+  name?: string
+  nameSuffix?: ReactNode
+  variant?: 'paragraph-small-medium' | 'paragraph-bold'
+}): ReactElement | null =>
   name ? (
     <span className="flex min-w-0 items-center gap-1">
-      <Typography variant="paragraph-small-medium" className="truncate">
+      <Typography variant={variant} className="truncate">
         {name}
       </Typography>
       {nameSuffix}
@@ -791,6 +815,7 @@ export const SafeAddress = ({
   avatarSize = 24,
   nameSuffix,
   chainId = '1',
+  nameVariant,
 }: {
   name?: string
   address: string
@@ -798,6 +823,8 @@ export const SafeAddress = ({
   nameSuffix?: ReactNode
   /** Picks the block explorer. */
   chainId?: string
+  /** The Safe accounts tab's larger name, where the account heads its own row. */
+  nameVariant?: 'paragraph-small-medium' | 'paragraph-bold'
 }): ReactElement => {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimer = useRef<number>(undefined)
@@ -829,7 +856,7 @@ export const SafeAddress = ({
       </Tooltip>
 
       <div className="flex min-w-0 flex-col">
-        <NameLine name={name} nameSuffix={nameSuffix} />
+        <NameLine name={name} nameSuffix={nameSuffix} variant={nameVariant} />
         <span className="w-fit" onMouseEnter={show} onMouseLeave={hide}>
           <ShortAddress address={address} />
         </span>
@@ -889,3 +916,9 @@ export const PolicyPage = ({ header, children }: { header: ReactNode; children: 
     {children}
   </main>
 )
+
+/** Account protection's icon everywhere: a check in A; in B and C, policy enforcement uses the Policies tab's landmark. */
+export const AccountProtectionIcon = forwardRef<SVGSVGElement, LucideProps>((props, ref) =>
+  usePrototypeModel() === 'protection' ? <CircleCheck ref={ref} {...props} /> : <Landmark ref={ref} {...props} />,
+) as LucideIcon
+AccountProtectionIcon.displayName = 'AccountProtectionIcon'

@@ -30,6 +30,11 @@ export const ByAccount: Story = {
 export const ByPolicy: Story = {
   name: 'By policy',
   render: ({ payments, onAddPolicy, onSelectAccount }) => (
-    <PoliciesByPolicyPage payments={payments} onAddPolicy={onAddPolicy} onSelectAccount={onSelectAccount} />
+    <PoliciesByPolicyPage
+      payments={payments}
+      onAddPolicy={onAddPolicy}
+      onSelectAccount={onSelectAccount}
+      initialGrouping={null}
+    />
   ),
 }
