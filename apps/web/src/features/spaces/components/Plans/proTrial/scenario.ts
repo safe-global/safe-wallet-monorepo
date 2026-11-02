@@ -140,6 +140,8 @@ export const scenarioHandlers = (scenario: ProTrialScenario) => {
           : [],
       })
     }),
+    // The shared "get Workspace by id" mock also matches this path, which breaks My accounts.
+    http.get(/\/v1\/spaces\/safes$/, () => HttpResponse.json([])),
     http.get(/\/v1\/spaces$/, () => HttpResponse.json([{ ...createMockSpace(), safeCount: scenario.safes }])),
     http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
       HttpResponse.json({ safes: { '1': safes.map((safe) => safe.address.value) } }),
