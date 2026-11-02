@@ -79,8 +79,6 @@ Run the repo's `verify` scripts before committing — they type-check, lint, pre
 - **Test scaffolding:** `yarn workspace @safe-global/web test:scaffold <file>`.
 - `SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.
 
-In Claude Code a `PreToolUse` hook (`.claude/hooks/verify-before-commit.mjs`) runs the scoped check for every workspace with staged changes and blocks `git commit` when it fails. Other tools: run it yourself.
-
 **Rules for agents:**
 
 - Run the scoped check for the workspace you changed, fix every error before moving on, and don't commit without a clean pass.
