@@ -12,9 +12,9 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 
 `--force` is required: turbo's `test` task doesn't hash `config/test` files, so without it a cached green pass can hide a breaking change. A change here can break both platforms' test suites at once.
 
-## MSW fixtures are generated (never edit by hand)
+## MSW fixtures are mostly generated (never edit those by hand)
 
-The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. To refresh or add one:
+The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. Adding a key to `SAFES` writes a new `safes/<key>.json`: add an `Edit(...)` deny line for it in `.claude/settings.json`. To refresh or add a generated fixture:
 
 ```bash
 node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions | --group=swaps | --group=staking]
