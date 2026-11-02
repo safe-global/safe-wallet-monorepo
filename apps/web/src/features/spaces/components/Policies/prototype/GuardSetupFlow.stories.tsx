@@ -36,6 +36,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { cn } from '@safe-global/views/utils/cn'
@@ -49,18 +50,23 @@ import {
   getAllowlistAccountKeys,
   getPanelOrder,
   getPolicyRows,
+  isAccountEnforced,
   POLICY_ROW_LABELS,
   POLICY_TYPES,
   PoliciesByPolicyPage,
   PoliciesOverviewPage,
   SETUP_ROW_ID,
   type PanelEntry,
+  type AddedPolicy,
+  type ChangeStage,
+  type Person,
   type PaymentsSnapshot,
   type PolicyFilters,
   type PolicyRow,
   type SpendingLimitState,
 } from './m2OverviewPage'
 import { AllowlistIntroDialog } from './m2AllowlistIntro'
+import { M2Alert } from './m2Alert'
 import { PolicyIntro, type IntroKind } from './m2PolicyIntros'
 import type { PanelNav } from './m2PanelParts'
 import {
@@ -71,7 +77,6 @@ import {
   type ProtectionRules,
 } from './m2PolicyDrawers'
 import {
-  AccountProtectionIcon,
   ADDRESS_BOOK,
   createPoliciesM2Story,
   getAccountKey,
@@ -96,6 +101,7 @@ import {
   EXECUTE_STEP,
   findM2Account,
   getActiveDetails,
+  getShownProposers,
   POLICIES_STEP,
   PROPOSERS_STEP,
   POPULAR_TOKENS,
@@ -173,7 +179,7 @@ const SIMPLE_POLICY_OPTIONS: { id: IntroKind; title: string; description: string
   { id: 'allowlist', title: 'Allowlist', description: 'Which tokens can be sent, and to whom.', Icon: Users },
   {
     id: 'settings',
-    title: 'Settings lock',
+    title: 'Protected settings',
     description: 'Which changes to signers, threshold and policies are allowed.',
     Icon: Settings2,
   },
@@ -197,56 +203,158 @@ const SIMPLE_POLICY_OPTIONS: { id: IntroKind; title: string; description: string
   },
 ]
 
-/** C: every policy on its own, as tiles; picking one starts its flow. Contract interactions waits at the end. */
 /** One row of C's list: icon, name, what it does, and an arrow. */
 const PolicyListRow = ({
   title,
   description,
   icon,
   onSelect,
-  className,
+  disabledReason,
 }: {
   title: string
   description: string
   icon: ReactNode
   onSelect: () => void
-  className?: string
-}): ReactElement => (
-  <button
-    type="button"
-    onClick={onSelect}
-    className={cn(
-      'group flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-      className ?? 'bg-muted hover:bg-secondary-hover',
-    )}
-  >
-    {icon}
-    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-      <Typography variant="paragraph-small-medium" as="span">
-        {title}
-      </Typography>
-      <Typography variant="paragraph-mini" color="muted" as="span">
-        {description}
-      </Typography>
-    </span>
-    <ArrowRight
-      className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-      aria-hidden
-    />
-  </button>
-)
+  /** Set when the account already has this policy: the row is off, and hovering says why. */
+  disabledReason?: string
+}): ReactElement => {
+  const row = (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={Boolean(disabledReason)}
+      className="group flex w-full cursor-pointer items-center gap-3 rounded-lg bg-muted p-3 text-left transition-colors hover:bg-secondary-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-default disabled:opacity-50 disabled:hover:bg-muted"
+    >
+      {icon}
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <Typography variant="paragraph-small-medium" as="span">
+          {title}
+        </Typography>
+        <Typography variant="paragraph-mini" color="muted" as="span">
+          {description}
+        </Typography>
+      </span>
+      <ArrowRight
+        className="size-4 shrink-0 text-muted-foreground transition-transform group-enabled:group-hover:translate-x-0.5"
+        aria-hidden
+      />
+    </button>
+  )
 
-/** C: every policy in one list; policy enforcement comes last, set apart because it covers the whole account. */
+  if (!disabledReason) return row
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="block w-full" />}>{row}</TooltipTrigger>
+      <TooltipContent>{disabledReason}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+/** C: which of a policy panel's Edit buttons reopen that policy's own flow. Proposers keep M1's panel as it is. */
+const SIMPLE_EDIT_KINDS: Partial<Record<PolicyRow['type'], SingleRuleKind>> = {
+  allowlist: 'allowlist',
+  'account-settings': 'settings',
+  'spending-limit': 'limits',
+}
+
+/** C: Enforce policies on an account with no allowlist or no settings lock says what enforcing would block first. */
+const EnforceGateDialog = ({
+  account,
+  rows,
+  onClose,
+  onSetUp,
+  onEnforceAnyway,
+}: {
+  account?: M2Account
+  rows: PolicyRow[]
+  onClose: () => void
+  onSetUp: (kind: SingleRuleKind, account: M2Account) => void
+  onEnforceAnyway: (account: M2Account) => void
+}): ReactElement | null => {
+  if (!account) return null
+  const live = rows.filter((row) => getAccountKey(row.account) === getAccountKey(account) && row.status !== 'failed')
+  const hasAllowlist = live.some(({ type }) => type === 'allowlist')
+  const hasLock = live.some(({ type }) => type === 'account-settings')
+  const missing: { kind: SingleRuleKind; text: string }[] = [
+    ...(hasAllowlist
+      ? []
+      : [
+          {
+            kind: 'allowlist' as const,
+            text: 'With no allowlist, no funds can leave this Safe account, not even through spending limits.',
+          },
+        ]),
+    ...(hasLock
+      ? []
+      : [
+          {
+            kind: 'settings' as const,
+            text: 'With no protected settings, no one can change signers or the threshold.',
+          },
+        ]),
+  ]
+  // Both missing: one flow sets up the two together.
+  const setUpKind: SingleRuleKind | undefined = missing.length === 2 ? 'basics' : missing[0]?.kind
+  const setUpLabel = {
+    basics: 'Set up allowlist and protected settings',
+    allowlist: 'Set up allowlist',
+    settings: 'Set up protected settings',
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
+      <DialogContent size="xs" data-testid="enforce-gate-dialog">
+        <DialogHeader>
+          <DialogTitle className="text-xl leading-6 font-semibold">Before you enforce</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 px-5 pb-5" data-m2-new="New · Enforce without allowlist or lock">
+          <Typography variant="paragraph-small" color="muted">
+            Enforcing blocks anything {account.name}’s policies don’t allow. Right now that would mean:
+          </Typography>
+          <ul className="flex flex-col gap-2">
+            {missing.map(({ text }) => (
+              <li key={text}>
+                <M2Alert tone="error" title={text} />
+              </li>
+            ))}
+            {/* Without an allowlist nothing can be sent, spending limits included. */}
+            {hasAllowlist && (
+              <li className="rounded-lg bg-muted p-3">
+                <Typography variant="paragraph-small-medium">Spending limits keep working as they do now.</Typography>
+              </li>
+            )}
+          </ul>
+          <div className="flex flex-col gap-2">
+            {setUpKind && (
+              <Button className="w-full" onClick={() => onSetUp(setUpKind, account)}>
+                {setUpLabel[setUpKind as keyof typeof setUpLabel]}
+              </Button>
+            )}
+            <Button variant="ghost-muted" className="w-full" onClick={() => onEnforceAnyway(account)}>
+              Enforce anyway
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/** C: every policy in one list; policy enforcement starts from the account's own row instead. */
 const SimplePolicyChooser = ({
   open,
   onOpenChange,
-  onEnforce,
   onSelect,
   onSuggest,
+  account,
+  existingKinds = [],
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onEnforce: () => void
+  /** Opened from an account's row: the one the new policy is for. */
+  account?: M2Account
+  /** Policies an account can only have one of, which it already has. */
+  existingKinds?: IntroKind[]
   onSelect: (kind: IntroKind) => void
   onSuggest: () => void
 }): ReactElement => (
@@ -268,19 +376,13 @@ const SimplePolicyChooser = ({
                 </span>
               }
               onSelect={() => onSelect(id)}
+              disabledReason={
+                account && existingKinds.includes(id)
+                  ? `${account.name} already has ${title === 'Protected settings' ? 'protected settings' : `an ${title.toLowerCase()}`}. Edit that one from its side panel instead.`
+                  : undefined
+              }
             />
           ))}
-          <PolicyListRow
-            title="Policy enforcement"
-            description="Blocks anything your policies don’t allow, even with every signature."
-            icon={
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
-                <AccountProtectionIcon className="size-4" aria-hidden />
-              </span>
-            }
-            onSelect={onEnforce}
-            className="border border-border bg-card hover:bg-muted"
-          />
         </div>
         <SuggestPolicyFooter onSelect={onSuggest} />
       </div>
@@ -399,6 +501,15 @@ type PrototypeState = {
   ruleIsEdit?: boolean
   /** Where the rule flow goes back to: the panel it was opened from, or the table. */
   ruleReturnPolicyId?: string | null
+  /** C: policies the prototype's flows set up, listed under their account. */
+  addedPolicies?: AddedPolicy[]
+  /** C: each enforced account's one pending Edit policies change, and what it will apply. */
+  bundleStages?: Record<string, ChangeStage>
+  bundleChoices?: Record<string, SetupChoices>
+  /** C: allowlist recipients an applied Edit policies left, by account key. */
+  allowlistPeople?: Record<string, { name: string; address: string }[]>
+  /** C: the account whose Enforce policies was clicked while it has no allowlist or settings lock. */
+  enforceGateKey?: string | null
   /** B: Trading desk's policy enforcement is live; off in the starting state, on through Jump to. */
   tradingDeskEnforced?: boolean
   /** An account whose protection change was executed and is waiting out its 24 hours. */
@@ -478,6 +589,11 @@ type Jump = {
 }
 
 const PAYMENTS_KEY = getAccountKey(PAYMENTS)
+/** C: the protected settings Payments starts with; its row and its panel both read it. */
+const C_PAYMENTS_LOCK: ProtectionRules = {
+  ...DEFAULT_PROTECTION_RULES,
+  blockedSettings: ['add-signer', 'remove-signer', 'change-threshold'],
+}
 const ON_PAYMENTS: Partial<PrototypeState> = { setupAccountKey: PAYMENTS_KEY }
 const SETUP_STARTED: Partial<PrototypeState> = { ...ON_PAYMENTS, signedBy: ['nadia'] }
 const FULLY_SIGNED: Partial<PrototypeState> = { ...ON_PAYMENTS, signedBy: ['nadia', 'tom'] }
@@ -541,6 +657,9 @@ const MANY_TOKENS_CHOICES: SetupChoices = {
 
 // A new setup starts with no recipients; later steps keep the prefilled ones so they have something to show.
 const FRESH_CHOICES: SetupChoices = { ...DEFAULT_CHOICES, recipients: [] }
+
+const toPeople = (recipients: Recipient[]): Person[] =>
+  recipients.filter(({ selected }) => selected).map(({ name, address }) => ({ name, address }))
 const CONFLICT_ONE: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC'] }
 const BLOCKED_SPENDING_LIMIT_TOKENS = ['USDC']
 
@@ -1379,6 +1498,29 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     })
   }
 
+  /** C: an edit starts from what the policy allows now; a new policy starts empty. */
+  const getRuleChoices = (account: M2Account | null, ruleKind: SingleRuleKind, isEdit: boolean): SetupChoices => {
+    const editedRow = isEdit ? getPolicyRows(payments).find(({ id }) => id === state.policyId) : undefined
+    if (ruleKind === 'allowlist' && editedRow) return choicesFromAllowlist(editedRow)
+    if (ruleKind === 'bundle' && account) {
+      const allowlist = getPolicyRows(payments).find(
+        (row) =>
+          row.type === 'allowlist' && getAccountKey(row.account) === getAccountKey(account) && row.status !== 'failed',
+      )
+      return {
+        ...(allowlist ? choicesFromAllowlist(allowlist) : FRESH_CHOICES),
+        blockedSettings: getProtectionRules(getAccountKey(account)).blockedSettings,
+      }
+    }
+    return {
+      ...FRESH_CHOICES,
+      blockedSettings:
+        isEdit && ruleKind === 'settings' && account
+          ? getProtectionRules(getAccountKey(account)).blockedSettings
+          : FRESH_CHOICES.blockedSettings,
+    }
+  }
+
   /** B: one rule on its own, added from the account's row or edited from its panel; the flow runs on that account. */
   const startRuleChange = (account: M2Account | null, ruleKind: SingleRuleKind, isEdit = false) =>
     update({
@@ -1388,17 +1530,89 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       ruleIsEdit: isEdit,
       ruleReturnPolicyId: isEdit ? state.policyId : null,
       wizardMode: 'create',
-      wizardStep: { allowlist: CREATE_STEP, settings: SETTINGS_STEP, limits: POLICIES_STEP, proposers: PROPOSERS_STEP }[
-        ruleKind
-      ],
+      wizardStep: {
+        allowlist: CREATE_STEP,
+        settings: SETTINGS_STEP,
+        basics: SETTINGS_STEP,
+        bundle: SETTINGS_STEP,
+        limits: POLICIES_STEP,
+        proposers: PROPOSERS_STEP,
+      }[ruleKind],
       setupAccountKey: account ? getAccountKey(account) : null,
       setupFromRow: Boolean(account),
-      ...(isSimpleModel && { choices: FRESH_CHOICES }),
+      ...(isSimpleModel && { choices: getRuleChoices(account, ruleKind, isEdit) }),
       policyId: null,
       panelKey: null,
       protectionKey: null,
       addPolicyOpen: false,
     })
+
+  /** C: the policy a flow just set up joins its account and opens in its side panel. */
+  const showSetUpPolicy = () => {
+    const account = state.setupAccountKey ? findM2Account(state.setupAccountKey) : undefined
+    const key = state.setupAccountKey
+    const kind = state.ruleKind
+    if (!account || !key || !kind) return
+    const people =
+      kind === 'allowlist'
+        ? toPeople(state.choices.recipients)
+        : kind === 'proposers'
+          ? toPeople(getShownProposers(state.choices, account))
+          : []
+    // Payments starts with its protected settings, so setting them up again edits that row.
+    const editedId =
+      state.ruleIsEdit && state.ruleReturnPolicyId
+        ? state.ruleReturnPolicyId
+        : kind === 'settings' && key === PAYMENTS_KEY
+          ? 'payments-settings-lock'
+          : null
+    if (editedId) {
+      updateFrom((current) => ({
+        policyId: editedId,
+        ...(kind === 'allowlist' && { allowlistPeople: { ...current.allowlistPeople, [key]: people } }),
+        addedPolicies: (current.addedPolicies ?? []).map((policy) =>
+          policy.id === editedId && people.length > 0 ? { ...policy, people } : policy,
+        ),
+      }))
+      return
+    }
+    if (kind === 'bundle') {
+      updateFrom((current) => ({
+        bundleStages: { ...current.bundleStages, [key]: 'waiting' },
+        bundleChoices: { ...current.bundleChoices, [key]: state.choices },
+        policyId: null,
+        protectionKey: key,
+      }))
+      return
+    }
+    // Both set up, the account is ready to enforce, so the enforcement intro opens next.
+    if (kind === 'basics') {
+      const both: AddedPolicy[] = [
+        { id: `added-allowlist-${key}`, kind: 'allowlist', account, people: toPeople(state.choices.recipients) },
+        { id: `added-settings-${key}`, kind: 'settings', account, people: [] },
+      ]
+      updateFrom((current) => ({
+        addedPolicies: [
+          ...(current.addedPolicies ?? []).filter((policy) => !both.some(({ id }) => id === policy.id)),
+          ...both,
+        ],
+        introOpen: true,
+        pendingAccountKey: key,
+        policyId: null,
+      }))
+      return
+    }
+    // An account holds several spending limits and proposers, but one allowlist and one protected settings.
+    const isMultiple = kind === 'limits' || kind === 'proposers'
+    updateFrom((current) => {
+      const existing = current.addedPolicies ?? []
+      const id = isMultiple ? `added-${kind}-${key}-${existing.length}` : `added-${kind}-${key}`
+      return {
+        addedPolicies: [...existing.filter((policy) => policy.id !== id), { id, kind, account, people }],
+        policyId: id,
+      }
+    })
+  }
 
   const endRuleChange = () =>
     update({
@@ -1473,10 +1687,13 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     // B's test set: five Safe accounts, none with policy enforcement until Jump to turns Trading desk's on.
     testAccounts: isRulesModel || isSimpleModel,
     simple: isSimpleModel,
+    addedPolicies: state.addedPolicies,
+    allowlistPeople: state.allowlistPeople,
     tradingDeskEnforced: !(isRulesModel || isSimpleModel) || Boolean(state.tradingDeskEnforced),
     // The setup's own choices, then whatever an edit saved, so the account settings row says what's blocked.
     blockedSettings: {
       ...(state.setupAccountKey ? { [state.setupAccountKey]: state.choices.blockedSettings } : {}),
+      ...(isSimpleModel && { [PAYMENTS_KEY]: C_PAYMENTS_LOCK.blockedSettings }),
       ...Object.fromEntries(
         Object.entries(state.protectionRulesByAccount ?? {}).map(([key, rules]) => [key, rules.blockedSettings]),
       ),
@@ -1492,6 +1709,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
   const isSetupProtection = Boolean(state.protectionKey) && state.protectionKey === state.setupAccountKey
   const getProtectionRules = (accountKey: string | null): ProtectionRules =>
     (accountKey && state.protectionRulesByAccount?.[accountKey]) ||
+    (isSimpleModel && accountKey === PAYMENTS_KEY ? C_PAYMENTS_LOCK : undefined) ||
     (accountKey && accountKey === state.setupAccountKey
       ? { baseline: state.choices.baseline ?? 'block-all', blockedSettings: state.choices.blockedSettings }
       : DEFAULT_PROTECTION_RULES)
@@ -1643,6 +1861,44 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       pendingChange: false,
     })
 
+  /** C: the policies an account can have only one of, among those it already has. */
+  const getSingleKinds = (accountKey: string | null): IntroKind[] => {
+    const live = getPolicyRows(payments).filter(
+      (row) => getAccountKey(row.account) === accountKey && row.status !== 'failed',
+    )
+    return [
+      ...(live.some(({ type }) => type === 'allowlist') ? (['allowlist'] as const) : []),
+      ...(live.some(({ type }) => type === 'account-settings') ? (['settings'] as const) : []),
+    ]
+  }
+  /** C: accounts that already have this one-per-account policy, so the flow's picker disables them. */
+  const getSingleKindAccountKeys = (kind: 'allowlist' | 'settings'): string[] =>
+    [...new Set(getPolicyRows(payments).map(({ account }) => getAccountKey(account)))].filter((key) =>
+      getSingleKinds(key).includes(kind),
+    )
+
+  /** C: Enforce policies on an account with no allowlist or settings lock warns first; otherwise the intro opens. */
+  const enforceAccount = (account: M2Account) => {
+    const live = getPolicyRows(payments).filter(
+      (row) => getAccountKey(row.account) === getAccountKey(account) && row.status !== 'failed',
+    )
+    const isMissingBasics =
+      !live.some(({ type }) => type === 'allowlist') || !live.some(({ type }) => type === 'account-settings')
+    if (isSimpleModel && isMissingBasics) update({ enforceGateKey: getAccountKey(account), protectionKey: null })
+    else openEnforceIntro(getAccountKey(account))
+  }
+  /** C: a policy under an enforced account opens inside the enforced panel, with Back to it. */
+  const selectPolicy = (row: PolicyRow) =>
+    isSimpleModel && isAccountEnforced(payments, row.account)
+      ? update({
+          policyId: row.id,
+          protectionKey: null,
+          returnToProtectionKey: getAccountKey(row.account),
+          panelKey: null,
+          panelScenario: null,
+        })
+      : openPolicy(row)
+
   /** Every Enforce policies entry opens the intro modal first; its button starts the flow for that account. */
   const openEnforceIntro = (accountKey: string | null) =>
     update({
@@ -1676,9 +1932,9 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             isRulesModel ? undefined : () => update({ addPolicyOpen: true, policyId: null, pendingAccountKey: null })
           }
           onSelectAccount={openPanel}
-          onSelectPolicy={openPolicy}
+          onSelectPolicy={selectPolicy}
           // The onboarding's first step explains protection, so the row goes straight in, without the old intro dialog.
-          onProtectAccount={(account) => openEnforceIntro(getAccountKey(account))}
+          onProtectAccount={enforceAccount}
           onOpenProtection={openProtection}
           // An account with no policies: Set up policies, already on that account.
           onAddRule={isRulesModel ? (account, rule) => startRuleChange(account, rule) : undefined}
@@ -1693,12 +1949,13 @@ const GuardSetupFlowPrototype = (): ReactElement => {
       <SimplePolicyChooser
         open={isSimpleModel && state.screen === 'overview' && state.addPolicyOpen}
         onOpenChange={(addPolicyOpen) => update({ addPolicyOpen })}
-        onEnforce={() => openEnforceIntro(state.pendingAccountKey)}
         onSelect={(kind) => {
           setSimpleIntro({ kind, accountKey: state.pendingAccountKey })
           update({ addPolicyOpen: false })
         }}
         onSuggest={() => update({ addPolicyOpen: false })}
+        account={state.pendingAccountKey ? findM2Account(state.pendingAccountKey) : undefined}
+        existingKinds={getSingleKinds(state.pendingAccountKey)}
       />
 
       {simpleIntro && (
@@ -1752,14 +2009,32 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         onExecute={isSetupRow ? () => openWizardAt(EXECUTE_STEP) : undefined}
         onCancelChange={() => (isSetupRow ? update({ pendingChange: false }) : undefined)}
         accountSettingsRules={openRow && getProtectionRules(getAccountKey(openRow.account))}
+        onEditInEnforcement={
+          isSimpleModel && openRow && isAccountEnforced(payments, openRow.account)
+            ? () => {
+                startSlide('back')
+                update({
+                  protectionKey: getAccountKey(openRow.account),
+                  returnToProtectionKey: null,
+                  policyId: null,
+                  panelScenario: null,
+                })
+              }
+            : undefined
+        }
         onEdit={
-          openAllowlistRow
-            ? () => editAllowlist(openAllowlistRow)
-            : openRow?.type === 'account-settings'
-              ? () => editProtection(openRow.account, getProtectionRules(getAccountKey(openRow.account)))
-              : isRulesModel && openRow?.type === 'spending-limit'
-                ? () => startRuleChange(openRow.account, 'limits', true)
-                : undefined
+          // C: an enforced account's policies change together, from Edit policies in the enforced panel.
+          isSimpleModel && openRow && isAccountEnforced(payments, openRow.account)
+            ? undefined
+            : isSimpleModel && openRow && SIMPLE_EDIT_KINDS[openRow.type]
+              ? () => startRuleChange(openRow.account, SIMPLE_EDIT_KINDS[openRow.type] as SingleRuleKind, true)
+              : openAllowlistRow
+                ? () => editAllowlist(openAllowlistRow)
+                : openRow?.type === 'account-settings'
+                  ? () => editProtection(openRow.account, getProtectionRules(getAccountKey(openRow.account)))
+                  : isRulesModel && openRow?.type === 'spending-limit'
+                    ? () => startRuleChange(openRow.account, 'limits', true)
+                    : undefined
         }
         // "See policy here" on a blocked spending limit: swap to the allowlist row on the same account.
         onOpenAllowlist={(account) => {
@@ -1787,7 +2062,76 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         onExecute={isSetupProtection ? () => openWizardAt(EXECUTE_STEP) : undefined}
         onCancelChange={() => update({ protectionChangeKey: null })}
         onEditProtection={protectionAccount ? () => editProtection(protectionAccount, protectionRules) : undefined}
-        onEnforce={protectionAccount ? () => openEnforceIntro(getAccountKey(protectionAccount)) : undefined}
+        onEnforce={protectionAccount ? () => enforceAccount(protectionAccount) : undefined}
+        onAddPolicy={
+          isSimpleModel && protectionAccount
+            ? () =>
+                update({
+                  addPolicyOpen: true,
+                  pendingAccountKey: getAccountKey(protectionAccount),
+                  protectionKey: null,
+                })
+            : undefined
+        }
+        onRemoveEnforcement={
+          isSimpleModel && state.protectionKey ? () => update({ protectionChangeKey: state.protectionKey }) : undefined
+        }
+        onEditPolicies={
+          isSimpleModel && protectionAccount && isAccountEnforced(payments, protectionAccount)
+            ? () => startRuleChange(protectionAccount, 'bundle')
+            : undefined
+        }
+        bundleStage={state.protectionKey ? state.bundleStages?.[state.protectionKey] : undefined}
+        onSkipBundleWait={() =>
+          state.protectionKey &&
+          updateFrom((current) => ({
+            bundleStages: { ...current.bundleStages, [state.protectionKey as string]: 'ready' },
+          }))
+        }
+        onActivateBundle={() => {
+          const key = state.protectionKey
+          const applied = key ? state.bundleChoices?.[key] : undefined
+          if (!key || !applied) return
+          updateFrom((current) => {
+            const { [key]: _done, ...stages } = current.bundleStages ?? {}
+            return {
+              bundleStages: stages,
+              protectionRulesByAccount: {
+                ...current.protectionRulesByAccount,
+                [key]: { ...DEFAULT_PROTECTION_RULES, blockedSettings: applied.blockedSettings },
+              },
+              allowlistPeople: {
+                ...current.allowlistPeople,
+                [key]: applied.recipients
+                  .filter(({ selected }) => selected)
+                  .map(({ name, address }) => ({ name, address })),
+              },
+            }
+          })
+        }}
+        onCancelBundle={() => {
+          const key = state.protectionKey
+          if (!key) return
+          updateFrom((current) => {
+            const { [key]: _cancelled, ...stages } = current.bundleStages ?? {}
+            return { bundleStages: stages }
+          })
+        }}
+      />
+
+      <EnforceGateDialog
+        account={state.enforceGateKey ? findM2Account(state.enforceGateKey) : undefined}
+        rows={getPolicyRows(payments)}
+        onClose={() => update({ enforceGateKey: null })}
+        onSetUp={(kind, account) => {
+          update({ enforceGateKey: null })
+          // Straight into the flow: the gate already said what each one is for.
+          startRuleChange(account, kind)
+        }}
+        onEnforceAnyway={(account) => {
+          update({ enforceGateKey: null })
+          openEnforceIntro(getAccountKey(account))
+        }}
       />
 
       {otherAccount ? (
@@ -1857,7 +2201,25 @@ const GuardSetupFlowPrototype = (): ReactElement => {
               state.setupKind === 'protection-edit'
                 ? () => endProtectionEdit(true)
                 : state.setupKind === 'rule'
-                  ? endRuleChange
+                  ? () => {
+                      // C: a saved settings lock becomes the rules its row and panel read.
+                      if (
+                        isSimpleModel &&
+                        (state.ruleKind === 'settings' || state.ruleKind === 'basics') &&
+                        state.setupAccountKey
+                      )
+                        update({
+                          protectionRulesByAccount: {
+                            ...state.protectionRulesByAccount,
+                            [state.setupAccountKey]: {
+                              ...DEFAULT_PROTECTION_RULES,
+                              blockedSettings: state.choices.blockedSettings,
+                            },
+                          },
+                        })
+                      endRuleChange()
+                      if (isSimpleModel) showSetUpPolicy()
+                    }
                   : execute
             }
             onClose={
@@ -1890,7 +2252,13 @@ const GuardSetupFlowPrototype = (): ReactElement => {
                   summary,
                 }))
             }
-            disabledAccountKeys={state.setupKind === 'protection' ? getAllowlistAccountKeys(payments) : undefined}
+            disabledAccountKeys={
+              state.setupKind === 'protection'
+                ? getAllowlistAccountKeys(payments)
+                : state.setupKind === 'rule' && (state.ruleKind === 'allowlist' || state.ruleKind === 'settings')
+                  ? getSingleKindAccountKeys(state.ruleKind)
+                  : undefined
+            }
             initialChoices={state.editInitialChoices ?? undefined}
             topBar={<FlowTopBar />}
           />
@@ -1954,8 +2322,8 @@ const B_TERMS: [RegExp, string][] = [
 
 const LIVE_POLICY_ORDER: PolicyRow['type'][] = ['account-settings', 'allowlist', 'spending-limit', 'proposer']
 
-// C also names the account settings policy "Settings lock", wherever it's the policy's name on its own.
-const C_TERMS: [RegExp, string][] = [...B_TERMS, [/^Account settings$/, 'Settings lock']]
+// C also names the account settings policy "Protected settings", wherever it's the policy's name on its own.
+const C_TERMS: [RegExp, string][] = [...B_TERMS, [/^Account settings$/, 'Protected settings']]
 
 const renameTerms = (text: string, terms: [RegExp, string][]): string =>
   terms.reduce((next, [pattern, replacement]) => next.replace(pattern, replacement), text)

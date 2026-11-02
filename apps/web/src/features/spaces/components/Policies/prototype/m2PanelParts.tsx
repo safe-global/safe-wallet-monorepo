@@ -5,7 +5,16 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import Identicon from '@/components/common/Identicon'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { PolicyDrawerActions } from '../components/PolicyDrawerActions'
 import { AccountProtectionIcon, SafeAddress, type M2Account } from './m2Prototype'
+
+export const EDIT_IN_ENFORCEMENT_LABEL = 'Edit in policy enforcement'
+export const EDIT_IN_ENFORCEMENT_HINT = 'Policies on this Safe account are enforced, so they change together.'
+
+/** C: an enforced account's policies change together, so a policy's panel sends its edit to policy enforcement. */
+export const EditInEnforcementActions = ({ onClick }: { onClick: () => void }): ReactElement => (
+  <PolicyDrawerActions actionLabel={EDIT_IN_ENFORCEMENT_LABEL} onClick={onClick} hint={EDIT_IN_ENFORCEMENT_HINT} />
+)
 
 /** How a panel moves to another: only Back, to the account protection panel it was opened from. */
 export type PanelNav = {

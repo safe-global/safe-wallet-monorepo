@@ -11,7 +11,7 @@ import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Pol
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import type { SpendingLimitMock } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
-import { PanelNavButtons, PinnedTop, PolicyIconTile, type PanelNav } from './m2PanelParts'
+import { EditInEnforcementActions, PanelNavButtons, PinnedTop, PolicyIconTile, type PanelNav } from './m2PanelParts'
 import { RowStatusChip, type RowStatus } from './m2OverviewPage'
 
 const LOCKED_HELPER = 'Locked by account protection.'
@@ -63,6 +63,8 @@ export type BlockedSpendingLimitDrawerProps = {
   open: boolean
   onClose: () => void
   onEdit?: () => void
+  /** C, enforced account: Edit opens policy enforcement, where its policies change together. */
+  onEditInEnforcement?: () => void
   nav?: PanelNav
   limit: SpendingLimitMock
   /** Set when the account has protection. */
@@ -143,11 +145,15 @@ export const BlockedSpendingLimitDrawer = (props: BlockedSpendingLimitDrawerProp
         </div>
       </DrawerBody>
 
-      <SpendingLimitActions
-        state={state}
-        onConnectWallet={() => {}}
-        onEdit={props.variant === 'locked' ? undefined : onEdit}
-      />
+      {props.onEditInEnforcement ? (
+        <EditInEnforcementActions onClick={props.onEditInEnforcement} />
+      ) : (
+        <SpendingLimitActions
+          state={state}
+          onConnectWallet={() => {}}
+          onEdit={props.variant === 'locked' ? undefined : onEdit}
+        />
+      )}
     </Drawer>
   )
 }

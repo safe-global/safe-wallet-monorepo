@@ -33,7 +33,7 @@ import { BalanceChanges, FeesPreview, TxNote } from '@/components/tx-flow/featur
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { SlotProvider } from '@/components/tx-flow/slots'
 import TxFlowProvider, { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { Badge } from '@safe-global/views/components/ui/badge'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
@@ -66,7 +66,6 @@ import {
   UsersRound,
   ListPlus,
   X,
-  Zap,
   type LucideIcon,
 } from 'lucide-react'
 import {
@@ -1795,12 +1794,14 @@ const PolicySummary = ({
   protectionOnly,
   isSinglePolicy,
   onlyRule,
+  asEnforcement = false,
 }: {
   choices: SetupChoices
   account?: M2Account
   protectionOnly?: boolean
   isSinglePolicy?: boolean
   onlyRule?: 'limits' | 'proposers'
+  asEnforcement?: boolean
   /** Edit only: the live allowlist, so the card marks what the edit adds and removes. */
   initialChoices?: SetupChoices
 }): ReactElement => {
@@ -1833,7 +1834,7 @@ const PolicySummary = ({
   const ruleGroups = onlyRule ? allRuleGroups.filter(({ id }) => id === onlyRule) : allRuleGroups
 
   // B's full setup: every policy at a glance, then what enforcing does to everything else.
-  if (isRulesModel && !onlyRule && !protectionOnly)
+  if ((isRulesModel || asEnforcement) && !onlyRule && !protectionOnly)
     return <EnforcementReview safe={safe} account={account} tokens={tokens} recipients={selected} choices={choices} />
 
   return (
@@ -2293,7 +2294,7 @@ const IntroStep = ({
         {accountField}
 
         {/* One fact per line, read top to bottom: what it does, how it's kept safe, what comes next. */}
-        <div className="flex flex-col divide-y divide-border rounded-xl bg-muted">
+        <div className="flex flex-col divide-y divide-border/60 rounded-xl bg-muted">
           {PROTECTION_FACTS.map(({ Icon, title, description }) => (
             <div key={title} className="flex items-start gap-4 p-4">
               <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-card">
@@ -2339,20 +2340,19 @@ const IntroStep = ({
 
 export type CheckOutcome = 'allow' | 'allow-without-signatures' | 'block'
 
-const OUTCOMES: Record<CheckOutcome, { label: string; variant: 'success' | 'info' | 'destructive'; Icon: LucideIcon }> =
-  {
-    allow: { label: 'Allowed', variant: 'success', Icon: Check },
-    'allow-without-signatures': { label: 'Allowed, no signatures', variant: 'info', Icon: Zap },
-    block: { label: 'Blocked', variant: 'destructive', Icon: X },
-  }
+const OUTCOMES: Record<CheckOutcome, { label: string; variant: 'success' | 'destructive' }> = {
+  allow: { label: 'Allowed', variant: 'success' },
+  'allow-without-signatures': { label: 'Allowed, no signatures', variant: 'success' },
+  block: { label: 'Blocked', variant: 'destructive' },
+}
 
 /** What account protection does with a transaction: goes through with signatures, goes through without, or never. */
 export const OutcomeBadge = ({ outcome }: { outcome: CheckOutcome }): ReactElement => {
-  const { label, variant, Icon } = OUTCOMES[outcome]
+  const { label, variant } = OUTCOMES[outcome]
 
   return (
     <Badge variant={variant} size="status" shape="status" data-m2-new="New · Outcome badge">
-      <Icon aria-hidden />
+      <BadgeDot />
       {label}
     </Badge>
   )
@@ -2466,7 +2466,7 @@ const PROPOSER_ADDRESSES: Record<string, string> = {
 }
 
 /** B: the proposers the setup shows, the account's own until the Proposers step changes them. */
-const getShownProposers = (choices: SetupChoices, account?: M2Account): Recipient[] =>
+export const getShownProposers = (choices: SetupChoices, account?: M2Account): Recipient[] =>
   choices.proposers ??
   (account ? (ACCOUNT_PROPOSERS[getAccountKey(account)] ?? []) : []).map((name) => ({
     name,
@@ -2654,7 +2654,8 @@ const SettingsStep = ({
                       ) : blocked === 0 ? (
                         <OutcomeBadge outcome="allow" />
                       ) : (
-                        <Badge variant="warning" shape="tag">
+                        <Badge variant="warning" size="status" shape="status">
+                          <BadgeDot />
                           {blocked} blocked
                         </Badge>
                       )}
@@ -3164,7 +3165,7 @@ const SetupActions = ({
       <Card variant="muted" size="none" data-m2-new="M1 copy · All actions (rule by rule)">
         <CardContent>
           <div className="p-2">
-            <div className="flex flex-col divide-y divide-border overflow-hidden rounded-sm">
+            <div className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-sm">
               {calls.map((call, index) => {
                 const entry = toMultiSendEntry(call)
 
@@ -3217,10 +3218,12 @@ const SetupActions = ({
 const PolicyReviewContent = ({
   txPreview,
   onSubmit,
+  isSubmitDisabled = false,
   children,
 }: {
   txPreview: TransactionPreview
   onSubmit: () => void
+  isSubmitDisabled?: boolean
   children: ReactNode
 }): ReactElement => {
   const { safeTx } = useContext(SafeTxContext)
@@ -3228,7 +3231,10 @@ const PolicyReviewContent = ({
   const txFlow = useContext(TxFlowContext)
 
   // With no real gas estimate or Safe Shield verdict, these flags would keep Continue disabled forever.
-  const unblockedTxFlow = useMemo(() => ({ ...txFlow, isSubmitDisabled: false, isSubmitLoading: false }), [txFlow])
+  const unblockedTxFlow = useMemo(
+    () => ({ ...txFlow, isSubmitDisabled, isSubmitLoading: false }),
+    [txFlow, isSubmitDisabled],
+  )
   const unblockedSafeShield = useMemo(() => ({ ...safeShield, needsRiskConfirmation: false }), [safeShield])
 
   return (
@@ -3251,18 +3257,26 @@ const PolicyReviewContent = ({
 }
 
 /** C's enforcement review: the account's live policies, each allowed as it is, then everything else blocked. */
-const LiveEnforcementSummary = ({ policies }: { policies: LivePolicy[] }): ReactElement => (
+const LiveEnforcementSummary = ({
+  policies,
+  missingAccount,
+}: {
+  policies: LivePolicy[]
+  missingAccount: boolean
+}): ReactElement => (
   <Card variant="muted" size="none" radius="lg" data-m2-new="New · Enforce live policies">
     <div className="flex flex-col gap-3 p-4">
       <Typography variant="paragraph-bold">Policies that will be enforced</Typography>
-      {policies.length > 0 ? (
+      {missingAccount ? (
+        <MutedLine>Pick a Safe account to see its policies.</MutedLine>
+      ) : policies.length > 0 ? (
         <ItemList>
           {policies.map(({ id, Icon, title, summary }) => (
             <ReviewPolicyRow key={id} Icon={Icon} title={title} summary={summary} />
           ))}
         </ItemList>
       ) : (
-        <MutedLine>Pick a Safe account to see its policies.</MutedLine>
+        <MutedLine>This account has no policies yet, so every action would be blocked.</MutedLine>
       )}
       <div className="flex items-center gap-3 rounded-lg border border-dashed border-border p-[11px]">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
@@ -3290,6 +3304,8 @@ const ReviewStep = ({
   isSinglePolicy,
   onlyRule,
   livePolicies,
+  missingAccount = false,
+  asEnforcement = false,
 }: {
   account: M2Account
   choices: SetupChoices
@@ -3302,6 +3318,10 @@ const ReviewStep = ({
   /** B: one rule added on its own; the review lists just that rule. */
   onlyRule?: 'limits' | 'proposers'
   livePolicies?: LivePolicy[]
+  /** C's enforcement picks its account on Review, so Continue waits for one. */
+  missingAccount?: boolean
+  /** C's Edit policies: B's every-policy review, since enforcement is already on. */
+  asEnforcement?: boolean
 }): ReactElement => {
   // Without decoded actions the app's Multisend renders nothing, so SetupActions takes its place below.
   const { txPreview } = useMemo(
@@ -3310,9 +3330,9 @@ const ReviewStep = ({
   )
 
   return (
-    <PolicyReviewContent txPreview={txPreview} onSubmit={onNext}>
+    <PolicyReviewContent txPreview={txPreview} onSubmit={onNext} isSubmitDisabled={missingAccount}>
       {livePolicies ? (
-        <LiveEnforcementSummary policies={livePolicies} />
+        <LiveEnforcementSummary policies={livePolicies} missingAccount={missingAccount} />
       ) : (
         <PolicySummary
           choices={choices}
@@ -3321,6 +3341,7 @@ const ReviewStep = ({
           protectionOnly={protectionOnly}
           isSinglePolicy={isSinglePolicy}
           onlyRule={onlyRule}
+          asEnforcement={asEnforcement}
         />
       )}
 
@@ -4318,7 +4339,16 @@ export type SetUpPoliciesFlowProps = ChoiceHandlers & {
 export type LivePolicy = { id: string; Icon: LucideIcon; title: string; summary: string }
 
 /** The policies that have a flow of their own, one at a time. */
-export type SingleRuleKind = 'allowlist' | 'settings' | 'limits' | 'proposers'
+export type SingleRuleKind = 'allowlist' | 'settings' | 'limits' | 'proposers' | 'basics' | 'bundle'
+
+const RULE_TITLES: Record<SingleRuleKind, { add: string; edit: string }> = {
+  bundle: { add: 'Edit policies', edit: 'Edit policies' },
+  basics: { add: 'Set up allowlist and protected settings', edit: 'Set up allowlist and protected settings' },
+  allowlist: { add: 'Add allowlist', edit: 'Edit allowlist' },
+  settings: { add: 'Protected settings', edit: 'Protected settings' },
+  proposers: { add: 'Add proposer', edit: 'Edit proposers' },
+  limits: { add: 'Add spending limit', edit: 'Edit spending limits' },
+}
 
 export const SetUpPoliciesFlow = ({
   account,
@@ -4368,29 +4398,28 @@ export const SetUpPoliciesFlow = ({
   // B, once set up: one rule on its own, then Review, Confirm and Execute.
   const isRuleOnly = kind === 'rule'
   const isSimpleModel = usePrototypeModel() === 'simple'
+  // `basics`: C's settings lock and allowlist in one flow, before enforcing. `bundle`: every enforced policy in one edit.
+  const isBundle = isSimpleModel && kind === 'rule' && ruleKind === 'bundle'
   const ruleStep = {
     allowlist: CREATE_STEP,
     settings: SETTINGS_STEP,
+    basics: SETTINGS_STEP,
+    bundle: SETTINGS_STEP,
     limits: POLICIES_STEP,
     proposers: PROPOSERS_STEP,
   }[ruleKind]
-  const ruleTitle =
-    ruleKind === 'allowlist'
-      ? isRuleEdit
-        ? 'Edit allowlist'
-        : 'Add allowlist'
-      : ruleKind === 'settings'
-        ? 'Settings lock'
-        : ruleKind === 'proposers'
-          ? isRuleEdit
-            ? 'Edit proposers'
-            : 'Add proposer'
-          : isRuleEdit
-            ? 'Edit spending limits'
-            : 'Add spending limit'
+  const ruleTitles = RULE_TITLES[ruleKind ?? 'limits']
+  const ruleTitle = isRuleEdit ? ruleTitles.edit : ruleTitles.add
   const visibleSteps = WIZARD_STEP_NAMES.map((_, index) => index).filter((index) =>
     isRuleOnly
-      ? [ruleStep, REVIEW_STEP, CONFIRM_STEP, EXECUTE_STEP].includes(index)
+      ? (ruleKind === 'basics'
+          ? [SETTINGS_STEP, CREATE_STEP]
+          : isBundle
+            ? [SETTINGS_STEP, CREATE_STEP, POLICIES_STEP, PROPOSERS_STEP]
+            : [ruleStep]
+        )
+          .concat(REVIEW_STEP, CONFIRM_STEP, EXECUTE_STEP)
+          .includes(index)
       : isProtectionEdit
         ? ![INTRO_STEP, ...(isRulesModel ? [BASELINE_STEP] : []), POLICIES_STEP, PROPOSERS_STEP, CREATE_STEP].includes(
             index,
@@ -4410,7 +4439,7 @@ export const SetUpPoliciesFlow = ({
             : ![BASELINE_STEP, POLICIES_STEP, PROPOSERS_STEP].includes(index),
   )
   // B: each rule is a building block; set ones stack above the current rule, and any can be opened in any order.
-  const isBlockFlow = isRulesModel && isProtectionOnly && !isProtectionEdit
+  const isBlockFlow = (isRulesModel && isProtectionOnly && !isProtectionEdit) || isBundle
   const blockTokens = getAllowedTokens(choices, account)
   const blockRecipients = getShownRecipients(choices, account).filter(({ selected }) => selected)
   const isAllowlistSet = blockTokens.length > 0 && blockRecipients.length > 0
@@ -4511,26 +4540,46 @@ export const SetUpPoliciesFlow = ({
     (isBlockFlow || (isSimpleModel && isProtectionOnly)) && currentStep === REVIEW_STEP
       ? {
           title: `Once executed, ${summaryAccount?.name ?? 'this account'} can only do what your policies allow.`,
-          description: 'Everything else is blocked, even with every signature. Any change after that waits 24 hours.',
+          description: isSimpleModel
+            ? 'Enforcement starts right away. After that, every change to your policies waits 24 hours and needs a second transaction, so a compromised signer can’t quietly change them.'
+            : 'Everything else is blocked, even with every signature. Any change after that waits 24 hours.',
         }
       : !isRuleOnly
         ? setupSummary
-        : isSimpleModel
+        : isBundle
           ? currentStep === REVIEW_STEP
-            ? { title: 'Check the policy before you sign.', description: 'Nothing changes until it’s executed.' }
-            : {
-                title: summaryAccount ? `This policy applies to ${summaryAccount.name}.` : 'Pick a Safe account first.',
-                description: 'It works on its own. Anything it doesn’t cover keeps working as before.',
-              }
-          : currentStep === REVIEW_STEP
             ? {
-                title: 'Check the change before you sign.',
-                description: 'It applies 24 hours after it’s executed. Any signer can cancel it until then.',
+                title: 'These changes apply 24 hours after they’re executed.',
+                description:
+                  'Then a second transaction, signed like any other, applies them together. Until then, the current policies stay.',
               }
             : {
-                title: `${summaryAccount?.name ?? 'This account'}’s account protection checks it like every other transaction.`,
-                description: 'Once it’s executed, the change waits 24 hours before it applies.',
+                title: `Every policy enforced on ${summaryAccount?.name ?? 'this account'}, in one edit.`,
+                description: 'Change any of them; they’re sent as one transaction and apply together.',
               }
+          : isSimpleModel
+            ? currentStep === REVIEW_STEP
+              ? { title: 'Check the policy before you sign.', description: 'Nothing changes until it’s executed.' }
+              : ruleKind === 'basics'
+                ? {
+                    title: `The allowlist and protected settings for ${summaryAccount?.name ?? 'this account'}.`,
+                    description: 'Once they’re executed, you can enforce them with the account’s other policies.',
+                  }
+                : {
+                    title: summaryAccount
+                      ? `This policy applies to ${summaryAccount.name}.`
+                      : 'Pick a Safe account first.',
+                    description: 'It works on its own. Anything it doesn’t cover keeps working as before.',
+                  }
+            : currentStep === REVIEW_STEP
+              ? {
+                  title: 'Check the change before you sign.',
+                  description: 'It applies 24 hours after it’s executed. Any signer can cancel it until then.',
+                }
+              : {
+                  title: `${summaryAccount?.name ?? 'This account'}’s account protection checks it like every other transaction.`,
+                  description: 'Once it’s executed, the change waits 24 hours before it applies.',
+                }
 
   useEffect(() => {
     latestSetup.choices = choices
@@ -4586,7 +4635,7 @@ export const SetUpPoliciesFlow = ({
       blocksBefore={blocksBefore}
       blocksAfter={blocksAfter}
       canJumpTo={canJumpTo}
-      stepLabels={isRuleOnly ? RULE_STEP_LABELS : undefined}
+      stepLabels={isRuleOnly && !isBundle ? RULE_STEP_LABELS : undefined}
       stepGroup={isBlockFlow ? POLICY_STEP_GROUP : undefined}
       isStepSet={isBlockFlow ? (step: number) => step !== CREATE_STEP || isAllowlistSet : undefined}
       belowSummary={
@@ -4665,10 +4714,15 @@ export const SetUpPoliciesFlow = ({
         onNext={next}
         mode={mode}
         initialChoices={editBaseline}
-        protectionOnly={(isProtectionOnly && !withAllowlist) || (isRuleOnly && ruleKind !== 'allowlist')}
-        isSinglePolicy={isSinglePolicy || isRuleOnly}
+        protectionOnly={
+          (isProtectionOnly && !withAllowlist) ||
+          (isRuleOnly && ruleKind !== 'allowlist' && ruleKind !== 'basics' && ruleKind !== 'bundle')
+        }
+        isSinglePolicy={(isSinglePolicy || isRuleOnly) && !isBundle}
+        asEnforcement={isBundle}
         onlyRule={isRuleOnly && (ruleKind === 'limits' || ruleKind === 'proposers') ? ruleKind : undefined}
-        livePolicies={isSimpleModel && isProtectionOnly ? (account ? livePolicies : []) : undefined}
+        livePolicies={isSimpleModel && isProtectionOnly ? (livePolicies ?? []) : undefined}
+        missingAccount={isSimpleModel && isProtectionOnly && !account}
       />
       <ReceiptStep key="confirm" action="sign" safeTx={setupTx} onSubmit={onSign} />
       <ReceiptStep key="execute" action="execute" safeTx={setupTx} onSubmit={onExecute} />

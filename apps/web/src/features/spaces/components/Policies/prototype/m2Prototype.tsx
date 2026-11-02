@@ -787,10 +787,18 @@ export const FullAddress = ({ address, chainId }: { address: string; chainId: st
   </span>
 )
 
-const NameLine = ({ name, nameSuffix }: { name?: string; nameSuffix?: ReactNode }): ReactElement | null =>
+const NameLine = ({
+  name,
+  nameSuffix,
+  variant = 'paragraph-small-medium',
+}: {
+  name?: string
+  nameSuffix?: ReactNode
+  variant?: 'paragraph-small-medium' | 'paragraph-bold'
+}): ReactElement | null =>
   name ? (
     <span className="flex min-w-0 items-center gap-1">
-      <Typography variant="paragraph-small-medium" className="truncate">
+      <Typography variant={variant} className="truncate">
         {name}
       </Typography>
       {nameSuffix}
@@ -807,6 +815,7 @@ export const SafeAddress = ({
   avatarSize = 24,
   nameSuffix,
   chainId = '1',
+  nameVariant,
 }: {
   name?: string
   address: string
@@ -814,6 +823,8 @@ export const SafeAddress = ({
   nameSuffix?: ReactNode
   /** Picks the block explorer. */
   chainId?: string
+  /** The Safe accounts tab's larger name, where the account heads its own row. */
+  nameVariant?: 'paragraph-small-medium' | 'paragraph-bold'
 }): ReactElement => {
   const [isOpen, setIsOpen] = useState(false)
   const closeTimer = useRef<number>(undefined)
@@ -845,7 +856,7 @@ export const SafeAddress = ({
       </Tooltip>
 
       <div className="flex min-w-0 flex-col">
-        <NameLine name={name} nameSuffix={nameSuffix} />
+        <NameLine name={name} nameSuffix={nameSuffix} variant={nameVariant} />
         <span className="w-fit" onMouseEnter={show} onMouseLeave={hide}>
           <ShortAddress address={address} />
         </span>
@@ -906,8 +917,8 @@ export const PolicyPage = ({ header, children }: { header: ReactNode; children: 
   </main>
 )
 
-/** Account protection's icon everywhere: a check in A; in B, policy enforcement uses the Policies tab's landmark. */
+/** Account protection's icon everywhere: a check in A; in B and C, policy enforcement uses the Policies tab's landmark. */
 export const AccountProtectionIcon = forwardRef<SVGSVGElement, LucideProps>((props, ref) =>
-  usePrototypeModel() === 'policies' ? <Landmark ref={ref} {...props} /> : <CircleCheck ref={ref} {...props} />,
+  usePrototypeModel() === 'protection' ? <CircleCheck ref={ref} {...props} /> : <Landmark ref={ref} {...props} />,
 ) as LucideIcon
 AccountProtectionIcon.displayName = 'AccountProtectionIcon'

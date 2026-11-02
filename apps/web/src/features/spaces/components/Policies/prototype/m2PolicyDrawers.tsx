@@ -1,6 +1,7 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
-import { Ban, Check, ChevronDown, ChevronRight, Copy, Landmark, Settings, X, type LucideIcon } from 'lucide-react'
+import { Ban, ChevronDown, ChevronRight, Copy, Landmark, Plus, Settings, type LucideIcon } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import {
@@ -32,13 +33,24 @@ import { PAYMENTS_LIMIT } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
 import { BlockedSpendingLimitDrawer, type ProtectionLink } from './m2BlockedSpendingLimitDrawer'
 import { CopyPolicyDialog } from './m2CopyPolicyDialog'
-import { PanelNavButtons, PinnedTop, PolicyIconTile, type PanelNav } from './m2PanelParts'
+import {
+  EDIT_IN_ENFORCEMENT_HINT,
+  EDIT_IN_ENFORCEMENT_LABEL,
+  EditInEnforcementActions,
+  PanelNavButtons,
+  PinnedTop,
+  PolicyIconTile,
+  type PanelNav,
+} from './m2PanelParts'
 import {
   getStatusDetail,
   POLICY_ROW_LABELS,
   POLICY_TYPES,
   RowStatusChip,
   TOM_ADDRESS,
+  VERDICTS,
+  getPolicyVerdict,
+  type Verdict,
   type PanelOperation,
   type PanelViewer,
   type Person,
@@ -97,6 +109,7 @@ const M2ProposerDrawer = ({
   row,
   actionLabel,
   actionVariant,
+  actionHint,
   onAction,
   ...content
 }: ProposerVariantContentProps & {
@@ -108,6 +121,7 @@ const M2ProposerDrawer = ({
   row: PolicyRow
   actionLabel: string
   actionVariant?: 'default' | 'secondary'
+  actionHint?: string
   onAction: () => void
 }): ReactElement => (
   <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
@@ -118,7 +132,7 @@ const M2ProposerDrawer = ({
         <ProposerVariantContent {...content} />
       </div>
     </DrawerBody>
-    <PolicyDrawerActions actionLabel={actionLabel} onClick={onAction} variant={actionVariant} />
+    <PolicyDrawerActions actionLabel={actionLabel} onClick={onAction} variant={actionVariant} hint={actionHint} />
   </Drawer>
 )
 
@@ -172,7 +186,7 @@ const PermissionsSection = ({
       </Typography>
     ) : (
       <Card variant="muted" size="none" radius="lg" data-m2-new="New · Covered permissions">
-        <div className="flex flex-col divide-y divide-border">
+        <div className="flex flex-col divide-y divide-border/60">
           {permissions.map((row) => (
             <PolicyListItem
               key={row.id}
@@ -201,7 +215,7 @@ const EnforcedPoliciesSection = ({
 }): ReactElement => (
   <DrawerSection title="Policies it checks">
     <Card variant="muted" size="none" radius="lg" data-m2-new="New · Policies the protection checks">
-      <div className="flex flex-col divide-y divide-border">
+      <div className="flex flex-col divide-y divide-border/60">
         {policies.map((row) => (
           <PolicyListItem key={row.id} row={row} onSelect={onSelect} tag={<RowStatusChip status={row.status} />} />
         ))}
@@ -578,6 +592,8 @@ const StatusSection = ({
 
 type M2DrawerHandlers = {
   onEdit?: () => void
+  /** C, enforced account: its policies change together, so Edit opens policy enforcement instead. */
+  onEditInEnforcement?: () => void
   /** Live protection only: set up the same protection on other Safe accounts. */
   onCopy?: () => void
   onConfirm?: () => void
@@ -594,6 +610,7 @@ const M2DrawerActions = ({
   row,
   state,
   onEdit,
+  onEditInEnforcement,
   onCopy,
   onConfirm,
   onExecute,
@@ -601,6 +618,8 @@ const M2DrawerActions = ({
 }: M2DrawerHandlers & { row: PolicyRow; state: PanelState }): ReactElement | null => {
   switch (state.kind) {
     case 'live':
+      if (onEditInEnforcement && state.action !== 'connect' && state.action !== 'not-signer')
+        return <EditInEnforcementActions onClick={onEditInEnforcement} />
       if (state.action === 'connect') {
         return <PolicyDrawerActions actionLabel="Connect wallet" onClick={() => {}} hint={ACTIVE_CONNECT_HELPER} />
       }
@@ -797,6 +816,7 @@ export const PolicyDrawer = ({
             protection={protection}
             blockedTokens={row.blockedTokens ?? spendingLimitBlockedTokens}
             onEdit={handlers.onEdit}
+            onEditInEnforcement={handlers.onEditInEnforcement}
             onOpenAllowlist={onOpenAllowlist ? () => onOpenAllowlist(row.account) : undefined}
           />
         )
@@ -822,6 +842,7 @@ export const PolicyDrawer = ({
           limit={limit}
           protection={protection}
           onEdit={handlers.onEdit}
+          onEditInEnforcement={handlers.onEditInEnforcement}
         />
       )
     }
@@ -836,6 +857,7 @@ export const PolicyDrawer = ({
           rules={accountSettingsRules}
           onOpenProtection={onOpenProtection ? () => onOpenProtection(row.account) : undefined}
           onEdit={handlers.onEdit}
+          onEditInEnforcement={handlers.onEditInEnforcement}
         />
       )
 
@@ -856,11 +878,15 @@ export const PolicyDrawer = ({
             initiatedBy: { address: NADIA_ADDRESS, name: 'Nadia Kaur' },
             chainId: row.account.chainId,
             lastUpdated: 'Jul 21, 2026 · 10:04 UTC',
-            enforcedBy: 'Safe module',
+            enforcedBy: 'Safe{Wallet}',
           }}
-          actionLabel="Remove proposer"
-          actionVariant="secondary"
-          onAction={() => {}}
+          {...(handlers.onEditInEnforcement
+            ? {
+                actionLabel: EDIT_IN_ENFORCEMENT_LABEL,
+                onAction: handlers.onEditInEnforcement,
+                actionHint: EDIT_IN_ENFORCEMENT_HINT,
+              }
+            : { actionLabel: 'Remove proposer', actionVariant: 'secondary' as const, onAction: () => {} })}
         />
       )
 
@@ -905,34 +931,66 @@ export type ProtectionDrawerProps = {
   onEditProtection?: () => void
   /** Not enforced: starts the Enforce policies flow for this account. */
   onEnforce?: () => void
+  /** C, enforced: adds a policy, which waits 24 hours and a second transaction like every change. */
+  onAddPolicy?: () => void
+  /** C, enforced: turns enforcement off, itself a change that waits 24 hours. */
+  onRemoveEnforcement?: () => void
+  /** C, enforced: one flow to change every enforced policy at once, sent as one transaction. */
+  onEditPolicies?: () => void
+  /** C: where the account's one pending change to its enforced policies is, if it has one. */
+  bundleStage?: 'waiting' | 'ready'
+  onSkipBundleWait?: () => void
+  onActivateBundle?: () => void
+  onCancelBundle?: () => void
 }
+
+/** C: the one change to an enforced account's policies, waiting out its 24 hours or ready for its second transaction. */
+const BundleChange = ({
+  stage,
+  onSkipWait,
+  onActivate,
+  onCancel,
+}: {
+  stage: 'waiting' | 'ready'
+  onSkipWait?: () => void
+  onActivate?: () => void
+  onCancel?: () => void
+}): ReactElement => (
+  <M2Alert
+    tone="warning"
+    title={stage === 'waiting' ? 'Your policy changes apply after 24 hours' : 'Your policy changes are ready'}
+    description={
+      stage === 'waiting'
+        ? 'Then a second transaction, signed like any other, applies them. Until then the current policies stay, and any signer can cancel.'
+        : 'Sign and execute the second transaction to apply them.'
+    }
+    action={
+      <span className="flex flex-wrap gap-2">
+        {stage === 'waiting'
+          ? onSkipWait && (
+              <Button variant="outline" size="xs" onClick={onSkipWait}>
+                Skip 24 hours (prototype)
+              </Button>
+            )
+          : onActivate && (
+              <Button size="xs" onClick={onActivate}>
+                Review transaction
+              </Button>
+            )}
+        {onCancel && (
+          <Button variant="ghost-muted" size="xs" onClick={onCancel}>
+            Cancel change
+          </Button>
+        )}
+      </span>
+    }
+  />
+)
 
 /** What the protection itself decides: what happens to anything no policy covers, and which account changes it lets through. */
 export type ProtectionRules = { baseline: Baseline; blockedSettings: string[] }
 
 export const DEFAULT_PROTECTION_RULES: ProtectionRules = { baseline: 'block-all', blockedSettings: [] }
-
-type Verdict = 'allowed' | 'blocked' | 'partly'
-
-const VERDICTS: Record<Verdict, ReactElement> = {
-  allowed: (
-    <Badge variant="success" size="status" shape="status">
-      <Check aria-hidden />
-      Allowed
-    </Badge>
-  ),
-  blocked: (
-    <Badge variant="destructive" size="status" shape="status">
-      <X aria-hidden />
-      Blocked
-    </Badge>
-  ),
-  partly: (
-    <Badge variant="warning" size="status" shape="status">
-      Partly blocked
-    </Badge>
-  ),
-}
 
 const getSettingsVerdict = (groupTitles: string[], blockedSettings: string[]): Verdict => {
   const ids = ACCOUNT_SETTING_GROUPS.filter(({ title }) => groupTitles.includes(title)).flatMap(({ settings }) =>
@@ -941,16 +999,6 @@ const getSettingsVerdict = (groupTitles: string[], blockedSettings: string[]): V
   const blocked = ids.filter((id) => blockedSettings.includes(id)).length
   return blocked === 0 ? 'allowed' : blocked === ids.length ? 'blocked' : 'partly'
 }
-
-/** A policy row's verdict: a live policy is allowed, a blocked one says so, anything in between keeps its status. */
-const getPolicyVerdict = (row: PolicyRow): ReactElement =>
-  row.status === 'active' || row.status === 'change-pending' ? (
-    VERDICTS.allowed
-  ) : row.status === 'blocked' ? (
-    VERDICTS.blocked
-  ) : (
-    <RowStatusChip status={row.status} />
-  )
 
 /** Laid out like PolicyListItem, with a blank where its chevron goes, so the badges line up. */
 const VerdictRow = ({
@@ -1008,6 +1056,7 @@ const AccountSettingsDrawer = ({
   rules,
   onOpenProtection,
   onEdit,
+  onEditInEnforcement,
 }: {
   open: boolean
   onClose: () => void
@@ -1016,6 +1065,7 @@ const AccountSettingsDrawer = ({
   rules: ProtectionRules
   onOpenProtection?: () => void
   onEdit?: () => void
+  onEditInEnforcement?: () => void
 }): ReactElement => (
   <Drawer open={open} onClose={onClose} ariaLabel={POLICY_ROW_LABELS[row.type]}>
     <M2DrawerHeader row={row} status={row.status} nav={nav} onOpenProtection={onOpenProtection} />
@@ -1030,7 +1080,7 @@ const AccountSettingsDrawer = ({
         {ACCOUNT_SETTING_GROUPS.map(({ title, settings }) => (
           <DrawerSection key={title} title={title}>
             <Card variant="muted" size="none" radius="lg">
-              <div className="flex flex-col divide-y divide-border">
+              <div className="flex flex-col divide-y divide-border/60">
                 {settings.map(({ id, title: settingTitle, description }) => (
                   <div key={id} className="flex items-center gap-3 p-3">
                     <span className="flex min-w-0 flex-1 flex-col">
@@ -1049,12 +1099,16 @@ const AccountSettingsDrawer = ({
       </div>
     </DrawerBody>
 
-    {onEdit && (
-      <DrawerFooter>
-        <Button className="w-full" onClick={onEdit}>
-          Edit account settings
-        </Button>
-      </DrawerFooter>
+    {onEditInEnforcement ? (
+      <EditInEnforcementActions onClick={onEditInEnforcement} />
+    ) : (
+      onEdit && (
+        <DrawerFooter>
+          <Button className="w-full" onClick={onEdit}>
+            Edit account settings
+          </Button>
+        </DrawerFooter>
+      )
     )}
   </Drawer>
 )
@@ -1085,7 +1139,7 @@ const EnforcedListSection = ({
   return (
     <DrawerSection title="Policies">
       <Card variant="muted" size="none" radius="lg" data-m2-new="New · Enforced policies list">
-        <div className="flex flex-col divide-y divide-border">
+        <div className="flex flex-col divide-y divide-border/60">
           {!isSimpleModel && (
             <>
               <VerdictRow
@@ -1107,7 +1161,19 @@ const EnforcedListSection = ({
             </>
           )}
           {ordered.map((row) => (
-            <PolicyListItem key={row.id} row={row} onSelect={onSelect} tag={getPolicyVerdict(row)} />
+            <PolicyListItem
+              key={row.id}
+              row={row}
+              onSelect={onSelect}
+              // A change still waiting to apply reads as pending, not as what it allows.
+              tag={
+                row.status === 'activating' || row.status === 'pending' ? (
+                  <RowStatusChip status="pending" tooltip={getStatusDetail(row)} />
+                ) : (
+                  getPolicyVerdict(row)
+                )
+              }
+            />
           ))}
           <VerdictRow
             Icon={Ban}
@@ -1127,7 +1193,8 @@ const EnforcedListSection = ({
  */
 /** B: the Policies tab's icon on the dark tile, set up or not; A keeps its own icon. */
 const ProtectionHeaderIcon = ({ isOn }: { isOn: boolean }): ReactElement => {
-  if (usePrototypeModel() === 'policies')
+  const model = usePrototypeModel()
+  if (model === 'policies' || (model === 'simple' && isOn))
     return (
       <div className="flex size-10 items-center justify-center rounded-lg bg-foreground text-background">
         <Landmark className="size-4" aria-hidden />
@@ -1161,6 +1228,13 @@ export const ProtectionDrawer = ({
   onCancelChange,
   onEditProtection,
   onEnforce,
+  onAddPolicy,
+  onRemoveEnforcement,
+  onEditPolicies,
+  bundleStage,
+  onSkipBundleWait,
+  onActivateBundle,
+  onCancelBundle,
 }: ProtectionDrawerProps): ReactElement | null => {
   const isSimpleModel = usePrototypeModel() === 'simple'
   if (!account) return null
@@ -1226,9 +1300,9 @@ export const ProtectionDrawer = ({
         <ProtectionHeaderIcon isOn />
         <div className="flex min-w-0 flex-col items-start gap-1">
           <DrawerTitle size="lg">{PROTECTION_TITLE}</DrawerTitle>
-          <Badge variant={isActive ? 'success' : 'subtle'} size="status" shape="status">
-            {isActive ? 'Active' : 'Pending'}
-          </Badge>
+          <RowStatusChip
+            status={isActive && (!isSettingUp || setupState?.kind === 'change-pending') ? 'active' : 'pending'}
+          />
         </div>
         {nav && (
           <div className="ml-auto">
@@ -1255,6 +1329,14 @@ export const ProtectionDrawer = ({
                 {isActive ? 'Anything' : 'Once it’s executed, anything'} your policies don’t allow on {account.name} is
                 blocked, even with every signature. Any change waits 24 hours.
               </Typography>
+              {isSimpleModel && bundleStage && (
+                <BundleChange
+                  stage={bundleStage}
+                  onSkipWait={onSkipBundleWait}
+                  onActivate={onActivateBundle}
+                  onCancel={onCancelBundle}
+                />
+              )}
               <EnforcedListSection
                 rules={rules}
                 policies={rows.filter(
@@ -1285,6 +1367,38 @@ export const ProtectionDrawer = ({
         <M2DrawerActions row={setup} state={setupState} onConfirm={onConfirm} onExecute={onExecute} />
       ) : changePending ? (
         <PolicyDrawerActions actionLabel="Cancel change" variant="secondary" onClick={onCancelChange} />
+      ) : isSimpleModel && (onEditPolicies || onAddPolicy || onRemoveEnforcement) ? (
+        // C: enforced policies change together, in one flow and one transaction.
+        <DrawerFooter>
+          <div className="flex flex-col gap-2" data-m2-new="New · Enforced policies actions">
+            {onEditPolicies &&
+              (bundleStage ? (
+                <Tooltip>
+                  <TooltipTrigger render={<span className="block w-full" />}>
+                    <Button className="w-full" disabled>
+                      Edit policies
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>A change is already waiting to apply. Cancel it to make a new one.</TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button className="w-full" onClick={onEditPolicies}>
+                  Edit policies
+                </Button>
+              ))}
+            {!onEditPolicies && onAddPolicy && (
+              <Button className="w-full" onClick={onAddPolicy}>
+                <Plus data-icon="inline-start" aria-hidden />
+                Add policy
+              </Button>
+            )}
+            {onRemoveEnforcement && (
+              <Button variant="ghost-muted" className="w-full" onClick={onRemoveEnforcement}>
+                Remove policy enforcement
+              </Button>
+            )}
+          </div>
+        </DrawerFooter>
       ) : (
         onEditProtection && (
           <DrawerFooter>

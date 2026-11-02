@@ -1,20 +1,39 @@
-import type { ReactElement, ReactNode } from 'react'
-import { Ban, Check, Clock, FileCode2, Settings2, ShieldCheck, UserRoundPlus, UsersRound } from 'lucide-react'
+import { useRef, type ReactElement, type ReactNode } from 'react'
+import {
+  ArrowRight,
+  Ban,
+  CalendarClock,
+  Check,
+  Clock,
+  FileCode2,
+  PenLine,
+  Settings2,
+  ShieldCheck,
+  UserRoundPlus,
+  UsersRound,
+  type LucideIcon,
+} from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import Identicon from '@/components/common/Identicon'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Button } from '@safe-global/views/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import PolicyIntroDialog, {
-  type PolicyIntroExplainer,
-} from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
-import ProposerIntroDialog from '../ProposerIntroDialog'
-import SpendingLimitIntroDialog from '../SpendingLimitIntroDialog'
+import ProposerPreview from '../ProposerIntroDialog/ProposerPreview'
+import SpendingLimitPreview from '../SpendingLimitIntroDialog/SpendingLimitPreview'
 import type { SingleRuleKind } from './m2SetupFlow'
 
 /** SpendingLimitPreview's frame: a sunken panel with one card on it. Hidden from assistive tech, the copy explains it. */
 const PreviewFrame = ({ title, children }: { title: string; children: ReactNode }): ReactElement => (
   <div
     aria-hidden
-    className="relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken"
+    className="relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-surface-sunken py-5"
   >
     <div className="flex w-[300px] flex-col gap-1.5 rounded-md bg-card p-3 shadow-lg">
       <Typography variant="paragraph-mini-medium">{title}</Typography>
@@ -48,40 +67,99 @@ const ALLOWED_RECIPIENTS = [
 ]
 const BLOCKED_RECIPIENT = '0x6D0a9f2c71b8e04d6a3c5b17e92f08d4c6a13e58'
 
-const ALLOWLIST_EXPLAINERS: PolicyIntroExplainer[] = [
-  { Icon: UsersRound, text: 'You choose the addresses that can receive funds and the tokens they can receive.' },
-  { Icon: ShieldCheck, text: 'It is checked onchain, so a blocked transfer fails even if every signer approves it.' },
-  {
-    Icon: Clock,
-    text: 'Setting it up, changing it or removing it requires a transaction. Every change waits 24 hours before it applies.',
-  },
-]
+type IntroPoint = { Icon: LucideIcon; title: string; description: string }
 
-const SETTINGS_EXPLAINERS: PolicyIntroExplainer[] = [
-  {
-    Icon: UserRoundPlus,
-    text: 'You choose which changes to the account are allowed: signers, the threshold, policies and other settings.',
-  },
-  { Icon: ShieldCheck, text: 'A blocked change fails onchain, even if every signer approves it.' },
-  { Icon: Clock, text: 'Changing these rules requires a transaction and waits 24 hours before it applies.' },
-]
-
-const CONTRACT_EXPLAINERS: PolicyIntroExplainer[] = [
-  { Icon: FileCode2, text: 'You choose the apps and contracts the account can use, and which of their actions.' },
-  { Icon: ShieldCheck, text: 'A call to anything else fails onchain, even if every signer approves it.' },
-  { Icon: Clock, text: 'Setting it up or changing it requires a transaction and waits 24 hours before it applies.' },
-]
+/** One size for the subtitle and the points, a step above the app's small text. */
+export const INTRO_TEXT_SIZE = 'text-[15px] leading-[22px]'
+const INTRO_TEXT = `${INTRO_TEXT_SIZE} font-medium`
 
 type IntroProps = { open: boolean; onOpenChange: (open: boolean) => void; onProceed: () => void }
 
+/** M1's PolicyIntroDialog layout, with three short points in a heavier weight and neutral icons. */
+const IntroDialog = ({
+  open,
+  onOpenChange,
+  onProceed,
+  title,
+  description,
+  helpArticle,
+  helpLabel,
+  points,
+  preview,
+  proceedLabel,
+  testId,
+}: IntroProps & {
+  title: string
+  description: string
+  helpArticle: string
+  helpLabel: string
+  points: IntroPoint[]
+  preview: ReactNode
+  proceedLabel: string
+  testId: string
+}): ReactElement => {
+  const proceedRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent size="xs" initialFocus={proceedRef} data-testid={testId}>
+        <DialogHeader>
+          <DialogTitle className="text-xl leading-6 font-semibold">{title}</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-5 px-5 pb-5" data-m2-new="New · Intro with three points">
+          {/* The points say what it does, so the subtitle only links to more. */}
+          <DialogDescription className={`${INTRO_TEXT} text-muted-foreground`}>
+            <span className="sr-only">{description} </span>
+            <ExternalLink
+              href={helpArticle}
+              className="font-normal [&>span]:underline [&>span]:decoration-current [&>span]:underline-offset-2"
+            >
+              {helpLabel}
+            </ExternalLink>
+          </DialogDescription>
+
+          {preview}
+
+          <ul className="flex flex-col gap-5">
+            {points.map(({ Icon, title: pointTitle, description: pointDescription }) => (
+              <li key={pointTitle} className="flex items-center gap-4">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Icon className="size-4 text-foreground" aria-hidden />
+                </div>
+                <div className={`flex flex-col ${INTRO_TEXT_SIZE}`}>
+                  <p className="font-semibold text-foreground">{pointTitle}</p>
+                  <p className="text-muted-foreground">{pointDescription}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <Button ref={proceedRef} className="w-full gap-2" onClick={onProceed}>
+            {proceedLabel}
+            <ArrowRight className="text-[var(--color-static-text-brand)] dark:text-black" aria-hidden />
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 const AllowlistPolicyIntro = (props: IntroProps): ReactElement => (
-  <PolicyIntroDialog
+  <IntroDialog
     {...props}
     title="Allowlist"
     description="Only the addresses and tokens on your list can receive funds."
     helpArticle={HelpCenterArticle.POLICIES}
     helpLabel="Learn more about allowlists"
-    explainers={ALLOWLIST_EXPLAINERS}
+    points={[
+      {
+        Icon: UsersRound,
+        title: 'Only the recipients you add',
+        description: 'Sending anywhere else fails, even with every signature.',
+      },
+      { Icon: Clock, title: 'Changes wait 24 hours', description: 'Time to stop a change you didn’t expect.' },
+    ]}
     preview={
       <PreviewFrame title="Allowed recipients">
         {ALLOWED_RECIPIENTS.map((address) => (
@@ -96,13 +174,20 @@ const AllowlistPolicyIntro = (props: IntroProps): ReactElement => (
 )
 
 const AccountSettingsPolicyIntro = (props: IntroProps): ReactElement => (
-  <PolicyIntroDialog
+  <IntroDialog
     {...props}
-    title="Settings lock"
+    title="Protected settings"
     description="Decide which changes to the Safe account itself are allowed."
     helpArticle={HelpCenterArticle.POLICIES}
-    helpLabel="Learn more about settings lock"
-    explainers={SETTINGS_EXPLAINERS}
+    helpLabel="Learn more about protected settings"
+    points={[
+      {
+        Icon: UserRoundPlus,
+        title: 'Protect signers, threshold and policies',
+        description: 'Changing them fails, even with every signature.',
+      },
+      { Icon: Clock, title: 'Changes wait 24 hours', description: 'Time to stop a change you didn’t expect.' },
+    ]}
     preview={
       <PreviewFrame title="Account changes">
         <PreviewRow lead={<PreviewIcon Icon={UsersRound} />} />
@@ -110,19 +195,26 @@ const AccountSettingsPolicyIntro = (props: IntroProps): ReactElement => (
         <PreviewRow lead={<PreviewIcon Icon={ShieldCheck} />} isBlocked />
       </PreviewFrame>
     }
-    proceedLabel="Set up settings lock"
+    proceedLabel="Set up protected settings"
     testId="account-settings-intro-dialog"
   />
 )
 
 const ContractInteractionsPolicyIntro = (props: IntroProps): ReactElement => (
-  <PolicyIntroDialog
+  <IntroDialog
     {...props}
     title="Contract interactions"
     description="Only the apps and actions you choose can be used from this account."
     helpArticle={HelpCenterArticle.POLICIES}
     helpLabel="Learn more about contract interactions"
-    explainers={CONTRACT_EXPLAINERS}
+    points={[
+      {
+        Icon: FileCode2,
+        title: 'Only the apps you pick',
+        description: 'Any other call fails, even with every signature.',
+      },
+      { Icon: Clock, title: 'Changes wait 24 hours', description: 'Time to stop a change you didn’t expect.' },
+    ]}
     preview={
       <PreviewFrame title="Allowed contracts">
         <PreviewRow lead={<PreviewIcon Icon={FileCode2} />} />
@@ -135,20 +227,56 @@ const ContractInteractionsPolicyIntro = (props: IntroProps): ReactElement => (
   />
 )
 
+const SpendingLimitPolicyIntro = (props: IntroProps): ReactElement => (
+  <IntroDialog
+    {...props}
+    title="Spending limit"
+    description="Let spenders access assets without collecting signatures."
+    helpArticle={HelpCenterArticle.SPENDING_LIMITS}
+    helpLabel="Learn more about spending limits"
+    points={[
+      { Icon: PenLine, title: 'No signatures needed', description: 'Spenders send up to their limit on their own.' },
+      { Icon: CalendarClock, title: 'Resets on your schedule', description: 'Every day, week or month.' },
+    ]}
+    preview={<SpendingLimitPreview />}
+    proceedLabel="Set up spending limit"
+    testId="spending-limit-intro-dialog"
+  />
+)
+
+const ProposerPolicyIntro = (props: IntroProps): ReactElement => (
+  <IntroDialog
+    {...props}
+    title="Proposer role"
+    description="Let teammates without signing rights propose transactions."
+    helpArticle={HelpCenterArticle.PROPOSERS}
+    helpLabel="Learn more about proposers"
+    points={[
+      { Icon: PenLine, title: 'Drafts, never signs', description: 'Proposers create transactions for signers.' },
+      { Icon: ShieldCheck, title: 'Signers stay in control', description: 'Nothing runs without their signatures.' },
+    ]}
+    preview={<ProposerPreview />}
+    proceedLabel="Set up proposer"
+    testId="proposer-intro-dialog"
+  />
+)
+
 export type IntroKind = SingleRuleKind | 'contracts'
 
-/** C: the intro each policy opens with: M1's own for spending limits and proposers, ours in the same dialog for the rest. */
+/** C: the intro each policy opens with, all in one layout; spending limits and proposers keep M1's previews. */
 export const PolicyIntro = ({ kind, ...props }: IntroProps & { kind: IntroKind }): ReactElement => {
   switch (kind) {
     case 'allowlist':
       return <AllowlistPolicyIntro {...props} />
     case 'settings':
+    case 'basics':
+    case 'bundle':
       return <AccountSettingsPolicyIntro {...props} />
     case 'contracts':
       return <ContractInteractionsPolicyIntro {...props} />
     case 'limits':
-      return <SpendingLimitIntroDialog {...props} />
+      return <SpendingLimitPolicyIntro {...props} />
     case 'proposers':
-      return <ProposerIntroDialog {...props} />
+      return <ProposerPolicyIntro {...props} />
   }
 }

@@ -1,9 +1,9 @@
 import { useId, useState, type ReactElement } from 'react'
-import { ArrowRight, Check, Send, UsersRound, X } from 'lucide-react'
+import { ArrowRight, Clock, Send, ShieldCheck, UsersRound } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { Badge } from '@safe-global/views/components/ui/badge'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import {
@@ -16,6 +16,7 @@ import {
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { PROTECTION_FACTS } from './m2SetupFlow'
 import { cn } from '@safe-global/views/utils/cn'
+import { INTRO_TEXT_SIZE } from './m2PolicyIntros'
 import { usePrototypeModel } from './m2Prototype'
 
 /** Illustrative only: the values are invented and the copy explains the check. */
@@ -26,8 +27,8 @@ const PlaceholderBar = ({ className }: { className: string }): ReactElement => (
 )
 
 const OUTCOMES = [
-  { allowed: true, label: 'Allowed', Icon: Check },
-  { allowed: false, label: 'Blocked', Icon: X },
+  { allowed: true, label: 'Allowed' },
+  { allowed: false, label: 'Blocked' },
 ]
 
 /** Static, in the style of M1's intro previews: one Safe account, one transaction, the two things that can happen to it. */
@@ -74,10 +75,10 @@ const EnforcementPreview = (): ReactElement => (
       <span className="h-[52px] w-4 shrink-0 rounded-l-md border-y border-l border-dashed border-border" />
 
       <div className="flex flex-col gap-3">
-        {OUTCOMES.map(({ allowed, label, Icon }) => (
+        {OUTCOMES.map(({ allowed, label }) => (
           <div key={label} className="flex items-center rounded-xl bg-card p-2 shadow-sm">
             <Badge variant={allowed ? 'success' : 'destructive'} size="status" shape="status">
-              <Icon aria-hidden />
+              <BadgeDot />
               {label}
             </Badge>
           </div>
@@ -93,15 +94,31 @@ export type AllowlistIntroDialogProps = {
   onProceed: () => void
 }
 
+/** C: when enforcement starts, what every later change needs, and why. */
+const SIMPLE_FACTS = [
+  {
+    Icon: ShieldCheck,
+    title: 'Only what your policies allow',
+    description: 'Anything else is blocked as soon as enforcement is executed.',
+  },
+  {
+    Icon: Clock,
+    title: 'Changes wait 24 hours',
+    description: 'After that, every change needs a second transaction.',
+  },
+]
+
 /** Account protection's intro, laid out like M1's PolicyIntroDialog, plus bold titles and "I understand". */
 export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: AllowlistIntroDialogProps): ReactElement => {
   const [hasUnderstood, setHasUnderstood] = useState(false)
   const checkboxId = useId()
   // C: the same width as the other policies' intros, and no "I understand" before Set up.
-  const isSimpleModel = usePrototypeModel() === 'simple'
+  const model = usePrototypeModel()
+  const isSimpleModel = model === 'simple'
   // B lists every rule it can hold, and which one is required.
-  const facts =
-    usePrototypeModel() === 'policies'
+  const facts = isSimpleModel
+    ? SIMPLE_FACTS
+    : model === 'policies'
       ? PROTECTION_FACTS.map((fact, index) =>
           index === 0
             ? {
@@ -126,8 +143,14 @@ export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: Allowlis
         </DialogHeader>
 
         <div className="flex flex-col gap-4 px-5 pb-5" data-m2-new="New · Account protection intro">
-          <DialogDescription className="text-base leading-6 text-secondary-foreground">
-            Make sure your Safe account can only do what your policies allow.{' '}
+          <DialogDescription
+            className={
+              isSimpleModel
+                ? `${INTRO_TEXT_SIZE} font-medium text-muted-foreground`
+                : 'text-base leading-6 text-secondary-foreground'
+            }
+          >
+            {!isSimpleModel && 'Make sure your Safe account can only do what your policies allow. '}
             <ExternalLink
               href={HelpCenterArticle.POLICIES}
               className="font-normal [&>span]:underline [&>span]:decoration-current [&>span]:underline-offset-2"
@@ -141,15 +164,31 @@ export const AllowlistIntroDialog = ({ open, onOpenChange, onProceed }: Allowlis
           <ul className="flex flex-col gap-4">
             {facts.map(({ Icon, title, description }) => (
               <li key={title} className="flex items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
-                  <Icon className="size-4 text-badge-dot-success" aria-hidden />
+                <div
+                  className={cn(
+                    'flex size-9 shrink-0 items-center justify-center rounded-full',
+                    isSimpleModel ? 'bg-muted' : 'bg-[var(--color-background-light-hover)]',
+                  )}
+                >
+                  <Icon
+                    className={cn('size-4', isSimpleModel ? 'text-foreground' : 'text-badge-dot-success')}
+                    aria-hidden
+                  />
                 </div>
-                <div className="flex flex-col">
-                  <Typography variant="paragraph-small-bold">{title}</Typography>
-                  <Typography variant="paragraph-small" color="muted">
-                    {description}
-                  </Typography>
-                </div>
+                {/* C: one short point per line, like the other intros. */}
+                {isSimpleModel ? (
+                  <div className={`flex flex-col ${INTRO_TEXT_SIZE}`}>
+                    <p className="font-semibold text-foreground">{title}</p>
+                    <p className="text-muted-foreground">{description}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    <Typography variant="paragraph-small-bold">{title}</Typography>
+                    <Typography variant="paragraph-small" color="muted">
+                      {description}
+                    </Typography>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
