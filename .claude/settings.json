@@ -1,3 +1,27 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json"
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Edit(/packages/store/src/gateway/AUTO_GENERATED/**)",
+      "Edit(/packages/utils/src/types/contracts/**)",
+      "Edit(/apps/web/src/styles/vars.css)",
+      "Edit(/config/test/msw/fixtures/**/*.json)",
+      "Edit(/apps/web/.storybook/COVERAGE.md)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(*git*commit*)",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/verify-before-commit.mjs\"",
+            "timeout": 1200
+          }
+        ]
+      }
+    ]
+  }
 }

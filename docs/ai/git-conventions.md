@@ -14,8 +14,8 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
 
 - **Pre-commit hooks (Husky):** **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**).
 - **Commit messages** use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in [CONTRIBUTING.md](../../CONTRIBUTING.md).
-- **CI/CD changes always use `chore:`** — CI, workflows, build configs (NEVER `feat:` or `fix:`).
-- **Test changes always use `tests:`** — changes in unit or e2e tests (NEVER `feat:` or `fix:`).
+- **CI/CD changes always use `chore:`** — CI, workflows, build configs (not `feat:` or `fix:`).
+- **Test changes always use `tests:`** — changes in unit or e2e tests (not `feat:` or `fix:`).
 
 ## Pull requests
 
@@ -23,7 +23,7 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
   - **What it solves** — link the issue or ticket (`Resolves #<n>` / the Linear ID), one sentence on the user-visible problem.
   - **How this PR fixes it** — the approach and any non-obvious decision, a few sentences; not a file-by-file diff narration.
   - **How to test it** — concrete steps a reviewer can follow, starting from which Safe/chain/state to use.
-  - **Affected flows / Blast radius / Risks — not checked** — carry these over from the pre-implementation regression checklist (root [AGENTS.md](../../AGENTS.md), Workflow section); do not re-derive them from the diff.
+  - **Affected flows / Blast radius / Risks — not checked** — carry these over from the pre-implementation regression checklist ([regression-checklist.md](regression-checklist.md)); do not re-derive them from the diff.
   - **Checklist** — tick honestly; an unticked box with a reason beats a false tick.
 - **Visual summary is required for AI-authored PRs.** Every AI-authored PR must include a visual in the `## Visual summary` section — mandatory, not optional:
   - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed — GitHub renders mermaid natively

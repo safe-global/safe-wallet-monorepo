@@ -47,7 +47,7 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
     cy.contains('expected text', { timeout: 30000 }).should('be.visible')
-    main.awaitVisualStability()  // ALWAYS last line (unless explicitly skipped with comment)
+    main.awaitVisualStability()  // last line (unless explicitly skipped with comment)
   })
 })
 ```
@@ -139,5 +139,5 @@ Adding a `data-testid` to a component:
 - Safe addresses: `getSafes(CATEGORIES.static)` — never hardcode
 - localStorage: payloads in `support/localstorage_data.js`, keys in `support/constants.js`
 - API mocks: `cy.intercept()` + `cy.fixture()` from `fixtures/`
-- Do NOT create new setup helpers — use existing patterns from `support/`
+- Don't create new setup helpers — use existing patterns from `support/`
 - **Data/selector separation**: fixtures hold test data only (ids, names, addresses, counts); page objects hold selectors, labels, and regex only. Never duplicate fixture data in page objects, never re-export fixtures from them — tests import fixtures directly.

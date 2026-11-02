@@ -9,12 +9,35 @@ Testing guide for the `apps/web/` workspace. Follow these conventions to write c
 - Components with conditional rendering, user interaction, or non-trivial logic
 - Bug fixes (write a regression test that fails without the fix)
 
+### Test decision matrix
+
+| What you changed             | Required tests                 | Test type                                      | Example                                                            |
+| ---------------------------- | ------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------ |
+| New hook (`use*.ts`)         | Unit test with `renderHook`    | `hooks/__tests__/useX.test.ts`                 | Mock dependencies, test return values and state changes            |
+| New utility/service (`*.ts`) | Unit test                      | `utils.test.ts` colocated                      | Pure function tests, edge cases, error paths                       |
+| New component with logic     | Unit test + Storybook story    | `Component.test.tsx` + `Component.stories.tsx` | Render with providers, test interactions, story for visual states  |
+| New component (layout only)  | Storybook story only           | `Component.stories.tsx`                        | No unit test needed — story covers visual correctness              |
+| Redux slice                  | State transition test          | `mySlice.test.ts`                              | Test reducers by dispatching actions and asserting resulting state |
+| RTK Query endpoint           | MSW integration test           | `api.test.ts`                                  | Use MSW to mock API, test cache behavior                           |
+| Bug fix (any file)           | Regression test                | Add to existing test file                      | Write a test that fails without the fix, passes with it            |
+| Feature (new feature dir)    | All of the above as applicable | Per-file rules above                           | Plus: add feature flag test showing disabled state                 |
+
 ## When NOT to test
 
 - Pure layout components with zero logic (just JSX composition)
 - Type-only files, barrel re-exports, constants-only files
 - Storybook stories (they have their own snapshot workflow)
 - Auto-generated files (`AUTO_GENERATED/`, contract types)
+
+## Developer-owned tests first
+
+Consider what developers should test before QA automation. For every changed feature, suggest developer-owned tests first:
+
+- **Unit tests** — pure functions, parsers, validators, formatters, hooks
+- **Component tests** — React components render correctly with props
+- **Integration tests** — hooks + stores + API mocks wired together
+
+If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation. Full QA-developer agreement: [Developer Testability Contract](../e2e/docs/developer-testability-contract.md).
 
 ## Running tests
 

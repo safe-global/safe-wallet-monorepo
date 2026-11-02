@@ -2,7 +2,7 @@
 
 Guidance for the workspaces under `config/` (`test`, `eslint`, `tsconfig`). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md). Most rules here concern `config/test` (`@safe-global/test`) — the shared test workspace with MSW handlers, fixture-based scenarios, faker factories, and the jest preset, consumed by **both** `apps/web` and `apps/mobile`.
 
-## Verifying config/ changes (IMPORTANT)
+## Verifying config/ changes
 
 `yarn verify:changed` only checks files under `apps/<workspace>/` — changed files under `config/` are **silently skipped**, so a green verify run says nothing about a config/ change. `@safe-global/test` has no test/lint/type-check scripts of its own; verify through its consumers instead:
 
