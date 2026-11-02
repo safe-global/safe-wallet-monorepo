@@ -19,6 +19,7 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
+  dependencyExtractor: path.join(__dirname, 'jest.dependencyExtractor.cjs'),
 
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
