@@ -83,6 +83,7 @@ certificates
 # storybook
 **/storybook-static/
 *storybook.log
+/screenshots/
 
 # visual regression (baselines stored on separate branches)
 **/__visual_snapshots__/

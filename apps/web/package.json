@@ -51,7 +51,8 @@
     "generate:storybook-tests": "node scripts/generate-storybook-tests.cjs",
     "integrity": "node scripts/integrity-hashes.cjs",
     "storybook:generate-coverage": "npx tsx ../../scripts/storybook/generate-storybook-coverage.ts && prettier -w .storybook/COVERAGE.md",
-    "storybook:sweep": "npx tsx ../../scripts/storybook/render-sweep.ts"
+    "storybook:sweep": "npx tsx ../../scripts/storybook/render-sweep.ts",
+    "storybook:screenshots": "node ../../scripts/storybook/screenshots/capture.mts"
   },
   "engines": {
     "node": ">=22.12.0"

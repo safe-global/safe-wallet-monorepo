@@ -1,0 +1,79 @@
+# Manual only: captures Storybook stories from a branch preview for decks and marketing.
+# Read-only (`permissions: {}`), no secrets, no commits; the result is a workflow artifact.
+# Script and options: scripts/storybook/screenshots/README.md.
+name: Storybook screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch whose preview to capture (e.g. dev or design/policies-m2)'
+        required: true
+        default: 'dev'
+      stories:
+        description: 'Story ids or title patterns, comma-separated'
+        required: true
+        default: 'Pages/**'
+      themes:
+        description: 'light, dark or both'
+        required: true
+        default: 'light,dark'
+      sizes:
+        description: 'desktop (1440x900), wide (1920x1080) or both'
+        required: true
+        default: 'desktop'
+
+permissions: {}
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          # Cone mode keeps root files such as .nvmrc
+          sparse-checkout: scripts/storybook/screenshots
+
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Playwright
+        run: |
+          # Outside the workspace, pinned, lifecycle scripts off
+          INSTALL_DIR="$RUNNER_TEMP/playwright-install"
+          mkdir -p "$INSTALL_DIR"
+          cd "$INSTALL_DIR"
+          cat > package.json <<'JSON'
+          {"name":"playwright-install","private":true}
+          JSON
+          cat > .yarnrc.yml <<'YAML'
+          nodeLinker: node-modules
+          enableScripts: false
+          enableTelemetry: false
+          YAML
+          corepack enable
+          yarn add playwright@1.64.1
+          yarn playwright install --with-deps chromium
+          # ESM ignores NODE_PATH, so let the script resolve playwright from the repo root
+          ln -s "$INSTALL_DIR/node_modules" "$GITHUB_WORKSPACE/node_modules"
+
+      - name: Capture
+        env:
+          BRANCH: ${{ inputs.branch }}
+          STORIES: ${{ inputs.stories }}
+          THEMES: ${{ inputs.themes }}
+          SIZES: ${{ inputs.sizes }}
+        run: >
+          node scripts/storybook/screenshots/capture.mts
+          --base="$BRANCH" --stories="$STORIES" --themes="$THEMES" --sizes="$SIZES" --out=screenshots
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots/
+          if-no-files-found: warn
+          retention-days: 14
