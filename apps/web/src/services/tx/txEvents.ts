@@ -1,4 +1,5 @@
 import EventBus from '@/services/EventBus'
+import { IS_DEV } from '@/config/constants'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 
 export enum TxEvent {
@@ -72,9 +73,10 @@ export const txDispatch = txEventBus.dispatch.bind(txEventBus)
 
 export const txSubscribe = txEventBus.subscribe.bind(txEventBus)
 
-// Log all events
-Object.values(TxEvent).forEach((event: TxEvent) => {
-  txSubscribe<TxEvent>(event, (detail) => {
-    console.info(`Transaction ${event} event received`, detail)
+if (IS_DEV) {
+  Object.values(TxEvent).forEach((event: TxEvent) => {
+    txSubscribe<TxEvent>(event, (detail) => {
+      console.info(`Transaction ${event} event received`, detail)
+    })
   })
-})
+}
