@@ -1,5 +1,5 @@
 import type { RenderHookOptions } from '@testing-library/react'
-import { render, renderHook, within } from '@testing-library/react'
+import { act, render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
@@ -121,13 +121,23 @@ export const renderWithUserEvent = (
   options?: {
     routerProps?: Partial<NextRouter>
     initialReduxState?: Partial<RootState>
+    advanceTimers?: (delay: number) => Promise<void> | void
   },
 ) => {
+  const { advanceTimers, ...renderOptions } = options ?? {}
+
   return {
-    user: userEvent.setup(),
-    ...customRender(ui, options),
+    user: userEvent.setup(advanceTimers ? { advanceTimers } : {}),
+    ...customRender(ui, renderOptions),
   }
 }
+
+export const renderOnFakeClock = (
+  ui: React.ReactElement,
+  options?: Omit<NonNullable<Parameters<typeof renderWithUserEvent>[1]>, 'advanceTimers'>,
+) => renderWithUserEvent(ui, { ...options, advanceTimers: jest.advanceTimersByTimeAsync })
+
+export const advanceClock = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms))
 
 export const mockWeb3Provider = (
   callImplementations: MockCallImplementation[],
