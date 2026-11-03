@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { createMockStory } from '@/stories/mocks'
@@ -35,9 +36,15 @@ const meta = {
   args: {
     safeApp,
     origin: 'https://app.morpho.org',
+    remember: false,
+    onRememberChange: () => {},
     onOpenSafeApp: () => {},
     onContinueWithWalletConnect: () => {},
     onBrowseSafeApps: () => {},
+  },
+  render: function Render(args) {
+    const [remember, setRemember] = useState(args.remember)
+    return <WcSafeAppSuggestion {...args} remember={remember} onRememberChange={setRemember} />
   },
 } satisfies Meta<typeof WcSafeAppSuggestion>
 

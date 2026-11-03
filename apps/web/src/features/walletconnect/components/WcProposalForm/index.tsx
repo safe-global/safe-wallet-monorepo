@@ -26,7 +26,7 @@ import BlockedAddress from '@/components/common/BlockedAddress'
 
 type ProposalFormProps = {
   proposal: WalletKitTypes.SessionProposal
-  onApprove: () => Promise<void>
+  onApprove: () => Promise<unknown>
   onReject: () => Promise<void>
 }
 

@@ -13,7 +13,7 @@ import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/anal
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { safeAppBuilder } from '@/tests/builders/walletConnect'
 import * as useSafeAppSuggestionHook from '../../../hooks/useSafeAppSuggestion'
-import type { SafeAppSuggestion } from '../../../hooks/useSafeAppSuggestion'
+import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.fixtures'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 jest.mock('@/services/analytics', () => ({
@@ -117,23 +117,21 @@ describe('WalletConnectUi', () => {
 
   describe('with a Safe App suggestion', () => {
     const safeApp = safeAppBuilder().build()
-    const mockDismiss = jest.fn()
-    const mockChoose = jest.fn()
+    const mockRememberChoice = jest.fn()
 
     beforeEach(() => jest.clearAllMocks())
 
-    const mockSuggestion = (status: SafeAppSuggestion['status']) =>
-      jest.spyOn(useSafeAppSuggestionHook, 'useSafeAppSuggestion').mockReturnValue({
-        status,
-        safeApp,
-        remember: true,
-        setRemember: jest.fn(),
-        choose: mockChoose,
-        dismiss: mockDismiss,
-      })
+    const mockSuggestion = (isShown: boolean) =>
+      jest
+        .spyOn(useSafeAppSuggestionHook, 'useSafeAppSuggestion')
+        .mockReturnValue(
+          safeAppSuggestionBuilder()
+            .with({ isShown, safeApp, remember: true, rememberChoice: mockRememberChoice })
+            .build(),
+        )
 
     it('records the dismissal without saving a choice when the popup is closed', async () => {
-      mockSuggestion('shown')
+      mockSuggestion(true)
       await renderUi()
       act(() => propose(proposal))
 
@@ -149,13 +147,12 @@ describe('WalletConnectUi', () => {
           [MixpanelEventParams.REMEMBER_CHOICE]: true,
         },
       )
-      expect(mockDismiss).toHaveBeenCalled()
-      expect(mockChoose).not.toHaveBeenCalled()
+      expect(mockRememberChoice).not.toHaveBeenCalled()
       await waitFor(() => expect(WalletConnectWallet.prototype.rejectSession).toHaveBeenCalledWith(proposal))
     })
 
     it('records no dismissal when the suggestion is not on screen', async () => {
-      mockSuggestion('none')
+      mockSuggestion(false)
       await renderUi()
       act(() => propose(proposal))
 
@@ -163,7 +160,6 @@ describe('WalletConnectUi', () => {
 
       await waitFor(() => expect(WalletConnectWallet.prototype.rejectSession).toHaveBeenCalled())
       expect(trackEvent).not.toHaveBeenCalled()
-      expect(mockDismiss).not.toHaveBeenCalled()
     })
   })
 })

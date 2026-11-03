@@ -9,13 +9,7 @@ type MatchingSafeApp = {
   isLoading: boolean
 }
 
-/**
- * Find the Safe App matching a dApp's URL on the current chain.
- *
- * The query is skipped until a URL is passed, so nothing is fetched unless there is a live
- * WalletConnect session proposal. The endpoint is per-chain, so results are already filtered
- * to apps available on the current chain and allowed for this host.
- */
+/** The Safe App for a dApp URL on the current chain; nothing is fetched until there is a URL */
 export const useMatchingSafeApp = (dappUrl?: string): MatchingSafeApp => {
   const chainId = useChainId()
   const clientUrl = typeof window !== 'undefined' ? window.location.origin : undefined

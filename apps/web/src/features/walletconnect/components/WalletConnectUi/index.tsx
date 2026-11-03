@@ -2,8 +2,8 @@ import { useCallback, useContext, useEffect } from 'react'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
-import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
-import { getSuggestionResultParams } from '../../services/tracking'
+import { WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
+import { getSuggestionResultEvent } from '../../services/tracking'
 import { WalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
 import useWcUri from '../../hooks/useWcUri'
 import WcHeaderWidget from '../WcHeaderWidget'
@@ -34,14 +34,12 @@ const WalletConnectWidget = () => {
     setOpen(false)
     if (!sessionProposal || loading) return
 
-    const { status, safeApp, remember, dismiss } = safeAppSuggestion
-    if (status === 'shown' && safeApp) {
+    const { isShown, safeApp, remember } = safeAppSuggestion
+    if (isShown && safeApp) {
       const origin = sessionProposal.verifyContext.verified.origin
-      trackEvent(
-        { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: origin },
-        getSuggestionResultParams(origin, safeApp, WcSafeAppSuggestionResult.DISMISSED, remember),
-      )
-      dismiss()
+      const result = WcSafeAppSuggestionResult.DISMISSED
+      const { event, params } = getSuggestionResultEvent(origin, safeApp, { result, remember })
+      trackEvent(event, params)
     }
 
     rejectSession().catch(setError)

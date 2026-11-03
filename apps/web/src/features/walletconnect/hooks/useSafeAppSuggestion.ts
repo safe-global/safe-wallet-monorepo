@@ -7,7 +7,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
-import { getProposalRisk, type ProposalRisk } from '../services/proposalRisk'
+import { getProposalRisk, needsConnectionForm } from '../services/proposalRisk'
 import { useMatchingSafeApp } from './useMatchingSafeApp'
 
 const REMEMBERED_CHOICES_KEY = 'wcSafeAppSuggestionChoices'
@@ -18,34 +18,22 @@ export type SafeAppSuggestionChoice = 'safeApp' | 'walletConnect'
 type RememberedChoices = Record<string, SafeAppSuggestionChoice>
 
 /**
- * - `off`: the feature is disabled or there is no proposal
- * - `loading`: the Safe App lookup is in flight
- * - `none`: no Safe App, or the proposal needs the connection form (risk, undeployed Safe, WalletConnect remembered)
- * - `shown`: the user must choose between the Safe App and WalletConnect
- * - `redirect`: the user chose the Safe App for this dApp before, so it opens without asking
- * - `resolved`: the user chose, for this proposal
+ * `off` (feature disabled or no proposal), `loading` (lookup in flight), `none` (the connection form applies),
+ * `shown` (the user must choose) or `redirect` (the user chose the Safe App for this dApp before)
  */
-export type SafeAppSuggestionStatus = 'off' | 'loading' | 'none' | 'shown' | 'redirect' | 'resolved'
+export type SafeAppSuggestionStatus = 'off' | 'loading' | 'none' | 'shown' | 'redirect'
 
 export type SafeAppSuggestion = {
   status: SafeAppSuggestionStatus
   /** The Safe App for the proposing dApp, matched on its verified origin */
   safeApp: SafeAppData | undefined
-  /** "Remember my choice for this dApp", saved only when the user chooses */
+  isShown: boolean
+  blocksAutoApprove: boolean
+  /** "Remember my choice for this dApp", for the current proposal only */
   remember: boolean
   setRemember: (remember: boolean) => void
-  choose: (choice: SafeAppSuggestionChoice) => void
-  /** The user left without choosing: browsed the store or closed the popup */
-  dismiss: () => void
+  rememberChoice: (origin: string, choice: SafeAppSuggestionChoice) => void
 }
-
-// Connecting from the suggestion skips the connection form, so anything that form warns about rules it out
-const hasNoWarnings = (risk: ProposalRisk, sanctionedAddress: string | undefined): boolean =>
-  risk.isVerified &&
-  !risk.isBlocked &&
-  !risk.isHighRisk &&
-  !risk.isUnsupportedChain &&
-  !(risk.isSafePass && sanctionedAddress)
 
 const statusForChoice = (choice: SafeAppSuggestionChoice | undefined): SafeAppSuggestionStatus => {
   if (choice === 'safeApp') return 'redirect'
@@ -71,30 +59,36 @@ export const useSafeAppSuggestion = (proposal: WalletKitTypes.SessionProposal | 
   )
   const sanctionedAddress = useSanctionedAddress(risk?.isSafePass ?? false)
 
-  const [resolvedId, setResolvedId] = useState<number>()
   const [rememberId, setRememberId] = useState<number>()
   const proposalId = activeProposal?.id
   const remember = proposalId !== undefined && rememberId === proposalId
 
   const setRemember = useCallback((value: boolean) => setRememberId(value ? proposalId : undefined), [proposalId])
 
-  const choose = useCallback(
-    (choice: SafeAppSuggestionChoice) => {
-      if (remember && origin) setRememberedChoices((prev) => ({ ...prev, [origin]: choice }))
-      setResolvedId(proposalId)
-    },
-    [remember, origin, setRememberedChoices, proposalId],
+  const rememberChoice = useCallback(
+    (choiceOrigin: string, choice: SafeAppSuggestionChoice) =>
+      setRememberedChoices((prev) => ({ ...prev, [choiceOrigin]: choice })),
+    [setRememberedChoices],
   )
 
-  const dismiss = useCallback(() => setResolvedId(proposalId), [proposalId])
-
   const getStatus = (): SafeAppSuggestionStatus => {
-    if (!activeProposal || !risk || !origin) return 'off'
-    if (resolvedId === activeProposal.id) return 'resolved'
+    if (!risk || !origin) return 'off'
     if (isLoading) return 'loading'
-    const isEligible = safeLoaded && !isCounterfactualSafe && hasNoWarnings(risk, sanctionedAddress)
-    return safeApp && isEligible ? statusForChoice(rememberedChoices?.[origin]) : 'none'
+    const canSkipForm = safeLoaded && !isCounterfactualSafe && !needsConnectionForm(risk, sanctionedAddress)
+    return safeApp && canSkipForm ? statusForChoice(rememberedChoices?.[origin]) : 'none'
   }
+  const status = getStatus()
 
-  return { status: getStatus(), safeApp, remember, setRemember, choose, dismiss }
+  return useMemo(
+    () => ({
+      status,
+      safeApp,
+      isShown: status === 'shown' && Boolean(safeApp),
+      blocksAutoApprove: status === 'loading' || status === 'shown' || status === 'redirect',
+      remember,
+      setRemember,
+      rememberChoice,
+    }),
+    [status, safeApp, remember, setRemember, rememberChoice],
+  )
 }

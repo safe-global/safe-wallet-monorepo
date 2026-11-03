@@ -9,14 +9,7 @@ export const getSafeAppHostname = (url: string): string | undefined => {
   }
 }
 
-/**
- * Resolve the Safe App that corresponds to a dApp connecting over WalletConnect.
- *
- * Matching is by hostname so that scheme, port and `www.` differences don't cause misses.
- * Several curated apps can share a hostname (e.g. apps-portal.safe.global/tx-builder), in
- * which case only an exact origin+path match is trustworthy — otherwise we recommend nothing
- * rather than send the user to the wrong app.
- */
+// When several apps share a hostname, only an exact path match is trusted, so no wrong app is suggested
 export const findMatchingSafeApp = (apps: SafeAppData[] = [], dappUrl = ''): SafeAppData | undefined => {
   const hostname = getSafeAppHostname(dappUrl)
   if (!hostname) return undefined

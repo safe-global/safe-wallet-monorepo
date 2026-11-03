@@ -96,6 +96,7 @@ describe('useSafeAppSuggestion', () => {
   it.each([
     ['a scam', () => sessionProposalBuilder({ isScam: true })],
     ['an unverified domain', () => sessionProposalBuilder({ validation: 'UNKNOWN' })],
+    ['a verified warned bridge', () => sessionProposalBuilder({ origin: 'https://bridge.arbitrum.io' })],
     ['an unsupported chain', () => sessionProposalBuilder({ chains: ['eip155:137'] })],
   ])('is none for %s, so the connection form shows its warning', (_, buildProposal) => {
     const { result } = renderHook(() => useSafeAppSuggestion(buildProposal()))
@@ -123,68 +124,67 @@ describe('useSafeAppSuggestion', () => {
     expect(result.current.status).toBe('none')
   })
 
-  // useLocalStorage caches per key across tests, so each test uses its own dApp origin
-  describe('after the user chose', () => {
-    type Action = (suggestion: ReturnType<typeof useSafeAppSuggestion>) => void
-    const chooseSafeApp: Action = (s) => s.choose('safeApp')
-    const chooseWalletConnect: Action = (s) => s.choose('walletConnect')
-    const dismiss: Action = (s) => s.dismiss()
+  it.each([
+    ['loading', { safeApp: undefined, isLoading: true }, true],
+    ['shown', { safeApp, isLoading: false }, true],
+    ['none', { safeApp: undefined, isLoading: false }, false],
+  ])('reports whether %s blocks auto-approve', (_, match, blocks) => {
+    mockMatch.mockReturnValue(match)
 
-    const actAndReconnect = (action: Action, { remember }: { remember: boolean }) => {
-      const origin = faker.internet.url({ appendSlash: false })
-      const { result, rerender } = renderHook(({ proposal }) => useSafeAppSuggestion(proposal), {
-        initialProps: { proposal: sessionProposalBuilder({ origin }) },
-      })
-      act(() => result.current.setRemember(remember))
-      act(() => action(result.current))
-      expect(result.current.status).toBe('resolved')
+    const { result } = renderHook(() => useSafeAppSuggestion(sessionProposalBuilder()))
 
-      return (overrides: Parameters<typeof sessionProposalBuilder>[0] = {}) => {
-        rerender({ proposal: sessionProposalBuilder({ origin, ...overrides }) })
-        return result.current
-      }
+    expect(result.current.blocksAutoApprove).toBe(blocks)
+  })
+
+  describe('with a remembered choice', () => {
+    const renderForOrigin = (origin: string, overrides: Parameters<typeof sessionProposalBuilder>[0] = {}) =>
+      renderHook(() => useSafeAppSuggestion(sessionProposalBuilder({ origin, ...overrides })))
+
+    const rememberFor = (origin: string, choice: 'safeApp' | 'walletConnect') => {
+      const { result } = renderForOrigin(origin)
+      act(() => result.current.rememberChoice(origin, choice))
     }
 
     it('opens the Safe App without asking for a dApp remembered as Safe App', () => {
-      const reconnect = actAndReconnect(chooseSafeApp, { remember: true })
+      const origin = faker.internet.url({ appendSlash: false })
+      rememberFor(origin, 'safeApp')
 
-      expect(reconnect().status).toBe('redirect')
+      const { result } = renderForOrigin(origin)
+
+      expect(result.current.status).toBe('redirect')
+      expect(result.current.blocksAutoApprove).toBe(true)
     })
 
     it('goes straight to WalletConnect for a dApp remembered as WalletConnect', () => {
-      const reconnect = actAndReconnect(chooseWalletConnect, { remember: true })
+      const origin = faker.internet.url({ appendSlash: false })
+      rememberFor(origin, 'walletConnect')
 
-      expect(reconnect().status).toBe('none')
+      expect(renderForOrigin(origin).result.current.status).toBe('none')
     })
 
-    it.each([
-      ['Safe App', chooseSafeApp],
-      ['WalletConnect', chooseWalletConnect],
-    ])('still asks for other dApps after remembering %s for one', (_, action) => {
-      const reconnect = actAndReconnect(action, { remember: true })
+    it.each(['safeApp', 'walletConnect'] as const)('still asks for other dApps after remembering %s', (choice) => {
+      rememberFor(faker.internet.url({ appendSlash: false }), choice)
 
-      expect(reconnect({ origin: faker.internet.url({ appendSlash: false }) }).status).toBe('shown')
-    })
-
-    it.each([
-      ['choosing without ticking the box', chooseSafeApp, false],
-      ['leaving without a choice', dismiss, true],
-    ])('asks again after %s', (_, action, remember) => {
-      const reconnect = actAndReconnect(action, { remember })
-
-      expect(reconnect().status).toBe('shown')
+      expect(renderForOrigin(faker.internet.url({ appendSlash: false })).result.current.status).toBe('shown')
     })
 
     it('does not open a remembered Safe App when the new proposal has a warning', () => {
-      const reconnect = actAndReconnect(chooseSafeApp, { remember: true })
+      const origin = faker.internet.url({ appendSlash: false })
+      rememberFor(origin, 'safeApp')
 
-      expect(reconnect({ validation: 'UNKNOWN' }).status).toBe('none')
+      expect(renderForOrigin(origin, { validation: 'UNKNOWN' }).result.current.status).toBe('none')
+    })
+  })
+
+  it('keeps "remember my choice" for the current proposal only', () => {
+    const { result, rerender } = renderHook(({ proposal }) => useSafeAppSuggestion(proposal), {
+      initialProps: { proposal: sessionProposalBuilder() },
     })
 
-    it('starts the next proposal with the box unticked', () => {
-      const reconnect = actAndReconnect(dismiss, { remember: true })
+    act(() => result.current.setRemember(true))
+    expect(result.current.remember).toBe(true)
 
-      expect(reconnect().remember).toBe(false)
-    })
+    rerender({ proposal: sessionProposalBuilder() })
+    expect(result.current.remember).toBe(false)
   })
 })

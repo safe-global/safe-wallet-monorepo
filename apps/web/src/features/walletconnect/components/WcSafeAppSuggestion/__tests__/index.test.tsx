@@ -6,8 +6,7 @@ import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/anal
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { WalletConnectContext } from '../../WalletConnectContext'
 import { WCLoadingState } from '../../../types'
-import type { SafeAppSuggestion } from '../../../hooks/useSafeAppSuggestion'
-import WcSafeAppSuggestion from '../index'
+import WcSafeAppSuggestion, { type WcSafeAppSuggestionProps } from '../index'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -17,33 +16,21 @@ jest.mock('@/services/analytics', () => ({
 const safeApp = safeAppBuilder().build()
 const origin = 'https://app.example.org'
 
-const suggestion = (overrides: Partial<SafeAppSuggestion> = {}): SafeAppSuggestion => ({
-  status: 'shown',
-  safeApp,
-  remember: false,
-  setRemember: jest.fn(),
-  choose: jest.fn(),
-  dismiss: jest.fn(),
-  ...overrides,
-})
-
 const handlers = {
+  onRememberChange: jest.fn(),
   onOpenSafeApp: jest.fn(),
   onContinueWithWalletConnect: jest.fn(),
   onBrowseSafeApps: jest.fn(),
 }
 
 const WithContext = ({
-  safeAppSuggestion = suggestion(),
   loading = null,
-}: {
-  safeAppSuggestion?: SafeAppSuggestion
-  loading?: WCLoadingState | null
-}) => {
+  ...props
+}: Partial<WcSafeAppSuggestionProps> & { loading?: WCLoadingState | null }) => {
   const context = useContext(WalletConnectContext)
   return (
-    <WalletConnectContext.Provider value={{ ...context, loading, safeAppSuggestion }}>
-      <WcSafeAppSuggestion safeApp={safeApp} origin={origin} {...handlers} />
+    <WalletConnectContext.Provider value={{ ...context, loading }}>
+      <WcSafeAppSuggestion safeApp={safeApp} origin={origin} remember={false} {...handlers} {...props} />
     </WalletConnectContext.Provider>
   )
 }
@@ -101,7 +88,7 @@ describe('WcSafeAppSuggestion', () => {
   })
 
   it('reports a remembered choice with the result', () => {
-    render(<WithContext safeAppSuggestion={suggestion({ remember: true })} />)
+    render(<WithContext remember />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Open in Safe App Store' }))
 
@@ -109,13 +96,12 @@ describe('WcSafeAppSuggestion', () => {
   })
 
   it('offers to remember the choice for this dApp only', () => {
-    const setRemember = jest.fn()
-    render(<WithContext safeAppSuggestion={suggestion({ setRemember })} />)
+    render(<WithContext />)
 
     expect(screen.getByText('Remember my choice for this dApp')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('checkbox'))
 
-    expect(setRemember).toHaveBeenCalledWith(true)
+    expect(handlers.onRememberChange).toHaveBeenCalledWith(true)
   })
 
   it('disables every choice, and tracks none, while a request is in flight', () => {

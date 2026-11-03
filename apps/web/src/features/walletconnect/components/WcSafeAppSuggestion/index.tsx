@@ -17,7 +17,7 @@ import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
 import { WalletConnectContext } from '../WalletConnectContext'
 import { WCLoadingState } from '../../types'
-import { getSuggestionParams, getSuggestionResultParams } from '../../services/tracking'
+import { getSuggestionParams, getSuggestionResultEvent } from '../../services/tracking'
 
 const BENEFITS = [
   { Icon: Link2, text: 'Stay connected without pairing or reconnecting' },
@@ -29,6 +29,8 @@ export type WcSafeAppSuggestionProps = {
   safeApp: SafeAppData
   /** The origin WalletConnect verified, shown so the user knows who they would connect to */
   origin: string
+  remember: boolean
+  onRememberChange: (remember: boolean) => void
   onOpenSafeApp: (safeApp: SafeAppData) => void
   onContinueWithWalletConnect: () => void
   onBrowseSafeApps: () => void
@@ -37,22 +39,22 @@ export type WcSafeAppSuggestionProps = {
 const WcSafeAppSuggestion = ({
   safeApp,
   origin,
+  remember,
+  onRememberChange,
   onOpenSafeApp,
   onContinueWithWalletConnect,
   onBrowseSafeApps,
 }: WcSafeAppSuggestionProps): ReactElement => {
-  const { loading, safeAppSuggestion } = useContext(WalletConnectContext)
-  const { remember, setRemember } = safeAppSuggestion
+  const { loading } = useContext(WalletConnectContext)
   const checkboxId = useId()
   const isBusy = !!loading
 
   useTrackOnce({ ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED, label: origin }, getSuggestionParams(origin, safeApp))
 
-  const trackResult = (result: WcSafeAppSuggestionResult) => ({
-    ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT,
-    label: origin,
-    mixpanelParams: getSuggestionResultParams(origin, safeApp, result, remember),
-  })
+  const resultTrackProps = (result: WcSafeAppSuggestionResult) => {
+    const { event, params } = getSuggestionResultEvent(origin, safeApp, { result, remember })
+    return { ...event, mixpanelParams: params }
+  }
 
   return (
     <div className="flex flex-col gap-6 text-center">
@@ -91,21 +93,21 @@ const WcSafeAppSuggestion = ({
             id={checkboxId}
             checked={remember}
             disabled={isBusy}
-            onCheckedChange={(checked) => setRemember(!!checked)}
+            onCheckedChange={(checked) => onRememberChange(!!checked)}
           />
           <FieldLabel htmlFor={checkboxId} className="text-muted-foreground">
             Remember my choice for this dApp
           </FieldLabel>
         </Field>
 
-        <Track {...trackResult(WcSafeAppSuggestionResult.OPENED_SAFE_APP)} as="div" className="flex flex-col">
+        <Track {...resultTrackProps(WcSafeAppSuggestionResult.OPENED_SAFE_APP)} as="div" className="flex flex-col">
           <Button variant="default" disabled={isBusy} onClick={() => onOpenSafeApp(safeApp)}>
             {loading === WCLoadingState.REJECT ? <Spinner /> : 'Open in Safe App Store'}
           </Button>
         </Track>
 
         <Track
-          {...trackResult(WcSafeAppSuggestionResult.CONTINUED_WITH_WALLETCONNECT)}
+          {...resultTrackProps(WcSafeAppSuggestionResult.CONTINUED_WITH_WALLETCONNECT)}
           as="div"
           className="flex flex-col"
         >
@@ -120,7 +122,7 @@ const WcSafeAppSuggestion = ({
 
         <Typography variant="paragraph-small" color="muted">
           Browse{' '}
-          <Track {...trackResult(WcSafeAppSuggestionResult.BROWSED_STORE)}>
+          <Track {...resultTrackProps(WcSafeAppSuggestionResult.BROWSED_STORE)}>
             <Link
               render={<button type="button" disabled={isBusy} />}
               className="cursor-pointer"

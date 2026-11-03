@@ -33,3 +33,11 @@ export const getProposalRisk = (
     isSafePass: isSafePassApp(origin),
   }
 }
+
+/** Whether the connection form has something the user must see before connecting */
+export const needsConnectionForm = (risk: ProposalRisk, sanctionedAddress: string | undefined): boolean =>
+  !risk.isVerified ||
+  risk.isBlocked ||
+  risk.isHighRisk ||
+  risk.isUnsupportedChain ||
+  (risk.isSafePass && Boolean(sanctionedAddress))

@@ -1,6 +1,6 @@
 import { chainBuilder } from '@/tests/builders/chains'
 import { sessionProposalBuilder } from '@/tests/builders/walletConnect'
-import { getProposalRisk } from '../proposalRisk'
+import { getProposalRisk, needsConnectionForm, type ProposalRisk } from '../proposalRisk'
 
 const configs = [chainBuilder().with({ chainId: '1' }).build(), chainBuilder().with({ chainId: '137' }).build()]
 
@@ -42,5 +42,41 @@ describe('getProposalRisk', () => {
     const risk = getProposalRisk(sessionProposalBuilder({ chains: ['eip155:1', 'eip155:999'] }), configs, '1')
 
     expect(risk.chainIds).toEqual(['1'])
+  })
+})
+
+describe('needsConnectionForm', () => {
+  const noRisk: ProposalRisk = {
+    chainIds: ['1'],
+    isUnsupportedChain: false,
+    isBlocked: false,
+    isHighRisk: false,
+    isVerified: true,
+    isSafePass: false,
+  }
+
+  it('lets a verified dApp without warnings skip the form', () => {
+    expect(needsConnectionForm(noRisk, undefined)).toBe(false)
+  })
+
+  it.each([
+    ['an unverified domain', { isVerified: false }],
+    ['a blocked dApp', { isBlocked: true }],
+    ['a high-risk dApp', { isHighRisk: true }],
+    ['an unsupported chain', { isUnsupportedChain: true }],
+  ])('requires the form for %s', (_, override) => {
+    expect(needsConnectionForm({ ...noRisk, ...override }, undefined)).toBe(true)
+  })
+
+  it('requires the form for a sanctioned address on Safe{Pass} only', () => {
+    expect(needsConnectionForm({ ...noRisk, isSafePass: true }, '0x1234')).toBe(true)
+    expect(needsConnectionForm(noRisk, '0x1234')).toBe(false)
+  })
+
+  it('requires the form for a warned bridge even when its domain is verified', () => {
+    const risk = getProposalRisk(sessionProposalBuilder({ origin: 'https://bridge.arbitrum.io' }), configs, '1')
+
+    expect(risk.isVerified).toBe(true)
+    expect(needsConnectionForm(risk, undefined)).toBe(true)
   })
 })

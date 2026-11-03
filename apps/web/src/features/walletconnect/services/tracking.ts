@@ -8,15 +8,18 @@ export const getSuggestionParams = (origin: string, safeApp: SafeAppData) => ({
   [MixpanelEventParams.SAFE_APP_NAME]: safeApp.name,
 })
 
-export const getSuggestionResultParams = (
+/** The suggestion-result event, as `trackEvent` arguments or as `Track` props */
+export const getSuggestionResultEvent = (
   origin: string,
   safeApp: SafeAppData,
-  result: WcSafeAppSuggestionResult,
-  remember: boolean,
+  { result, remember }: { result: WcSafeAppSuggestionResult; remember: boolean },
 ) => ({
-  ...getSuggestionParams(origin, safeApp),
-  [MixpanelEventParams.RESULT]: result,
-  [MixpanelEventParams.REMEMBER_CHOICE]: remember,
+  event: { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: origin },
+  params: {
+    ...getSuggestionParams(origin, safeApp),
+    [MixpanelEventParams.RESULT]: result,
+    [MixpanelEventParams.REMEMBER_CHOICE]: remember,
+  },
 })
 
 const trackedRequests = [
