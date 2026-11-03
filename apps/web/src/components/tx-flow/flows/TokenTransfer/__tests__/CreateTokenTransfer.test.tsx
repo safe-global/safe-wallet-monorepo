@@ -16,6 +16,7 @@ import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
 import * as payFromSafeHooks from '@/features/fee-payment'
+import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -85,7 +86,7 @@ describe('CreateTokenTransfer', () => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
     useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
-    jest.spyOn(gtfHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
+    jest.spyOn(payFromSafeHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
     jest.spyOn(sharedTxHooks, 'useRecommendedNonce').mockReturnValue(undefined)
   })
 
@@ -488,7 +489,7 @@ describe('CreateTokenTransfer', () => {
       })
     })
 
-    it('does not show fee banner when Pay from Safe is disabled', () => {
+    it('does not show fee banner when Pay from Safe is disabled', async () => {
       useHasFeatureSpy.mockImplementation(() => false)
       isPayFromSafeEnabledSpy.mockReturnValue(false)
       mockBalancesForPayFromSafe()
