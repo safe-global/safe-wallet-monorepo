@@ -51,10 +51,10 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   safeAppSuggestion: {
     status: 'off',
     safeApp: undefined,
-    optOut: false,
-    setOptOut: () => {},
-    resolve: () => {},
-    decline: () => {},
+    remember: false,
+    setRemember: () => {},
+    choose: () => {},
+    dismiss: () => {},
   },
 })
 
@@ -280,8 +280,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
   // Auto approve previously approved non-malicious dApps, unless the user gets to choose the Safe App instead
   const suggestionStatus = safeAppSuggestion.status
-  const isSuggestionPending =
-    suggestionStatus === 'loading' || suggestionStatus === 'shown' || suggestionStatus === 'resolved'
+  const isSuggestionPending = suggestionStatus !== 'off' && suggestionStatus !== 'none'
   useEffect(() => {
     if (isSuggestionPending) return
     if (sessionProposal && autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {

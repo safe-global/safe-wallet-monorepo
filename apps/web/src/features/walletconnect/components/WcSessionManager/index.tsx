@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import type { UrlObject } from 'url'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
@@ -9,13 +9,14 @@ import WcConnectionForm from '../WcConnectionForm'
 import WcErrorMessage from '../WcErrorMessage'
 import { trackEvent, trackSafeAppEvent } from '@/services/analytics'
 import { SAFE_APPS_EVENTS } from '@/services/analytics/events/safeApps'
-import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
+import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
 import { MixpanelEventParams, SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import { AppRoutes } from '@/config/routes'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { Errors, logError } from '@/services/exceptions'
 import { splitError } from '../../services/utils'
+import { getSuggestionResultParams } from '../../services/tracking'
 import WcProposalForm from '../WcProposalForm'
 import WcSafeAppSuggestion from '../WcSafeAppSuggestion'
 import WcChainSwitchModal from '../WcChainSwitchModal'
@@ -43,8 +44,8 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   const {
     status: suggestionStatus,
     safeApp: suggestedSafeApp,
-    resolve: resolveSuggestion,
-    decline: declineSuggestion,
+    choose: chooseSuggestion,
+    dismiss: dismissSuggestion,
   } = safeAppSuggestion
 
   useEffect(() => {
@@ -92,26 +93,32 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
 
   const onContinueWithWalletConnect = useCallback(async () => {
     await onApprove()
-    declineSuggestion()
-  }, [onApprove, declineSuggestion])
+    chooseSuggestion('walletConnect')
+  }, [onApprove, chooseSuggestion])
 
   // The proposal is rejected so the dApp gets an answer instead of waiting while the user leaves
+  const [isLeaving, setIsLeaving] = useState(false)
   const leaveForSafeApps = useCallback(
     async (url: UrlObject | string) => {
+      setIsLeaving(true)
       try {
         await rejectSession()
       } catch (e) {
         setError(asError(e))
       }
-      resolveSuggestion()
       setOpen(false)
-      await router.push(url)
+      try {
+        await router.push(url)
+      } finally {
+        setIsLeaving(false)
+      }
     },
-    [rejectSession, setError, resolveSuggestion, setOpen, router],
+    [rejectSession, setError, setOpen, router],
   )
 
   const onOpenSafeApp = useCallback(
     (safeApp: SafeAppData) => {
+      chooseSuggestion('safeApp')
       leaveForSafeApps(getSafeAppUrl(router, safeLinkQuery, safeApp.url))
         .then(() => {
           trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: safeApp.name }, safeApp, {
@@ -120,14 +127,25 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
         })
         .catch((e) => logError(Errors._900, asError(e).message))
     },
-    [leaveForSafeApps, router, safeLinkQuery],
+    [chooseSuggestion, leaveForSafeApps, router, safeLinkQuery],
   )
 
   const onBrowseSafeApps = useCallback(() => {
+    dismissSuggestion()
     leaveForSafeApps({ pathname: AppRoutes.apps.index, query: safeLinkQuery }).catch((e) =>
       logError(Errors._902, asError(e).message),
     )
-  }, [leaveForSafeApps, safeLinkQuery])
+  }, [dismissSuggestion, leaveForSafeApps, safeLinkQuery])
+
+  useEffect(() => {
+    if (suggestionStatus !== 'redirect' || !suggestedSafeApp || !sessionProposal) return
+    const origin = sessionProposal.verifyContext.verified.origin
+    trackEvent(
+      { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: origin },
+      getSuggestionResultParams(origin, suggestedSafeApp, WcSafeAppSuggestionResult.OPENED_REMEMBERED_SAFE_APP, true),
+    )
+    onOpenSafeApp(suggestedSafeApp)
+  }, [suggestionStatus, suggestedSafeApp, sessionProposal, onOpenSafeApp])
 
   // Reset error
   const onErrorReset = useCallback(() => {
@@ -163,8 +181,8 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     return <WcErrorMessage error={error} onClose={onErrorReset} />
   }
 
-  // The connection form must not be approvable in the moment before the suggestion replaces it
-  if (suggestionStatus === 'loading') {
+  // The connection form must not be approvable in the moment before the suggestion or the Safe App replaces it
+  if (suggestionStatus === 'loading' || suggestionStatus === 'redirect' || isLeaving) {
     return (
       <div className="flex justify-center py-10">
         <Spinner />

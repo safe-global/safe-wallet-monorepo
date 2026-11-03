@@ -125,49 +125,66 @@ describe('useSafeAppSuggestion', () => {
 
   // useLocalStorage caches per key across tests, so each test uses its own dApp origin
   describe('after the user chose', () => {
-    const chooseAndReconnect = (choice: 'resolve' | 'decline', { optOut }: { optOut: boolean }) => {
+    type Action = (suggestion: ReturnType<typeof useSafeAppSuggestion>) => void
+    const chooseSafeApp: Action = (s) => s.choose('safeApp')
+    const chooseWalletConnect: Action = (s) => s.choose('walletConnect')
+    const dismiss: Action = (s) => s.dismiss()
+
+    const actAndReconnect = (action: Action, { remember }: { remember: boolean }) => {
       const origin = faker.internet.url({ appendSlash: false })
       const { result, rerender } = renderHook(({ proposal }) => useSafeAppSuggestion(proposal), {
         initialProps: { proposal: sessionProposalBuilder({ origin }) },
       })
-      act(() => result.current.setOptOut(optOut))
-      act(() => result.current[choice]())
+      act(() => result.current.setRemember(remember))
+      act(() => action(result.current))
       expect(result.current.status).toBe('resolved')
 
-      return (nextOrigin = origin) => {
-        rerender({ proposal: sessionProposalBuilder({ origin: nextOrigin }) })
+      return (overrides: Parameters<typeof sessionProposalBuilder>[0] = {}) => {
+        rerender({ proposal: sessionProposalBuilder({ origin, ...overrides }) })
         return result.current
       }
     }
 
-    it('stops suggesting the Safe App for a dApp the user opted out of', () => {
-      const reconnect = chooseAndReconnect('decline', { optOut: true })
+    it('opens the Safe App without asking for a dApp remembered as Safe App', () => {
+      const reconnect = actAndReconnect(chooseSafeApp, { remember: true })
+
+      expect(reconnect().status).toBe('redirect')
+    })
+
+    it('goes straight to WalletConnect for a dApp remembered as WalletConnect', () => {
+      const reconnect = actAndReconnect(chooseWalletConnect, { remember: true })
 
       expect(reconnect().status).toBe('none')
     })
 
-    it('keeps suggesting Safe Apps for other dApps', () => {
-      const reconnect = chooseAndReconnect('decline', { optOut: true })
+    it.each([
+      ['Safe App', chooseSafeApp],
+      ['WalletConnect', chooseWalletConnect],
+    ])('still asks for other dApps after remembering %s for one', (_, action) => {
+      const reconnect = actAndReconnect(action, { remember: true })
 
-      expect(reconnect('https://other.example.org').status).toBe('shown')
+      expect(reconnect({ origin: faker.internet.url({ appendSlash: false }) }).status).toBe('shown')
     })
 
-    it('keeps suggesting when the user declined without opting out', () => {
-      const reconnect = chooseAndReconnect('decline', { optOut: false })
+    it.each([
+      ['choosing without ticking the box', chooseSafeApp, false],
+      ['leaving without a choice', dismiss, true],
+    ])('asks again after %s', (_, action, remember) => {
+      const reconnect = actAndReconnect(action, { remember })
 
       expect(reconnect().status).toBe('shown')
     })
 
-    it('keeps suggesting when the user opened the Safe App, even with the box ticked', () => {
-      const reconnect = chooseAndReconnect('resolve', { optOut: true })
+    it('does not open a remembered Safe App when the new proposal has a warning', () => {
+      const reconnect = actAndReconnect(chooseSafeApp, { remember: true })
 
-      expect(reconnect().status).toBe('shown')
+      expect(reconnect({ validation: 'UNKNOWN' }).status).toBe('none')
     })
 
     it('starts the next proposal with the box unticked', () => {
-      const reconnect = chooseAndReconnect('resolve', { optOut: true })
+      const reconnect = actAndReconnect(dismiss, { remember: true })
 
-      expect(reconnect().optOut).toBe(false)
+      expect(reconnect().remember).toBe(false)
     })
   })
 })

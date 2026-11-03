@@ -634,10 +634,10 @@ describe('WalletConnectProvider', () => {
         jest.spyOn(useSafeAppSuggestionHook, 'useSafeAppSuggestion').mockReturnValue({
           status,
           safeApp: undefined,
-          optOut: false,
-          setOptOut: jest.fn(),
-          resolve: jest.fn(),
-          decline: jest.fn(),
+          remember: false,
+          setRemember: jest.fn(),
+          choose: jest.fn(),
+          dismiss: jest.fn(),
         })
         jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockResolvedValue(mockSession)
         jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
@@ -655,7 +655,7 @@ describe('WalletConnectProvider', () => {
         )
       }
 
-      it.each(['loading', 'shown', 'resolved'] as const)(
+      it.each(['loading', 'shown', 'redirect', 'resolved'] as const)(
         'waits for the user when the suggestion is %s',
         async (status) => {
           const { getByText } = renderAutoApproved(status)

@@ -34,14 +34,14 @@ const WalletConnectWidget = () => {
     setOpen(false)
     if (!sessionProposal || loading) return
 
-    const { status, safeApp, optOut, decline } = safeAppSuggestion
+    const { status, safeApp, remember, dismiss } = safeAppSuggestion
     if (status === 'shown' && safeApp) {
       const origin = sessionProposal.verifyContext.verified.origin
       trackEvent(
         { ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: origin },
-        getSuggestionResultParams(origin, safeApp, WcSafeAppSuggestionResult.DISMISSED, optOut),
+        getSuggestionResultParams(origin, safeApp, WcSafeAppSuggestionResult.DISMISSED, remember),
       )
-      decline()
+      dismiss()
     }
 
     rejectSession().catch(setError)

@@ -78,6 +78,7 @@ export const WALLETCONNECT_EVENTS = {
 
 export enum WcSafeAppSuggestionResult {
   OPENED_SAFE_APP = 'Opened Safe App',
+  OPENED_REMEMBERED_SAFE_APP = 'Opened remembered Safe App',
   CONTINUED_WITH_WALLETCONNECT = 'Continued with WalletConnect',
   BROWSED_STORE = 'Browsed Safe App Store',
   DISMISSED = 'Dismissed',

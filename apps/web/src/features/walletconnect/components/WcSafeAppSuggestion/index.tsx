@@ -42,7 +42,7 @@ const WcSafeAppSuggestion = ({
   onBrowseSafeApps,
 }: WcSafeAppSuggestionProps): ReactElement => {
   const { loading, safeAppSuggestion } = useContext(WalletConnectContext)
-  const { optOut, setOptOut } = safeAppSuggestion
+  const { remember, setRemember } = safeAppSuggestion
   const checkboxId = useId()
   const isBusy = !!loading
 
@@ -51,7 +51,7 @@ const WcSafeAppSuggestion = ({
   const trackResult = (result: WcSafeAppSuggestionResult) => ({
     ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT,
     label: origin,
-    mixpanelParams: getSuggestionResultParams(origin, safeApp, result, optOut),
+    mixpanelParams: getSuggestionResultParams(origin, safeApp, result, remember),
   })
 
   return (
@@ -89,12 +89,12 @@ const WcSafeAppSuggestion = ({
         <Field orientation="horizontal" className="w-auto self-center">
           <Checkbox
             id={checkboxId}
-            checked={optOut}
+            checked={remember}
             disabled={isBusy}
-            onCheckedChange={(checked) => setOptOut(!!checked)}
+            onCheckedChange={(checked) => setRemember(!!checked)}
           />
           <FieldLabel htmlFor={checkboxId} className="text-muted-foreground">
-            Don&apos;t suggest this again for this dApp
+            Remember my choice for this dApp
           </FieldLabel>
         </Field>
 

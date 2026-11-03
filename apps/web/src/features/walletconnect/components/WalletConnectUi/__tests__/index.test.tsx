@@ -117,7 +117,8 @@ describe('WalletConnectUi', () => {
 
   describe('with a Safe App suggestion', () => {
     const safeApp = safeAppBuilder().build()
-    const mockDecline = jest.fn()
+    const mockDismiss = jest.fn()
+    const mockChoose = jest.fn()
 
     beforeEach(() => jest.clearAllMocks())
 
@@ -125,13 +126,13 @@ describe('WalletConnectUi', () => {
       jest.spyOn(useSafeAppSuggestionHook, 'useSafeAppSuggestion').mockReturnValue({
         status,
         safeApp,
-        optOut: true,
-        setOptOut: jest.fn(),
-        resolve: jest.fn(),
-        decline: mockDecline,
+        remember: true,
+        setRemember: jest.fn(),
+        choose: mockChoose,
+        dismiss: mockDismiss,
       })
 
-    it('records the dismissal and declines the suggestion when the popup is closed', async () => {
+    it('records the dismissal without saving a choice when the popup is closed', async () => {
       mockSuggestion('shown')
       await renderUi()
       act(() => propose(proposal))
@@ -145,10 +146,11 @@ describe('WalletConnectUi', () => {
           [MixpanelEventParams.APP_URL]: origin,
           [MixpanelEventParams.SAFE_APP_NAME]: safeApp.name,
           [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.DISMISSED,
-          [MixpanelEventParams.OPT_OUT_TICKED]: true,
+          [MixpanelEventParams.REMEMBER_CHOICE]: true,
         },
       )
-      expect(mockDecline).toHaveBeenCalled()
+      expect(mockDismiss).toHaveBeenCalled()
+      expect(mockChoose).not.toHaveBeenCalled()
       await waitFor(() => expect(WalletConnectWallet.prototype.rejectSession).toHaveBeenCalledWith(proposal))
     })
 
@@ -161,7 +163,7 @@ describe('WalletConnectUi', () => {
 
       await waitFor(() => expect(WalletConnectWallet.prototype.rejectSession).toHaveBeenCalled())
       expect(trackEvent).not.toHaveBeenCalled()
-      expect(mockDecline).not.toHaveBeenCalled()
+      expect(mockDismiss).not.toHaveBeenCalled()
     })
   })
 })

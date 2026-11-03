@@ -20,10 +20,10 @@ const origin = 'https://app.example.org'
 const suggestion = (overrides: Partial<SafeAppSuggestion> = {}): SafeAppSuggestion => ({
   status: 'shown',
   safeApp,
-  optOut: false,
-  setOptOut: jest.fn(),
-  resolve: jest.fn(),
-  decline: jest.fn(),
+  remember: false,
+  setRemember: jest.fn(),
+  choose: jest.fn(),
+  dismiss: jest.fn(),
   ...overrides,
 })
 
@@ -48,13 +48,13 @@ const WithContext = ({
   )
 }
 
-const resultEvent = (result: WcSafeAppSuggestionResult, optOut = false) => [
+const resultEvent = (result: WcSafeAppSuggestionResult, remember = false) => [
   expect.objectContaining({ ...WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT, label: origin }),
   {
     [MixpanelEventParams.APP_URL]: origin,
     [MixpanelEventParams.SAFE_APP_NAME]: safeApp.name,
     [MixpanelEventParams.RESULT]: result,
-    [MixpanelEventParams.OPT_OUT_TICKED]: optOut,
+    [MixpanelEventParams.REMEMBER_CHOICE]: remember,
   },
 ]
 
@@ -100,24 +100,22 @@ describe('WcSafeAppSuggestion', () => {
     expect(handler).toHaveBeenCalled()
   })
 
-  it('reports a ticked opt-out with the result', () => {
-    render(<WithContext safeAppSuggestion={suggestion({ optOut: true })} />)
+  it('reports a remembered choice with the result', () => {
+    render(<WithContext safeAppSuggestion={suggestion({ remember: true })} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with WalletConnect' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open in Safe App Store' }))
 
-    expect(trackEvent).toHaveBeenCalledWith(
-      ...resultEvent(WcSafeAppSuggestionResult.CONTINUED_WITH_WALLETCONNECT, true),
-    )
+    expect(trackEvent).toHaveBeenCalledWith(...resultEvent(WcSafeAppSuggestionResult.OPENED_SAFE_APP, true))
   })
 
-  it('offers the opt-out for this dApp only', () => {
-    const setOptOut = jest.fn()
-    render(<WithContext safeAppSuggestion={suggestion({ setOptOut })} />)
+  it('offers to remember the choice for this dApp only', () => {
+    const setRemember = jest.fn()
+    render(<WithContext safeAppSuggestion={suggestion({ setRemember })} />)
 
-    expect(screen.getByText("Don't suggest this again for this dApp")).toBeInTheDocument()
+    expect(screen.getByText('Remember my choice for this dApp')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('checkbox'))
 
-    expect(setOptOut).toHaveBeenCalledWith(true)
+    expect(setRemember).toHaveBeenCalledWith(true)
   })
 
   it('disables every choice, and tracks none, while a request is in flight', () => {

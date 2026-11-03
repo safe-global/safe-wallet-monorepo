@@ -12,11 +12,11 @@ export const getSuggestionResultParams = (
   origin: string,
   safeApp: SafeAppData,
   result: WcSafeAppSuggestionResult,
-  optOut: boolean,
+  remember: boolean,
 ) => ({
   ...getSuggestionParams(origin, safeApp),
   [MixpanelEventParams.RESULT]: result,
-  [MixpanelEventParams.OPT_OUT_TICKED]: optOut,
+  [MixpanelEventParams.REMEMBER_CHOICE]: remember,
 })
 
 const trackedRequests = [

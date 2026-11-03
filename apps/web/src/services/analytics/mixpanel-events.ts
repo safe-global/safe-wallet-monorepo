@@ -314,7 +314,7 @@ export enum MixpanelEventParams {
   SIGNER_ROLE = 'Signer Role',
   SAFE_TX_HASH = 'Safe Tx Hash',
   SAFE_APP_AVAILABLE = 'Safe App Available',
-  OPT_OUT_TICKED = 'Opt Out Ticked',
+  REMEMBER_CHOICE = 'Remember Choice',
 }
 
 export enum AuthLoginMethod {
