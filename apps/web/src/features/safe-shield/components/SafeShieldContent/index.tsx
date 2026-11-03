@@ -21,7 +21,6 @@ import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { analysisVisibilityDelay, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { CARD_ORDER, PRO_CARD_ORDER, getRevealDelays } from '../../utils/revealDelays'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
@@ -74,8 +73,7 @@ export const SafeShieldContent = ({
 
   const highlightedSeverity = overallStatus?.severity
   const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
-  const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
-  const shouldShowContent = !isLoadingVisible
+  const shouldShowContent = !loading
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
@@ -129,9 +127,9 @@ export const SafeShieldContent = ({
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
 
-        {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
+        {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
 
-        {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
+        {shouldShowContent && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
         <div data-testid="open-checks-list">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}

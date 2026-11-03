@@ -279,6 +279,31 @@ describe('SafeShieldDisplay', () => {
       expect(screen.getByText('Analyzing...')).toBeInTheDocument()
     })
 
+    it('shows the result as soon as the checks finish loading', () => {
+      const loadedRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
+      const loadingRecipient: AsyncResult<RecipientAnalysisResults> = [loadedRecipient[0], undefined, true]
+      const { rerender } = render(
+        <SafeShieldDisplay
+          recipient={loadingRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      rerender(
+        <SafeShieldDisplay
+          recipient={loadedRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-shield-status')).not.toHaveTextContent('Analyzing...')
+      expect(screen.getByTestId('recipient-analysis-group-card')).toBeInTheDocument()
+    })
+
     it('should show "Checks unavailable" on error', () => {
       const error = new Error('Analysis failed')
       const errorRecipient: AsyncResult<RecipientAnalysisResults> = [undefined, error, false]
@@ -440,13 +465,8 @@ describe('SafeShieldDisplay', () => {
     let recipient: string
 
     beforeEach(() => {
-      jest.useFakeTimers()
       safeAddress = fakerChecksummedAddress()
       recipient = fakerChecksummedAddress()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
     })
 
     const findRecipientCard = () => screen.findByTestId('recipient-analysis-group-card')
