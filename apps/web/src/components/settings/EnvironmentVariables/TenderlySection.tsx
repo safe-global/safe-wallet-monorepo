@@ -16,7 +16,7 @@ import {
 import { ArrowRight, EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
-import { useSafeProAccess } from '@/features/spaces'
+import { useSafeProAccess } from '@/features/spaces/hooks/useSafeProAccess'
 import { cn } from '@safe-global/views/utils/cn'
 import { EnvVariablesField, type EnvVariablesFormData } from './index'
 import {

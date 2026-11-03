@@ -1,5 +1,5 @@
 import { positionsFixtures } from '@safe-global/test/msw/fixtures'
-import { getReadablePositionType } from '@safe-global/utils/features/positions'
+import { getReadablePositionType } from '@safe-global/utils/features/positions/utils/getReadablePositionType'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { render, screen, within } from '@/tests/test-utils'

@@ -1,13 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import TableCard from '@safe-global/views/components/common/TableCard'
-import {
-  useIsInvited,
-  useIsAdmin,
-  useAddressBookSearch,
-  useSpaceAddressBookState,
-  useAddressBookRequestsState,
-} from '@/features/spaces'
+import { useIsInvited, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
+import { useSpaceAddressBookState } from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useAddressBookRequestsState } from '@/features/spaces/hooks/useGetAddressBookRequests'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'

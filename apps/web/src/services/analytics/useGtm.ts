@@ -22,7 +22,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { AnalyticsUserProperties, DeviceType } from './types'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
-import { OVERVIEW_EVENTS } from './events'
+import { OVERVIEW_EVENTS } from './events/overview'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 const useGtm = () => {

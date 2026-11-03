@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import useReportDrawer from '../useReportDrawer'
-import type { ScanContext } from '@/features/security/types'
+import type { ScanContext } from '@/features/security/data/scanners/types'
 import type { OverviewMap, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 let mockScanContext: ScanContext | null = null

@@ -38,12 +38,14 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: jest.fn(() => false),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => ({
     AccountsNavigation: () => <nav data-testid="accounts-nav" />,
     SafeProBanner: () => <div data-testid="safe-pro-banner" />,
     SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
   }),
+}))
+jest.mock('@/features/__core__/createFeatureHandle', () => ({
   createFeatureHandle: () => ({}),
 }))
 
@@ -56,6 +58,8 @@ const mockUseIsSafeProEnabled = jest.fn()
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
+}))
+jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 
@@ -65,7 +69,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/entitlements', () => ({
   useEntitlementsGetAllEntitlementsV1Query: () => ({ plan: undefined }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
 }))
 

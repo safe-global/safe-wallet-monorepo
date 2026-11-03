@@ -17,7 +17,9 @@ import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import css from './styles.module.css'
-import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
+import { trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
+import { SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 
 type SafeAppPreviewDrawerProps = {
   safeApp?: SafeAppData

@@ -1,5 +1,6 @@
 import { trackTxEvents } from './tracking'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 

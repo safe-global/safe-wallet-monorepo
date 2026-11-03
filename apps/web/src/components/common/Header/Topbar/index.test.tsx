@@ -5,7 +5,7 @@ import Topbar, {
   SEARCH_CONTEXT_WRAP,
 } from './index'
 import type { ReactNode } from 'react'
-import * as contracts from '@/features/__core__'
+import * as contracts from '@/features/__core__/useLoadFeature'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { Notification } from '@/store/notificationsSlice'
@@ -14,11 +14,11 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import walletConnectFeature from '@/features/walletconnect/feature'
-import { wcPopupStore } from '@/features/walletconnect/store'
+import { wcPopupStore } from '@/features/walletconnect/store/wcPopupStore'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 
@@ -37,7 +37,10 @@ jest.mock('@/hooks/useMediaQuery', () => ({
 
 jest.mock('@/features/wallet', () => ({
   WalletFeature: { name: 'wallet' },
-  useWalletPopover: () => ({
+}))
+jest.mock('@/features/wallet/hooks/useWalletPopover', () => ({
+  __esModule: true,
+  default: () => ({
     wallet: mockWallet,
     open: false,
     anchorEl: null,
@@ -58,9 +61,12 @@ jest.mock('@reown/walletkit', () => ({
 }))
 
 const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
-jest.mock('@/features/batching', () => ({
+jest.mock('@/features/batching/hooks/useDraftBatch', () => ({
   useDraftBatch: () => mockUseDraftBatch(),
-  BatchTooltip: ({ children }: { children: ReactNode }) => children,
+}))
+jest.mock('@/features/batching/components/BatchTooltip', () => ({
+  __esModule: true,
+  default: ({ children }: { children: ReactNode }) => children,
 }))
 
 const mockUseSafeAddress = jest.fn<string, []>(() => '')
@@ -108,11 +114,17 @@ jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRen
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: {
     NOTIFICATION_CENTER: 'notification_center',
     OPEN_ONBOARD: { action: 'Open wallet modal', category: 'overview' },
   },
   OVERVIEW_LABELS: { top_bar: 'top_bar' },
+}))
+jest.mock('@/services/analytics/events/batching', () => ({
+  ...jest.requireActual('@/services/analytics/events/batching'),
   BATCH_EVENTS: { BATCH_SIDEBAR_OPEN: { action: 'Batch sidebar open', category: 'batching' } },
 }))
 
@@ -125,11 +137,13 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 
 const mockUseCurrentSpaceId = jest.fn<string | null, []>(() => 'space-42')
 jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
   get HeaderNavigation() {
     return jest.requireActual('@/features/spaces/components/HeaderNavigation').HeaderNavigation
   },
   HeaderAccountInfo: () => <div data-testid="header-account-info" />,
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
 jest.mock(

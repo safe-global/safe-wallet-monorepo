@@ -32,7 +32,7 @@ import {
 } from './transaction-guards'
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import extractTxInfo from '@/services/tx/extractTxInfo'
-import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
+import type { AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
 import type { SafeTransaction, TransactionOptions, MetaTransactionData } from '@safe-global/types-kit'
 import { OperationType } from '@safe-global/types-kit'
 import uniqBy from 'lodash/uniqBy'

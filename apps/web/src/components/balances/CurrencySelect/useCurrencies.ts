@@ -1,5 +1,4 @@
-import type { FiatCurrencies } from '@safe-global/store/gateway/types'
-
+import type { BalancesGetSupportedFiatCodesV1ApiResponse as FiatCurrencies } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useBalancesGetSupportedFiatCodesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const useCurrencies = (): FiatCurrencies | undefined => {

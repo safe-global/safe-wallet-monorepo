@@ -1,8 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { useSafesSearch } from './useSafesSearch'
-import type { AllSafeItems, MultiChainSafeItem } from './useAllSafesGrouped'
-import type { SafeItem } from './useAllSafes'
-
+import type { AllSafeItems } from './useAllSafesGrouped'
+import type { MultiChainSafeItem, SafeItem } from '@safe-global/views/hooks/safes/types'
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({

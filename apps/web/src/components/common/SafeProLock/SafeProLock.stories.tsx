@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { UpgradeFeature } from '@/services/analytics'
+import { UpgradeFeature } from '@/services/analytics/mixpanel-events'
 import SafeProLock from './index'
 
 const meta = {

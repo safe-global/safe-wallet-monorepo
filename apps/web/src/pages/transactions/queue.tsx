@@ -8,14 +8,12 @@ import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
 import { BatchExecuteHoverProvider } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { BRAND_NAME } from '@/config/constants'
-import {
-  useIsHypernativeEligible,
-  useIsHypernativeQueueScanFeature,
-  HypernativeFeature,
-  useHnQueueAssessment,
-} from '@/features/hypernative'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/useIsHypernativeQueueScanFeature'
+import { useHnQueueAssessment } from '@/features/hypernative/hooks/useHnQueueAssessment'
 
 const Queue: NextPage = () => {
   const { RecoveryList } = useLoadFeature(RecoveryFeature)

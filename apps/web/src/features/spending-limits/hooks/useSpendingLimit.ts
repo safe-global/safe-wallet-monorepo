@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/store'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { SpendingLimitState } from '../types'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { selectSpendingLimits } from '../store/spendingLimitsSlice'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 

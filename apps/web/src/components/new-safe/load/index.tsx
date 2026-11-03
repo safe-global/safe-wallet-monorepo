@@ -1,7 +1,6 @@
 import React from 'react'
 import { useRouter } from 'next/router'
-
-import { LOAD_SAFE_CATEGORY } from '@/services/analytics'
+import { LOAD_SAFE_CATEGORY } from '@/services/analytics/events/createLoadSafe'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'

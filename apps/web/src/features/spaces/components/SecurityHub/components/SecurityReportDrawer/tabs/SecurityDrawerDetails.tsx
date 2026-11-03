@@ -7,9 +7,9 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useChain } from '@/hooks/useChains'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { SecurityFeature } from '@/features/security'
-import type { ScanContext } from '@/features/security/types'
+import type { ScanContext } from '@/features/security/data/scanners/types'
 import { cn } from '@safe-global/views/utils/cn'
 
 type SecurityDrawerDetailsProps = {

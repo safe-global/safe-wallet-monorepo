@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowContext } from '../../TxFlowProvider'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { ReviewRemoveModule } from './ReviewRemoveModule'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 

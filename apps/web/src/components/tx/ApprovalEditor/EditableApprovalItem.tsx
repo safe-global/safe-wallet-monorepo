@@ -1,10 +1,9 @@
 import { Button } from '@safe-global/views/components/ui/button'
 import css from '@/components/tx/ApprovalEditor/styles.module.css'
-import type { ApprovalInfo } from './hooks/useApprovalInfos'
-
+import type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { ApprovalValueField } from './ApprovalValueField'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { useFormContext } from 'react-hook-form'
 import get from 'lodash/get'
 import { SquarePen } from 'lucide-react'

@@ -31,7 +31,8 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { ALLOWLIST_ROW_CLASSES } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import TokenIcon from '@/components/common/TokenIcon'
-import { tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
+import { tokenOptionLabel } from '../../SpendingLimitFlow/utils/tokenOptions'
+import { type TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 type TokenGroup = { value: TokenOption['group']; label: string; items: TokenOption[] }
 

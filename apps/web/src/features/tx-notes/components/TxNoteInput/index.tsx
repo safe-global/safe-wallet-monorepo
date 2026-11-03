@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { Controller, useForm } from 'react-hook-form'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Field } from '@safe-global/views/components/ui/field'

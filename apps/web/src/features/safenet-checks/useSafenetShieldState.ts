@@ -1,7 +1,7 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SEVERITY_TO_TITLE } from '@safe-global/utils/features/safe-shield/constants'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
+import { CheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
 import { rejectionSeverity, summariseRejection } from './summariseRejection'
 import { useFlowSafenetCheck } from './useFlowSafenetCheck'
 

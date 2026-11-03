@@ -54,7 +54,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 

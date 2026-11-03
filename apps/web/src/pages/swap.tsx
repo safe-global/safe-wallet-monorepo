@@ -6,7 +6,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { SwapFeature } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 // Cow Swap expects native token addresses to be in the format '0xeeee...eeee'
 const adjustEthAddress = (address: string) => {

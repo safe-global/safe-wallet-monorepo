@@ -6,7 +6,8 @@ import { cn } from '@safe-global/views/utils/cn'
 import type { ResolvedSidebarItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { getSidebarItemTestId } from '../../utils'
 import css from '../../styles.module.css'
-import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -14,7 +15,7 @@ import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { AppRoutes } from '@/config/routes'
-import { PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
+import { PlanSelectionEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { trackPlanSelectionStarted } from '../../../Plans/planSelection'
 
 const customNavEvents: Record<

@@ -13,8 +13,6 @@ import type {
 import { toAllowlists, type Erc20TokenResolver, type NativeTokenResolver } from './mapAllowlists'
 import { toPolicyToken } from './toPolicyToken'
 
-export type { Erc20TokenResolver, NativeTokenResolver }
-
 const toAllowance = (allowance: SpendingLimitAllowanceDto): PolicyAllowance => {
   const remaining = BigInt(allowance.amount) - BigInt(allowance.spent)
 

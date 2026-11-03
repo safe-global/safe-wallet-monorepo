@@ -2,7 +2,8 @@ import { useState, useImperativeHandle, forwardRef, type ReactElement } from 're
 import { Button } from '@safe-global/views/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger } from '@safe-global/views/components/ui/dropdown-menu'
 import ManageTokensMenu from './ManageTokensMenu'
-import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'
 
 interface ManageTokensButtonProps {

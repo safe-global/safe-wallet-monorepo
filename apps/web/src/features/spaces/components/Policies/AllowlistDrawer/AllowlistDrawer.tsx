@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
-import { Drawer, DrawerBody } from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { AppRoutes } from '@/config/routes'
@@ -12,7 +13,7 @@ import { getPolicyTokens } from '../utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { formatAppliesAt } from '@safe-global/views/features/spaces/components/Policies/utils/policyStatusDetail'
 import { formatTimeToSign } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/format'
-import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
+import PendingBanner from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner/PendingBanner'
 import {
   getPolicyStatus,
   type FailedAllowlistPolicy,
@@ -25,9 +26,9 @@ import {
   activatedBannerLine,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
-import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
-import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
+import PolicyDrawerHeader from '../components/PolicyDrawerHeader/PolicyDrawerHeader'
+import PendingSignatures from '../SpendingLimitDrawer/components/PendingSignatures/PendingSignatures'
+import PolicyOverview from '../SpendingLimitDrawer/components/PolicyOverview/PolicyOverview'
 import { inferAllowlistOutcome, resolveAllowlistDrawerState, type ActiveAllowlistPolicy } from './resolveState'
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'

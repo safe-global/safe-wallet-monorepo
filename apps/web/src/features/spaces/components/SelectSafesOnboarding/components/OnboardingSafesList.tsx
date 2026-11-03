@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
-import { type AllSafeItems } from '@/hooks/safes'
-import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
-import type { SimilarWarning } from '@/features/address-poisoning'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { SafeAccountsTable } from '@/features/myAccounts'
+import { type AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
+import { type SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
 import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balance']

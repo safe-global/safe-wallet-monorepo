@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecurityDrawerDetails from './SecurityDrawerDetails'
-import { createMockStory } from '@/stories/mocks'
-import { createMockContext } from '@/features/security/testing'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createMockContext } from '@/features/security/data/scanners/test-helpers'
 
 const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
 

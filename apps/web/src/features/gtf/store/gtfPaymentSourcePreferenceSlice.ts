@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
-import type { GtfPaymentMode } from '@/features/gtf/types'
+import type { GtfPaymentMode } from '@safe-global/views/features/gtf/types'
 
 export type GtfPaymentSourcePreferenceState = Record<string, GtfPaymentMode>
 

@@ -38,8 +38,8 @@ jest.mock('../../AuthState', () => ({
 
 let mockIsAllowlistActive: boolean | undefined = false
 
-jest.mock('@/features/policy-guard', () => ({
-  ...jest.requireActual('@/features/policy-guard'),
+jest.mock('@/features/policy-guard/hooks/useIsAllowlistActiveInSpace', () => ({
+  ...jest.requireActual('@/features/policy-guard/hooks/useIsAllowlistActiveInSpace'),
   useIsAllowlistActiveInSpace: () => mockIsAllowlistActive,
 }))
 

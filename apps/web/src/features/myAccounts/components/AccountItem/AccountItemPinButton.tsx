@@ -6,7 +6,7 @@ import { useSingleChainPinActions } from '../../hooks/useSingleChainPinActions'
 import { usePinActions } from '../../hooks/usePinActions'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import type { SafeOverview, AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 type SingleChainProps = {

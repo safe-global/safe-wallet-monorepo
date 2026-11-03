@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import ProposerDrawer from './ProposerDrawer'
 import { ProposerStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { createDefaultAllowlistValues } from '../types'
 import RecipientAllowlistFlow from '..'
 

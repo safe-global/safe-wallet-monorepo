@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import AuditEventRow from './AuditEventRow'
 

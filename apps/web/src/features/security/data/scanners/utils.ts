@@ -1,5 +1,4 @@
-import type { SafeGrade, ScanResult } from './types'
-import type { SecurityGrade } from '../securityTypes'
+import type { SafeGrade, ScanResult, SecurityGrade } from '@safe-global/views/features/security/types'
 import { getGrade } from '../securityScoring'
 import { SCANNER_TIMEOUT_MS, SEVERITY_RANK } from './constants'
 

@@ -1,4 +1,5 @@
-import { MODAL_NAVIGATION, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MODAL_NAVIGATION } from '@/services/analytics/events/modals'
 import { useCallback, useState } from 'react'
 
 const useTxStepper = <T extends unknown>(initialData: T, eventCategory?: string) => {

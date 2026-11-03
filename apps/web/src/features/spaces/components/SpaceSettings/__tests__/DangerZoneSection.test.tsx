@@ -4,14 +4,21 @@ import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
 import DangerZoneSection from '../sections/DangerZoneSection'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin, useIsActiveMember, useIsLastActiveAdmin, useSpaceDeletionGuard } from '@/features/spaces'
+import { useIsAdmin, useIsActiveMember } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsLastActiveAdmin } from '@/features/spaces/hooks/useIsLastActiveAdmin'
+import { useSpaceDeletionGuard } from '@/features/spaces/hooks/billing/useSpaceDeletionGuard'
+
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(() => false),
   useIsActiveMember: jest.fn(() => false),
+}))
+jest.mock('@/features/spaces/hooks/useIsLastActiveAdmin', () => ({
   useIsLastActiveAdmin: jest.fn(() => false),
+}))
+jest.mock('@/features/spaces/hooks/billing/useSpaceDeletionGuard', () => ({
   useSpaceDeletionGuard: jest.fn(() => ({ isDeletionBlocked: false })),
 }))
 

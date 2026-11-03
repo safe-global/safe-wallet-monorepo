@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import useScanResultsState from '../useScanResultsState'
-import type { ScanResult } from '@/features/security/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({

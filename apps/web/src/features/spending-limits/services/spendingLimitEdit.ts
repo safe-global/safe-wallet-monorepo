@@ -1,6 +1,6 @@
 import uniqWith from 'lodash/uniqWith'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpendingLimitState } from '../types'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import type { DesiredAllowance } from './spendingLimitExecution'
 import { isSameAllowance, isSpendingLimitFor } from './spendingLimitMatching'
 

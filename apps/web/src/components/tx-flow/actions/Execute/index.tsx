@@ -1,10 +1,11 @@
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { type ReactNode, useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
-import { useIsCounterfactualSafe } from '@/features/counterfactual'
-import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
-import type { SubmitCallback } from '../../TxFlow'
+import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { type SlotComponentProps, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '../../slots/withSlot'
+import type { SubmitCallback } from '@safe-global/views/components/tx-flow/types'
 
 export const Execute = ({
   onSubmit,

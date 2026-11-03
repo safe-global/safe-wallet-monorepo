@@ -8,16 +8,13 @@ import {
 } from '@safe-global/views/components/ui/accordion'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Chip } from '@safe-global/views/components/ui/chip'
-import DateTime from '@/components/common/DateTime'
+import DateTime from '@/components/common/DateTime/DateTimeContainer'
 import { cn } from '@safe-global/views/utils/cn'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import {
-  CheckStatus,
-  type PublicCheckStatus,
-  type SafenetCheckSnapshot,
-} from '@safe-global/utils/features/safenet-checks'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
 import { CHIP_VARIANT, STATUS_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'

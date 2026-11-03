@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
+import type { NestedSafeWithStatus } from '@safe-global/views/components/nested-safes/NestedSafesPopover/types'
 import {
   getIsFirstTimeCuration,
   getIsManageMode,

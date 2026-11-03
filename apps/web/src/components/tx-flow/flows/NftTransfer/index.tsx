@@ -2,7 +2,7 @@ import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/coll
 import NftIcon from '@/public/images/common/nft.svg'
 import SendNftBatch from './SendNftBatch'
 import ReviewNftBatch from './ReviewNftBatch'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 

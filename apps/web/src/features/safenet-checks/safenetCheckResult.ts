@@ -1,10 +1,9 @@
+import { CheckEventType, type NormalizedCheckEvent } from '@safe-global/utils/features/safenet-checks/types/events'
 import {
-  CheckEventType,
   CheckStatus,
-  type NormalizedCheckEvent,
   type PublicCheckStatus,
   type UnavailableReason,
-} from '@safe-global/utils/features/safenet-checks'
+} from '@safe-global/utils/features/safenet-checks/types/status'
 import { SafenetCheckResult } from '@/services/analytics/mixpanel-events'
 
 const NO_RULING_EVENTS = [CheckEventType.ARBITRATION_TIMED_OUT, CheckEventType.DISPUTE_OUT_OF_SCOPE]

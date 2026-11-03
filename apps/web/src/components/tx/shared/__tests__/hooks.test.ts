@@ -29,7 +29,7 @@ import { type SignerWallet } from '@/components/common/WalletProvider'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as loadFeature from '@/features/__core__/useLoadFeature'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 

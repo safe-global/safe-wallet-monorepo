@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { ApprovalValueField } from './ApprovalValueField'
-import type { ApprovalInfo } from './hooks/useApprovalInfos'
+import type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
 const FIELD_NAME = 'approvals.0'
 const INITIAL_AMOUNT = '420.0'

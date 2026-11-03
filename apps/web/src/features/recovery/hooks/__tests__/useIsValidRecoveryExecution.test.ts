@@ -15,7 +15,7 @@ import {
 import { useRecoveryTxState } from '../useRecoveryTxState'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 
 jest.mock('@gnosis.pm/zodiac')
 
@@ -24,6 +24,7 @@ const mockGetModuleInstance = getModuleInstance as jest.MockedFunction<typeof ge
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/wallets/web3')
+jest.mock('@/hooks/wallets/web3ReadOnly')
 jest.mock('@/features/recovery/hooks/useIsRecoverer')
 jest.mock('@/features/recovery/hooks/useRecoveryTxState')
 jest.mock('@/hooks/useIsValidExecution')

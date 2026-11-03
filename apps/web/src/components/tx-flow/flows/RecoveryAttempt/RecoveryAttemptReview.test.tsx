@@ -9,17 +9,18 @@ import { mockCurrentChain, mockHasFeature, mockSafeInfo } from '@/tests/mocks/ho
 import { mockRole } from '@/tests/mocks/roles'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { COULD_NOT_SUBMIT_RETRY_MESSAGE } from '@/components/tx/TxSubmitError'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { dispatchRecoveryExecution } from '@/features/recovery/services'
+import { dispatchRecoveryExecution } from '@/features/recovery/services/recovery-sender'
 import { seedRecoveryScenario } from '@/features/recovery/test-helpers'
-import { RecoveryFeature, type RecoveryQueueItem } from '@/features/recovery'
+import { RecoveryFeature } from '@/features/recovery'
+import { type RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import useGasPrice from '@/hooks/useGasPrice'
 import useChains from '@/hooks/useChains'
 import RecoveryAttemptReview from './RecoveryAttemptReview'
 
-jest.mock('@/features/recovery/services', () => ({
-  ...jest.requireActual('@/features/recovery/services'),
+jest.mock('@/features/recovery/services/recovery-sender', () => ({
+  ...jest.requireActual('@/features/recovery/services/recovery-sender'),
   dispatchRecoveryExecution: jest.fn(),
 }))
 jest.mock('@/features/recovery/hooks/useIsValidRecoveryExecution', () => ({
@@ -35,9 +36,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChains')
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'),
+  default: jest.fn(),
 }))
 
 const GAS_PRICE = { maxFeePerGas: BigInt(20), maxPriorityFeePerGas: BigInt(2) }

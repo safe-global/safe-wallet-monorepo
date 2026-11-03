@@ -5,7 +5,7 @@ import { selectAllAddressBooks, type AddressBook, type AddressBookState } from '
 import useChainId from '@/hooks/useChainId'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { selectAccountAnchorAddresses, selectAnchorIndex } from '../store'
+import { selectAccountAnchorAddresses, selectAnchorIndex } from '../store/anchorIndex'
 
 export type SimilarSavedAddress = {
   /** The saved address the checked one looks like, checksummed. */

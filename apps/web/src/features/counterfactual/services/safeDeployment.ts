@@ -3,8 +3,9 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { safeCreationDispatch, SafeCreationEvent } from './safeCreationEvents'
 import { extractCounterfactualSafeSetup } from './typeGuards'
 import { addUndeployedSafe } from '../store/undeployedSafesSlice'
-import type { UndeployedSafe, ReplayedSafeProps, PayMethod } from '../types'
-import { PendingSafeStatus } from '../types'
+import type { UndeployedSafe, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import { CF_TX_GROUP_KEY } from '../constants'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -88,9 +89,6 @@ export const deploySafeAndExecuteTx = async (
 
   return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, provider, safeAddress)
 }
-
-// Re-export lightweight balance getter (extracted to separate file to reduce bundle size)
-export { getCounterfactualBalance } from './getCounterfactualBalance'
 
 export const replayCounterfactualSafeDeployment = (
   chainId: string,
@@ -267,9 +265,6 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
     clearInterval(intervalId)
   }, TIMEOUT_TIME)
 }
-
-// Re-export lightweight utilities for backwards compatibility within the feature
-export { isReplayedSafeProps, isPredictedSafeProps, extractCounterfactualSafeSetup } from './typeGuards'
 
 export const activateReplayedSafe = async (
   chain: Chain,

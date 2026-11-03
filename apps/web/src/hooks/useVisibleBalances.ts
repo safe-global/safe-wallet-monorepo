@@ -2,7 +2,7 @@ import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/format
 import { useMemo } from 'react'
 import useBalances from './useBalances'
 import useHiddenTokens from './useHiddenTokens'
-import type { PortfolioBalances } from './loadables/useLoadBalances'
+import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
 import { useAppSelector } from '@/store'
 import { selectHideDust } from '@/store/settingsSlice'
 import { DUST_THRESHOLD } from '@/config/constants'

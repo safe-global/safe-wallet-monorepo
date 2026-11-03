@@ -1,1 +1,0 @@
-export { requestSafenetCheck } from './requestSafenetCheck'

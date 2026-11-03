@@ -23,7 +23,9 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 interface TenderlySimulationProps {
   safeTx?: SafeTransaction

@@ -1,6 +1,6 @@
 import { getAddress, parseUnits } from 'ethers'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import type { SpendingLimitState } from '../types'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import type { DesiredAllowance } from './spendingLimitExecution'
 import { buildSpendingLimitEdit } from './spendingLimitEdit'
 

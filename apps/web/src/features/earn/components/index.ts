@@ -1,4 +1,3 @@
-export { default as EarnPage } from './EarnPage'
 export { default as EarnButton } from './EarnButton'
 export { default as VaultDepositTxDetails } from './VaultDepositTxDetails'
 export { default as VaultRedeemTxDetails } from './VaultRedeemTxDetails'

@@ -1,8 +1,7 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
-import { HYPERNATIVE_EVENTS } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { HYPERNATIVE_SOURCE, HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
 
 const mockTrackEvent = jest.fn()

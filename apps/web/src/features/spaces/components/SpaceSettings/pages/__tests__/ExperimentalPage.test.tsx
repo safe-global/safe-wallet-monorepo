@@ -16,12 +16,14 @@ const mockUnwrap = jest.fn()
 const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseSpacesUpdateV1Mutation = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: () => mockUseIsAdmin(),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => SPACE_ID,
 }))
 
-jest.mock('@/features/policy-guard', () => ({
+jest.mock('@/features/policy-guard/hooks/useAllowlistAvailability', () => ({
   useIsAllowlistAvailableInSpace: () => mockUseIsAllowlistAvailableInSpace(),
 }))
 

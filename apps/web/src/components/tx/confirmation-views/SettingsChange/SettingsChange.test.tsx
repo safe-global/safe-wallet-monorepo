@@ -4,9 +4,10 @@ import { render } from '@/tests/test-utils'
 import SettingsChange from '.'
 import { ownerAddress, txInfo } from './mockData'
 import { SettingsChangeContext } from '@safe-global/views/components/tx-flow/flows/AddOwner/context'
-import { type AddOwnerFlowProps } from '@/components/tx-flow/flows/AddOwner'
-import { type ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOwner'
-
+import {
+  type AddOwnerFlowProps,
+  type ReplaceOwnerFlowProps,
+} from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 describe('SettingsChange', () => {
   it('should display the SettingsChange component with owner details', () => {
     const { container, getByText } = render(

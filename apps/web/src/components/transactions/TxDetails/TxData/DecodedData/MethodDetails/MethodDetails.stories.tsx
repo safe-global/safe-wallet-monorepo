@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
 import type { DataDecoded, DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { basicTypesActions, HUGE_UINT } from '@/tests/builders/dataDecoded'
 import { MethodDetails } from '.'
 

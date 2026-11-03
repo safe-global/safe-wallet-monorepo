@@ -10,16 +10,14 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
-import {
-  useRecipientAnalysisWithPoisoning,
-  useCounterpartyAnalysis,
-  useRecipientAnalysis,
-  useThreatAnalysis,
-} from './hooks'
+import { useRecipientAnalysisWithPoisoning } from './hooks/useRecipientAnalysisWithPoisoning'
+import { useCounterpartyAnalysis } from './hooks/useCounterpartyAnalysis'
+import { useRecipientAnalysis } from './hooks/useRecipientAnalysis'
+import { useThreatAnalysis } from './hooks/useThreatAnalysis'
 import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import {
   type ContractAnalysisResults,
   type ThreatAnalysisResults,
@@ -29,10 +27,10 @@ import {
   Severity,
   StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
-import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
-import { useAuthToken } from '@/features/hypernative'
+import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
+import { useAuthToken } from '@/features/hypernative/hooks/useAuthToken'
 import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
-import { useSafeProAccess } from '@/features/spaces'
+import { useSafeProAccess } from '@/features/spaces/hooks/useSafeProAccess'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>

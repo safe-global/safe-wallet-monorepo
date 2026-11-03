@@ -27,7 +27,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn((feature) => mockUseHasFeature(feature)),
 }))
 
-jest.mock('@/features/safe-pro-announcement', () => ({
+jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 
@@ -87,7 +87,7 @@ jest.mock('../../../config', () => ({
   },
 }))
 
-jest.mock('../../SpacesSidebarVariant', () => ({
+jest.mock('../../SpacesSidebarVariant/SpacesSidebarVariant', () => ({
   SpacesSidebarVariant: ({
     mainNavItems,
     setupGroup,

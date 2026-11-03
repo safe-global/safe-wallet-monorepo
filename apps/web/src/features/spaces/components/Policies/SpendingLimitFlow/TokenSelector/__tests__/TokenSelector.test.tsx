@@ -5,7 +5,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import TokenSelector from '..'
 import {

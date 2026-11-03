@@ -24,7 +24,8 @@ import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { useAllSafes, useGetHref } from '@/hooks/safes'
+import useAllSafes from '@/hooks/safes/useAllSafes'
+import { useGetHref } from '@/hooks/safes/useGetHref'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const createMockStore = <T,>(initialValue: T) => {
@@ -59,12 +60,14 @@ const mockWalletConnectInstance = {
 }
 
 // Mock useLoadFeature to return the WalletConnect feature (flat structure)
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: jest.fn(() => ({
     wcPopupStore: mockWcPopupStore,
     wcChainSwitchStore: mockWcChainSwitchStore,
     walletConnectInstance: mockWalletConnectInstance,
   })),
+}))
+jest.mock('@/features/__core__/createFeatureHandle', () => ({
   createFeatureHandle: jest.fn((name: string) => ({
     name,
     useIsEnabled: () => true,
@@ -87,9 +90,12 @@ const updateSessionsMock = mockWalletConnectInstance.updateSessions as jest.Mock
 
 updateSessionsMock.mockResolvedValue(undefined)
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafes', () => ({
   __esModule: true,
-  useAllSafes: jest.fn(),
+  default: jest.fn(),
+}))
+jest.mock('@/hooks/safes/useGetHref', () => ({
+  __esModule: true,
   useGetHref: jest.fn(),
 }))
 
@@ -590,7 +596,7 @@ describe('useSafeWalletProvider', () => {
         txStatus: 'AWAITING_CONFIRMATIONS',
       }
 
-      jest.spyOn(require('@/utils/transactions'), 'getTransactionDetails').mockResolvedValue(mockTxDetails)
+      jest.spyOn(require('@/utils/tx-details'), 'getTransactionDetails').mockResolvedValue(mockTxDetails)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 

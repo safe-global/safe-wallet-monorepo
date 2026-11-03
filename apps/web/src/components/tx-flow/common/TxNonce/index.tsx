@@ -16,7 +16,7 @@ import {
 } from '@safe-global/views/components/ui/combobox'
 import { InputGroupAddon, InputGroupButton } from '@safe-global/views/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { _formatNumber } from '@/components/common/NumberField'
 import { useQueuedTxByNonce } from '@/hooks/useTxQueue'

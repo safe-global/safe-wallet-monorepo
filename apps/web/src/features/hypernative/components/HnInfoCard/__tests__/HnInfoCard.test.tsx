@@ -2,7 +2,7 @@ import { render, screen } from '@/tests/test-utils'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { HnInfoCard } from '../index'
 
-jest.mock('../../HypernativeTooltip', () => ({
+jest.mock('../../HypernativeTooltip/HypernativeTooltip', () => ({
   HypernativeTooltip: ({ children, title }: { children: React.ReactNode; title: string }) => (
     <div title={title}>{children}</div>
   ),

@@ -32,13 +32,13 @@ import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { initialState as initialSettings } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
-import * as useTrustSafeHook from '@/features/myAccounts'
+import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
 
 jest.mock('@/components/tx/ApprovalEditor/hooks/useApprovalInfos', () => ({
   useApprovalInfos: jest.fn(() => [[], undefined, false]),
@@ -54,15 +54,23 @@ jest.mock('@/components/common/NamedAddressInfo', () => ({
   },
 }))
 
-jest.mock('@/features/safe-shield/hooks', () => ({
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
   __esModule: true,
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 

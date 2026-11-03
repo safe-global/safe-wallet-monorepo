@@ -6,13 +6,10 @@ import type {
   AddressBookRequestItemDto,
   SpaceAddressBookItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import {
-  useAddressBookRequestsState,
-  useIsAdmin,
-  useIsInvited,
-  useMemberNameResolver,
-  useSpaceAddressBookState,
-} from '@/features/spaces'
+import { useAddressBookRequestsState } from '@/features/spaces/hooks/useGetAddressBookRequests'
+import { useIsAdmin, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
+import { useMemberNameResolver } from '@/features/spaces/hooks/useMemberNameResolver'
+import { useSpaceAddressBookState } from '@/features/spaces/hooks/useGetSpaceAddressBook'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
@@ -29,12 +26,20 @@ const SPACE_ID = '7'
 
 const mockIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   useSpaceAddressBookState: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useGetAddressBookRequests', () => ({
   useAddressBookRequestsState: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useMemberNameResolver', () => ({
   useMemberNameResolver: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => SPACE_ID),
 }))
 jest.mock('@/hooks/useChains', () => ({

@@ -6,9 +6,9 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { HYPERNATIVE_SOURCE, HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 export const HnLoginCard = (): ReactElement | null => {
   const isSafeOwner = useIsSafeOwner()

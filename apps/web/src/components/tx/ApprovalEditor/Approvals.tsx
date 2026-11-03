@@ -1,4 +1,4 @@
-import { type ApprovalInfo } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
+import { type ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import css from './styles.module.css'
 import ApprovalItem from '@/components/tx/ApprovalEditor/ApprovalItem'
 import groupBy from 'lodash/groupBy'

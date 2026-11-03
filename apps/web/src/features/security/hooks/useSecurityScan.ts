@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import type { ScanContext, ScanResult, ScannerId } from '../data/scanners/types'
+import type { ScanContext, ScannerId } from '../data/scanners/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 import { SCANNERS } from '../data/scanners/registry'
 import { scanKey, withScannerTimeout } from '../data/scanners/utils'
 import { getCachedScan, setCachedScan } from '../data/scanResultsCache'

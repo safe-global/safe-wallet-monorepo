@@ -9,7 +9,9 @@ import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful, 
 const mockUseSafeProAccess = jest.fn()
 const mockSimulateTransaction = jest.fn()
 let mockSimulationRequestStatus: FETCH_STATUS = FETCH_STATUS.NOT_ASKED
-jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
+jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+  useSafeProAccess: () => mockUseSafeProAccess(),
+}))
 jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
   ...jest.requireActual('@safe-global/utils/components/tx/security/tenderly/utils'),
   isTxSimulationEnabled: () => true,
@@ -31,7 +33,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
     },
   }),
 }))
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createExistingTx: async () => ({
     data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0xa9059cbb', operation: 0 },
   }),

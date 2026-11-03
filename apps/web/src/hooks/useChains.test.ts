@@ -6,7 +6,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains, { useChain, useHasFeature } from './useChains'
 import * as store from '@/store'
-import * as gateway from '@safe-global/store/gateway'
+import * as gateway from '@safe-global/store/gateway/chains'
 import * as useChainIdModule from './useChainId'
 
 /**

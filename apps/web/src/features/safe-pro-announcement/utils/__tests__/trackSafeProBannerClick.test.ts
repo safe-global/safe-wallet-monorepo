@@ -1,4 +1,5 @@
-import { MixpanelEvent, MixpanelEventParams, trackMixpanelEvent } from '@/services/analytics'
+import { trackMixpanelEvent } from '@/services/analytics'
+import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { SAFE_PRO_INTRO_URL } from '@/config/constants'
 import { trackSafeProBannerClick } from '../trackSafeProBannerClick'
 

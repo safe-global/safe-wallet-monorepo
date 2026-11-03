@@ -31,7 +31,7 @@ import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useManageNestedSafes } from '@/components/nested-safes/NestedSafesList/useManageNestedSafes'
 import { SimilarityConfirmDialog } from '@/components/nested-safes/NestedSafesList/SimilarityConfirmDialog'
-import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
+import type { NestedSafeWithStatus } from '@safe-global/views/components/nested-safes/NestedSafesPopover/types'
 
 function PopoverHeaderAction({
   isManageMode,

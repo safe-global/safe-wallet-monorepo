@@ -4,7 +4,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { FieldLabel } from '@safe-global/views/components/ui/field'
 import { RoleMenuItem } from './index'
-import { MemberRole } from '@/features/spaces'
+import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 
 const MemberInfoForm = ({
   isEdit = false,

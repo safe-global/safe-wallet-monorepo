@@ -5,7 +5,7 @@ import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Link } from '@safe-global/views/components/ui/link'

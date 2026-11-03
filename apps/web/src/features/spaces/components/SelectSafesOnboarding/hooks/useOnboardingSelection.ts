@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
-import { type AllSafeItems } from '@/hooks/safes'
-import type { AccountLine } from '@/features/myAccounts'
-import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
+import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
+import { type SafeLimit } from '@safe-global/views/features/spaces/components/SelectedCounter/types'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../utils/selection'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 

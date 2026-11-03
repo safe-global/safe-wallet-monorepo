@@ -4,13 +4,14 @@ import { renderHook } from '@/tests/test-utils'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { basicTypesActions, multiSendTxDataBuilder, setFallbackHandlerAction } from '@/tests/builders/dataDecoded'
 import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
-import { useTWAPFallbackHandlerAddress } from '@/features/swap'
+import { useTWAPFallbackHandlerAddress } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+
 // Imported directly from helpers to avoid circular deps in tests
 import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
 import { useSetsUntrustedFallbackHandler } from './UntrustedFallbackHandlerTxAlert'
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/features/swap', () => ({
+jest.mock('@/features/swap/hooks/useIsTWAPFallbackHandler', () => ({
   useTWAPFallbackHandlerAddress: jest.fn(),
 }))
 

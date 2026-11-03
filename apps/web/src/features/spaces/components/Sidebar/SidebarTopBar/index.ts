@@ -1,1 +1,0 @@
-export { SidebarTopBar } from './SidebarTopBar'

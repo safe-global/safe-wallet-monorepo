@@ -4,10 +4,10 @@ import { http, HttpResponse } from 'msw'
 import { fn } from 'storybook/test'
 import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
-import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
+import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { buildSafeAccountId, groupSafeAccounts } from '../../SafeAccountSelector/utils'
 import type {
   SafeAccountEntry,

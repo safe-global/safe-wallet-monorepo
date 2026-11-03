@@ -1,7 +1,7 @@
 import { render } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { _GasParams as GasParams } from '@/components/tx/GasParams/index'
-import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
+import type { AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('GasParams', () => {

@@ -2,7 +2,7 @@ import { type ReactElement } from 'react'
 import AccountHeader from './components/AccountHeader'
 import { AssetsFeature } from '@/features/assets'
 import { TransactionsFeature } from '@/features/transactions'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const SafeOverview = (): ReactElement => {
   const { AssetsList } = useLoadFeature(AssetsFeature)

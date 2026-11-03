@@ -8,7 +8,7 @@ import type {
   SpaceItem,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
-jest.mock('../../SidebarDeveloperGroup', () => ({
+jest.mock('../../SidebarDeveloperGroup/SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
     <div data-testid="developer-group" data-loading={isLoading}>
       Developer group
@@ -60,7 +60,7 @@ jest.mock('next/link', () => {
   return Link
 })
 
-jest.mock('../../SpaceSelectorDropdown', () => ({
+jest.mock('../../SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ selectedSpace, spaces }: { selectedSpace?: SpaceItem; spaces?: SpaceItem[] }) => (
     <div>
       Selected: {selectedSpace?.name} | Spaces: {spaces?.length}

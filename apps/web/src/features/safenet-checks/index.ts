@@ -1,4 +1,4 @@
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafenetChecksContract } from './types'
@@ -14,6 +14,3 @@ export const SafenetChecksFeature: FeatureHandle<SafenetChecksContract> = {
   useIsEnabled: useIsSafenetChecksEnabled,
   load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: SafenetChecksContract }>,
 }
-
-export type { SafenetChecksContract } from './types'
-export { useSafenetShieldState, type SafenetCheckCount, type SafenetShieldState } from './useSafenetShieldState'

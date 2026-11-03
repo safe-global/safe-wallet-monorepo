@@ -1,4 +1,4 @@
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { BatchingContract } from './contract'
 
 // Batching is a core feature — always enabled, not gated by a CGW feature flag.
@@ -9,10 +9,5 @@ export const BatchingFeature: FeatureHandle<BatchingContract> = {
   load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: BatchingContract }>,
 }
 
-export { useDraftBatch, useUpdateBatch } from './hooks/useDraftBatch'
-
 export { default as BatchTxList } from './components/BatchSidebar/BatchTxList'
 export { default as BatchTooltip } from './components/BatchTooltip'
-
-export { batchSlice, addTx, removeTx, selectBatchBySafe } from './store/batchSlice'
-export type { DraftBatchItem, CallOnlyTxData, BatchTxsState } from './store/batchSlice'

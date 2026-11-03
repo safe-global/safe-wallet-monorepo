@@ -1,5 +1,5 @@
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import type { SafeLimit } from '@/utils/spaces'
+import type { SafeLimit } from '@safe-global/views/features/spaces/components/SelectedCounter/types'
 import { SAFE_ACCOUNTS_LIMIT } from '../constants'
 import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
 

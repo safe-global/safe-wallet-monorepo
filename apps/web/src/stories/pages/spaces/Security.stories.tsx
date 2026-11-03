@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { spaceWithSafesHandler } from '@/stories/mocks/handlers'
 import SpaceSecurity from '@/pages/spaces/security'
 

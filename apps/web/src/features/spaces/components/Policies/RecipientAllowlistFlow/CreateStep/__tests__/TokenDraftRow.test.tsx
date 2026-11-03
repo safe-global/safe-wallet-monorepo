@@ -1,5 +1,5 @@
 import { fireEvent, renderWithUserEvent, screen } from '@/tests/test-utils'
-import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import TokenDraftRow from '../TokenDraftRow'
 
 const option = (address: string, symbol: string, name: string): TokenOption => ({

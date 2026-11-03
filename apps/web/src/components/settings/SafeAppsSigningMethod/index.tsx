@@ -1,5 +1,6 @@
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOnChainSigning, setOnChainSigning } from '@/store/settingsSlice'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'

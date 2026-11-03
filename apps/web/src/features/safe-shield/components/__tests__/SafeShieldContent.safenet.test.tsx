@@ -1,20 +1,21 @@
 import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
-import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis.builder'
 import { SafeShieldContent } from '../SafeShieldContent'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
+import { CheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
+import { buildBenignSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
 import * as useChainsModule from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 // The real lazy feature chunk mounts inside the widget; only the chain read is mocked.
 // A missing feature.tsx registry member cannot be caught by the stubbed widget test.
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'),
   useSafenetCheck: jest.fn(),
 }))
 

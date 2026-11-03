@@ -1,4 +1,4 @@
-import { EventType } from '@/services/analytics'
+import { EventType } from '@/services/analytics/types'
 
 const RECOVERY_CATEGORY = 'recovery'
 

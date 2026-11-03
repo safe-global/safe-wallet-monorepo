@@ -1,15 +1,15 @@
 import { type RootState } from '@/store'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { selectChainIdAndSafeAddress } from '@/store/common'
+import type { PredictedSafeProps } from '../types'
 import type {
   UndeployedSafe,
   UndeployedSafesState,
   UndeployedSafeStatus,
-  PredictedSafeProps,
   ReplayedSafeProps,
-  PayMethod,
-} from '../types'
-import { PendingSafeStatus } from '../types'
+} from '@safe-global/utils/features/counterfactual/store/types'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 
 const initialState: UndeployedSafesState = {}
 

@@ -23,7 +23,7 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
-import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
@@ -94,8 +94,8 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
-jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope/context', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope/context'),
   useSafeScope: jest.fn(),
 }))
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>

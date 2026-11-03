@@ -3,9 +3,9 @@ import { Interface } from 'ethers'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { collectibleBuilder } from '@/tests/builders/collectibles'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
+import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender/create'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { NftTransferParams } from '..'
 import ReviewNftBatch from '../ReviewNftBatch'
@@ -14,7 +14,7 @@ const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
 const RECIPIENT = '0x2222222222222222222222222222222222222222'
 
 jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => SAFE_ADDRESS }))
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createTx: jest.fn(),
   createMultiSendCallOnlyTx: jest.fn(),
 }))

@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode } from 'react'
-import { getGsCodeFromError } from '@safe-global/utils/services/exceptions/contractErrors'
-import { getGuardErrorInfo, isRevertError } from '@/utils/transaction-errors'
+import { getGsCodeFromError, isRevertError } from '@safe-global/utils/services/exceptions/contractErrors'
+import { getGuardErrorInfo } from '@/utils/transaction-errors'
 import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'

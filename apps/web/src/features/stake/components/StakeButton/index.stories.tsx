@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from './index'
 

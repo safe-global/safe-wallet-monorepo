@@ -6,7 +6,7 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { getSafeTransaction } from '@/utils/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { type JsonRpcProvider, type TransactionReceipt } from 'ethers'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import { getRelayTxStatus, RelayStatus } from '@safe-global/utils/services/RelayTxWatcher'
 import { getBaseUrl } from '@safe-global/store/gateway/cgwClient'
 

@@ -1,4 +1,6 @@
-import { getSidebarVariant, SafeSidebarContent, SpacesSidebarContent } from '../variants'
+import { getSidebarVariant } from '../variants'
+import { SafeSidebarContent } from '../variants/SafeSidebarContent/SafeSidebarContent'
+import { SpacesSidebarContent } from '../variants/SpacesSidebarContent/SpacesSidebarContent'
 
 describe('getSidebarVariant', () => {
   it('returns SafeSidebarContent when type is "safe"', () => {

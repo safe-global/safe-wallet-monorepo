@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
-import { Drawer, DrawerBody } from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
@@ -8,12 +9,12 @@ import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Po
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
-import { PendingSignatures } from './components/PendingSignatures'
-import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
-import { SpendingLimitActions } from './components/SpendingLimitActions'
-import { SpendingLimits } from './components/SpendingLimits'
-import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
+import PendingBanner from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner/PendingBanner'
+import PendingSignatures from './components/PendingSignatures/PendingSignatures'
+import PolicyOverview, { type PolicyOverviewProps } from './components/PolicyOverview/PolicyOverview'
+import SpendingLimitActions from './components/SpendingLimitActions/SpendingLimitActions'
+import SpendingLimits from './components/SpendingLimits/SpendingLimits'
+import PolicyDrawerHeader from '../components/PolicyDrawerHeader/PolicyDrawerHeader'
 import {
   getPolicyStatus,
   type QueuedSpendingLimitPolicy,

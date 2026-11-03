@@ -2,7 +2,8 @@
 import { faker } from '@faker-js/faker'
 import { act, fireEvent, waitFor } from '@testing-library/react'
 import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
-import { CopyDeeplinkLabels, TX_LIST_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { CopyDeeplinkLabels, TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import TxShareLink from './TxShareLink'
 
 jest.mock('@/services/analytics', () => ({

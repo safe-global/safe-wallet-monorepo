@@ -5,7 +5,7 @@ import { forbiddenSessionListener } from '../forbiddenSessionListener'
 import { SESSION_EXPIRED_GROUP_KEY } from '../expireSession'
 import { authSlice, setAuthenticated } from '@/store/authSlice'
 import { notificationsSlice } from '@/store/notificationsSlice'
-import { stepUpSlice } from '@/features/oidc-auth/store'
+import { stepUpSlice } from '@/features/oidc-auth/store/stepUpSlice'
 import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { AppRoutes } from '@/config/routes'
 

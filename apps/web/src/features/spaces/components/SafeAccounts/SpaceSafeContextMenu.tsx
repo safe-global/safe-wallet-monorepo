@@ -1,4 +1,5 @@
-import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
+import { type SafeItem, type MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
@@ -14,7 +15,8 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'
+import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 
 enum ModalType {

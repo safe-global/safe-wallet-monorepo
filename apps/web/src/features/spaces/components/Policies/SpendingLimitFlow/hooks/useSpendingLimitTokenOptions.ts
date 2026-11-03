@@ -9,7 +9,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { getPopularTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
-import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenOption } from '../utils/tokenOptions'
+import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo } from '../utils/tokenOptions'
+import { type TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type TokenOptionsResult = {
   /** Held tokens first (fiat desc), then popular in table order (native first). */

@@ -1,9 +1,9 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useContext, useEffect, type PropsWithChildren } from 'react'
-
-import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
-import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { createUpdateThresholdTx } from '@/services/tx/tx-sender/create'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { ChangeThresholdFlowFieldNames } from '@/components/tx-flow/flows/ChangeThreshold'
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 

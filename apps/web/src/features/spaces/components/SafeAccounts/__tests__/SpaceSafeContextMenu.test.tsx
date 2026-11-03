@@ -1,20 +1,40 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SpaceSafeContextMenu from '../SpaceSafeContextMenu'
-import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type SafeItem, type MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: jest.fn(),
 }))
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: jest.fn(),
 }))
 jest.mock('@/services/analytics')
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/services/analytics/types')
+jest.mock('@/services/analytics/events/addressBook')
+jest.mock('@/services/analytics/events/addressPoisoning')
+jest.mock('@/services/analytics/events/assets')
+jest.mock('@/services/analytics/events/createLoadSafe')
+jest.mock('@/services/analytics/events/hypernative')
+jest.mock('@/services/analytics/events/modals')
+jest.mock('@/services/analytics/events/overview')
+jest.mock('@/services/analytics/events/safeApps')
+jest.mock('@/services/analytics/events/settings')
+jest.mock('@/services/analytics/events/txList')
+jest.mock('@/services/analytics/events/wallet')
+jest.mock('@/services/analytics/events/batching')
+jest.mock('@/services/analytics/events/safe-shield')
+jest.mock('@/services/analytics/events/safenet')
+jest.mock('@/services/analytics/mixpanel-events')
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: jest.fn(),
 }))
 

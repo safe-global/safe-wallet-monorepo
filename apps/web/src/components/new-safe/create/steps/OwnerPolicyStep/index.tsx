@@ -18,7 +18,8 @@ import { useSafeSetupHints } from '@/components/new-safe/create/steps/OwnerPolic
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
 import { ArrowLeft as ArrowBackIcon } from 'lucide-react'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
-import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
 import OwnerRow from '@/components/new-safe/OwnerRow'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 

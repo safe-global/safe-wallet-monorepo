@@ -24,11 +24,6 @@ export const toPopularToken = (token: TokenMetadata): PopularToken => ({
   logoUri: token.logoUri,
 })
 
-export type {
-  TokenOption,
-  TokenOptionGroup,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
-
 export type NativeCurrencyInfo = {
   symbol: string
   name: string

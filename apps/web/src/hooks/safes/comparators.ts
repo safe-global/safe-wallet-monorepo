@@ -1,7 +1,5 @@
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
-import type { SafeItem } from './useAllSafes'
-import type { MultiChainSafeItem } from './useAllSafesGrouped'
-
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 type SortableSafe = SafeItem | MultiChainSafeItem
 
 const byAddress = (a: SortableSafe, b: SortableSafe) => a.address.toLowerCase().localeCompare(b.address.toLowerCase())

@@ -1,4 +1,5 @@
-import { BatchTxList, useDraftBatch } from '@/features/batching'
+import { BatchTxList } from '@/features/batching'
+import { useDraftBatch } from '@/features/batching/hooks/useDraftBatch'
 
 function BatchTransactions() {
   const batchTxs = useDraftBatch()

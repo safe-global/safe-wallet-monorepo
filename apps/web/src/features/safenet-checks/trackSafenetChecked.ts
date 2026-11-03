@@ -1,16 +1,9 @@
-import type {
-  NormalizedCheckEvent,
-  PublicCheckStatus,
-  UnavailableReason,
-} from '@safe-global/utils/features/safenet-checks'
+import type { NormalizedCheckEvent } from '@safe-global/utils/features/safenet-checks/types/events'
+import type { PublicCheckStatus, UnavailableReason } from '@safe-global/utils/features/safenet-checks/types/status'
 import { checkKey, type CheckIdentity } from '@safe-global/store/safenet/safenetCheckSlice'
-import {
-  MixpanelEventParams,
-  SAFENET_EVENTS,
-  SafenetCheckResult,
-  type SafenetSignerRole,
-  trackEvent,
-} from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, SafenetCheckResult, type SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { toSafenetCheckResult } from './safenetCheckResult'
 import { summariseRejection } from './summariseRejection'
 

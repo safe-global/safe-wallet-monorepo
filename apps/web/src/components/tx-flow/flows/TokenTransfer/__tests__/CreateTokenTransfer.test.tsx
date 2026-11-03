@@ -1,4 +1,4 @@
-import { TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import { TokenTransferType } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import TokenTransferFlow from '@/components/tx-flow/flows/TokenTransfer'
 import CreateTokenTransfer, {
   type CreateTokenTransferProps,
@@ -11,11 +11,11 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import * as useRecipientAnalysis from '@/features/safe-shield'
+import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
-import * as gtfHooks from '@/features/gtf'
+import * as gtfHooks from '@/features/gtf/hooks/useResolvedGasToken'
 import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -24,15 +24,23 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 
-jest.mock('@/features/safe-shield/hooks', () => ({
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
   __esModule: true,
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 

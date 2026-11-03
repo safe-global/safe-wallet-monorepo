@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { safeAppsFixtures } from '../../../../../../config/test/msw/fixtures'
 import SafeAppList from './index'
-import { SAFE_APPS_LABELS } from '@/services/analytics'
+import { SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
 
 // Get apps from fixtures for props
 const getAppsForStory = (count: 'full' | 'few' | 'empty' = 'full') => {

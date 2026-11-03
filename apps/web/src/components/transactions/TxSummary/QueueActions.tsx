@@ -4,7 +4,7 @@ import ExecuteTxButton from '../ExecuteTxButton'
 import SignTxButton from '../SignTxButton'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { SpeedupFeature } from '@/features/speedup'
 
 const QueueActions = ({ tx }: { tx: Transaction }) => {

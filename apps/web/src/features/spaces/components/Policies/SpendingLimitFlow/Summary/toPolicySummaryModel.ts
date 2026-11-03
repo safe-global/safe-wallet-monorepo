@@ -1,13 +1,14 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope'
+import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
 import {
   isSafeAccountGroup,
   type SafeAccountEntry,
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption } from '../utils/tokenOptions'
+import { type TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import type {
   LimitSummaryToken,
   SpendingLimitSummaryModel,

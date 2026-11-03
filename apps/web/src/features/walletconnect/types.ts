@@ -3,7 +3,7 @@ import type { SessionTypes } from '@walletconnect/types'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { AppInfo } from '@/services/safe-wallet-provider'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import type WalletConnectWallet from './services/WalletConnectWallet'
 
 export enum WCLoadingState {

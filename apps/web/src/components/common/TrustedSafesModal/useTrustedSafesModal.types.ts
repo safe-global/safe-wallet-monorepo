@@ -1,10 +1,4 @@
-/**
- * Type definitions for the trusted Safes modal
- *
- * Used by the TrustedSafesModal component for selecting safes to pin.
- */
-
-import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 
 /** A safe item with selection state for the modal - extends SafeItem with selection and similarity data */
 export interface SelectableSafe extends SafeItem {

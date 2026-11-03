@@ -4,7 +4,7 @@ import { render, screen, fakerChecksummedAddress, fakerLookalikeAddress } from '
 import { chainBuilder } from '@/tests/builders/chains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
-import { SimilarAddressTooltip } from '.'
+import { SimilarAddressTooltip } from './SimilarAddressTooltip'
 
 jest.mock('@/hooks/useChains')
 const mockUseCurrentChain = jest.requireMock('@/hooks/useChains').useCurrentChain as jest.Mock

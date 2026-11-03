@@ -5,18 +5,16 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { getSpaceOrderScope, OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import {
-  type AllSafeItems,
-  type SafeItem,
-  _groupAndSort,
-  flattenSafeItems,
-  useSafeOrderComparator,
-  useSafesSearch,
-  useSaveManualOrder,
-} from '@/hooks/safes'
+import { type AllSafeItems, _groupAndSort, flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
+import { useSafeOrderComparator } from '@/hooks/safes/useSafeOrderComparator'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
+import { useSaveManualOrder } from '@/hooks/safes/useSaveManualOrder'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { useSimilarityClusters } from '@/features/address-poisoning'
-import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
+import useSimilarityClusters from '@/features/address-poisoning/hooks/useSimilarityClusters'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useIsInvited, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { SafeAccountsTable } from '@/features/myAccounts'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'

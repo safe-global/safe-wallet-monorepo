@@ -1,7 +1,7 @@
 import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
 import { OidcAuthFeature } from '@/features/oidc-auth'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useMemoDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks'
+import { useMemoDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks/useMemoDeepCompare'
 import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import extractTxInfo from '@/services/tx/extractTxInfo'

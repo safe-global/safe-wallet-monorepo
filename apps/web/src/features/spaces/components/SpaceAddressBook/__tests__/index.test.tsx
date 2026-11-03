@@ -1,13 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SpaceAddressBook from '../index'
-import {
-  useIsAdmin,
-  useIsInvited,
-  useAddressBookSearch,
-  useSpaceAddressBookState,
-  useAddressBookRequestsState,
-} from '@/features/spaces'
+import { useIsAdmin, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
+import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
+import { useSpaceAddressBookState } from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useAddressBookRequestsState } from '@/features/spaces/hooks/useGetAddressBookRequests'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { useHasFeature } from '@/hooks/useChains'
@@ -26,12 +23,21 @@ jest.mock('@/hooks/useChains', () => ({
   default: jest.fn(() => ({ configs: [] })),
   useHasFeature: jest.fn(() => true),
 }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(() => false),
-  useAddressBookSearch: jest.fn(() => []),
+}))
+jest.mock('@/features/spaces/hooks/useAddressBookSearch', () => ({
+  __esModule: true,
+  default: jest.fn(() => []),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   useSpaceAddressBookState: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useGetAddressBookRequests', () => ({
   useAddressBookRequestsState: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => '1'),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({

@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react'
-import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
+import { useGetChainsConfigV2Query } from '@safe-global/store/gateway/chains'
 import { useLaunchScreen, MIN_DISPLAY_MS, MAX_DISPLAY_MS } from './useLaunchScreen'
 
-jest.mock('@safe-global/store/gateway', () => ({
+jest.mock('@safe-global/store/gateway/chains', () => ({
   useGetChainsConfigV2Query: jest.fn(),
 }))
 

@@ -2,8 +2,9 @@ import { render, screen } from '@/tests/test-utils'
 import { HnBanner } from './HnBanner'
 
 // Mock HnSignupFlow to avoid rendering the actual modal in tests
-jest.mock('../HnSignupFlow', () => ({
-  HnSignupFlow: ({ open }: { open: boolean }) => (open ? <div data-testid="hn-signup-flow" /> : null),
+jest.mock('../HnSignupFlow/HnSignupFlow', () => ({
+  __esModule: true,
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="hn-signup-flow" /> : null),
 }))
 
 describe('HnBanner', () => {

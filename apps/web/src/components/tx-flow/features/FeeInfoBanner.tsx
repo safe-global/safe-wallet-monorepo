@@ -1,7 +1,10 @@
 import type { ReactElement } from 'react'
-import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useIsGtfSlotVisible, IS_RELAYING_LIVE } from '@/features/gtf'
-import { SlotName, withSlot } from '../slots'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { GTFFeature } from '@/features/gtf'
+import { useIsGtfSlotVisible } from '@/features/gtf/hooks/useIsGtfSlotVisible'
+import { IS_RELAYING_LIVE } from '@/features/gtf/constants'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '../slots/withSlot'
 
 const FeeInfoBanner = (): ReactElement => {
   const { FeeInfoBanner: FeeInfoBannerComponent } = useLoadFeature(GTFFeature)

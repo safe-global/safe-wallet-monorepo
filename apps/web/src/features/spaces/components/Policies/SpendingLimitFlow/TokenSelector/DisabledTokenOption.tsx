@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { ComboboxItem } from '@safe-global/views/components/ui/combobox'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import type { TokenOption } from '../utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import TokenOptionRow from './TokenOptionRow'
 
 /** Listed and searchable but not selectable; hovering it shows why. */

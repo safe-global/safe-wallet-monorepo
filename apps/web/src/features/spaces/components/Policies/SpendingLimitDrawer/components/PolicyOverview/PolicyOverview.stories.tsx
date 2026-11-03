@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_SAFE_NAME } from '../../../mocks/policies'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import PolicyOverview from './PolicyOverview'
 
 // The Network row reads chain config, so the stories need a store and the chains endpoint.

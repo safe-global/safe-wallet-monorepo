@@ -8,10 +8,8 @@ import {
   type AnalysisResult,
   type StatusGroupType,
 } from '@safe-global/utils/features/safe-shield/types'
-import {
-  RecipientAnalysisBuilder,
-  RecipientAnalysisResultBuilder,
-} from '@safe-global/utils/features/safe-shield/builders'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis.builder'
+import { RecipientAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis-result.builder'
 
 describe('AnalysisGroupCard with expandedGroups', () => {
   it('renders every result in a listed group instead of just the primary', async () => {

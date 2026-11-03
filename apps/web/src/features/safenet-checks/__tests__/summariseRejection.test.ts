@@ -1,10 +1,9 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   AttestationVerificationStatus,
-  CheckEventType,
   UNVERIFIED_ATTESTATION,
-  type NormalizedCheckEvent,
-} from '@safe-global/utils/features/safenet-checks'
+} from '@safe-global/utils/features/safenet-checks/types/status'
+import { CheckEventType, type NormalizedCheckEvent } from '@safe-global/utils/features/safenet-checks/types/events'
 import {
   arbitrationTimedOutEvent,
   attestedEvent,
@@ -14,7 +13,7 @@ import {
   requestCreatedEvent,
   sentinelCommittedEvent,
   sentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks/builders'
+} from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
 import { explainFailure, formatFlaggedCount, rejectionSeverity, summariseRejection } from '../summariseRejection'
 
 const SENTINELS = ['0x01', '0x02', '0x03', '0x04'].map((s) => s.padEnd(42, '0'))

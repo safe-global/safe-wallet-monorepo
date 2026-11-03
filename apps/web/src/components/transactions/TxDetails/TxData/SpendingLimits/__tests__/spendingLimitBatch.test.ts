@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import type { MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Operation } from '@safe-global/store/gateway/types'
-import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import { getSpendingLimitBatch } from '../spendingLimitBatch'
 
 const CHAIN_ID = '11155111'

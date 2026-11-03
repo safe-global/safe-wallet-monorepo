@@ -3,18 +3,18 @@ import { useState, useEffect, useCallback } from 'react'
 import type { ReactNode, ReactElement } from 'react'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from '@/features/gtf/store'
-import type { GtfPaymentMode } from '@/features/gtf/types'
+import {
+  selectGtfPaymentSourcePreference,
+  setGtfPaymentSourcePreference,
+} from '@/features/gtf/store/gtfPaymentSourcePreferenceSlice'
+import type { GtfPaymentMode } from '@safe-global/views/features/gtf/types'
 import useWallet from '@/hooks/wallets/useWallet'
-
-export { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-export type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const scope = useSafeScope()

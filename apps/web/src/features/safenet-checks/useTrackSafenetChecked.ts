@@ -1,11 +1,8 @@
 import { useEffect } from 'react'
-import type {
-  NormalizedCheckEvent,
-  PublicCheckStatus,
-  UnavailableReason,
-} from '@safe-global/utils/features/safenet-checks'
+import type { NormalizedCheckEvent } from '@safe-global/utils/features/safenet-checks/types/events'
+import type { PublicCheckStatus, UnavailableReason } from '@safe-global/utils/features/safenet-checks/types/status'
 import type { CheckIdentity } from '@safe-global/store/safenet/safenetCheckSlice'
-import type { SafenetSignerRole } from '@/services/analytics'
+import type { SafenetSignerRole } from '@/services/analytics/mixpanel-events'
 import { trackSafenetChecked } from './trackSafenetChecked'
 
 type TrackSafenetCheckedInput = {

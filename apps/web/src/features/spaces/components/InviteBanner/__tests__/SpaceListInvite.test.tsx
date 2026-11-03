@@ -48,7 +48,7 @@ jest.mock('@/components/common/Track', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   MemberStatus: { INVITED: 'INVITED', ACTIVE: 'ACTIVE', DECLINED: 'DECLINED' },
 }))
 

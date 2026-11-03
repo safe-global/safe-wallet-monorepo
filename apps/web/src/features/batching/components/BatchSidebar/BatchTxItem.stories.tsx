@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import type { MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OperationType } from '@safe-global/types-kit'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { CallOnlyTxData } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory, getFixtureData } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { getFixtureData } from '@/stories/mocks/handlers'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { OwnerList } from './index'
 

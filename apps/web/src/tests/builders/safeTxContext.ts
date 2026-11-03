@@ -1,4 +1,4 @@
-import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { Builder, type IBuilder } from '../Builder'
 
 export const safeTxContextBuilder = (): IBuilder<SafeTxContextParams> =>

@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useAppSelector } from '@/store'
-import { selectFeatureFlagOverrides, type FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store'
+import {
+  selectFeatureFlagOverrides,
+  type FeatureFlagOverridesState,
+} from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
 import { isKnownFeature } from '@/features/feature-flag-overrides/knownFeatures'
 
 /**

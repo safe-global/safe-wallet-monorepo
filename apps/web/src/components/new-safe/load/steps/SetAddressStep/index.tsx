@@ -19,18 +19,14 @@ import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENE
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
-import {
-  ADDRESS_POISONING_EVENTS,
-  DismissAction,
-  LOAD_SAFE_EVENTS,
-  LookalikeWarningLocation,
-  MixpanelEventParams,
-  trackEvent,
-} from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { DismissAction, LookalikeWarningLocation, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { LOAD_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
-import { useAddressPoisoningCheck } from '@/features/address-poisoning'
-import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice'
+import useAddressPoisoningCheck from '@/features/address-poisoning/hooks/useAddressPoisoningCheck'
+import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice/SimilarSavedAddressNotice'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 

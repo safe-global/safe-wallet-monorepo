@@ -1,11 +1,12 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TxProposalChip } from '@/features/proposers'
-import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
+import TxProposalChip from '@safe-global/views/features/proposers/components/TxProposalChip'
+import { SwapFeature } from '@/features/swap'
+import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import css from './styles.module.css'
-import DateTime from '@/components/common/DateTime'
+import DateTime from '@/components/common/DateTime/DateTimeContainer'
 import TxInfo from '@/components/transactions/TxInfo'
 import { isMultisigExecutionInfo, isTxQueued } from '@/utils/transaction-guards'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
@@ -19,12 +20,10 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
-import {
-  useHnQueueAssessmentResult,
-  useShowHypernativeAssessment,
-  useHypernativeOAuth,
-  HypernativeFeature,
-} from '@/features/hypernative'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useHnQueueAssessmentResult } from '@/features/hypernative/hooks/useHnQueueAssessmentResult'
+import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 

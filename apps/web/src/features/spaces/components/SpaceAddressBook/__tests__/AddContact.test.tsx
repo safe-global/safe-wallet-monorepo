@@ -21,9 +21,14 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: () => [mockUpsertAddressBook],
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
-  useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => [{ id: 1 }, { id: 2 }],
+}))
+jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 

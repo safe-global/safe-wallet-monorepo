@@ -6,7 +6,7 @@ import { screen } from '@testing-library/react'
 import AccountsList from './index'
 import FilteredSafes from '../FilteredSafes'
 import PinnedSafes from '../PinnedSafes'
-import type { AllSafeItemsGrouped } from '@/hooks/safes'
+import type { AllSafeItemsGrouped } from '@/hooks/safes/useAllSafesGrouped'
 
 // Mock child components to simplify tests, we just need to verify their rendering and props.
 jest.mock('../FilteredSafes', () => jest.fn(() => <div>FilteredSafes Component</div>))

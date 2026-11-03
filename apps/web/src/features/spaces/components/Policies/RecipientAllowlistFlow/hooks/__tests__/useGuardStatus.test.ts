@@ -1,9 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
-import { usePolicyGuard, type UsePolicyGuardResult } from '@/features/policy-guard'
+import { usePolicyGuard, type UsePolicyGuardResult } from '@/features/policy-guard/hooks/usePolicyGuard'
 import { useGuardStatus } from '../useGuardStatus'
 
-jest.mock('@/features/policy-guard', () => ({ usePolicyGuard: jest.fn() }))
+jest.mock('@/features/policy-guard/hooks/usePolicyGuard', () => ({
+  usePolicyGuard: jest.fn(),
+}))
 
 const mockUsePolicyGuard = usePolicyGuard as jest.MockedFunction<typeof usePolicyGuard>
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { MAX_DISPLAY_MS } from '@/components/common/LaunchScreen/useLaunchScreen'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectStepUpPhase, selectStepUpReturnUrl, stepUpSettled } from '../store'
+import { selectStepUpPhase, selectStepUpReturnUrl, stepUpSettled } from '../store/stepUpSlice'
 import { startStepUp } from '../utils/stepUp'
 
 const CAPTIONS = {

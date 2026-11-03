@@ -1,7 +1,8 @@
 import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
+import { tokenOptionLabel } from '../utils/tokenOptions'
+import { type TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { TOKEN_ICON_SIZE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 /** Shown under the symbol: the name when both exist, the address when only one does. */

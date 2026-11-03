@@ -1,12 +1,12 @@
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
-import { useAddressBookWriteScope } from '@/features/spaces'
+import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
 import {
   SELECT_COLUMN,
   type SafeAccountColumn,
 } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
-import type { AccountLine } from '../useSafeAccountRows'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
 // Stub the lazy overview fetch — its own suite covers it (and it needs an IntersectionObserver). The

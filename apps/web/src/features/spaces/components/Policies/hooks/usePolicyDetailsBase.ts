@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'

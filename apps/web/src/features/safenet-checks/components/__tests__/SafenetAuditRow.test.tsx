@@ -2,21 +2,17 @@ import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import {
-  buildBenignSnapshot,
-  buildCheckView,
-  buildSnapshot,
-  attestedEvent,
-  sentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks/builders'
+import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
+import { buildBenignSnapshot, buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
+import { attestedEvent, sentinelRevealedEvent } from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
 import { SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
 
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'),
   useSafenetCheck: jest.fn(),
 }))
 jest.mock('@/hooks/useChains', () => ({

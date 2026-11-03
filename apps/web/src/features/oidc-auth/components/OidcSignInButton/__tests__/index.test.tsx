@@ -7,6 +7,8 @@ const mockLoginWithRedirect = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/types', () => ({
   EventType: { META: 'meta' },
 }))
 

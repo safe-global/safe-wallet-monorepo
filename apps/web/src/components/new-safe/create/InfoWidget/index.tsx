@@ -10,7 +10,8 @@ import {
 } from '@safe-global/views/components/ui/accordion'
 import type { CreateSafeInfoVariant } from '@/components/new-safe/create/CreateSafeInfos'
 import css from '@/components/new-safe/create/InfoWidget/styles.module.css'
-import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
 
 type InfoWidgetProps = {
   title: string

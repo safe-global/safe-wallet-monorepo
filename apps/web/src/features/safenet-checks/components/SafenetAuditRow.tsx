@@ -2,11 +2,8 @@ import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import {
-  CheckStatus,
-  type PublicCheckStatus,
-  type SafenetCheckSnapshot,
-} from '@safe-global/utils/features/safenet-checks'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
 import { isWarningRisk, summariseRejection } from '../summariseRejection'

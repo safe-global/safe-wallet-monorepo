@@ -1,5 +1,4 @@
-import { showLedgerHashComparison, hideLedgerHashComparison } from './index'
-import ledgerHashStore from './ledgerHashStore'
+import ledgerHashStore, { showLedgerHashComparison, hideLedgerHashComparison } from './ledgerHashStore'
 
 describe('ledgerHashStore', () => {
   afterEach(() => {

@@ -1,15 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ShieldCheck, UserRoundPen } from 'lucide-react'
 import { Drawer } from './Drawer'
-import {
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerList,
-  DrawerSection,
-  DrawerSubtitle,
-  DrawerTitle,
-} from '@/components/common/Drawer/components'
+import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
+import { DrawerSubtitle } from '@safe-global/views/components/common/Drawer/components/DrawerSubtitle'
+import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'

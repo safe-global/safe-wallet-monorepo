@@ -11,9 +11,9 @@ jest.mock('./SecurityDrawerContent', () => ({
   ),
 }))
 
-jest.mock('@/features/hypernative', () => ({
+jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupFlow', () => ({
   __esModule: true,
-  HnSignupFlow: ({ open }: { open: boolean }) => (open ? <div>Hypernative signup</div> : null),
+  default: ({ open }: { open: boolean }) => (open ? <div>Hypernative signup</div> : null),
 }))
 
 const SAFE: SelectedSafe = { address: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6', chainId: '1' }

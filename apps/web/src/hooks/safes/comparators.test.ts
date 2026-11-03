@@ -1,6 +1,6 @@
 import { getComparator, manualComparator, nameComparator, lastVisitedComparator } from './comparators'
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
-import type { SafeItem } from './useAllSafes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 const safe = (over: Partial<SafeItem> & Pick<SafeItem, 'address'>): SafeItem => ({
   chainId: '1',

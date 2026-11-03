@@ -7,8 +7,10 @@ jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/ana
 
 let mockSpaceId: string | null = 'space-1'
 const mockTrackPlanSelectionStarted = jest.fn()
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockSpaceId }),
+}))
+jest.mock('@/features/spaces/components/Plans/planSelection', () => ({
   trackPlanSelectionStarted: (props: unknown) => mockTrackPlanSelectionStarted(props),
 }))
 

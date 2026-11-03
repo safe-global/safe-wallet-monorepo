@@ -3,8 +3,8 @@ import { act, render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotProvider } from '@/components/tx-flow/slots'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import type { SignerWallet } from '@/components/common/WalletProvider'
 import { ComboSubmit } from '../ComboSubmit'
 import SignSlot from '../Sign'
@@ -29,7 +29,10 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(),
 }))
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
 
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
   __esModule: true,

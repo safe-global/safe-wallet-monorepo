@@ -14,10 +14,16 @@ jest.mock('@/services/analytics', () => ({
   ...(
     jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
   ).createAnalyticsMock(),
+}))
+jest.mock('@/services/analytics/events/wallet', () => ({
+  ...jest.requireActual('@/services/analytics/events/wallet'),
   WALLET_EVENTS: {
     CONNECT: { action: 'connect_wallet' },
     WALLET_CONNECT: { action: 'wallet_connect' },
   },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: {
     EOA_WALLET_LABEL: 'EOA Wallet Label',
     EOA_WALLET_ADDRESS: 'EOA Wallet Address',

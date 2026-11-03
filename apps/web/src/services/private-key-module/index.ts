@@ -7,7 +7,6 @@ import { numberToHex } from '@/utils/hex'
 import { signTypedData } from './signTypedData'
 
 import { PRIVATE_KEY_MODULE_LABEL } from './constants'
-export { PRIVATE_KEY_MODULE_LABEL }
 
 async function getPrivateKey() {
   const savedKey = pkPopupStore.getStore()?.privateKey

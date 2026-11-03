@@ -59,9 +59,7 @@ export default [
       'jsx-quotes': ['error', 'prefer-double'],
       'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
 
-      // Feature architecture — same patterns as apps/web. Reused @/features/*
-      // code resolves through the @/* alias in tsconfig, so the same import
-      // restrictions apply.
+      // Same feature-component ban as apps/web: reused @/features/* code resolves through the @/* alias.
       'no-restricted-imports': [
         'warn',
         {
@@ -70,23 +68,6 @@ export default [
               group: ['@/features/*/components', '@/features/*/components/**'],
               message:
                 'Do not import components directly. Use useLoadFeature() to access lazy-loaded components. See docs/feature-architecture.md',
-            },
-            {
-              group: ['@/features/*/hooks', '@/features/*/hooks/**'],
-              message: 'Import hooks from the feature barrel (@/features/myfeature) not from hooks folder directly.',
-            },
-            {
-              group: ['@/features/*/services/*', '!@/features/*/services/index'],
-              message:
-                'Import from @/features/myfeature/services (barrel) for lightweight utils, or use useLoadFeature() for heavy services.',
-            },
-            {
-              group: ['@/features/*/store/*', '!@/features/*/store/index'],
-              message: 'Import from @/features/myfeature/store (barrel) not from internal store files.',
-            },
-            {
-              group: ['@/features/*/handle'],
-              message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
             },
             {
               group: [

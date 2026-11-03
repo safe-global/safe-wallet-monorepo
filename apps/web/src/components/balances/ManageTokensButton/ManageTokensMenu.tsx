@@ -17,7 +17,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { DUST_THRESHOLD } from '@/config/constants'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import Track from '@/components/common/Track'
-import { ASSETS_EVENTS } from '@/services/analytics'
+import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { cn } from '@safe-global/views/utils/cn'
 

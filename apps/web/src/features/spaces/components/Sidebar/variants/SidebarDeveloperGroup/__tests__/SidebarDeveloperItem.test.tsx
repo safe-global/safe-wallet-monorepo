@@ -10,7 +10,7 @@ import type {
 
 const mockNavItem = jest.fn()
 
-jest.mock('../../NavItem', () => ({
+jest.mock('../../NavItem/NavItem', () => ({
   NavItem: (props: { item: ResolvedSidebarItem | null; isLoading?: boolean; children?: ReactNode }) => {
     mockNavItem(props)
     return <div data-testid="nav-item">{props.children}</div>

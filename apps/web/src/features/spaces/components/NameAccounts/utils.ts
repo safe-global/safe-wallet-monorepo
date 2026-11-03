@@ -5,10 +5,10 @@ import {
   _getMultiChainAccounts,
   _getSingleChainAccounts,
   flattenSafeItems,
-  isMultiChainSafeItem,
   type AllSafeItems,
-  type SafeItem,
-} from '@/hooks/safes'
+} from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import type { WorkspaceSafeName } from '../../hooks/useUpsertWorkspaceSafeName'
 import { validateContactName } from '../SpaceAddressBook/utils'

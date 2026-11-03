@@ -2,7 +2,7 @@ import { useAppSelector } from '@/store'
 import { selectIsCuratedNestedSafe } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPinnedSafe from '@/hooks/useIsPinnedSafe'
-import { useIsSafeInCurrentSpace } from '@/features/spaces'
+import { useIsSafeInCurrentSpace } from '@/features/spaces/hooks/useIsSafeInCurrentSpace'
 
 /**
  * Hook to check if the current safe is trusted.

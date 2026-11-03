@@ -1,6 +1,6 @@
 import css from './styles.module.css'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { NestedSafeBreadcrumbs } from '@/components/common/NestedSafeBreadcrumbs'
 
 const Breadcrumbs = () => {

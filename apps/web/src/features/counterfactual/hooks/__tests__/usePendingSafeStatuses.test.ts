@@ -38,7 +38,13 @@ jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/createLoadSafe', () => ({
+  ...jest.requireActual('@/services/analytics/events/createLoadSafe'),
   CREATE_SAFE_EVENTS: {},
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: {},
 }))
 

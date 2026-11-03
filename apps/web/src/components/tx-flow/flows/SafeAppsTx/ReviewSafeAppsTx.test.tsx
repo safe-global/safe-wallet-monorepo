@@ -3,13 +3,13 @@ import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { faker } from '@faker-js/faker'
 import { render, waitFor } from '@/tests/test-utils'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import ReviewSafeAppsTx from './ReviewSafeAppsTx'
 
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createTx: jest.fn(),
   createMultiSendCallOnlyTx: jest.fn(),
 }))

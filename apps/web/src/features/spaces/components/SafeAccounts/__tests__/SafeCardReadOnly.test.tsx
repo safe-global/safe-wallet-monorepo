@@ -4,7 +4,7 @@ import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
 import type { RootState } from '@/store'
 import * as gatewayApi from '@/store/api/gateway'
-import * as gatewaySlices from '@/store/slices'
+import * as gatewaySlices from '@/store/api/gateway'
 
 class MockIntersectionObserver {
   observe = jest.fn()
@@ -45,14 +45,21 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(() => true),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => ({ SpaceSafeContextMenu: () => null }),
+}))
+jest.mock('@/features/__core__/createFeatureHandle', () => ({
   createFeatureHandle: () => ({}),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: {},
-  useGetSpaceAddressBook: () => [],
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => [],
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => undefined,
 }))
 

@@ -4,8 +4,9 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import CompareFeaturesCard from '../CompareFeaturesCard'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
-jest.mock('@/features/hypernative', () => ({
-  HnSignupFlow: ({ open }: { open: boolean }) => (open ? <div data-testid="hn-signup-flow" /> : null),
+jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupFlow', () => ({
+  __esModule: true,
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="hn-signup-flow" /> : null),
 }))
 
 const renderCard = (isExpanded: boolean) => {

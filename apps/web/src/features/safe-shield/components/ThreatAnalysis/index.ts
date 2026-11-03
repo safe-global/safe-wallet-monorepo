@@ -1,1 +1,0 @@
-export { ThreatAnalysis } from './ThreatAnalysis'

@@ -1,4 +1,4 @@
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { PolicyGuardContract } from './contract'
 

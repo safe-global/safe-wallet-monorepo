@@ -4,15 +4,15 @@ import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Setti
 import { SidebarProvider, Sidebar, SidebarHeader } from '@safe-global/views/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { withMockProvider } from '@/storybook/decorators'
-import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
-import { SidebarTopBar } from './SidebarTopBar'
-import { SidebarCommonFooter } from './SidebarCommonFooter'
+import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant/SpacesSidebarVariant'
+import { SidebarTopBar } from './SidebarTopBar/SidebarTopBar'
+import { SidebarCommonFooter } from './SidebarCommonFooter/SidebarCommonFooter'
 import type { SpaceItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
-import { MOCK_SPACE_ID } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 
 const mockSpaceId = '1'
 

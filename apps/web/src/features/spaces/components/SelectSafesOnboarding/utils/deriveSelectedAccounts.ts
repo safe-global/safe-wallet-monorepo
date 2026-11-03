@@ -1,4 +1,6 @@
-import { flattenSafeItems, isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { flattenSafeItems, type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeAppMockupAccount } from '@safe-global/views/features/spaces/components/OnboardingLayout/mockup/types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'

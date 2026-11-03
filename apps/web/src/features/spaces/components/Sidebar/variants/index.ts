@@ -1,11 +1,7 @@
 import type { ComponentType } from 'react'
-import { SafeSidebarVariant } from './SafeSidebarVariant'
-import { SafeSidebarContent } from './SafeSidebarContent'
-import { SpacesSidebarVariant } from './SpacesSidebarVariant'
-import { SpacesSidebarContent } from './SpacesSidebarContent'
+import { SafeSidebarContent } from './SafeSidebarContent/SafeSidebarContent'
+import { SpacesSidebarContent } from './SpacesSidebarContent/SpacesSidebarContent'
 import type { SidebarVariantContentProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
-
-export type { SidebarVariantContentProps }
 
 export type SidebarVariantType = 'safe' | 'spaces'
 
@@ -16,5 +12,3 @@ const variantMap: Record<SidebarVariantType, ComponentType<SidebarVariantContent
 
 export const getSidebarVariant = (type: SidebarVariantType): ComponentType<SidebarVariantContentProps> =>
   variantMap[type]
-
-export { SafeSidebarVariant, SafeSidebarContent, SpacesSidebarVariant, SpacesSidebarContent }

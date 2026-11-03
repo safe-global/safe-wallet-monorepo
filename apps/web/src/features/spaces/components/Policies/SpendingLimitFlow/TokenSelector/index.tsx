@@ -18,7 +18,11 @@ import {
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
+import { findTokenOption, tokenOptionLabel } from '../utils/tokenOptions'
+import {
+  type TokenOption,
+  type TokenOptionGroup,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { matchesTokenQuery } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
 import DisabledTokenOption from './DisabledTokenOption'

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { localItem } from '@/services/local-storage/local'
 import { SWAPS_CONSENT_STORAGE_KEY } from '@/features/swap/constants'
 import Swap from '@/pages/swap'

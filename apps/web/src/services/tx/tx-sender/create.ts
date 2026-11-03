@@ -3,7 +3,7 @@ import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContract
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { toSafeSignature } from '@safe-global/utils/utils/safeTransaction'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { getTransactionDetails } from '@/utils/transactions'
+import { getTransactionDetails } from '@/utils/tx-details'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'

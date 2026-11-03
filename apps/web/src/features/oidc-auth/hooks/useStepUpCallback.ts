@@ -4,7 +4,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import reconcileAuth from '@/store/reconcileAuth'
 import { STEP_UP_CANCELLED, STEP_UP_FAILED_MESSAGE } from '../constants'
-import { stepUpReturning, stepUpSettled } from '../store'
+import { stepUpReturning, stepUpSettled } from '../store/stepUpSlice'
 import { replayStepUpAction, takeStepUpTrip } from '../utils/stepUpReplay'
 
 /** Call once globally, from `InitApp`, so it runs on page load. */

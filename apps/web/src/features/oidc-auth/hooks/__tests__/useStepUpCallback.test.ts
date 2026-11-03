@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useStepUpCallback } from '../useStepUpCallback'
 import { STEP_UP_CANCELLED, STEP_UP_FAILED_MESSAGE } from '../../constants'
-import { stepUpReturning, stepUpSettled } from '../../store'
+import { stepUpReturning, stepUpSettled } from '../../store/stepUpSlice'
 import { saveStepUpTrip } from '../../utils/stepUpReplay'
 
 const mockReplace = jest.fn()

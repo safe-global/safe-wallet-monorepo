@@ -1,6 +1,6 @@
 import { computeSummary, severityRank, scanKey, formatTimestamp, withScannerTimeout, getSafeGrade } from '../utils'
 import { SCANNER_TIMEOUT_MS } from '../constants'
-import type { ScanResult } from '../types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 
 const makeScanResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   status: 'clear',

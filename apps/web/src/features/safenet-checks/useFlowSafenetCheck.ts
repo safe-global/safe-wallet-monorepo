@@ -3,7 +3,10 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useSafenetCheck, type SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
+import {
+  useSafenetCheck,
+  type SafenetCheckView,
+} from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
 
 export type FlowSafenetCheck = {
   safeTxHash: string | undefined

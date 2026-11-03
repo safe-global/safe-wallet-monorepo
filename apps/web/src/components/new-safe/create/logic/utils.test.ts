@@ -6,7 +6,7 @@ import * as web3Hooks from '@/hooks/wallets/web3'
 import { type JsonRpcProvider, id } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
-import { predictAddressBasedOnReplayData } from '@/features/multichain'
+import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 
 // Proxy Factory 1.3.0 creation code
 const mockProxyCreationCode =

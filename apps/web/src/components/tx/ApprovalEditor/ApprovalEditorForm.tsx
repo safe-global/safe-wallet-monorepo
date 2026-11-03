@@ -1,8 +1,7 @@
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
-import type { ApprovalInfo } from './hooks/useApprovalInfos'
-
+import type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { useMemo } from 'react'
 import EditableApprovalItem from './EditableApprovalItem'
 import groupBy from 'lodash/groupBy'

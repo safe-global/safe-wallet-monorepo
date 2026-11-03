@@ -5,7 +5,8 @@ import { fakerChecksummedAddress, render, renderWithUserEvent, screen, waitFor, 
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
-import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis.builder'
+import { ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/contract-analysis.builder'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import * as useCheckSimulation from '../../hooks/useCheckSimulation'
@@ -16,7 +17,7 @@ import type {
   DeadlockAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useRecipientAnalysis } from '@safe-global/utils/features/safe-shield/hooks'
+import { useRecipientAnalysis } from '@safe-global/utils/features/safe-shield/hooks/useRecipientAnalysis'
 import { transformThreatAnalysisResponse } from '@safe-global/utils/features/safe-shield/utils/transformThreatAnalysisResponse'
 import type {
   SingleRecipientAnalysisDto,
@@ -24,13 +25,13 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
-import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks'
+import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks/useSafenetShieldState'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
-jest.mock('@/features/safenet-checks', () => ({
-  ...jest.requireActual('@/features/safenet-checks'),
+jest.mock('@/features/safenet-checks/useSafenetShieldState', () => ({
+  ...jest.requireActual('@/features/safenet-checks/useSafenetShieldState'),
   useSafenetShieldState: jest.fn(),
 }))
 

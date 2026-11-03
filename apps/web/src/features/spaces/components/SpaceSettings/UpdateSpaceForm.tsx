@@ -3,10 +3,9 @@ import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
 import ErrorAlert from '@safe-global/views/features/spaces/components/SpaceSettings/ErrorAlert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin } from '@/features/spaces'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import NameInput from '@/components/common/NameInput'
-import { NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
+import { NAME_MIN_LENGTH, sanitizeName, SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 
 const UpdateSpaceForm = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose?: () => void }) => {
   const { handleUpdate, error } = useUpdateSpace(space, onClose)

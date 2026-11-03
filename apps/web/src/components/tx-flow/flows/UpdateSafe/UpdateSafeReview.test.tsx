@@ -1,12 +1,13 @@
 import { render, waitFor } from '@/tests/test-utils'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { UpdateSafeReview } from './UpdateSafeReview'
-import { SafeTxContext } from '../../SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { createUpdateSafeTxs } from '@/services/tx/safeUpdateParams'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 
 jest.mock('@/services/tx/safeUpdateParams')
-jest.mock('@/services/tx/tx-sender')
+jest.mock('@/services/tx/tx-sender/create')
+jest.mock('@/services/tx/tx-sender/dispatch')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChains')
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({

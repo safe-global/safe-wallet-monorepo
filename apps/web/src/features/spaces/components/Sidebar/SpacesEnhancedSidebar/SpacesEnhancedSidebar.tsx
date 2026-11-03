@@ -12,7 +12,7 @@ import { parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
-import { SidebarSkeleton } from '../SidebarSkeleton'
+import { SidebarSkeleton } from '../SidebarSkeleton/SidebarSkeleton'
 import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 

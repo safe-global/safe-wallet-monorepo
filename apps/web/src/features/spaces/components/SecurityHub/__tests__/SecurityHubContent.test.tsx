@@ -9,7 +9,7 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => ({
     $isReady: true,
     scanKey: (address: string, chainId: string) => `${chainId}:${address}`,

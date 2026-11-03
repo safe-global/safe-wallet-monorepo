@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { DrawerSection } from '@/components/common/Drawer'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'

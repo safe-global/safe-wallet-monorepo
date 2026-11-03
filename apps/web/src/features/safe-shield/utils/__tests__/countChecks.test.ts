@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { ContractAnalysisBuilder, RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import { ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/contract-analysis.builder'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis.builder'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { countChecks } from '../countChecks'
 

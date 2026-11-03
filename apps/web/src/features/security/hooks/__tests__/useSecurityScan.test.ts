@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import useSecurityScan from '../useSecurityScan'
-import type { ScanContext, ScanResult, ScannerId, SecurityScanner } from '../../data/scanners/types'
+import type { ScanContext, ScannerId, SecurityScanner } from '../../data/scanners/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 import { createMockContext } from '../../data/scanners/test-helpers'
 import { clearScanCache } from '../../data/scanResultsCache'
 

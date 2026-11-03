@@ -4,7 +4,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import HnSignupLayout from '@safe-global/views/features/hypernative/components/HnSignupFlow/HnSignupLayout'
 import css from '@safe-global/views/features/hypernative/components/HnSignupFlow/styles.module.css'
 import Track from '@/components/common/Track'
-import { HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import HypernativeLogo from '@safe-global/views/features/hypernative/components/HypernativeLogo'
 
 export type HnSignupIntroProps = {

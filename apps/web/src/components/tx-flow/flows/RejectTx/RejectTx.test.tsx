@@ -2,12 +2,13 @@ import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
-import { createRejectTx } from '@/services/tx/tx-sender'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { createRejectTx } from '@/services/tx/tx-sender/create'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import RejectTx from './RejectTx'
 
-jest.mock('@/services/tx/tx-sender')
+jest.mock('@/services/tx/tx-sender/create')
+jest.mock('@/services/tx/tx-sender/dispatch')
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,

@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { useSafeBarSafes } from '../useSafeBarSafes'
-import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
@@ -9,9 +9,14 @@ const mockUseIsQualifiedSafe = jest.fn(() => false)
 const mockSpaceSafes: AllSafeItems = []
 const mockUseSpaceSafes = jest.fn(() => ({ allSafes: mockSpaceSafes }))
 
-jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: () => mockUseIsQualifiedSafe(),
+jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: () => mockUseIsQualifiedSafe(),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 
@@ -39,11 +44,12 @@ const mockGrouped = jest.fn<{ allMultiChainSafes: MultiChainSafeItem[]; allSingl
     allSingleSafes: items,
   }),
 )
-jest.mock('@/hooks/safes', () => ({
-  useAllSafes: () => mockAllSafes(),
+jest.mock('@/hooks/safes/useAllSafes', () => ({
+  __esModule: true,
+  default: () => mockAllSafes(),
+}))
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
   useAllSafesGrouped: (items: SafeItem[]) => mockGrouped(items),
-  // Real hook so ordering is exercised against the (mocked) store; types are erased at runtime.
-  useSafeOrderComparator: jest.requireActual('@/hooks/safes/useSafeOrderComparator').useSafeOrderComparator,
 }))
 
 const mockOrderBy = jest.fn(() => 'name')

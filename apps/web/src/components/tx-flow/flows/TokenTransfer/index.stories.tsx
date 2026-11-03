@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { createMockStory, getFixtureData } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { getFixtureData } from '@/stories/mocks/handlers'
 import TokenTransferFlow from './index'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', shadcn: true })

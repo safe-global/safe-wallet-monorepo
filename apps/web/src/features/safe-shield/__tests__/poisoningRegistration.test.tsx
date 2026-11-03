@@ -14,20 +14,32 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 // mock ONLY the sibling analyses (like the real create step: nothing registered)
-jest.mock('@/features/safe-shield/hooks', () => ({
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: jest.fn(() => true) }))
-jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => ({ hasProFeatures: true, isLoading: false }) }))
-jest.mock('@/features/myAccounts', () => ({ useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })) }))
-jest.mock('@/features/hypernative', () => ({ useAuthToken: jest.fn(() => [{ token: undefined }]) }))
+jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+  useSafeProAccess: () => ({ hasProFeatures: true, isLoading: false }),
+}))
+jest.mock('@/features/myAccounts/hooks/useTrustSafe', () => ({
+  useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
+}))
+jest.mock('@/features/hypernative/hooks/useAuthToken', () => ({
+  useAuthToken: jest.fn(() => [{ token: undefined }]),
+}))
 
 const ANCHOR = checksumAddress('0xa1b2c3d4e5f60718293a4b5c6d7e8f9012345678')
 const LOOKALIKE = checksumAddress('0xa1b2ffffffffffffffffffffffffffffffff5678')

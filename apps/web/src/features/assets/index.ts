@@ -1,4 +1,4 @@
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { AssetsContract } from './contract'
 
 export const AssetsFeature: FeatureHandle<AssetsContract> = {

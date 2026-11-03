@@ -12,7 +12,7 @@ import type { MyAccountsContract } from './contract'
 
 // Direct component imports (already lazy-loaded at feature level)
 import MyAccounts from './components/MyAccounts'
-import MyAccountsV2 from './components/MyAccountsV2'
+import MyAccountsV2 from './components/MyAccountsV2/MyAccountsV2'
 import AccountItemButton from './components/AccountItem/AccountItemButton'
 import AccountItemLink from './components/AccountItem/AccountItemLink'
 import AccountItemCheckbox from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemCheckbox'

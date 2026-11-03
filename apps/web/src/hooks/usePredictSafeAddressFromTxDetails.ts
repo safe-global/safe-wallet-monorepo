@@ -1,8 +1,7 @@
 import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-
-import { predictSafeAddress } from '@/features/multichain'
+import { predictSafeAddress } from '@/features/multichain/utils/utils'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useWeb3ReadOnly } from './wallets/web3'
+import { useWeb3ReadOnly } from './wallets/web3ReadOnly'
 
 export function _getSetupFromDataDecoded(dataDecoded: DataDecoded) {
   if (dataDecoded?.method !== 'createProxyWithNonce') {

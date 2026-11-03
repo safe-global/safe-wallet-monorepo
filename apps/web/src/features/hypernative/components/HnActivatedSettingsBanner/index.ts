@@ -4,10 +4,6 @@ import { withGuardCheck } from '../HnSecurityReportBtn/withGuardCheck'
 import { withOwnerCheck } from '../HnSecurityReportBtn/withOwnerCheck'
 import { HnActivatedSettingsBanner } from '@safe-global/views/features/hypernative/components/HnActivatedSettingsBanner/HnActivatedSettingsBanner'
 
-// Export the original pure component for tests and stories
-export { HnActivatedSettingsBanner } from '@safe-global/views/features/hypernative/components/HnActivatedSettingsBanner/HnActivatedSettingsBanner'
-export { hnActivatedSettingsBannerConfig } from '@safe-global/views/features/hypernative/components/HnActivatedSettingsBanner/config'
-
 // Export version for Settings page (only shows when guard is active and user is owner)
 // Apply withOwnerCheck first (inner, cheaper check), then withGuardCheck, then withHnFeature (outer)
 const HnActivatedSettingsBannerWithOwnerCheck = withOwnerCheck(HnActivatedSettingsBanner)

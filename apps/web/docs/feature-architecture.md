@@ -31,7 +31,7 @@ A **feature** is a self-contained domain module that:
 - Resides in its own directory under `src/features/{feature-name}/`
 - Implements a typed **Feature Contract** interface
 - Exports a **Feature Handle** for lazy loading
-- Has explicit **public API** enforced via ESLint (only `index.ts` exports)
+- Keeps its feature handle in `index.ts`; everything else is imported from the file that declares it
 - Communicates with other features via **Redux** (data) or direct imports of feature handles
 - Has no side effects when its feature flag is disabled
 
@@ -79,8 +79,9 @@ Each feature exposes a **handle** with two parts:
 The `useLoadFeature()` hook combines flag check + lazy loading in one step:
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 // Components can render before ready (stub renders null)
 // Prefer destructuring for cleaner component usage
@@ -119,7 +120,7 @@ function MyPageWithStates() {
 
 **Why `undefined` for services?** Services are `undefined` when not ready (no stub function). Attempting to call them throws `TypeError: X is not a function`, which helps catch missing `$isReady` checks.
 
-**What about hooks?** Hooks are NOT part of the lazy-loaded feature. They are exported directly from the feature's `index.ts` and imported directly by consumers. See "Hooks Pattern" section.
+**What about hooks?** Hooks are NOT part of the lazy-loaded feature. Consumers import them from the file that declares them. See "Hooks Pattern" section.
 
 **Meta properties** (prefixed with `$`) provide state information:
 
@@ -146,7 +147,7 @@ return <feature.Banner />  // Always renders, returns null if not ready
 
 ## Hooks Pattern
 
-**IMPORTANT:** Hooks are NOT part of the lazy-loaded feature. They are exported directly from the feature's `index.ts` and imported directly by consumers.
+**IMPORTANT:** Hooks are NOT part of the lazy-loaded feature. Consumers import them from the file that declares them.
 
 ### The Problem with Lazy-Loading Hooks
 
@@ -162,9 +163,9 @@ const data = feature.useMyHook() // Called every render
 
 **Swapping a stub function for a real hook violates Rules of Hooks** because the number of internal hook calls changes between renders.
 
-### The Solution: Direct Exports (Not Lazy-Loaded)
+### The Solution: Direct Imports (Not Lazy-Loaded)
 
-**Hooks are exported directly from `index.ts`** and imported directly by consumers. They are always loaded (not lazy).
+**Hooks live in `hooks/`** and consumers import them from their file. They are always loaded (not lazy).
 
 ```typescript
 // hooks/useMyHook.ts - Keep lightweight (minimal imports)
@@ -174,9 +175,8 @@ export function useMyHook() {
   return data
 }
 
-// index.ts - Export hook directly
+// index.ts - the feature handle only
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Direct export, always loaded
 
 // contract.ts - NO hooks
 import type MyComponent from './components/MyComponent'
@@ -203,8 +203,9 @@ export default {
 
 ```typescript
 // Consumer - direct import
-import { MyFeature, useMyHook } from '@/features/myfeature'
-import { useLoadFeature } from '@/features/__core__'
+import { MyFeature } from '@/features/myfeature'
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 function MyComponent() {
   const feature = useLoadFeature(MyFeature)
@@ -216,7 +217,7 @@ function MyComponent() {
 
 ### Hook Guidelines
 
-1. **DO** export hooks directly from `index.ts` (not in `feature.ts`)
+1. **DO** keep hooks in `hooks/` and import them from their file (not via `feature.ts`)
 2. **DO NOT** include hooks in the feature contract
 3. **DO** keep hooks lightweight - minimal imports, minimal bundle size
 4. **DO** put heavy logic/imports in services (lazy-loaded), not hooks
@@ -240,7 +241,7 @@ export function useChart(data) {
 
 // ✅ BETTER: Lightweight hook + lazy-loaded service
 // hooks/useChart.ts (always loaded, but lightweight)
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { MyFeature } from '../index'
 
 export function useChart(data) {
@@ -265,7 +266,7 @@ export const chartService = {
 }
 ```
 
-### Benefits of Direct Export
+### Benefits of Direct Imports
 
 - ✅ No Rules of Hooks violations (always the same function)
 - ✅ Simple to use (direct import, no `$isReady` checks)
@@ -319,7 +320,7 @@ Feature contracts use a **flat structure** - no nested `components`, `hooks`, or
  * - camelCase → service/function (undefined, no stub)
  *
  * NOTE: Hooks should NOT be part of the feature implementation.
- * Export hooks directly from index.ts (always loaded, not lazy).
+ * Hooks are imported from their own file (always loaded, not lazy).
  */
 export type FeatureImplementation = Record<string, unknown>
 
@@ -347,7 +348,7 @@ When calling `useLoadFeature()`, types are automatically inferred from the handl
 
 ```typescript
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 // Type is automatically inferred from WalletConnectFeature
 const walletConnect = useLoadFeature(WalletConnectFeature)
@@ -390,9 +391,8 @@ export interface MyFeatureContract {
   myService: typeof myService
 }
 
-// index.ts - hooks exported separately
+// index.ts - the feature handle only
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 **Why this matters:**
@@ -427,15 +427,14 @@ export interface OldContract {
   components: { MyComponent: typeof MyComponent } // Don't nest!
 }
 
-// ✅ CORRECT: Export hooks directly from index.ts
+// ✅ CORRECT: hooks stay out of the contract; consumers import them from hooks/useMyHook
 // contract.ts - NO hooks
 export interface GoodContract {
   MyComponent: typeof MyComponent
 }
 
-// index.ts - hooks exported separately
+// index.ts - the feature handle only
 export const MyFeature = createFeatureHandle<GoodContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 ### Example Contracts
@@ -474,11 +473,9 @@ export interface MultichainContract {
 
 // src/features/multichain/index.ts
 export const MultichainFeature = createFeatureHandle<MultichainContract>('multichain')
-// Hooks exported directly (always loaded, not in contract)
-export { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
 ```
 
-**Note:** Hooks are NOT in the contract. They are exported directly from `index.ts` (always loaded) to avoid Rules of Hooks violations. See the "Hooks Pattern" section.
+**Note:** Hooks are NOT in the contract. Consumers import them from their file (always loaded) to avoid Rules of Hooks violations. See the "Hooks Pattern" section.
 
 **Full Feature Contract (components and services):**
 
@@ -502,9 +499,6 @@ export interface WalletConnectContract {
 
 // src/features/walletconnect/index.ts
 export const WalletConnectFeature = createFeatureHandle<WalletConnectContract>('walletconnect')
-// Hooks exported directly (always loaded, not in contract)
-export { useWcUri } from './hooks/useWcUri'
-export { useWalletConnectSearchParamUri } from './hooks/useWalletConnectSearchParamUri'
 ```
 
 ## Feature Handles
@@ -603,7 +597,7 @@ export function useLoadFeature<T extends FeatureImplementation>(handle: FeatureH
 // This file is SMALL (~100 bytes) - only flag lookup + lazy import
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { WalletConnectImplementation } from './contract'
 
 export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {
@@ -631,7 +625,7 @@ export type { WalletConnectContract } from './contract'
 ```typescript
 // src/components/common/Header/index.tsx
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 function Header() {
   const wc = useLoadFeature(WalletConnectFeature)
@@ -657,7 +651,7 @@ function HeaderWithStates() {
 The `createFeatureHandle` function simplifies creating feature handles by auto-deriving feature flags from folder names.
 
 ```typescript
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 // Auto-derive feature flag from folder name
@@ -742,7 +736,7 @@ import { myService } from './services/myService'
 export default { MyComponent, myService } satisfies MyFeatureContract
 
 // index.ts - Use factory, no handle.ts needed!
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { MyFeatureContract } from './contract'
 
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
@@ -782,7 +776,7 @@ export interface MyFeatureContract {
 }
 
 // index.ts - Uses contract type
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { MyFeatureContract } from './contract'
 
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
@@ -859,7 +853,7 @@ For straightforward features with minimal logic:
 
 ```
 src/features/bridge/
-├── index.ts              # Public API exports
+├── index.ts              # Feature handle
 ├── contract.ts           # Feature contract type
 ├── feature.ts            # Implementation exports
 └── Bridge.tsx            # Implementation
@@ -871,7 +865,7 @@ For features with multiple components and hooks:
 
 ```
 src/features/multichain/
-├── index.ts              # Public API exports
+├── index.ts              # Feature handle
 ├── contract.ts           # Feature contract type
 ├── feature.ts            # Implementation exports
 ├── types.ts              # Public types
@@ -890,7 +884,7 @@ For features with multiple components, hooks, services, and store:
 
 ```
 src/features/walletconnect/
-├── index.ts              # Public API exports
+├── index.ts              # Feature handle
 ├── contract.ts           # Feature contract type
 ├── feature.ts            # Implementation exports
 ├── types.ts              # Public types
@@ -899,8 +893,7 @@ src/features/walletconnect/
 │   ├── WalletConnectWidget/
 │   └── WcSessionManager/
 ├── hooks/
-│   ├── useWcUri.ts
-│   └── index.ts
+│   └── useWcUri.ts
 ├── services/
 │   ├── walletConnectService.ts
 │   └── sessionManager.ts
@@ -912,7 +905,7 @@ src/features/walletconnect/
 **Key points:**
 
 - Structure adapts to feature needs
-- ESLint enforces that external code can only import from `index.ts` and `types.ts`
+- ESLint bans importing another feature's `components/`; everything else is imported from the file that declares it, never through a barrel
 - Internal folders (components/, hooks/, services/) are implementation details
 - A component in `components/` connects data to a view: it calls hooks and renders a view from `@safe-global/views/features/<feature>/components/`. The markup itself goes in that view in `packages/views`.
 
@@ -984,11 +977,8 @@ export default {
   MyComponent, // PascalCase → component (stub renders null)
   AnotherComponent, // PascalCase → component (stub renders null)
   myService, // camelCase → service (undefined when not ready)
-  // NO HOOKS HERE - export hooks directly from index.ts
+  // NO HOOKS HERE - consumers import them from hooks/
 }
-
-// Hooks exported separately in index.ts:
-// export { useMyThing } from './hooks/useMyThing'
 ```
 
 **Naming conventions determine stub behavior:**
@@ -996,7 +986,7 @@ export default {
 - `PascalCase` → Component → stub renders `null`
 - `camelCase` → Service/function → `undefined` (no stub - check `$isReady` before calling)
 
-**Hooks are NOT lazy-loaded** - they are exported directly from `index.ts` as lightweight wrappers that call lazy-loaded services. See the "Hooks Pattern" section for details.
+**Hooks are NOT lazy-loaded** - they are lightweight wrappers that call lazy-loaded services, imported from their own file. See the "Hooks Pattern" section for details.
 
 ### Anti-Pattern: Nested Lazy Loading Inside Features
 
@@ -1033,7 +1023,7 @@ The ONLY time to use `lazy()` inside `feature.ts` is when you have a giant inter
 // feature.ts - Rare exception for giant sub-dependency
 import RegularComponent from './components/RegularComponent'
 import { useMyHook } from './hooks/useMyHook'
-import { withSuspense } from '@/features/__core__'
+import { withSuspense } from '@/features/__core__/withSuspense'
 import { lazy } from 'react'
 
 export default {
@@ -1050,8 +1040,9 @@ export default {
 ### Benefits of This Pattern
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const wc = useLoadFeature(WalletConnectFeature)
 
@@ -1072,52 +1063,35 @@ Benefits:
 - **IDE-friendly**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
 - **Tree-shakeable**: Unused features won't be bundled
 - **No boilerplate**: No context providers, no string lookups
-- **Testable**: Just mock the feature module with Jest
+- **Testable**: Mock the module the code imports (the handle's `index.ts`, or a hook's own file) with Jest
 
 ## Public API Pattern
 
-Each feature exposes:
-
-1. **Feature handle**: For use with `useLoadFeature()` (static flag + lazy refs)
-2. **Contract type**: TypeScript interface for type safety
-3. **Hooks** (optional): Direct exports, always loaded
-4. **Public types** (optional): Types needed by consumers
+A feature's `index.ts` declares its **feature handle** (for `useLoadFeature()`) and nothing else to import from.
+Code outside the feature imports hooks, store, services and types from the file that declares them, for
+example `@/features/myfeature/hooks/useMyHook`. Components are the exception: they are reached only through
+`useLoadFeature()`. ESLint rejects an import of a name from a file that only re-exports it.
 
 ### index.ts Template
 
 ```typescript
 // src/features/{feature-name}/index.ts
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { MyFeatureContract } from './contract'
 
-// Export the handle as {FeatureName}Feature
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-
-// Export contract type
-export type { MyFeatureContract } from './contract'
-
-// Export hooks directly (always loaded, not in contract)
-export { useMyHook } from './hooks/useMyHook'
-
-// Export public types (if any)
-export type * from './types'
 ```
 
-### Allowed Exports
+### Importing from a feature
 
-| Export Type    | Example                                 | Notes                         |
-| -------------- | --------------------------------------- | ----------------------------- |
-| Feature handle | `export const MyFeature = ...`          | For use with useLoadFeature   |
-| Contract type  | `export type { MyFeatureContract }`     | TypeScript interface          |
-| Hooks          | `export { useMyHook } from './hooks'`   | Direct exports, always loaded |
-| Public types   | `export type { MyData } from './types'` | Types needed by consumers     |
-
-### What NOT to Export
-
-- ❌ Internal services (access via feature handle with `useLoadFeature()`)
-- ❌ Internal components (access via feature handle with `useLoadFeature()`)
-- ❌ Internal utilities
-- ❌ Store slices directly (expose selectors via contract)
+| What           | Import from                                 |
+| -------------- | ------------------------------------------- |
+| Feature handle | `@/features/myfeature` (its `index.ts`)     |
+| Hook           | `@/features/myfeature/hooks/useMyHook`      |
+| Store          | `@/features/myfeature/store/mySlice`        |
+| Service, util  | `@/features/myfeature/services/myService`   |
+| Type           | `@/features/myfeature/types`                |
+| Component      | `useLoadFeature(MyFeature)`, never the file |
 
 ## Cross-Feature Communication
 
@@ -1138,8 +1112,9 @@ const status = useSelector(selectTransactionStatus(id))
 Features access other features' **capabilities** through handles:
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 function MyComponent() {
   const wc = useLoadFeature(WalletConnectFeature)
@@ -1169,48 +1144,49 @@ function MyComponent() {
 
 ### Communication Patterns Summary
 
-| Need                               | Pattern            | Example                                               |
-| ---------------------------------- | ------------------ | ----------------------------------------------------- |
-| Get feature                        | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)`     |
-| Check if ready                     | Meta property      | `if (wc.$isReady) ...`                                |
-| Render another feature's component | Feature handle     | `<wc.Widget />`                                       |
-| Use another feature's hook         | Direct import      | `import { useWcUri } from '@/features/walletconnect'` |
-| Call another feature's service     | Feature handle     | `if (wc.$isReady) wc.doY()`                           |
-| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                         |
-| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                         |
-| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`         |
+| Need                               | Pattern            | Example                                                              |
+| ---------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| Get feature                        | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)`                    |
+| Check if ready                     | Meta property      | `if (wc.$isReady) ...`                                               |
+| Render another feature's component | Feature handle     | `<wc.Widget />`                                                      |
+| Use another feature's hook         | Direct import      | `import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'` |
+| Call another feature's service     | Feature handle     | `if (wc.$isReady) wc.doY()`                                          |
+| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                                        |
+| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                                        |
+| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`                        |
 
 ## Common Mistakes & Anti-Patterns
 
 ### ❌ Importing Internal Files
 
 ```typescript
-// WRONG - imports feature internals
+// WRONG - imports another feature's component, or goes through a barrel
 import { WcInput } from '@/features/walletconnect/components/WcInput'
-import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
+import { useWcUri } from '@/features/walletconnect'
 ```
 
 ```typescript
-// CORRECT - uses feature handle
+// CORRECT - component via the feature handle, hook from its file
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
 
 const wc = useLoadFeature(WalletConnectFeature)
-const uri = wc.useWcUri()
+const uri = useWcUri()
 ```
 
 ### ❌ Optional Chaining with Feature Results
 
 ```typescript
 // WRONG - unnecessary, feature always returns an object
-const uri = wc?.useWcUri() ?? ''
+const Widget = wc?.WalletConnectWidget
 if (!wc) return null
 ```
 
 ```typescript
-// CORRECT - always callable, use meta properties for state
-const uri = wc.useWcUri()
+// CORRECT - always an object, use meta properties for state
 if (wc.$isDisabled) return null
+return <wc.WalletConnectWidget />
 ```
 
 ### ❌ Static Import of Feature Internals
@@ -1223,7 +1199,7 @@ import MyFeature from '@/features/my-feature/components/MyFeatureWidget'
 ```typescript
 // CORRECT - use feature handle with useLoadFeature
 import { MyFeature } from '@/features/my-feature'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const feature = useLoadFeature(MyFeature)
 return <feature.MyFeatureWidget />
@@ -1299,7 +1275,7 @@ export default {
 
 ## Testing Strategy
 
-Testing is straightforward - just mock the feature module.
+Mock the module the code under test imports: the feature's `index.ts` for its handle, and a hook's own file for the hook. A barrel mock does not reach code that imports the declaring file.
 
 ### Unit Testing a Feature
 
@@ -1316,10 +1292,13 @@ jest.mock('@/features/walletconnect', () => ({
       default: {
         // Flat structure - no nested categories
         WalletConnectWidget: () => <div data-testid="widget">Mock Widget</div>,
-        useWcUri: () => 'wc://mock-uri',
       },
     }),
   },
+}))
+
+jest.mock('@/features/walletconnect/hooks/useWcUri', () => ({
+  useWcUri: () => 'wc://mock-uri',
 }))
 
 describe('Component using WalletConnect', () => {
@@ -1354,61 +1333,32 @@ it('renders nothing when feature is disabled', () => {
 ### Benefits for Testing
 
 - **No context providers needed**: Each component manages its own state
-- **Easy mocking**: Just mock the feature module with Jest
+- **Easy mocking**: Mock the handle's `index.ts` and each hook's own file with Jest
 - **Proxy stubs**: Components render null, hooks return {} when not ready
 - **Async handling**: Use `waitFor()` to wait for lazy loading
 
 ## ESLint Enforcement
 
-### Configuration
+`apps/web/eslint.config.mjs` enforces two rules as errors:
 
-```javascript
-// apps/web/eslint.config.mjs
-'no-restricted-imports': [
-  'warn', // 'error' after migration is complete
-  {
-    patterns: [
-      {
-        // Block internal feature folders
-        group: [
-          '@/features/*/components/*',
-          '@/features/*/hooks/*',
-          '@/features/*/services/*',
-          '@/features/*/store/*',
-        ],
-        message: 'Import from feature index file only (e.g., @/features/walletconnect).',
-      },
-      {
-        // Block internal file imports (handle.ts is internal)
-        group: ['@/features/*/handle'],
-        message: 'Import from feature index file only. The handle is internal.',
-      },
-    ],
-  },
-],
-```
-
-### Migration Strategy
-
-1. **During Migration**: Rule is set to `'warn'` - violations show warnings but don't fail builds
-2. **After Migration**: Rule changes to `'error'` - violations fail builds
-
-### Allowed Imports
+- `no-restricted-imports` bans `@/features/*/components/**` (and the relative `../features/*/components` forms):
+  components are reached through `useLoadFeature()`, never imported.
+- `local/no-barrel-imports` (defined in `packages/views/eslint-no-barrel-imports.mjs`, also on in
+  `packages/views`) rejects importing a name from a file that only re-exports it. Import it from the file that
+  declares it. A feature's `index.ts` declares its handle, so importing the handle from `@/features/my-feature`
+  is fine. The rule allows the components a feature `index.ts` still re-exports, since their path is banned.
 
 ```typescript
-// ✅ Allowed: Feature export (for use with useLoadFeature)
+// ✅ Feature handle, declared in the feature's index.ts
 import { MyFeature } from '@/features/my-feature'
-
-// ✅ Allowed: Contract type (for type annotations if needed)
-import type { MyFeatureContract } from '@/features/my-feature/contract'
-
-// ✅ Allowed: Public types
+// ✅ Hooks, store, services and types from the declaring file
+import { useMyHook } from '@/features/my-feature/hooks/useMyHook'
 import type { MyFeatureData } from '@/features/my-feature/types'
 
-// ❌ Blocked: Internal imports
-import { useInternalHook } from '@/features/my-feature/hooks/useInternal'
+// ❌ A component: use useLoadFeature(MyFeature) instead
 import { InternalComponent } from '@/features/my-feature/components/Internal'
-import { myFeatureHandle } from '@/features/my-feature/handle' // Use index.ts instead
+// ❌ A name the target only re-exports
+import { useMyHook } from '@/features/my-feature/hooks'
 ```
 
 ## Bundle Verification
@@ -1478,7 +1428,7 @@ export default {
 
 ```typescript
 // src/features/{feature-name}/index.ts
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { MyFeatureContract } from './contract'
 
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
@@ -1503,7 +1453,7 @@ export default function MyComponent(): ReactElement {
 ```typescript
 // src/features/{feature-name}/hooks/useMyThing.ts
 // Lightweight wrapper - no heavy imports
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { MyFeature } from '../index'
 
 export function useMyThing() {
@@ -1540,7 +1490,6 @@ yarn workspace @safe-global/web test
 
 1. Create `src/features/__core__/types.ts` with base contract types
 2. Create `src/features/__core__/useLoadFeature.ts` with the loading hook
-3. Update ESLint rules (keep as warnings initially)
 
 ### Phase 2: Migrate Features (One at a Time)
 
@@ -1556,7 +1505,6 @@ For each feature:
 
 ### Phase 3: Enforce
 
-1. Change ESLint rule from 'warn' to 'error'
 2. Verify CI passes
 3. Document any exceptions
 
@@ -1580,8 +1528,6 @@ function SafeShieldScanner() {
 ```typescript
 // src/features/hypernative/index.ts
 export const HypernativeFeature = createFeatureHandle<HypernativeContract>('hypernative')
-// Hook exported directly (always loaded)
-export { useHypernativeScanner } from './hooks/useHypernativeScanner'
 
 // src/features/hypernative/contract.ts (NO hooks)
 import type Banner from './components/Banner'
@@ -1606,8 +1552,9 @@ export function useHypernativeScanner() {
 }
 
 // src/features/safe-shield/components/SafeShieldScanner.tsx
-import { HypernativeFeature, useHypernativeScanner } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useHypernativeScanner } from '@/features/hypernative/hooks/useHypernativeScanner'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 function SafeShieldScanner() {
   const hn = useLoadFeature(HypernativeFeature)
@@ -1636,9 +1583,8 @@ function SafeShieldScannerWithStates() {
 - [ ] Created `contract.ts` with **flat structure** (components and services only, NO hooks)
 - [ ] **Used `typeof` pattern in contract for IDE navigation**
 - [ ] **Used naming conventions**: `PascalCase` (components), `camelCase` (services)
-- [ ] **NO hooks in contract** - hooks are exported directly from `index.ts`
+- [ ] **NO hooks in contract** - consumers import hooks from their file
 - [ ] Created `index.ts` with `createFeatureHandle()` factory
-- [ ] **Exported hooks directly from `index.ts`** (always loaded, minimal imports)
 - [ ] **`feature.ts` uses direct imports** (NOT `lazy()`) - see "Lazy Loading: One Dynamic Import"
 - [ ] **`feature.ts` exports flat object** with components and services only (NO hooks)
 - [ ] Organized implementation in `components/`, `hooks/`, `services/`, `store/`
@@ -1652,11 +1598,11 @@ function SafeShieldScannerWithStates() {
 - [ ] Created `contract.ts` with **flat structure** (components and services only, NO hooks)
 - [ ] **Used `typeof` pattern in contract for IDE navigation**
 - [ ] Created `index.ts` with `{FeatureName}Feature` export
-- [ ] **Moved hooks out of contract** - export directly from `index.ts`
+- [ ] **Moved hooks out of contract** - consumers import them from their file
 - [ ] **Kept hooks lightweight** - minimal imports (moved heavy imports to services if needed)
 - [ ] **`feature.ts` uses direct imports and flat structure** (NO hooks)
 - [ ] Organized internals in `components/`, `hooks/`, `services/`, `store/`
-- [ ] Updated consumers to import hooks directly (e.g., `import { useMyHook } from '@/features/myfeature'`)
+- [ ] Updated consumers to import hooks from their file (e.g., `import { useMyHook } from '@/features/myfeature/hooks/useMyHook'`)
 - [ ] Removed null checks where proxy stubs suffice (for components)
 - [ ] Verified no ESLint warnings
 - [ ] Tests pass
@@ -1664,12 +1610,12 @@ function SafeShieldScannerWithStates() {
 ### For Feature Consumers
 
 - [ ] Using `useLoadFeature()` hook with feature handle for components/services
-- [ ] **Importing hooks directly from feature index** (e.g., `import { useMyHook } from '@/features/myfeature'`)
+- [ ] **Importing hooks from the declaring file** (e.g., `import { useMyHook } from '@/features/myfeature/hooks/useMyHook'`)
 - [ ] **No optional chaining** - feature always returns an object (proxy stubs for components)
 - [ ] Using **flat access**: `feature.MyComponent`, `feature.myService` (no nested `.components.`)
 - [ ] Using meta properties (`$isDisabled`, `$isReady`, `$error`) for explicit state handling
 - [ ] Type-safe (types inferred from handle)
-- [ ] No direct imports from feature internal folders (except hooks from index)
+- [ ] No imports of another feature's components; no imports through barrels
 
 ### Verification
 
@@ -1708,8 +1654,9 @@ The handle is imported at app startup, but it's tiny (~100 bytes). The actual fe
 2. **Meta properties** (`$isDisabled`, `$isReady`, `$error`)
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__core__'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const wc = useLoadFeature(WalletConnectFeature)
 
@@ -1744,7 +1691,7 @@ import type { SafeSetup } from '@/features/multichain/types'
 
 ### Q: What about testing internal components?
 
-Test files inside a feature can import from other files within the same feature freely. External tests should mock the feature module.
+Test files import and mock the file that declares what they need, like any other code.
 
 ### Q: How does lazy loading work?
 
@@ -1759,17 +1706,11 @@ import { myService } from './services/myService'
 export default {
   MyComponent, // PascalCase → component (stub renders null)
   myService, // camelCase → service (undefined when not ready)
-  // NO hooks here - they're exported from index.ts
+  // NO hooks here - consumers import them from hooks/
 }
 ```
 
-**Hooks are NOT lazy-loaded** - they're exported directly from `index.ts`:
-
-```typescript
-// index.ts
-export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Always loaded
-```
+**Hooks are NOT lazy-loaded** - consumers import them from their file (`./hooks/useMyHook`), so they are always loaded.
 
 **Do NOT use `lazy()` inside `feature.ts`** - the file is already lazy-loaded. Adding more `lazy()` calls creates unnecessary chunks and complexity. See the "Lazy Loading: One Dynamic Import" section above.
 
@@ -1778,7 +1719,7 @@ The rare exception is when you have a giant internal dependency (500KB+ chart li
 ```typescript
 // Rare exception for giant sub-dependency
 import RegularComponent from './components/RegularComponent'
-import { withSuspense } from '@/features/__core__'
+import { withSuspense } from '@/features/__core__/withSuspense'
 import { lazy } from 'react'
 
 export default {
@@ -1791,7 +1732,8 @@ export default {
 Consumers use flat access:
 
 ```typescript
-import { MyFeature, useMyHook } from '@/features/myfeature'
+import { MyFeature } from '@/features/myfeature'
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
 
 const feature = useLoadFeature(MyFeature)
 const data = useMyHook()  // Direct import, always safe

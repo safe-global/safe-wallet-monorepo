@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { useEffect, useState, type ComponentProps } from 'react'
 import { fn } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
-import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import type { NestedSafeWithStatus } from '@safe-global/views/components/nested-safes/NestedSafesPopover/types'
 import { NestedSafesPopover } from './index'
 
 // The mock harness resolves the current Safe (parent) to the efSafe fixture address.

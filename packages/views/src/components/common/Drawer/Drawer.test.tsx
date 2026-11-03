@@ -1,12 +1,10 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { Drawer } from './Drawer'
-import {
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerSubtitle,
-  DrawerTitle,
-} from '@/components/common/Drawer/components'
+import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+import { DrawerSubtitle } from '@safe-global/views/components/common/Drawer/components/DrawerSubtitle'
+import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 
 describe('Drawer', () => {
   it('renders the composed header, body and footer', () => {

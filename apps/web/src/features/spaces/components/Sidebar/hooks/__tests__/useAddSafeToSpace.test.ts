@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store/stepUpSlice'
 import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { Errors } from '@/services/exceptions'
 import { useAddSafeToSpace } from '../useAddSafeToSpace'

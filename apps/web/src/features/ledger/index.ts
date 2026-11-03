@@ -1,4 +1,4 @@
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { LedgerContract } from './contract'
 
 // Ledger is a core feature - always enabled, not gated by a CGW feature flag.

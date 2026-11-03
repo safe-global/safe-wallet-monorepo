@@ -1,5 +1,5 @@
-import { isMultiChainSafeItem } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { SafeCardReadOnly } from '@/features/spaces'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import type { SectionItemProps } from '../../sectionItems'

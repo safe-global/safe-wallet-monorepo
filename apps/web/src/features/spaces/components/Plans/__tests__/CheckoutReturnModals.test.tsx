@@ -10,8 +10,9 @@ jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: strin
 jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
   useCheckoutReturn: (spaceId?: string) => mockUseCheckoutReturn(spaceId),
 }))
-jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => ({
-  SafeProTrialActivatedModal: ({
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProTrialActivatedModal', () => ({
+  __esModule: true,
+  default: ({
     open,
     onOpenChange,
     trialEndsAt,
@@ -34,10 +35,19 @@ jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => (
         {ctaLabel ?? 'Go to Workspace'}
       </button>
     ) : null,
-  SafeProSubscriptionActivatedModal: ({ open, planName }: { open: boolean; planName: string }) =>
+}))
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProSubscriptionActivatedModal', () => ({
+  __esModule: true,
+  default: ({ open, planName }: { open: boolean; planName: string }) =>
     open ? <div data-testid="subscription-activated-modal">{planName}</div> : null,
-  SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="checkout-pending">{title}</div>,
-  SafeProNoticeModal: ({
+}))
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProPendingModal', () => ({
+  __esModule: true,
+  default: ({ title }: { title: string }) => <div data-testid="checkout-pending">{title}</div>,
+}))
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProNoticeModal', () => ({
+  __esModule: true,
+  default: ({
     title,
     actionLabel,
     onAction,

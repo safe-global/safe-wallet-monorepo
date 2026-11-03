@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpaceActivity from '@/pages/spaces/activity'
 
 const ACTOR = '0x1234567890AbcdEF1234567890aBcdef12345678'

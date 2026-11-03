@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMinimalDecorator } from '@/stories/mocks'
+import { createMinimalDecorator } from '@/stories/mocks/createMockStory'
 import { ContractVersion } from './index'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 

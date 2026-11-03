@@ -1,7 +1,5 @@
 import type { SafeVersion } from '@safe-global/types-kit'
-import type { SecurityGrade } from '../securityTypes'
-import type { SafeGrade } from './types'
-
+import type { SecurityGrade, SafeGrade } from '@safe-global/views/features/security/types'
 /** Maximum time a single scanner is allowed to run before being rejected. */
 export const SCANNER_TIMEOUT_MS = 15_000
 

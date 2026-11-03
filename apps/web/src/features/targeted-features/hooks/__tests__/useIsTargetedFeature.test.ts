@@ -4,7 +4,7 @@ import * as useOutreachSafeHook from '../useIsOutreachSafe'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useIsTargetedFeature, type TargetedFeatures } from '@/features/targeted-features'
+import { useIsTargetedFeature, type TargetedFeatures } from '@/features/targeted-features/hooks/useIsTargetedFeature'
 
 jest.mock('../../constants', () => ({
   TARGETED_FEATURES: [

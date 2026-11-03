@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
-import type { ScanResult } from '@/features/security/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import ChainIndicator from '@/components/common/ChainIndicator'

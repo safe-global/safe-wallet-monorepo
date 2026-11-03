@@ -1,20 +1,18 @@
 import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Methods } from '@safe-global/safe-apps-sdk'
-import * as web3 from '@/hooks/wallets/web3'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { render, screen } from '@/tests/test-utils'
 import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import ReviewSignMessageOnChain from '@/components/tx-flow/flows/SignMessageOnChain/ReviewSignMessageOnChain'
-import { JsonRpcProvider } from 'ethers'
 import { act } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import type { SafeTxContextParams } from '../../SafeTxProvider'
-import { SafeTxContext } from '../../SafeTxProvider'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import * as useTxPreviewHooks from '@/components/tx/confirmation-views/useTxPreview'
-import { SlotProvider } from '../../slots'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([])
@@ -28,7 +26,6 @@ describe('ReviewSignMessageOnChain', () => {
       undefined,
       false,
     ])
-    jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(() => new JsonRpcProvider())
     const safeAddress = faker.finance.ethereumAddress()
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safeAddress,

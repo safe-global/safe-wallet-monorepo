@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { mswLoader } from 'msw-storybook-addon'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import NewTxFlow from './index'
 

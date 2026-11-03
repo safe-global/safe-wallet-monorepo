@@ -15,7 +15,8 @@ import { BaseError as ViemBaseError, ContractFunctionRevertedError } from 'viem'
 import { ContractAbis } from '@gnosis.pm/zodiac'
 import { Safe4337Module__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-modules-deployments/dist/assets/safe-4337-module/v0.3.0/Safe4337Module__factory'
 import { SafeWebauthnSharedSigner__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-modules-deployments/dist/assets/safe-passkey-module/v0.2.1/SafeWebauthnSharedSigner__factory'
-import { HypernativeGuardAbi, HypernativeGuardV2Abi } from '@/features/hypernative/services'
+import HypernativeGuardAbi from '@/features/hypernative/services/HypernativeGuard.abi.json'
+import HypernativeGuardV2Abi from '@/features/hypernative/services/HypernativeGuardV2.abi.json'
 
 export type KnownCustomError = {
   name: string

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { SimpleTxWatcher } from '../SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import { type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { waitFor } from '@/tests/test-utils'
 

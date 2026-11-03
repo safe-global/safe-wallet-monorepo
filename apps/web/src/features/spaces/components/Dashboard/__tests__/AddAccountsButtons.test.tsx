@@ -1,14 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import SpaceDashboard from '../index'
-import { useLoadFeature } from '@/features/__core__'
-import {
-  useCurrentSpaceId,
-  useSpaceSafes,
-  useSpaceMembersByStatus,
-  useIsInvited,
-  useSpacePendingTransactions,
-} from '@/features/spaces'
-import { useSpaceAccountsData } from '@/features/myAccounts'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
+import useSpaceAccountsData from '@/features/myAccounts/hooks/useSpaceAccountsData'
 import type { ReactNode } from 'react'
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => false }))
@@ -38,23 +35,40 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   MixpanelEventParams: { SAFE_ADDRESS: 'Safe Address', TX_ID: 'TX ID' },
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   useSpaceSafes: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useSpaceMembersByStatus: jest.fn(),
   useIsInvited: jest.fn(),
-  useTrackSpace: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useTrackSpace', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useSpacePendingTransactions', () => ({
   useSpacePendingTransactions: jest.fn(),
-  useGetSpaceAddressBook: jest.fn(() => []),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: jest.fn(() => []),
+}))
+jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: { name: 'spaces' },
 }))
 
 jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: { name: 'myAccounts' },
-  useSpaceAccountsData: jest.fn(() => ({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })),
+}))
+jest.mock('@/features/myAccounts/hooks/useSpaceAccountsData', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: jest.fn(),
 }))
 
@@ -69,12 +83,14 @@ jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default
 
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
+}))
+jest.mock('@/features/safe-pro-announcement/hooks/useSafeProAnnouncementModal', () => ({
   useSafeProAnnouncementModal: () => ({ isOpen: false, setIsOpen: jest.fn() }),
 }))
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
 }))
 

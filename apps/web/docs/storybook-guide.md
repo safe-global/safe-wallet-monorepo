@@ -26,11 +26,11 @@ Rules:
 
 1. **No store/API needs** → plain `Meta`/`StoryObj` with an explicit `meta.title`.
 2. **Redux hooks only** (`useAppSelector`, `useDispatch`) → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
-3. **Pages/widgets needing API mocks** → **`createMockStory` from `@/stories/mocks` — the canonical factory. Do NOT hand-roll `StoreDecorator` + provider stacks + MSW handlers**; that is exactly what the factory replaces.
+3. **Pages/widgets needing API mocks** → **`createMockStory` from `@/stories/mocks/createMockStory` — the canonical factory. Do NOT hand-roll `StoreDecorator` + provider stacks + MSW handlers**; that is exactly what the factory replaces.
 
 ```typescript
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import Dashboard from './index'
 
 const defaultSetup = createMockStory({
@@ -65,7 +65,7 @@ export const Default: Story = {}
 | `pathname` | `string`                                                                                                                       | `'/home'`                                           | Router pathname                               |
 
 - **Do not override feature flags** unless testing a specific disabled state (e.g. `features: { swaps: false }`).
-- Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (all from `@/stories/mocks`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
+- Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (each from its own file in `src/stories/mocks/`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
 
 ## What preview.tsx already provides globally (don't re-add)
 

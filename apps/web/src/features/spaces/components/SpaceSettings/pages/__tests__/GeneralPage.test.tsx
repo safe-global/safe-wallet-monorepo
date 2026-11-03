@@ -4,8 +4,10 @@ import GeneralPage from '../GeneralPage'
 const mockUseSpaceMembersByStatus = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => 'space-uuid',
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useSpaceMembersByStatus: () => mockUseSpaceMembersByStatus(),
   useIsAdmin: () => mockUseIsAdmin(),
 }))
@@ -29,16 +31,11 @@ jest.mock('../../sections/DangerZoneSection', () => ({
   default: () => <div data-testid="danger-zone-section" />,
 }))
 
-jest.mock('@/features/oidc-auth', () => ({
-  WorkspaceTwoFactorSection: ({
-    members,
-    spaceId,
-    isAdmin,
-  }: {
-    members: { id: number }[]
-    spaceId?: string
-    isAdmin?: boolean
-  }) => <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}:${isAdmin}`}</div>,
+jest.mock('@/features/oidc-auth/components/WorkspaceTwoFactorSection', () => ({
+  __esModule: true,
+  default: ({ members, spaceId, isAdmin }: { members: { id: number }[]; spaceId?: string; isAdmin?: boolean }) => (
+    <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}:${isAdmin}`}</div>
+  ),
 }))
 
 describe('GeneralPage', () => {

@@ -4,7 +4,7 @@ import { useCurrentChain } from '../useChains'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 // mock useWeb3Readonly
-jest.mock('../wallets/web3', () => {
+jest.mock('../wallets/web3ReadOnly', () => {
   const provider = {
     getFeeData: jest.fn(() =>
       Promise.resolve({

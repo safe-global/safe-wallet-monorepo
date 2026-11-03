@@ -2,7 +2,7 @@ import { useAppDispatch } from '@/store'
 import { setBannerDismissed } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
+import type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'
 import { HnMiniTxBanner } from './HnMiniTxBanner'
 
 export interface HnMiniTxBannerWithDismissalProps extends WithHnSignupFlowProps {}

@@ -1,5 +1,5 @@
 import Track from '@/components/common/Track'
-import { isPairingUri } from '../../services/utils'
+import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { WalletConnectContext } from '../WalletConnectContext'
 import { WCLoadingState } from '../../types'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'

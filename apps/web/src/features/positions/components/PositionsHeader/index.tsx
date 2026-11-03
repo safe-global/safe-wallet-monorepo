@@ -4,7 +4,7 @@ import { Chip } from '@safe-global/views/components/ui/chip'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import { calculateProtocolPercentage } from '@safe-global/utils/features/positions'
+import { calculateProtocolPercentage } from '@safe-global/utils/features/positions/utils/calculateProtocolPercentage'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
 const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTotal?: number }) => {

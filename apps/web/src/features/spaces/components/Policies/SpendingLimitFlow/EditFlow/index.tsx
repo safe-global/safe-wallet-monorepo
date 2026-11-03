@@ -4,7 +4,7 @@ import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProv
 import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import type { PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
 import CreateSpendingLimitPolicy from '../CreateStep'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'

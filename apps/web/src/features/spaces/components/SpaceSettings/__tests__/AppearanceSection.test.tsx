@@ -5,6 +5,9 @@ import AppearanceSection from '../sections/AppearanceSection'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/settings', () => ({
+  ...jest.requireActual('@/services/analytics/events/settings'),
   SETTINGS_EVENTS: {
     APPEARANCE: {
       DARK_MODE: { action: 'Dark mode', category: 'settings' },

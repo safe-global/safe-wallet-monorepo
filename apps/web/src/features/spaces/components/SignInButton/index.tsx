@@ -2,7 +2,8 @@ import WalletLogin, {
   type WalletLoginButtonStyle,
   type WalletLoginButtonText,
 } from '@/components/welcome/WelcomeLogin/WalletLogin'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -11,7 +12,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { AuthLoginMethod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isSmartContractWallet, isLedger } from '@/utils/wallets'

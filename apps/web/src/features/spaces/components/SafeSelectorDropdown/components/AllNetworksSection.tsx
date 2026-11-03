@@ -9,8 +9,9 @@ import {
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useAddNetworkState, type AddNetworkUnavailableReason } from '@/features/multichain'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
+import { useAddNetworkState, type AddNetworkUnavailableReason } from '@/features/multichain/hooks/useAddNetworkState'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import ChainLogo from './ChainLogo'
 
 const UNAVAILABLE_MESSAGES: Record<AddNetworkUnavailableReason, string> = {

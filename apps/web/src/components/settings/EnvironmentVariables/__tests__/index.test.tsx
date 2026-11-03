@@ -9,7 +9,7 @@ import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
 import { reloadPage } from '@/utils/navigation'
-import type { useSafeProAccess } from '@/features/spaces'
+import type { useSafeProAccess } from '@/features/spaces/hooks/useSafeProAccess'
 import { TENDERLY_SETUP_GUIDE_URL, TENDERLY_SIMULATE_URL_PLACEHOLDER } from '../utils'
 
 // Mock chain data
@@ -35,11 +35,16 @@ const mockUseSafeProAccess = jest.fn<Partial<ReturnType<typeof useSafeProAccess>
   isLoading: false,
   spaceId: null,
 }))
-jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
+jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+  useSafeProAccess: () => mockUseSafeProAccess(),
+}))
 
 // Mock analytics
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/settings', () => ({
+  ...jest.requireActual('@/services/analytics/events/settings'),
   SETTINGS_EVENTS: {
     ENV_VARIABLES: {
       SAVE: { category: 'settings', action: 'env_variables_save' },

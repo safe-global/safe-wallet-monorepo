@@ -3,7 +3,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { useRecipientAnalysis as useRecipientAnalysisUtils } from '@safe-global/utils/features/safe-shield/hooks'
+import { useRecipientAnalysis as useRecipientAnalysisUtils } from '@safe-global/utils/features/safe-shield/hooks/useRecipientAnalysis'
 import useOwnedSafes from '@/hooks/useOwnedSafes'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 

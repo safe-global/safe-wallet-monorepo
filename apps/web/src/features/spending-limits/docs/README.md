@@ -114,7 +114,7 @@ Supported versions:
 
 ```
 src/features/spending-limits/
-├── index.ts                 # Public API exports
+├── index.ts                 # Feature handle
 ├── contract.ts              # TypeScript interface
 ├── feature.ts               # Lazy-loaded implementation
 ├── types.ts                 # Type definitions
@@ -154,7 +154,7 @@ This keeps the heavy fetching logic lazy-loaded while making data available to a
 **How to read spending limits:**
 
 ```typescript
-import { selectSpendingLimits } from '@/features/spending-limits'
+import { selectSpendingLimits } from '@/features/spending-limits/store/spendingLimitsSlice'
 import { useAppSelector } from '@/store'
 
 // Read data from store (loaded on app start)
@@ -167,7 +167,7 @@ This feature is controlled by the `SPENDING_LIMIT` feature flag, configured per-
 
 ```typescript
 import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const { SpendingLimitsSettings, $isDisabled, $isReady } = useLoadFeature(SpendingLimitsFeature)
 

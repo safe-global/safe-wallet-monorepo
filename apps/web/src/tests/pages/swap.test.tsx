@@ -6,8 +6,8 @@ import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
 
 jest.mock('@/hooks/useChains')
 
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: () => ({
     SwapWidget: ({ sell }: { sell?: { asset: string; amount: string } }) => (
       <div data-testid="swap-widget" data-sell-asset={sell?.asset ?? ''} data-sell-amount={sell?.amount ?? ''} />

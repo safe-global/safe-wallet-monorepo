@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { usePolicyDetailsBase, type PolicyDetailsBase } from '../../hooks/usePolicyDetailsBase'
-import type { ActiveDrawerPolicy } from '../../SpendingLimitDrawer'
+import type { ActiveDrawerPolicy } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import { formatLastUpdated } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 import type { PendingSpendingLimitPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 

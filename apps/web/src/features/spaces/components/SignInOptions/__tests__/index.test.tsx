@@ -5,6 +5,8 @@ const mockAfterSignIn = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/types', () => ({
   EventType: { META: 'meta' },
 }))
 
@@ -12,7 +14,7 @@ jest.mock('@/services/siwe/useSiwe', () => ({
   useSiwe: () => ({ signIn: jest.fn(), loading: false }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 
@@ -21,8 +23,10 @@ const MockGoogleSignInButton = () => <button data-testid="google-login-btn">Cont
 
 const mockUseLoadFeature = jest.fn()
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => mockUseLoadFeature(),
+}))
+jest.mock('@/features/__core__/createFeatureHandle', () => ({
   createFeatureHandle: () => ({}),
 }))
 

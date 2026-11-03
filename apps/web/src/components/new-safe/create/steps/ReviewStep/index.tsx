@@ -1,15 +1,15 @@
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import {
-  safeCreationDispatch,
-  SafeCreationEvent,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-  persistCounterfactualSafe,
-} from '@/features/counterfactual/services'
-import { CF_TX_GROUP_KEY, PayNowPayLater } from '@/features/counterfactual'
-import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
-
+} from '@/features/counterfactual/services/safeDeployment'
+import { persistCounterfactualSafe } from '@/features/counterfactual/services/persistCounterfactualSafe'
+import { PayNowPayLater } from '@/features/counterfactual'
+import { CF_TX_GROUP_KEY } from '@/features/counterfactual/constants'
+import { NetworkLogosList } from '@/features/multichain'
+import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {
@@ -42,13 +42,10 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import {
-  CREATE_SAFE_CATEGORY,
-  CREATE_SAFE_EVENTS,
-  OVERVIEW_EVENTS,
-  trackEvent,
-  MixpanelEventParams,
-} from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -66,13 +63,15 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NetworkWarning from '../../NetworkWarning'
-import { useAllSafes } from '@/hooks/safes'
+import useAllSafes from '@/hooks/safes/useAllSafes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store/stepUpSlice'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'

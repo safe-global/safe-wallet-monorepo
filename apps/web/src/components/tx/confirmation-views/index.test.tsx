@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Operation, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { render } from '@/tests/test-utils'
-import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import ConfirmationView from '.'
 
 const CHAIN_ID = '11155111'

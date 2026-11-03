@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 import RejectTx from './RejectTx'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 
 type RejectTxProps = {

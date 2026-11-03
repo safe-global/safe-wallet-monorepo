@@ -1,11 +1,9 @@
 import { renderHook, act } from '@testing-library/react'
 import { useSpaceSafeSelectorItems } from '../useSpaceSafeSelectorItems'
-import type { SafeItem } from '@/hooks/safes/useAllSafes'
-import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
-
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 // ── mocks ──────────────────────────────────────────────────────────────
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 
@@ -60,8 +58,7 @@ jest.mock('@/config/routes', () => ({
     welcome: { spaces: '/welcome/spaces' },
   },
 }))
-
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSafeBarSafes } from '../useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -72,7 +69,7 @@ import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useRouter } from 'next/router'
 

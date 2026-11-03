@@ -1,4 +1,8 @@
-import { compareGroups, type AccountGroup, type SafeSortKeys } from '../useSafeAccountRows'
+import { compareGroups } from '../useSafeAccountRows'
+import {
+  type AccountGroup,
+  type SafeSortKeys,
+} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 
 const group = (sort: Partial<SafeSortKeys>, address = '0x0'): AccountGroup =>
   ({

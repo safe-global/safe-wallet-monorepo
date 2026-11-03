@@ -6,7 +6,7 @@ import { render, screen, waitFor } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { mockUnenforcedPolicy } from '../../../mocks/policies'
 import {
   MODULE_ALREADY_ENABLED_ERROR,
@@ -28,8 +28,8 @@ jest.mock('@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton', () =>
   __esModule: true,
   default: () => <div data-testid="review-skeleton" />,
 }))
-jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope/context', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope/context'),
   useSafeScope: jest.fn(),
 }))
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { faker } from '@faker-js/faker'
 import { ApprovalValueField } from './ApprovalValueField'
-import type { ApprovalInfo } from './hooks/useApprovalInfos'
+import type { ApprovalInfo } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { TokenType } from '@safe-global/store/gateway/types'
 
 // Seed faker for deterministic visual regression tests

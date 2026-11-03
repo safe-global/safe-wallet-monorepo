@@ -1,13 +1,15 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   AttestationVerificationStatus,
-  CheckEventType,
   CheckStatus,
-  type NormalizedCheckEvent,
   type PublicCheckStatus,
-  type SafenetCheckSnapshot,
+} from '@safe-global/utils/features/safenet-checks/types/status'
+import {
+  CheckEventType,
+  type NormalizedCheckEvent,
   type SentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks'
+} from '@safe-global/utils/features/safenet-checks/types/events'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
 import {
   isSafenetRuleId,
   SAFENET_RULE_IDS,

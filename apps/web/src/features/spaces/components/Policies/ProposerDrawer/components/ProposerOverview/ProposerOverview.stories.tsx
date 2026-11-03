@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import ProposerOverview, { ProposerOverviewSkeleton } from './ProposerOverview'
 
 // The Network row reads chain config, so the stories need a store and the chains endpoint.

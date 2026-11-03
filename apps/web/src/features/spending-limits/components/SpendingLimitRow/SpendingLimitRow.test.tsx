@@ -2,8 +2,11 @@ import type { ReactNode } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { parseUnits } from 'ethers'
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import {
+  MultiTransfersFields,
+  TokenTransferType,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import * as useHasPermission from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { erc20TokenBuilder } from '@/tests/builders/balances'

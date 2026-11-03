@@ -1,13 +1,12 @@
-import {
-  useThreatAnalysis as useThreatAnalysisUtils,
-  useThreatAnalysisHypernative,
-} from '@safe-global/utils/features/safe-shield/hooks'
+import { useThreatAnalysis as useThreatAnalysisUtils } from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysis'
+import { useThreatAnalysisHypernative } from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernative'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { useContext, useMemo } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { useIsHypernativeEligible, useIsHypernativeFeatureEnabled } from '@/features/hypernative'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import { useIsHypernativeFeature as useIsHypernativeFeatureEnabled } from '@/features/hypernative/hooks/useIsHypernativeFeature'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useNestedTransaction } from '../components/useNestedTransaction'
 import { useCurrentChain } from '@/hooks/useChains'

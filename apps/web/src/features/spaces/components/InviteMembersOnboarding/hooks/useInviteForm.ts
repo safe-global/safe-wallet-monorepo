@@ -6,7 +6,7 @@ import { MemberRole } from '../../../hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store/stepUpSlice'
 import { useAppDispatch } from '@/store'
 
 interface MemberInvite {

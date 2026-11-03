@@ -1,6 +1,6 @@
-import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import type { SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
+import type { SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
 export type SafenetDisplayStatus = {

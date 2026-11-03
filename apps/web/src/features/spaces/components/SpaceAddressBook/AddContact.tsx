@@ -2,11 +2,10 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
 import AddContactDialog from './AddContactDialog'
-
-export type { ContactField } from './AddContactDialog'
 
 const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const addressBookItems = useGetSpaceAddressBook()

@@ -1,7 +1,7 @@
 import { Typography } from '@safe-global/views/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
 import { SafeListItem } from '../SafesList/SafeListItem'

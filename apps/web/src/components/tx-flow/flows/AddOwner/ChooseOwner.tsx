@@ -18,8 +18,10 @@ import {
   validateThreshold,
 } from '@safe-global/utils/utils/validation'
 import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
-import type { AddOwnerFlowProps } from '.'
-import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
+import type {
+  AddOwnerFlowProps,
+  ReplaceOwnerFlowProps,
+} from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'

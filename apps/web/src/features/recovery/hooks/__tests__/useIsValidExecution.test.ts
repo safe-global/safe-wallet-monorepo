@@ -6,6 +6,7 @@ import useIsValidExecution from '../../../../hooks/useIsValidExecution'
 import type { EthersError } from '@/utils/ethers-utils'
 import type { EthersTxReplacedReason } from '@/utils/ethers-utils'
 import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import type { Eip1193Provider } from 'ethers'
 import { JsonRpcProvider, BrowserProvider } from 'ethers'
 import * as contracts from '@/services/contracts/safeContracts'
@@ -55,7 +56,7 @@ describe('useIsValidExecution', () => {
   beforeEach(() => {
     jest.resetAllMocks()
 
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockImplementation(() => mockReadOnlyProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(() => mockReadOnlyProvider)
     jest.spyOn(useWallet, 'useSigner').mockReturnValue(mockWallet)
     jest.spyOn(web3, 'createWeb3').mockImplementation(() => mockProvider)
   })

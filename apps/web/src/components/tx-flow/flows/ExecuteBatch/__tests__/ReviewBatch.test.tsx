@@ -8,9 +8,11 @@ import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
 import { getMockTx } from '@/tests/mocks/transactions'
 import { transactionDataBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
-import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
+import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
+import { dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender/dispatch'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError } from '@/services/exceptions'
 import type { GasPaymentOptions } from '@/hooks/useGasPaymentOptions'
 import type { SponsoredOffer } from '@/utils/gasPayment'
@@ -30,9 +32,11 @@ jest.mock('@/components/tx/ExecutionMethodSelector', () => ({
   ),
 }))
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/dispatch', () => ({
   dispatchBatchExecution: jest.fn(),
   dispatchBatchExecutionRelay: jest.fn(),
+}))
+jest.mock('@/services/tx/tx-sender/create', () => ({
   createMultiSendCallOnlyTx: jest.fn(),
 }))
 

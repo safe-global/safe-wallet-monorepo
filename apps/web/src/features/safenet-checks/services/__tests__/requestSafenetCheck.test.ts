@@ -1,6 +1,10 @@
 import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
-import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
+import {
+  apiSliceWithChainsConfig,
+  chainsAdapter,
+  initialState as chainsInitialState,
+} from '@safe-global/store/gateway/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -9,7 +13,9 @@ import { makeStore, setStoreInstance } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { server } from '@/tests/server'
-import { MixpanelEventParams, SAFENET_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { requestSafenetCheck as requestCheck } from '../requestSafenetCheck'
 
 jest.mock('@/services/exceptions', () => ({ ...jest.requireActual('@/services/exceptions'), logError: jest.fn() }))

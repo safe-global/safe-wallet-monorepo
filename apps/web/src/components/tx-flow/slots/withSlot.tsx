@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import type { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
-import { useRegisterSlot, type UseRegisterSlotProps } from './hooks'
-import type { FEATURES } from '@/utils/featureToggled'
+import { useRegisterSlot, type UseRegisterSlotProps } from './hooks/useRegisterSlot'
+import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 
 /**

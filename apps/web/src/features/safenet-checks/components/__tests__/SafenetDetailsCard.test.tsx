@@ -8,35 +8,31 @@ import type {
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { AttestationVerificationStatus, CheckStatus, type Hex } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
+import type { Hex } from '@safe-global/utils/features/safenet-checks/types/events'
+import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks/types/status'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'
 import {
   arbitrationTimedOutEvent,
   attestedEvent,
-  buildBenignSnapshot,
-  buildCheckView,
-  buildSnapshot,
   disputeTriggeredEvent,
   oracleResultEvent,
   sentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks/builders'
+} from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
+import { buildBenignSnapshot, buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders/checkView'
 import SafenetDetailsCard, { SafenetDetailsCardView } from '../SafenetDetailsCard'
 import { SAFENET_ATTESTATION_LINK_LABEL } from '../SafenetLinks'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import SafenetChecksSection from '../SafenetChecksSection'
-import {
-  MixpanelEventParams,
-  SAFENET_EVENTS,
-  SafenetCheckResult,
-  SafenetSignerRole,
-  trackEvent,
-} from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, SafenetCheckResult, SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 
 jest.mock('@/hooks/useChains', () => ({ useChain: jest.fn() }))
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
-  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+jest.mock('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks/useSafenetCheck'),
   useSafenetCheck: jest.fn(),
 }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: jest.fn() }))

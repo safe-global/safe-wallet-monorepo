@@ -8,24 +8,26 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { useSafeShield } from '../SafeShieldContext'
+import { useHypernativeOAuth, type HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import {
-  useHypernativeOAuth,
   useIsHypernativeEligible,
-  type HypernativeAuthStatus,
   type HypernativeEligibility,
-} from '@/features/hypernative'
+} from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 
 jest.mock('../SafeShieldContext')
-jest.mock('@/features/hypernative', () => ({
-  ...jest.requireActual('@/features/hypernative'),
+jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth'),
   useHypernativeOAuth: jest.fn(),
+}))
+jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeEligible'),
   useIsHypernativeEligible: jest.fn(),
 }))
 jest.mock('../hooks/useCheckSimulation')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
     $isDisabled: false,

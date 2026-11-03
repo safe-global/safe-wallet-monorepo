@@ -26,8 +26,9 @@ jest.mock('../../../hooks/useSpaceMembers', () => ({
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
-jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => ({
-  SafeProNoticeModal: ({
+jest.mock('@safe-global/views/features/spaces/components/SafeProModals/SafeProNoticeModal', () => ({
+  __esModule: true,
+  default: ({
     title,
     body,
     onAction,

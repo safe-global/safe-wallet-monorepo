@@ -11,13 +11,14 @@ import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/Netwo
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
-import type { ContactField } from './AddContact'
+import type { ContactField } from './AddContactDialog'
 import {
   type SpaceAddressBookItemDto,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
 import { useAppDispatch } from '@/store'
 import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'

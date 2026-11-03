@@ -1,6 +1,6 @@
-import { removeUndeployedSafe, selectUndeployedSafe } from '@/features/counterfactual/store'
+import { removeUndeployedSafe, selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useMemo } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'

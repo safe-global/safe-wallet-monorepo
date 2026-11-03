@@ -2,17 +2,16 @@ import {
   AttestationVerificationStatus,
   CheckStatus,
   type PublicCheckStatus,
-  type SafenetCheckSnapshot,
-} from '@safe-global/utils/features/safenet-checks'
+} from '@safe-global/utils/features/safenet-checks/types/status'
+import { type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks/types/snapshot'
 import {
   arbitrationTimedOutEvent,
   attestedEvent,
-  buildBenignSnapshot,
-  buildSnapshot,
   disputeTriggeredEvent,
   requestCreatedEvent,
   sentinelRevealedEvent,
-} from '@safe-global/utils/features/safenet-checks/builders'
+} from '@safe-global/utils/features/safenet-checks/builders/checkEvents'
+import { buildBenignSnapshot, buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders/snapshot'
 
 export const STORY_SAFE_TX_HASH = `0x${'cd'.repeat(32)}` as const
 export const STORY_CHAIN_ID = '1'

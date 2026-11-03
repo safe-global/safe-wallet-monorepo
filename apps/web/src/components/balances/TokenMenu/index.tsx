@@ -1,6 +1,6 @@
 import { Sticky } from '@safe-global/views/components/common/Sticky'
 import Track from '@/components/common/Track'
-import { ASSETS_EVENTS } from '@/services/analytics'
+import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { EyeOff } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'

@@ -1,6 +1,6 @@
 import { render, screen, act, fireEvent } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
 jest.mock('@/features/spaces/constants', () => ({
@@ -83,11 +83,10 @@ jest.mock('../hooks/useOnboardingSubmit', () => ({
   },
 }))
 
-jest.mock('../../NameAccounts', () => ({
-  ...jest.requireActual('../../NameAccounts'),
-  NameAccountsFields: ({ items }: { items: unknown[] }) => (
-    <div data-testid="name-accounts-fields" data-count={items.length} />
-  ),
+jest.mock('../../NameAccounts/NameAccountsFields', () => ({
+  __esModule: true,
+  ...jest.requireActual('../../NameAccounts/NameAccountsFields'),
+  default: ({ items }: { items: unknown[] }) => <div data-testid="name-accounts-fields" data-count={items.length} />,
 }))
 
 let mockWalletValue: { address: string } | null = { address: '0xWallet' }

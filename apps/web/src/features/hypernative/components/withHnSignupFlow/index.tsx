@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
-import { HnSignupFlow } from '../HnSignupFlow'
+import HnSignupFlow from '../HnSignupFlow/HnSignupFlow'
 import type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'
-
-export type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'
 
 /**
  * Higher-order component that wraps a component with HnSignupFlow functionality.

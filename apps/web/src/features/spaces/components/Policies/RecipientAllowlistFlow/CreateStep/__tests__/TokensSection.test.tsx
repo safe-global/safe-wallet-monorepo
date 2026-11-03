@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { createDefaultAllowlistValues, type RecipientAllowlistFormValues } from '../../types'
-import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import TokensSection from '../TokensSection'
 

@@ -8,7 +8,7 @@ import { TxFlowContext, initialContext, type TxFlowContextType } from '@/compone
 import { ChooseThreshold } from '../ChooseThreshold'
 import { ChangeThresholdFlowFieldNames, type ChangeThresholdFlowProps } from '..'
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
   __esModule: true,
   createUpdateThresholdTx: jest.fn().mockResolvedValue({}),
 }))

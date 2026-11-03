@@ -1,6 +1,4 @@
-import type { SafeItem } from './useAllSafes'
-import type { MultiChainSafeItem } from './useAllSafesGrouped'
-
+import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 /**
  * Type guard for a grouped multi-chain Safe item.
  *

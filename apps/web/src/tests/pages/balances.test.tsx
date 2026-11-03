@@ -39,6 +39,8 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 
 jest.mock('@/features/no-fee-campaign', () => ({
   NoFeeCampaignFeature: {},
+}))
+jest.mock('@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled', () => ({
   useIsNoFeeCampaignEnabled: () => false,
 }))
 
@@ -48,11 +50,14 @@ jest.mock('@/features/portfolio', () => ({
 
 jest.mock('@/features/stake', () => ({
   StakeFeature: {},
-  useIsStakingPromoBannerVisible: () => false,
+}))
+jest.mock('@/features/stake/hooks/useIsStakingPromoBannerVisible', () => ({
+  __esModule: true,
+  default: () => false,
   STAKING_PROMO_BANNER_HIDE_KEY: 'hideStakingPromoBanner_v2',
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => ({
     NoFeeCampaignBanner: () => <div data-testid="no-fee-campaign-banner" />,
     StakingPromoBanner: () => <div data-testid="staking-promo-banner" />,

@@ -1,5 +1,5 @@
 // Extract status handling into separate components
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { SpeedupFeature } from '@/features/speedup'
 import { PendingStatus, type PendingTx } from '@/store/pendingTxsSlice'
 import { Typography } from '@safe-global/views/components/ui/typography'

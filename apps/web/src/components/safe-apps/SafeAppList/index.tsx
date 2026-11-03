@@ -11,7 +11,9 @@ import css from './styles.module.css'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import NativeSwapsCardCell from '@/components/safe-apps/NativeSwapsCard/NativeSwapsCardCell'
-import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
+import { trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
+import { SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 
 type SafeAppListProps = {

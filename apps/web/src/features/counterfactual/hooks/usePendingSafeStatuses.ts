@@ -1,17 +1,16 @@
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
 import { safeCreationDispatch, SafeCreationEvent, safeCreationSubscribe } from '../services/safeCreationEvents'
 import { removeUndeployedSafe, selectUndeployedSafes, updateUndeployedSafeStatus } from '../store/undeployedSafesSlice'
-import {
-  checkSafeActionViaRelay,
-  checkSafeActivation,
-  extractCounterfactualSafeSetup,
-} from '../services/safeDeployment'
+import { checkSafeActionViaRelay, checkSafeActivation } from '../services/safeDeployment'
+import { extractCounterfactualSafeSetup } from '../services/typeGuards'
 import { safeCreationPendingStatuses } from './safeCreationPendingStatuses'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { CREATE_SAFE_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'

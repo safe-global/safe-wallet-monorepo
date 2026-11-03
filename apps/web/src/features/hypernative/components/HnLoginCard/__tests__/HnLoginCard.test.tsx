@@ -1,9 +1,9 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { HnLoginCard } from '../HnLoginCard'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { HYPERNATIVE_SOURCE, HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 const mockInitiateLogin = jest.fn()
 
@@ -22,7 +22,6 @@ jest.mock('../../../hooks/useHypernativeOAuth', () => ({
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics').HYPERNATIVE_EVENTS,
 }))
 
 describe('HnLoginCard', () => {

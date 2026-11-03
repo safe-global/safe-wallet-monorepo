@@ -3,7 +3,7 @@ import { Severity, SafeStatus } from '@safe-global/utils/features/safe-shield/ty
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import useIsTrustedSafe from '@/hooks/useIsTrustedSafe'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useTrustSafe } from '@/features/myAccounts'
+import { useTrustSafe } from '@/features/myAccounts/hooks/useTrustSafe'
 
 type UntrustedSafeAnalysisResult = {
   safeAnalysis: SafeAnalysisResult | null

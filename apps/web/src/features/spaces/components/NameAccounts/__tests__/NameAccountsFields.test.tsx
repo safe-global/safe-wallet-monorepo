@@ -1,15 +1,16 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
-import type { AllSafeItems, SafeItem } from '@/hooks/safes'
-import type { AccountLine } from '@/features/myAccounts'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import NameAccountsFields from '../NameAccountsFields'
 import { touchNames } from '../utils'
 
 // The table has its own suite; here it only has to hand each row to the name cell.
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
   __esModule: true,
-  SafeAccountsTable: ({
+  default: ({
     items,
     renderName,
   }: {

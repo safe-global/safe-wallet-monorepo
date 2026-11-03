@@ -4,7 +4,7 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
 import type { GasPaymentOption } from '@safe-global/utils/utils/gasPaymentOptions'
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import type { SafeSponsoredTxs } from '@/features/spaces'
+import type { SafeSponsoredTxs } from '@/features/spaces/hooks/useSafeSponsoredTxs'
 import * as useChains from '@/hooks/useChains'
 import * as useRemainingRelays from '@/hooks/useRemainingRelays'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -15,10 +15,16 @@ const mockUseNoFeeCampaignEligibility = jest.fn()
 const mockUseIsNoFeeCampaignEnabled = jest.fn<boolean, []>()
 const mockUseGasTooHigh = jest.fn<boolean, []>()
 
-jest.mock('@/features/spaces', () => ({ useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs() }))
-jest.mock('@/features/no-fee-campaign', () => ({
+jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
+  useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
+}))
+jest.mock('@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility', () => ({
   useNoFeeCampaignEligibility: () => mockUseNoFeeCampaignEligibility(),
+}))
+jest.mock('@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled', () => ({
   useIsNoFeeCampaignEnabled: () => mockUseIsNoFeeCampaignEnabled(),
+}))
+jest.mock('@/features/no-fee-campaign/hooks/useGasTooHigh', () => ({
   useGasTooHigh: () => mockUseGasTooHigh(),
 }))
 

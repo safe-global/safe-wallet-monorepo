@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { userEvent } from '@testing-library/user-event'
 import TxNonce from '../index'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 

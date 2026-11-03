@@ -8,10 +8,15 @@ const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 const mockUseGetSpaceAddressBook = jest.fn((): { address: string }[] => [])
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
   useIsAdmin: () => true,
-  useGetSpaceAddressBook: () => mockUseGetSpaceAddressBook(),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => mockUseGetSpaceAddressBook(),
 }))
 const mockApprove = jest.fn()
 const mockReject = jest.fn()

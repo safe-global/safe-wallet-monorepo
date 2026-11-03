@@ -1,17 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
-import {
-  FullAnalysisBuilder,
-  ContractAnalysisBuilder,
-  RecipientAnalysisBuilder,
-} from '@safe-global/utils/features/safe-shield/builders'
+import { FullAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/full-analysis.builder'
+import { ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/contract-analysis.builder'
+import { RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/recipient-analysis.builder'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { safeFixtures } from '../../../../../config/test/msw/fixtures'
 import { createSafeInfoState } from '@/stories/mocks/defaults'

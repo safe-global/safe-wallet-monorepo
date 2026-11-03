@@ -11,8 +11,10 @@ import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { ManageSignersForm } from '@/components/tx-flow/flows/ManagerSigners'
-import type { AddOwnerFlowProps } from '@/components/tx-flow/flows/AddOwner'
-import type { ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOwner'
+import type {
+  AddOwnerFlowProps,
+  ReplaceOwnerFlowProps,
+} from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 import type { TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'

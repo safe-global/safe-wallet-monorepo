@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { BridgeWidget } from './index'
 
 // BridgeWidget embeds the LI.FI bridge app via AppFrame. The page story

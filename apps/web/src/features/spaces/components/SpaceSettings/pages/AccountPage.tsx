@@ -1,6 +1,6 @@
 import { LogOut, Pencil } from 'lucide-react'
 import { useState } from 'react'
-import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
+import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces/hooks/useSpaceMembers'
 import { SwitchAuthenticatorSection, WalletTwoFactorSection } from '@/features/oidc-auth'
 import useLogout from '@/hooks/useLogout'
 import Track from '@/components/common/Track'

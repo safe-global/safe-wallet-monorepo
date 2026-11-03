@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { AddAccountsFormValues } from '../../../../hooks/addAccounts.types'
-import type { SafeLimit } from '@/utils/spaces'
+import type { SafeLimit } from '@safe-global/views/features/spaces/components/SelectedCounter/types'
 import useOnboardingSelection from '../useOnboardingSelection'
 
 // Minimal AccountLine shapes — the hook only reads key/variant/address/source.

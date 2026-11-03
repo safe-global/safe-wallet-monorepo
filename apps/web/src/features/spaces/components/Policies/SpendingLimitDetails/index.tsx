@@ -1,6 +1,7 @@
 import { useContext, type ReactElement } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
-import { SpendingLimitDrawer, type ActiveDrawerPolicy } from '../SpendingLimitDrawer'
+import SpendingLimitDrawer from '../SpendingLimitDrawer/SpendingLimitDrawer'
+import { type ActiveDrawerPolicy } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type { PendingSpendingLimitPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { usePendingSpendingLimitActions } from './hooks/usePendingSpendingLimitActions'
 import { useSpendingLimitDetails } from './hooks/useSpendingLimitDetails'

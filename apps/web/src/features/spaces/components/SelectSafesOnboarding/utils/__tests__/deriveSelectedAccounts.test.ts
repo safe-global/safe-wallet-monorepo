@@ -1,4 +1,4 @@
-import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
+import type { MultiChainSafeItem, SafeItem } from '@safe-global/views/hooks/safes/types'
 import { deriveSidePanelAccounts, deriveSelectedBalanceSafes, deriveNameByAddress } from '../deriveSelectedAccounts'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 

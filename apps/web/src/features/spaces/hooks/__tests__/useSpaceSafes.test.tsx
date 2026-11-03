@@ -42,8 +42,10 @@ jest.mock('@/store/orderByPreferenceSlice', () => ({
   getSpaceOrderScope: (id: string) => `space:${id}`,
 }))
 
-jest.mock('@/store/slices', () => ({
+jest.mock('@/store/addressBookSlice', () => ({
   selectAllAddressBooks: 'selectAllAddressBooks',
+}))
+jest.mock('@/store/visitedSafesSlice', () => ({
   selectAllVisitedSafes: 'selectAllVisitedSafes',
 }))
 
@@ -51,10 +53,12 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
   _buildSafeItems: jest.fn(() => []),
   _getMultiChainAccounts: jest.fn(() => []),
   _getSingleChainAccounts: jest.fn(() => []),
+}))
+jest.mock('@/hooks/safes/useSafeOrderComparator', () => ({
   useSafeOrderComparator: () => () => 0,
 }))
 
@@ -128,7 +132,7 @@ describe('useSpaceSafes', () => {
 
     renderHook(() => useSpaceSafes())
 
-    const { _buildSafeItems } = jest.requireMock('@/hooks/safes') as { _buildSafeItems: jest.Mock }
+    const { _buildSafeItems } = jest.requireMock('@/hooks/safes/useAllSafesGrouped') as { _buildSafeItems: jest.Mock }
     expect(_buildSafeItems).toHaveBeenCalledWith(
       { '1': ['0xA'] },
       expect.objectContaining({ '1': { '0xA': 'Local Name' } }),
@@ -152,7 +156,7 @@ describe('useSpaceSafes', () => {
 
     renderHook(() => useSpaceSafes())
 
-    const { _buildSafeItems } = jest.requireMock('@/hooks/safes') as { _buildSafeItems: jest.Mock }
+    const { _buildSafeItems } = jest.requireMock('@/hooks/safes/useAllSafesGrouped') as { _buildSafeItems: jest.Mock }
     expect(_buildSafeItems).toHaveBeenCalledWith(
       { '1': ['0xA'] },
       expect.anything(),

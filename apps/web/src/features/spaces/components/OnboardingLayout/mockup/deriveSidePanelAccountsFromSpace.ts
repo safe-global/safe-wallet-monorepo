@@ -1,4 +1,6 @@
-import { isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { type SafeItem } from '@safe-global/views/hooks/safes/types'
 import type { SafeAppMockupAccount } from '@safe-global/views/features/spaces/components/OnboardingLayout/mockup/types'
 
 /**

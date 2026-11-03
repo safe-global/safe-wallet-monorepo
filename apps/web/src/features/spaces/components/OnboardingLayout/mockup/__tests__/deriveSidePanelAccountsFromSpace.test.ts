@@ -1,4 +1,4 @@
-import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
+import type { MultiChainSafeItem, SafeItem } from '@safe-global/views/hooks/safes/types'
 import { deriveSidePanelAccountsFromSpace } from '../deriveSidePanelAccountsFromSpace'
 
 const makeSafe = (overrides: Partial<SafeItem> = {}): SafeItem => ({

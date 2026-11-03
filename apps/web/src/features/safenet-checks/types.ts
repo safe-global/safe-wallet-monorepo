@@ -1,4 +1,4 @@
-import type { FeatureImplementation } from '@/features/__core__'
+import type { FeatureImplementation } from '@/features/__core__/types'
 import type SafenetAuditRow from './components/SafenetAuditRow'
 import type SafenetChecksSection from './components/SafenetChecksSection'
 import type SafenetDetailsCard from './components/SafenetDetailsCard'

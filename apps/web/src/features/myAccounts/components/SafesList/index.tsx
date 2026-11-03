@@ -1,4 +1,6 @@
-import { type SafeItem, type AllSafeItems, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
+import { type SafeItem, type MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import { type AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import MultiAccountItem from '../AccountItems/MultiAccountItem'
 import { SafeListItem } from './SafeListItem'
 

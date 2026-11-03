@@ -5,7 +5,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { useIsOnlySpendingLimitBeneficiary } from '@/features/spending-limits'
+import useIsOnlySpendingLimitBeneficiary from '@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 export type TestRole =

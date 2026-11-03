@@ -1,6 +1,6 @@
 import { getAddress, parseUnits } from 'ethers'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { toEditSummaryModel } from '../toEditSummaryModel'

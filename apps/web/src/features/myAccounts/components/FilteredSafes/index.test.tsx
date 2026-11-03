@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import FilteredSafes from './index'
 import SafesList from '../SafesList'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import * as safesSearch from '@/hooks/safes/useSafesSearch'
 
 jest.mock('../SafesList', () => jest.fn(() => <div data-testid="safes-list" />))

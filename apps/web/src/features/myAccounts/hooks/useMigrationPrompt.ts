@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 
 export interface UseMigrationPromptReturn {

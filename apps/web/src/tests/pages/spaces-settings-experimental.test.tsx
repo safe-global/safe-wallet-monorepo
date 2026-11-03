@@ -2,23 +2,33 @@ import { render, screen } from '@testing-library/react'
 import SpaceSettingsExperimentalPage from '../../pages/spaces/settings/experimental'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as featureModule from '@/features/__core__'
-import * as spacesFeature from '@/features/spaces'
+import * as featureModule from '@/features/__core__/useLoadFeature'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
+import useFeatureRedirect from '@/features/spaces/hooks/useFeatureRedirect'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: jest.fn(),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: 'SpacesFeature',
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
-  useFeatureFlagRedirect: jest.fn(),
-  useFeatureRedirect: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useFeatureFlagRedirect', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useFeatureRedirect', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 const SPACE_ID = 'space-uuid-1'
@@ -31,7 +41,7 @@ const SpaceSettingsPageMock = ({ spaceId, activePage }: { spaceId: string; activ
 
 const setup = ({ isReady = true, spaceId = SPACE_ID }: { isReady?: boolean; spaceId?: string | null } = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ isReady, query: { spaceId } })
-  ;(spacesFeature.useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)
+  ;(useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceSettingsPage: SpaceSettingsPageMock })
 }
 
@@ -44,7 +54,7 @@ describe('SpaceSettingsExperimentalPage (/spaces/settings/experimental)', () => 
     setup()
     render(<SpaceSettingsExperimentalPage />)
 
-    expect(spacesFeature.useFeatureRedirect).toHaveBeenCalledWith(
+    expect(useFeatureRedirect).toHaveBeenCalledWith(
       FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES,
       AppRoutes.spaces.settingsGeneral,
     )
@@ -54,7 +64,7 @@ describe('SpaceSettingsExperimentalPage (/spaces/settings/experimental)', () => 
     setup()
     render(<SpaceSettingsExperimentalPage />)
 
-    expect(spacesFeature.useFeatureFlagRedirect).toHaveBeenCalled()
+    expect(useFeatureFlagRedirect).toHaveBeenCalled()
   })
 
   it('renders the settings page on the experimental tab', () => {

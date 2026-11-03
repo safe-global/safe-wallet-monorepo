@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import AccountItemPinButton from '../AccountItemPinButton'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 const mockAddress = '0x1234567890123456789012345678901234567890'
 const mockChainId = '1'

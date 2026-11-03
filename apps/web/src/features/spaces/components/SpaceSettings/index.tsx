@@ -1,4 +1,4 @@
-import { useIsInvited } from '@/features/spaces'
+import { useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import SettingsRail, { type SettingsPageKey } from './SettingsRail'
 import GeneralPage from './pages/GeneralPage'

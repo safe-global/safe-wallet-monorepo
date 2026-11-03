@@ -1,7 +1,9 @@
 import { AppRoutes } from '@/config/routes'
-import { useIsRecoverySupported, useRecovery } from '@/features/recovery'
+import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
+import useRecovery from '@/features/recovery/hooks/useRecovery'
 import dynamic from '@/utils/dynamic'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -16,7 +18,7 @@ import RecoveryPlus from '@safe-global/views/assets/images/common/recovery-plus.
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 import { Wrench } from 'lucide-react'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
+import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const txBuilder = useTxBuilderApp()

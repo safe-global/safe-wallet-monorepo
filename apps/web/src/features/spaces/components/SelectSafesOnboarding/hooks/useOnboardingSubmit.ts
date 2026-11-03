@@ -4,7 +4,8 @@ import { useRouter } from 'next/router'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
+import { type AllSafeItems, flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
   type AddressBookItem,
@@ -35,7 +36,7 @@ import {
 } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store/stepUpSlice'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 

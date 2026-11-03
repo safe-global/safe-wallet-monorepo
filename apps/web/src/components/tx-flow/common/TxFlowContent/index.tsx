@@ -1,7 +1,8 @@
 import { TxFlowContext } from '../../TxFlowProvider'
 import { Children, type ReactNode, useContext } from 'react'
 import TxLayoutBase from '../TxLayoutBase'
-import { Slot, SlotName } from '../../slots'
+import { Slot } from '../../slots/Slot'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 
 /**
  * Context-driven entry point for the slot-based transaction flows (the ones built on

@@ -1,4 +1,4 @@
-import { AddressImage } from '@safe-global/views/features/safe-shield/components/AddressImage'
+import { AddressImage } from '@safe-global/views/features/safe-shield/components/AddressImage/AddressImage'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useState } from 'react'
@@ -7,7 +7,7 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { AnalysisDetailsDropdown } from '@safe-global/views/features/safe-shield/components/AnalysisDetailsDropdown'
+import { AnalysisDetailsDropdown } from '@safe-global/views/features/safe-shield/components/AnalysisDetailsDropdown/AnalysisDetailsDropdown'
 
 interface ShowAllAddressProps {
   showImage?: boolean

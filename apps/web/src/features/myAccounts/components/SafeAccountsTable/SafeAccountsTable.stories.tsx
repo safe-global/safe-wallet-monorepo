@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import SafeAccountsTable from './index'
 
 const meta = {

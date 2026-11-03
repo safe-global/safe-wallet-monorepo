@@ -8,7 +8,8 @@ import { useMemo } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
-import { transformAppBalancesToProtocols, getPositionsEndpointConfig } from '@safe-global/utils/features/positions'
+import { transformAppBalancesToProtocols } from '@safe-global/utils/features/positions/utils/transformAppBalancesToProtocols'
+import { getPositionsEndpointConfig } from '@safe-global/utils/features/positions/utils/getPositionsEndpointConfig'
 
 const POLLING_INTERVAL = 300_000 // 5 minutes
 

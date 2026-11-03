@@ -68,15 +68,23 @@ jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' })
 
 jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => '' }))
 
-jest.mock('@/hooks/safes', () => ({ useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }) }))
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
+}))
 
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))
 
 jest.mock('@/features/multichain', () => ({
   __esModule: true,
-  hasMultiChainAddNetworkFeature: () => false,
-  useSafeCreationData: () => [undefined, undefined, false],
   CreateSafeOnSpecificChain: () => null,
+}))
+jest.mock('@/features/multichain/utils/utils', () => ({
+  __esModule: true,
+  hasMultiChainAddNetworkFeature: () => false,
+}))
+jest.mock('@/features/multichain/hooks/useSafeCreationData', () => ({
+  __esModule: true,
+  useSafeCreationData: () => [undefined, undefined, false],
 }))
 
 describe('NetworkSelector', () => {

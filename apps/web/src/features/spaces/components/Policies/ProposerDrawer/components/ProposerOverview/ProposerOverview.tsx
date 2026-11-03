@@ -1,12 +1,11 @@
 import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { DrawerList, DrawerSection } from '@/components/common/Drawer'
+import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { AccountIdentity, AccountIdentitySkeleton } from '../../../components/AccountIdentity'
+import AccountIdentity, { AccountIdentitySkeleton } from '../../../components/AccountIdentity/AccountIdentity'
 import type { ProposerOverviewProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/types'
-
-export type { ProposerOverviewProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/types'
 
 const ProposerOverview = ({
   proposer,

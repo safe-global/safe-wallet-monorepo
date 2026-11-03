@@ -9,12 +9,9 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import {
-  ExplorerLinkButton,
-  HOVER_ACTION_CLASS,
-  SafeInfoDisplay,
-  TOOLTIP_DELAY_MS,
-} from '@/components/common/AccountRow'
+import ExplorerLinkButton from '@safe-global/views/components/common/AccountRow/ExplorerLinkButton'
+import { HOVER_ACTION_CLASS, TOOLTIP_DELAY_MS } from '@safe-global/views/components/common/AccountRow/utils'
+import SafeInfoDisplay from '@/components/common/AccountRow/SafeInfoDisplay'
 import { cn } from '@safe-global/views/utils/cn'
 import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
 import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'

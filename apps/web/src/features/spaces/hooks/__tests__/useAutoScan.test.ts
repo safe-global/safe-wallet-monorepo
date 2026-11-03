@@ -1,7 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import useAutoScan, { type AutoScanServices } from '../useAutoScan'
-import type { ScanContext, ScanResult, ScannerId, SecurityScanner } from '@/features/security/types'
-import type { SpaceSafeEntry, SelectedSafe } from '../../components/SecurityHub'
+import type { ScanContext, ScannerId, SecurityScanner } from '@/features/security/data/scanners/types'
+import type { ScanResult } from '@safe-global/views/features/security/types'
+import type { SpaceSafeEntry, SelectedSafe } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 // useSafeScanContext is mocked to return the value we inject via `mockScanContext`
 // so these tests stay focused on queue/scanner orchestration, not the context builder.

@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSpendingLimitTokenOptions from '../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import useHeldTokenAddresses from '../useHeldTokenAddresses'
 
 jest.mock('../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions')

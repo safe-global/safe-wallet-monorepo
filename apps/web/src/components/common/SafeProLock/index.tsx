@@ -9,7 +9,7 @@ import {
   PlanSelectionEntryPoint,
   UpgradeLocation,
   type UpgradeFeature,
-} from '@/services/analytics'
+} from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '@/features/spaces'

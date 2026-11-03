@@ -50,15 +50,16 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => mockUseSafeInfo(),
 }))
 
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: () => mockUseIsCounterfactualSafe(),
 }))
 
 jest.mock('@/hooks/useIsHydrated', () => ({
   useIsHydrated: () => mockUseSidebarHydrated(),
 }))
 
-jest.mock('../../../NewTransactionButton', () => ({
+jest.mock('../../../NewTransactionButton/SidebarActionButton', () => ({
   SidebarActionButton: () => (
     <button type="button" data-testid="new-tx-btn">
       New transaction
@@ -70,7 +71,7 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
   isNonCriticalUpdate: () => false,
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
@@ -82,7 +83,7 @@ jest.mock('@/utils/colors', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
-jest.mock('../../NavItem', () => ({
+jest.mock('../../NavItem/NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
     item ? (
       <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
@@ -162,7 +163,7 @@ jest.mock('../../../config', () => ({
   },
 }))
 
-jest.mock('../../SidebarDeveloperGroup', () => ({
+jest.mock('../../SidebarDeveloperGroup/SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
     <div data-testid="developer-group" data-loading={isLoading}>
       Developer group
@@ -170,7 +171,7 @@ jest.mock('../../SidebarDeveloperGroup', () => ({
   ),
 }))
 
-jest.mock('../../SpaceSelectorDropdown', () => ({
+jest.mock('../../SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
       <button type="button" data-testid="add-safe-to-workspace-button">

@@ -6,7 +6,8 @@ import {
 } from '@safe-global/utils/services/contracts/safeContracts'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { EvidenceItem, ScanResult, SecurityScanner } from './types'
+import type { SecurityScanner } from './types'
+import type { EvidenceItem, ScanResult } from '@safe-global/views/features/security/types'
 import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
 
 const REMEDIATION = {

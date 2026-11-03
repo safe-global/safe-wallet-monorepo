@@ -22,14 +22,23 @@ jest.mock('next/router', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: jest.fn(() => false),
-  useCurrentSpaceId: () => undefined,
-  useAddressBookWriteScope: () => ({ scope: 'local', canRename: true }),
-  matchesSafeSearch: jest.requireActual('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils')
-    .matchesSafeSearch,
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
   },
+}))
+jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => undefined,
+}))
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+  useAddressBookWriteScope: () => ({ scope: 'local', canRename: true }),
+}))
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils', () => ({
+  matchesSafeSearch: jest.requireActual('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils')
+    .matchesSafeSearch,
 }))
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -116,7 +125,7 @@ jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: {},
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: () => ({}),
 }))
 
@@ -138,9 +147,10 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 
 jest.mock('@/hooks/useChainId', () => () => '1')
 
-jest.mock('@/hooks/safes', () => ({
-  ...jest.requireActual('@/hooks/safes'),
-  useAllSafes: () => [],
+jest.mock('@/hooks/safes/useAllSafes', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/hooks/safes/useAllSafes'),
+  default: () => [],
 }))
 
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -161,7 +171,7 @@ jest.mock('@/store', () => ({
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'

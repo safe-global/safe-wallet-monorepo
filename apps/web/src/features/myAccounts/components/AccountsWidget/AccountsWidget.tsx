@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { WalletCards } from 'lucide-react'
 import { SafeWidget } from '@/features/spaces'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import SafeAccountsTable from '../SafeAccountsTable'
 
 interface AccountsWidgetProps {

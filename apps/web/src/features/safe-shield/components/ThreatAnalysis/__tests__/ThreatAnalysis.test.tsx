@@ -6,7 +6,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 
 // Mock AnalysisGroupCard — forward expandedGroups to a data attribute for assertions
-jest.mock('../../AnalysisGroupCard', () => ({
+jest.mock('../../AnalysisGroupCard/AnalysisGroupCard', () => ({
   AnalysisGroupCard: jest.fn(
     ({ children, delay, highlightedSeverity, analyticsEvent, requestId, expandedGroups, 'data-testid': testId }) => (
       <div
@@ -36,6 +36,9 @@ jest.mock('@/services/analytics', () => ({
   ...(
     jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
   ).createAnalyticsMock(),
+}))
+jest.mock('@/services/analytics/events/safe-shield', () => ({
+  ...jest.requireActual('@/services/analytics/events/safe-shield'),
   SAFE_SHIELD_EVENTS: {
     THREAT_ANALYZED: { action: 'Threat analyzed', category: 'safe-shield' },
   },
@@ -43,8 +46,10 @@ jest.mock('@/services/analytics', () => ({
 
 // Mock useLoadFeature to provide HnAnalysisGroupCard
 // Forward expandedGroups + overflowRow to data attributes / children for assertions
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/createFeatureHandle', () => ({
   createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
+}))
+jest.mock('@/features/__core__/useLoadFeature', () => ({
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
     $isDisabled: false,

@@ -6,7 +6,7 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import { ChooseOwner, ChooseOwnerMode } from '../ChooseOwner'
-import type { AddOwnerFlowProps } from '..'
+import type { AddOwnerFlowProps } from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
   __esModule: true,
