@@ -73,7 +73,12 @@ export const useGasPayerSelection = ({
   const chainOptions = useMemo(() => getGasPaymentOptions(chain), [chain])
   const hasSponsoredOffer = !!offer && !offer.disabledReason
 
-  const planState: FeePayerPlanState = !isPro ? 'FREE' : left === 0 ? 'PRO_NO_SPONSORED' : 'PRO_SPONSORED_LEFT'
+  const isPlanSponsoring = isPro && chainOptions.includes('SUBSCRIPTION')
+  const planState: FeePayerPlanState = !isPlanSponsoring
+    ? 'FREE'
+    : left === 0
+      ? 'PRO_NO_SPONSORED'
+      : 'PRO_SPONSORED_LEFT'
 
   // Not `fees.canCoverFees`: it flips on a failed quote and would refetch it in a loop (see `hasQuoteError`).
   const canPayFromSafe =

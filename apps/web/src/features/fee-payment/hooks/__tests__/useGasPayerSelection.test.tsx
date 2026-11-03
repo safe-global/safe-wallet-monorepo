@@ -380,6 +380,35 @@ describe('useGasPayerSelection', () => {
     })
   })
 
+  describe('a Pro Safe on a chain whose relayer sponsors no plans', () => {
+    beforeEach(() => {
+      mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 10, meter: { quota: 50, resetsAt: null } })
+    })
+
+    it('locks the Signer wallet at signing instead of promising the Pro plan', () => {
+      gasPaymentOptions = ['FREE_DAILY_LIMIT']
+      mockUseFeesPreview.mockReturnValue(buildFees({ availableGasTokens: [] }))
+
+      const { result } = renderSelection()
+
+      expect(result.current.planState).toBe('FREE')
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'WALLET' })
+      expect(result.current.view?.footer).toEqual({ kind: 'none' })
+    })
+
+    it('offers Safe account where the chain offers Pay from Safe', () => {
+      gasPaymentOptions = ['PAY_FROM_SAFE']
+
+      const { result } = renderSelection()
+
+      expect(result.current.view?.payer).toEqual({
+        kind: 'choice',
+        value: 'WALLET',
+        options: ['PAY_FROM_SAFE', 'WALLET'],
+      })
+    })
+  })
+
   describe('sponsor at execution', () => {
     const signedTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
     signedTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)
