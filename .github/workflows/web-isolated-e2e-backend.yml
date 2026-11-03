@@ -295,6 +295,7 @@ jobs:
           fi
           # The merged report already holds the traces, videos and screenshots; the fork cache is not worth keeping.
           for shard in "$RESULTS"/isolated-e2e-results-*; do
+            mkdir -p "$REPORT/shards/${shard##*-}"
             rsync -a --prune-empty-dirs --exclude '.anvil-cache/' --exclude 'artifacts/playwright/' \
               "$shard/" "$REPORT/shards/${shard##*-}/"
           done
