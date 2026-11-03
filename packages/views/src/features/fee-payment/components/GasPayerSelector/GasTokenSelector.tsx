@@ -14,7 +14,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import type { GasTokenOption } from '@safe-global/views/features/fee-payment/types'
 import css from './styles.module.css'
 
-export const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
+const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
 
 export type TokenIconRenderer = (token: { logoUri?: string; symbol?: string }) => ReactNode
 

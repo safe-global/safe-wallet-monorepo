@@ -1,16 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { useState } from 'react'
-import GasPayerSelector from './index'
-import type { FeePayerView, GasPayerChoice, NetworkFee } from '../../types'
-import { StoreDecorator } from '@/stories/storeDecorator'
-import { RouterDecorator } from '@/stories/routerDecorator'
-import { createInitialState } from '@/stories/mocks/defaults'
-import { safeFixtures } from '@safe-global/test/msw/fixtures'
+import { useState, type ReactNode } from 'react'
+import { Button } from '@safe-global/views/components/ui/button'
+import type { FeePayerView, GasPayerChoice, NetworkFee } from '@safe-global/views/features/fee-payment/types'
+import { withMockProvider } from '@/storybook/decorators'
+import TokenIcon from '@/components/common/TokenIcon'
+import SponsoredTxsCounter from '@/components/tx/SponsoredTxsCounter'
+import GasPayerSelector, { ProUpsell, type TokenIconRenderer } from './index'
 
-/**
- * Every screen of the fee payment design (Prototype/Fee payment), one story per cell of its case
- * table. Dropdowns keep their own selection so the fee rows follow the picked option.
- */
+// Every screen of the fee payment design (Prototype/Fee payment), one story per cell of its case table.
 const ZERO = '0x0000000000000000000000000000000000000000'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const ETH = {
@@ -50,6 +47,25 @@ const safeTokens = {
 const nativeLocked = { tokens: [ETH], selected: ZERO, locked: true }
 const base = { executionFee: {}, sponsored: false, sponsorKind: 'plan' as const }
 
+const renderTokenIcon: TokenIconRenderer = ({ logoUri, symbol }) => (
+  <TokenIcon logoUri={logoUri} tokenSymbol={symbol} size={24} />
+)
+
+const storyFooter = (footer: FeePayerView['footer']): ReactNode => {
+  if (footer.kind === 'none') return null
+  if (footer.kind === 'upsell')
+    return (
+      <ProUpsell
+        upgradeButton={
+          <Button variant="outline" size="xs">
+            Upgrade to Pro
+          </Button>
+        }
+      />
+    )
+  return <SponsoredTxsCounter {...footer} isPro={footer.isSubscription} />
+}
+
 const Harness = ({ view }: { view: FeePayerView }) => {
   const [choice, setChoice] = useState<GasPayerChoice>(view.payer.value)
   const [token, setToken] = useState(view.gasToken.selected)
@@ -68,7 +84,14 @@ const Harness = ({ view }: { view: FeePayerView }) => {
 
   return (
     <div className="w-[600px]">
-      <GasPayerSelector view={live} onChoiceChange={setChoice} onGasTokenChange={setToken} />
+      <GasPayerSelector
+        view={live}
+        onChoiceChange={setChoice}
+        onGasTokenChange={setToken}
+        currency="usd"
+        renderTokenIcon={renderTokenIcon}
+        footer={storyFooter(live.footer)}
+      />
     </div>
   )
 }
@@ -77,21 +100,7 @@ const meta = {
   title: 'Features/FeePayment/GasPayerSelector',
   component: Harness,
   parameters: { layout: 'centered' },
-  decorators: [
-    (Story, context) => (
-      <StoreDecorator
-        initialState={createInitialState({
-          safeData: safeFixtures.efSafe,
-          isDarkMode: context.globals?.theme === 'dark',
-        })}
-        context={context}
-      >
-        <RouterDecorator>
-          <Story />
-        </RouterDecorator>
-      </StoreDecorator>
-    ),
-  ],
+  decorators: [withMockProvider()],
   tags: ['autodocs'],
 } satisfies Meta<typeof Harness>
 

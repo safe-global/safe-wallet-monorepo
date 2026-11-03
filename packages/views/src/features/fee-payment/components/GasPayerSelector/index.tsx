@@ -28,8 +28,7 @@ import { GasTokenSelector, type TokenIconRenderer } from './GasTokenSelector'
 import { TotalOutgoingSection } from './TotalOutgoingSection'
 import css from './styles.module.css'
 
-export { GasTokenSelector, SIGNER_FEE_TOOLTIP, type TokenIconRenderer } from './GasTokenSelector'
-export { TotalOutgoingSection } from './TotalOutgoingSection'
+export type { TokenIconRenderer } from './GasTokenSelector'
 
 const PAYER_LABEL: Record<GasPayerChoice, string> = {
   PAY_FROM_SAFE: 'Safe account',
@@ -74,6 +73,7 @@ const PayerChoice = ({
   <DropdownMenu>
     <DropdownMenuTrigger
       data-testid="fee-payer-selector"
+      nativeButton={false}
       render={
         <div
           role="button"
