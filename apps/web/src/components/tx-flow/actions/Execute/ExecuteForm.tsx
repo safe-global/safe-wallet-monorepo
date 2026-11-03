@@ -93,8 +93,7 @@ export const ExecuteForm = ({
   const isPayFromSafe = selection.isPayFromSafe
   const isSponsored = selection.choice === 'SPONSORED' && !!offer && !offer.disabledReason
 
-  // Paying from the Safe relays through the public route, never against a Workspace allowance: the
-  // Safe refunds the relayer on-chain (`handlePayment()`), and `WorkspaceRelayer` refuses such payloads.
+  // Safe-pays relays through the public route: the Workspace relayer refuses payloads that refund it.
   const gasPayer: GasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : isSponsored ? offer.option : 'WALLET'
   const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'

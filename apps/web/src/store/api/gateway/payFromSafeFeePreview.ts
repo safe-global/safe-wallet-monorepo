@@ -86,9 +86,7 @@ export const payFromSafeFeePreviewEndpoints = (builder: GatewayEndpointBuilder) 
         if (!isFeePreviewResponse(body)) {
           return { error: new Error('Fee preview response did not match expected shape') }
         }
-        // The CGW answers 200 with an empty quote (zero gas, zero refund receiver) for a payload it does
-        // not relay for a fee, such as `approveHash` on another Safe. That is no quote: the card shows
-        // "Cannot estimate" and nothing is ever signed against a receiver that is not a fee collector.
+        // The CGW answers an all-zero quote for payloads it does not relay for a fee (e.g. nested approveHash).
         if (!isFeeCollector(body.txData.refundReceiver)) {
           return { error: new Error(`Fee preview returned an untrusted refundReceiver ${body.txData.refundReceiver}`) }
         }

@@ -136,9 +136,7 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
-    // A proposer's proposal carries no fee params: the first signer picks who pays. Signing it with the
-    // Safe paying merges the fee params in, which is a different payload with its own hash, so it is
-    // proposed as a new transaction instead of being attached to the proposal's txId.
+    // Signing a proposal with the Safe paying changes its hash, so it is proposed as a new tx instead.
     const confirmableTxId = (txId: string | undefined, original: SafeTransaction, merged: SafeTransaction) =>
       merged === original ? txId : undefined
 

@@ -6,10 +6,7 @@ import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 
-/**
- * Sign step of the fee payment spec: the first signer picks who pays the network fee (Pay from Safe is
- * the one choice made at signing); later signers see the locked line, or nothing.
- */
+/** Sign step: the first signer picks who pays; later signers see it locked. */
 const FeePayerSignStep = (): ReactElement | null => {
   const { GasPayerSelector, $isReady } = useLoadFeature(FeePaymentFeature)
   const { safeTx } = useContext(SafeTxContext)

@@ -30,8 +30,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   )
   const signerAddress = useWallet()?.address
   const preferredFeePaymentMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress))
-  // The mode this flow signs with. It starts from the signer's remembered pick (Signer wallet by default);
-  // the fee selector keeps it in step with what is shown and persists only explicit picks.
+  // Starts from the signer's remembered pick; the fee card keeps it in step with what it shows.
   const [feePaymentMode, setFeePaymentMode] = useState<FeePaymentMode>(preferredFeePaymentMode ?? 'signer')
   const [feeGasToken, setFeeGasToken] = useState<string>()
 

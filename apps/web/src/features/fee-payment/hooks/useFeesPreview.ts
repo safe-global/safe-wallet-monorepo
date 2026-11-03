@@ -68,11 +68,7 @@ export type FeesPreviewData = {
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-/**
- * @param options.isExecution - the payload is about to be executed: the executor is known, so a Signer-pays
- *   payload is estimated even with one signature missing (the last signer of an m/n Safe executes without
- *   signing first and approves by executing).
- */
+/** @param options.isExecution - the executor is known, so signer-pays is estimated even one signature short. */
 export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean } = {}): FeesPreviewData => {
   const { safeTx, feePaymentMode, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
@@ -146,10 +142,7 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // Chains that do not list PAY_FROM_SAFE can't quote Safe-pays fees at all
-  // — render the signer-pays variant: free execution fee, no
-  // gas-token selector, and no call to the preview endpoint. Paying from the Safe is open to every
-  // plan; only sponsoring depends on the Workspace.
+  // Without PAY_FROM_SAFE on the chain there is no quote: render signer-pays and skip the preview call.
   const feePreviewAvailable = isPayFromSafeAvailable(chain)
   const isSignerMode =
     !isConfirmation && (!feePreviewAvailable || feePaymentMode === 'signer' || candidates.length === 0)
@@ -274,9 +267,7 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
     }
   }
 
-  // Signed payload without Pay from Safe fee setup. Locked confirmer-style UI: no selectors, gas fee
-  // shown as "Calculated at execution" while the executor is unknown, or a local estimate once it is
-  // (fully signed, or the Execute step).
+  // Signed without Safe-pays fees: locked, "Calculated at execution" until the executor is known.
   if (isLegacySigned && safeTx) {
     if (!isExecution && safeTx.signatures.size < safe.threshold) {
       return {

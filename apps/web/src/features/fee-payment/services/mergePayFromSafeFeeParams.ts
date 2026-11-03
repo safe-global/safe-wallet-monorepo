@@ -20,10 +20,7 @@ export type PayFromSafeMergeContext = {
   dispatch: AppDispatch
 }
 
-/**
- * Merge CGW fee-preview fee fields into a SafeTx before the first signer signs.
- * Confirmers inherit the locked fields from the signed payload — bails out if signatures exist.
- */
+/** Merges the CGW quote into an unsigned SafeTx; signed payloads keep their fee params. */
 export const mergePayFromSafeFeeParams = async ({
   safeTx,
   chain,

@@ -2,11 +2,7 @@ import type { FeatureHandle } from '@/features/__core__'
 import type { FeePaymentContract } from './contract'
 import { useCurrentChain } from '@/hooks/useChains'
 
-/**
- * Hand-rolled instead of `createFeatureHandle`: there is no feature flag. The module loads on any
- * chain once it is known, because the history shows the breakdown of a Safe-paid transaction even
- * where the relayer no longer offers Pay from Safe; callers check `useIsPayFromSafeEnabled` for the rest.
- */
+// No feature flag: the module loads on every known chain because the history breakdown needs it.
 const useIsFeePaymentModuleEnabled = (): boolean | undefined => (useCurrentChain() ? true : undefined)
 
 export const FeePaymentFeature: FeatureHandle<FeePaymentContract> = {

@@ -26,8 +26,7 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
-// Fee breakdown for executed multisig txs on any chain: "Paid from the Safe" from the signed
-// payload, or "Paid from the signer" from the on-chain receipt.
+// Fee breakdown on any chain: from the signed payload when the Safe paid, from the receipt otherwise.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
   const { HistoryFeesAccordion } = useLoadFeature(FeePaymentFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)

@@ -77,8 +77,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
   // Safe-pays: use the `payment` field — the actual amount transferred to the refundReceiver,
   // denominated in `gasToken` base units. Falls back to native chain metadata when the gas
-  // token is the zero address. Shown on any chain: the payload itself says the Safe paid, even
-  // where the relayer no longer offers Pay from Safe.
+  // token is the zero address.
   const safePaidData = useMemo<HistoryFeesData | null>(() => {
     if (!executedAt || !exec || !isSafePaid) return null
     if (!payment) return null
@@ -105,8 +104,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   ])
 
   // Signer-pays: fetch receipt once per txHash. Deps are primitives so polling balances
-  // doesn't trigger a re-fetch. Shown on any chain: what the executing wallet paid in gas is
-  // worth knowing whether or not the relayer offers Pay from Safe.
+  // doesn't trigger a re-fetch.
   const [receipt] = useAsync(async () => {
     if (!executedAt || !exec) return null
     if (isSafePaid) return null
