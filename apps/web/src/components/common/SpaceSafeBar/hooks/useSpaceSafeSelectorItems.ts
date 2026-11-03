@@ -25,8 +25,16 @@ import type { SafeItemData, SafeItemDataChain } from '@/features/spaces'
 import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { usePortfolioSummaries } from '@/features/portfolio'
 import { useSafeBarSafes } from './useSafeBarSafes'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
+
+type ResolveBalance = (
+  chainId: string,
+  address: string,
+  overview: SafeOverview | undefined,
+) => { balance: string | undefined; isLoading: boolean }
 
 const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
@@ -71,7 +79,7 @@ const mapMultiChainItemChains = (
   chainIds: string[],
   item: MultiChainSafeItem,
   overviews: SafeOverview[] | undefined,
-  overviewsLoading: boolean,
+  resolveBalance: ResolveBalance,
   undeployedSafes: UndeployedSafesState,
   walletAddress: string | undefined,
 ): SafeItemDataChain[] =>
@@ -79,6 +87,7 @@ const mapMultiChainItemChains = (
     const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === id)
     const perChainSafe = item.safes.find((s) => s.chainId === id)
     const undeployed = undeployedSafes[id]?.[item.address]
+    const { balance, isLoading } = resolveBalance(id, item.address, overview)
     return {
       ...toChainInfo(
         id,
@@ -86,8 +95,8 @@ const mapMultiChainItemChains = (
       ),
       threshold: overview?.threshold,
       owners: overview?.owners.length,
-      balance: overview?.fiatTotal,
-      isLoading: overviewsLoading && !overview,
+      balance,
+      isLoading,
       queued: overview?.queued,
       awaitingConfirmation: getOwnerAwaitingConfirmations(overview, walletAddress) || undefined,
       isReadOnly: deriveIsReadOnly(overview, walletAddress, perChainSafe?.isReadOnly ?? false),
@@ -101,7 +110,7 @@ function buildMultiChainItem(
   isCurrentSafe: boolean,
   currentChainId: string,
   overviews: SafeOverview[] | undefined,
-  overviewsLoading: boolean,
+  resolveBalance: ResolveBalance,
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
   undeployedSafes: UndeployedSafesState,
@@ -113,20 +122,21 @@ function buildMultiChainItem(
   const currentChainOverview = overviews?.find(
     (o) => sameAddress(o.address.value, item.address) && o.chainId === currentChainId,
   )
+  const currentChainBalance = resolveBalance(currentChainId, item.address, currentChainOverview)
 
   return {
     id: `${orderedChainIds[0]}:${item.address}`,
     name: item.name ?? '',
     address: item.address,
     ...resolveThresholdAndOwners(isCurrentSafe, safe, currentChainOverview),
-    balance: currentChainOverview?.fiatTotal ?? '0',
-    isLoading: overviewsLoading && !currentChainOverview,
+    balance: currentChainBalance.balance ?? '0',
+    isLoading: currentChainBalance.isLoading,
     chains: mapMultiChainItemChains(
       chainConfigs,
       orderedChainIds,
       item,
       overviews,
-      overviewsLoading,
+      resolveBalance,
       undeployedSafes,
       walletAddress,
     ),
@@ -137,7 +147,7 @@ function buildSingleChainItem(
   item: SafeItem,
   isCurrentSafe: boolean,
   overviews: SafeOverview[] | undefined,
-  overviewsLoading: boolean,
+  resolveBalance: ResolveBalance,
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
   undeployedSafes: UndeployedSafesState,
@@ -145,14 +155,15 @@ function buildSingleChainItem(
 ): SafeItemData {
   const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === item.chainId)
   const undeployed = undeployedSafes[item.chainId]?.[item.address]
+  const { balance, isLoading } = resolveBalance(item.chainId, item.address, overview)
 
   return {
     id: `${item.chainId}:${item.address}`,
     name: item.name ?? '',
     address: item.address,
     ...resolveThresholdAndOwners(isCurrentSafe, safe, overview),
-    balance: overview?.fiatTotal ?? '0',
-    isLoading: overviewsLoading && !overview,
+    balance: balance ?? '0',
+    isLoading,
     chains: mapChainIds(chainConfigs, [item.chainId]).map((chain) => ({
       ...chain,
       queued: overview?.queued,
@@ -191,6 +202,21 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
   } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
+  const summaries = usePortfolioSummaries(flatSafes, FEATURES.PORTFOLIO_SUMMARIES_SELECTOR)
+
+  // A Safe missing from the summaries response falls back to its overview rather than showing $0
+  const resolveBalance = useCallback<ResolveBalance>(
+    (chainId, address, overview) => {
+      if (summaries.isEnabled(chainId)) {
+        const summary = summaries.getSummary(chainId, address)
+        if (summary) return { balance: summary.fiatTotal, isLoading: false }
+        if (summaries.isLoading) return { balance: undefined, isLoading: true }
+      }
+      return { balance: overview?.fiatTotal, isLoading: overviewsLoading && !overview }
+    },
+    [summaries, overviewsLoading],
+  )
+
   const buildItems = useCallback(
     (safes: AllSafeItems): SafeItemData[] =>
       safes.map((item) => {
@@ -202,7 +228,7 @@ export function useSpaceSafeSelectorItems() {
             isCurrentSafe,
             currentChainId,
             overviews,
-            overviewsLoading,
+            resolveBalance,
             safe,
             chainConfigs,
             undeployedSafes,
@@ -214,7 +240,7 @@ export function useSpaceSafeSelectorItems() {
           item,
           isCurrentSafe,
           overviews,
-          overviewsLoading,
+          resolveBalance,
           safe,
           chainConfigs,
           undeployedSafes,
@@ -226,7 +252,7 @@ export function useSpaceSafeSelectorItems() {
       currentChainId,
       safe,
       overviews,
-      overviewsLoading,
+      resolveBalance,
       chainConfigs,
       undeployedSafes,
       walletAddress,
