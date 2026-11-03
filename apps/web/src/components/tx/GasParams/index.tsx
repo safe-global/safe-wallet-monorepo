@@ -38,7 +38,6 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
-  /** Replaces the estimated fee in the header when the fee is shown elsewhere (e.g. paid from the Safe). */
   feeLabel?: ReactNode
   noFeeCampaign?: {
     isEligible: boolean
