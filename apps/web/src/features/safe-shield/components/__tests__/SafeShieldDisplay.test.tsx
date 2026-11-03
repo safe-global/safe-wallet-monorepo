@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { http, HttpResponse } from 'msw'
 import { JsonRpcProvider, Network, toQuantity } from 'ethers'
 import userEvent from '@testing-library/user-event'
-import { act, fakerChecksummedAddress, render, screen, within } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, screen, within } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
@@ -10,7 +10,6 @@ import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import * as useCheckSimulation from '../../hooks/useCheckSimulation'
-import { calculateAnalysisDelays } from '../../hooks/useDelayedLoading'
 import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
@@ -27,7 +26,9 @@ import type {
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, StatusGroup } from '@safe-global/utils/features/safe-shield/types'
+import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
+import { BASE_DELAY, STAGGER_STEP } from '../../utils/revealDelays'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
@@ -502,14 +503,6 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('No threat', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('shows no threat detected, its details, and neither a malicious nor a failed result', async () => {
       const response: ThreatAnalysisResponseDto = {
         THREAT: [
@@ -522,8 +515,7 @@ describe('SafeShieldDisplay', () => {
         ],
       }
       const threat: AsyncResult<ThreatAnalysisResults> = [transformThreatAnalysisResponse(response), undefined, false]
-      const { threatAnalysisDelay } = calculateAnalysisDelays(true, true, true)
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+      const user = userEvent.setup()
       render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
@@ -536,11 +528,54 @@ describe('SafeShieldDisplay', () => {
       const card = screen.getByTestId('threat-analysis-group-card')
       await user.click(within(card).getByText('No threat detected'))
 
-      await act(() => jest.advanceTimersByTimeAsync(threatAnalysisDelay))
-
       expect(within(card).getByText('Threat analysis found no issues.')).toBeVisible()
       expect(screen.queryByText('Malicious threat detected')).not.toBeInTheDocument()
       expect(screen.queryByText('Threat analysis failed')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Failed threat check', () => {
+    const failedThreat: AsyncResult<ThreatAnalysisResults> = [
+      { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] },
+      new Error('Failed to fetch threat analysis'),
+      false,
+    ]
+
+    it('reveals the failed threat card first and the recipient and contract cards after it', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={failedThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByTestId('threat-analysis-group-card')).toHaveStyle({ animationDelay: `${BASE_DELAY}ms` })
+      expect(screen.getByTestId('recipient-analysis-group-card')).toHaveStyle({
+        animationDelay: `${BASE_DELAY + STAGGER_STEP}ms`,
+      })
+      expect(screen.getByTestId('contract-analysis-group-card')).toHaveStyle({
+        animationDelay: `${BASE_DELAY + 2 * STAGGER_STEP}ms`,
+      })
+    })
+
+    it('shows the failure instead of the empty state when it is the only result', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={failedThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByText('Threat analysis failed')).toBeInTheDocument()
+      expect(
+        screen.queryByText(
+          'Transaction details will be automatically scanned for potential risks and will appear here.',
+        ),
+      ).not.toBeInTheDocument()
     })
   })
 
