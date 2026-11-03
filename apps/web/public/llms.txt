@@ -1,0 +1,66 @@
+# Safe{Wallet}
+
+> Safe{Wallet} is the web app for Safe accounts: multi-signature smart contract accounts on Ethereum and other EVM chains. A transaction needs signatures from a threshold of the Safe's owners before it can be executed.
+
+New: an agent can now prepare any Safe transaction for the user as a link, without the user filling in a form in the app.
+
+An agent cannot sign or execute for the user. It can prepare a transaction as a link. The user opens the link, reviews every detail on the review screen, and signs or executes it there.
+
+## Transaction links
+
+```
+<app-url>/home?safe=<chainPrefix>:<safeAddress>&txs=<url-encoded JSON>[&nonce=<n>]
+```
+
+- `<app-url>` is the address of this app, for example `https://app.safe.global`.
+- `<chainPrefix>` is the EIP-3770 short name of the chain: `eth` (Ethereum), `sep` (Sepolia), `base`, `oeth` (Optimism), `arb1` (Arbitrum), `matic` (Polygon), `gno` (Gnosis Chain).
+- `txs` is one call or an array of calls, as JSON. Build it with `encodeURIComponent(JSON.stringify(txs))`.
+- `nonce` is optional. It sets the Safe nonce, for example to replace a transaction that is already queued. Without it, the recommended nonce is used.
+
+Two or more calls are sent as one `MultiSendCallOnly` transaction, so they all succeed or all fail together.
+
+Each call has these fields:
+
+- `to` (required): target address.
+- `value` (optional): native amount in wei, as a decimal or `0x` hex string. Default `0`. `"0.02"` is not allowed; write `"20000000000000000"`.
+- `data` (optional): raw calldata as hex. Default `0x`.
+- `method` (optional): function signature, for example `transfer(address to, uint256 amount)`. The app encodes the calldata. Do not set it together with `data`.
+- `args` (optional): arguments for `method`, in order. Pass large integers as strings.
+
+Only `CALL` operations are possible. A link cannot create a `DELEGATECALL`.
+
+If the link is invalid, the app shows an error that names the call and the field, for example `Call 2: "to" must be an address`.
+
+## Examples
+
+Send 0.02 ETH:
+
+```json
+[{ "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "value": "20000000000000000" }]
+```
+
+Send 100 USDC (6 decimals) on Ethereum:
+
+```json
+[
+  {
+    "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "method": "transfer(address to, uint256 amount)",
+    "args": ["0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", "100000000"]
+  }
+]
+```
+
+Approve and deposit in one transaction:
+
+```json
+[
+  { "to": "<token>", "method": "approve(address spender, uint256 amount)", "args": ["<vault>", "1000000"] },
+  { "to": "<vault>", "method": "deposit(uint256 assets, address receiver)", "args": ["1000000", "<safe>"] }
+]
+```
+
+## Limits
+
+- Keep the full URL under about 8 KB. That is roughly 15 to 30 calls with `method` and `args`, and fewer with long raw `data`.
+- A link only creates a new transaction. It cannot sign messages or confirm a transaction that is already queued.
