@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { http, HttpResponse } from 'msw'
 import { JsonRpcProvider, Network, toQuantity } from 'ethers'
-import { fakerChecksummedAddress, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
+import { act, fakerChecksummedAddress, render, screen, within } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
@@ -9,6 +10,7 @@ import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import * as useCheckSimulation from '../../hooks/useCheckSimulation'
+import { calculateAnalysisDelays } from '../../hooks/useDelayedLoading'
 import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
@@ -437,8 +439,13 @@ describe('SafeShieldDisplay', () => {
     let recipient: string
 
     beforeEach(() => {
+      jest.useFakeTimers()
       safeAddress = fakerChecksummedAddress()
       recipient = fakerChecksummedAddress()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
     })
 
     const findRecipientCard = () => screen.findByTestId('recipient-analysis-group-card')
@@ -495,6 +502,14 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('No threat', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
     it('shows no threat detected, its details, and neither a malicious nor a failed result', async () => {
       const response: ThreatAnalysisResponseDto = {
         THREAT: [
@@ -507,7 +522,9 @@ describe('SafeShieldDisplay', () => {
         ],
       }
       const threat: AsyncResult<ThreatAnalysisResults> = [transformThreatAnalysisResponse(response), undefined, false]
-      const { user } = renderWithUserEvent(
+      const { threatAnalysisDelay } = calculateAnalysisDelays(true, true, true)
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+      render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
           contract={emptyContract}
@@ -519,7 +536,9 @@ describe('SafeShieldDisplay', () => {
       const card = screen.getByTestId('threat-analysis-group-card')
       await user.click(within(card).getByText('No threat detected'))
 
-      await waitFor(() => expect(within(card).getByText('Threat analysis found no issues.')).toBeVisible())
+      await act(() => jest.advanceTimersByTimeAsync(threatAnalysisDelay))
+
+      expect(within(card).getByText('Threat analysis found no issues.')).toBeVisible()
       expect(screen.queryByText('Malicious threat detected')).not.toBeInTheDocument()
       expect(screen.queryByText('Threat analysis failed')).not.toBeInTheDocument()
     })
