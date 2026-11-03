@@ -299,6 +299,16 @@ jobs:
             rsync -a --prune-empty-dirs --exclude '.anvil-cache/' --exclude 'artifacts/playwright/' \
               "$shard/" "$REPORT/shards/${shard##*-}/"
           done
+          # The PR comment always links index.html, so a run without tests still opens the shard logs.
+          if [ ! -f "$REPORT/index.html" ]; then
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>Isolated E2E logs</title>'
+              echo '<h1>Playwright did not run</h1>'
+              echo "<p>No test report was produced, usually because the backend did not start. See the <a href=\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\">workflow run</a> and the shard logs:</p><ul>"
+              (cd "$REPORT" && find shards -type f | sort | sed -E 's|.*|<li><a href="&">&</a></li>|')
+              echo '</ul>'
+            } > "$REPORT/index.html"
+          fi
 
       - name: Upload merged report
         uses: actions/upload-artifact@v7.0.2
