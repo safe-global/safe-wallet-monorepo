@@ -91,8 +91,6 @@ export const ExecuteForm = ({
   const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
   const isPayFromSafe = selection.isPayFromSafe
   const isSponsored = selection.choice === 'SPONSORED' && !!offer && !offer.disabledReason
-
-  // Safe-pays relays through the public route: the Workspace relayer refuses payloads that refund it.
   const gasPayer: GasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : isSponsored ? offer.option : 'WALLET'
   const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'

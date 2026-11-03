@@ -19,7 +19,6 @@ export const getGasPaymentRefusal = (
   err: Error,
   gasPayer: GasPayer,
 ): { excluded: SponsoredOption[]; message: string } | undefined => {
-  // The Safe paying its own gas excludes no sponsored option: the CGW error reaches the user as is.
   if (gasPayer === 'WALLET' || gasPayer === 'PAY_FROM_SAFE') return undefined
 
   if (err instanceof QuotaExceededError) return { excluded: [gasPayer], message: sponsoredQuotaMessage(err) }
