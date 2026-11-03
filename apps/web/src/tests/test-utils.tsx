@@ -1,5 +1,5 @@
 import type { RenderHookOptions } from '@testing-library/react'
-import { render, renderHook, within } from '@testing-library/react'
+import { act, render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
@@ -10,6 +10,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 import { userEvent } from '@testing-library/user-event'
 import { createMockWeb3Provider, type MockCallImplementation } from '@safe-global/utils/tests/web3Provider'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 export const getAppName = (): string => {
   const isOfficialHost = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
@@ -113,6 +114,15 @@ export const mockClipboard = (): jest.Mock => {
   const writeText = jest.fn().mockResolvedValue(undefined)
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
   return writeText
+}
+
+/**
+ * Removes a key from localStorage and from the in-memory copy that useLocalStorage keeps per key.
+ * Removing it from localStorage alone leaves the old value in that copy for the next test.
+ */
+export const clearLocalStorageKey = (key: string): void => {
+  const { result } = renderHook(() => useLocalStorage<unknown>(key))
+  act(() => result.current[1](() => undefined))
 }
 
 // https://testing-library.com/docs/user-event/intro#writing-tests-with-userevent
