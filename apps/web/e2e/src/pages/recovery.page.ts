@@ -103,6 +103,10 @@ export class RecoveryPage {
   /** Open the queued recovery and start its cancellation; the review opens */
   async cancel(): Promise<void> {
     await this.queuedRecoveries.click()
+    // A click while the panel still opens can land off the moving button, and nothing happens
+    await this.queuedRecoveries.getByTestId('accordion-details').evaluate(async (panel) => {
+      await Promise.all(panel.getAnimations().map((animation) => animation.finished))
+    })
     await this.cancelButton.click()
     await this.confirmCancelButton.click()
   }

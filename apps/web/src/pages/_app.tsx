@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
@@ -56,7 +56,7 @@ const RecoveryLoader = () => {
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
  * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered next/dynamic imports.
+ * through handle.ts rather than scattered dynamic() imports.
  */
 const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)

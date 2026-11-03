@@ -156,16 +156,14 @@ export class TxReviewPage {
     await this.execute()
   }
 
-  /** Confirm the risk, continue from the review and execute with the relay, which pays the gas */
+  /** Continue from the review and execute with the relay, which pays the gas */
   async continueAndExecuteWithRelay(): Promise<void> {
-    await this.confirmRisk()
     await this.continueButton.click()
     await this.executeWithRelay()
   }
 
-  /** Confirm the risk, continue from the review and pick Sign over Execute, as the last signer of an m/n Safe */
+  /** Continue from the review and pick Sign over Execute, as the last signer of an m/n Safe */
   async continueAndChooseSign(): Promise<void> {
-    await this.confirmRisk()
     await this.continueButton.click()
     await this.submitActions.click()
     await this.signChoice.click()
