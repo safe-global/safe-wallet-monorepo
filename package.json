@@ -49,6 +49,7 @@
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.6.4",
     "@storybook/react": "^10.6.4",
+    "@types/node": "^22.13.1",
     "@typescript/native": "npm:typescript@7.0.2",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
@@ -57,8 +58,11 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
     "prettier": "^3.9.10",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "storybook": "^10.6.4",
-    "turbo": "^2.11.10"
+    "turbo": "^2.11.10",
+    "typescript": "~5.9.2"
   },
   "dependenciesMeta": {
     "cypress": {
