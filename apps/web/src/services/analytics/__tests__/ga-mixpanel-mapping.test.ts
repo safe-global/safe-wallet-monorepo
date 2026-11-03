@@ -66,7 +66,6 @@ describe('GA to Mixpanel Mapping', () => {
       })
     })
 
-    // Without these rows trackEvent silently drops the events
     it('should map the WalletConnect Safe App suggestion events', () => {
       expect(GA_TO_MIXPANEL_MAPPING[WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action]).toBe(
         MixpanelEvent.WC_SAFE_APP_SUGGESTED,

@@ -1,18 +1,7 @@
-import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { safeAppBuilder } from '@/tests/builders/walletConnect'
 import { findMatchingSafeApp, getSafeAppHostname } from '../safeAppMatch'
 
-const makeApp = (url: string, name = 'App', id = 1): SafeAppData => ({
-  id,
-  url,
-  name,
-  description: '',
-  chainIds: ['1'],
-  accessControl: { type: 'NO_RESTRICTIONS' },
-  tags: [],
-  features: [],
-  socialProfiles: [],
-  featured: false,
-})
+const makeApp = (url: string, name = 'App', id = 1) => safeAppBuilder().with({ url, name, id }).build()
 
 describe('getSafeAppHostname', () => {
   it('lowercases the hostname and strips a www. prefix', () => {
@@ -69,8 +58,6 @@ describe('findMatchingSafeApp', () => {
     expect(findMatchingSafeApp(apps, 'https://apps-portal.safe.global/drain-safe')?.name).toBe('Drain Account')
   })
 
-  // The disambiguation branch compares origin+path, so a trailing slash on either side must
-  // not stop a genuine match
   it('disambiguates by path across a trailing slash difference', () => {
     const apps = [
       makeApp('https://apps-portal.safe.global/tx-builder', 'Transaction Builder', 1),
