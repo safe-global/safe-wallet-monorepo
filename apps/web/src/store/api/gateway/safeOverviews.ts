@@ -21,7 +21,7 @@ type SafeOverviewQueueItem = {
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
 
-const _FETCH_TIMEOUT = 300
+export const SAFE_OVERVIEWS_BATCH_WINDOW_MS = 300
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
@@ -101,7 +101,7 @@ class SafeOverviewFetcher {
     if (this.fetchTimeout === null) {
       this.fetchTimeout = setTimeout(() => {
         this.processQueuedItems()
-      }, _FETCH_TIMEOUT)
+      }, SAFE_OVERVIEWS_BATCH_WINDOW_MS)
     }
   }
 
