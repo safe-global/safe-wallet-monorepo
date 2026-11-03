@@ -21,6 +21,7 @@ function InlineRetryError({ message = 'Failed to load data', onRetry }: InlineRe
           <Button
             variant="ghost"
             size="sm"
+            // eslint-disable-next-line shadcn/no-restyle -- red at rest, while the ghost-destructive variant is muted at rest
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={onRetry}
           >

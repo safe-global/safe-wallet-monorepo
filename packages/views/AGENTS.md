@@ -8,6 +8,7 @@
 - **No imports from an app.** Production files must not import `@/…` (apps/web) or anything that holds hooks, store access, SDK calls or analytics. Data and callbacks come in through props. ESLint (`no-restricted-imports`) enforces this; tests and stories are exempt.
 - Inside the package, import other package files as `@safe-global/views/…`.
 - Assets the views render (SVGs, CSS modules) live in the package (`src/assets/`, next to the view). An SVG that the app also serves by URL stays in `apps/web/public` as well.
+- Which classes a component allows in `className` is set by the `shadcn/no-restyle` contracts in `eslint-design-system-contracts.mjs`. The escape hatch here is `// eslint-disable-next-line shadcn/no-restyle -- <reason>`. `apps/web` still uses the `no-restricted-syntax` rules from `eslint-design-system.mjs`.
 - shadcn primitives are managed with the shadcn CLI from `apps/web` (`components.json` points at this package); read `src/components/ui/README.md` before editing them by hand.
 
 ## Checks

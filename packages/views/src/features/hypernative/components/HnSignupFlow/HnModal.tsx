@@ -19,7 +19,7 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
         size="md"
         surface="paper"
         padding="none"
-        // eslint-disable-next-line no-restricted-syntax -- rounded-2xl: bespoke 16px radius, no dialog radius token
+        // eslint-disable-next-line shadcn/no-restyle -- rounded-2xl: bespoke 16px radius, no dialog radius token
         className="overflow-auto rounded-2xl"
       >
         {children}

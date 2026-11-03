@@ -79,8 +79,9 @@ export default function SplitMenuButton({
               // `bg-clip-border` paints the fill under Button's 1px transparent border, which
               // otherwise lets the card background through as a white gap at the seam.
               className={cn(
-                // eslint-disable-next-line no-restricted-syntax -- split-button halves fill the button-group row height and paint their fill to the border box so the seam stays a single hairline
+                // eslint-disable-next-line shadcn/no-restyle -- split-button halves fill the button-group row height and paint their fill to the border box so the seam stays a single hairline
                 'h-full min-w-0 flex-1 shrink bg-clip-border',
+                // eslint-disable-next-line shadcn/no-restyle -- split-button halves flatten inner corners at the join
                 hasMenu && 'in-data-[slot=button-group]:rounded-r-none',
               )}
               // The floor keeps the button from resizing as the selected option's label changes, but
@@ -104,7 +105,7 @@ export default function SplitMenuButton({
                 aria-label="select action"
                 disabled={loading}
                 data-testid="combo-submit-dropdown"
-                // eslint-disable-next-line no-restricted-syntax -- split-button halves flatten inner corners at the join and fill the button-group row height
+                // eslint-disable-next-line shadcn/no-restyle -- split-button halves flatten inner corners at the join and fill the button-group row height
                 className="border-l-primary-foreground/20 h-full max-w-12 border-l bg-clip-border px-3 in-data-[slot=button-group]:rounded-l-none"
               />
             }

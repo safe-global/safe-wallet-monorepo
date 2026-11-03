@@ -18,7 +18,7 @@ const SettingsCard = ({
   ...props
 }: SettingsCardProps) => {
   return (
-    // eslint-disable-next-line no-restricted-syntax -- SettingsCard preset owns its 32px padding; no p-8 Card size variant exists
+    // eslint-disable-next-line shadcn/no-restyle -- SettingsCard preset owns its 32px padding; no p-8 Card size variant exists
     <Card size="none" radius="lg" className={cn('p-8', className)} {...props}>
       <div
         data-slot="settings-card-content"

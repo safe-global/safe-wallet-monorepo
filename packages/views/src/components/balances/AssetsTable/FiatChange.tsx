@@ -40,7 +40,7 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
           <Chip
             variant={direction === 'up' ? 'positive' : direction === 'down' ? 'negative' : 'default'}
             size={inline ? 'default' : 'auto'}
-            // eslint-disable-next-line no-restricted-syntax -- inline table-cell variant is not a pill: transparent background and no padding (pre-migration parity), colored text/arrow only
+            // eslint-disable-next-line shadcn/no-restyle -- inline table-cell variant is not a pill: transparent background and no padding (pre-migration parity), colored text/arrow only
             className={inline ? 'bg-transparent px-0 pr-0 dark:bg-transparent' : 'pr-1'}
           >
             {direction === 'down' ? (
