@@ -15,6 +15,14 @@ test('every registered Playwright spec exists and names scenario functions', () 
   }
 })
 
+test('every scenario function serves at least one Playwright spec', () => {
+  const used = new Set(Object.values(playwrightSpecs).flatMap(({ scenarios: names = [] }) => names))
+  assert.deepEqual(
+    Object.keys(scenarios).filter((name) => !used.has(name)),
+    [],
+  )
+})
+
 test('every fork that a Playwright spec names has a stack profile', () => {
   for (const [spec, { chains = [] }] of Object.entries(playwrightSpecs)) {
     for (const chainId of chains) assert.ok(chainProfiles[chainId], `${spec} names unknown fork ${chainId}`)

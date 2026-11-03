@@ -27,7 +27,7 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
-      {onRename && <button data-testid="rename-btn" onClick={onRename} />}
+      {onRename && <span role="button" data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
   Mock.displayName = 'SafeInfoDisplay'
