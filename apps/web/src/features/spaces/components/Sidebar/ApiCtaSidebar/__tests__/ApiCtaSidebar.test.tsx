@@ -16,11 +16,6 @@ let mockSidebarState: 'expanded' | 'collapsed' = 'expanded'
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [mockIsCollapsed, mockSetIsCollapsed]))
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
-}))
-
 jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,

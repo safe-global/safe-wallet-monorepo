@@ -5,7 +5,7 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeInfoBuilder } from '@/tests/builders/safe'
-import * as ens from '@/services/ens'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import SafeOwnerStep from '.'
 
@@ -13,7 +13,14 @@ const CHAIN_ID = '11155111'
 const OTHER_CHAIN_ID = '1'
 const ENS_NAME = 'signer.eth'
 
-const mockChain = chainBuilder().with({ chainId: CHAIN_ID, shortName: 'sep' }).build()
+const mockChain = chainBuilder()
+  .with({ chainId: CHAIN_ID, shortName: 'sep', isTestnet: true, features: [FEATURES.DOMAIN_LOOKUP] })
+  .build()
+
+let mockEnsName: string | null = null
+jest.mock('@/store/api/ens', () => ({
+  useGetEnsPrimaryNameQuery: () => ({ currentData: mockEnsName, isFetching: false }),
+}))
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -55,7 +62,7 @@ const signerNameInputs = () => screen.findAllByLabelText('Signer name', { exact:
 
 describe('SafeOwnerStep', () => {
   beforeEach(() => {
-    jest.spyOn(ens, 'lookupAddress').mockResolvedValue(undefined)
+    mockEnsName = null
   })
 
   it('submits the signers and the threshold of the Safe from CGW', async () => {
@@ -97,7 +104,7 @@ describe('SafeOwnerStep', () => {
 
   it('suggests the ENS name of a signer and passes it on', async () => {
     const owner = fakerChecksummedAddress()
-    jest.spyOn(ens, 'lookupAddress').mockResolvedValue(ENS_NAME)
+    mockEnsName = ENS_NAME
     serveSafe([owner], 1)
     const { onSubmit } = renderStep()
 

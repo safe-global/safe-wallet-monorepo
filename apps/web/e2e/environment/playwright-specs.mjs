@@ -2,7 +2,7 @@
  * Every Playwright spec that runs against the isolated backend, by path under e2e/tests. `scenarios` names the
  * functions in scenarios/index.mjs that prepare the spec's data, once per spec file; `safes` maps each key of SAFES
  * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return. `chains` lists the forks
- * besides Sepolia that the spec needs; the stack of the Playwright job starts them.
+ * besides Sepolia that the spec needs; the stack of every Playwright shard in CI starts them.
  */
 export const playwrightSpecs = {
   'e2e/ledger-sign-execute.spec.ts': {
@@ -38,6 +38,7 @@ export const playwrightSpecs = {
   'e2e/relay.spec.ts': {},
   'e2e/replace.spec.ts': {},
   'e2e/safe-shield-recipient.spec.ts': {},
+  'e2e/safe-shield-untrusted-safe.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'e2e/tx-history-filter.spec.ts': {},

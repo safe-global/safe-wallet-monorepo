@@ -8,7 +8,7 @@ const isValid = ({ address, chainId, name, abi }) =>
   isAddress(address) && Number(chainId) === SEPOLIA && name && Array.isArray(abi) && abi.length > 0
 
 /** Registers the contracts in one decoder process, because each process start takes about 1.5 s. */
-export async function registerContracts(env, contracts) {
+async function registerContracts(env, contracts) {
   if (!contracts.every(isValid)) throw new Error('Contract metadata requires a Sepolia address, name and ABI')
   const script = await readFile(new URL('./register-contract.py', import.meta.url), 'utf8')
   await runInLocalService(

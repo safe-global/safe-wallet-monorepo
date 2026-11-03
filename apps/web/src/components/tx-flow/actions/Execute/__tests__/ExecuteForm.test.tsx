@@ -26,6 +26,20 @@ import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 
+jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
+jest.mock('@/hooks/useGasLimit', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ gasLimit: undefined, gasLimitError: undefined, gasLimitLoading: false })),
+}))
+jest.mock('@/hooks/useIsValidExecution', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isValidExecution: undefined,
+    executionValidationError: undefined,
+    isValidExecutionLoading: false,
+  })),
+}))
+
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
 jest.mock('@/hooks/useGasPaymentOptions', () => ({
   useGasPaymentOptions: () => mockUseGasPaymentOptions(),
