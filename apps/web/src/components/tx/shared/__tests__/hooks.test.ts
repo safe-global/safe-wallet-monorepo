@@ -1454,7 +1454,7 @@ describe('SignOrExecute hooks', () => {
     }
 
     const setupPayFromSafeChain = () => {
-      // Safe-pays requires both the Pay from Safe flag and a RELAY_FEE relayer on the chain.
+      // Safe-pays requires a relayer that lists PAY_FROM_SAFE.
       const payFromSafeChain = chainBuilder()
         .with({
           chainId: '1',

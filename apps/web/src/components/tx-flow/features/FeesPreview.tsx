@@ -6,21 +6,18 @@ import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 
-/** Sign step: the first signer picks who pays; later signers see it locked. */
 const FeePayerSignStep = (): ReactElement | null => {
   const { GasPayerSelector, $isReady } = useLoadFeature(FeePaymentFeature)
   const { safeTx } = useContext(SafeTxContext)
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
   const selection = useGasPayerSelection({ safeTx, offer: null, step: 'sign' })
 
-  // Signing with "Pay from Safe" depends on the quote: hold the CTA until it is in, and while it fails.
   const blocksSubmit = selection.isQuoteLoading || selection.hasQuoteError
   useEffect(() => {
     setIsSubmitDisabled(blocksSubmit)
     return () => setIsSubmitDisabled(false)
   }, [blocksSubmit, setIsSubmitDisabled])
 
-  // Safe Shield simulates the payload the user is about to sign, fee params included.
   useSafeShieldForTxData(selection.isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
 
   if (!$isReady || !selection.view) return null
@@ -33,7 +30,6 @@ const FeePayerSignStep = (): ReactElement | null => {
   )
 }
 
-// Shown on every chain while no execute form is mounted (`useIsFeeCardSlotVisible`).
 const FeesPreviewSlot = withSlot({
   Component: FeePayerSignStep,
   slotName: SlotName.Main,

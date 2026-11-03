@@ -86,7 +86,6 @@ export const ExecuteForm = ({
 
   const { offer, exclude } = useGasPaymentOptions({ safeTx })
 
-  // The fee card of the fee payment spec decides who pays on every chain: a sponsor, the Safe or the wallet.
   const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(FeePaymentFeature)
   const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
   const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
@@ -98,7 +97,6 @@ export const ExecuteForm = ({
   const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'
 
-  // Safe Shield simulates the payload the user is about to sign, fee params included.
   useSafeShieldForTxData(isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
 
   useEffect(() => {
@@ -231,7 +229,6 @@ export const ExecuteForm = ({
           />
         </div>
 
-        {/* The fee card of the fee payment design stands on its own, under the gas params. */}
         {isPayFromSafeReady && selection.view && (
           <GasPayerSelector
             view={selection.view}
@@ -240,7 +237,6 @@ export const ExecuteForm = ({
           />
         )}
 
-        {/* The campaign is on offer but refuses this gas price: the card locks the wallet, the banner says why. */}
         {offer?.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && <GasTooHighBanner />}
 
         {/* Error messages */}

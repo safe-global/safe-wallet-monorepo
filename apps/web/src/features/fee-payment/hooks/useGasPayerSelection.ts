@@ -36,9 +36,7 @@ export type GasPayerSelection = {
   setChoice: (choice: GasPayerChoice) => void
   /** The payload already carries Safe-pays fee params: the Safe pays, nothing else can without paying gas twice. */
   isLocked: boolean
-  /** The Safe pays: locked, or chosen for an unsigned payload. */
   isPayFromSafe: boolean
-  /** The quote the signature depends on is still resolving. */
   isQuoteLoading: boolean
   /** Safe account is chosen but could not be quoted: signing would silently fall back to signer-pays. */
   hasQuoteError: boolean
@@ -95,7 +93,6 @@ export const useGasPayerSelection = ({
 
   // Pro with sponsored txs left decides at execution; a proposer leaves the pick to the first signer.
   const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT' && !isProposing
-  // At execution a sponsored offer replaces the Safe toggle (Pro plan / Signer wallet).
   const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
 
   const isChoiceAvailable = (candidate: GasPayerChoice | undefined): candidate is GasPayerChoice =>
@@ -150,7 +147,6 @@ export const useGasPayerSelection = ({
     const payer: FeePayerControl = (() => {
       if (isLocked) return { kind: 'locked', value: 'PAY_FROM_SAFE' }
       if (step === 'sign') {
-        // Design: a Pro Workspace with sponsored transactions left has nothing to pick at signing.
         if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'locked', value: 'SPONSORED' }
         if (offersSafeToggle) {
           return {
@@ -216,7 +212,6 @@ export const useGasPayerSelection = ({
           currency: fees.executionFee.currency,
           fiatAmount: fees.executionFee.fiatAmount,
         }
-    // The fee leaves the Safe only when the Safe pays it.
     const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : withoutFees(fees.totalOutgoing)
 
     // At execution the offer decides the strip; at signing the Workspace meter, where the chain sponsors plans.

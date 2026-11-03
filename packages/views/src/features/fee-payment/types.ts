@@ -21,7 +21,6 @@ export type GasPayerChoice = 'SPONSORED' | 'PAY_FROM_SAFE' | 'WALLET'
 
 export type GasTokenOption = { address: string; symbol: string; logoUri: string; fiatBalance?: string }
 
-/** A priced amount, a note in its place (e.g. "Calculated at execution"), or a loading/error state. */
 export type NetworkFee = {
   amount?: string
   currency?: string
@@ -35,7 +34,6 @@ export type OutgoingLine = { amount: string; currency: string }
 
 export type TotalOutgoingView = { primary: OutgoingLine[]; fees?: OutgoingLine; fiatTotal: string }
 
-/** A dropdown when there is a choice, a locked pill (with its reason) when there is not. */
 export type FeePayerControl =
   | { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] }
   | { kind: 'locked'; value: GasPayerChoice; reason?: string }

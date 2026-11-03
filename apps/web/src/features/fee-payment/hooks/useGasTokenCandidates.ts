@@ -31,8 +31,7 @@ export type GasTokenCandidatesResult = {
  * synchronously off the chain config + balances.
  *
  * The native gas token is always included when held, regardless of allowlist membership, so the
- * flow still works on chains not yet in the allowlist (native-only). While {@link NATIVE_GAS_TOKEN_ONLY}
- * is on, it is the only candidate.
+ * flow still works on chains not yet in the allowlist (native-only).
  */
 export const useGasTokenCandidates = (
   tx: FeePreviewTx | undefined,

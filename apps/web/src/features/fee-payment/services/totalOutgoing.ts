@@ -72,7 +72,6 @@ export const getSendInGasToken = (safeTx: SafeTransaction, gasTokenAddress: stri
   return getOutflowInGasToken({ to, value, data }, gasTokenAddress)
 }
 
-/** The total without the fee, for when the signer pays it. */
 export const withoutFees = (totalOutgoing: TotalOutgoing | undefined): TotalOutgoing | undefined =>
   totalOutgoing && totalOutgoing.primary.length > 0 ? { ...totalOutgoing, fees: undefined } : undefined
 
@@ -227,7 +226,6 @@ export const computeTotalOutgoing = ({
     }
   }
 
-  // No native value leaves the Safe: only the fee, which `withoutFees` drops when the signer pays.
   if (isEmptyData || value === '0') return feeOnly()
 
   return undefined

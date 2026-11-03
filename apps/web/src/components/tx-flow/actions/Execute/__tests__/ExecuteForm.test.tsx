@@ -38,8 +38,7 @@ jest.mock('@/hooks/useGasPaymentOptions', () => ({
   useGasPaymentOptions: () => mockUseGasPaymentOptions(),
 }))
 
-// The lazily loaded features render as stubs: the fee card exposes the view it was given, so the tests
-// can read who the form decided pays.
+// The fee card stub exposes the view it was given, so tests can read who the form decided pays.
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: () => ({
@@ -271,8 +270,7 @@ describe('ExecuteForm', () => {
   })
 
   it('relays a Safe-pays tx through the public route, never against the Workspace allowance', async () => {
-    // Even with a subscription offer on screen, a payload that refunds the relayer from the Safe must not
-    // use the Workspace route: the CGW refuses refunding transactions there (REFUNDING_TRANSACTION).
+    // The CGW refuses refunding transactions on the Workspace route (REFUNDING_TRANSACTION).
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: subscriptionOffer }))
     const mockExecuteTx = jest.fn()
     const safePaysTx = createMockSafeTransaction({

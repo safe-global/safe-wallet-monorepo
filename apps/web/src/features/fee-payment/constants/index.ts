@@ -11,7 +11,6 @@ export const FEE_COLLECTORS: ReadonlyArray<string> = [
   '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD',
 ]
 
-/** Whether a `refundReceiver` quoted by the CGW is one of the known fee collectors. */
 export const isFeeCollector = (address: string): boolean => FEE_COLLECTORS.some((addr) => sameAddress(addr, address))
 
 export * from './gasTokenAllowlist'
