@@ -894,5 +894,31 @@ describe('TxSigners (Audit Log)', () => {
       // Created connects to Signed; Signed is the last visible row.
       expect(container.getElementsByClassName('timelineLine')).toHaveLength(1)
     })
+
+    it('moves isLast off the signing row when a pending tx cannot read its check', async () => {
+      useHasFeature.mockReturnValue(true)
+      mockSafeInfo({ chainId: '1', threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
+      // A failed read has no snapshot, yet the row still renders.
+      useSafenetCheck.mockReturnValue({
+        snapshot: undefined,
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'READ_FAILED',
+        isLoading: false,
+        isFetching: false,
+        isStale: false,
+        refetch: jest.fn(),
+      })
+      const { txDetails, txSummary } = buildPendingSafenetTx()
+
+      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      await waitFor(() => expect(screen.getByText("Couldn't read Safenet status")).toBeInTheDocument(), {
+        timeout: 10_000,
+      })
+      // Created + Signed keep their connectors; the Safenet step is the last row.
+      expect(container.getElementsByClassName('timelineLine')).toHaveLength(2)
+    }, 15_000)
   })
 })
