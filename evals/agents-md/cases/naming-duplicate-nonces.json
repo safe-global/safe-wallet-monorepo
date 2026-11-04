@@ -1,0 +1,4 @@
+{
+  "prompt": "Add a helper to packages/utils/src/utils that takes a list of Safe transactions with nonces and returns the nonces that are used by more than one transaction, with unit tests.",
+  "expectation": "New names follow Clean Code: a reader knows what each value is without reading where it is set; no single-letter names outside a one-line callback; no cryptic abbreviations (such as `res`, `arr`, `tmp`, `cnt`, `acc`, `m`, `obj`, `data`, `item`, `val`); names that hold IDs or lists say of what; boolean names read as a question (`is…`, `has…`, `should…`, `can…`). FAIL if the diff adds any name that breaks one of these."
+}
