@@ -42,7 +42,14 @@
     "@shadcn/lint": "^0.2.3",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.72.0"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    }
   }
 }
