@@ -1,4 +1,3 @@
-// The trial offer of the creation wizard opens the local billing service's checkout page in place of Stripe's.
 import { test, expect } from '../../../src/fixtures/test.fixture'
 import { removeSubscription, signInWithEmail, uniqueEmail } from '../../../src/fixtures/email-session'
 import { WorkspacePage } from '../../../src/pages/workspace.page'
