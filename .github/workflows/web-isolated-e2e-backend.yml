@@ -256,7 +256,7 @@ jobs:
             apps/web/e2e/environment/infra/.anvil-cache/**
             ${{ runner.temp }}/tx-builder.log
             ${{ runner.temp }}/simulation.log
-          retention-days: 7
+          retention-days: 1
           if-no-files-found: ignore
 
   merge-report:
