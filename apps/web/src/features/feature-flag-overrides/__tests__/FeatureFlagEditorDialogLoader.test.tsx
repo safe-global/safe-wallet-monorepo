@@ -21,6 +21,8 @@ describe('FeatureFlagEditorDialogLoader', () => {
   })
 
   it('renders the dialog outside production', async () => {
+    // Pre-loads the lazy chunk so it can't outlast findByRole's 1s timeout on a slow runner
+    await import('../components/FeatureFlagEditorDialog')
     const { findByRole } = render(<FeatureFlagEditorDialogLoader open onOpenChange={jest.fn()} />)
 
     expect(await findByRole('heading', { name: 'Feature flags' })).toBeInTheDocument()
