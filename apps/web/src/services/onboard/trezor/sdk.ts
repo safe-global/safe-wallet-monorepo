@@ -14,7 +14,8 @@ export async function getTrezorSdk() {
     await TrezorConnect.init({
       manifest: { appName: 'Safe{Wallet}', appUrl: TREZOR_APP_URL, email: TREZOR_EMAIL },
       lazyLoad: true,
-      coreMode: 'popup',
+      // Trezor Safe 7 cannot use the popup; 'auto' goes through Trezor Suite when it runs
+      coreMode: 'auto',
     })
     trezorConnectInitialized = true
   }
