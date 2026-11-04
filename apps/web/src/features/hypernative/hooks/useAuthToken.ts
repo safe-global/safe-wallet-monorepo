@@ -112,7 +112,7 @@ const refreshAuthToken = async (refreshToken: string): Promise<RefreshOutcome> =
     try {
       const response = await store
         .dispatch(
-          hypernativeApi.endpoints.refreshToken.initiate({
+          hypernativeApi.endpoints.exchangeToken.initiate({
             grant_type: 'refresh_token',
             client_id: HYPERNATIVE_OAUTH_CONFIG.clientId,
             refresh_token: current.refreshToken,

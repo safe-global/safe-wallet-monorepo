@@ -17,10 +17,11 @@ jest.mock('@/store', () => ({
   getStoreInstance: jest.fn(),
 }))
 
+// The refresh grant goes through the same /oauth/token endpoint as the code exchange
 jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
   hypernativeApi: {
     endpoints: {
-      refreshToken: {
+      exchangeToken: {
         initiate: jest.fn(),
       },
     },
@@ -33,7 +34,7 @@ const mockGetAuthCookieData = cookieStorage.getAuthCookieData as jest.MockedFunc
 const mockSetAuthCookie = cookieStorage.setAuthCookie as jest.MockedFunction<typeof cookieStorage.setAuthCookie>
 const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction<typeof cookieStorage.clearAuthCookie>
 const mockGetStoreInstance = getStoreInstance as jest.MockedFunction<typeof getStoreInstance>
-const mockInitiate = hypernativeApi.endpoints.refreshToken.initiate as jest.Mock
+const mockInitiate = hypernativeApi.endpoints.exchangeToken.initiate as jest.Mock
 
 /** Mirrors REFRESH_RETRY_DELAYS_MS in the hook - the number of retries before a token is left alone */
 const REFRESH_RETRY_ATTEMPTS = 4

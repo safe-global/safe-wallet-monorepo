@@ -21,7 +21,13 @@ export const hypernativeApi = createApi({
   baseQuery: retry(fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL }), { maxRetries: 2 }),
   tagTypes: addTagTypes,
   endpoints: (build) => ({
-    exchangeToken: build.mutation<HypernativeTokenExchangeResponseDto['data'], HypernativeTokenExchangeRequestDto>({
+    /**
+     * POST /oauth/token for both grants: the authorization-code exchange and the refresh.
+     */
+    exchangeToken: build.mutation<
+      HypernativeTokenExchangeResponseDto['data'],
+      HypernativeTokenExchangeRequestDto | HypernativeTokenRefreshRequestDto
+    >({
       query: (request) => ({
         url: '/oauth/token',
         method: 'POST',
@@ -33,21 +39,9 @@ export const hypernativeApi = createApi({
       }),
       transformResponse: (response: HypernativeTokenExchangeResponseDto) => response.data, // Extract data from the response wrapper
       transformErrorResponse: (response: HypernativeQueryErrorDto) => response.data,
-      invalidatesTags: ['hypernative-oauth'],
-    }),
-    refreshToken: build.mutation<HypernativeTokenExchangeResponseDto['data'], HypernativeTokenRefreshRequestDto>({
-      query: (request) => ({
-        url: '/oauth/token',
-        method: 'POST',
-        body: request,
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      }),
-      transformResponse: (response: HypernativeTokenExchangeResponseDto) => response.data,
-      transformErrorResponse: (response: HypernativeQueryErrorDto) => response.data,
-      // The refresh token is single-use; retrying with an already-consumed token revokes the whole chain
+      // Both grants are single-use: a retried refresh token reads as a replay and revokes the whole
+      // chain, and a retried authorization code fails once the server has consumed it. The caller
+      // decides whether a failure is worth another attempt.
       extraOptions: { maxRetries: 0 },
       invalidatesTags: ['hypernative-oauth'],
     }),
