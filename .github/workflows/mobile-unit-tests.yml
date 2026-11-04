@@ -70,7 +70,7 @@ jobs:
             | tee ./coverage.txt && exit ${PIPESTATUS[0]}
 
       - name: Jest Coverage Comment
-        uses: MishaKav/jest-coverage-comment@v1.0.37
+        uses: MishaKav/jest-coverage-comment@v1.0.38
         with:
           coverage-summary-path: ./coverage/coverage-summary.json
           coverage-title: Coverage
