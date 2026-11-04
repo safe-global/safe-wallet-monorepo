@@ -7,10 +7,13 @@ import { basename, join } from 'node:path'
 const MODEL = process.env.AGENTS_EVAL_MODEL || 'claude-opus-5-5'
 const AGENT_TOOLS = 'Read,Edit,Write,Glob,Grep'
 const MAX_DIFF_CHARS = 200_000
+const MIN_CASES_PER_RULE = 5
+const RULE_ID_PATTERN = /^- `([A-Z][A-Z0-9_]*)`/gm
 const modelsUsed = new Set()
 
 const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim()
 const casesDir = join(repoRoot, 'evals/agents-md/cases')
+const rulesFile = join(repoRoot, 'AGENTS.md')
 
 function git(cwd, args) {
   return execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
@@ -41,7 +44,7 @@ function runClaude(cwd, args, prompt) {
 }
 
 function createWorktree(caseName, variant) {
-  const dir = mkdtempSync(join(tmpdir(), `agents-md-eval-${caseName}-${variant}-`))
+  const dir = mkdtempSync(join(tmpdir(), `agents-md-eval-${caseName.replace('/', '-')}-${variant}-`))
   git(repoRoot, ['worktree', 'add', '--quiet', '--detach', dir, 'HEAD'])
   if (variant === 'control') {
     const contextFiles = git(dir, ['ls-files', '-z', '--', ':(glob)**/AGENTS.md', ':(glob)**/CLAUDE.md'])
@@ -123,13 +126,38 @@ async function runCase(evalCase) {
   }
 }
 
-function loadCases(names) {
-  const files = readdirSync(casesDir).filter((file) => file.endsWith('.json'))
-  const cases = files.map((file) => ({
-    name: basename(file, '.json'),
-    ...JSON.parse(readFileSync(join(casesDir, file), 'utf8')),
-  }))
-  return names.length ? cases.filter((evalCase) => names.includes(evalCase.name)) : cases
+function loadCases(filters) {
+  const ruleIds = [...readFileSync(rulesFile, 'utf8').matchAll(RULE_ID_PATTERN)].map((match) => match[1])
+  const caseFolders = readdirSync(casesDir)
+  const problems = [
+    ...ruleIds
+      .filter((ruleId) => !caseFolders.includes(ruleId))
+      .map((ruleId) => `Rule ${ruleId} has no folder in evals/agents-md/cases`),
+    ...caseFolders
+      .filter((folder) => !ruleIds.includes(folder))
+      .map((folder) => `evals/agents-md/cases/${folder} has no rule with that ID in AGENTS.md`),
+  ]
+  const cases = ruleIds
+    .filter((ruleId) => caseFolders.includes(ruleId))
+    .flatMap((ruleId) => {
+      const files = readdirSync(join(casesDir, ruleId)).filter((file) => file.endsWith('.json'))
+      if (files.length < MIN_CASES_PER_RULE) {
+        problems.push(`Rule ${ruleId} has ${files.length} of the ${MIN_CASES_PER_RULE} required cases`)
+      }
+      return files.map((file) => ({
+        name: `${ruleId}/${basename(file, '.json')}`,
+        ...JSON.parse(readFileSync(join(casesDir, ruleId, file), 'utf8')),
+      }))
+    })
+  if (problems.length > 0) {
+    console.error(problems.join('\n'))
+    process.exit(1)
+  }
+  return filters.length
+    ? cases.filter((evalCase) =>
+        filters.some((filter) => evalCase.name === filter || evalCase.name.startsWith(`${filter}/`)),
+      )
+    : cases
 }
 
 function report(results) {

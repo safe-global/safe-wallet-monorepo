@@ -13,13 +13,16 @@ A pull request that changes an `AGENTS.md` or `CLAUDE.md` file must also add or 
 
 To add a rule:
 
-1. Write prompts that make it likely the agent breaks the rule without it. Each prompt is one case.
-2. Write the expected behaviour that the judge checks the diff against, including when to fail.
-3. Add the rule to `AGENTS.md`, commit, and run the evals.
+1. Pick a rule ID in capitals, such as `MARKUP_IN_PACKAGES_VIEWS`, and start the rule's line in `AGENTS.md` with it: ``- `MARKUP_IN_PACKAGES_VIEWS` **Put as much markup…**``.
+2. Write at least 5 prompts that make it likely the agent breaks the rule without it. Each prompt is one case.
+3. Write the expected behaviour that the judge checks the diff against, including when to fail.
+4. Commit, and run the evals.
+
+The runner stops before calling the model when a rule has no case folder, a case folder has no rule, or a rule has fewer than 5 cases.
 
 ## Case format
 
-One JSON file per case in `cases/`. The file name is the case name.
+One JSON file per case in `cases/<RULE_ID>/`. Results show a case as `<RULE_ID>/<file name>`, for example `MARKUP_IN_PACKAGES_VIEWS/chain-badge`.
 
 ```json
 {
@@ -33,8 +36,9 @@ One JSON file per case in `cases/`. The file name is the case name.
 The runner needs the `claude` CLI and an `ANTHROPIC_API_KEY`. It checks out `HEAD` into temporary git worktrees, so commit your changes first. Each case runs the agent twice and the judge twice.
 
 ```bash
-node evals/agents-md/run.mjs                        # all cases
-node evals/agents-md/run.mjs views-chain-badge      # one case
+node evals/agents-md/run.mjs                                          # all cases
+node evals/agents-md/run.mjs MARKUP_IN_PACKAGES_VIEWS                 # all cases of one rule
+node evals/agents-md/run.mjs MARKUP_IN_PACKAGES_VIEWS/chain-badge     # one case
 AGENTS_EVAL_MODEL=sonnet node evals/agents-md/run.mjs
 ```
 
