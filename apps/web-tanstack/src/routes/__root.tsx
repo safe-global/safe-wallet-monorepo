@@ -18,12 +18,13 @@ import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
+import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
@@ -93,7 +94,6 @@ const InitApp = (): ReactElement => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
@@ -115,6 +115,8 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <CookieAndTermBanner />
+      <WhatsNewTopBar />
+      <WhatsNewUpdatesFrame />
       <TargetedOutreachPopupLoader />
       <Notifications />
       <RecoveryLoader />
