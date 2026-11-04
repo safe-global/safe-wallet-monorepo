@@ -151,6 +151,7 @@ class EnvironmentTests(unittest.TestCase):
             },
             "nginx": {"ports": [{"published": "8000"}]},
             "ledger-emulator": {"ports": [{"published": "9555"}]},
+            "trezor-emulator": {"ports": [{"published": "9556"}, {"published": "21328"}]},
             "txs-init": {"environment": {"FORK_CHAIN_ID": "11155111"}},
         }
         for service in services.values():
@@ -159,6 +160,8 @@ class EnvironmentTests(unittest.TestCase):
         self.assertNotIn("secret", str(result))
         self.assertEqual(result["gatewayUrl"], GATEWAY)
         self.assertEqual(result["ledgerEmulatorUrl"], "http://localhost:9555")
+        self.assertEqual(result["trezorEmulatorUrl"], "http://localhost:9556")
+        self.assertEqual(result["trezorBridgeUrl"], "http://localhost:21328")
         self.assertEqual(result["forkBlock"], 100)
 
     @patch("scripts.test_env.subprocess.run")
