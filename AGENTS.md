@@ -110,6 +110,5 @@ Safe is a smart contract wallet requiring M-of-N owner signatures (the **thresho
 Cross-cutting mistakes to avoid. Web-specific pitfalls live in [apps/web/AGENTS.md](apps/web/AGENTS.md#web-specific-common-pitfalls); mobile-specific ones in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md#mobile-specific-common-pitfalls).
 
 1. **Breaking mobile when changing shared code** – `packages/**` affects both web and mobile, and app verify scripts don't cover it — see [packages/AGENTS.md](packages/AGENTS.md).
-2. **Modifying generated files** – never hand-edit generated files under `packages/` (contract types, `AUTO_GENERATED/`); regeneration commands in [packages/AGENTS.md](packages/AGENTS.md).
-3. **Not handling chain-specific logic** – Always consider multi-chain scenarios.
-4. **Incomplete error handling** – Always handle loading, error, and empty states in UI components.
+2. **Not handling chain-specific logic** – Always consider multi-chain scenarios.
+3. **Incomplete error handling** – Always handle loading, error, and empty states in UI components.

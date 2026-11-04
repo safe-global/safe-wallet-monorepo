@@ -15,7 +15,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
 - **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`; an event that mirrors an API result is sent by a store listener on the endpoint's `matchFulfilled`, with props from the request args, the response or the RTK cache (see `features/spaces/store/workspaceTrackingListener.ts`). Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
-- **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<img>` instead of `next/image`, `<a>` instead of `next/link` for external links, `dynamic` from `@/utils/dynamic` instead of `next/dynamic` (it renders nothing on the server, so the module does not load during the static export), and a plain function component instead of the `NextPage` type. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/app`, `next/document`) have no replacement yet, so keep using them.
+- **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<a>` instead of `next/link` for external links. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/app`, `next/document`) have no replacement yet, so keep using them.
 
 ## Component variants over custom styling
 
@@ -24,24 +24,12 @@ padding/height/border/hover on a primitive, a variant probably exists; if the pa
 add a variant or a preset instead of pasting the classes again. The **`UI/Button` → Guidelines and
 `UI/Input` stories are the canonical variant/size reference** — this section only states the rule.
 
-- **On `<Button>`, `className` is layout-only** (`w-full`, margins, grid placement); size/skin utilities are **ESLint-enforced errors** (`no-restricted-syntax` in `eslint.config.mjs`). The only sanctioned escape is a justified `// eslint-disable-next-line no-restricted-syntax -- <reason>` — when a pattern recurs, add a size/variant to `packages/views/src/components/ui/button.tsx` rather than disabling.
 - **Prefer the closed presets in `components/common/`** (`SubmitButton`, `ActionBar`+`ActionButton`, `DialogActions`, `OnboardingFooter`, `IconAction`) over the raw primitive — they take semantic props and reject styling `className` at the type level.
 - **Token gotcha (bit you):** `--input` is the field **fill** token, not a border colour — a visible field/button border must use `border-border`, never `border-input` or hard-coded `border-gray-*`. The field primitives already default correctly; don't re-declare borders/backgrounds on them.
 
 ## Feature Architecture Import Rules
 
-Features are lazy-loaded to keep the bundle small. ESLint enforces the import boundaries as **errors** (CI-failing):
-
-```typescript
-// ✅ Allowed
-import { MyFeature, useMyHook } from '@/features/myfeature' // barrel: handle + hooks
-import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
-import type { MyType } from '@/features/myfeature/types' // public types
-import { lightUtil } from '@/features/myfeature/services' // services barrel only — lightweight utils
-
-// ❌ Forbidden: any deep import (components, hooks/*, services/* files) — it defeats
-// lazy loading. Components and heavy services are reached via useLoadFeature() instead.
-```
+Features are lazy-loaded to keep the bundle small.
 
 **Using a feature:**
 
