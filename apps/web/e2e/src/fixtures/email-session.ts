@@ -245,6 +245,30 @@ export async function workspaceName(session: EmailSession, uuid: string): Promis
   return String(workspace.name)
 }
 
+/** The membership status (`INVITED`, `ACTIVE`, …) of the user with `email` in the Workspace, or null when not listed. */
+export async function memberStatus(session: EmailSession, uuid: string, email: string): Promise<string | null> {
+  const response = await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}/members`)
+  if (
+    typeof response !== 'object' ||
+    response === null ||
+    !('members' in response) ||
+    !Array.isArray(response.members)
+  ) {
+    throw new Error(`GET /v1/spaces/${uuid}/members returned no members`)
+  }
+  const member: unknown = response.members.find(
+    (entry: unknown) =>
+      typeof entry === 'object' &&
+      entry !== null &&
+      'user' in entry &&
+      typeof entry.user === 'object' &&
+      entry.user !== null &&
+      'email' in entry.user &&
+      entry.user.email === email,
+  )
+  return typeof member === 'object' && member !== null && 'status' in member ? String(member.status) : null
+}
+
 /** How the browser's gateway session was signed in (`oidc` for email), or null without a session. */
 export async function sessionAuthMethod(page: Page): Promise<string | null> {
   const { status, text } = await page.evaluate(async (url) => {

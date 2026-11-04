@@ -1,4 +1,4 @@
-import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
+import { type AnimationEvent, type ReactElement, useContext, useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { ExternalLinkIcon as LaunchIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
@@ -24,6 +24,7 @@ import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import css from './reveal.module.css'
 
 interface TenderlySimulationProps {
   safeTx?: SafeTransaction
@@ -48,7 +49,7 @@ export const TenderlySimulation = ({
   const showSimulation = chain && isTxSimulationEnabled(chain) && safeTx
 
   const [simulationExpanded, setSimulationExpanded] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
+  const [revealed, setRevealed] = useState(false)
 
   // Reset simulation state when transaction changes
   // Use useRef to track the previous transaction and only reset when it actually changes
@@ -146,19 +147,15 @@ export const TenderlySimulation = ({
     }
   }, [mainSimulationResult, nestedSimulationResult])
 
-  useEffect(() => {
-    if (!showSimulation) return
-
-    setTimeout(() => {
-      setIsVisible(true)
-    }, delay)
-  }, [delay, showSimulation])
-
   if (!showSimulation) {
     return null
   }
 
   const showExpandable = isNested && isSimulationFinished
+
+  const handleRevealEnd = (e: AnimationEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) setRevealed(true)
+  }
 
   const getSimulationHeaderText = () => {
     if (!isSimulationFinished) return 'Transaction simulation'
@@ -249,13 +246,9 @@ export const TenderlySimulation = ({
       open={simulationExpanded}
       onOpenChange={setSimulationExpanded}
       data-testid="tenderly-simulation"
-      className="overflow-hidden"
-      style={{
-        opacity: isVisible ? 1 : 0,
-        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
-        transition: `opacity 0.3s ease-in-out, max-height 0.3s ease-in-out`,
-        transitionDelay: `${delay}ms`,
-      }}
+      className={revealed ? undefined : css.reveal}
+      style={revealed ? undefined : { animationDelay: `${delay}ms` }}
+      onAnimationEnd={handleRevealEnd}
     >
       {/* A trigger only when expandable: before the run finishes the header holds the Run button. */}
       {showExpandable ? (

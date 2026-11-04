@@ -7,10 +7,15 @@ import {
   type PublicCheckStatus,
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { STATUS_PRESENTATION } from '../statusPresentation'
-import { useSafenetLinks } from '../useSafenetLinks'
-import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
+import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
+import {
+  STATUS_PRESENTATION,
+  UNAVAILABLE_PRESENTATION,
+  WARNING_RISK_LABEL,
+  getSafenetExplorerUrl,
+} from '../statusPresentation'
+import { isWarningRisk, summariseRejection } from '../summariseRejection'
+import { SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -36,6 +41,14 @@ const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
   [CheckStatus.TIMED_OUT]: 'var(--color-warning-main)',
 }
 
+const DARK_WARNING_RISK_COLOR = 'var(--color-warning-main)'
+
+// Neutral in dark mode; light mode keeps the sibling rows' default color.
+const UNAVAILABLE_STEP_COLOR = 'var(--color-text-secondary)'
+
+// The row appears only once the chain read resolves; the entrance animation
+// softens the late insert instead of popping it in one frame.
+const STEP_ENTRANCE = 'animate-in fade-in slide-in-from-top-1 duration-300'
 export type SafenetAuditRowProps = {
   safeTxHash: string | undefined
   /** The Safe's home chain id — the Safenet explorer indexes checks by it. */
@@ -63,22 +76,14 @@ export const SafenetAuditRowView = ({
   isLast,
 }: SafenetAuditRowViewProps): ReactElement => {
   const isDarkMode = useDarkMode()
-  const label = STATUS_PRESENTATION[publicStatus].label
-  const { attestationHref, explorerHref } = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
+  const isWarning = isWarningRisk(publicStatus, summariseRejection(snapshot.events))
+  const label = isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label
+  const darkColor = isWarning ? DARK_WARNING_RISK_COLOR : DARK_STEP_COLOR[publicStatus]
 
-  const actor = attestationHref ? (
-    <ExternalLink
-      data-testid="safenet-attestation-link"
-      href={attestationHref}
-      aria-label={SAFENET_ATTESTATION_LINK_LABEL}
-      noIcon
-    >
-      Safenet
-    </ExternalLink>
-  ) : EXPLORER_LINKED.includes(publicStatus) ? (
+  const actor = EXPLORER_LINKED.includes(publicStatus) ? (
     <ExternalLink
       data-testid="safenet-explorer-link"
-      href={explorerHref}
+      href={getSafenetExplorerUrl(chainId, safeTxHash)}
       aria-label={SAFENET_EXPLORER_LINK_LABEL}
       noIcon
     >
@@ -89,13 +94,11 @@ export const SafenetAuditRowView = ({
   )
 
   return (
-    // The row appears only once the chain read resolves; the entrance
-    // animation softens the late insert instead of popping it in one frame.
-    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
+    <div className={STEP_ENTRANCE}>
       <AuditRow
         label={label}
         actionType={STEP_ICON[publicStatus]}
-        iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
+        iconColor={isDarkMode ? darkColor : undefined}
         actor={actor}
         isLast={isLast}
         // Null while running or when the header read failed — column stays empty.
@@ -105,7 +108,32 @@ export const SafenetAuditRowView = ({
   )
 }
 
-/** Renders nothing until a check has been observed — most transactions never had one. */
+export type SafenetUnavailableAuditRowViewProps = {
+  reason: ShownUnavailableReason
+  isLast?: boolean
+}
+
+/** Audit-log step for a check that could not be read: no verdict, no date, no link. */
+export const SafenetUnavailableAuditRowView = ({
+  reason,
+  isLast,
+}: SafenetUnavailableAuditRowViewProps): ReactElement => {
+  const isDarkMode = useDarkMode()
+
+  return (
+    <div className={STEP_ENTRANCE}>
+      <AuditRow
+        label={UNAVAILABLE_PRESENTATION[reason].label}
+        actionType="pending"
+        iconColor={isDarkMode ? UNAVAILABLE_STEP_COLOR : undefined}
+        actor="Safenet"
+        isLast={isLast}
+      />
+    </div>
+  )
+}
+
+/** Renders nothing until a check is observed or its read fails — most transactions never had one. */
 export const SafenetAuditRow = ({
   safeTxHash,
   chainId,
@@ -114,6 +142,9 @@ export const SafenetAuditRow = ({
 }: SafenetAuditRowProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
   if (!safeTxHash || !display) return null
+  if (display.publicStatus === CheckStatus.UNAVAILABLE) {
+    return <SafenetUnavailableAuditRowView reason={display.unavailableReason} isLast={isLast} />
+  }
 
   return (
     <SafenetAuditRowView

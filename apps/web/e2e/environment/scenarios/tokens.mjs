@@ -35,8 +35,6 @@ export async function registerTokens(env, tokens) {
   )
 }
 
-export const registerToken = (env, token) => registerTokens(env, [token])
-
 export async function trustTokens(env, addresses) {
   if (!addresses.every(isAddress)) throw new Error('Token registration requires valid addresses')
   await runDjango(

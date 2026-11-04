@@ -1,4 +1,5 @@
 export * from './addressBook'
+export * from './addressPoisoning'
 export * from './assets'
 export * from './createLoadSafe'
 export * from './hypernative'

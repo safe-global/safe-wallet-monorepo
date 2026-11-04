@@ -124,4 +124,10 @@ describe('SafeAppPreviewDrawer', () => {
     const logos = await screen.findByTestId('network-logos-list')
     expect(logos).toHaveAttribute('data-networks', '')
   })
+
+  it('describes the drawer with the app description', async () => {
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
+
+    expect(await screen.findByRole('dialog')).toHaveAccessibleDescription(safeAppMock.description)
+  })
 })

@@ -15,6 +15,10 @@ inputs:
     description: 'Turborepo remote cache team slug'
     required: false
     default: ''
+  cache:
+    description: "Restore and save the Yarn caches; set to 'false' in jobs that hold deploy or publish credentials"
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
@@ -37,6 +41,7 @@ runs:
     # Archives are stored by checksum, so an older cache is safe to restore and saves most downloads.
     - name: Restore Yarn download cache
       id: downloads
+      if: inputs.cache == 'true'
       uses: actions/cache/restore@v5.0.5
       with:
         path: ~/.yarn/berry/cache
@@ -46,6 +51,7 @@ runs:
     # Restored only on an exact match: an older tree could keep packages that the lockfile dropped.
     - name: Restore node_modules
       id: modules
+      if: inputs.cache == 'true'
       uses: actions/cache/restore@v5.0.5
       with:
         path: |
@@ -66,16 +72,17 @@ runs:
       shell: bash
       run: yarn workspace @safe-global/web after-install
 
-    # Pull request runs only restore: their caches serve no other branch and evict the shared ones.
+    # Only trusted events save: pull request caches serve no other branch and evict the shared ones,
+    # and pull_request_target, workflow_run or issue_comment runs could poison the dev scope that deploys restore.
     - name: Save Yarn download cache
-      if: ${{ !startsWith(github.event_name, 'pull_request') && steps.downloads.outputs.cache-hit != 'true' }}
+      if: ${{ inputs.cache == 'true' && contains(fromJSON('["push", "schedule", "workflow_dispatch"]'), github.event_name) && steps.downloads.outputs.cache-hit != 'true' }}
       uses: actions/cache/save@v5.0.5
       with:
         path: ~/.yarn/berry/cache
         key: ${{ steps.downloads.outputs.cache-primary-key }}
 
     - name: Save node_modules
-      if: ${{ !startsWith(github.event_name, 'pull_request') && steps.modules.outputs.cache-hit != 'true' }}
+      if: ${{ inputs.cache == 'true' && contains(fromJSON('["push", "schedule", "workflow_dispatch"]'), github.event_name) && steps.modules.outputs.cache-hit != 'true' }}
       uses: actions/cache/save@v5.0.5
       with:
         path: |

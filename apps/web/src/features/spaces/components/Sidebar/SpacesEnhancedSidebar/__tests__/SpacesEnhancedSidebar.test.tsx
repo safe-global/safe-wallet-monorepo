@@ -16,8 +16,8 @@ const mockUseIsQualifiedSafe = jest.fn()
 jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarProvider: ({ children }: { children: ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
   useSidebar: () => mockUseSidebar(),
-  Sidebar: ({ children, ...props }: { children: ReactNode } & Record<string, unknown>) => (
-    <div {...props}>{children}</div>
+  Sidebar: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
+    <div data-testid={testId}>{children}</div>
   ),
   SidebarHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,

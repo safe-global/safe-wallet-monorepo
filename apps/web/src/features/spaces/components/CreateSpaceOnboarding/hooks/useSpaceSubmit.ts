@@ -64,6 +64,10 @@ const useSpaceSubmit = (
       if (isSafePro) {
         setCreatedSpaceId(newSpaceId)
         setIsSubmitting(false)
+        // The URL must name the Workspace: the router guard or Back from checkout can reload this step
+        void router.replace({ pathname: router.pathname, query: { ...router.query, spaceId: newSpaceId } }, undefined, {
+          shallow: true,
+        })
         return
       }
       goToSelectSafes(newSpaceId)
