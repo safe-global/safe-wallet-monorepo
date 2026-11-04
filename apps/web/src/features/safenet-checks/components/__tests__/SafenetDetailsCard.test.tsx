@@ -20,8 +20,9 @@ import {
   oracleResultEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
-import SafenetDetailsCard, { SafenetDetailsCardView } from '../SafenetDetailsCard'
-import { SAFENET_ATTESTATION_LINK_LABEL } from '../SafenetLinks'
+import SafenetDetailsCard, { SafenetDetailsCardView, SafenetUnavailableCardView } from '../SafenetDetailsCard'
+import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
+import { getSafenetExplorerUrl } from '../../statusPresentation'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -168,6 +169,18 @@ describe('SafenetDetailsCardView', () => {
   })
 })
 
+describe('SafenetUnavailableCardView', () => {
+  it('links the Safenet explorer page of the transaction', () => {
+    render(
+      <SafenetUnavailableCardView reason="READ_FAILED" safeTxHash={safeTxHash} chainId={chainId} defaultExpanded />,
+    )
+
+    const link = screen.getByTestId('safenet-details-explorer')
+    expect(link).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
+    expect(link).toHaveAttribute('href', getSafenetExplorerUrl(chainId, safeTxHash))
+  })
+})
+
 describe('SafenetDetailsCard', () => {
   it('renders nothing when no check was observed', () => {
     jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView())
@@ -175,6 +188,27 @@ describe('SafenetDetailsCard', () => {
     const { container } = render(<SafenetDetailsCard safeTxHash={safeTxHash} chainId={chainId} />)
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it.each([
+    ['NO_CHECK', 'proven'],
+    ['WINDOW_UNCERTAIN', 'heuristic'],
+  ] as const)('renders nothing when the read found no check: %s', (unavailableReason, windowCoverage) => {
+    const snapshot = buildSnapshot({ safeTxHash, status: CheckStatus.UNAVAILABLE, windowCoverage })
+    jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView({ snapshot, unavailableReason }))
+
+    const { container } = render(<SafenetDetailsCard safeTxHash={safeTxHash} chainId={chainId} />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it("shows a neutral card when Safenet's status could not be read", () => {
+    jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView({ unavailableReason: 'READ_FAILED' }))
+
+    render(<SafenetDetailsCard safeTxHash={safeTxHash} chainId={chainId} />)
+
+    expect(screen.getByTestId('safenet-details-card')).toHaveAttribute('data-status', CheckStatus.UNAVAILABLE)
+    expect(screen.getByText("Couldn't read Safenet status")).toBeInTheDocument()
   })
 
   it('shows the card once a check is read', () => {
@@ -279,6 +313,22 @@ describe('SafenetDetailsCard Mixpanel tracking', () => {
     render(card(hash))
 
     expect(rolesTracked()).toEqual([undefined, SafenetSignerRole.CO_SIGNER])
+  })
+
+  it('tracks a check that could not be read as unavailable', () => {
+    const hash = newHash()
+    jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView({ unavailableReason: 'READ_FAILED' }))
+
+    render(card(hash))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFENET_EVENTS.CHECKED,
+      expect.objectContaining({
+        [MixpanelEventParams.SAFE_TX_HASH]: hash,
+        [MixpanelEventParams.RESULT]: SafenetCheckResult.UNAVAILABLE,
+      }),
+    )
   })
 
   it('tracks again when a co-signer opens the flow and executes', () => {
