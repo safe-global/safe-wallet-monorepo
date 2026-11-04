@@ -159,6 +159,7 @@ const SafeAppsPermissions = (): ReactElement => {
             <Link
               href="#"
               className="flex items-center text-destructive"
+              aria-label="Remove permissions"
               onClick={(event) => handleRemoveApp(event, domain)}
             >
               <DeleteIcon className="size-4" />
