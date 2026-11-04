@@ -641,6 +641,8 @@ services:
       FF_FILTER_VALUE_PARSING: 'true'
       FF_SAFE_QUEUE_SERVICE: 'true'
       SAFE_QUEUE_SERVICE_BASE_URI: http://queue-web:8888
+      # Below the 2 s idle timeout of the gunicorn upstreams: a socket they close as it is reused fails the request (503)
+      UNDICI_KEEP_ALIVE_TIMEOUT_MILLISECONDS: '1000'
       FF_AUTH: 'true'
       FF_USERS: 'true'
       FF_TRUSTED_DELEGATE_CALL: 'true'
