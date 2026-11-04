@@ -7,6 +7,7 @@ import { basename, join } from 'node:path'
 const MODEL = process.env.AGENTS_EVAL_MODEL || 'claude-opus-5-5'
 const AGENT_TOOLS = 'Read,Edit,Write,Glob,Grep'
 const MAX_DIFF_CHARS = 200_000
+const MAX_SUMMARY_DIFF_CHARS = 30_000
 const MIN_CASES_PER_RULE = 5
 const RULE_ID_PATTERN = /^- `([A-Z][A-Z0-9_]*)`/gm
 const modelsUsed = new Set()
@@ -97,7 +98,7 @@ ${evalCase.expectation}
 ${diff.length > MAX_DIFF_CHARS ? `${diff.slice(0, MAX_DIFF_CHARS)}\n[diff cut off]` : diff || '[empty diff: the agent changed nothing]'}
 </diff>
 
-Answer with a first line that is exactly \`VERDICT: PASS\` or \`VERDICT: FAIL\`, then one short paragraph with the reason.`
+Answer with a first line that is exactly \`VERDICT: PASS\` or \`VERDICT: FAIL\`. If the verdict is FAIL, then list each violation as one bullet: the file path, the offending code quoted in backticks, and a few words on why it breaks the expected behaviour. If the verdict is PASS, then write one short sentence on why.`
   try {
     const answer = await runClaude(dir, ['--tools', ''], prompt)
     const verdict = answer.match(/^VERDICT: (PASS|FAIL)/m)
@@ -160,36 +161,80 @@ function loadCases(filters) {
     : cases
 }
 
+const VARIANT_LABELS = { control: 'Without AGENTS.md', experiment: 'With AGENTS.md' }
+
+function describeOutcome(result) {
+  if (result.error) return `⚠️ error: ${result.error}`
+  if (result.ok) return '✅ rule works'
+  if (!result.experiment.pass) return '❌ rule not followed'
+  return '❌ model follows it without the rule'
+}
+
+function describeVariant(variantResult) {
+  return variantResult.pass ? 'follows rule' : 'breaks rule'
+}
+
+function variantDetails(result, variant) {
+  const { pass, reason, diff } = result[variant]
+  const shownDiff =
+    diff.length > MAX_SUMMARY_DIFF_CHARS ? `${diff.slice(0, MAX_SUMMARY_DIFF_CHARS)}\n[cut off, see the job log]` : diff
+  return [
+    `#### ${VARIANT_LABELS[variant]}: ${describeVariant({ pass })}`,
+    '',
+    reason,
+    '',
+    '````diff',
+    shownDiff || '[the agent changed nothing]',
+    '````',
+  ].join('\n')
+}
+
+function caseDetails(result) {
+  const [ruleId, caseName] = result.name.split('/')
+  return [
+    `<details><summary><code>${ruleId}</code> / ${caseName}: ${describeOutcome(result)}</summary>`,
+    '',
+    `**Prompt:** ${result.prompt}`,
+    '',
+    ...(result.error ? [] : [variantDetails(result, 'control'), '', variantDetails(result, 'experiment')]),
+    '',
+    '</details>',
+  ].join('\n')
+}
+
 function report(results) {
   for (const result of results) {
-    console.log(`\n::group::${result.name}`)
-    if (result.error) {
-      console.log(`error: ${result.error}`)
-    } else {
-      for (const variant of ['control', 'experiment']) {
-        console.log(
-          `--- ${variant}: ${result[variant].pass ? 'PASS' : 'FAIL'}\n${result[variant].reason}\n\n${result[variant].diff}`,
-        )
-      }
+    console.log(`${describeOutcome(result)}  ${result.name}`)
+    if (result.error) continue
+    for (const variant of ['control', 'experiment']) {
+      console.log(`::group::${result.name}: ${VARIANT_LABELS[variant]}, ${describeVariant(result[variant])}`)
+      console.log(`${result[variant].reason}\n\n${result[variant].diff}`)
+      console.log('::endgroup::')
     }
-    console.log('::endgroup::')
   }
 
-  const rows = results.map((result) =>
-    result.error
-      ? `| ${result.name} | error | error | ❌ ${result.error} |`
-      : `| ${result.name} | ${result.control.pass ? 'PASS' : 'FAIL'} | ${result.experiment.pass ? 'PASS' : 'FAIL'} | ${result.ok ? '✅' : '❌'} |`,
-  )
-  const summary = [
-    `AGENTS.md evals (model requested: ${MODEL}; models used: ${[...modelsUsed].join(', ') || 'none'}). A case passes when the control (no AGENTS.md or CLAUDE.md) fails and the experiment passes.`,
+  const rows = results.map((result) => {
+    const [ruleId, caseName] = result.name.split('/')
+    const variantCells = result.error
+      ? '| – | – |'
+      : `| ${describeVariant(result.control)} | ${describeVariant(result.experiment)} |`
+    return `| \`${ruleId}\` | ${caseName} ${variantCells} ${describeOutcome(result)} |`
+  })
+  const table = [
+    `### AGENTS.md evals`,
     '',
-    '| Case | Control | Experiment | Result |',
-    '| --- | --- | --- | --- |',
+    `Model requested: \`${MODEL}\`. Models used: ${[...modelsUsed].map((model) => `\`${model}\``).join(', ') || 'none'}.`,
+    'A case passes when the agent breaks the rule without AGENTS.md and follows it with AGENTS.md.',
+    '',
+    '| Rule | Case | Without AGENTS.md | With AGENTS.md | Result |',
+    '| --- | --- | --- | --- | --- |',
     ...rows,
     '',
   ].join('\n')
-  console.log(`\n${summary}`)
-  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary)
+  console.log(`\n${table}`)
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, [table, ...results.map(caseDetails), ''].join('\n\n'))
+  }
 }
 
 const cases = loadCases(process.argv.slice(2))
@@ -199,4 +244,5 @@ if (cases.length === 0) {
 }
 const results = await Promise.all(cases.map(runCase))
 report(results)
-process.exit(results.every((result) => result.ok) ? 0 : 1)
+// process.exit() can drop log output that is still being written to a pipe, so only set the exit code.
+process.exitCode = results.every((result) => result.ok) ? 0 : 1
