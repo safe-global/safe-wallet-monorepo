@@ -34,7 +34,6 @@
       "next/link": ["./src/compat/next-link.tsx"],
       "next/head": ["./src/compat/next-head.tsx"],
       "next/dynamic": ["./src/compat/next-dynamic.tsx"],
-      "next/image": ["./src/compat/next-image.tsx"],
       "next/app": ["./src/compat/next-app.ts"],
       "next/navigation": ["./src/compat/next-navigation.tsx"]
     }

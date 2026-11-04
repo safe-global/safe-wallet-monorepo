@@ -914,6 +914,7 @@ src/features/walletconnect/
 - Structure adapts to feature needs
 - ESLint enforces that external code can only import from `index.ts` and `types.ts`
 - Internal folders (components/, hooks/, services/) are implementation details
+- A component in `components/` connects data to a view: it calls hooks and renders a view from `@safe-global/views/features/<feature>/components/`. The markup itself goes in that view in `packages/views`.
 
 ## Feature Flag Pattern
 

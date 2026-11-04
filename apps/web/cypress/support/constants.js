@@ -16,7 +16,6 @@ export const TEST_SAFE = 'gor:0x04f8b1EA3cBB315b87ced0E32deb5a43cC151a91'
 export const EOA = '0x03042B890b99552b60A073F808100517fb148F60'
 export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
-export { defaultOwnerAddress } from './credentials.js'
 export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
 export const SIDEBAR_ADDRESS = '0x04f8...1a91'
@@ -34,7 +33,7 @@ export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = Cypress.expose('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
+export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const addressBookUrl = '/address-book?safe='
@@ -62,13 +61,10 @@ export const dataSettingsUrl = '/settings/data?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
-export const stagingTxServiceUrl = (
-  Cypress.expose('SAFE_TXS_BASE_URL') || 'https://safe-transaction-sepolia.staging.5afe.dev/api'
-).replace(/\/$/, '')
+export const stagingTxServiceUrl = 'https://safe-transaction-sepolia.staging.5afe.dev/api'
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
-export const stagingCGWUrl =
-  (Cypress.expose('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
+export const stagingCGWUrl = 'https://safe-client.staging.5afe.dev/'
 export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
 export const stagingCGWChains = '/chains/'
 export const stagingCGWSafes = '/safes/'

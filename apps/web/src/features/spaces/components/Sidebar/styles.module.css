@@ -273,22 +273,6 @@
   display: block;
 }
 
-/* Beamer unread count */
-.footerBeamerButton {
-  position: relative;
-  overflow: visible;
-}
-
-.footerBeamerButton :global(.beamer_icon) {
-  position: absolute;
-  right: 0.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 18px;
-  background-color: var(--color-background-light-hover) !important;
-  color: var(--sidebar-accent-foreground) !important;
-}
-
 .sidebarGroup {
   padding-block: 0;
 }
