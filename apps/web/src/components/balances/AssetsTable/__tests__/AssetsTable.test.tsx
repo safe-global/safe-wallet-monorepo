@@ -29,7 +29,7 @@ jest.mock('@/hooks/useChains', () => ({
 // jsdom has no canvas, so the QR code shows the value it encodes as an attribute
 jest.mock('qrcode.react', () => ({
   __esModule: true,
-  default: ({ value }: { value: string }) => <canvas role="img" aria-label="QR code" data-value={value} />,
+  QRCodeCanvas: ({ value }: { value: string }) => <canvas role="img" aria-label="QR code" data-value={value} />,
 }))
 
 const mockUseIsMobile = jest.fn(() => false)

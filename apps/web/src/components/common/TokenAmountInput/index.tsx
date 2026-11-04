@@ -24,6 +24,8 @@ import { computeFiatValue } from '@/utils/fiat'
 
 export const InsufficientFundsValidationError = 'Insufficient funds'
 
+export const AMOUNT_ERROR_DEBOUNCE_MS = 500
+
 const getFieldName = (field: TokenAmountFields, fieldArray?: TokenAmountInputProps['fieldArray']) =>
   fieldArray ? `${fieldArray.name}.${fieldArray.index}.${field}` : field
 
@@ -72,7 +74,7 @@ const TokenAmountInput = ({
   // corrected-then-broken field must not flash a previous, different message before it settles.
   const amountError = get(errors, amountField)
   const amountErrorMessage = amountError?.message?.toString()
-  const debouncedAmountErrorMessage = useDebounce(amountErrorMessage, 500)
+  const debouncedAmountErrorMessage = useDebounce(amountErrorMessage, AMOUNT_ERROR_DEBOUNCE_MS)
   const shownAmountError = amountError && debouncedAmountErrorMessage === amountErrorMessage ? amountError : undefined
   const isAmountError = !!shownAmountError
 

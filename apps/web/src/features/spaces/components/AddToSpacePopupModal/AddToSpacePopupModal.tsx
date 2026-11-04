@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { X, Check, Plus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -37,11 +36,10 @@ export const AddToSpacePopupModal = (): ReactElement => {
         </Typography>
 
         <div className="relative h-[140px] sm:h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
-          <Image
+          <img
             src="/images/spaces/empty_dashboard.png"
             alt="Add to Workspace illustration"
-            fill
-            className="object-contain"
+            className="absolute inset-0 h-full w-full object-contain"
           />
         </div>
 
