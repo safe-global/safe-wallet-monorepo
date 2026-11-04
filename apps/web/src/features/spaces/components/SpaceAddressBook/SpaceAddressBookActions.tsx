@@ -2,16 +2,21 @@ import { type MouseEvent, useState } from 'react'
 import { ADMIN_ONLY_DELETE_CONTACT_MESSAGE, ADMIN_ONLY_EDIT_CONTACT_MESSAGE } from '@/utils/addressBookNotifications'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import EditIcon from '@/public/images/common/edit.svg'
+import EditIcon from '@safe-global/views/assets/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditContactDialog from './EditContactDialog'
 import DeleteContactDialog from './DeleteContactDialog'
 import { useIsAdmin } from '@/features/spaces'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { EllipsisVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@safe-global/views/components/ui/dropdown-menu'
 
 enum ModalType {
   EDIT = 'edit',

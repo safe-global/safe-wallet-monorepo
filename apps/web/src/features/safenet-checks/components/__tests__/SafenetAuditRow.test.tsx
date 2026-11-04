@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -7,10 +8,12 @@ import {
   buildBenignSnapshot,
   buildCheckView,
   buildSnapshot,
-  plainAttestedEvent,
+  attestedEvent,
+  sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
+import { SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
@@ -40,15 +43,30 @@ describe('SafenetAuditRow', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when no check was observed (UNAVAILABLE)', () => {
-    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.UNAVAILABLE })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.UNAVAILABLE, publicStatus: CheckStatus.UNAVAILABLE }),
-    )
+  it.each([
+    ['NO_CHECK', 'proven'],
+    ['WINDOW_UNCERTAIN', 'heuristic'],
+  ] as const)('renders nothing when the read found no check: %s', (unavailableReason, windowCoverage) => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.UNAVAILABLE,
+      windowCoverage,
+    })
+    mockUseSafenetCheck.mockReturnValue(view({ snapshot, unavailableReason }))
 
     const { container } = render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
 
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it("renders a neutral step by Safenet when Safenet's status could not be read", () => {
+    mockUseSafenetCheck.mockReturnValue(view({ unavailableReason: 'READ_FAILED' }))
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
+
+    expect(screen.getByText("Couldn't read Safenet status")).toBeInTheDocument()
+    expect(screen.getByText('By Safenet')).toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-explorer-link')).not.toBeInTheDocument()
   })
 
   it('renders a Simulating step by Safenet while the check is in flight', () => {
@@ -61,12 +79,12 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByText('Simulating')).toBeInTheDocument()
     expect(screen.getByText('By Safenet')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-explorer-link')).not.toBeInTheDocument()
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument()
   })
 
-  it('links the attestation transaction on the Safenet chain block explorer once FROST-verified', () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
+  it('links a verified check to the Safenet explorer, not to the attestation transaction', () => {
+    const attested = attestedEvent({ safeTxHash: HASH as `0x${string}` })
     const snapshot = buildBenignSnapshot({
       safeTxHash: HASH as `0x${string}`,
       events: [attested],
@@ -76,6 +94,7 @@ describe('SafenetAuditRow', () => {
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
+    // A configured block explorer must not replace the Safenet explorer link.
     mockUseChain.mockReturnValue({
       blockExplorerUriTemplate: {
         txHash: 'https://gnosisscan.io/tx/{{txHash}}',
@@ -87,33 +106,11 @@ describe('SafenetAuditRow', () => {
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
     expect(screen.getByText('No issues found')).toBeInTheDocument()
-    // "By Safenet" with "Safenet" as the link — the actor line IS the proof link.
     expect(screen.getByText(/^By/)).toBeInTheDocument()
-    expect(screen.getByTestId('safenet-attestation-link')).toHaveTextContent('Safenet')
-    expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
-      'href',
-      `https://gnosisscan.io/tx/${attested.transactionHash}`,
-    )
-  })
-
-  it('falls back to the Safenet explorer hash route when the chain config is unknown', () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
-    const snapshot = buildBenignSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      events: [attested],
-      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
-    })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
-    )
-    mockUseChain.mockReturnValue(undefined)
-
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
-
-    expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
-      'href',
-      expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`),
-    )
+    const link = screen.getByTestId('safenet-explorer-link')
+    expect(link).toHaveTextContent('Safenet')
+    expect(link).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
+    expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
   })
 
   it('dates the No-issues step from the attested block', () => {
@@ -128,6 +125,35 @@ describe('SafenetAuditRow', () => {
     expect(screen.getByText(formatAuditDateTime(1_785_749_985_000))).toBeInTheDocument()
   })
 
+  it('renders a Check failed step dated from the deadline block', () => {
+    const timedOutAtMs = faker.date.recent().getTime()
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.TIMED_OUT, timedOutAtMs })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.TIMED_OUT, publicStatus: CheckStatus.TIMED_OUT }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Check failed')).toBeInTheDocument()
+    expect(screen.getByText(formatAuditDateTime(timedOutAtMs))).toBeInTheDocument()
+  })
+
+  it('renders an Under review step by Safenet that links the explorer while a dispute is open', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.DISPUTED })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.DISPUTED, publicStatus: CheckStatus.DISPUTED }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
+
+    expect(screen.getByText('Under review')).toBeInTheDocument()
+    expect(screen.queryByText('Check failed')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safenet-explorer-link')).toHaveAttribute(
+      'href',
+      expect.stringContaining(`/#/safeTx?chainId=100&safeTxHash=${HASH}`),
+    )
+  })
+
   it('renders No issues found without a date when the attested header could not be read', () => {
     const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}`, attestedAtMs: null })
     mockUseSafenetCheck.mockReturnValue(
@@ -140,41 +166,40 @@ describe('SafenetAuditRow', () => {
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument()
   })
 
-  it('drops the proof link when a pinned BENIGN outlives a refetch that lost the attestation', () => {
-    // Reorg / flaky-RPC refetch: merged status stays BENIGN (monotonic pin) but
-    // the fresh snapshot no longer carries the attestation. The generic explorer
-    // route is not proof, so the row must not present one.
-    const snapshot = buildSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      status: CheckStatus.BENIGN,
-      attestation: { status: AttestationVerificationStatus.UNVERIFIED, signatureId: null, message: null },
-    })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
-    )
-
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
-
-    expect(screen.getByText('No issues found')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
-  })
-
-  it.each([
-    ['INVALID', AttestationVerificationStatus.INVALID],
-    ['VERIFIED', AttestationVerificationStatus.VERIFIED],
-  ])('renders Risk detected without a link when MALICIOUS (attestation %s)', (_name, attestationStatus) => {
+  it('links a MALICIOUS step to the Safenet explorer', () => {
     const snapshot = buildSnapshot({
       safeTxHash: HASH as `0x${string}`,
       status: CheckStatus.MALICIOUS,
-      attestation: { status: attestationStatus, signatureId: null, message: null },
+      events: [sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.6' })],
     })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
     )
 
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
     expect(screen.getByText('Risk detected')).toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
+    const link = screen.getByTestId('safenet-explorer-link')
+    expect(link).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
+    expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
+  })
+
+  it('names a risk that cites only warning rules "Issues found", like Safe Shield', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.MALICIOUS,
+      events: [
+        sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.2' }),
+        sentinelRevealedEvent({ sentinel: '0x2', approved: false, reason: 'R-4.1' }),
+      ],
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Issues found')).toBeInTheDocument()
+    expect(screen.queryByText('Risk detected')).not.toBeInTheDocument()
   })
 })

@@ -58,6 +58,8 @@ export {
 export {
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  checkoutTrackingListener,
+  workspaceTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
   safeActionsModalSlice,

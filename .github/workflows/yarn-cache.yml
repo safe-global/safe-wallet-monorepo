@@ -1,0 +1,43 @@
+name: Seed Yarn caches
+
+# Pull requests only restore the Yarn caches, so this workflow saves them on dev for every runner type that
+# pull requests use. The daily run puts back a cache that eviction removed.
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - yarn.lock
+      - '**/package.json'
+      - .yarnrc.yml
+      - .yarn/patches/**
+      - .github/actions/yarn/**
+      - .github/workflows/yarn-cache.yml
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A newer run saves the same or a newer key, so a save that started may finish.
+  cancel-in-progress: false
+
+jobs:
+  save:
+    name: save ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/yarn
+        with:
+          after-install: 'false'

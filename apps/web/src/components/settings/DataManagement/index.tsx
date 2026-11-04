@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
-import FileIcon from '@/public/images/settings/data/file.svg'
+import FileIcon from '@safe-global/views/assets/images/settings/data/file.svg'
 import ExportIcon from '@/public/images/common/export.svg'
 import { getPersistedState, useAppSelector } from '@/store'
 import { addressBookSlice, selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -20,7 +20,7 @@ import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { ClearPendingTxs } from '../ClearPendingTxs'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -91,7 +91,7 @@ const DataManagement = () => {
             title={<b>{exportFileName}</b>}
             action={
               <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
-                <Button className="min-w-[unset] p-[var(--space-1)]" onClick={exportAppData}>
+                <Button aria-label="Export data" className="min-w-[unset] p-[var(--space-1)]" onClick={exportAppData}>
                   <ExportIcon className="size-4" />
                 </Button>
               </Track>

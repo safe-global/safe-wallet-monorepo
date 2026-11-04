@@ -219,7 +219,7 @@ When creating new components, add a corresponding `.stories.tsx` file for docume
 This app is built using the following frameworks:
 
 - [Safe Protocol Kit](https://github.com/safe-global/safe-core-sdk/tree/main/packages/protocol-kit) and [API Kit](https://github.com/safe-global/safe-core-sdk/tree/main/packages/api-kit)
-- [Next.js 15](https://nextjs.org/)
+- [Next.js 16](https://nextjs.org/)
 - [React 19](https://react.dev/)
 - [Redux Toolkit](https://redux-toolkit.js.org/)
 - [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS v4](https://tailwindcss.com/)

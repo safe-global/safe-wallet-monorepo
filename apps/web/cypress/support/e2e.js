@@ -16,9 +16,9 @@
 // Import commands.js using ES2015 syntax:
 import '@testing-library/cypress/add-commands'
 import './commands'
-import './safe-apps-commands'
 import * as constants from './constants'
 import * as ls from './localstorage_data'
+import { setWalletCredentials } from './credentials'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
@@ -26,7 +26,7 @@ import * as ls from './localstorage_data'
 // Argos visual regression — no-op when ARGOS_TOKEN is absent
 import '@argos-ci/cypress/support'
 
-const beamer = JSON.parse(Cypress.env('BEAMER_DATA_E2E') || '{}')
+const beamer = JSON.parse(Cypress.expose('BEAMER_DATA_E2E') || '{}')
 const productID = beamer.PRODUCT_ID
 
 Cypress.on('test:before:run', () => {
@@ -35,6 +35,26 @@ Cypress.on('test:before:run', () => {
     params: {
       locale: 'en-US',
     },
+  })
+})
+
+// One browser runs all specs of a shard, so the app's IndexedDB, caches and service workers would carry over.
+before(() => {
+  if (!Cypress.isBrowser({ family: 'chromium' })) return
+  const origin = new URL(Cypress.config('baseUrl')).origin
+  cy.wrap(
+    Cypress.automation('remote:debugger:protocol', {
+      command: 'Storage.clearDataForOrigin',
+      params: { origin, storageTypes: 'all' },
+    }),
+    { log: false },
+  )
+})
+
+before(() => {
+  cy.env(['CYPRESS_WALLET_CREDENTIALS']).then(({ CYPRESS_WALLET_CREDENTIALS }) => {
+    if (!CYPRESS_WALLET_CREDENTIALS) throw new Error('Set CYPRESS_WALLET_CREDENTIALS to run the staging specs')
+    setWalletCredentials(JSON.parse(CYPRESS_WALLET_CREDENTIALS))
   })
 })
 

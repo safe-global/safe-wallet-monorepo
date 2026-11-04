@@ -128,7 +128,7 @@ describe('SpacePlansPage', () => {
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
-    expect(screen.getByText('Starter')).toBeInTheDocument()
+    expect(screen.getAllByTestId('plan-card')[0]).toHaveTextContent('Starter')
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Switch to Starter' })).not.toBeInTheDocument()
   })
@@ -139,7 +139,8 @@ describe('SpacePlansPage', () => {
 
     expect(mockUseChangePlan).toHaveBeenCalledWith(SPACE_ID)
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
-    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: /Continue with/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
@@ -192,12 +193,7 @@ describe('SpacePlansPage', () => {
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
-    expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter_m', {
-      'Target Plan': 'starter',
-      Seats: 2,
-      'Billing Period': 'monthly',
-      'Entry Point': 'direct',
-    })
+    expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter_m')
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
   })
 

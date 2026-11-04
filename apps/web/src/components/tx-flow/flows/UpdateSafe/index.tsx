@@ -1,5 +1,5 @@
 import { UpdateSafeReview } from './UpdateSafeReview'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 

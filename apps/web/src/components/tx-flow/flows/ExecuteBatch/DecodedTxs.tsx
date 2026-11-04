@@ -5,20 +5,41 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SyntheticEvent } from 'react'
 import extractTxInfo from '@/services/tx/extractTxInfo'
-import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
+import {
+  isCustomTxInfo,
+  isMultisigDetailedExecutionInfo,
+  isNativeTokenTransfer,
+  isTransferTxInfo,
+} from '@/utils/transaction-guards'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { useState } from 'react'
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
+import { SafenetChecksFeature } from '@/features/safenet-checks'
+import { useLoadFeature } from '@/features/__core__'
+
+const BatchTxRiskChip = ({ details }: { details: TransactionDetails }) => {
+  const safenet = useLoadFeature(SafenetChecksFeature)
+  const execution = details.detailedExecutionInfo
+  if (!isMultisigDetailedExecutionInfo(execution)) return null
+
+  return <safenet.SafenetRiskChip safeTxHash={execution.safeTxHash} timestampMs={execution.submittedAt} />
+}
+
+type DecodableTx = TransactionDetails & { txData: NonNullable<TransactionDetails['txData']> }
 
 const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
+  const safenet = useLoadFeature(SafenetChecksFeature)
 
   if (!txs) return null
 
+  const decodableTxs = txs.filter((transaction): transaction is DecodableTx => !!transaction.txData)
+
   return (
     <>
-      <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={txs.length} compact />
+      <safenet.SafenetBatchWarning txs={txs} />
+      <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={decodableTxs.length} compact />
 
       <Card variant="muted" size="none" className="mt-2">
         <CardContent>
@@ -27,9 +48,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
               16px less the 8px inset, which keeps the two concentric. */}
           <div className="p-2">
             <div className="flex flex-col divide-y divide-border overflow-hidden rounded-sm">
-              {txs.map((transaction, idx) => {
-                if (!transaction.txData) return null
-
+              {decodableTxs.map((transaction, idx) => {
                 const onChange = (_: SyntheticEvent, expanded: boolean) => {
                   setOpenMap((prev) => ({
                     ...prev,
@@ -70,6 +89,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
                     expanded={openMap?.[idx] ?? false}
                     onChange={onChange}
                     isExecuted={!!transaction.executedAt}
+                    badge={<BatchTxRiskChip details={transaction} />}
                   />
                 )
               })}

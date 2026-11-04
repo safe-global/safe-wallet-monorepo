@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import css from './SafeLogo.module.css'
 

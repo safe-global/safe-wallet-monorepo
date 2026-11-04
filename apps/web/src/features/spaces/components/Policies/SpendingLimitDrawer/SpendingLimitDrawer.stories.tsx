@@ -45,6 +45,7 @@ const meta = {
     safe: SAFE,
     overview: OVERVIEW,
     onEdit: fn(),
+    onEnableModule: fn(),
     onConnectWallet: fn(),
     policy: mockActiveSpendingLimit(),
     viewer: MOCK_VIEWERS.signer,

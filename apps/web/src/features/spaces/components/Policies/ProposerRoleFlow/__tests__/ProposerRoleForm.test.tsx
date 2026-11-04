@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react'
-import { act, fireEvent, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import {
+  act,
+  advanceClock,
+  fireEvent,
+  renderOnFakeClock,
+  renderWithUserEvent,
+  screen,
+  waitFor,
+} from '@/tests/test-utils'
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useChainIdHook from '@/hooks/useChainId'
@@ -7,10 +15,11 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
-import { getNestedSafesNoticeText } from '../../SafeAccountSelector/constants'
+import { getNestedSafesNoticeText } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../SafeAccountSelector/types'
-import { PARENT_SAFE_WALLET_COPY } from '../constants'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/constants'
+import { ADDRESS_ERROR_DEBOUNCE_MS } from '@/components/common/AddressInput'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -69,6 +78,11 @@ const renderForm = (props: Partial<ProposerRoleFormProps> = {}, addressBook = {}
     { initialReduxState: { addressBook } },
   )
 
+const renderFormOnFakeClock = (props: Partial<ProposerRoleFormProps>) =>
+  renderOnFakeClock(
+    <ProposerRoleForm onSubmit={jest.fn()} safeAccounts={eligible} onSafeAccountChange={jest.fn()} {...props} />,
+  )
+
 const submitButton = () => screen.getByRole('button', { name: 'Submit' })
 
 // The proposer field is a combobox too, so the account field is addressed by its test id.
@@ -108,6 +122,8 @@ describe('ProposerRoleForm', () => {
   })
 
   describe('submit gating', () => {
+    afterEach(() => jest.useRealTimers())
+
     it('disables submit until a Safe account is picked', () => {
       renderForm({ defaultValues: { proposer: PROPOSER, name: 'Nicole' } })
 
@@ -218,15 +234,15 @@ describe('ProposerRoleForm', () => {
     })
 
     it('runs the proposer rule on the typed address and blocks submit on its message', async () => {
+      jest.useFakeTimers()
       const validateProposer = jest.fn().mockResolvedValue('Cannot add a signer of this Safe account as proposer')
-      const { user } = renderForm({ safeAccount: treasury.id, validateProposer })
+      const { user } = renderFormOnFakeClock({ safeAccount: treasury.id, validateProposer })
 
       await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
 
-      await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
-      await waitFor(() =>
-        expect(screen.getByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument(),
-      )
+      expect(validateProposer).toHaveBeenCalledWith(PROPOSER)
+      expect(screen.getByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument()
       expect(submitButton()).toBeDisabled()
     })
 
@@ -252,12 +268,14 @@ describe('ProposerRoleForm', () => {
     })
 
     it('re-validates the proposer when the rule itself changes, e.g. once the Safe has loaded', async () => {
+      jest.useFakeTimers()
       const loading = jest.fn().mockResolvedValue('Loading the Safe account details, please wait')
       const loaded = jest.fn().mockResolvedValue(undefined)
-      const { user, rerender } = renderForm({ safeAccount: treasury.id, validateProposer: loading })
+      const { user, rerender } = renderFormOnFakeClock({ safeAccount: treasury.id, validateProposer: loading })
 
       await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
-      await waitFor(() => expect(screen.getByText('Loading the Safe account details, please wait')).toBeInTheDocument())
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
+      expect(screen.getByText('Loading the Safe account details, please wait')).toBeInTheDocument()
       expect(submitButton()).toBeDisabled()
 
       rerender(

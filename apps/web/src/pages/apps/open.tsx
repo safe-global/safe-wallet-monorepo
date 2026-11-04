@@ -1,7 +1,6 @@
-import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
@@ -21,7 +20,7 @@ import { useSafeAppRedirects } from '@/hooks/safe-apps/useSafeAppRedirects'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
-const SafeApps: NextPage = () => {
+const SafeApps = () => {
   const chainId = useChainId()
   const router = useRouter()
   const safeLinkQuery = useSafeLinkQuery()

@@ -17,12 +17,7 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   },
 }))
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => <img alt={alt} />,
-}))
-
-jest.mock('@/components/ui/button', () => ({
+jest.mock('@safe-global/views/components/ui/button', () => ({
   Button: ({ children, className }: { children: ReactNode; className?: string }) => (
     <button type="button" className={className}>
       {children}
@@ -30,11 +25,11 @@ jest.mock('@/components/ui/button', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/typography', () => ({
+jest.mock('@safe-global/views/components/ui/typography', () => ({
   Typography: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
 
-jest.mock('@/components/ui/dialog', () => ({
+jest.mock('@safe-global/views/components/ui/dialog', () => ({
   DialogClose: ({
     children,
     'aria-label': ariaLabel,

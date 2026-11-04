@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
-import { cn } from '@/utils/cn'
-import { MixpanelEventParams, WorkspaceCreateStep, trackEvent } from '@/services/analytics'
+import { cn } from '@safe-global/views/utils/cn'
+import { MixpanelEventParams, WorkspaceCreateStep } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
 const STEP_NAMES: Record<number, WorkspaceCreateStep> = {
@@ -17,15 +17,10 @@ interface StepCounterProps {
 }
 
 const StepCounter = ({ currentStep, totalSteps, className }: StepCounterProps) => {
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_CREATE_STEP_VIEWED, {
-      [MixpanelEventParams.STEP_NUMBER]: currentStep,
-      [MixpanelEventParams.STEP_NAME]: STEP_NAMES[currentStep],
-    })
-  }, [currentStep])
+  useTrackOnce(SAFE_PRO_EVENTS.WORKSPACE_CREATE_STEP_VIEWED, {
+    [MixpanelEventParams.STEP_NUMBER]: currentStep,
+    [MixpanelEventParams.STEP_NAME]: STEP_NAMES[currentStep],
+  })
 
   return (
     <div

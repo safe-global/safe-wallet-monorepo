@@ -25,7 +25,7 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarTrigger: ({ className, 'data-testid': testId }: { className?: string; 'data-testid'?: string }) => (
     <button data-testid={testId} className={className}>
       Toggle
@@ -68,7 +68,7 @@ describe('SidebarTopBar', () => {
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsSpaceRoute.mockReturnValue(false)
     mockUseIsSafeProEnabled.mockReturnValue(true)
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
   })
 
@@ -81,7 +81,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('exposes the expanded sidebar state on the top bar', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
 
     render(<SidebarTopBar />)
@@ -90,7 +90,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('exposes the collapsed sidebar state on the top bar', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
 
     render(<SidebarTopBar />)
@@ -182,7 +182,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('does not show the Home label pill when the sidebar is collapsed', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
     mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
 
@@ -196,7 +196,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('stacks the PRO chip under the logo when collapsed on a Workspace with a plan', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
     mockUseIsSpaceRoute.mockReturnValue(true)

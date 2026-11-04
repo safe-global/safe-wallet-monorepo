@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
+import { Label } from '@safe-global/views/components/ui/label'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
 import { Controller, FormProvider, useForm, useFormState, type DefaultValues } from 'react-hook-form'
 import { useMemo, type ReactElement } from 'react'
@@ -129,7 +129,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                     >
                       {Object.values(TxFilterType).map((value) => (
                         <div key={value} className={css.radioOption}>
-                          <RadioGroupItem value={value} id={`filter-type-${value}`} />
+                          <RadioGroupItem value={value} id={`filter-type-${value}`} aria-label={value} />
                           <Label htmlFor={`filter-type-${value}`} className="font-normal">
                             {value}
                           </Label>

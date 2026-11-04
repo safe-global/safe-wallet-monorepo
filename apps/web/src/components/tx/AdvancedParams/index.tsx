@@ -3,7 +3,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useState } from 'react'
 import AdvancedParamsForm from './AdvancedParamsForm'
-import { type AdvancedParameters } from './types'
+import { type AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type Props = {
@@ -68,4 +68,4 @@ export default AdvancedParams
 
 export * from './useAdvancedParams'
 
-export * from './types'
+export * from '@safe-global/views/components/tx/AdvancedParams/types'

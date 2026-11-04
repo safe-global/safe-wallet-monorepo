@@ -17,6 +17,7 @@ jest.mock('../../hooks/useHasOwnTenderly', () => ({ useHasOwnTenderly: () => moc
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ chainId: '1', features: ['TX_SIMULATION'] }),
   useHasFeature: () => true,
+  useChain: () => undefined,
 }))
 jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
   ...jest.requireActual('@safe-global/utils/components/tx/security/tenderly/utils'),

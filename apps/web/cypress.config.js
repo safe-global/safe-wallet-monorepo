@@ -3,6 +3,7 @@ import 'dotenv/config'
 import * as fs from 'fs'
 import { registerArgosTask } from '@argos-ci/cypress/task'
 import { version } from './src/markdown/terms/version.js'
+import { esbuildPreprocessor } from './cypress/plugins/esbuild-preprocessor.js'
 
 function setupArgosPlugin(on, config) {
   registerArgosTask(on, config, {
@@ -18,7 +19,7 @@ const HEADLESS_HEIGHT = 1080
 
 function setupHeadlessViewport(on) {
   on('before:browser:launch', (browser, launchOptions) => {
-    if (browser.name === 'chrome' && browser.isHeadless) {
+    if (browser.family === 'chromium' && browser.name !== 'electron' && browser.isHeadless) {
       launchOptions.args.push(`--window-size=${HEADLESS_WIDTH},${HEADLESS_HEIGHT}`)
       launchOptions.args.push('--force-device-scale-factor=1')
     }
@@ -29,6 +30,11 @@ function setupHeadlessViewport(on) {
     return launchOptions
   })
 }
+
+// Fork RPC URLs carry provider keys and no spec needs them.
+const environment = Object.fromEntries(
+  Object.entries(process.env).filter(([key]) => !key.startsWith('FORK_') && key !== 'SEPOLIA_FORK_RPC_URL'),
+)
 
 export default defineConfig({
   projectId: 'exhdra',
@@ -46,8 +52,7 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 800,
     setupNodeEvents(on, config) {
-      config.env.CURRENT_COOKIE_TERMS_VERSION = version
-
+      on('file:preprocessor', esbuildPreprocessor)
       setupArgosPlugin(on, config)
       setupHeadlessViewport(on)
 
@@ -59,6 +64,9 @@ export default defineConfig({
       })
 
       on('after:spec', (spec, results) => {
+        results?.tests
+          ?.filter((test) => test.state === 'failed')
+          .forEach((test) => console.log(`\n✖ ${test.title.join(' > ')}\n${test.displayError}\n`))
         if (results && results.video) {
           const failures = results.tests.some((test) => test.attempts.some((attempt) => attempt.state === 'failed'))
           if (!failures) {
@@ -69,17 +77,16 @@ export default defineConfig({
 
       return config
     },
-    env: {
-      ...process.env,
-    },
+    env: environment,
     baseUrl: 'http://localhost:3000',
     testIsolation: false,
     hideXHR: true,
     defaultCommandTimeout: 10000,
     pageLoadTimeout: 60000,
-    experimentalMemoryManagement: true,
     numTestsKeptInMemory: 0,
   },
 
   chromeWebSecurity: false,
+  forceHttp1: true,
+  expose: { BEAMER_DATA_E2E: process.env.BEAMER_DATA_E2E, CURRENT_COOKIE_TERMS_VERSION: version },
 })

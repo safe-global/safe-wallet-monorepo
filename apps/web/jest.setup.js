@@ -81,6 +81,7 @@ jest.mock(
       addError: jest.fn(),
       setGlobalContextProperty: jest.fn(),
       getInitConfiguration: jest.fn(),
+      setTrackingConsent: jest.fn(),
     },
   }),
   { virtual: true },
@@ -123,7 +124,7 @@ Object.defineProperty = (obj, prop, desc) => {
 }
 
 beforeAll(() => {
-  server.listen()
+  server.listen({ onUnhandledRequest: 'error' })
 })
 
 afterEach(() => server.resetHandlers())

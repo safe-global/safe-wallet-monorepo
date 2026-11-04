@@ -1,7 +1,7 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React from 'react'
 import css from './styles.module.css'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
+import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { dateString } from '@safe-global/utils/utils/formatters'

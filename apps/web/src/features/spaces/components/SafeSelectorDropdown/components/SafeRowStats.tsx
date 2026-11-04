@@ -1,10 +1,10 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@safe-global/views/components/common/AccountBadges'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
 import { TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import ChainLogo from './ChainLogo'
-import type { SafeItemDataChain } from '../types'
+import type { SafeItemDataChain } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 const MAX_CHAIN_LOGOS = 3
 

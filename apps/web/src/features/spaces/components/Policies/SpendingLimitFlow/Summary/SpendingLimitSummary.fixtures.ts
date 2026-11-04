@@ -2,8 +2,13 @@ import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../SafeAccountSelector/types'
-import type { LimitSummary, LimitSummaryToken, SpendingLimitSummaryModel, SpenderSummary } from './types'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type {
+  LimitSummary,
+  LimitSummaryToken,
+  SpendingLimitSummaryModel,
+  SpenderSummary,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 // Test-only data factories.
 const fakeAddress = (): string => checksumAddress(faker.finance.ethereumAddress())

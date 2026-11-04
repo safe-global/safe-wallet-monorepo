@@ -182,18 +182,12 @@ exports[`./index.stories Default 1`] = `
                           >
                             <span
                               class="whitespace-nowrap"
-                              data-slot="tooltip-trigger"
-                              id="base-ui-_r_1_"
                             >
+                              $ 5,475
                               <span
-                                aria-hidden="true"
+                                class="text-muted-foreground"
                               >
-                                $ 5,475
-                              </span>
-                              <span
-                                class="sr-only"
-                              >
-                                $ 5,475.00
+                                .00
                               </span>
                             </span>
                           </p>
@@ -205,7 +199,7 @@ exports[`./index.stories Default 1`] = `
                             <span
                               class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-foreground py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
                               data-slot="tooltip-trigger"
-                              id="base-ui-_r_3_"
+                              id="base-ui-_r_1_"
                             >
                               <mock-icon
                                 class="h-[6px] w-[9px] text-[var(--color-success-main)]"
@@ -321,18 +315,12 @@ exports[`./index.stories Default 1`] = `
                           >
                             <span
                               class="whitespace-nowrap"
-                              data-slot="tooltip-trigger"
-                              id="base-ui-_r_5_"
                             >
+                              $ 10,000
                               <span
-                                aria-hidden="true"
+                                class="text-muted-foreground"
                               >
-                                $ 10,000
-                              </span>
-                              <span
-                                class="sr-only"
-                              >
-                                $ 10,000.00
+                                .00
                               </span>
                             </span>
                           </p>
@@ -344,7 +332,7 @@ exports[`./index.stories Default 1`] = `
                             <span
                               class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-foreground py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
                               data-slot="tooltip-trigger"
-                              id="base-ui-_r_7_"
+                              id="base-ui-_r_3_"
                             >
                               <mock-icon
                                 class="h-[6px] w-[9px] text-[var(--color-success-main)]"
@@ -460,18 +448,12 @@ exports[`./index.stories Default 1`] = `
                           >
                             <span
                               class="whitespace-nowrap"
-                              data-slot="tooltip-trigger"
-                              id="base-ui-_r_9_"
                             >
+                              $ 5,000
                               <span
-                                aria-hidden="true"
+                                class="text-muted-foreground"
                               >
-                                $ 5,000
-                              </span>
-                              <span
-                                class="sr-only"
-                              >
-                                $ 5,000.00
+                                .00
                               </span>
                             </span>
                           </p>
@@ -483,7 +465,7 @@ exports[`./index.stories Default 1`] = `
                             <span
                               class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-destructive py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
                               data-slot="tooltip-trigger"
-                              id="base-ui-_r_b_"
+                              id="base-ui-_r_5_"
                             >
                               <mock-icon
                                 class="h-[6px] w-[9px] text-[var(--color-error-main)]"
@@ -599,18 +581,12 @@ exports[`./index.stories Default 1`] = `
                           >
                             <span
                               class="whitespace-nowrap"
-                              data-slot="tooltip-trigger"
-                              id="base-ui-_r_d_"
                             >
+                              $ 2,500
                               <span
-                                aria-hidden="true"
+                                class="text-muted-foreground"
                               >
-                                $ 2,500
-                              </span>
-                              <span
-                                class="sr-only"
-                              >
-                                $ 2,500.00
+                                .00
                               </span>
                             </span>
                           </p>
@@ -622,7 +598,7 @@ exports[`./index.stories Default 1`] = `
                             <span
                               class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none text-foreground py-0.5 text-xs rounded-4xl bg-transparent px-0 pr-0 dark:bg-transparent"
                               data-slot="tooltip-trigger"
-                              id="base-ui-_r_f_"
+                              id="base-ui-_r_7_"
                             >
                               <mock-icon
                                 class="h-[6px] w-[9px] text-[var(--color-success-main)]"

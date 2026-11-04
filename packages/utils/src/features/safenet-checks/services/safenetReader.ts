@@ -1,5 +1,5 @@
 import { Contract, isCallException, JsonRpcProvider } from 'ethers'
-import { CONSENSUS_READ_ABI, CONSENSUS_TOPIC0S, COORDINATOR_READ_ABI, SENTINEL_TOPIC0S } from '../abi'
+import { CONSENSUS_READ_ABI, CONSENSUS_TOPIC0S, COORDINATOR_READ_ABI, ORACLE_READ_ABI, SENTINEL_TOPIC0S } from '../abi'
 import {
   BLOCK_ESTIMATE_MAX_REFINEMENTS,
   BLOCK_ESTIMATE_TOLERANCE_SECONDS,
@@ -21,13 +21,13 @@ import {
   type NormalizedCheckEvent,
   type OracleAttestedEvent,
   type OracleProposedEvent,
-  type PlainAttestedEvent,
   type WindowCoverage,
 } from '../types'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
+import { openDisputeRequestIds, rulingEventFor } from '../utils/openDispute'
 import { isValidPoint, verifyAttestation as verifyFrostAttestation } from '../utils/frost'
-import { plainProposalHash, transactionProposalHash } from '../utils/proposalHash'
+import { transactionProposalHash } from '../utils/proposalHash'
 
 /**
  * Everything one poll reads off-chain for a single check. Numeric values are
@@ -37,7 +37,10 @@ export type CheckReadResult = {
   safeTxHash: Hex
   /** The Safenet chain the Consensus contract lives on (the config chain id). */
   chainId: string
-  /** Decoded lifecycle events, sorted ascending by (blockNumber, logIndex). */
+  /**
+   * Decoded lifecycle events, sorted ascending by (blockNumber, logIndex). An open
+   * dispute's ruling, which no log window holds, joins them as an inferred event.
+   */
   events: NormalizedCheckEvent[]
   headBlock: string
   /**
@@ -288,6 +291,52 @@ export class SafenetReader {
     return best
   }
 
+  /** Sentinel logs per oracle, plus the ruling of every dispute those logs leave open. */
+  private async readOracleEvents(
+    provider: JsonRpcProvider,
+    requestIdsByOracle: ReadonlyMap<string, Hex[]>,
+    range: { fromBlock: number; toBlock: number },
+    head: number,
+  ): Promise<NormalizedCheckEvent[]> {
+    const events: NormalizedCheckEvent[] = []
+    for (const [oracle, requestIds] of requestIdsByOracle) {
+      const logs = await this.getLogsChunked(provider, {
+        address: oracle,
+        topics: [[...SENTINEL_TOPIC0S], requestIds],
+        fromBlock: range.fromBlock,
+        toBlock: range.toBlock,
+      })
+      const decoded = decodeLogs(logs)
+      events.push(...decoded, ...(await this.readOpenDisputeRulings(provider, oracle, decoded, head)))
+    }
+    return events
+  }
+
+  /**
+   * An open dispute outlives the block window the logs come from by weeks, so
+   * its ruling is in none of them. `getRequest` reports the current state at any
+   * age; a ruled or timed-out state comes back as the event it stands in for.
+   */
+  private async readOpenDisputeRulings(
+    provider: JsonRpcProvider,
+    oracle: string,
+    events: ReadonlyArray<NormalizedCheckEvent>,
+    head: number,
+  ): Promise<NormalizedCheckEvent[]> {
+    const requestIds = openDisputeRequestIds(events)
+    if (requestIds.length === 0) return []
+
+    const contract = new Contract(oracle, [...ORACLE_READ_ABI], provider)
+    // Issued concurrently so the provider coalesces them into one batched request.
+    const rulings = await Promise.all(
+      requestIds.map(async (requestId) => {
+        const request: { progress: { state: bigint } } = await contract.getRequest(requestId)
+        return rulingEventFor(requestId, Number(request.progress.state), head)
+      }),
+    )
+    return rulings.filter((event) => event !== null)
+  }
+
   /**
    * Read a check's full lifecycle: Consensus logs keyed by `safeTxHash`, then —
    * for every proposal naming an allowlisted oracle — the sentinel logs keyed by
@@ -346,16 +395,7 @@ export class SafenetReader {
         if (!ids.includes(id)) requestIdsByOracle.set(key, [...ids, id].slice(-MAX_REQUEST_IDS_PER_ORACLE))
       }
 
-      const oracleEvents: NormalizedCheckEvent[] = []
-      for (const [oracle, requestIds] of requestIdsByOracle) {
-        const oracleLogs = await this.getLogsChunked(provider, {
-          address: oracle,
-          topics: [[...SENTINEL_TOPIC0S], requestIds],
-          fromBlock: range.fromBlock,
-          toBlock: range.toBlock,
-        })
-        oracleEvents.push(...decodeLogs(oracleLogs))
-      }
+      const oracleEvents = await this.readOracleEvents(provider, requestIdsByOracle, range, head)
 
       // The latest allowlisted proposal is the live one.
       const active = proposals.reduce<OracleProposedEvent | null>(
@@ -432,24 +472,15 @@ export class SafenetReader {
    * A group-key fetch failure is retryable (`PENDING`); a signature that does
    * not verify is terminal (`INVALID`).
    */
-  async verifyAttestation(attested: OracleAttestedEvent | PlainAttestedEvent): Promise<AttestationVerification> {
-    // The two paths sign different EIP-712 preimages; the event type decides.
-    const message =
-      attested.type === CheckEventType.ORACLE_ATTESTED
-        ? transactionProposalHash({
-            chainId: this.chainId,
-            consensus: this.consensus,
-            epoch: attested.epoch,
-            oracle: attested.oracle,
-            oracleDataHash: attested.oracleDataHash,
-            safeTxHash: attested.safeTxHash,
-          })
-        : plainProposalHash({
-            chainId: this.chainId,
-            consensus: this.consensus,
-            epoch: attested.epoch,
-            safeTxHash: attested.safeTxHash,
-          })
+  async verifyAttestation(attested: OracleAttestedEvent): Promise<AttestationVerification> {
+    const message = transactionProposalHash({
+      chainId: this.chainId,
+      consensus: this.consensus,
+      epoch: attested.epoch,
+      oracle: attested.oracle,
+      oracleDataHash: attested.oracleDataHash,
+      safeTxHash: attested.safeTxHash,
+    })
 
     let groupKey: { x: string; y: string }
     try {
@@ -469,8 +500,8 @@ export class SafenetReader {
   /**
    * Wall-clock time of a block in ms — dates the audit-log step. `eth_getLogs`
    * carries no timestamps, so this is one extra header read on every poll that
-   * observes an attestation, including the slow polls a settled check keeps
-   * making while its arbitration window is open.
+   * observes an attestation or a passed deadline, including the slow polls a
+   * settled check keeps making while its arbitration or late window is open.
    * Returns null on failure: a missing date must never suppress a verdict.
    */
   async blockTimeMs(blockNumber: number): Promise<number | null> {

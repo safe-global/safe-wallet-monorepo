@@ -1,6 +1,6 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import ModalDialog from '@/components/common/ModalDialog'
 import QRCode from '@/components/common/QRCode'
 import Track from '@/components/common/Track'
@@ -17,18 +17,18 @@ import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
-import { type ReactNode, useState } from 'react'
-import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
+import { type ReactNode, useId, useState } from 'react'
+import { Card, WidgetBody, WidgetContainer } from '@safe-global/views/components/dashboard/styled'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { Circle, CircleCheck, CircleCheckBig, Lightbulb, Plus } from 'lucide-react'
-import css from './styles.module.css'
-import { ProgressRing } from './ProgressRing'
+import css from '@safe-global/views/components/dashboard/FirstSteps/styles.module.css'
+import { ProgressRing } from '@safe-global/views/components/dashboard/FirstSteps/ProgressRing'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
-import { calculateProgress } from './utils'
+import { calculateProgress } from '@safe-global/views/components/dashboard/FirstSteps/utils'
 
 const StatusCard = ({
   badge,
@@ -109,6 +109,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
   const settings = useAppSelector(selectSettings)
   const qrPrefix = settings.shortName.qr ? `${chain?.shortName}:` : ''
   const qrCode = `${qrPrefix}${safeAddress}`
+  const qrPrefixLabelId = useId()
 
   const title = 'Add native assets'
   const content = `Receive ${chain?.nativeCurrency.name} to start interacting with your account.`
@@ -152,10 +153,11 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                 <Label className="justify-center">
                   <Switch
                     data-testid="qr-code-switch"
+                    aria-labelledby={qrPrefixLabelId}
                     checked={settings.shortName.qr}
                     onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
                   />
-                  <span>
+                  <span id={qrPrefixLabelId}>
                     QR code with chain prefix (<b>{chain?.shortName}:</b>)
                   </span>
                 </Label>

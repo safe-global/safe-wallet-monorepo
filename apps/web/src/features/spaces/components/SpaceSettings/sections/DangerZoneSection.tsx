@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin, useIsActiveMember, useIsLastActiveAdmin, useSpaceDeletionGuard } from '@/features/spaces'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -19,17 +21,16 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
   const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(isAdmin ? (space?.uuid ?? null) : null)
 
   const deleteButton = (
-    <Button
-      variant="destructive"
-      data-testid="space-delete-button"
-      disabled={isDeletionBlocked}
-      onClick={() => {
-        setDeleteOpen(true)
-        trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
-      }}
-    >
-      Delete Workspace
-    </Button>
+    <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_settings}>
+      <Button
+        variant="destructive"
+        data-testid="space-delete-button"
+        disabled={isDeletionBlocked}
+        onClick={() => setDeleteOpen(true)}
+      >
+        Delete Workspace
+      </Button>
+    </Track>
   )
 
   return (
@@ -53,17 +54,16 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
             <TooltipContent side="top">You are the last active admin and cannot leave the Workspace.</TooltipContent>
           </Tooltip>
         ) : (
-          <Button
-            variant="destructive"
-            data-testid="space-leave-button"
-            disabled={!isActiveMember}
-            onClick={() => {
-              setLeaveOpen(true)
-              trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
-            }}
-          >
-            Leave Workspace
-          </Button>
+          <Track {...SPACE_EVENTS.LEAVE_SPACE_MODAL} label={SPACE_LABELS.space_settings}>
+            <Button
+              variant="destructive"
+              data-testid="space-leave-button"
+              disabled={!isActiveMember}
+              onClick={() => setLeaveOpen(true)}
+            >
+              Leave Workspace
+            </Button>
+          </Track>
         )}
       </div>
 

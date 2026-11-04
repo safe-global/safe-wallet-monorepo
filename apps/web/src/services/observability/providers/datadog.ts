@@ -243,6 +243,8 @@ export class DatadogProvider implements IObservabilityProvider {
         service: DATADOG_RUM_SERVICE,
         env: DATADOG_RUM_ENV,
         version: COMMIT_HASH,
+        // No session cookie and no data until Analytics.tsx grants analytics consent
+        trackingConsent: 'not-granted',
         sessionSampleRate: DATADOG_RUM_SESSION_SAMPLE_RATE,
         sessionReplaySampleRate: DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE,
         trackUserInteractions: DATADOG_RUM_TRACK_USER_INTERACTIONS,

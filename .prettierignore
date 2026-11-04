@@ -25,8 +25,10 @@ apps/mobile/resources/
 apps/web/.next
 apps/web/storybook-static
 apps/web/cypress/downloads
+apps/web/e2e/environment/artifacts
 apps/web/.swc
 apps/web/out
+apps/web/next-env.d.ts
 apps/web/public
 apps/web/src/config/__generated__/
 
@@ -48,3 +50,5 @@ specs/**/contracts/*.template.*
 
 # Agent worktrees (spawned-session sandboxes; contain vendored third-party files)
 .claude/worktrees/
+apps/web/e2e/environment/infra/.anvil-cache
+apps/web/e2e/environment/infra/fork-cache

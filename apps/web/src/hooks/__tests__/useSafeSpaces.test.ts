@@ -19,8 +19,22 @@ jest.mock('@/store/authSlice', () => ({
 const mockUseSpacesGetV1Query = useSpacesGetV1Query as jest.Mock
 const mockUseLazySpaceSafesGetV1Query = useLazySpaceSafesGetV1Query as jest.Mock
 
-const spaceAlpha = { uuid: 'alpha', name: 'Alpha', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
-const spaceBravo = { uuid: 'bravo', name: 'Bravo', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
+const spaceAlpha = {
+  uuid: 'alpha',
+  name: 'Alpha',
+  members: [],
+  memberCount: 1,
+  safeCount: 1,
+  experimentalFeatures: [],
+} as GetSpaceResponse
+const spaceBravo = {
+  uuid: 'bravo',
+  name: 'Bravo',
+  members: [],
+  memberCount: 1,
+  safeCount: 1,
+  experimentalFeatures: [],
+} as GetSpaceResponse
 
 const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) =>
   mockUseLazySpaceSafesGetV1Query.mockReturnValue([

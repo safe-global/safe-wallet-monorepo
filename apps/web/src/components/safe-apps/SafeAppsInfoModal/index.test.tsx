@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAppsInfoModal from '.'
-import { PermissionStatus } from '../types'
-import type { AllowedFeatures } from '../types'
+import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
+import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
 
 const defaultProps = {
   onCancel: jest.fn(),
@@ -58,6 +58,18 @@ describe('SafeAppsInfoModal', () => {
       { feature: 'camera', status: PermissionStatus.GRANTED },
       { feature: 'microphone', status: PermissionStatus.DENIED },
     ])
+  })
+
+  it('shows the disclaimer before the consent is accepted', () => {
+    render(<SafeAppsInfoModal {...defaultProps} isConsentAccepted={false} />)
+
+    expect(screen.getByRole('heading', { name: 'Disclaimer' })).toBeInTheDocument()
+  })
+
+  it('skips the disclaimer once the consent is accepted', () => {
+    render(<SafeAppsInfoModal {...defaultProps} isConsentAccepted />)
+
+    expect(screen.queryByRole('heading', { name: 'Disclaimer' })).not.toBeInTheDocument()
   })
 
   it('does not render the features slide once the permissions review is completed', () => {

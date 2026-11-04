@@ -20,7 +20,7 @@ import {
   mockPendingRemoval,
   mockPendingUpdate,
 } from '../../mocks/policies'
-import type { PendingSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction, type PendingPolicyTransaction } from '../hooks/usePendingPolicyTransaction'
 import SpendingLimitDetails from '..'
@@ -272,7 +272,7 @@ describe('a pending spending limit', () => {
 
     renderPending(mockPendingPolicy({ confirmationsSubmitted: 0, confirmationsRequired: 2 }))
 
-    expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
+    expect(screen.getByText('1 of 2 signatures')).toBeInTheDocument()
   })
 
   it('copies a link that opens the transaction on its Safe, without the Space', async () => {

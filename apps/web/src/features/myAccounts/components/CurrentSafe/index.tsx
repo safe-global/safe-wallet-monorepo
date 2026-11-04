@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { AllSafeItems } from '@/hooks/safes'

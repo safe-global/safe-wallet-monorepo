@@ -27,5 +27,6 @@ export function spaceBuilder(): IBuilder<GetSpaceResponse> {
     safeCount: 0,
     memberCount: 1,
     members: [spaceMemberBuilder().build()],
+    experimentalFeatures: [],
   })
 }

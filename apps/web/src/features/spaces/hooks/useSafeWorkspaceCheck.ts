@@ -18,7 +18,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { selectStepUpPhase } from '@/features/oidc-auth/store'
 import useChainId from '@/hooks/useChainId'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import { parseSpaceId } from '@/hooks/useUrlSpaceId'
+import { parseSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 import { isUnauthorized } from '../utils'
 import { MemberStatus } from './useSpaceMembers'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
@@ -64,19 +64,30 @@ export const getSafeWorkspaceAction = (state: SafeWorkspaceState): SafeWorkspace
 const isWorkspaceOrWelcomePage = (pathname: string): boolean =>
   pathname.startsWith(AppRoutes.spaces.index) || pathname.startsWith(AppRoutes.welcome.index)
 
-const useSafeWorkspaceState = (): SafeWorkspaceState => {
+/** True on a Safe page, once the router is ready. */
+export const useIsSafeRoute = (): boolean => {
   const { query, isReady, pathname } = useRouter()
-  const isSignedIn = useAppSelector(isAuthenticated)
+  return isReady && typeof query.safe === 'string' && query.safe.length > 0 && !isWorkspaceOrWelcomePage(pathname)
+}
+
+/** True until the session is known, including during a sign-in or a step-up. */
+export const useIsWorkspaceSessionPending = (): boolean => {
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
   // A step-up return replays the add of a new Safe, which a list read before it would miss
   const isStepUpInProgress = useAppSelector(selectStepUpPhase) !== 'idle'
+  return !isStoreHydrated || isSessionCheckPending || isOidcLoginPending || isStepUpInProgress
+}
+
+const useSafeWorkspaceState = (): SafeWorkspaceState => {
+  const { query, isReady } = useRouter()
+  const isSignedIn = useAppSelector(isAuthenticated)
+  const isSessionPending = useIsWorkspaceSessionPending()
   const chainId = useChainId()
   const safeAddress = useSafeAddressFromUrl()
 
-  const isSafeRoute =
-    isReady && typeof query.safe === 'string' && query.safe.length > 0 && !isWorkspaceOrWelcomePage(pathname)
+  const isSafeRoute = useIsSafeRoute()
   const spaceId = parseSpaceId(query.spaceId)
   const skip = !isSafeRoute || !isSignedIn || spaceId === null
 
@@ -101,7 +112,7 @@ const useSafeWorkspaceState = (): SafeWorkspaceState => {
   return {
     rawSpaceId: isReady ? query.spaceId : undefined,
     isSafeRoute,
-    isSessionPending: !isStoreHydrated || isSessionCheckPending || isOidcLoginPending || isStepUpInProgress,
+    isSessionPending,
     isSignedIn,
     hasNoAccess: Boolean(isUnauthorized(spaceError)),
     membershipStatus,
@@ -120,6 +131,20 @@ export const useRemoveUrlSpaceId = (): (() => void) => {
     const { spaceId: _removed, ...query } = router.query
     router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
   }, [router])
+}
+
+/** Opens the current page in the Workspace, without a new history entry. */
+export const useAddUrlSpaceId = (): ((spaceId: string) => void) => {
+  const router = useRouter()
+
+  return useCallback(
+    (spaceId: string) => {
+      router.replace({ pathname: router.pathname, query: withSpaceId(router.query, spaceId) }, undefined, {
+        shallow: true,
+      })
+    },
+    [router],
+  )
 }
 
 /**

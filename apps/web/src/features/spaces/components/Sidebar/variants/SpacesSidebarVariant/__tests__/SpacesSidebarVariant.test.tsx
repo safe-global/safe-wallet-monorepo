@@ -2,7 +2,11 @@ import { render, screen } from '@testing-library/react'
 import { Home, FileText, Users, Shield } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
+import type {
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+  SpaceItem,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 jest.mock('../../SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
@@ -12,7 +16,7 @@ jest.mock('../../SidebarDeveloperGroup', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
@@ -20,7 +24,7 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipContent: () => null,
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   useSidebar: () => ({ state: 'expanded', isMobile: false }),
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,

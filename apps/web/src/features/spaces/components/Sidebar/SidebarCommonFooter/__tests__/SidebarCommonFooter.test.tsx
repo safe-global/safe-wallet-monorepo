@@ -7,20 +7,16 @@ const mockUseAppDispatch = jest.fn()
 const mockUseDarkMode = jest.fn()
 const mockTrackEvent = jest.fn()
 
-let mockHasBeamerConsent = true
-
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
   OVERVIEW_EVENTS: {
     HELP_CENTER: { action: 'Open Help Center' },
-    WHATS_NEW: { action: "Open What's New" },
   },
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockUseAppDispatch(),
-  useAppSelector: () => mockHasBeamerConsent,
 }))
 
 jest.mock('@/hooks/useDarkMode', () => ({
@@ -34,7 +30,7 @@ jest.mock('@/components/common/HelpMenu', () => ({
 }))
 
 // Mock sidebar UI components
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarFooter: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
@@ -63,7 +59,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
     children,
@@ -77,7 +73,7 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipContent: ({ children }: { children: ReactNode }) => <div role="tooltip">{children}</div>,
 }))
 
-jest.mock('@/components/ui/switch', () => ({
+jest.mock('@safe-global/views/components/ui/switch', () => ({
   Switch: ({
     id,
     checked,
@@ -97,7 +93,7 @@ jest.mock('@/components/ui/switch', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/field', () => ({
+jest.mock('@safe-global/views/components/ui/field', () => ({
   Field: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   FieldLabel: ({ children, htmlFor }: { children: ReactNode; htmlFor: string }) => (
     <label htmlFor={htmlFor}>{children}</label>
@@ -198,15 +194,14 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: mockPathname }),
 }))
 
-jest.mock('@/services/beamer', () => ({
-  BEAMER_SELECTOR: 'whats-new-button',
+jest.mock('../../WhatsNewButton', () => ({
+  WhatsNewButton: () => <button data-testid="list-item-whats-new" />,
 }))
 
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     isProductionMock = true
-    mockHasBeamerConsent = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockIsSafeProAnnouncementEnabled = false
@@ -444,32 +439,6 @@ describe('SidebarCommonFooter', () => {
     expect(mockTrackEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'Open Help Center' }),
       expect.objectContaining({ sidebarElement: 'Help Center' }),
-    )
-  })
-
-  it("fires WHATS_NEW tracking event when clicking What's new", () => {
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockTrackEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ action: "Open What's New" }),
-      expect.objectContaining({ sidebarElement: "What's New" }),
-    )
-  })
-
-  it("dispatches open cookie banner when What's new is clicked without Beamer consent", () => {
-    mockHasBeamerConsent = false
-    const mockDispatch = jest.fn()
-    mockUseAppDispatch.mockReturnValue(mockDispatch)
-
-    render(<SidebarCommonFooter />)
-    fireEvent.click(screen.getByTestId('list-item-whats-new'))
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: expect.stringMatching(/openCookieBanner/),
-        payload: { warningKey: 'updates' },
-      }),
     )
   })
 

@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactElement } from 'react'
 
-import { SearchInput } from '@/components/ui/search-input'
-import { cn } from '@/utils/cn'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { cn } from '@safe-global/views/utils/cn'
 
 type SearchFieldProps = Omit<ComponentProps<'input'>, 'type'> &
   Pick<ComponentProps<typeof SearchInput>, 'inputSize' | 'variant'> & {

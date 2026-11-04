@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { withMockProvider } from '@/storybook/preview'
-import { createChainData } from '@/stories/mocks'
+import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@safe-global/views/components/ui/sidebar'
+import { withMockProvider } from '@/storybook/decorators'
+import { MOCK_SPACE_ID, createChainData } from '@/stories/mocks'
 import { EnhancedSidebar } from './index'
 import { SafeSidebarVariant } from './variants/SafeSidebarVariant'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
@@ -11,19 +11,24 @@ import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY, DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@safe-global/utils/config/chains'
 import type { RootState } from '@/store'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SidebarItemConfig, SpaceItem } from './types'
+import type {
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+  SidebarItemConfig,
+  SpaceItem,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { safeDefiGroup, safeMainNavigation } from './config'
 
 const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
 
 const SAFE_SIDEBAR_ROUTER_QUERY = {
-  spaceId: 'uuid-1',
+  spaceId: MOCK_SPACE_ID,
   chain: defaultChainShortName,
   safe: '0x1234567890123456789012345678901234567890',
 }
 
-const STORY_SELECTED_SPACE: SpaceItem = { uuid: 'uuid-1', name: 'Company Space', safeCount: 0 }
+const STORY_SELECTED_SPACE: SpaceItem = { uuid: MOCK_SPACE_ID, name: 'Company Space', safeCount: 0 }
 
 const storyChain = (() => {
   const base = createChainData()
@@ -270,7 +275,7 @@ export const VariantAddToWorkspace: Story = {
         workspaceHeader={{
           variant: 'addToWorkspace',
           spaces: [
-            { uuid: 'uuid-1', name: 'Company Space', safeCount: 2 },
+            { uuid: MOCK_SPACE_ID, name: 'Company Space', safeCount: 2 },
             { uuid: 'uuid-2', name: 'Treasury', safeCount: 5 },
           ],
         }}

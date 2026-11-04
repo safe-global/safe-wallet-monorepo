@@ -1,10 +1,10 @@
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
-import { InfoTooltip } from '@/components/common/InfoTooltip'
+import { InfoTooltip } from '@safe-global/views/components/common/InfoTooltip'
 
 type StakingOrderConfirmationViewProps = {
   order: NativeStakingValidatorsExitTransactionInfo

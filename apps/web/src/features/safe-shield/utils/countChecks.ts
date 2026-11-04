@@ -21,6 +21,7 @@ export const countChecks = ({
   isSimulationSuccess,
   isContractCall = false,
   isOffchainMessage = false,
+  safenet = { shown: false, passed: false },
 }: {
   threat?: ThreatAnalysisResults
   recipient?: RecipientAnalysisResults
@@ -33,6 +34,7 @@ export const countChecks = ({
   /** The transaction calls a contract, so the contract row is on screen (with results or locked). */
   isContractCall?: boolean
   isOffchainMessage?: boolean
+  safenet?: { shown: boolean; passed: boolean }
 }): ChecksCount => {
   const isOk = (status: { severity: Severity } | undefined) => status?.severity === Severity.OK
   const checks: Array<{ shown: boolean; passed: boolean }> = [
@@ -50,6 +52,7 @@ export const countChecks = ({
       passed: hasProFeatures && !isEmpty(recipient) && isOk(getOverallStatus(recipient)),
     },
     { shown: hasSimulation && !isOffchainMessage, passed: hasSimulation && isSimulationSuccess },
+    safenet,
   ]
   const shown = checks.filter((check) => check.shown)
   return { total: shown.length, passed: shown.filter((check) => check.passed).length }

@@ -4,6 +4,7 @@
     "paths": {
       "@safe-global/store/*": ["${configDir}/../../packages/store/src/*"],
       "@safe-global/utils/*": ["${configDir}/../../packages/utils/src/*"],
+      "@safe-global/views/*": ["${configDir}/../../packages/views/src/*"],
       "@safe-global/test/*": ["${configDir}/../../config/test/*"]
     },
     "importHelpers": true,

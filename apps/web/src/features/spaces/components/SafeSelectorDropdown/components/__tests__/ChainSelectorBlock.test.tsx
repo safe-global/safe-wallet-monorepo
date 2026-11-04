@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 
 // base-ui's portal does not open from a synthetic click under jsdom, so the popup parts render inline.
-jest.mock('@/components/ui/dropdown-menu', () => ({
+jest.mock('@safe-global/views/components/ui/dropdown-menu', () => ({
   __esModule: true,
   DropdownMenu: ({
     children,

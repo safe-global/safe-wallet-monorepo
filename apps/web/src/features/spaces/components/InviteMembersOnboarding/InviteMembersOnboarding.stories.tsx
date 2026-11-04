@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { userEvent, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import { INVALID_IDENTIFIER_ERROR } from '../AddMemberModal/utils'
 import InviteMembersOnboarding from '.'
 
@@ -10,7 +10,7 @@ const defaultSetup = createMockStory({
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/welcome/invite-members',
-  query: { spaceId: 'uuid-1' },
+  query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
 })
 

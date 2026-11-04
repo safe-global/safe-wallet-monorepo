@@ -25,7 +25,7 @@ Rules:
 ## Choosing a mock setup
 
 1. **No store/API needs** → plain `Meta`/`StoryObj` with an explicit `meta.title`.
-2. **Redux hooks only** (`useAppSelector`, `useDispatch`) → `decorators: [withMockProvider()]` from `@/storybook/preview`.
+2. **Redux hooks only** (`useAppSelector`, `useDispatch`) → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
 3. **Pages/widgets needing API mocks** → **`createMockStory` from `@/stories/mocks` — the canonical factory. Do NOT hand-roll `StoreDecorator` + provider stacks + MSW handlers**; that is exactly what the factory replaces.
 
 ```typescript
@@ -54,15 +54,15 @@ export const Default: Story = {}
 
 ### createMockStory options
 
-| Option     | Type                                                                                                           | Default                                             | Description                                   |
-| ---------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
-| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`                                        | `'efSafe'`                                          | Data fixture scenario                         |
-| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                                                       | `'disconnected'`                                    | Wallet connection state                       |
-| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces?, oidcAuth?, switchAuthenticator? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
-| `layout`   | `'none' \| 'paper' \| 'withSidebar' \| 'fullPage'`                                                             | `'none'`                                            | Layout wrapper                                |
-| `store`    | `object`                                                                                                       | `{}`                                                | Redux store overrides                         |
-| `handlers` | `RequestHandler[]`                                                                                             | `[]`                                                | Additional MSW handlers                       |
-| `pathname` | `string`                                                                                                       | `'/home'`                                           | Router pathname                               |
+| Option     | Type                                                                                                                           | Default                                             | Description                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | --------------------------------------------- |
+| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`                                                        | `'efSafe'`                                          | Data fixture scenario                         |
+| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                                                                       | `'disconnected'`                                    | Wallet connection state                       |
+| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces?, oidcAuth?, switchAuthenticator?, spaceAuditLog? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
+| `layout`   | `'none' \| 'paper' \| 'withSidebar' \| 'fullPage'`                                                                             | `'none'`                                            | Layout wrapper                                |
+| `store`    | `object`                                                                                                                       | `{}`                                                | Redux store overrides                         |
+| `handlers` | `RequestHandler[]`                                                                                                             | `[]`                                                | Additional MSW handlers                       |
+| `pathname` | `string`                                                                                                                       | `'/home'`                                           | Router pathname                               |
 
 - **Do not override feature flags** unless testing a specific disabled state (e.g. `features: { swaps: false }`).
 - Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (all from `@/stories/mocks`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
@@ -71,7 +71,7 @@ export const Default: Story = {}
 
 - **`mswLoader` is registered globally** — do NOT add `loaders: [mswLoader]` at meta or story level. (~110 story files still cargo-cult it; don't copy them.)
 - `ShadcnProvider` + light/dark theme sync decorators, viewport presets, and the sidebar `storySort`.
-- `withMockProvider` is re-exported from `@/storybook/preview`.
+- Nothing app-heavy: every story downloads what `preview.tsx` imports, so the store-backed `withMockProvider` is imported per story from `@/storybook/decorators`.
 
 ## MSW patterns
 
@@ -158,7 +158,7 @@ _Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` befo
 
 ## Visual regression (Argos)
 
-`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads to Argos. **The workflow is currently `workflow_dispatch`-only — its `pull_request` trigger is temporarily disabled, so visual regression does NOT run automatically on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
+`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads to Argos. It runs every Monday on `dev` to refresh the baseline, and by hand (`workflow_dispatch`) before a release. **It does NOT run on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
 
 ```bash
 yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr> to scope

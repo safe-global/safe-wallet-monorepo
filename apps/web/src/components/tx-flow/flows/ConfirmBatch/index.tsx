@@ -7,6 +7,7 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
+import { TxModalContext } from '@/components/tx-flow'
 
 type ConfirmBatchProps = {
   onSubmit: () => void
@@ -14,7 +15,13 @@ type ConfirmBatchProps = {
 
 const ConfirmBatch = (props: ReviewTransactionProps) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setTxFlow } = useContext(TxModalContext)
   const batchTxs = useDraftBatch()
+  const isBatchEmpty = batchTxs.length === 0
+
+  useEffect(() => {
+    if (isBatchEmpty) setTxFlow(undefined)
+  }, [isBatchEmpty, setTxFlow])
 
   useEffect(() => {
     const calls = batchTxs.map((tx) => tx.txData)

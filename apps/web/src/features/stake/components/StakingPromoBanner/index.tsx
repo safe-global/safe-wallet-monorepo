@@ -1,10 +1,10 @@
-import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Spinner } from '@/components/ui/spinner'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import css from './styles.module.css'
 
 const LEARN_MORE_LINK =
@@ -13,9 +13,7 @@ const LEARN_MORE_LINK =
 const StakingPromoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
 
-  useEffect(() => {
-    trackEvent(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
-  }, [])
+  useTrackOnce(OVERVIEW_EVENTS.SHOW_STAKING_BANNER)
 
   const onStake = () => {
     openSafenetStakingApp()

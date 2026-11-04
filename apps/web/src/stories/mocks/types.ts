@@ -45,6 +45,14 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
+  /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
+  workspacesExperimentalFeatures?: boolean
+  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
+  policyRecipientAllowlist?: boolean
+  /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
+  spaceAuditLog?: boolean
+  /** MY_ACCOUNTS - the accounts list widgets, e.g. on the Workspace dashboard (default: false) */
+  myAccounts?: boolean
 }
 
 /**

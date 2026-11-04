@@ -8,6 +8,7 @@ import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful, 
 
 const mockUseSafeProAccess = jest.fn()
 const mockSimulateTransaction = jest.fn()
+let mockSimulationRequestStatus: FETCH_STATUS = FETCH_STATUS.NOT_ASKED
 jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
 jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
   ...jest.requireActual('@safe-global/utils/components/tx/security/tenderly/utils'),
@@ -39,7 +40,7 @@ jest.mock('@/components/tx/security/tenderly/useSimulation', () => ({
   useSimulation: () => ({
     simulateTransaction: mockSimulateTransaction,
     simulationData: undefined,
-    _simulationRequestStatus: 'NOT_ASKED',
+    _simulationRequestStatus: mockSimulationRequestStatus,
     simulationLink: '',
     requestError: undefined,
     resetSimulation: () => {},
@@ -130,6 +131,10 @@ describe('QueuedTxSimulation gating', () => {
     },
   }
 
+  beforeEach(() => {
+    mockSimulationRequestStatus = FETCH_STATUS.NOT_ASKED
+  })
+
   it('leads to Tenderly settings instead of simulating without Safe Pro nor an own Tenderly project', async () => {
     mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
     render(<QueuedTxSimulation transaction={transaction} />)
@@ -164,5 +169,23 @@ describe('QueuedTxSimulation gating', () => {
 
     expect(await screen.findByRole('button', { name: /Simulate/ })).toBeInTheDocument()
     expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+  })
+
+  it('points to the Tenderly settings when a request to the own Tenderly project fails', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+    mockSimulationRequestStatus = FETCH_STATUS.ERROR
+    render(<QueuedTxSimulation transaction={transaction} />, { initialReduxState: ownTenderlyState })
+
+    expect(
+      await screen.findByText('Simulation failed. Check your Tenderly API URL and access token.'),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps the generic error when the built-in simulation request fails', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
+    mockSimulationRequestStatus = FETCH_STATUS.ERROR
+    render(<QueuedTxSimulation transaction={transaction} />)
+
+    expect(await screen.findByText('Error while simulating')).toBeInTheDocument()
   })
 })

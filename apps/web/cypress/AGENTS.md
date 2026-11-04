@@ -1,6 +1,6 @@
 # Cypress E2E (legacy — maintenance only)
 
-**No new Cypress tests.** All new E2E tests are Playwright — see [../e2e/AGENTS.md](../e2e/AGENTS.md). This file governs maintaining the existing suite (still active, mostly visual/Argos work). To migrate a spec: [../e2e/docs/CYPRESS_MIGRATION_GUIDE.md](../e2e/docs/CYPRESS_MIGRATION_GUIDE.md).
+**No new Cypress tests.** All new E2E tests are Playwright — see [../e2e/AGENTS.md](../e2e/AGENTS.md). This file governs maintaining the existing suite (still active, mostly visual/Argos work). Delete a Cypress test only when a Jest or Playwright test covers it, and list each deleted test with its replacement in the PR description.
 
 Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cypress:run` (headless).
 
@@ -10,11 +10,7 @@ Run locally: `yarn workspace @safe-global/web cypress:open` (interactive) / `cyp
 cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.page*.js)
-│   ├── smoke/          # Functional smoke tests (CI on every PR)
 │   ├── visual/         # Visual regression tests (Argos E2E)
-│   ├── regression/     # Feature tests
-│   ├── happypath/      # User journey tests
-│   ├── happypath_2/    # User journey tests (run by the full on-demand CI suite)
 │   └── safe-apps/      # Safe Apps tests
 ├── fixtures/           # Static test data (JSON, safes/)
 ├── support/            # Shared config, commands, constants, localstorage_data
@@ -23,19 +19,18 @@ cypress/
 
 ## Test categories
 
-| Category     | Folder             | CI trigger                           | Naming                    |
-| ------------ | ------------------ | ------------------------------------ | ------------------------- |
-| Smoke        | `e2e/smoke/`       | Every PR                             | `[SMOKE] Verify ...`      |
-| Visual       | `e2e/visual/`      | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
-| Regression   | `e2e/regression/`  | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
-| Happy path   | `e2e/happypath/`   | On-demand + Wed cron (04:00 UTC)     | `Verify ...`              |
-| Happy path 2 | `e2e/happypath_2/` | Runs with the full on-demand suite   | `Verify ...`              |
+| Category  | Folder           | CI trigger                           | Naming                    |
+| --------- | ---------------- | ------------------------------------ | ------------------------- |
+| Visual    | `e2e/visual/`    | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
+| Safe Apps | `e2e/safe-apps/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs smoke + regression + happypath_2 + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+The PR gate is Playwright on the isolated stack (`web-isolated-e2e-backend.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)). No Cypress spec runs on a PR or on the isolated stack; Cypress runs only against staging. The on-demand workflow (`web-e2e-full-ondemand.yml`) runs `safe-apps/`; its `workflow_dispatch` input can narrow it to named specs (comma-separated, no path/extension).
+
+CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
 ## Visual regression tests (Argos E2E)
 
-All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
+All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`. Only states that no Storybook story renders yet stay here (`COVERAGE.md`); new visual coverage is a story — see [../docs/storybook-guide.md](../docs/storybook-guide.md). When a story renders a test's state, delete the test.
 
 ### Structure
 
@@ -52,7 +47,7 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
     cy.contains('expected text', { timeout: 30000 }).should('be.visible')
-    main.awaitVisualStability()  // ALWAYS last line (unless explicitly skipped with comment)
+    main.awaitVisualStability()  // last line (unless explicitly skipped with comment)
   })
 })
 ```
@@ -60,6 +55,10 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
 ### Wallet tests
 
 Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds storage and skips the slow UI flow of the older `connectSigner()` (still present in ~18 legacy call sites; don't add new ones).
+
+### Credentials and environment values
+
+`Cypress.env()` no longer exists (Cypress 16). Read wallet keys from `walletCredentials` (`support/credentials.js`) inside hooks or tests, never at module level: a root `before` hook fills it from `cy.env()`. It lives on the window, because the support file and each spec are separate bundles. Read other secrets with `cy.env([...])` in a hook. Read public values with `Cypress.expose()`; add a new one to `expose` in `cypress.config.js`.
 
 ### Key utilities
 
@@ -75,7 +74,7 @@ Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds s
 
 ### API mocking for visual tests
 
-Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data — except the `spaces_*.cy.js` specs, which sign in via `signInToSpaces()` and run unmocked against the live spaces backend. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
+Visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. The mocks prevent flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions
@@ -140,5 +139,5 @@ Adding a `data-testid` to a component:
 - Safe addresses: `getSafes(CATEGORIES.static)` — never hardcode
 - localStorage: payloads in `support/localstorage_data.js`, keys in `support/constants.js`
 - API mocks: `cy.intercept()` + `cy.fixture()` from `fixtures/`
-- Do NOT create new setup helpers — use existing patterns from `support/`
+- Don't create new setup helpers — use existing patterns from `support/`
 - **Data/selector separation**: fixtures hold test data only (ids, names, addresses, counts); page objects hold selectors, labels, and regex only. Never duplicate fixture data in page objects, never re-export fixtures from them — tests import fixtures directly.

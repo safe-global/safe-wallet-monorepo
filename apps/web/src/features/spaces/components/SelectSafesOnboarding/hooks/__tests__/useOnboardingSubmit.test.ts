@@ -3,7 +3,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useOnboardingSubmit from '../useOnboardingSubmit'
 import type { SafeItem } from '@/hooks/safes'
 import type { MultiChainSafeItem } from '@/hooks/safes'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 
 const mockChains: Chain[] = []

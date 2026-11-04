@@ -1,3 +1,4 @@
+// Every story downloads what this file imports: keep app-heavy modules (e.g. the store) in per-story decorators
 import type { Preview } from '@storybook/nextjs'
 import React, { useEffect } from 'react'
 
@@ -10,10 +11,6 @@ import { ShadcnProvider } from './shadcn'
 initialize({
   onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
 })
-
-// Export decorators for use in individual stories
-// These are not applied globally but can be imported and used per-story
-export { withMockProvider } from './decorators'
 
 // Canvas colors mirror the card/paper surface components actually sit on (--color-background-paper):
 // light #fff, dark #1c1c1c. Transparent controls (the default Input, ghost Button, etc.) rely on this

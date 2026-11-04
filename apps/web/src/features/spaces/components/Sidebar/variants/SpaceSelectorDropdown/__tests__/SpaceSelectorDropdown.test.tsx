@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { getDeterministicColor } from '@/utils/colors'
-import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../../constants'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '@safe-global/views/features/spaces/components/Sidebar/constants'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { truncateSpaceName } from '../../../utils'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
@@ -115,7 +115,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   },
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     onClick,
@@ -131,7 +131,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/avatar', () => ({
+jest.mock('@safe-global/views/components/ui/avatar', () => ({
   Avatar: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   AvatarFallback: ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
     <div data-testid="avatar-fallback" style={style}>
@@ -140,13 +140,13 @@ jest.mock('@/components/ui/avatar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/components/ui/dropdown-menu', () => {
+jest.mock('@safe-global/views/components/ui/dropdown-menu', () => {
   const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
 
   type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }
@@ -341,7 +341,7 @@ describe('SpaceSelectorDropdown', () => {
     fireEvent.click(trigger)
     fireEvent.click(screen.getByText('View all'))
 
-    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }), undefined)
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
   })
 
@@ -1201,7 +1201,7 @@ describe('SpaceSelectorDropdown', () => {
     it.each([
       [false, false, null, 'Workspace', false],
       [true, true, 20, 'Free access', false],
-      [true, true, 14, 'Free access · 14 days left', false],
+      [true, true, 14, 'Free access', false],
       [true, true, 7, 'Free access · 7 days left', true],
       [true, true, 1, 'Free access · 1 day left', true],
       [true, true, null, 'Free access', false],

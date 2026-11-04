@@ -26,18 +26,10 @@ import {
   type TotalOutgoing,
   type TotalOutgoingLine,
 } from '../services/totalOutgoing'
+import type { FeeRow } from '@safe-global/views/features/gtf/types'
 
 export type { TotalOutgoing, TotalOutgoingLine }
-
-export type FeeRow = {
-  label: string
-  amount?: string
-  currency?: string
-  fiatAmount?: string
-  isFree?: boolean
-  /** When set, replaces the amount/currency/fiat slot with explanatory copy (e.g. "Calculated at execution"). */
-  note?: string
-}
+export type { FeeRow } from '@safe-global/views/features/gtf/types'
 
 export type FeesPreviewData = {
   canCoverFees: boolean

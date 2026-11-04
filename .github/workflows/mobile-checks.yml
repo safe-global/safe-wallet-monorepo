@@ -1,14 +1,8 @@
 name: Mobile Checks
 
 on:
+  # No paths filter: the required result job must report on every pull request.
   pull_request:
-    paths:
-      - apps/mobile/**
-      - packages/**
-      - yarn.lock
-      - package.json
-      - .yarnrc.yml
-      - .yarn/patches/**
   push:
     branches:
       - main
@@ -26,7 +20,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/mobile/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            expo-plugins/**
+            .prettierrc
+            .prettierignore
+            .github/workflows/mobile-checks.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
   lint:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       contents: read
@@ -34,14 +59,16 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
           after-install: 'false'
       - name: Run lint
         run: yarn workspace @safe-global/mobile lint
 
   prettier:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       contents: read
@@ -49,14 +76,16 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
           after-install: 'false'
       - name: Run Prettier check
         run: yarn workspace @safe-global/mobile prettier
 
   type-check:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       contents: read
@@ -64,9 +93,22 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/yarn
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
         with:
-          after-install: 'false'
+          after-install: 'true'
       - name: Type check
         run: yarn workspace @safe-global/mobile type-check
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: Mobile checks result
+    permissions: {}
+    if: always()
+    needs: [changes, lint, prettier, type-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

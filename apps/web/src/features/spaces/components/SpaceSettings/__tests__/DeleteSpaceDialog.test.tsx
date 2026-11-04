@@ -27,6 +27,7 @@ const mockSpace: GetSpaceResponse = {
   members: [],
   safeCount: 0,
   memberCount: 0,
+  experimentalFeatures: [],
 }
 
 const renderDialog = (space = mockSpace, onClose = jest.fn()) => {

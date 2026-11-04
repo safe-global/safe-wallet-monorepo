@@ -16,15 +16,10 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { isRateLimitError } from '@/utils/transaction-errors'
-import type { FeeRow } from './useFeesPreview'
+import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/gtf/types'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 
-export type HistoryFeesData = {
-  totalFee: { amount: string; currency: string; fiatAmount?: string }
-  executionFee: FeeRow
-  gasFee: FeeRow
-  paidFrom: 'safe' | 'signer'
-}
+export type { HistoryFeesData } from '@safe-global/views/features/gtf/types'
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 

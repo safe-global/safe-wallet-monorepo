@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useRouter } from 'next/router'
-import Disclaimer from '@/components/common/Disclaimer'
+import Disclaimer from '@safe-global/views/components/common/Disclaimer'
 import { AppRoutes } from '@/config/routes'
 
 const BlockedAddress = ({

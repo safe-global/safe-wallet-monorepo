@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
 import SecurityDrawerChecks from './SecurityDrawerChecks'
@@ -98,6 +99,27 @@ describe('SecurityDrawerChecks', () => {
       }
       render(<SecurityDrawerChecks {...baseProps} results={results} />)
       expect(screen.getByText('1 issue found')).toBeInTheDocument()
+    })
+  })
+
+  describe('score summary', () => {
+    const getSummaryCard = () => screen.getByText(/Scanned/i).closest('[data-slot="card"]') as HTMLElement
+
+    it('shows an Update link when a newer contract version is available', () => {
+      const results = {
+        ...allClearResults,
+        contract_version: { ...mkResult('clear'), upgradeAvailable: true },
+      }
+      render(<SecurityDrawerChecks {...baseProps} results={results} />)
+      expect(within(getSummaryCard()).getByText('Healthy')).toBeInTheDocument()
+      const link = within(getSummaryCard()).getByRole('link', { name: /update/i })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
+      expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
+    })
+
+    it('shows no Update link when the contract version is current', () => {
+      render(<SecurityDrawerChecks {...baseProps} />)
+      expect(within(getSummaryCard()).queryByRole('link', { name: /update/i })).not.toBeInTheDocument()
     })
   })
 })

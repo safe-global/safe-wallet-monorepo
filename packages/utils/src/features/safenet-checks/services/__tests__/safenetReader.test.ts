@@ -7,18 +7,27 @@ import { transactionProposalHash } from '../../utils/proposalHash'
 import { BLOCK_ESTIMATE_TOLERANCE_SECONDS } from '../../constants'
 import {
   resetLogCounter,
+  buildDisputeResolvedLog,
+  buildDisputeTriggeredLog,
+  buildNewRequestLog,
   buildOracleProposedLog,
   buildOracleAttestedLog,
-  buildPlainProposedLog,
-  buildPlainAttestedLog,
   buildOracleResultLog,
   buildLifecycle,
   EMPTY_ORACLE_DATA_HASH,
 } from '../../builders/rawLogs'
 import type { RawLog } from '../../utils/decodeLogs'
-import { AttestationVerificationStatus, CheckEventType, CheckStatus, type Hex } from '../../types'
+import {
+  AttestationVerificationStatus,
+  CheckEventType,
+  CheckStatus,
+  DisputeOutcome,
+  OracleRequestState,
+  UNVERIFIED_ATTESTATION,
+  type Hex,
+} from '../../types'
 import { deriveCheckState } from '../../utils/deriveCheckState'
-import { makeEndpoint, type GetLogsFilter } from './rpcEndpoint'
+import { makeEndpoint, type GetLogsFilter, type RpcConfig } from './rpcEndpoint'
 
 const consensusCalls = (calls: GetLogsFilter[]): GetLogsFilter[] =>
   calls.filter((c) => (Array.isArray(c.topics[0]) ? (c.topics[0] as string[]) : []).includes(CONSENSUS_TOPIC0S[0]))
@@ -47,20 +56,15 @@ const makeReader = (over: Partial<SafenetReaderConfig> = {}, url = 'http://rpc.t
     chainId: CHAIN_ID,
     consensus: CONSENSUS,
     coordinator: ORACLE,
-    oracles: [],
+    oracles: [ORACLE],
     ...over,
   })
 
-/**
- * The plain (non-oracle) pair — the only lifecycle live beta emits. Built with
- * OUT-OF-ORDER metas so the reader's (blockNumber, logIndex) sort has teeth:
- * the harness replays logs in insertion order.
- */
-const plainPairFor = (safeTxHash: Hex): RawLog[] => {
+const consensusPairFor = (safeTxHash: Hex): RawLog[] => {
   resetLogCounter()
   return [
-    buildPlainAttestedLog({ safeTxHash, epoch: 7n }, { blockNumber: 200, logIndex: 0 }),
-    buildPlainProposedLog({ safeTxHash, epoch: 7n }, { blockNumber: 100, logIndex: 5 }),
+    buildOracleAttestedLog({ safeTxHash, epoch: 7n }, { blockNumber: 200, logIndex: 0 }),
+    buildOracleProposedLog({ safeTxHash, epoch: 7n }, { blockNumber: 100, logIndex: 5 }),
   ]
 }
 
@@ -70,7 +74,7 @@ let server: SetupServerApi
 afterEach(() => server?.close())
 
 describe('SafenetReader.fetchCheckState', () => {
-  it('verifies a captured Safenet deployment on Gnosis Chain approval and leaves a split dispute inconclusive', async () => {
+  it('verifies a captured Safenet deployment on Gnosis Chain approval and reads a split dispute as open', async () => {
     const fixture = JSON.parse(
       readFileSync(join(__dirname, '../../__fixtures__/safenet-gnosis-chain.captured.json'), 'utf8'),
     ) as {
@@ -83,6 +87,7 @@ describe('SafenetReader.fetchCheckState', () => {
       head: 48597645,
       logs: [...approved.logs, ...disputed.logs],
       groupKey: approved.groupKey,
+      requestState: OracleRequestState.FROZEN,
     })
     server = setupServer(endpoint.handler)
     server.listen()
@@ -96,11 +101,11 @@ describe('SafenetReader.fetchCheckState', () => {
       AttestationVerificationStatus.INVALID,
     )
     const split = await reader.fetchCheckState(disputed.safeTxHash)
-    expect(deriveCheckState({ ...split, attestation })).toBe(CheckStatus.TIMED_OUT)
+    expect(deriveCheckState({ ...split, attestation })).toBe(CheckStatus.DISPUTED)
   })
 
-  it('bootstraps from the chain head and returns the sorted, decoded plain pair', async () => {
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+  it('bootstraps from the chain head and returns the sorted, decoded Consensus pair', async () => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(endpoint.handler)
     server.listen()
 
@@ -109,7 +114,7 @@ describe('SafenetReader.fetchCheckState', () => {
     expect(endpoint.methods).toContain('eth_getBlockByNumber')
     expect(result.headBlock).toBe('25000')
     expect(result.safeTxHash).toBe(SAFE_TX_HASH)
-    expect(result.events.map((e) => e.type)).toEqual([CheckEventType.PLAIN_PROPOSED, CheckEventType.PLAIN_ATTESTED])
+    expect(result.events.map((e) => e.type)).toEqual([CheckEventType.ORACLE_PROPOSED, CheckEventType.ORACLE_ATTESTED])
     // Sorted ascending by (blockNumber, logIndex).
     const keys = result.events.map((e) => e.blockNumber * 1e6 + e.logIndex)
     expect(keys).toEqual([...keys].sort((a, b) => a - b))
@@ -140,13 +145,13 @@ describe('SafenetReader.fetchCheckState', () => {
   })
 
   it('chunks the lookback window into ≤10k-block getLogs calls', async () => {
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(endpoint.handler)
     server.listen()
 
     await makeReader().fetchCheckState(SAFE_TX_HASH)
 
-    expect(endpoint.getLogsCalls.map((c) => [c.fromBlock, c.toBlock])).toEqual([
+    expect(consensusCalls(endpoint.getLogsCalls).map((c) => [c.fromBlock, c.toBlock])).toEqual([
       [0, 9999],
       [10_000, 19_999],
       [20_000, 25_000],
@@ -176,7 +181,7 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it('rotates to the next endpoint when the first one fails', async () => {
     const down = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
-    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(down.handler, up.handler)
     server.listen()
 
@@ -185,7 +190,7 @@ describe('SafenetReader.fetchCheckState', () => {
       chainId: CHAIN_ID,
       consensus: CONSENSUS,
       coordinator: ORACLE,
-      oracles: [],
+      oracles: [ORACLE],
     })
     const result = await reader.fetchCheckState(SAFE_TX_HASH)
     expect(result.headBlock).toBe('25000')
@@ -197,7 +202,7 @@ describe('SafenetReader.fetchCheckState', () => {
     // retry on a dead URL and the read fails; the generation guard cannot.
     const down1 = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
     const down2 = makeEndpoint({ url: 'http://rpc.test/2', failEverything: true })
-    const up = makeEndpoint({ url: 'http://rpc.test/3', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const up = makeEndpoint({ url: 'http://rpc.test/3', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(down1.handler, down2.handler, up.handler)
     server.listen()
 
@@ -206,7 +211,7 @@ describe('SafenetReader.fetchCheckState', () => {
       chainId: CHAIN_ID,
       consensus: CONSENSUS,
       coordinator: ORACLE,
-      oracles: [],
+      oracles: [ORACLE],
     })
     const results = await Promise.all([
       reader.fetchCheckState(SAFE_TX_HASH),
@@ -222,7 +227,7 @@ describe('SafenetReader.fetchCheckState', () => {
     const endpoint = makeEndpoint({
       url: 'http://rpc.test/1',
       head: 25_000,
-      logs: plainPairFor(SAFE_TX_HASH),
+      logs: consensusPairFor(SAFE_TX_HASH),
       failBlockProbes: 'error',
       gateLogs: true,
     })
@@ -242,7 +247,7 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it('keeps the rotated endpoint for the next read instead of retrying the failed one', async () => {
     const down = makeEndpoint({ url: 'http://rpc.test/1', failEverything: true })
-    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
+    const up = makeEndpoint({ url: 'http://rpc.test/2', head: 25_000, logs: consensusPairFor(SAFE_TX_HASH) })
     server = setupServer(down.handler, up.handler)
     server.listen()
     const reader = makeReader({ rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2'] })
@@ -277,20 +282,6 @@ describe('SafenetReader.fetchCheckState', () => {
     expect(result.epoch).toBe('1')
     // The reveal deadline is the request's effective deadline.
     expect(result.deadlineBlock).toBe('160')
-  })
-
-  it('returns null correlation fields for the plain pair — the beta path has no oracle', async () => {
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: plainPairFor(SAFE_TX_HASH) })
-    server = setupServer(endpoint.handler)
-    server.listen()
-
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
-
-    expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
-    expect(result.requestId).toBeNull()
-    expect(result.epoch).toBeNull()
-    expect(result.oracle).toBeNull()
-    expect(result.deadlineBlock).toBeNull()
   })
 
   it('targets Proposed.oracle for the sentinel getLogs when the proposal names an allowlisted oracle', async () => {
@@ -335,7 +326,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [] }).fetchCheckState(SAFE_TX_HASH)
 
     expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
     expect(result.requestId).toBeNull()
@@ -636,8 +627,8 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     resetLogCounter()
     const centre = 980_000
     const logs = [
-      buildPlainProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: centre, logIndex: 0 }),
-      buildPlainAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: 988_999, logIndex: 0 }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: centre, logIndex: 0 }),
+      buildOracleAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 7n }, { blockNumber: 988_999, logIndex: 0 }),
     ]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 1_000_000, headTimestamp: 1_000_000, logs })
     server = setupServer(endpoint.handler)
@@ -758,5 +749,68 @@ describe('SafenetReader window coverage', () => {
     // centre = head − ageSeconds/5, then 1,000 blocks back, clamped at the head.
     expect([calls[0].fromBlock, calls[0].toBlock]).toEqual([1_000_000 - ageSeconds / 5 - 1_000, 1_000_000])
     expect(result.windowCoverage).toBe('proven')
+  })
+})
+
+describe('SafenetReader open disputes', () => {
+  const requestId = requestIdFor('1')
+
+  const disputeLogs = (): RawLog[] => {
+    resetLogCounter()
+    return [
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
+      buildNewRequestLog({ requestId }),
+      buildDisputeTriggeredLog({ requestId, deadline: 600n }),
+    ]
+  }
+
+  const readCheck = async (logs: RawLog[], config: Partial<RpcConfig> = {}) => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs, ...config })
+    server = setupServer(endpoint.handler)
+    server.listen()
+    const read = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const status = deriveCheckState({ ...read, attestation: UNVERIFIED_ATTESTATION })
+    return { endpoint, read, status }
+  }
+
+  it('asks the oracle for the request state once and keeps a frozen dispute open', async () => {
+    const { endpoint, read, status } = await readCheck(disputeLogs(), { requestState: OracleRequestState.FROZEN })
+
+    expect(endpoint.requestReads).toEqual([requestId])
+    expect(read.events.map((event) => event.type)).not.toContain(CheckEventType.DISPUTE_RESOLVED)
+    expect(status).toBe(CheckStatus.DISPUTED)
+  })
+
+  it('reads a ruling that sits outside the block window as a denial', async () => {
+    const { read, status } = await readCheck(disputeLogs(), { requestState: OracleRequestState.RESOLVED_DENIED })
+
+    expect(read.events).toContainEqual(
+      expect.objectContaining({ type: CheckEventType.DISPUTE_RESOLVED, outcome: DisputeOutcome.RESOLVED_DENIED }),
+    )
+    expect(status).toBe(CheckStatus.MALICIOUS)
+  })
+
+  it('reads an arbitration that timed out outside the block window as a timeout', async () => {
+    const { read, status } = await readCheck(disputeLogs(), { requestState: OracleRequestState.TIMED_OUT })
+
+    expect(read.events.map((event) => event.type)).toContain(CheckEventType.ARBITRATION_TIMED_OUT)
+    expect(status).toBe(CheckStatus.TIMED_OUT)
+  })
+
+  it('does not ask the oracle when the logs already carry the ruling', async () => {
+    const logs = [...disputeLogs(), buildDisputeResolvedLog({ requestId, outcome: DisputeOutcome.RESOLVED_DENIED })]
+    const { endpoint, status } = await readCheck(logs, { requestState: OracleRequestState.FROZEN })
+
+    expect(endpoint.requestReads).toEqual([])
+    expect(status).toBe(CheckStatus.MALICIOUS)
+  })
+
+  it('does not ask the oracle about a check that has no dispute', async () => {
+    resetLogCounter()
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
+    const { endpoint } = await readCheck(logs)
+
+    expect(endpoint.requestReads).toEqual([])
+    expect(endpoint.methods).not.toContain('eth_call')
   })
 })

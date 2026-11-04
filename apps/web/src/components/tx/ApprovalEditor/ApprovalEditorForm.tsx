@@ -1,4 +1,4 @@
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@safe-global/views/components/ui/separator'
 import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
@@ -48,7 +48,7 @@ export const ApprovalEditorForm = ({
             <div className="flex flex-col gap-4">
               {approvals.map((tx) => (
                 <li
-                  key={tx.tokenAddress + tx.spender}
+                  key={tx.transactionIndex}
                   className={`flex w-full ${0n === tx.amount ? css.zeroValueApproval : ''}`}
                   data-testid="approval-item"
                 >

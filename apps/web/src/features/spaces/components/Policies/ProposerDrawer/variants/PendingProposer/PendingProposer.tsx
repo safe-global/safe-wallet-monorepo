@@ -1,16 +1,11 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement } from 'react'
 import { DrawerSection } from '@/components/common/Drawer'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { ProposerOverview, type ProposerOverviewProps } from '../../components/ProposerOverview'
-import { SafeSignatureInfo, type SignatureSafeInfo } from '../../components/SafeSignatureInfo'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { ProposerOverview } from '../../components/ProposerOverview'
+import { SafeSignatureInfo } from '../../components/SafeSignatureInfo'
+import type { PendingProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
-export type PendingProposerProps = {
-  description: ReactNode
-  safe: SignatureSafeInfo
-  signatures: number
-  expiresLabel?: string
-  overview: ProposerOverviewProps
-}
+export type { PendingProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 export const PendingProposer = ({
   description,

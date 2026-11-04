@@ -1,17 +1,12 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement } from 'react'
 import { TriangleAlert } from 'lucide-react'
 import { DrawerSection } from '@/components/common/Drawer'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ProposerOverview, type ProposerOverviewProps } from '../../components/ProposerOverview'
-import { SafeSignatureInfo, type SignatureSafeInfo } from '../../components/SafeSignatureInfo'
+import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { ProposerOverview } from '../../components/ProposerOverview'
+import { SafeSignatureInfo } from '../../components/SafeSignatureInfo'
+import type { NotActivatedProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
-export type NotActivatedProposerProps = {
-  description: ReactNode
-  safe: SignatureSafeInfo
-  signatures: number
-  expiresLabel?: string
-  overview: ProposerOverviewProps
-}
+export type { NotActivatedProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 export const NotActivatedProposer = ({
   description,

@@ -1,6 +1,6 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import ExternalLink from '@/components/common/ExternalLink'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 

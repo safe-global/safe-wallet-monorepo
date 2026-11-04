@@ -2,10 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import type * as React from 'react'
 import type { ReactNode } from 'react'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
-import type { ResolvedSidebarItem } from '../../../types'
+import type { ResolvedSidebarItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { setIsProduction } from '@/tests/env'
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,

@@ -24,7 +24,7 @@ const mockChains = [
 // base-ui keeps the popup in a portal that synthetic clicks do not reliably open under jsdom, so the
 // popup parts render inline here. The data-slot attributes match the real primitive because the
 // component finds its rows by them.
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@safe-global/views/components/ui/select', () => ({
   __esModule: true,
   Select: ({
     children,

@@ -1,5 +1,19 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import * as useChains from '@/hooks/useChains'
+import { trackEvent } from '@/services/analytics'
+import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import SafeListContextMenu from '.'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
+const mockNestedSafe = '0x2222222222222222222222222222222222222222'
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/owners', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/owners'),
+  useOwnersGetSafesByOwnerV1Query: () => ({ currentData: { safes: [mockNestedSafe] } }),
+}))
 
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
 jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
@@ -21,7 +35,7 @@ jest.mock('@/components/address-book/EntryDialog', () => {
 const ADDRESS = '0x1111111111111111111111111111111111111111'
 const CHAIN_ID = '1'
 
-const renderMenu = () =>
+const renderMenu = ({ hideNestedSafes = true } = {}) =>
   render(
     <SafeListContextMenu
       name="Treasury"
@@ -30,7 +44,7 @@ const renderMenu = () =>
       addNetwork={false}
       rename
       undeployedSafe={false}
-      hideNestedSafes
+      hideNestedSafes={hideNestedSafes}
     />,
   )
 
@@ -75,5 +89,18 @@ describe('SafeListContextMenu', () => {
     fireEvent.click(screen.getByTestId('rename-btn'))
 
     expect(screen.queryByTestId('entry-dialog')).not.toBeInTheDocument()
+  })
+
+  it('tracks opening the nested Safes list with the nested Safes label on the accounts page', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    renderMenu({ hideNestedSafes: false })
+    openMenu()
+
+    fireEvent.click(screen.getByTestId('nested-safes-btn'))
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...NESTED_SAFE_EVENTS.OPEN_LIST, label: NESTED_SAFE_LABELS.sidebar },
+      undefined,
+    )
   })
 })

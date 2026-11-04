@@ -133,7 +133,6 @@ export default defineConfig(({ mode }) => {
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },
         { find: 'next/dynamic', replacement: path.resolve(__dirname, 'src/compat/next-dynamic.tsx') },
-        { find: 'next/image', replacement: path.resolve(__dirname, 'src/compat/next-image.tsx') },
         { find: 'next/app', replacement: path.resolve(__dirname, 'src/compat/next-app.ts') },
         { find: 'next/navigation', replacement: path.resolve(__dirname, 'src/compat/next-navigation.tsx') },
 
@@ -166,6 +165,7 @@ export default defineConfig(({ mode }) => {
         { find: /^@safe-global\/theme\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/theme/src/$1') },
         { find: /^@safe-global\/store\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/store/src/$1') },
         { find: /^@safe-global\/utils\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/utils/src/$1') },
+        { find: /^@safe-global\/views\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/views/src/$1') },
         { find: /^@safe-global\/test\/(.*)$/, replacement: path.resolve(__dirname, '../../config/test/$1') },
 
         // apps/web/src/pages/_app.tsx uses bare `src/...` imports (Next.js baseUrl convention).

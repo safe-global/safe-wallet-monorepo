@@ -8,7 +8,7 @@
  * 1. The feature flag FEATURES.NATIVE_SWAPS is enabled
  * 2. A consumer calls useLoadFeature(SwapFeature)
  */
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import type { SwapContract } from './contract'
 
 // Heavy components - code-split into separate chunks (CowSwap SDK is large)
@@ -19,7 +19,7 @@ const FallbackSwapWidget = dynamic(() => import('./components/FallbackSwapWidget
 import SwapButton from './components/SwapButton'
 import SwapOrder from './components/SwapOrder'
 import SwapOrderConfirmation from './components/SwapOrderConfirmationView'
-import StatusLabel from './components/StatusLabel'
+import StatusLabel from '@safe-global/views/features/swap/components/StatusLabel'
 import SwapTokens from './components/SwapTokens'
 
 // Flat structure - naming determines stub behavior

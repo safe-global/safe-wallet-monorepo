@@ -7,7 +7,7 @@ import {
 } from '@/services/contracts/safeContracts'
 import type { TenderlySimulatePayload } from '@safe-global/utils/components/tx/security/tenderly/types'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 
 import type {
   MultiSendTransactionSimulationParams,

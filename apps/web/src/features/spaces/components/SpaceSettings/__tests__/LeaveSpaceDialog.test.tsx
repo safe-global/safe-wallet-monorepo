@@ -28,6 +28,7 @@ const mockSpace: GetSpaceResponse = {
   members: [],
   safeCount: 0,
   memberCount: 0,
+  experimentalFeatures: [],
 }
 
 const renderDialog = (opts: { space?: GetSpaceResponse | undefined; onClose?: () => void } = {}) => {

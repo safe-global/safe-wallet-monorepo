@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import SpacePlansPage from './Page'
-import { DAY, SPACE_ID, billingHandlers, now, subscription } from './plans.fixtures'
+import { DAY, billingHandlers, now, subscription } from './plans.fixtures'
 
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   features: { spaces: true, safePro: true },
   pathname: '/spaces/plans',
-  query: { spaceId: SPACE_ID },
+  query: { spaceId: MOCK_SPACE_ID },
   layout: 'paper',
   shadcn: true,
 })
@@ -22,7 +22,7 @@ const withBilling = (subscriptions: Subscription[]) => ({
 const meta = {
   title: 'Features/Spaces/Plans/SpacePlansPage',
   component: SpacePlansPage,
-  args: { spaceId: SPACE_ID },
+  args: { spaceId: MOCK_SPACE_ID },
   decorators: [setup.decorator],
 } satisfies Meta<typeof SpacePlansPage>
 

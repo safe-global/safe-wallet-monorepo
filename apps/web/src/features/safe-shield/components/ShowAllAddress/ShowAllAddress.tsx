@@ -1,13 +1,13 @@
-import { AddressImage } from '../AddressImage'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { AddressImage } from '@safe-global/views/features/safe-shield/components/AddressImage'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useState } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import ExplorerButton from '@/components/common/ExplorerButton'
+import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { AnalysisDetailsDropdown } from '../AnalysisDetailsDropdown'
+import { AnalysisDetailsDropdown } from '@safe-global/views/features/safe-shield/components/AnalysisDetailsDropdown'
 
 interface ShowAllAddressProps {
   showImage?: boolean

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import type { AccountLine } from '@/features/myAccounts'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
 import SelectAccountsStep, { _initialSelection } from '../SelectAccountsStep'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'

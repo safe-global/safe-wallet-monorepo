@@ -22,7 +22,7 @@ const withIssues: Record<string, ScanResult> = {
     status: 'issue',
     severity: 'High',
     evidence: [
-      { label: 'Current version', value: '1.3.0' },
+      { label: 'Current version', value: '1.1.1' },
       { label: 'Latest version', value: '1.4.1' },
     ],
     remediation: 'Update to the latest version.',

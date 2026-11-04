@@ -18,12 +18,8 @@ exports[`./HnBanner.stories Default 1`] = `
         <img
           alt="Guardian badge"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
           src="/images/hypernative/guardian-badge.svg"
-          style="color: transparent;"
           width="95"
         />
         <div
@@ -133,12 +129,8 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
         <img
           alt="Guardian badge"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
           src="/images/hypernative/guardian-badge.svg"
-          style="color: transparent;"
           width="95"
         />
         <div

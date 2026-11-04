@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useMemoDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks'
 import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import extractTxInfo from '@/services/tx/extractTxInfo'
@@ -109,7 +110,10 @@ export const useNestedTransaction = (
   safeTx: SafeTransaction | undefined,
   chain: Chain | undefined,
 ): UseNestedTransactionResult => {
-  const nestedTxInfo = useMemo(() => detectNestedTransaction(safeTx), [safeTx])
+  const nestedTxInfo = useMemoDeepCompare(
+    () => detectNestedTransaction(safeTx),
+    [safeTx?.data.to.toLowerCase(), safeTx?.data.data],
+  )
   const [nestedSafeInfo, , nestedSafeInfoLoading] = useAsync(
     () =>
       !!chain && !!nestedTxInfo?.nestedSafeAddress

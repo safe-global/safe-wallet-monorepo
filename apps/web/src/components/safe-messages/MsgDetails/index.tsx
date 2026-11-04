@@ -1,14 +1,19 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useMemo, type ReactElement } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { Code as CodeIcon } from 'lucide-react'
 import classNames from 'classnames'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
+import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import MsgAuditLog from '@/components/safe-messages/MsgAuditLog'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -17,7 +22,7 @@ import { generateSafeMessageMessage, isEIP712TypedData } from '@safe-global/util
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 import singleTxDecodedCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
-import infoDetailsCss from '@/components/transactions/InfoDetails/styles.module.css'
+import infoDetailsCss from '@safe-global/views/components/transactions/InfoDetails/styles.module.css'
 import { DecodedMsg } from '../DecodedMsg'
 import CopyButton from '@/components/common/CopyButton'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'

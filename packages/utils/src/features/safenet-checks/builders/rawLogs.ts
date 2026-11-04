@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { keccak256, toBeHex, ZeroAddress, type Interface } from 'ethers'
-import { consensusInterface, consensusPlainInterface, sentinelInterface } from '../abi'
+import { consensusInterface, sentinelInterface } from '../abi'
 import type { RawLog } from '../utils/decodeLogs'
 
 /**
@@ -129,52 +129,6 @@ export const buildOracleAttestedLog = (
   )
 }
 
-// --- Consensus non-oracle (plain) pair — what live beta emits ------------------
-
-export const buildPlainProposedLog = (
-  spec: { safeTxHash?: string; chainId?: bigint; safe?: string; epoch?: bigint } = {},
-  meta: LogMeta = {},
-): RawLog => {
-  const chainId = spec.chainId ?? 100n
-  const safe = spec.safe ?? addr()
-  return encode(
-    consensusPlainInterface,
-    'TransactionProposed',
-    [spec.safeTxHash ?? hash(), chainId, safe, spec.epoch ?? 1n, txTuple(chainId, safe)],
-    meta,
-    CONSENSUS,
-  )
-}
-
-export const buildPlainAttestedLog = (
-  spec: {
-    safeTxHash?: string
-    chainId?: bigint
-    safe?: string
-    epoch?: bigint
-    signatureId?: string
-    r?: { x: bigint; y: bigint }
-    z?: bigint
-  } = {},
-  meta: LogMeta = {},
-): RawLog => {
-  const r = spec.r ?? { x: faker.number.bigInt(), y: faker.number.bigInt() }
-  return encode(
-    consensusPlainInterface,
-    'TransactionAttested',
-    [
-      spec.safeTxHash ?? hash(),
-      spec.chainId ?? 100n,
-      spec.safe ?? addr(),
-      spec.epoch ?? 1n,
-      spec.signatureId ?? hash(),
-      [[r.x, r.y], spec.z ?? faker.number.bigInt()],
-    ],
-    meta,
-    CONSENSUS,
-  )
-}
-
 // --- Sentinel oracle ------------------------------------------------------------
 
 export const buildNewRequestLog = (
@@ -260,6 +214,15 @@ export const buildDisputeResolvedLog = (
     meta,
     ORACLE,
   )
+
+export const buildDisputeTriggeredLog = (
+  spec: { requestId?: string; deadline?: bigint } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(sentinelInterface, 'DisputeTriggered', [spec.requestId ?? hash(), spec.deadline ?? 200n], meta, ORACLE)
+
+export const buildArbitrationTimedOutLog = (spec: { requestId?: string } = {}, meta: LogMeta = {}): RawLog =>
+  encode(sentinelInterface, 'ArbitrationTimedOut', [spec.requestId ?? hash()], meta, ORACLE)
 
 // --- Lifecycle sequence -------------------------------------------------------
 

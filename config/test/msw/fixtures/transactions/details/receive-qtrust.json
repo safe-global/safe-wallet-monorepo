@@ -1,0 +1,37 @@
+{
+  "safeAddress": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+  "txId": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_ed89d768d24991bca3a9eed93f369a3fa10727accc3d02aacb5c38794ba5b9136119",
+  "executedAt": 1702636380000,
+  "txStatus": "SUCCESS",
+  "txInfo": {
+    "type": "Transfer",
+    "humanDescription": null,
+    "sender": {
+      "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+      "name": null,
+      "logoUri": null
+    },
+    "recipient": {
+      "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+      "name": null,
+      "logoUri": null
+    },
+    "direction": "INCOMING",
+    "transferInfo": {
+      "type": "ERC20",
+      "tokenAddress": "0x7CB180dE9BE0d8935EbAAc9b4fc533952Df128Ae",
+      "value": "1000000000000000000000",
+      "tokenName": "QATRUSTED",
+      "tokenSymbol": "QTRUST",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x7CB180dE9BE0d8935EbAAc9b4fc533952Df128Ae.png",
+      "decimals": 18,
+      "trusted": true,
+      "imitation": false
+    }
+  },
+  "txData": null,
+  "detailedExecutionInfo": null,
+  "txHash": "0xd89d768d24991bca3a9eed93f369a3fa10727accc3d02aacb5c38794ba5b9136",
+  "safeAppInfo": null,
+  "note": null
+}

@@ -38,3 +38,7 @@ export const Locked: Story = {
     locked: { ...mockStarterPlan, onUpgrade: fn() },
   },
 }
+
+export const WithRecipientAllowlist: Story = {
+  args: { onSelect: fn(), isAllowlistAvailable: true },
+}

@@ -47,9 +47,28 @@ export const SAFES = {
   SEP_OWNER_4_SAFE: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
   /** 1/4 Safe holding ETH plus six $0 test tokens, OWNER_4 is an owner — for assets-table tests (mirrors Cypress SEP_STATIC_SAFE_2) */
   SEP_ASSETS_SAFE: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-  /** 1/2 Safe where OWNER_1 is a proposer but not an owner — for proposer-permission tests (mirrors Cypress SEP_STATIC_SAFE_31) */
-  SEP_PROPOSER_SAFE: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
+  /** Safe with an executed transaction history — for tx history tests (mirrors Cypress SEP_STATIC_SAFE_7) */
+  SEP_HISTORY_SAFE: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  /** Safe with queued transactions, two of them for one nonce — for the pending-transactions widget (mirrors Cypress SEP_STATIC_SAFE_2) */
+  SEP_QUEUE_SAFE: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
+  /** Mainnet Safe that holds trusted and untrusted tokens — for the token lists (mirrors Cypress ETH_STATIC_SAFE_15) */
+  ETH_TOKEN_LIST_SAFE: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
+  /** Polygon Safe on an unsupported but known singleton, which can migrate in the app (mirrors Cypress MATIC_STATIC_SAFE_31) */
+  MATIC_MIGRATABLE_SAFE: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
+  /** Polygon Safe on an unofficial singleton, which only the CLI can migrate (mirrors Cypress MATIC_STATIC_SAFE_32) */
+  MATIC_UNOFFICIAL_SINGLETON_SAFE: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
+  /** Isolated stack only (no staging Safe): mainnet Safe whose tokens and positions the local Zerion lists */
+  ETH_ZERION_SAFE: 'eth:0x0000000000000000000000000000000000000000',
+  /** Isolated stack only (no staging Safe): mainnet Safe with the DeFi positions that the local Zerion lists */
+  ETH_ZERION_POSITIONS_SAFE: 'eth:0x0000000000000000000000000000000000000000',
+  /** Isolated stack only (no staging Safe): 3/3 Safe of the emulated Ledger with a transfer that needs its signature */
+  SEP_LEDGER_SIGN_SAFE: 'sep:0x0000000000000000000000000000000000000000',
+  /** Isolated stack only (no staging Safe): 1/1 Safe of the emulated Ledger with a signed transfer to execute */
+  SEP_LEDGER_EXECUTE_SAFE: 'sep:0x0000000000000000000000000000000000000000',
 } as const
+
+/** The address of a prefixed Safe such as `sep:0x…` */
+export const safeAddress = (prefixedSafe: string): string => prefixedSafe.split(':')[1]
 
 /** Fiat value below which "Hide small balances" hides a token — mirrors DUST_THRESHOLD in src/config/constants.ts */
 export const DUST_THRESHOLD_USD = 0.01
@@ -104,6 +123,9 @@ export const TEST_ADDRESSES = {
   NON_OWNER: '0x1234567890123456789012345678901234567890',
   /** Zero address — for edge case tests */
   ZERO: '0x0000000000000000000000000000000000000000',
+  /** Placeholder accounts, e.g. for a Workspace that holds more Safes than a plan allows */
+  PLACEHOLDER_A: '0xa0000000000000000000000000000000000000a0',
+  PLACEHOLDER_B: '0xb0000000000000000000000000000000000000b0',
 } as const
 
 // ---------------------------------------------------------------------------
@@ -113,14 +135,19 @@ export const TEST_ADDRESSES = {
 export const ROUTES = {
   home: '/home',
   welcomeSpaces: '/welcome/spaces',
+  spacesPolicies: '/spaces/policies',
   welcomeAccounts: '/welcome/accounts',
   balances: '/balances',
+  balancesNfts: '/balances/nfts',
   transactions: '/transactions',
   transactionsQueue: '/transactions/queue',
   transactionsHistory: '/transactions/history',
+  transactionsMessages: '/transactions/messages',
   settings: '/settings',
+  settingsSetup: '/settings/setup',
   addressBook: '/address-book',
   apps: '/apps',
+  loadSafe: '/new-safe/load',
 } as const
 
 // ---------------------------------------------------------------------------

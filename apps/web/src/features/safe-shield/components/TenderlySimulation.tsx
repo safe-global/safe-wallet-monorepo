@@ -1,9 +1,10 @@
-import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
-import { ChevronDown, ExternalLink as LaunchIcon } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { type AnimationEvent, type ReactElement, useContext, useState, useEffect, useRef } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { ExternalLinkIcon as LaunchIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
 import { SeverityIcon } from './SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
@@ -13,7 +14,7 @@ import {
   isTxSimulationEnabled,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -23,6 +24,7 @@ import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import css from './reveal.module.css'
 
 interface TenderlySimulationProps {
   safeTx?: SafeTransaction
@@ -47,7 +49,7 @@ export const TenderlySimulation = ({
   const showSimulation = chain && isTxSimulationEnabled(chain) && safeTx
 
   const [simulationExpanded, setSimulationExpanded] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
+  const [revealed, setRevealed] = useState(false)
 
   // Reset simulation state when transaction changes
   // Use useRef to track the previous transaction and only reset when it actually changes
@@ -145,19 +147,15 @@ export const TenderlySimulation = ({
     }
   }, [mainSimulationResult, nestedSimulationResult])
 
-  useEffect(() => {
-    if (!showSimulation) return
-
-    setTimeout(() => {
-      setIsVisible(true)
-    }, delay)
-  }, [delay, showSimulation])
-
   if (!showSimulation) {
     return null
   }
 
   const showExpandable = isNested && isSimulationFinished
+
+  const handleRevealEnd = (e: AnimationEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) setRevealed(true)
+  }
 
   const getSimulationHeaderText = () => {
     if (!isSimulationFinished) return 'Transaction simulation'
@@ -248,13 +246,9 @@ export const TenderlySimulation = ({
       open={simulationExpanded}
       onOpenChange={setSimulationExpanded}
       data-testid="tenderly-simulation"
-      className="overflow-hidden"
-      style={{
-        opacity: isVisible ? 1 : 0,
-        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
-        transition: `opacity 0.3s ease-in-out, max-height 0.3s ease-in-out`,
-        transitionDelay: `${delay}ms`,
-      }}
+      className={revealed ? undefined : css.reveal}
+      style={revealed ? undefined : { animationDelay: `${delay}ms` }}
+      onAnimationEnd={handleRevealEnd}
     >
       {/* A trigger only when expandable: before the run finishes the header holds the Run button. */}
       {showExpandable ? (

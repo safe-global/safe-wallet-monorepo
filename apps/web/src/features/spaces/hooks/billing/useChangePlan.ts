@@ -5,7 +5,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
-import type { SafeRef } from '../../components/Plans/types'
+import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
 import { isPlanChangeable } from './subscription'
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useSpaceSubscription } from './useSpaceSubscription'

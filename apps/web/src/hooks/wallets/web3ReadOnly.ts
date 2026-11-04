@@ -6,7 +6,7 @@
 import type { JsonRpcProvider, BrowserProvider } from 'ethers'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 // Imported from `context` directly so this always-loaded module depends on nothing but the React context.
-import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 export const { setStore: setWeb3, useStore: useWeb3 } = new ExternalStore<BrowserProvider>()
 

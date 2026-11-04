@@ -1,7 +1,7 @@
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { type ComponentProps } from 'react'
 
 type InviterProps = {
