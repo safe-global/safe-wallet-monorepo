@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react'
 import useSpaceSubmit from './useSpaceSubmit'
 
 const mockPush = jest.fn()
+const mockReplace = jest.fn()
 const mockCreateSpaceWithUser = jest.fn()
 const mockUpdateSpace = jest.fn()
 
@@ -10,7 +11,12 @@ let mockIsSafePro = false
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush, query: mockRouterQuery }),
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    pathname: '/welcome/create-space',
+    query: mockRouterQuery,
+  }),
 }))
 
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
@@ -79,6 +85,28 @@ describe('useSpaceSubmit under Safe Pro', () => {
     })
 
     expect(result.current.selectSafesUrl).toBe('/welcome?spaceId=11111111-1111-1111-1111-111111111111&next=%2Fbalances')
+  })
+
+  it('names the created Workspace in the URL of the step while it waits on its trial offer', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(
+      {
+        pathname: '/welcome/create-space',
+        query: { next: '/balances', spaceId: '11111111-1111-1111-1111-111111111111' },
+      },
+      undefined,
+      { shallow: true },
+    )
+    expect(result.current.error).toBeUndefined()
   })
 
   it('never creates a second Workspace while the first waits on its trial offer', async () => {
