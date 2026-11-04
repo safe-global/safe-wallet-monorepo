@@ -2,7 +2,7 @@
 
 Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) consumed by both `apps/web/` and `apps/mobile/`. `views` is web only and has its own guide: [views/AGENTS.md](views/AGENTS.md). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md).
 
-## Verifying packages/ changes (IMPORTANT)
+## Verifying packages/ changes
 
 `yarn verify:changed` / `verify:changed:web` only checks files under `apps/<workspace>/` — changed files under `packages/` are **silently skipped** (`scripts/verify.mjs` filters on the `apps/<ws>/` prefix), so a green verify run says nothing about a packages/ change. Run the package's own checks instead:
 

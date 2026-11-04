@@ -2,7 +2,7 @@
  * Every Playwright spec that runs against the isolated backend, by path under e2e/tests. `scenarios` names the
  * functions in scenarios/index.mjs that prepare the spec's data, once per spec file; `safes` maps each key of SAFES
  * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return. `chains` lists the forks
- * besides Sepolia that the spec needs; the stack of the Playwright job starts them.
+ * besides Sepolia that the spec needs; the stack of every Playwright shard in CI starts them.
  */
 export const playwrightSpecs = {
   'e2e/ledger-sign-execute.spec.ts': {
@@ -25,6 +25,7 @@ export const playwrightSpecs = {
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
   'e2e/policies.spec.ts': {},
+  'e2e/workspace.spec.ts': {},
   'e2e/positions.spec.ts': {
     scenarios: ['prepareZerionPositionsScenario'],
     safes: { ETH_ZERION_POSITIONS_SAFE: 'ETH_ZERION_POSITIONS_SAFE' },
@@ -37,6 +38,7 @@ export const playwrightSpecs = {
   'e2e/relay.spec.ts': {},
   'e2e/replace.spec.ts': {},
   'e2e/safe-shield-recipient.spec.ts': {},
+  'e2e/safe-shield-untrusted-safe.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': {},
   'e2e/tx-history-filter.spec.ts': {},
@@ -59,6 +61,10 @@ export const playwrightSpecs = {
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2' },
+  },
+  'regression/dashboard-mastercopy-warning.spec.ts': {
+    scenarios: ['prepareMastercopyScenario'],
+    safes: { MATIC_MIGRATABLE_SAFE: 'MATIC_STATIC_SAFE_31', MATIC_UNOFFICIAL_SINGLETON_SAFE: 'MATIC_STATIC_SAFE_32' },
   },
   'regression/recipient-dropdown-caret-toggle.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],
@@ -97,6 +103,8 @@ export const playwrightSpecs = {
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
   'regression/auth0/step-up-workspace-rename.spec.ts': {},
+  'regression/auth0/workspace-invite.spec.ts': {},
+  'regression/auth0/workspace-trial-checkout.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

@@ -1,6 +1,6 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type Safe from '@safe-global/protocol-kit'
-import { act } from 'react'
+import { act, useState } from 'react'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -34,13 +34,58 @@ import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { initialState as initialSettings } from '@/store/settingsSlice'
+import { AppRoutes } from '@/config/routes'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
 import * as useTrustSafeHook from '@/features/myAccounts'
 
+jest.mock('@/components/tx/ApprovalEditor/hooks/useApprovalInfos', () => ({
+  useApprovalInfos: jest.fn(() => [[], undefined, false]),
+}))
+
+jest.mock('@/components/common/NamedAddressInfo', () => ({
+  __esModule: true,
+  get useAddressName() {
+    return jest.requireActual('@/components/common/NamedAddressInfo').useAddressName
+  },
+  get default() {
+    return jest.requireActual('@/components/common/EthHashInfo').default
+  },
+}))
+
+jest.mock('@/features/safe-shield/hooks', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks'),
+  useRecipientAnalysis: jest.fn(() => undefined),
+  useCounterpartyAnalysis: jest.fn(() => ({
+    recipient: [undefined, undefined, false],
+    contract: [undefined, undefined, false],
+    deadlock: [undefined, undefined, false],
+  })),
+  useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
+}))
+
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 }
+
+const mockSafeShield = ({ needsRiskConfirmation = false, isRiskConfirmed = false } = {}) =>
+  jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
+    needsRiskConfirmation,
+    isRiskConfirmed,
+    setIsRiskConfirmed: jest.fn(),
+    setRecipientAddresses: jest.fn(),
+    setSafeMessage: jest.fn(),
+    setSafeMessageHash: jest.fn(),
+    setSafeTx: jest.fn(),
+    safeTx: undefined,
+    recipient: undefined,
+    contract: undefined,
+    threat: undefined,
+    safeAnalysis: null,
+    addToTrustedList: jest.fn(),
+  })
 
 let mockProvider = {
   request: jest.fn,
@@ -408,13 +453,11 @@ describe('SignMessage', () => {
       }),
     )
 
-    // Use a mutable object to control the return value
-    let currentMessage = msg
-    const mockSetMessage = jest.fn((newVal) => {
-      currentMessage = newVal
-    })
-
-    jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [currentMessage, mockSetMessage, undefined])
+    const useStatefulSafeMessage = () => {
+      const [safeMessage, setSafeMessage] = useState<MessageItem | undefined>(msg)
+      return [safeMessage, setSafeMessage, undefined] as const
+    }
+    jest.spyOn(useSafeMessage, 'default').mockImplementation(useStatefulSafeMessage)
 
     const { getByText } = renderWithSafeShield(
       <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
@@ -935,19 +978,7 @@ describe('SignMessage', () => {
     })
 
     it('disables Sign button when risk confirmation is needed but not confirmed', async () => {
-      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
-        needsRiskConfirmation: true,
-        isRiskConfirmed: false,
-        setIsRiskConfirmed: jest.fn(),
-        setRecipientAddresses: jest.fn(),
-        setSafeTx: jest.fn(),
-        safeTx: undefined,
-        recipient: undefined,
-        contract: undefined,
-        threat: undefined,
-        safeAnalysis: null,
-        addToTrustedList: jest.fn(),
-      })
+      mockSafeShield({ needsRiskConfirmation: true, isRiskConfirmed: false })
 
       const { getByText } = renderWithSafeShield(
         <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
@@ -959,19 +990,7 @@ describe('SignMessage', () => {
     })
 
     it('enables Sign button when risk is confirmed', async () => {
-      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
-        needsRiskConfirmation: true,
-        isRiskConfirmed: true,
-        setIsRiskConfirmed: jest.fn(),
-        setRecipientAddresses: jest.fn(),
-        setSafeTx: jest.fn(),
-        safeTx: undefined,
-        recipient: undefined,
-        contract: undefined,
-        threat: undefined,
-        safeAnalysis: null,
-        addToTrustedList: jest.fn(),
-      })
+      mockSafeShield({ needsRiskConfirmation: true, isRiskConfirmed: true })
 
       const { getByText } = renderWithSafeShield(
         <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
@@ -982,20 +1001,39 @@ describe('SignMessage', () => {
       })
     })
 
+    it('blocks signing a blind-signing payload while blind signing is off', async () => {
+      mockSafeShield()
+
+      const { findByText, getByRole, getByText } = render(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="0x0000000" requestId="123" />,
+      )
+
+      expect(await findByText(/This request involves/)).toBeInTheDocument()
+      expect(getByText(/If you wish to proceed, you must first/)).toBeInTheDocument()
+      expect(getByRole('link', { name: 'enable blind signing' })).toHaveAttribute(
+        'href',
+        expect.stringContaining(AppRoutes.settings.security),
+      )
+      expect(getByText('Sign')).toBeDisabled()
+    })
+
+    it('warns but allows signing a blind-signing payload once blind signing is on', async () => {
+      const blindSigningOn = {
+        settings: { ...initialSettings, signing: { ...initialSettings.signing, blindSigning: true } },
+      }
+      mockSafeShield()
+
+      const { findByText, getByText } = render(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="0x0000000" requestId="123" />,
+        { initialReduxState: blindSigningOn },
+      )
+
+      expect(await findByText(/Proceed with caution\./)).toBeInTheDocument()
+      await waitFor(() => expect(getByText('Sign')).toBeEnabled())
+    })
+
     it('shows RiskConfirmation checkbox when threat is detected', async () => {
-      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
-        needsRiskConfirmation: true,
-        isRiskConfirmed: false,
-        setIsRiskConfirmed: jest.fn(),
-        setRecipientAddresses: jest.fn(),
-        setSafeTx: jest.fn(),
-        safeTx: undefined,
-        recipient: undefined,
-        contract: undefined,
-        threat: undefined,
-        safeAnalysis: null,
-        addToTrustedList: jest.fn(),
-      })
+      mockSafeShield({ needsRiskConfirmation: true, isRiskConfirmed: false })
 
       const { getByTestId, getByText } = renderWithSafeShield(
         <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
@@ -1012,21 +1050,7 @@ describe('SignMessage', () => {
     const EXAMPLE_MESSAGE = 'Hello world!'
 
     const renderPendingConfirmation = () => {
-      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
-        needsRiskConfirmation: false,
-        isRiskConfirmed: false,
-        setIsRiskConfirmed: jest.fn(),
-        setRecipientAddresses: jest.fn(),
-        setSafeMessage: jest.fn(),
-        setSafeMessageHash: jest.fn(),
-        setSafeTx: jest.fn(),
-        safeTx: undefined,
-        recipient: undefined,
-        contract: undefined,
-        threat: undefined,
-        safeAnalysis: null,
-        addToTrustedList: jest.fn(),
-      })
+      mockSafeShield()
       jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => true)
       jest.spyOn(useWalletHook, 'default').mockImplementation(

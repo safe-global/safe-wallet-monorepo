@@ -15,7 +15,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { balancesBuilder } from '@/tests/builders/balances'
 import { initialState as initialSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { SafeAppsTxFlow } from '@/components/tx-flow/flows'
+import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import type AppCommunicator from '@/services/safe-apps/AppCommunicator'
 import { useCustomAppCommunicator } from '../useCustomAppCommunicator'
@@ -92,6 +92,8 @@ const setup = ({ deployed = true, features = [], tokenList = TOKEN_LISTS.TRUSTED
 
   return { safe, loadedBalances, setTxFlow, request, lastReply }
 }
+
+const openedFlow = <Props,>(setTxFlow: jest.Mock): ReactElement<Props> => setTxFlow.mock.lastCall?.[0]
 
 const recordBalancesRequests = (response: () => Response) => {
   const urls: URL[] = []
@@ -181,15 +183,12 @@ describe('useCustomAppCommunicator', () => {
       { to: contract, value: '', data: '' },
     ]
 
-    const openedFlow = (setTxFlow: jest.Mock): ReactElement<ComponentProps<typeof SafeAppsTxFlow>> =>
-      setTxFlow.mock.lastCall?.[0]
-
     it('opens the Safe Apps tx flow with the normalized transactions', async () => {
       const { setTxFlow, request } = setup()
 
       await request(Methods.sendTransactions, { txs: sentTxs, params: { safeTxGas: 0 } }, 'request-1')
 
-      const flow = openedFlow(setTxFlow)
+      const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
       expect(flow.type).toBe(SafeAppsTxFlow)
       expect(flow.props.data).toMatchObject({
         app: APP,
@@ -256,6 +255,35 @@ describe('useCustomAppCommunicator', () => {
       const reply = await request(Methods.rpcCall, { call: 'eth_sign', params: [] })
 
       expect(reply).toMatchObject({ success: false, error: 'Request failed' })
+    })
+  })
+
+  describe('signMessage', () => {
+    it('opens the off-chain sign message flow with the app and its message', async () => {
+      const { setTxFlow, request } = setup({ features: [FEATURES.EIP1271] })
+
+      await request(Methods.signMessage, { message: 'Message 1' }, 'request-1')
+
+      const flow = openedFlow<ComponentProps<typeof SignMessageFlow>>(setTxFlow)
+      expect(flow.type).toBe(SignMessageFlow)
+      expect(flow.props).toMatchObject({ name: APP.name, message: 'Message 1', requestId: 'request-1' })
+    })
+
+    it('opens the on-chain sign message flow when the app turned off-chain signing off', async () => {
+      serveRpc({})
+      const { setTxFlow, request } = setup({ features: [FEATURES.EIP1271] })
+
+      await request(Methods.rpcCall, { call: RPC_CALLS.safe_setSettings, params: [{ offChainSigning: false }] })
+      await request(Methods.signMessage, { message: 'Message 1' }, 'request-1')
+
+      const flow = openedFlow<ComponentProps<typeof SignMessageOnChainFlow>>(setTxFlow)
+      expect(flow.type).toBe(SignMessageOnChainFlow)
+      expect(flow.props.props).toMatchObject({
+        app: APP,
+        requestId: 'request-1',
+        message: 'Message 1',
+        method: Methods.signMessage,
+      })
     })
   })
 })

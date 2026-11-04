@@ -8,7 +8,6 @@ const closePreviewWindowBtn = 'button[aria-label*="Close"][aria-label*="preview"
 export const contractMethodIndex = '[name="contractMethodIndex"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
-const appMessageInput = 'input[placeholder="Message"]'
 const txBuilderUntrustedFallbackWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 export const handlerInput = 'input[id="contract-field-handler"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
@@ -59,12 +58,6 @@ export const useImplementationABI = 'Use Implementation ABI'
 export const transferEverythingStr = 'Transfer everything'
 export const noTokensSelectedStr = 'No tokens selected'
 export const reviewConfirmStr = 'Review and Confirm'
-const blindSigningStr = 'This request involves blind signing'
-const enableBlindSigningStr = 'Enable blind signing'
-const blindSigningStr2 = 'blind signing'
-const blindSigningAllowedStr = 'Proceed with caution.'
-const blindSigningBlockedStr = 'If you wish to proceed, you must first'
-const signBtnStr = 'Sign'
 
 export const dummyTxStr = 'Trigger dummy tx (safe.txs.send)'
 export const signOnchainMsgStr = 'Sign message (on-chain)'
@@ -117,38 +110,6 @@ export function verifyUntrustedHandllerWarningDoesNotExist() {
 
 export function clickOnAdvancedDetails() {
   cy.get(decodedTxSummary).click({ force: true })
-}
-
-// The warning shows in both states: blocking while the setting is off, a caution once it is on
-export function verifyBlindSigningWarning(settingEnabled) {
-  cy.contains(blindSigningStr).should('be.visible')
-  cy.contains(settingEnabled ? blindSigningAllowedStr : blindSigningBlockedStr).should('be.visible')
-}
-
-export function clickOnBlindSigningOption() {
-  cy.contains(blindSigningStr2).click()
-  // Navigating away from the open message flow asks to discard it. This used to be a
-  // native confirm() that Cypress auto-accepted; the themed dialog needs a real click.
-  cy.contains('button', 'Discard').click()
-  cy.contains('label', enableBlindSigningStr).parent().find('[role="checkbox"]').as('blindSigning')
-  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'false').click()
-  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'true')
-}
-
-export function triggetSignMsg() {
-  cy.contains(signOnchainMsgStr).click()
-}
-
-export function enterMessage(msg) {
-  cy.get(appMessageInput).type(msg)
-}
-
-export function verifySignBtnDisabled() {
-  cy.get('button').contains(signBtnStr).should('be.disabled')
-}
-
-export function triggetOnChainTx() {
-  cy.contains(signOnchainMsgStr).click()
 }
 
 export function typeAppName(name) {

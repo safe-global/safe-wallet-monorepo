@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useId } from 'react'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -19,6 +19,7 @@ const QrModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const qrCode = `${qrPrefix}${safeAddress}`
   const chainName = chain?.chainName || ''
   const nativeToken = chain?.nativeCurrency.symbol || ''
+  const qrPrefixLabelId = useId()
 
   return (
     <ModalDialog
@@ -46,8 +47,12 @@ const QrModal = ({ onClose }: { onClose: () => void }): ReactElement => {
           </div>
 
           <Label className="gap-2">
-            <Switch checked={settings.shortName.qr} onCheckedChange={(checked) => dispatch(setQrShortName(checked))} />
-            <span>
+            <Switch
+              aria-labelledby={qrPrefixLabelId}
+              checked={settings.shortName.qr}
+              onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
+            />
+            <span id={qrPrefixLabelId}>
               QR code with chain prefix (<b>{chain?.shortName}:</b>)
             </span>
           </Label>

@@ -99,6 +99,27 @@ describe('AnalysisGroupCard with expandedGroups', () => {
     await user.keyboard(' ')
     expect(header).toHaveAttribute('aria-expanded', 'false')
   })
+
+  it('shows its findings right away, however long its reveal delay', async () => {
+    const { user } = renderWithUserEvent(
+      <AnalysisGroupCard
+        data={
+          {
+            '0x': {
+              THREAT: [
+                { severity: Severity.WARN, type: ThreatStatus.MODERATE, title: 'Threat A', description: 'desc-a' },
+              ],
+            },
+          } as unknown as Parameters<typeof AnalysisGroupCard>[0]['data']
+        }
+        delay={60_000}
+      />,
+    )
+
+    await user.click(screen.getByText('Threat A'))
+
+    expect(screen.getByText('desc-a')).toBeVisible()
+  })
 })
 
 const RECURRING_TWICE = 'You have interacted with this address 2 times.'
