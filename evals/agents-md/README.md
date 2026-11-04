@@ -9,7 +9,7 @@ A second Claude call, run outside the repository and not told which run it is lo
 
 ## Changing AGENTS.md
 
-A pull request that changes an `AGENTS.md` or `CLAUDE.md` file must also add or change a case in `cases/`, and all cases must pass. The `AGENTS.md evals result` check enforces both. When the model changes, cases may start to fail; update the rules or the cases until they pass again.
+A pull request that changes an `AGENTS.md` or `CLAUDE.md` file must also add or change at least 5 cases in `cases/`, and all cases must pass. The `AGENTS.md evals result` check enforces both. When the model changes, cases may start to fail; update the rules or the cases until they pass again.
 
 To add a rule:
 

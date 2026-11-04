@@ -22,7 +22,6 @@ jobs:
     outputs:
       relevant: ${{ steps.relevant.outputs.relevant }}
       context: ${{ steps.context.outputs.relevant }}
-      cases: ${{ steps.cases.outputs.relevant }}
     steps:
       - name: Detect changes that the evals cover
         id: relevant
@@ -42,25 +41,27 @@ jobs:
           paths: |
             *AGENTS.md
             *CLAUDE.md
-      - name: Detect eval case changes
-        id: cases
-        uses: $/.github/actions/pr-changes
-        with:
-          paths: |
-            evals/agents-md/cases/**
 
   require-cases:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions: {}
+    permissions:
+      pull-requests: read
     steps:
-      - name: Require an eval case for every AGENTS.md change
-        if: needs.changes.outputs.context == 'true' && needs.changes.outputs.cases != 'true'
+      - name: Require five eval cases for every AGENTS.md change
+        if: github.event_name == 'pull_request' && needs.changes.outputs.context == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          echo '::error::This pull request changes an AGENTS.md or CLAUDE.md file but no case in evals/agents-md/cases. See evals/agents-md/README.md.'
-          exit 1
+          count=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
+            --jq '.[] | select(.status != "removed") | .filename' | grep -c '^evals/agents-md/cases/.*\.json$' || true)
+          if [ "$count" -lt 5 ]; then
+            echo "::error::This pull request changes an AGENTS.md or CLAUDE.md file but adds or changes only $count of the 5 required cases in evals/agents-md/cases. See evals/agents-md/README.md."
+            exit 1
+          fi
 
   evals:
     needs: changes
