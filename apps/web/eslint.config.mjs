@@ -129,6 +129,7 @@ export default [
         'error',
         {
           paths: [
+            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
             {
               name: 'next/image',
