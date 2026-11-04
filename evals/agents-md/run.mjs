@@ -4,9 +4,10 @@ import { appendFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from '
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 
-const MODEL = process.env.AGENTS_EVAL_MODEL || 'opus'
+const MODEL = process.env.AGENTS_EVAL_MODEL || 'claude-opus-5-5'
 const AGENT_TOOLS = 'Read,Edit,Write,Glob,Grep'
 const MAX_DIFF_CHARS = 200_000
+const modelsUsed = new Set()
 
 const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim()
 const casesDir = join(repoRoot, 'evals/agents-md/cases')
@@ -32,6 +33,7 @@ function runClaude(cwd, args, prompt) {
       if (code !== 0) return reject(new Error(`claude exited with code ${code}`))
       const output = JSON.parse(stdout)
       if (output.is_error) return reject(new Error(`claude returned an error: ${output.result}`))
+      Object.keys(output.modelUsage ?? {}).forEach((model) => modelsUsed.add(model))
       resolve(output.result)
     })
     child.stdin.end(prompt)
@@ -151,7 +153,7 @@ function report(results) {
       : `| ${result.name} | ${result.control.pass ? 'PASS' : 'FAIL'} | ${result.experiment.pass ? 'PASS' : 'FAIL'} | ${result.ok ? '✅' : '❌'} |`,
   )
   const summary = [
-    `AGENTS.md evals (model: ${MODEL}). A case passes when the control (no AGENTS.md or CLAUDE.md) fails and the experiment passes.`,
+    `AGENTS.md evals (model requested: ${MODEL}; models used: ${[...modelsUsed].join(', ') || 'none'}). A case passes when the control (no AGENTS.md or CLAUDE.md) fails and the experiment passes.`,
     '',
     '| Case | Control | Experiment | Result |',
     '| --- | --- | --- | --- |',

@@ -87,7 +87,7 @@ jobs:
       - name: Run evals
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          AGENTS_EVAL_MODEL: opus
+          AGENTS_EVAL_MODEL: claude-opus-5-5
         run: node evals/agents-md/run.mjs
 
   result:
