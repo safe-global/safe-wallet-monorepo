@@ -173,7 +173,7 @@ class WalletConnectWallet {
   public async updateSessions(chainId: string, safeAddress: string) {
     // If updating sessions disconnects multiple due to an unsupported chain,
     // we need to wait for the previous session to disconnect before the next
-    for await (const session of this.getActiveSessions()) {
+    for (const session of this.getActiveSessions()) {
       await this.updateSession(session, chainId, safeAddress)
     }
   }

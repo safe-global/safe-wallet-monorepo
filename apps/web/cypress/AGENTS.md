@@ -24,7 +24,7 @@ cypress/
 | Visual    | `e2e/visual/`    | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
 | Safe Apps | `e2e/safe-apps/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The PR smoke gate is Playwright `@smoke` (`web-pw-smoke.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)). No Cypress spec runs on a PR or on the isolated stack; Cypress runs only against staging. The on-demand workflow (`web-e2e-full-ondemand.yml`) runs `safe-apps/`; its `workflow_dispatch` input can narrow it to named specs (comma-separated, no path/extension).
+The PR gate is Playwright on the isolated stack (`web-isolated-e2e-backend.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)). No Cypress spec runs on a PR or on the isolated stack; Cypress runs only against staging. The on-demand workflow (`web-e2e-full-ondemand.yml`) runs `safe-apps/`; its `workflow_dispatch` input can narrow it to named specs (comma-separated, no path/extension).
 
 CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
@@ -47,7 +47,7 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
     cy.contains('expected text', { timeout: 30000 }).should('be.visible')
-    main.awaitVisualStability()  // ALWAYS last line (unless explicitly skipped with comment)
+    main.awaitVisualStability()  // last line (unless explicitly skipped with comment)
   })
 })
 ```
@@ -139,5 +139,5 @@ Adding a `data-testid` to a component:
 - Safe addresses: `getSafes(CATEGORIES.static)` — never hardcode
 - localStorage: payloads in `support/localstorage_data.js`, keys in `support/constants.js`
 - API mocks: `cy.intercept()` + `cy.fixture()` from `fixtures/`
-- Do NOT create new setup helpers — use existing patterns from `support/`
+- Don't create new setup helpers — use existing patterns from `support/`
 - **Data/selector separation**: fixtures hold test data only (ids, names, addresses, counts); page objects hold selectors, labels, and regex only. Never duplicate fixture data in page objects, never re-export fixtures from them — tests import fixtures directly.

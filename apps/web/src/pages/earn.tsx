@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
