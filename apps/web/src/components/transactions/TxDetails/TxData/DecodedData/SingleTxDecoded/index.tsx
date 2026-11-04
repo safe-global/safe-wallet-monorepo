@@ -34,6 +34,8 @@ type SingleTxDecodedProps = {
   onChange?: OnAccordionChange
   isExecuted?: boolean
   actions?: React.ReactNode
+  /** A status chip shown right after the row's summary. */
+  badge?: React.ReactNode
 }
 
 const SingleTxDecoded = ({
@@ -46,6 +48,7 @@ const SingleTxDecoded = ({
   onChange,
   isExecuted = false,
   actions,
+  badge,
 }: SingleTxDecodedProps) => {
   const chain = useCurrentChain()
   const isNativeTransfer = tx.value !== '0' && (!tx.data || isEmptyHexData(tx.data))
@@ -111,6 +114,7 @@ const SingleTxDecoded = ({
               <b>{method}</b>
             </Typography>
           )}
+          {badge}
         </div>
 
         {actions !== undefined && <div className={css.actions}>{actions}</div>}

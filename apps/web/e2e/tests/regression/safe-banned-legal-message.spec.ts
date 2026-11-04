@@ -7,8 +7,8 @@
  * extraction and the component→hook wiring; this spec covers the one seam they can't:
  * a real 451 travelling from the network, through RTK Query, onto the rendered screen.
  *
- * A 451 cannot be produced by the real staging API, so safe-info is stubbed —
- * the error-state exception in docs/AI_TEST_OUTPUT_FORMAT.md step 6.
+ * A 451 cannot be produced by the backend, so safe-info is stubbed —
+ * the mock rule in apps/web/AGENTS.md, "Choose the test level".
  *
  * Run: yarn workspace @safe-global/web pw:test safe-banned-legal-message
  * Tag: @regression — runs under the chromium project, on demand.

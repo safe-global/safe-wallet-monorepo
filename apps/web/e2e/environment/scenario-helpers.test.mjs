@@ -2,9 +2,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { test } from 'node:test'
-import { AbiCoder, Interface, dataSlice, getAddress } from 'ethers'
-import { addressOf, multiSend, short } from './scenarios/chain.mjs'
-import { localOrderUid, replayed } from './scenarios/cow.mjs'
+import { Interface, dataSlice, getAddress } from 'ethers'
+import { multiSend, short } from './scenarios/chain.mjs'
 import { creationCode } from './scenarios/dashboard.mjs'
 import { LEDGER_TEST_MNEMONIC, ledgerOwner } from './scenarios/ledger.mjs'
 import { poll } from './scenarios/indexing.mjs'
@@ -13,13 +12,8 @@ import { approvedHashSignatures } from './scenarios/staging.mjs'
 const safe = '0x1111111111111111111111111111111111111111'
 const other = '0x2222222222222222222222222222222222222222'
 
-test('shortens addresses as the wallet shows them and reads EIP-3770 Safe references', () => {
+test('shortens addresses as the wallet shows them', () => {
   assert.equal(short('0x5cB12ca69FD636349521c76c2D50331eDBB29176'), '0x5cB1...9176')
-  assert.equal(
-    addressOf('sep:0x5cB12ca69FD636349521c76c2D50331eDBB29176'),
-    '0x5cB12ca69FD636349521c76c2D50331eDBB29176',
-  )
-  assert.equal(addressOf('matic:0xabc'), '0xabc')
 })
 
 test('packs calls for MultiSendCallOnly as one delegate call of the chosen version', () => {
@@ -50,16 +44,6 @@ test('orders approved-hash signatures by owner address with v = 1', () => {
 test('wraps runtime code in creation code that returns it unchanged', () => {
   const code = creationCode('0x6001600155')
   assert.equal(code, '0x61000580600c6000396000f36001600155')
-})
-
-test('rewrites recorded CoW orders and transactions for the local Safe', () => {
-  const uid = `0x${'ab'.repeat(32)}${'cd'.repeat(20)}12345678`
-  const orders = [{ validTo: 7, uid }]
-  assert.equal(localOrderUid(7, safe, orders), `0x${'ab'.repeat(32)}${safe.slice(2)}12345678`)
-  assert.throws(() => localOrderUid(8, safe, orders), /No recorded CoW order has validTo 8/)
-  const recipient = AbiCoder.defaultAbiCoder().encode(['address'], [other]).slice(2)
-  const transactions = { order: { safe: other, to: safe, value: '0', data: `0x${recipient}`, operation: 0 } }
-  assert.equal(replayed('order', safe, transactions).data, AbiCoder.defaultAbiCoder().encode(['address'], [safe]))
 })
 
 test('polls until ready and otherwise reports the last answer', async (t) => {
