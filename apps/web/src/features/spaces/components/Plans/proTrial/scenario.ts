@@ -85,32 +85,40 @@ const mockSafes = (count: number) =>
 
 /** MSW handlers for one scenario: billing, entitlements and a Workspace with `safes` Safes. */
 export const scenarioHandlers = (scenario: ProTrialScenario) => {
-  const subscriptions = subscriptionsFor(scenario)
-  const links = (scenario.plan === 'pre-trial' ? TRIAL_LINKS : PAID_LINKS).map((link) =>
-    inRegion(link, scenario.region),
-  )
-  const live = subscriptions.find((sub) => sub.status === 'trialing' || sub.status === 'active')
+  // The prototype's "start trial" endpoint turns a pre-trial Workspace into a fresh trial for the rest of the story.
+  let hasStartedTrial = false
+  const current = (): ProTrialScenario => (hasStartedTrial ? { ...scenario, plan: 'trial' } : scenario)
+  const subscriptions = () => subscriptionsFor(current())
+  const links = () =>
+    (current().plan === 'pre-trial' ? TRIAL_LINKS : PAID_LINKS).map((link) => inRegion(link, scenario.region))
+  const live = () => subscriptions().find((sub) => sub.status === 'trialing' || sub.status === 'active')
   const seatsQuota = scenario.plan === 'paid' ? recommendSeats(scenario.safes) : 20
   const safes = mockSafes(scenario.safes)
 
   return [
-    http.get(/\/v1\/billing\/spaces\/[^/]+\/subscriptions/, () => HttpResponse.json(subscriptions)),
-    http.get(/\/v1\/billing\/spaces\/[^/]+\/payment-links$/, () => HttpResponse.json(links)),
+    http.post(/\/v1\/billing\/spaces\/[^/]+\/trial$/, async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      hasStartedTrial = true
+      return HttpResponse.json({ status: 'trialing' })
+    }),
+    http.get(/\/v1\/billing\/spaces\/[^/]+\/subscriptions/, () => HttpResponse.json(subscriptions())),
+    http.get(/\/v1\/billing\/spaces\/[^/]+\/payment-links$/, () => HttpResponse.json(links())),
     // Stripe Checkout is mocked: the hand-off "navigates" to a hash, so the story stays on its step.
     http.get(/\/v1\/billing\/spaces\/[^/]+\/payment-links\/[^/]+\/checkout-url$/, () =>
       HttpResponse.json({ url: '#mock-stripe-checkout' }),
     ),
-    http.get(/\/v1\/spaces\/[^/]+\/entitlements$/, () =>
-      HttpResponse.json({
-        plan: live
+    http.get(/\/v1\/spaces\/[^/]+\/entitlements$/, () => {
+      const plan = live()
+      return HttpResponse.json({
+        plan: plan
           ? {
-              id: live.plan.id,
-              name: live.plan.name,
-              cycleEndsAt: new Date((live.currentPeriodEnd ?? now()) * 1000).toISOString(),
-              status: live.status === 'trialing' ? 'trialing' : 'active',
+              id: plan.plan.id,
+              name: plan.plan.name,
+              cycleEndsAt: new Date((plan.currentPeriodEnd ?? now()) * 1000).toISOString(),
+              status: plan.status === 'trialing' ? 'trialing' : 'active',
             }
           : null,
-        entitlements: live
+        entitlements: plan
           ? [
               {
                 feature: 'safe_seats',
@@ -130,8 +138,10 @@ export const scenarioHandlers = (scenario: ProTrialScenario) => {
               },
             ]
           : [],
-      }),
-    ),
+      })
+    }),
+    // The shared "get Workspace by id" mock also matches this path, which breaks My accounts.
+    http.get(/\/v1\/spaces\/safes$/, () => HttpResponse.json([])),
     http.get(/\/v1\/spaces$/, () => HttpResponse.json([{ ...createMockSpace(), safeCount: scenario.safes }])),
     http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
       HttpResponse.json({ safes: { '1': safes.map((safe) => safe.address.value) } }),

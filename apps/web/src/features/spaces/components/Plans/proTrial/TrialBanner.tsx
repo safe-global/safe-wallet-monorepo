@@ -14,7 +14,10 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { CONTACT_SALES_URL } from '../../../constants'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../../hooks/useSpacePlan'
+import { useWorkspaceLock } from '../../../hooks/useWorkspaceLock'
+import ClaimTrialModal from '../ClaimTrialModal'
 import { PRO_TRIAL_COPY } from './copy'
+import { useIsWorkspaceFirst } from './trialFlow'
 import { isSalesLed } from './recommendPlan'
 import UpgradeHandoffModal from './UpgradeHandoffModal'
 import { useRecommendedPick } from './useRecommendedPick'
@@ -30,6 +33,26 @@ export default function TrialBanner({ spaceId }: { spaceId: string }) {
   const isAdmin = useIsAdmin(spaceId)
   const { pick } = useRecommendedPick(spaceId)
   const [handoff, setHandoff] = useState<typeof pick>()
+  const isWorkspaceFirst = useIsWorkspaceFirst()
+  const lock = useWorkspaceLock(spaceId)
+  const [isStartOpen, setStartOpen] = useState(false)
+
+  // Variant B: before the trial the Workspace is open, so a quiet strip offers it instead of a blocking modal.
+  if (isWorkspaceFirst && isAdmin && lock.isLocked && lock.reason === 'trial-offered') {
+    return (
+      <div className={cn('shadcn-scope mb-6', isDarkMode && 'dark')}>
+        <Alert variant="subtle" className="py-2.5" data-testid="pro-trial-offer-banner">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Typography variant="paragraph-small">{PRO_TRIAL_COPY.preTrial.status}</Typography>
+            <Button size="sm" onClick={() => setStartOpen(true)}>
+              {PRO_TRIAL_COPY.preTrial.start}
+            </Button>
+          </div>
+        </Alert>
+        {isStartOpen && <ClaimTrialModal spaceId={spaceId} onBack={() => setStartOpen(false)} />}
+      </div>
+    )
+  }
 
   const endsAt = isTrialing && plan?.periodEndsAt ? Date.parse(plan.periodEndsAt) : NaN
   // The Plans page shows the trial in its own status card.
