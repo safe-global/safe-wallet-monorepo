@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { flattenSafeItems, type SafeItem } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces'
 import useSearchFilter from '@/hooks/useSearchFilter'

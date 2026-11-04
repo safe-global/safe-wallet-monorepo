@@ -68,7 +68,7 @@ export const formatAllowanceAmount = (allowance: PolicyAllowance): string => {
 export const formatRemaining = (allowance: PolicyAllowance): string =>
   `${formatTokenAmount(allowance.remaining, allowance.token)} remaining`
 
-export const formatSignedCount = (signed: number, required: number): string => `${signed} of ${required} signed`
+export const formatSignedCount = (signed: number, required: number): string => `${signed} of ${required} signatures`
 
 export const formatAwaitingSignatures = (missing: number): string =>
   `Waiting for ${missing} more signature${missing === 1 ? '' : 's'}`

@@ -10,7 +10,7 @@
  */
 import { createHash, createPrivateKey, createPublicKey, randomBytes, sign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-import { KEYS_DIR, isMain, json, requiredEnv, serveTls } from './http.ts'
+import { KEYS_DIR, escapeHtml, html, isMain, json, requiredEnv, serveTls } from './http.ts'
 import type { HeaderMap, MockRequest, Reply } from './http.ts'
 import { signJwt } from './jwt.ts'
 import type { Signer } from './jwt.ts'
@@ -41,18 +41,9 @@ export function userId(email: string): string {
   return `email|${createHash('sha256').update(email.toLowerCase()).digest('hex').slice(0, 24)}`
 }
 
-function escapeHtml(value: string): string {
-  const entities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' }
-  return value.replace(/[&<>"']/g, (character) => entities[character])
-}
-
 function redirect(url: string, params: Form, headers: HeaderMap = {}): Reply {
   const separator = url.includes('?') ? '&' : '?'
   return { status: 302, headers: { Location: url + separator + new URLSearchParams(params), ...headers }, body: '' }
-}
-
-function html(status: number, body: string): Reply {
-  return { status, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body }
 }
 
 function cookieValue(header: string | undefined, name: string): string | undefined {

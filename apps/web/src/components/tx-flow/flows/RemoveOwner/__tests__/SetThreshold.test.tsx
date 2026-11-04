@@ -2,6 +2,7 @@ import { render } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { zeroPadValue } from 'ethers'
+import userEvent from '@testing-library/user-event'
 import { SetThreshold } from '../SetThreshold'
 import type { RemoveOwnerFlowProps } from '..'
 
@@ -46,5 +47,15 @@ describe('SetThreshold (WA-3005 Bucket A / GS201-GS202)', () => {
 
     expect(queryByText('Threshold cannot be higher than the number of signers')).not.toBeInTheDocument()
     expect(getByTestId('next-btn')).not.toBeDisabled()
+  })
+
+  it('offers thresholds up to the signer count after the removal', async () => {
+    mockSafeInfo(3)
+
+    const { getByTestId, getByText, findAllByRole } = render(<SetThreshold params={params} onSubmit={jest.fn()} />)
+    await userEvent.click(getByTestId('threshold-selector'))
+
+    expect(getByText('out of 2 signers')).toBeInTheDocument()
+    expect((await findAllByRole('option')).map((option) => option.textContent)).toEqual(['1', '2'])
   })
 })

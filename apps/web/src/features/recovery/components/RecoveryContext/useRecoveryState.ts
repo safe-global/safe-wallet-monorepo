@@ -96,11 +96,10 @@ export function useRecoveryState(delayModifiers?: Array<Delay>): AsyncResult<Rec
         safeAddress,
         provider: web3ReadOnly,
         chainId: safe.chainId,
-        version: safe.version,
       })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [delayModifiers, counter, refetchDep, web3ReadOnly, safeAddress, safe.chainId, safe.version],
+    [delayModifiers, counter, refetchDep, web3ReadOnly, safeAddress, safe.chainId],
     false,
   )
 }

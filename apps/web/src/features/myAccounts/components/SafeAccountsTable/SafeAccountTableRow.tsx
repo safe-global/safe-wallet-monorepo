@@ -9,7 +9,7 @@ import { useRowOverviews } from './useRowOverviews'
 import { GripVertical } from 'lucide-react'
 import { SimilarityWarningIcon } from './SimilarityBand'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import FiatBalance from '@/components/common/FiatBalance'
@@ -104,7 +104,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={canRename ? onRename : undefined}
-      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon address={line.address} warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
       nameLink={nameLink}

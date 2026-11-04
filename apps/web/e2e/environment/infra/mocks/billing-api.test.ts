@@ -2,8 +2,18 @@ import assert from 'node:assert/strict'
 import { verify } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
-import { Billing, PLANS, PRODUCT_ID, dispatch, es256Signer, serviceToken, subscriptionEvent } from './billing-api.ts'
-import type { Subscription } from './billing-api.ts'
+import {
+  Billing,
+  PAYMENT_LINKS,
+  PLANS,
+  PRODUCT_ID,
+  dispatch,
+  es256Signer,
+  serviceToken,
+  subscriptionEvent,
+} from './billing-api.ts'
+import type { EventType, Subscription } from './billing-api.ts'
+import type { Reply } from './http.ts'
 
 const BUSINESS_PRICE = PLANS.business.price.id
 const STARTER_PRICE = PLANS.starter.price.id
@@ -13,12 +23,21 @@ const COMPOSE = readFileSync(new URL('../docker-compose.test.yml', import.meta.u
 
 type Payload = Record<string, unknown>
 
-function recordingBilling(): { billing: Billing; announced: Subscription[] } {
+type Recording = { billing: Billing; announced: Subscription[]; eventTypes: EventType[] }
+
+function recordingBilling(publicUrl?: string): Recording {
   const announced: Subscription[] = []
-  const billing = new Billing(async (subscription) => {
+  const eventTypes: EventType[] = []
+  const billing = new Billing(async (subscription, eventType) => {
     announced.push(subscription)
-  })
-  return { billing, announced }
+    eventTypes.push(eventType)
+  }, publicUrl)
+  return { billing, announced, eventTypes }
+}
+
+function send(billing: Billing, method: string, path: string, body?: unknown, query = ''): Promise<Reply> {
+  const request = { method, path, query: new URLSearchParams(query), body: body ? JSON.stringify(body) : '' }
+  return dispatch(request, billing)
 }
 
 async function call(
@@ -28,8 +47,7 @@ async function call(
   body?: unknown,
   query = '',
 ): Promise<[number, Payload]> {
-  const request = { method, path, query: new URLSearchParams(query), body: body ? JSON.stringify(body) : '' }
-  const reply = await dispatch(request, billing)
+  const reply = await send(billing, method, path, body, query)
   return [reply.status, JSON.parse(reply.body) as Payload]
 }
 
@@ -108,9 +126,8 @@ describe('billing API', () => {
     await assert.rejects(store(billing, {}), /did not accept/)
   })
 
-  it('offers no payment links and serves both plans', async () => {
+  it('serves both plans', async () => {
     const { billing } = recordingBilling()
-    assert.deepEqual(await call(billing, 'GET', '/api/v1/payment-links'), [200, { paymentLinks: [] }])
     for (const [price, name] of [
       [BUSINESS_PRICE, 'Business'],
       [STARTER_PRICE, 'Starter'],
@@ -120,6 +137,114 @@ describe('billing API', () => {
       assert.deepEqual([status, plan.id, product.id, product.name], [200, price, PRODUCT_ID, name])
     }
     assert.equal((await call(billing, 'GET', '/api/v1/plans/other'))[0], 404)
+  })
+
+  it('offers each plan paid and as a trial for both sides of the enforcement date', async () => {
+    const { billing } = recordingBilling()
+    const [status, payload] = await call(billing, 'GET', '/api/v1/payment-links')
+    assert.equal(status, 200)
+    const links = payload.paymentLinks as typeof PAYMENT_LINKS
+    const offers = links.map((link) => [link.metadata.planName, link.trialPeriodDays, link.metadata.gracePeriod])
+    const expected = ['Business', 'Starter'].flatMap((name) => [
+      [name, null, undefined],
+      [name, 30, 'true'],
+      [name, 30, 'false'],
+    ])
+    assert.deepEqual(offers, expected)
+    for (const link of links) {
+      const price = link.lineItems[0].price as { id: string; recurring: { interval: string } }
+      assert.ok([BUSINESS_PRICE, STARTER_PRICE].includes(price.id))
+      assert.equal(price.recurring.interval, 'month')
+    }
+  })
+
+  it('offers no links negotiated for one customer', async () => {
+    const { billing } = recordingBilling()
+    const reply = await call(billing, 'GET', '/api/v1/payment-links', undefined, `customerId=${CUSTOMER}`)
+    assert.deepEqual(reply, [200, { paymentLinks: [] }])
+  })
+
+  it('leaves a cleared Workspace without a plan and announces nothing', async () => {
+    const { billing, announced } = recordingBilling()
+    assert.equal((await call(billing, 'DELETE', `/__test/customers/${SPACE_UUID}/subscriptions`))[0], 200)
+    assert.deepEqual(await subscriptionsOf(billing), [])
+    assert.deepEqual(announced, [])
+  })
+
+  it('opens a local checkout page for the plan and the Workspace', async () => {
+    const { billing } = recordingBilling('http://localhost:8010/billing')
+    const body = { upstreamCustomerId: CUSTOMER, returnUrl: 'https://wallet.test/welcome/select-safes' }
+    const [status, result] = await call(
+      billing,
+      'POST',
+      '/api/v1/payment-links/plink_e2e_business_trial_grace/checkout',
+      body,
+    )
+    assert.equal(status, 200)
+    assert.equal(result.url, `http://localhost:8010/billing/checkout/${result.sessionId}`)
+    const page = await send(billing, 'GET', `/checkout/${result.sessionId}`)
+    assert.equal(page.status, 200)
+    assert.equal(page.headers['Content-Type'], 'text/html; charset=utf-8')
+    for (const line of [
+      'Plan: Business',
+      '30 days free',
+      `Workspace: ${CUSTOMER}`,
+      'Returns to: https://wallet.test/welcome/select-safes',
+    ]) {
+      assert.ok(page.body.includes(line), `the checkout page lacks ${line}`)
+    }
+  })
+
+  it('escapes the return URL on the checkout page', async () => {
+    const { billing } = recordingBilling()
+    const body = { upstreamCustomerId: CUSTOMER, returnUrl: 'https://wallet.test/"><script>' }
+    const [, result] = await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_starter/checkout', body)
+    const page = await send(billing, 'GET', `/checkout/${result.sessionId}`)
+    assert.doesNotMatch(page.body, /<script/i)
+  })
+
+  it('rejects a checkout for an unknown link or session, or without its fields', async () => {
+    const { billing } = recordingBilling()
+    const body = { upstreamCustomerId: CUSTOMER, returnUrl: 'https://wallet.test' }
+    assert.equal((await call(billing, 'POST', '/api/v1/payment-links/plink_other/checkout', body))[0], 404)
+    assert.equal((await call(billing, 'GET', '/checkout/cs_other'))[0], 404)
+    const incomplete = { upstreamCustomerId: CUSTOMER }
+    assert.equal((await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_starter/checkout', incomplete))[0], 400)
+  })
+
+  it('replaces the plan on a plan change and announces an update', async () => {
+    const { billing, announced, eventTypes } = recordingBilling()
+    const [subscription] = await subscriptionsOf(billing)
+    const path = `/api/v1/customers/${CUSTOMER}/subscriptions/${subscription.id}`
+    const [status, preview] = await call(billing, 'GET', `${path}/preview-update`, undefined, `planId=${STARTER_PRICE}`)
+    assert.deepEqual([status, preview.amountDue, preview.currency], [200, 18_900, 'eur'])
+    const change = { planId: STARTER_PRICE, paymentLinkId: 'plink_e2e_starter' }
+    assert.deepEqual(await call(billing, 'PATCH', path, change), [
+      200,
+      { subscriptionId: subscription.id, success: true },
+    ])
+    const [changed] = await subscriptionsOf(billing)
+    assert.deepEqual([changed.plan.id, changed.status], [STARTER_PRICE, subscription.status])
+    assert.equal(eventTypes.at(-1), 'customer.subscription.updated')
+    assert.deepEqual(announced.at(-1), changed)
+  })
+
+  it('rejects a plan change for an unknown subscription or plan', async () => {
+    const { billing } = recordingBilling()
+    const [subscription] = await subscriptionsOf(billing)
+    const path = `/api/v1/customers/${CUSTOMER}/subscriptions`
+    assert.equal((await call(billing, 'PATCH', `${path}/sub_other`, { planId: STARTER_PRICE }))[0], 404)
+    assert.equal((await call(billing, 'PATCH', `${path}/${subscription.id}`, { planId: 'other' }))[0], 404)
+    const preview = await call(billing, 'GET', `${path}/sub_other/preview-update`, undefined, `planId=${STARTER_PRICE}`)
+    assert.equal(preview[0], 404)
+  })
+
+  it('names the event type in the webhook event and its ID', async () => {
+    const { billing } = recordingBilling()
+    const [subscription] = await subscriptionsOf(billing)
+    const event = subscriptionEvent(subscription, 1, 'customer.subscription.updated')
+    assert.equal(event.type, 'customer.subscription.updated')
+    assert.match(String(event.id), /customer\.subscription\.updated$/)
   })
 
   it('rejects calls it cannot answer', async () => {

@@ -61,7 +61,7 @@ QA automation needs to know when the page is ready. If a component has loading, 
   isLoading && <Skeleton data-testid="balance-skeleton" />
 }
 {
-  error && <Alert severity="error">Failed to load balances</Alert>
+  error && <Alert variant="destructive">Failed to load balances</Alert>
 }
 {
   data && <BalanceList items={data.items} />
@@ -83,53 +83,40 @@ Every testable page should have a stable, bookmarkable URL. Tests navigate direc
 ❌ /page/3?tab=2&view=grid    → fragile, position-dependent
 ```
 
-## 6. Feature Flags Must Be Overridable
+## 6. Feature Flags Come From the Chain Config
 
-If a feature is behind a flag, QA needs a way to enable/disable it in tests without touching the production flag system. Options:
+Feature flags come from the chain config that CGW serves (`useHasFeature`). The isolated stack enables the features in [`setup_test_chain.py`](../environment/infra/scripts/cfg_management/commands/setup_test_chain.py); a flag that a Playwright spec needs goes in its `DEFAULT_FEATURES`. Test the state with the flag off in Jest, with `useHasFeature` mocked.
 
-- localStorage override: `localStorage.setItem('FEATURE_X', 'true')`
-- URL parameter: `?feature_x=true`
-- Environment variable: `NEXT_PUBLIC_FEATURE_X=true`
+## 7. Setup Through the SDK and the Local APIs
 
-Document the override mechanism when creating the flag. If there's no test override, QA can't automate the feature.
+Specs seed their data on the isolated stack through the Safe SDK, CGW and the local services (`e2e/src/seed/`, `e2e/environment/scenarios/`), and check the result through CGW and the fork. What a feature needs for this:
 
-## 7. API Endpoints for Test Setup
+- **Read endpoints** — to check the outcome of an action in CGW
+- **Predictable response shapes** — so a spec can poll for the state it expects
 
-If a feature creates or mutates state (transactions, settings, address book entries), QA needs an API path to set up and verify that state without clicking through the UI.
-
-What QA needs:
-
-- **Read endpoints** — to verify preconditions before test and outcomes after
-- **Predictable response shapes** — so API tests can validate contracts
-
-What QA does NOT need from you:
-
-- Write/mutation endpoints for test setup (we use the Safe Client Gateway staging API)
-- Test-only API routes (we work with what exists)
+Test-only API routes are not needed.
 
 ## 8. Don't Break Existing Selectors
 
 Before refactoring a component's DOM structure:
 
 - Search for `data-testid` attributes on the elements you're changing
-- Search for the component's visible text strings in `e2e/tests/` and `cypress/e2e/`
-- If you find matches, coordinate with QA or update the test locators in the same PR
+- Search for the component's visible text strings in `e2e/tests/` and, until it is deleted, `cypress/e2e/`
+- If you find matches, update the test locators in the same PR
 
 Broken selectors = broken CI = blocked merges.
 
 ## 9. Test Pyramid Ownership
 
-This is the most important section. Playwright E2E tests are the **top** of the pyramid, not the foundation.
+This is the most important section. Playwright E2E tests are the **top** of the pyramid, not the foundation. Which behaviour goes at which level: [Choose the test level](../../AGENTS.md#choose-the-test-level).
 
-| Test level              | Owner          | What it covers                                              |
-| ----------------------- | -------------- | ----------------------------------------------------------- |
-| **Unit tests**          | Developer      | Pure functions, parsers, validators, formatters, hooks      |
-| **Component tests**     | Developer      | React components render correctly with props, handle events |
-| **Integration tests**   | Developer      | Hooks + stores + API mocks wired together                   |
-| **API tests**           | QA + Developer | Backend returns correct data                                |
-| **Playwright UI tests** | QA             | Critical user flows that require a real browser             |
+| Test level           | Owner                                                          | What it covers                                                       |
+| -------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Unit tests**       | Developer                                                      | Rules and calculations: parsers, validators, formatters, hooks       |
+| **Component tests**  | Developer                                                      | Components with props, user events and MSW fixtures of CGW responses |
+| **Playwright specs** | QA owns the suite and advises; developers add and change specs | Flows that need a real browser or several real services together     |
 
-**If your PR changes business logic, it should include unit/component tests.** QA will not write Playwright tests to compensate for missing lower-level coverage. If we find a gap, we'll flag it back to you — that's not a QA failure, it's the process working correctly.
+**If your PR changes business logic, it should include unit/component tests.** A Playwright spec does not make up for missing lower-level coverage. If QA finds a gap, they flag it back to you — that's not a QA failure, it's the process working correctly.
 
 ---
 
@@ -141,6 +128,6 @@ Before marking a PR as "Ready for QA":
 - [ ] Form fields have accessible labels
 - [ ] Loading/error/empty states are visually distinguishable
 - [ ] Feature has a stable URL for direct navigation
-- [ ] Feature flags have a documented test override
+- [ ] A flag that a Playwright spec needs is enabled on the isolated stack, and Jest covers the flag-off state
 - [ ] Unit and component tests cover the business logic
 - [ ] No existing `data-testid` attributes were removed without replacement

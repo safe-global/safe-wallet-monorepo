@@ -2,12 +2,13 @@
  * Answers the gateway's billing service calls (SAFE_BILLING_SERVICE_BASE_URI) in place of the hosted service.
  *
  * Every Workspace holds a Business trial, as on staging, unless a test stores another subscription through
- * POST /__test/customers/{id}/subscriptions (body: optional "plan" business|starter, "status", "metadata").
+ * POST /__test/customers/{id}/subscriptions (body: optional "plan" business|starter, "status", "metadata"), or
+ * leaves a new Workspace without one, as in production, through DELETE /__test/customers/{id}/subscriptions.
  * Like the real service, the mock announces each subscription to the gateway with a signed webhook, which is
- * what writes the Workspace's entitlements.
+ * what writes the Workspace's entitlements. A checkout opens a local page in place of Stripe's.
  */
 import { createECDH, createPrivateKey, sign } from 'node:crypto'
-import { isMain, json, postJson, requiredEnv, serve } from './http.ts'
+import { escapeHtml, html, isMain, json, postJson, requiredEnv, serve } from './http.ts'
 import type { MockRequest, Reply } from './http.ts'
 import { base64url, signJwt } from './jwt.ts'
 import type { Signer } from './jwt.ts'
@@ -21,6 +22,7 @@ const TOKEN_LIFETIME_SECONDS = 3600
 const WEBHOOK_ATTEMPTS = 5
 const WEBHOOK_TIMEOUT_MS = 30_000
 const DEFAULT_PLAN = 'business'
+const TRIAL_PERIOD_DAYS = 30
 const PORT = 8093
 
 type Plan = { price: { id: string; currentPrice: number }; metadata: Record<string, string> }
@@ -73,8 +75,12 @@ export const PLANS: Record<string, Plan> = {
 }
 
 const CUSTOMER_PATH = /^\/api\/v1\/customers\/([0-9a-fA-F-]+)\/subscriptions$/
+const SUBSCRIPTION_PATH = /^\/api\/v1\/customers\/([0-9a-fA-F-]+)\/subscriptions\/([^/]+)$/
+const PREVIEW_PATH = /^\/api\/v1\/customers\/([0-9a-fA-F-]+)\/subscriptions\/([^/]+)\/preview-update$/
 const TEST_CUSTOMER_PATH = /^\/__test\/customers\/([0-9a-fA-F-]+)\/subscriptions$/
 const PLAN_PATH = /^\/api\/v1\/plans\/([^/]+)$/
+const CHECKOUT_PATH = /^\/api\/v1\/payment-links\/([^/]+)\/checkout$/
+const CHECKOUT_PAGE_PATH = /^\/checkout\/([^/]+)$/
 
 export type Subscription = {
   id: string
@@ -89,7 +95,20 @@ export type Subscription = {
 
 type Overrides = { plan?: string; status?: string; metadata?: Record<string, string> }
 
-export type Announce = (subscription: Subscription) => Promise<void>
+export type EventType = 'customer.subscription.created' | 'customer.subscription.updated'
+export type Announce = (subscription: Subscription, eventType: EventType) => Promise<void>
+
+type TrialSide = 'grace' | 'new'
+
+export type PaymentLink = {
+  id: string
+  active: boolean
+  metadata: Record<string, string>
+  lineItems: { price: Record<string, unknown>; quantity: number }[]
+  trialPeriodDays: number | null
+}
+
+type CheckoutSession = { id: string; paymentLinkId: string; upstreamCustomerId: string; returnUrl: string }
 
 class UnknownPlan extends Error {}
 
@@ -108,6 +127,42 @@ function planPrice(plan: string): Plan['price'] & Record<string, unknown> {
 function planOfPrice(priceId: string): string | undefined {
   return Object.keys(PLANS).find((plan) => PLANS[plan].price.id === priceId)
 }
+
+/** A plan of the general catalog; a trial link carries the `gracePeriod` side of the enforcement date it serves. */
+function paymentLink(plan: string, trialSide?: TrialSide): PaymentLink {
+  const { price, metadata } = PLANS[plan]
+  const link: PaymentLink = {
+    id: `plink_e2e_${plan}`,
+    active: true,
+    metadata,
+    lineItems: [
+      {
+        price: {
+          id: price.id,
+          unitAmount: price.currentPrice * 100,
+          currency: 'eur',
+          recurring: { interval: 'month', intervalCount: 1 },
+        },
+        quantity: 1,
+      },
+    ],
+    trialPeriodDays: null,
+  }
+  if (trialSide === undefined) return link
+  return {
+    ...link,
+    id: `plink_e2e_${plan}_trial_${trialSide}`,
+    metadata: { ...metadata, gracePeriod: trialSide === 'grace' ? 'true' : 'false' },
+    trialPeriodDays: TRIAL_PERIOD_DAYS,
+  }
+}
+
+// Both trial sides: the gateway offers the grace trial to Workspaces created before ENTITLEMENTS_ENFORCEMENT_STARTS_AT.
+export const PAYMENT_LINKS = Object.keys(PLANS).flatMap((plan) => [
+  paymentLink(plan),
+  paymentLink(plan, 'grace'),
+  paymentLink(plan, 'new'),
+])
 
 /** The gateway sends Space UUIDs without dashes; tests may send them with. */
 function customerKey(customerId: string): string {
@@ -139,10 +194,14 @@ function defaultSubscription(customer: string, overrides: Overrides = {}): Subsc
   }
 }
 
-export function subscriptionEvent(subscription: Subscription, created: number): Record<string, unknown> {
+export function subscriptionEvent(
+  subscription: Subscription,
+  created: number,
+  eventType: EventType = 'customer.subscription.created',
+): Record<string, unknown> {
   return {
-    id: `evt_e2e_${subscription.upstreamCustomerId}_${created}`,
-    type: 'customer.subscription.created',
+    id: `evt_e2e_${subscription.upstreamCustomerId}_${created}_${eventType}`,
+    type: eventType,
     created,
     data: {
       subscriptionId: subscription.id,
@@ -191,13 +250,16 @@ export function serviceToken(issuer: string, signer: Signer, now: number): strin
   return signJwt({ alg: 'ES256', typ: 'JWT' }, claims, signer)
 }
 
-/** Subscriptions by customer, and the webhook that announces them to the gateway. */
+/** Subscriptions and checkouts by customer, and the webhook that announces subscriptions to the gateway. */
 export class Billing {
   private readonly subscriptions = new Map<string, Subscription[]>()
+  private readonly sessions = new Map<string, CheckoutSession>()
   private readonly announce: Announce
+  private readonly publicUrl: string
 
-  constructor(announce: Announce) {
+  constructor(announce: Announce, publicUrl = 'http://localhost:8000/billing') {
     this.announce = announce
+    this.publicUrl = publicUrl
   }
 
   listSubscriptions(customer: string): Subscription[] {
@@ -205,19 +267,60 @@ export class Billing {
     if (stored) return [...stored]
     const subscription = defaultSubscription(customer)
     this.subscriptions.set(customer, [subscription])
-    this.announce(subscription).catch((error: unknown) => console.error(error))
+    this.announce(subscription, 'customer.subscription.created').catch((error: unknown) => console.error(error))
     return [subscription]
   }
 
   async store(customer: string, overrides: Overrides): Promise<Subscription> {
     const subscription = defaultSubscription(customer, overrides)
     this.subscriptions.set(customer, [subscription])
-    await this.announce(subscription)
+    await this.announce(subscription, 'customer.subscription.created')
     return subscription
+  }
+
+  /** A Workspace the gateway has not read yet starts without a plan, as in production. */
+  clear(customer: string): void {
+    this.subscriptions.set(customer, [])
+  }
+
+  find(customer: string, subscriptionId: string): Subscription | undefined {
+    return this.subscriptions.get(customer)?.find((subscription) => subscription.id === subscriptionId)
+  }
+
+  async changePlan(customer: string, subscriptionId: string, plan: string): Promise<Subscription | undefined> {
+    const current = this.find(customer, subscriptionId)
+    if (current === undefined) return undefined
+    const changed = defaultSubscription(customer, { plan, status: current.status })
+    this.subscriptions.set(customer, [changed])
+    await this.announce(changed, 'customer.subscription.updated')
+    return changed
+  }
+
+  checkout(paymentLinkId: string, customer: string, returnUrl: string): { sessionId: string; url: string } {
+    const sessionId = `cs_e2e_${this.sessions.size + 1}`
+    this.sessions.set(sessionId, { id: sessionId, paymentLinkId, upstreamCustomerId: customer, returnUrl })
+    return { sessionId, url: `${this.publicUrl}/checkout/${sessionId}` }
+  }
+
+  checkoutSession(sessionId: string): CheckoutSession | undefined {
+    return this.sessions.get(sessionId)
   }
 }
 
-function plan(priceId: string): Reply {
+type BillingRequest = Pick<MockRequest, 'method' | 'path' | 'query' | 'body'>
+type Route = {
+  method: string
+  path: RegExp
+  handle: (params: string[], request: BillingRequest, billing: Billing) => Reply | Promise<Reply>
+}
+
+const UNKNOWN_SUBSCRIPTION_OR_PLAN = json(404, { message: 'Unknown subscription or plan' })
+
+function parseBody<T>(body: string): Partial<T> {
+  return body ? (JSON.parse(body) as Partial<T>) : {}
+}
+
+function plan([priceId]: string[]): Reply {
   const name = planOfPrice(priceId)
   if (!name) return json(404, { message: `Unknown plan ${priceId}` })
   const product = {
@@ -231,38 +334,101 @@ function plan(priceId: string): Reply {
   return json(200, { ...planPrice(name), product })
 }
 
-async function storeSubscription(billing: Billing, customer: string, body: string): Promise<Reply> {
+function listSubscriptions([customer]: string[], { query }: BillingRequest, billing: Billing): Reply {
+  const status = query.get('status') ?? 'all'
+  const subscriptions = billing.listSubscriptions(customerKey(customer))
+  return json(200, { subscriptions: subscriptions.filter((s) => status === 'all' || s.status === status) })
+}
+
+async function storeSubscription([customer]: string[], { body }: BillingRequest, billing: Billing): Promise<Reply> {
   try {
-    return json(200, await billing.store(customerKey(customer), body ? (JSON.parse(body) as Overrides) : {}))
+    return json(200, await billing.store(customerKey(customer), parseBody<Overrides>(body)))
   } catch (error) {
     if (error instanceof UnknownPlan) return json(400, { message: error.message })
     throw error
   }
 }
 
-export async function dispatch(
-  { method, path, query, body }: Pick<MockRequest, 'method' | 'path' | 'query' | 'body'>,
+function checkout([linkId]: string[], { body }: BillingRequest, billing: Billing): Reply {
+  if (!PAYMENT_LINKS.some((link) => link.id === linkId)) return json(404, { message: `Unknown payment link ${linkId}` })
+  const { upstreamCustomerId, returnUrl } = parseBody<{ upstreamCustomerId: string; returnUrl: string }>(body)
+  if (!upstreamCustomerId || !returnUrl)
+    return json(400, { message: 'A checkout needs upstreamCustomerId and returnUrl' })
+  return json(200, billing.checkout(linkId, customerKey(upstreamCustomerId), returnUrl))
+}
+
+function checkoutPage([sessionId]: string[], _request: BillingRequest, billing: Billing): Reply {
+  const session = billing.checkoutSession(sessionId)
+  const link = PAYMENT_LINKS.find((candidate) => candidate.id === session?.paymentLinkId)
+  if (!session || !link) return json(404, { message: 'Unknown checkout session' })
+  const trial = link.trialPeriodDays ? `<p>${link.trialPeriodDays} days free</p>` : ''
+  return html(
+    200,
+    `<!doctype html><html><head><title>Local checkout</title></head><body>
+<h1>Local checkout</h1>
+<p>Plan: ${escapeHtml(link.metadata.planName)}</p>${trial}
+<p>Workspace: ${escapeHtml(session.upstreamCustomerId)}</p>
+<p>Returns to: ${escapeHtml(session.returnUrl)}</p>
+</body></html>`,
+  )
+}
+
+function previewPlanChange([customer, subscriptionId]: string[], { query }: BillingRequest, billing: Billing): Reply {
+  const name = planOfPrice(query.get('planId') ?? '')
+  if (!name || !billing.find(customerKey(customer), subscriptionId)) return UNKNOWN_SUBSCRIPTION_OR_PLAN
+  const amount = PLANS[name].price.currentPrice * 100
+  const item = { description: `Remaining time on ${PLANS[name].metadata.planName}`, amount, currency: 'eur' }
+  return json(200, { amountDue: amount, currency: 'eur', nextBillingDate: PERIOD_END, lineItems: [item] })
+}
+
+async function changePlan(
+  [customer, subscriptionId]: string[],
+  { body }: BillingRequest,
   billing: Billing,
 ): Promise<Reply> {
-  if (method === 'GET' && path === '/health') return json(200, { ready: true })
-  const customer = CUSTOMER_PATH.exec(path)
-  if (method === 'GET' && customer) {
-    const status = query.get('status') ?? 'all'
-    const subscriptions = billing.listSubscriptions(customerKey(customer[1]))
-    return json(200, { subscriptions: subscriptions.filter((s) => status === 'all' || s.status === status) })
+  const name = planOfPrice(parseBody<{ planId: string }>(body).planId ?? '')
+  const changed = name && (await billing.changePlan(customerKey(customer), subscriptionId, name))
+  if (!changed) return UNKNOWN_SUBSCRIPTION_OR_PLAN
+  return json(200, { subscriptionId: changed.id, success: true })
+}
+
+const ROUTES: Route[] = [
+  { method: 'GET', path: /^\/health$/, handle: () => json(200, { ready: true }) },
+  { method: 'GET', path: CUSTOMER_PATH, handle: listSubscriptions },
+  {
+    method: 'GET',
+    path: /^\/api\/v1\/payment-links$/,
+    // Links negotiated for one customer: none here.
+    handle: (_params, { query }) => json(200, { paymentLinks: query.has('customerId') ? [] : PAYMENT_LINKS }),
+  },
+  { method: 'POST', path: CHECKOUT_PATH, handle: checkout },
+  { method: 'GET', path: CHECKOUT_PAGE_PATH, handle: checkoutPage },
+  { method: 'GET', path: PREVIEW_PATH, handle: previewPlanChange },
+  { method: 'PATCH', path: SUBSCRIPTION_PATH, handle: changePlan },
+  { method: 'GET', path: PLAN_PATH, handle: plan },
+  { method: 'POST', path: TEST_CUSTOMER_PATH, handle: storeSubscription },
+  {
+    method: 'DELETE',
+    path: TEST_CUSTOMER_PATH,
+    handle: ([customer], _request, billing) => {
+      billing.clear(customerKey(customer))
+      return json(200, { subscriptions: [] })
+    },
+  },
+]
+
+export async function dispatch(request: BillingRequest, billing: Billing): Promise<Reply> {
+  for (const route of ROUTES) {
+    const match = route.method === request.method ? route.path.exec(request.path) : null
+    if (match) return route.handle(match.slice(1), request, billing)
   }
-  if (method === 'GET' && path === '/api/v1/payment-links') return json(200, { paymentLinks: [] })
-  const planMatch = PLAN_PATH.exec(path)
-  if (method === 'GET' && planMatch) return plan(planMatch[1])
-  const testCustomer = TEST_CUSTOMER_PATH.exec(path)
-  if (method === 'POST' && testCustomer) return storeSubscription(billing, testCustomer[1], body)
-  return json(404, { message: `The local billing service does not support ${method} ${path}` })
+  return json(404, { message: `The local billing service does not support ${request.method} ${request.path}` })
 }
 
 function announcer(webhookUrl: string, issuer: string, signer: Signer): Announce {
-  return async (subscription) => {
+  return async (subscription, eventType) => {
     const now = Math.floor(Date.now() / 1000)
-    const event = subscriptionEvent(subscription, now)
+    const event = subscriptionEvent(subscription, now, eventType)
     for (let attempt = 1; attempt <= WEBHOOK_ATTEMPTS; attempt++) {
       try {
         const authorization = `Bearer ${serviceToken(issuer, signer, now)}`
@@ -279,9 +445,8 @@ function announcer(webhookUrl: string, issuer: string, signer: Signer): Announce
 
 if (isMain(import.meta.url)) {
   const signer = es256Signer(requiredEnv('BILLING_WEBHOOK_SIGNING_KEY'))
-  const billing = new Billing(
-    announcer(requiredEnv('BILLING_WEBHOOK_URL'), requiredEnv('BILLING_WEBHOOK_JWT_ISSUER'), signer),
-  )
+  const announce = announcer(requiredEnv('BILLING_WEBHOOK_URL'), requiredEnv('BILLING_WEBHOOK_JWT_ISSUER'), signer)
+  const billing = new Billing(announce, requiredEnv('BILLING_PUBLIC_URL'))
   serve(PORT, async (request) => {
     try {
       return await dispatch(request, billing)

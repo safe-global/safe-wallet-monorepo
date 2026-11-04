@@ -23,10 +23,6 @@ describe(
       cy.wait('@getQueuedTransactions')
     })
 
-    it('[VISUAL] Screenshot queue page with pending transactions', () => {
-      main.awaitVisualStability()
-    })
-
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
       cy.contains('Batch').first().click()
       main.awaitVisualStability()

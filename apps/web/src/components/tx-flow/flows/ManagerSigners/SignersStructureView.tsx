@@ -51,7 +51,7 @@ export function SignersStructureView(props: Props): ReactElement {
 
           <TxCardActions>
             <Button
-              data-testId="submit-next"
+              data-testid="submit-next"
               type="submit"
               disabled={props.isSameSetup || !props.formMethods.formState.isValid}
             >

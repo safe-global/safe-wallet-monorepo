@@ -2,7 +2,7 @@
  * Email sessions of the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
  */
 import { expect, request, test, type APIResponse, type BrowserContext, type Page } from '@playwright/test'
-import { CGW_BASE_URL, LS_NAMESPACE } from '../data/constants'
+import { CGW_BASE_URL, CHAIN_IDS, LS_NAMESPACE } from '../data/constants'
 import { AUTH0_CODE, Auth0Page } from '../pages/auth0.page'
 
 /** The gateway sends browsers here; playwright.isolated.config.ts maps the name to the published port of the mock. */
@@ -20,6 +20,13 @@ export type EmailSession = { email: string; cookies: Cookie[] }
 
 export const uniqueEmail = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@safe-e2e.test`
+
+// The return from Auth0 is a page load: the app boots again behind its launch screen.
+export const launchScreen = (page: Page) => page.getByTestId('launch-screen')
+
+/** The URL of a Workspace page, with nothing after the Workspace. */
+export const workspaceUrl = (path: string, workspaceId: string): RegExp =>
+  new RegExp(`${path}\\?spaceId=${workspaceId}$`)
 
 /** Starts the email sign-in from the Workspace welcome page and stops on the local Auth0 page. */
 export async function openEmailSignIn(page: Page): Promise<Auth0Page> {
@@ -165,15 +172,64 @@ export async function createWorkspace(session: EmailSession, name: string): Prom
   return created
 }
 
-/** Stores the Workspace's plan in the local billing service, which returns once the gateway has applied it. */
-export async function storeSubscription(uuid: string, subscription: { status?: string } = {}): Promise<void> {
-  const url = `${new URL(CGW_BASE_URL).origin}/billing/__test/customers/${uuid}/subscriptions`
+/** Adds Sepolia Safes to the Workspace through the gateway. */
+export async function addWorkspaceSafes(
+  session: EmailSession,
+  workspaceId: string,
+  addresses: string[],
+): Promise<void> {
+  await gatewayRequest(session, 'POST', `/v1/spaces/${workspaceId}/safes`, {
+    safes: addresses.map((address) => ({ chainId: CHAIN_IDS.sepolia, address })),
+  })
+}
+
+const billingSubscriptionsUrl = (uuid: string): string =>
+  `${new URL(CGW_BASE_URL).origin}/billing/__test/customers/${uuid}/subscriptions`
+
+const offersTrial = async (session: EmailSession, uuid: string): Promise<boolean> => {
+  const links = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/payment-links`)
+  return Array.isArray(links) && links.some((link: { trialPeriodDays?: number | null }) => link.trialPeriodDays != null)
+}
+
+/**
+ * Stores the Workspace's plan in the local billing service, and waits until the gateway has applied the webhook:
+ * a Workspace that had a plan is offered no trial.
+ */
+export async function storeSubscription(
+  session: EmailSession,
+  uuid: string,
+  subscription: { plan?: 'business' | 'starter'; status?: string } = {},
+): Promise<void> {
+  const url = billingSubscriptionsUrl(uuid)
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscription),
   })
   if (!response.ok) throw new Error(`POST ${url} returned ${response.status}: ${await response.text()}`)
+  await expect.poll(() => offersTrial(session, uuid)).toBe(false)
+}
+
+/** Leaves a Workspace the gateway has not read yet without a plan, as every new Workspace is in production. */
+export async function removeSubscription(uuid: string): Promise<void> {
+  const url = billingSubscriptionsUrl(uuid)
+  const response = await fetch(url, { method: 'DELETE' })
+  if (!response.ok) throw new Error(`DELETE ${url} returned ${response.status}: ${await response.text()}`)
+}
+
+/** The name of the Workspace's plan, as the gateway reports it; null without a subscription. */
+export async function planName(session: EmailSession, uuid: string): Promise<string | null> {
+  const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) return null
+  const [{ metadata }] = subscriptions as Array<{ metadata?: { planName?: string } }>
+  return metadata?.planName ?? null
+}
+
+/** Sponsored transactions the Workspace spent in the current cycle, as the gateway counts them; null without the meter. */
+export async function sponsoredTransactionsUsed(session: EmailSession, uuid: string): Promise<number | null> {
+  const response = await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}/entitlements`)
+  const entitlements = (response as { entitlements?: Array<{ feature?: string; used?: number }> })?.entitlements
+  return entitlements?.find(({ feature }) => feature === 'sponsored_transactions')?.used ?? null
 }
 
 /** The gateway's answer for a resource of the Workspace (`safes`, `members`, `address-book`), as text. */
@@ -187,6 +243,30 @@ export async function workspaceName(session: EmailSession, uuid: string): Promis
     throw new Error(`GET /v1/spaces/${uuid} returned no name`)
   }
   return String(workspace.name)
+}
+
+/** The membership status (`INVITED`, `ACTIVE`, …) of the user with `email` in the Workspace, or null when not listed. */
+export async function memberStatus(session: EmailSession, uuid: string, email: string): Promise<string | null> {
+  const response = await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}/members`)
+  if (
+    typeof response !== 'object' ||
+    response === null ||
+    !('members' in response) ||
+    !Array.isArray(response.members)
+  ) {
+    throw new Error(`GET /v1/spaces/${uuid}/members returned no members`)
+  }
+  const member: unknown = response.members.find(
+    (entry: unknown) =>
+      typeof entry === 'object' &&
+      entry !== null &&
+      'user' in entry &&
+      typeof entry.user === 'object' &&
+      entry.user !== null &&
+      'email' in entry.user &&
+      entry.user.email === email,
+  )
+  return typeof member === 'object' && member !== null && 'status' in member ? String(member.status) : null
 }
 
 /** How the browser's gateway session was signed in (`oidc` for email), or null without a session. */

@@ -7,6 +7,7 @@ import {
   mockRecoveryPolicy,
   mockSpendingLimitPolicy,
 } from '@/features/spaces/components/Policies/mocks/policies'
+import { mockActiveAllowlist } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
 import {
   formatAllowance,
   formatContactLabel,
@@ -72,6 +73,10 @@ describe('getPolicyLabel', () => {
   it('should, when the policy is a proposer grant, label it Proposer', () => {
     expect(getPolicyLabel(asActivePolicy(mockProposerPolicy()))).toBe('Proposer')
   })
+
+  it('should, when the policy is an allowlist, label it Allowlist', () => {
+    expect(getPolicyLabel(mockActiveAllowlist())).toBe('Allowlist')
+  })
 })
 
 describe('getPolicySummary', () => {
@@ -99,6 +104,10 @@ describe('getPolicySummary', () => {
 
   it('should, when the policy is a proposer grant, summarise it as never expiring', () => {
     expect(getPolicySummary(asActivePolicy(mockProposerPolicy()))).toBe('Never expires')
+  })
+
+  it('should, when the policy is an allowlist, count each recipient once across its tokens', () => {
+    expect(getPolicySummary(mockActiveAllowlist())).toBe('3 recipients')
   })
 
   it('should, when a removal is queued, say the limit is being removed rather than gone', () => {

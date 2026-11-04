@@ -24,14 +24,6 @@ export const checkDataLayerEvents = (expectedEvents) => {
 }
 
 export const events = {
-  safeCreatedCF: {
-    category: 'create-safe',
-    action: 'Created Safe',
-    eventName: 'safe_created',
-    eventLabel: 'counterfactual',
-    eventType: 'safe_created',
-  },
-
   txCreatedSwapOwner: {
     category: 'transactions',
     action: 'Create transaction',
@@ -58,27 +50,5 @@ export const events = {
     action: 'Confirm transaction',
     eventLabel: 'native_swap',
     eventType: 'tx_confirmed',
-  },
-
-  txCreatedTxBuilder: {
-    category: 'transactions',
-    action: 'Confirm transaction',
-    eventLabel: TX_Builder_url,
-    eventType: 'tx_created',
-    event: 'tx_created',
-  },
-
-  txConfirmedTxBuilder: {
-    category: 'transactions',
-    action: 'Confirm transaction',
-    eventLabel: TX_Builder_url,
-    eventType: 'tx_confirmed',
-    event: 'tx_confirmed',
-  },
-
-  txCopyShareBlockLink: {
-    action: 'Copy deeplink',
-    event: 'customClick',
-    category: 'tx-list',
   },
 }

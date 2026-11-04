@@ -12,6 +12,11 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import * as walletUtils from '@/utils/wallets'
 import { trackTxEvents } from '@/components/tx/shared/tracking'
 
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
@@ -73,11 +78,13 @@ describe('TxFlowProvider', () => {
     txId,
     onContinueToExecute,
     isExecutable,
+    isBatchable,
     safeTx,
   }: {
     txId?: string
     onContinueToExecute?: (txId: string) => void
     isExecutable?: boolean
+    isBatchable?: boolean
     safeTx?: SafeTransaction
   }) => {
     const Wrapper = ({ children }: PropsWithChildren) => (
@@ -90,6 +97,7 @@ describe('TxFlowProvider', () => {
           txId={txId}
           onContinueToExecute={onContinueToExecute}
           isExecutable={isExecutable}
+          isBatchable={isBatchable}
         >
           {children}
         </TxFlowProvider>
@@ -112,6 +120,12 @@ describe('TxFlowProvider', () => {
     expect(result.current.txId).toBe(signedTxId)
     expect(result.current.isCreation).toBe(true)
     expect(result.current.canExecute).toBe(true)
+  })
+
+  it.each([true, false])('exposes isBatchable=%s from the flow to the context', (isBatchable) => {
+    const { result } = renderContext({ isBatchable })
+
+    expect(result.current.isBatchable).toBe(isBatchable)
   })
 
   it('keeps the id of an existing transaction when continuing to execute', () => {
@@ -203,6 +217,20 @@ describe('TxFlowProvider', () => {
       expect(result.current.canExecute).toBe(false)
     })
 
+    it('does not offer execution to the last signer of an m/n Safe', () => {
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { ...extendedSafeInfoBuilder().build(), threshold: 2 },
+        safeAddress: faker.finance.ethereumAddress(),
+        safeLoaded: true,
+        safeLoading: false,
+      })
+      const existingTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+      const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(1) })
+
+      expect(result.current.canExecute).toBe(false)
+      expect(result.current.willSignBeforeExecute).toBe(false)
+    })
+
     it('offers execution of a fully signed tx', () => {
       const existingTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
       const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(1) })
@@ -246,12 +274,14 @@ describe('TxFlowProvider', () => {
       await waitFor(() => expect(result.current.willSignBeforeExecute).toBe(true))
     })
 
-    it('signs before executing when the signature completes the threshold of an m/n Safe', async () => {
+    it('executes directly when the signature completes the threshold of an m/n Safe', async () => {
       mockThreshold(3)
       const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(2) })
 
-      await waitFor(() => expect(result.current.willSignBeforeExecute).toBe(true))
+      await settleSmartContractCheck()
       expect(result.current.canExecute).toBe(true)
+      expect(result.current.isLastSignature).toBe(true)
+      expect(result.current.willSignBeforeExecute).toBe(false)
     })
 
     it('does not sign before executing an m/n tx that is still missing other signatures', async () => {
@@ -280,10 +310,20 @@ describe('TxFlowProvider', () => {
       expect(result.current.canExecute).toBe(true)
     })
 
-    it('does not offer execution to a smart-contract last signer on an m/n Safe', async () => {
+    it('offers direct execution to a smart-contract last signer on an m/n Safe', async () => {
       mockThreshold(3)
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
       const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(2) })
+
+      await settleSmartContractCheck()
+      expect(result.current.canExecute).toBe(true)
+      expect(result.current.willSignBeforeExecute).toBe(false)
+    })
+
+    it('does not offer execution of a new unsigned tx to a smart-contract signer on a 1/n Safe', async () => {
+      mockThreshold(1)
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+      const { result } = renderContext({ safeTx: createSafeTx(0) })
 
       await waitFor(() => expect(result.current.canExecute).toBe(false))
       expect(result.current.willSignBeforeExecute).toBe(false)
