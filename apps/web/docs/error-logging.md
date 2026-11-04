@@ -36,9 +36,9 @@ consumer, per render — so logging belongs on the imperative path that produced
   expected answer is not a fault.
 - **Pass the caught value, not its message** — `CodedException` recovers the HTTP status and
   hardware-wallet details from the error itself, and neither survives being flattened to a string.
+- **On an RPC path, pass `getRpcErrorContext(provider)` from the provider that failed** — not from
+  current-chain state, because providers are also built for other chains and for Safe Apps.
 - **Tests** target the catch site, not a render. Unit-test the service function or the listener with
   `logError` mocked (`jest.mock('@/services/exceptions', ...)`); when asserting against the real
   implementation, call `__resetLogThrottleForTests()` in `beforeEach` so each test starts with an open
   throttle window.
-
-RPC-specific context (`getRpcErrorContext`) rules: [rpc-endpoint-attribution.md](rpc-endpoint-attribution.md).
