@@ -16,7 +16,7 @@ import {
   getCanonicalMultiSendAddress,
   resolveChainAgnosticContractAddresses,
 } from '../../contracts/deployments'
-import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
+import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chainIds'
 
 describe('deployments utils', () => {
   const chainId = '1'
