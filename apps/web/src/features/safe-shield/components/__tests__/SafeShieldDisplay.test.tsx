@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { http, HttpResponse } from 'msw'
 import { JsonRpcProvider, Network, toQuantity } from 'ethers'
-import { fakerChecksummedAddress, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
+import { fakerChecksummedAddress, render, screen, within } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
@@ -25,7 +26,9 @@ import type {
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, StatusGroup } from '@safe-global/utils/features/safe-shield/types'
+import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
+import { BASE_DELAY, STAGGER_STEP } from '../../utils/revealDelays'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
@@ -276,6 +279,31 @@ describe('SafeShieldDisplay', () => {
       expect(screen.getByText('Analyzing...')).toBeInTheDocument()
     })
 
+    it('shows the result as soon as the checks finish loading', () => {
+      const loadedRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
+      const loadingRecipient: AsyncResult<RecipientAnalysisResults> = [loadedRecipient[0], undefined, true]
+      const { rerender } = render(
+        <SafeShieldDisplay
+          recipient={loadingRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      rerender(
+        <SafeShieldDisplay
+          recipient={loadedRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-shield-status')).not.toHaveTextContent('Analyzing...')
+      expect(screen.getByTestId('recipient-analysis-group-card')).toBeInTheDocument()
+    })
+
     it('should show "Checks unavailable" on error', () => {
       const error = new Error('Analysis failed')
       const errorRecipient: AsyncResult<RecipientAnalysisResults> = [undefined, error, false]
@@ -507,7 +535,8 @@ describe('SafeShieldDisplay', () => {
         ],
       }
       const threat: AsyncResult<ThreatAnalysisResults> = [transformThreatAnalysisResponse(response), undefined, false]
-      const { user } = renderWithUserEvent(
+      const user = userEvent.setup()
+      render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
           contract={emptyContract}
@@ -519,9 +548,54 @@ describe('SafeShieldDisplay', () => {
       const card = screen.getByTestId('threat-analysis-group-card')
       await user.click(within(card).getByText('No threat detected'))
 
-      await waitFor(() => expect(within(card).getByText('Threat analysis found no issues.')).toBeVisible())
+      expect(within(card).getByText('Threat analysis found no issues.')).toBeVisible()
       expect(screen.queryByText('Malicious threat detected')).not.toBeInTheDocument()
       expect(screen.queryByText('Threat analysis failed')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Failed threat check', () => {
+    const failedThreat: AsyncResult<ThreatAnalysisResults> = [
+      { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] },
+      new Error('Failed to fetch threat analysis'),
+      false,
+    ]
+
+    it('reveals the failed threat card first and the recipient and contract cards after it', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={failedThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByTestId('threat-analysis-group-card')).toHaveStyle({ animationDelay: `${BASE_DELAY}ms` })
+      expect(screen.getByTestId('recipient-analysis-group-card')).toHaveStyle({
+        animationDelay: `${BASE_DELAY + STAGGER_STEP}ms`,
+      })
+      expect(screen.getByTestId('contract-analysis-group-card')).toHaveStyle({
+        animationDelay: `${BASE_DELAY + 2 * STAGGER_STEP}ms`,
+      })
+    })
+
+    it('shows the failure instead of the empty state when it is the only result', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={failedThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByText('Threat analysis failed')).toBeInTheDocument()
+      expect(
+        screen.queryByText(
+          'Transaction details will be automatically scanned for potential risks and will appear here.',
+        ),
+      ).not.toBeInTheDocument()
     })
   })
 
