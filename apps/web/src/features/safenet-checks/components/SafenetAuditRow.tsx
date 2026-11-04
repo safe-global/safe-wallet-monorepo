@@ -8,10 +8,14 @@ import {
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
-import { STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
+import {
+  STATUS_PRESENTATION,
+  UNAVAILABLE_PRESENTATION,
+  WARNING_RISK_LABEL,
+  getSafenetExplorerUrl,
+} from '../statusPresentation'
 import { isWarningRisk, summariseRejection } from '../summariseRejection'
-import { useSafenetLinks } from '../useSafenetLinks'
-import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
+import { SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -75,21 +79,11 @@ export const SafenetAuditRowView = ({
   const isWarning = isWarningRisk(publicStatus, summariseRejection(snapshot.events))
   const label = isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label
   const darkColor = isWarning ? DARK_WARNING_RISK_COLOR : DARK_STEP_COLOR[publicStatus]
-  const { attestationHref, explorerHref } = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
 
-  const actor = attestationHref ? (
-    <ExternalLink
-      data-testid="safenet-attestation-link"
-      href={attestationHref}
-      aria-label={SAFENET_ATTESTATION_LINK_LABEL}
-      noIcon
-    >
-      Safenet
-    </ExternalLink>
-  ) : EXPLORER_LINKED.includes(publicStatus) ? (
+  const actor = EXPLORER_LINKED.includes(publicStatus) ? (
     <ExternalLink
       data-testid="safenet-explorer-link"
-      href={explorerHref}
+      href={getSafenetExplorerUrl(chainId, safeTxHash)}
       aria-label={SAFENET_EXPLORER_LINK_LABEL}
       noIcon
     >

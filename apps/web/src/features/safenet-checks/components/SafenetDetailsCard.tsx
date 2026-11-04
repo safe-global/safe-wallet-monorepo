@@ -20,7 +20,7 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
-import { CHIP_VARIANT, STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
+import { STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } from '../statusPresentation'
 import { explainFailure, isWarningRisk, summariseRejection, type RejectionSummary } from '../summariseRejection'
 import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
@@ -30,7 +30,8 @@ import { detailsSignerRole } from '../safenetSignerRole'
 import { useTrackSafenetChecked } from '../useTrackSafenetChecked'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
-import { SafenetDetailsPanel, SafenetDetailsPanelStack, SafenetPulse } from './SafenetBlocks'
+import { SafenetDetailsPanel, SafenetDetailsPanelStack } from './SafenetBlocks'
+import { SafenetStatusChip } from './SafenetStatusChip'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -241,20 +242,7 @@ export const SafenetDetailsCardView = ({
       status={publicStatus}
       accent={cardAccent(publicStatus, isWarning)}
       defaultExpanded={defaultExpanded}
-      chip={
-        <Chip variant={isWarning ? 'warning' : CHIP_VARIANT[publicStatus]}>
-          {isInFlight ? (
-            <SafenetPulse size={12} />
-          ) : (
-            <SeverityIcon
-              severity={isWarning ? Severity.WARN : STATUS_PRESENTATION[publicStatus].severity}
-              width={12}
-              height={12}
-            />
-          )}
-          {isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label}
-        </Chip>
-      }
+      chip={<SafenetStatusChip publicStatus={publicStatus} isInFlight={isInFlight} isWarning={isWarning} />}
     >
       <ResultBlock
         publicStatus={publicStatus}
