@@ -5,7 +5,7 @@ Every rule in `AGENTS.md` must change what an agent does. These evals check that
 - **Control:** every `AGENTS.md` and `CLAUDE.md` file is removed from the checkout.
 - **Experiment:** the checkout is left as it is.
 
-A second Claude call, run outside the repository and not told which run it is looking at, grades the diff of each run against the case's expected behaviour. A case passes only when the control fails and the experiment passes. If the control already passes, the model does the right thing without the rule, and the rule is not needed.
+A second Claude call, run outside the repository and not told which run it is looking at, grades the diff of each run against the case's expected behaviour. The same prompt can give different code each time, so each case runs 3 times as control and 3 times as experiment. A case passes only when the control fails in most of its runs and the experiment passes in most of its runs. If the control already passes, the model does the right thing without the rule, and the rule is not needed.
 
 ## Changing AGENTS.md
 
@@ -33,7 +33,7 @@ One JSON file per case in `cases/<RULE_ID>/`. Results show a case as `<RULE_ID>/
 
 ## Running
 
-The runner needs the `claude` CLI and an `ANTHROPIC_API_KEY`. It checks out `HEAD` into temporary git worktrees, so commit your changes first. Each case runs the agent twice and the judge twice.
+The runner needs the `claude` CLI and an `ANTHROPIC_API_KEY`. It checks out `HEAD` into temporary git worktrees, so commit your changes first. Each case runs the agent and the judge 6 times, at most 8 runs at once.
 
 ```bash
 node evals/agents-md/run.mjs                                          # all cases

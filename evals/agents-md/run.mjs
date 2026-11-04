@@ -7,8 +7,10 @@ import { basename, join } from 'node:path'
 const MODEL = process.env.AGENTS_EVAL_MODEL || 'claude-opus-5-5'
 const AGENT_TOOLS = 'Read,Edit,Write,Glob,Grep'
 const MAX_DIFF_CHARS = 200_000
-const MAX_SUMMARY_DIFF_CHARS = 30_000
+const MAX_SUMMARY_DIFF_CHARS = 10_000
 const MIN_CASES_PER_RULE = 5
+const RUNS_PER_VARIANT = 3
+const MAX_PARALLEL_RUNS = 8
 const RULE_ID_PATTERN = /^- `([A-Z][A-Z0-9_]*)`/gm
 const modelsUsed = new Set()
 
@@ -109,10 +111,32 @@ Answer with a first line that is exactly \`VERDICT: PASS\` or \`VERDICT: FAIL\`.
   }
 }
 
+let runningCount = 0
+const waitingRuns = []
+
+async function withRunSlot(task) {
+  if (runningCount >= MAX_PARALLEL_RUNS) await new Promise((resolve) => waitingRuns.push(resolve))
+  runningCount++
+  try {
+    return await task()
+  } finally {
+    runningCount--
+    waitingRuns.shift()?.()
+  }
+}
+
+async function runOnce(evalCase, variant) {
+  return withRunSlot(async () => {
+    const diff = await runAgent(evalCase.name, variant, evalCase.prompt)
+    const verdict = await judge(evalCase, diff)
+    return { diff, ...verdict }
+  })
+}
+
 async function runVariant(evalCase, variant) {
-  const diff = await runAgent(evalCase.name, variant, evalCase.prompt)
-  const verdict = await judge(evalCase, diff)
-  return { diff, ...verdict }
+  const runs = await Promise.all(Array.from({ length: RUNS_PER_VARIANT }, () => runOnce(evalCase, variant)))
+  const passCount = runs.filter((run) => run.pass).length
+  return { runs, passCount, pass: passCount > RUNS_PER_VARIANT / 2 }
 }
 
 async function runCase(evalCase) {
@@ -170,18 +194,23 @@ function describeOutcome(result) {
   return '❌ model follows it without the rule'
 }
 
-function describeVariant(variantResult) {
-  return variantResult.pass ? 'follows rule' : 'breaks rule'
+function describeRun(run) {
+  return run.pass ? 'follows rule' : 'breaks rule'
 }
 
-function variantDetails(result, variant) {
-  const { pass, reason, diff } = result[variant]
+function describeVariant(variantResult) {
+  return `follows rule in ${variantResult.passCount} of ${RUNS_PER_VARIANT}`
+}
+
+function runDetails(variant, run, runIndex) {
   const shownDiff =
-    diff.length > MAX_SUMMARY_DIFF_CHARS ? `${diff.slice(0, MAX_SUMMARY_DIFF_CHARS)}\n[cut off, see the job log]` : diff
+    run.diff.length > MAX_SUMMARY_DIFF_CHARS
+      ? `${run.diff.slice(0, MAX_SUMMARY_DIFF_CHARS)}\n[cut off, see the job log]`
+      : run.diff
   return [
-    `#### ${VARIANT_LABELS[variant]}: ${describeVariant({ pass })}`,
+    `#### ${VARIANT_LABELS[variant]}, run ${runIndex + 1}: ${describeRun(run)}`,
     '',
-    reason,
+    run.reason,
     '',
     '````diff',
     shownDiff || '[the agent changed nothing]',
@@ -191,12 +220,17 @@ function variantDetails(result, variant) {
 
 function caseDetails(result) {
   const [ruleId, caseName] = result.name.split('/')
+  const runSections = result.error
+    ? []
+    : ['control', 'experiment'].flatMap((variant) =>
+        result[variant].runs.map((run, runIndex) => runDetails(variant, run, runIndex)),
+      )
   return [
     `<details><summary><code>${ruleId}</code> / ${caseName}: ${describeOutcome(result)}</summary>`,
     '',
     `**Prompt:** ${result.prompt}`,
     '',
-    ...(result.error ? [] : [variantDetails(result, 'control'), '', variantDetails(result, 'experiment')]),
+    runSections.join('\n\n'),
     '',
     '</details>',
   ].join('\n')
@@ -207,9 +241,11 @@ function report(results) {
     console.log(`${describeOutcome(result)}  ${result.name}`)
     if (result.error) continue
     for (const variant of ['control', 'experiment']) {
-      console.log(`::group::${result.name}: ${VARIANT_LABELS[variant]}, ${describeVariant(result[variant])}`)
-      console.log(`${result[variant].reason}\n\n${result[variant].diff}`)
-      console.log('::endgroup::')
+      result[variant].runs.forEach((run, runIndex) => {
+        console.log(`::group::${result.name}: ${VARIANT_LABELS[variant]}, run ${runIndex + 1}, ${describeRun(run)}`)
+        console.log(`${run.reason}\n\n${run.diff}`)
+        console.log('::endgroup::')
+      })
     }
   }
 
@@ -224,7 +260,7 @@ function report(results) {
     `### AGENTS.md evals`,
     '',
     `Model requested: \`${MODEL}\`. Models used: ${[...modelsUsed].map((model) => `\`${model}\``).join(', ') || 'none'}.`,
-    'A case passes when the agent breaks the rule without AGENTS.md and follows it with AGENTS.md.',
+    `Each case runs ${RUNS_PER_VARIANT} times without and ${RUNS_PER_VARIANT} times with AGENTS.md. It passes when the agent breaks the rule in most runs without AGENTS.md and follows it in most runs with AGENTS.md.`,
     '',
     '| Rule | Case | Without AGENTS.md | With AGENTS.md | Result |',
     '| --- | --- | --- | --- | --- |',
