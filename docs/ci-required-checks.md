@@ -64,5 +64,6 @@ Set these job names as required status checks in branch protection for `dev`:
 | `tx-builder checks result`   | `tx-builder-checks.yml` (lint, prettier, type-check, tests, build) | `apps/tx-builder`, `packages`, `config`, dependencies               |
 | `Utils unit tests result`    | `package-utils-unit-tests.yml`                                     | `packages/utils`, `packages/store`, `config`, dependencies          |
 | `Isolated E2E result`        | `web-isolated-e2e-backend.yml`                                     | `apps/web`, `apps/tx-builder`, `packages`, `config`, dependencies   |
+| `AGENTS.md evals result`     | `agents-md-evals.yml`                                              | any `AGENTS.md` or `CLAUDE.md`, `evals/agents-md`                   |
 
 "Dependencies" means `yarn.lock`, `package.json`, `.yarnrc.yml`, `yarn.config.cjs` and `.yarn/patches`. Workflows that run prettier, turbo, knip or `scripts/verify.mjs` also list their config files. Each workflow also runs when its own file or the shared actions it uses change. The `pr-changes` step of each workflow holds the exact list.

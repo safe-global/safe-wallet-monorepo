@@ -1,0 +1,103 @@
+name: AGENTS.md evals
+
+on:
+  workflow_dispatch:
+  # No paths filter: the required result check must report on every pull request, so the changes job detects changes.
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.relevant.outputs.relevant }}
+      context: ${{ steps.context.outputs.relevant }}
+      cases: ${{ steps.cases.outputs.relevant }}
+    steps:
+      - name: Detect changes that the evals cover
+        id: relevant
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            *AGENTS.md
+            *CLAUDE.md
+            evals/agents-md/**
+            .github/workflows/agents-md-evals.yml
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+      - name: Detect AGENTS.md and CLAUDE.md changes
+        id: context
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            *AGENTS.md
+            *CLAUDE.md
+      - name: Detect eval case changes
+        id: cases
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            evals/agents-md/cases/**
+
+  require-cases:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require an eval case for every AGENTS.md change
+        if: needs.changes.outputs.context == 'true' && needs.changes.outputs.cases != 'true'
+        run: |
+          echo '::error::This pull request changes an AGENTS.md or CLAUDE.md file but no case in evals/agents-md/cases. See evals/agents-md/README.md.'
+          exit 1
+
+  evals:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      # Fork pull requests get no secrets, so they cannot call the model.
+      - name: Block fork pull requests
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo '::error::AGENTS.md evals cannot run on a fork pull request; push the branch to this repository'
+          exit 1
+
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Claude Code
+        run: npm install --global @anthropic-ai/claude-code@2.1.305
+
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENTS_EVAL_MODEL: opus
+        run: node evals/agents-md/run.mjs
+
+  result:
+    name: AGENTS.md evals result
+    permissions: {}
+    if: always()
+    needs: [changes, require-cases, evals]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

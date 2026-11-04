@@ -1,0 +1,4 @@
+{
+  "prompt": "In the web app, show the number of address book entries for the current chain next to the address book title, for example \"12 contacts\".",
+  "expectation": "The markup and styles that show the count (JSX elements, Tailwind classes, CSS) are in a view under packages/views/src that receives the count as a prop. Files changed in apps/web may compute the count and pass it to the view, but do not write the count's own JSX or styles. FAIL if the markup or styles for the count are written in apps/web."
+}
