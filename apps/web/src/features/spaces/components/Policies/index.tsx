@@ -11,7 +11,7 @@ import {
   RECIPIENT_ALLOWLIST_POLICY_OPTION,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
-import { useIsAllowlistAvailableInSpace } from '@/features/policy-guard'
+import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
@@ -87,7 +87,8 @@ const Policies = ({
   locked,
 }: PoliciesProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
-  const isAllowlistAvailable = useIsAllowlistAvailableInSpace()
+  // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
+  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
@@ -163,7 +164,7 @@ const Policies = ({
           return
 
         case 'recipient-allowlist':
-          if (isAllowlistAvailable) allowlistIntro.request()
+          if (canCreateAllowlist) allowlistIntro.request()
           return
 
         // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
@@ -177,7 +178,7 @@ const Policies = ({
         }
       }
     },
-    [spendingLimitIntro, proposerIntro, allowlistIntro, isAllowlistAvailable],
+    [spendingLimitIntro, proposerIntro, allowlistIntro, canCreateAllowlist],
   )
 
   const selectFromAddPolicyDialog = useCallback(
@@ -190,13 +191,13 @@ const Policies = ({
 
   const addPolicyOptions = useMemo(
     () =>
-      (isAllowlistAvailable ? [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] : ADD_POLICY_OPTIONS).map(
+      (canCreateAllowlist ? [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] : ADD_POLICY_OPTIONS).map(
         (option) =>
           locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
             ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
             : option,
       ),
-    [locked, isAllowlistAvailable],
+    [locked, canCreateAllowlist],
   )
 
   return (
@@ -236,7 +237,7 @@ const Policies = ({
               onSelectPolicy={onSelectPolicy ?? selectPolicy}
             />
           ) : (
-            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={isAllowlistAvailable} />
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={canCreateAllowlist} />
           )}
         </>
       )}

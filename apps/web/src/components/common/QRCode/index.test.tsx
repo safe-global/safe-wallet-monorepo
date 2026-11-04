@@ -8,7 +8,7 @@ jest.mock('@/hooks/useDarkMode', () => ({
 
 jest.mock('qrcode.react', () => ({
   __esModule: true,
-  default: ({
+  QRCodeCanvas: ({
     size,
     imageSettings,
     bgColor: _bgColor,

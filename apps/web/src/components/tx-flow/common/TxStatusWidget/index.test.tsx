@@ -95,12 +95,11 @@ describe('TxStatusWidget', () => {
     expect(screen.getByText('Sign').closest('li')).not.toHaveClass('incomplete')
   })
 
-  it('shows a Sign step before Execute when the signature completes the threshold of an m/n Safe', () => {
+  it('shows no Sign step when the signature completes the threshold of an m/n Safe', () => {
     renderWidget(3, { txSummary: createTxSummary(2, 3) })
 
-    const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
-
-    expect(labels).toEqual(['Create', 'Confirmed (2 of 3)+1', 'Sign', 'Execute'])
+    expect(screen.queryByText('Sign')).not.toBeInTheDocument()
+    expect(screen.getByText('Execute')).toBeInTheDocument()
   })
 
   it('shows no Sign step on an m/n Safe while other signatures are still missing', () => {

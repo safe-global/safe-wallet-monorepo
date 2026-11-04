@@ -1,5 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { multisigExecutionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { render } from '@/tests/test-utils'
 import SingleTx from '@/pages/transactions/tx'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
@@ -76,6 +77,38 @@ describe('SingleTx', () => {
     expect(button).not.toBeInTheDocument()
 
     expect(await screen.findByText('Contract interaction')).toBeInTheDocument()
+  })
+
+  describe('queue label', () => {
+    const serveTransactionWithNonce = (nonce: number) => {
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`, () => {
+          return HttpResponse.json({
+            ...txDetails,
+            detailedExecutionInfo: multisigExecutionDetailsBuilder().with({ nonce }).build(),
+          })
+        }),
+      )
+    }
+
+    it('shows that an earlier nonce must be executed first when the transaction nonce is ahead of the Safe', async () => {
+      serveTransactionWithNonce(extendedSafeInfo.nonce + 2)
+
+      const screen = render(<SingleTx />)
+
+      expect(
+        await screen.findByText(`Queued - transaction with nonce ${extendedSafeInfo.nonce} needs to be executed first`),
+      ).toBeInTheDocument()
+    })
+
+    it('labels the transaction as next when its nonce is the Safe nonce', async () => {
+      serveTransactionWithNonce(extendedSafeInfo.nonce)
+
+      const screen = render(<SingleTx />)
+
+      expect(await screen.findByText('Next')).toBeInTheDocument()
+      expect(screen.queryByText(/needs to be executed first/)).not.toBeInTheDocument()
+    })
   })
 
   it('shows an error when the transaction has failed to load', async () => {

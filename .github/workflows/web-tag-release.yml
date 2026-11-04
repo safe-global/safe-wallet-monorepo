@@ -141,6 +141,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
 
       - uses: $/.github/actions/build
         env:
@@ -198,6 +201,7 @@ jobs:
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
           prod: ${{ true }}
+          cache: 'false'
 
       - name: Add SRI to scripts
         run: node ./scripts/integrity-hashes.cjs

@@ -1,7 +1,6 @@
 /* eslint-disable */
 
-import { CURRENT_COOKIE_TERMS_VERSION, defaultOwnerAddress } from './constants.js'
-import { aliasedStorage, storageFixture } from './fixture.js'
+import { CURRENT_COOKIE_TERMS_VERSION } from './constants.js'
 
 const cookieState = {
   necessary: true,
@@ -11,275 +10,6 @@ const cookieState = {
   termsVersion: CURRENT_COOKIE_TERMS_VERSION,
 }
 
-export const batchData = {
-  entry0: aliasedStorage({
-    11155111: {
-      '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415': [
-        {
-          id: 'vn8dwe0amz',
-          timestamp: 1701091870022,
-          txDetails: {
-            safeAddress: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-            txId: 'multisig_0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415_0xcb83bc36cf4a2998e7fe222e36c458c59c3778f65b4e5bb361c29a73c2de62cc',
-            executedAt: null,
-            txStatus: 'AWAITING_CONFIRMATIONS',
-            txInfo: {
-              type: 'Transfer',
-              humanDescription: null,
-              richDecodedInfo: null,
-              sender: {
-                value: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-                name: null,
-                logoUri: null,
-              },
-              recipient: {
-                value: '0x03042B890b99552b60A073F808100517fb148F60',
-                name: null,
-                logoUri: null,
-              },
-              direction: 'OUTGOING',
-              transferInfo: { type: 'NATIVE_COIN', value: '1000000000000000' },
-            },
-            txData: {
-              hexData: null,
-              dataDecoded: null,
-              to: {
-                value: '0x03042B890b99552b60A073F808100517fb148F60',
-                name: null,
-                logoUri: null,
-              },
-              value: '1000000000000000',
-              operation: 0,
-              trustedDelegateCallTarget: null,
-              addressInfoIndex: null,
-            },
-            txHash: null,
-            detailedExecutionInfo: {
-              type: 'MULTISIG',
-              submittedAt: 1698650125722,
-              nonce: 15,
-              safeTxGas: '0',
-              baseGas: '0',
-              gasPrice: '0',
-              gasToken: '0x0000000000000000000000000000000000000000',
-              refundReceiver: {
-                value: '0x0000000000000000000000000000000000000000',
-                name: null,
-                logoUri: null,
-              },
-              safeTxHash: '0xcb83bc36cf4a2998e7fe222e36c458c59c3778f65b4e5bb361c29a73c2de62cc',
-              executor: null,
-              signers: [
-                {
-                  value: '0x61a0c717d18232711bC788F19C9Cd56a43cc8872',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8',
-                  name: null,
-                  logoUri: null,
-                },
-              ],
-              confirmationsRequired: 1,
-              confirmations: [],
-              rejectors: [],
-              gasTokenInfo: null,
-              trusted: false,
-            },
-            safeAppInfo: null,
-          },
-        },
-        {
-          id: 'g30cj4yatap',
-          timestamp: 1701099937261,
-          txDetails: {
-            safeAddress: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-            txId: 'multisig_0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415_0xcb83bc36cf4a2998e7fe222e36c458c59c3778f65b4e5bb361c29a73c2de62cc',
-            executedAt: null,
-            txStatus: 'AWAITING_CONFIRMATIONS',
-            txInfo: {
-              type: 'Transfer',
-              humanDescription: null,
-              richDecodedInfo: null,
-              sender: {
-                value: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-                name: null,
-                logoUri: null,
-              },
-              recipient: {
-                value: '0x03042B890b99552b60A073F808100517fb148F60',
-                name: null,
-                logoUri: null,
-              },
-              direction: 'OUTGOING',
-              transferInfo: { type: 'NATIVE_COIN', value: '2000000000000000' },
-            },
-            txData: {
-              hexData: null,
-              dataDecoded: null,
-              to: {
-                value: '0x03042B890b99552b60A073F808100517fb148F60',
-                name: null,
-                logoUri: null,
-              },
-              value: '2000000000000000',
-              operation: 0,
-              trustedDelegateCallTarget: null,
-              addressInfoIndex: null,
-            },
-            txHash: null,
-            detailedExecutionInfo: {
-              type: 'MULTISIG',
-              submittedAt: 1698650125722,
-              nonce: 15,
-              safeTxGas: '0',
-              baseGas: '0',
-              gasPrice: '0',
-              gasToken: '0x0000000000000000000000000000000000000000',
-              refundReceiver: {
-                value: '0x0000000000000000000000000000000000000000',
-                name: null,
-                logoUri: null,
-              },
-              safeTxHash: '0xcb83bc36cf4a2998e7fe222e36c458c59c3778f65b4e5bb361c29a73c2de62cc',
-              executor: null,
-              signers: [
-                {
-                  value: '0x61a0c717d18232711bC788F19C9Cd56a43cc8872',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8',
-                  name: null,
-                  logoUri: null,
-                },
-              ],
-              confirmationsRequired: 1,
-              confirmations: [],
-              rejectors: [],
-              gasTokenInfo: null,
-              trusted: false,
-            },
-            safeAppInfo: null,
-          },
-        },
-      ],
-    },
-  }),
-  entry1: aliasedStorage({
-    11155111: {
-      '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415': [
-        {
-          id: 'vn8dwe0amz',
-          timestamp: 1701091870022,
-          txDetails: {
-            safeAddress: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-            txId: 'multisig_0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415_0xcb83bc36cf4a2998e7fe222e36c458c59c3778f65b4e5bb361c29a73c2de62cc',
-            executedAt: null,
-            txStatus: 'AWAITING_CONFIRMATIONS',
-            txInfo: {
-              type: 'Transfer',
-              humanDescription: null,
-              richDecodedInfo: null,
-              sender: {
-                value: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-                name: null,
-                logoUri: null,
-              },
-              recipient: {
-                value: '0x03042B890b99552b60A073F808100517fb148F60',
-                name: null,
-                logoUri: null,
-              },
-              direction: 'OUTGOING',
-              transferInfo: { type: 'NATIVE_COIN', value: '1000000000000000' },
-            },
-            txData: {
-              hexData: null,
-              dataDecoded: null,
-              to: {
-                value: '0x03042B890b99552b60A073F808100517fb148F60',
-                name: null,
-                logoUri: null,
-              },
-              value: '1000000000000000',
-              operation: 0,
-              trustedDelegateCallTarget: null,
-              addressInfoIndex: null,
-            },
-            txHash: null,
-            detailedExecutionInfo: {
-              type: 'MULTISIG',
-              submittedAt: 1698650125722,
-              nonce: 15,
-              safeTxGas: '0',
-              baseGas: '0',
-              gasPrice: '0',
-              gasToken: '0x0000000000000000000000000000000000000000',
-              refundReceiver: {
-                value: '0x0000000000000000000000000000000000000000',
-                name: null,
-                logoUri: null,
-              },
-              safeTxHash: '0xcb83bc36cf4a2998e7fe222e36c458c59c3778f65b4e5bb361c29a73c2de62cc',
-              executor: null,
-              signers: [
-                {
-                  value: '0x61a0c717d18232711bC788F19C9Cd56a43cc8872',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
-                  name: null,
-                  logoUri: null,
-                },
-                {
-                  value: '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8',
-                  name: null,
-                  logoUri: null,
-                },
-              ],
-              confirmationsRequired: 1,
-              confirmations: [],
-              rejectors: [],
-              gasTokenInfo: null,
-              trusted: false,
-            },
-            safeAppInfo: null,
-          },
-        },
-      ],
-    },
-  }),
-}
 export const visitedSafes = {
   set1: {
     11155111: {
@@ -290,18 +20,17 @@ export const visitedSafes = {
   },
 }
 export const addressBookData = {
-  proposers: storageFixture('proposers.addressBook', {
+  proposers: {
     11155111: {
       '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1',
       '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b': 'AD Proposer2',
     },
-  }),
+  },
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },
-  // Getters, because isolated runs set the default owner after this module loads.
-  get sepoliaAddress2() {
-    return { 11155111: { [defaultOwnerAddress()]: 'Automation owner' } }
+  sepoliaAddress2: {
+    11155111: { '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'Automation owner' },
   },
   importedSafe: {
     5: {
@@ -407,7 +136,7 @@ export const safeSettings = {
 }
 
 export const addedSafes = {
-  set1: aliasedStorage({
+  set1: {
     5: {
       '0x10f999F150a2E7fd356Aa471bCBf0b75aA7b0e2A': {
         owners: [
@@ -493,7 +222,7 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  }),
+  },
   set2: {
     11155111: {
       '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': {
@@ -609,16 +338,6 @@ export const addedSafes = {
   },
 }
 
-export const customApps = (url) => ({
-  safeTestApp: [{ url: url }],
-  grantedPermissions: {
-    [url]: [
-      { feature: 'camera', status: 'granted' },
-      { feature: 'microphone', status: 'granted' },
-    ],
-  },
-})
-
 const infoModalAccepted = {
   11155111: {
     consentsAccepted: true,
@@ -654,7 +373,7 @@ export const safeProAnnouncement = {
 }
 
 export const undeployedSafe = {
-  safe1: storageFixture('undeployedSafes', {
+  safe1: {
     11155111: {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': {
         props: {
@@ -674,7 +393,7 @@ export const undeployedSafe = {
         },
       },
     },
-  }),
+  },
   safes2: {
     1: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {

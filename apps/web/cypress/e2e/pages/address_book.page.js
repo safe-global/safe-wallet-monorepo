@@ -22,7 +22,7 @@ export function typeInName(name) {
   cy.get(main.nameInput).type(name)
 }
 
-export function typeInAddress(address) {
+function typeInAddress(address) {
   cy.get(main.addressInput).type(address)
 }
 

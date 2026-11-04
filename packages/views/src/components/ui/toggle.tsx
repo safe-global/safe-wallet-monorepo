@@ -20,7 +20,7 @@ import { cn } from '@safe-global/views/utils/cn'
  * @remarks
  * Key Props:
  * - `pressed`, `onPressedChange`
- * - `variant` ('default' | 'outline')
+ * - `variant` ('default' | 'outline' | 'chip') — `chip` is a Safe addition: a pill that dims while unpressed
  * - `size` ('default' | 'sm' | 'lg')
  * - `disabled` — see Base UI
  */
@@ -32,6 +32,7 @@ const toggleVariants = cva(
       variant: {
         default: 'bg-transparent',
         outline: 'border-border hover:bg-muted border bg-transparent shadow-xs',
+        chip: 'border-border border bg-transparent shadow-xs rounded-full gap-2 leading-none hover:bg-[var(--color-background-secondary)] aria-pressed:bg-card aria-pressed:hover:bg-[var(--color-background-secondary)] not-aria-pressed:opacity-50 not-aria-pressed:hover:bg-card not-aria-pressed:hover:opacity-100',
       },
       size: {
         default: 'h-9 min-w-9 px-2',

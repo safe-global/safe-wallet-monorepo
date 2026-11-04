@@ -149,6 +149,17 @@ describe('SwapWidget', () => {
     })
   })
 
+  describe('preselected token', () => {
+    it('preselects the sell token that the swap page passes in', () => {
+      const sell = { asset: faker.finance.ethereumAddress(), amount: '1' }
+      giveConsent(true)
+
+      render(<SwapWidget sell={sell} />)
+
+      expect(widgetProps().params.sell).toEqual(sell)
+    })
+  })
+
   describe('widget events', () => {
     it.each([
       { messageType: ToastMessageType.ORDER_CREATED, title: 'Order created' },

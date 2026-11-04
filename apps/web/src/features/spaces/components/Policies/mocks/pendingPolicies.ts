@@ -16,6 +16,7 @@ export const mockPendingDto = (overrides: Partial<PendingPolicyDto> = {}): Pendi
   confirmations: 1,
   confirmationsRequired: 2,
   proposedAt: 1_790_342_985,
+  proposer: null,
   data: {
     module: ALLOWANCE_MODULE,
     changes: [

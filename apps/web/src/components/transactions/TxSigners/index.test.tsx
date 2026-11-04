@@ -1,5 +1,5 @@
 import { render } from '@/tests/test-utils'
-import { screen, within, fireEvent, waitFor } from '@testing-library/react'
+import { act, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import TxSigners from './index'
 import {
   transactionDetailsBuilder,
@@ -13,6 +13,7 @@ import { mockSafeInfo, mockWallet, mockCurrentChain } from '@/tests/mocks/hooks'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/wallets/useWallet')
@@ -26,8 +27,9 @@ jest.mock('@/hooks/useTransactionStatus', () => jest.fn(() => 'Awaiting confirma
 jest.mock('@/hooks/useAddressBook', () => jest.fn(() => ({})))
 
 const mockGetTransaction = jest.fn()
+const mockReadOnlyProvider = { getTransaction: mockGetTransaction }
 jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
-  useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
+  useWeb3ReadOnly: jest.fn(() => mockReadOnlyProvider),
 }))
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => {
@@ -438,6 +440,24 @@ describe('TxSigners (Audit Log)', () => {
     expect(disabledExplorerBtn).toBeInTheDocument()
   })
 
+  it('offers to copy the transaction link for a queued transaction', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2 })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        txHash: null,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
+  })
+
   it('uses consistent labels for cancellation transactions', () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
@@ -511,7 +531,7 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
   })
 
-  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', () => {
+  it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', async () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
       .with({
@@ -540,8 +560,9 @@ describe('TxSigners (Audit Log)', () => {
 
       const trigger = button.closest<HTMLElement>('[data-slot="tooltip-trigger"]')
       expect(trigger).not.toBe(button)
-      trigger?.focus()
+      act(() => trigger?.focus())
       expect(trigger).toHaveFocus()
+      expect(await screen.findByText('Available after execution')).toBeInTheDocument()
     }
   })
 
@@ -623,18 +644,19 @@ describe('TxSigners (Audit Log)', () => {
 
       render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
+      const initiator = await screen.findByRole('button', { name: `Copy address ${initiatorAddr}` })
+      expect(initiator).toHaveTextContent(`By ${shortenAddress(initiatorAddr)}`)
+      expect(screen.queryByText('—')).not.toBeInTheDocument()
       expect(screen.getByText('Audit log')).toBeInTheDocument()
       expect(screen.getByText('Created')).toBeInTheDocument()
       expect(screen.getByText('Executed')).toBeInTheDocument()
       expect(screen.getByText(/Allowance Module/)).toBeInTheDocument()
-
-      await waitFor(() => {
-        expect(mockGetTransaction).toHaveBeenCalledWith(txDetails.txHash)
-      })
+      expect(mockGetTransaction).toHaveBeenCalledTimes(1)
+      expect(mockGetTransaction).toHaveBeenCalledWith(txDetails.txHash)
     })
 
     it('shows dash for Created row when RPC lookup has not resolved', () => {
-      mockGetTransaction.mockReturnValue(new Promise(() => {})) // never resolves
+      mockGetTransaction.mockReturnValue(new Promise(() => {}))
 
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
@@ -645,20 +667,24 @@ describe('TxSigners (Audit Log)', () => {
       expect(screen.getByText('—')).toBeInTheDocument()
     })
 
-    it('does not show confirmation chip for module transactions', () => {
-      mockGetTransaction.mockResolvedValue({ from: checksumAddress(faker.finance.ethereumAddress()) })
+    it('does not show confirmation chip for module transactions', async () => {
+      const initiatorAddr = checksumAddress(faker.finance.ethereumAddress())
+      mockGetTransaction.mockResolvedValue({ from: initiatorAddr })
 
       const txDetails = buildModuleTxDetails()
       const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
       render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
+      expect(await screen.findByRole('button', { name: `Copy address ${initiatorAddr}` })).toBeInTheDocument()
       expect(screen.queryByText(/\d\/\d/)).not.toBeInTheDocument()
     })
   })
 
   describe('Incoming/simple executed transactions', () => {
-    it('renders audit log with Executed row for incoming transactions', () => {
+    it('renders audit log with Executed row for incoming transactions', async () => {
+      const senderAddr = checksumAddress(faker.finance.ethereumAddress())
+      mockGetTransaction.mockResolvedValue({ from: senderAddr })
       const txDetails = transactionDetailsBuilder()
         .with({
           detailedExecutionInfo: undefined,
@@ -671,6 +697,8 @@ describe('TxSigners (Audit Log)', () => {
 
       render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
+      const sender = await screen.findByRole('button', { name: `Copy address ${senderAddr}` })
+      expect(sender).toHaveTextContent(`By ${shortenAddress(senderAddr)}`)
       expect(screen.getByText('Audit log')).toBeInTheDocument()
       expect(screen.getByText('Executed')).toBeInTheDocument()
       expect(screen.getByTestId('transaction-actions-list')).toBeInTheDocument()

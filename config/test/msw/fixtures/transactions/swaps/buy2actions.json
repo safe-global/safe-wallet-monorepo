@@ -1,0 +1,293 @@
+{
+  "item": {
+    "type": "TRANSACTION",
+    "transaction": {
+      "txInfo": {
+        "type": "SwapOrder",
+        "humanDescription": null,
+        "uid": "0xa316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae99",
+        "status": "expired",
+        "kind": "buy",
+        "orderClass": "limit",
+        "validUntil": 1718267545,
+        "sellAmount": "8474700998129483003",
+        "buyAmount": "1000000000000000000",
+        "executedSellAmount": "0",
+        "executedBuyAmount": "0",
+        "sellToken": {
+          "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+          "name": "CoW Protocol Token",
+          "symbol": "COW",
+          "trusted": true
+        },
+        "buyToken": {
+          "address": "0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De.png",
+          "name": "GNO (test)",
+          "symbol": "GNO",
+          "trusted": false
+        },
+        "explorerUrl": "https://explorer.cow.fi/orders/0xa316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae99",
+        "executedFee": "0",
+        "executedFeeToken": {
+          "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+          "name": "CoW Protocol Token",
+          "symbol": "COW",
+          "trusted": true
+        },
+        "receiver": "0x03042B890b99552b60A073F808100517fb148F60",
+        "owner": "0x03042B890b99552b60A073F808100517fb148F60",
+        "fullAppData": {
+          "appCode": "Safe Wallet Swaps",
+          "metadata": {
+            "orderClass": {
+              "orderClass": "market"
+            },
+            "quote": {
+              "slippageBips": 50
+            },
+            "widget": {
+              "appCode": "CoW Swap-SafeApp",
+              "environment": "production"
+            }
+          },
+          "version": "1.1.0"
+        }
+      },
+      "id": "multisig_0x03042B890b99552b60A073F808100517fb148F60_0x135ff0282653d4c2a62c76cd247764b1abd4c0daa9201a72964feac2acaa7b44",
+      "txHash": "0xfe7b2e547fcc77b55ed6ef299067d900da5d1e57035f68c6f3074c8249c11c50",
+      "timestamp": 1718265900000,
+      "txStatus": "SUCCESS",
+      "executionInfo": {
+        "type": "MULTISIG",
+        "nonce": 3,
+        "confirmationsRequired": 1,
+        "confirmationsSubmitted": 1,
+        "missingSigners": null
+      },
+      "safeAppInfo": null,
+      "note": null
+    },
+    "conflictType": "None"
+  },
+  "details": {
+    "safeAddress": "0x03042B890b99552b60A073F808100517fb148F60",
+    "txId": "multisig_0x03042B890b99552b60A073F808100517fb148F60_0x135ff0282653d4c2a62c76cd247764b1abd4c0daa9201a72964feac2acaa7b44",
+    "executedAt": 1718265900000,
+    "txStatus": "SUCCESS",
+    "txInfo": {
+      "type": "SwapOrder",
+      "humanDescription": null,
+      "uid": "0xa316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae99",
+      "status": "expired",
+      "kind": "buy",
+      "orderClass": "limit",
+      "validUntil": 1718267545,
+      "sellAmount": "8474700998129483003",
+      "buyAmount": "1000000000000000000",
+      "executedSellAmount": "0",
+      "executedBuyAmount": "0",
+      "sellToken": {
+        "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+        "name": "CoW Protocol Token",
+        "symbol": "COW",
+        "trusted": true
+      },
+      "buyToken": {
+        "address": "0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De.png",
+        "name": "GNO (test)",
+        "symbol": "GNO",
+        "trusted": false
+      },
+      "explorerUrl": "https://explorer.cow.fi/orders/0xa316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae99",
+      "executedFee": "0",
+      "executedFeeToken": {
+        "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+        "name": "CoW Protocol Token",
+        "symbol": "COW",
+        "trusted": true
+      },
+      "receiver": "0x03042B890b99552b60A073F808100517fb148F60",
+      "owner": "0x03042B890b99552b60A073F808100517fb148F60",
+      "fullAppData": {
+        "appCode": "Safe Wallet Swaps",
+        "metadata": {
+          "orderClass": {
+            "orderClass": "market"
+          },
+          "quote": {
+            "slippageBips": 50
+          },
+          "widget": {
+            "appCode": "CoW Swap-SafeApp",
+            "environment": "production"
+          }
+        },
+        "version": "1.1.0"
+      }
+    },
+    "txData": {
+      "hexData": "0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000192000625afb445c3b6b7b929342a04a22599fd5dbb5900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110000000000000000000000000000000000000000000000000759c2ebfc600c000009008d19f58aabd9ed0d60971565aa8510560ab41000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4ec6cb13f000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000038a316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae9900000000000000000000000000000000000000000000",
+      "dataDecoded": {
+        "method": "multiSend",
+        "parameters": [
+          {
+            "name": "transactions",
+            "type": "bytes",
+            "value": "0x000625afb445c3b6b7b929342a04a22599fd5dbb5900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110000000000000000000000000000000000000000000000000759c2ebfc600c000009008d19f58aabd9ed0d60971565aa8510560ab41000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4ec6cb13f000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000038a316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae990000000000000000",
+            "valueDecoded": [
+              {
+                "to": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+                "value": "0",
+                "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110000000000000000000000000000000000000000000000000759c2ebfc600c000",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "approve",
+                  "parameters": [
+                    {
+                      "name": "spender",
+                      "type": "address",
+                      "value": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "amount",
+                      "type": "uint256",
+                      "value": "8474700000000000000",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              },
+              {
+                "to": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+                "value": "0",
+                "data": "0xec6cb13f000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000038a316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae990000000000000000",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "setPreSignature",
+                  "parameters": [
+                    {
+                      "name": "orderUid",
+                      "type": "bytes",
+                      "value": "0xa316537f5a2a147d573a8da7ed6be877015ac6f23d24835241ace18958156b3003042b890b99552b60a073f808100517fb148f60666aae99",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "signed",
+                      "type": "bool",
+                      "value": "True",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "accuracy": "FULL_MATCH"
+      },
+      "to": {
+        "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+        "name": "Safe: MultiSendCallOnly 1.3.0",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+      },
+      "value": "0",
+      "operation": 1,
+      "trustedDelegateCallTarget": true,
+      "addressInfoIndex": {
+        "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59": {
+          "value": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+          "name": "CoW Protocol Token",
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png"
+        },
+        "0x9008D19f58AAbD9eD0D60971565AA8510560ab41": {
+          "value": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+          "name": "GPv2Settlement",
+          "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x9008D19f58AAbD9eD0D60971565AA8510560ab41.png"
+        }
+      },
+      "tokenInfoIndex": null
+    },
+    "txHash": "0xfe7b2e547fcc77b55ed6ef299067d900da5d1e57035f68c6f3074c8249c11c50",
+    "detailedExecutionInfo": {
+      "type": "MULTISIG",
+      "submittedAt": 1718265900000,
+      "nonce": 3,
+      "safeTxGas": "0",
+      "baseGas": "0",
+      "gasPrice": "0",
+      "gasToken": "0x0000000000000000000000000000000000000000",
+      "fee": "5953634223105696",
+      "payment": "0",
+      "refundReceiver": {
+        "value": "0x0000000000000000000000000000000000000000",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      },
+      "safeTxHash": "0x135ff0282653d4c2a62c76cd247764b1abd4c0daa9201a72964feac2acaa7b44",
+      "executor": {
+        "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xC16Db0251654C0a72E91B190d81eAD367d2C6fED.png"
+      },
+      "signers": [
+        {
+          "value": "0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x9c7a96d86BC4f5a6DeC9664C67CC02E3d4591e24",
+          "name": null,
+          "logoUri": null
+        }
+      ],
+      "confirmationsRequired": 1,
+      "confirmations": [
+        {
+          "signer": {
+            "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0x000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed000000000000000000000000000000000000000000000000000000000000000001",
+          "submittedAt": 1718265900000
+        }
+      ],
+      "rejectors": [],
+      "gasTokenInfo": null,
+      "trusted": true,
+      "proposer": null,
+      "proposedByDelegate": null
+    },
+    "safeAppInfo": null,
+    "note": null
+  }
+}
