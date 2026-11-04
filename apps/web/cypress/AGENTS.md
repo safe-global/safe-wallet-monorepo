@@ -11,7 +11,6 @@ cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.page*.js)
 │   ├── visual/         # Visual regression tests (Argos E2E)
-│   ├── regression/     # Feature tests
 │   └── safe-apps/      # Safe Apps tests
 ├── fixtures/           # Static test data (JSON, safes/)
 ├── support/            # Shared config, commands, constants, localstorage_data
@@ -20,12 +19,12 @@ cypress/
 
 ## Test categories
 
-| Category   | Folder            | CI trigger                           | Naming                    |
-| ---------- | ----------------- | ------------------------------------ | ------------------------- |
-| Visual     | `e2e/visual/`     | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
-| Regression | `e2e/regression/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
+| Category  | Folder           | CI trigger                           | Naming                    |
+| --------- | ---------------- | ------------------------------------ | ------------------------- |
+| Visual    | `e2e/visual/`    | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
+| Safe Apps | `e2e/safe-apps/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
 
-The PR smoke gate is Playwright `@smoke` (`web-pw-smoke.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)); on PRs, Cypress specs run only through the isolated job (`web-isolated-e2e-backend.yml`, registry in `e2e/environment/specs.mjs`). The full on-demand workflow (`web-e2e-full-ondemand.yml`) runs regression + safe-apps; via `workflow_dispatch` inputs it can be narrowed to a single suite or named specs (comma-separated, no path/extension).
+The PR gate is Playwright on the isolated stack (`web-isolated-e2e-backend.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)). No Cypress spec runs on a PR or on the isolated stack; Cypress runs only against staging. The on-demand workflow (`web-e2e-full-ondemand.yml`) runs `safe-apps/`; its `workflow_dispatch` input can narrow it to named specs (comma-separated, no path/extension).
 
 CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
@@ -48,7 +47,7 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
     cy.contains('expected text', { timeout: 30000 }).should('be.visible')
-    main.awaitVisualStability()  // ALWAYS last line (unless explicitly skipped with comment)
+    main.awaitVisualStability()  // last line (unless explicitly skipped with comment)
   })
 })
 ```
@@ -59,7 +58,7 @@ Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds s
 
 ### Credentials and environment values
 
-`Cypress.env()` no longer exists (Cypress 16). Read wallet keys from `walletCredentials` (`support/credentials.js`) inside hooks or tests, never at module level: a root `before` hook fills it, from `cy.env()` on staging and from the scenario in isolated runs. Read the default owner with `constants.defaultOwnerAddress()` at the same places. Both live on the window, because the support file and each spec are separate bundles. Read other secrets with `cy.env([...])` in a hook. Read public values (URLs, flags, scenario data) with `Cypress.expose()`; add a new one to `exposedValues()` in `e2e/environment/cypress.mjs`.
+`Cypress.env()` no longer exists (Cypress 16). Read wallet keys from `walletCredentials` (`support/credentials.js`) inside hooks or tests, never at module level: a root `before` hook fills it from `cy.env()`. It lives on the window, because the support file and each spec are separate bundles. Read other secrets with `cy.env([...])` in a hook. Read public values with `Cypress.expose()`; add a new one to `expose` in `cypress.config.js`.
 
 ### Key utilities
 
@@ -140,17 +139,5 @@ Adding a `data-testid` to a component:
 - Safe addresses: `getSafes(CATEGORIES.static)` — never hardcode
 - localStorage: payloads in `support/localstorage_data.js`, keys in `support/constants.js`
 - API mocks: `cy.intercept()` + `cy.fixture()` from `fixtures/`
-- Do NOT create new setup helpers — use existing patterns from `support/`
+- Don't create new setup helpers — use existing patterns from `support/`
 - **Data/selector separation**: fixtures hold test data only (ids, names, addresses, counts); page objects hold selectors, labels, and regex only. Never duplicate fixture data in page objects, never re-export fixtures from them — tests import fixtures directly.
-
-## Isolated regression
-
-The isolated CI workflow runs registered specs against local Anvil, CGW, TXS and Queue Service: pull requests run every registered spec in six parallel shards; a manual dispatch runs any selection, by default every registered spec. Shared Cypress support prepares SDK scenario data through a Node task in isolated mode; preserve staging defaults for ordinary runs. Keep generated owner keys in memory and wait for CGW-visible state before browser assertions. Each shard runs its specs in one Cypress process; the config process creates new owners before every spec.
-
-Use `yarn workspace @safe-global/web e2e:env cypress` after starting the backend and wallet. `SAFE_E2E_SPECS` selects registered specs, `SAFE_E2E_WEB_URL` overrides the wallet URL, and `SAFE_E2E_BROWSER` selects a Chromium executable (default: Chrome). The runner clears `e2e/environment/artifacts/cypress` once per invocation and retains per-spec videos, screenshots and JUnit reports. Backend cleanup belongs to the calling CI workflow and must run after failures. See [local setup](../e2e/docs/ISOLATED_ENVIRONMENT.md).
-
-Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `getSafes()` only reads prepared fixtures. Specs must not branch on `SAFE_E2E_ISOLATED`: seed their expected data and expose generated identifiers through fixture getters. Preserve existing mocks and assertions.
-
-Per-spec scenario `files` replace JSON data at existing fixture paths in a temporary fixtures directory. Preserve the original fixture shape and expected values, supplying generated IDs for seeded backend records. Source fixture files remain unchanged; the temporary directory is removed after each spec.
-
-When a spec hard-codes staging data (a Safe address outside `getSafes`, a short address, a transaction ID or a date), move the value into a fixture under `fixtures/` built with `fixtureGetters(namespace, { name: stagingDefault })`, and read it in the spec; the scenario returns the local value as `fixtures['<namespace>.<name>']`. Wrap localStorage payloads keyed by static Safes in `aliasedStorage`. Rebuild static Safes from `scenarios/staging-safes.mjs` snapshots of their real staging state instead of inventing data.

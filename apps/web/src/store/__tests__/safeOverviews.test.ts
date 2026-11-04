@@ -1,9 +1,10 @@
-import { act, renderHook, waitFor } from '@/tests/test-utils'
+import { act, advanceClock, renderHook, waitFor } from '@/tests/test-utils'
 import { gatewayApi, useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '../api/gateway'
 import { useAppDispatch } from '@/store'
 import { faker } from '@faker-js/faker'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
+import { SAFE_OVERVIEWS_BATCH_WINDOW_MS } from '../api/gateway/safeOverviews'
 
 const mockedInitiate = jest.spyOn(additionalSafesRtkApi.endpoints.safesGetOverviewForMany, 'initiate')
 mockedInitiate.mockImplementation(jest.fn())
@@ -29,6 +30,11 @@ describe('safeOverviews', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     mockedInitiate.mockReset()
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   describe('useGetSafeOverviewQuery', () => {
@@ -57,6 +63,9 @@ describe('safeOverviews', () => {
       // Request should get queued and remain loading for the queue seconds
       expect(result.current.isLoading).toBeTruthy()
 
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeDefined()
@@ -73,10 +82,10 @@ describe('safeOverviews', () => {
       // Request should get queued and remain loading for the queue seconds
       expect(result.current.isLoading).toBeTruthy()
 
-      await Promise.resolve()
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
 
       await waitFor(() => {
-        expect(mockedInitiate).toHaveBeenCalled()
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeUndefined()
         expect(result.current.data).toEqual(null)
@@ -102,10 +111,10 @@ describe('safeOverviews', () => {
       // Request should get queued and remain loading for the queue seconds
       expect(result.current.isLoading).toBeTruthy()
 
-      await Promise.resolve()
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
 
       await waitFor(() => {
-        expect(mockedInitiate).toHaveBeenCalled()
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeUndefined()
         expect(result.current.data).toEqual(mockOverview)
@@ -129,6 +138,9 @@ describe('safeOverviews', () => {
       mockQueryAction({ data: [mockOverview] })
 
       const { result } = renderHook(() => useGetSafeOverviewQuery(request))
+
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
 
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
@@ -220,6 +232,9 @@ describe('safeOverviews', () => {
       // Request should get queued and remain loading for the queue seconds
       expect(result.current.isLoading).toBeTruthy()
 
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeUndefined()
@@ -257,8 +272,10 @@ describe('safeOverviews', () => {
       // Request should get queued and remain loading for the queue seconds
       expect(result.current.isLoading).toBeTruthy()
 
-      await waitFor(async () => {
-        await Promise.resolve()
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
+      await waitFor(() => {
         // With Promise.allSettled, failed fetches result in empty array, not error
         // This allows partial successes when only some safes fail
         expect(result.current.error).toBeUndefined()
@@ -299,6 +316,9 @@ describe('safeOverviews', () => {
 
       // Request should get queued and remain loading for the queue seconds
       expect(result.current.isLoading).toBeTruthy()
+
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
 
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
@@ -376,6 +396,9 @@ describe('safeOverviews', () => {
 
       const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
 
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
       })
@@ -417,6 +440,9 @@ describe('safeOverviews', () => {
 
       const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
 
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
       })
@@ -428,14 +454,6 @@ describe('safeOverviews', () => {
   })
 
   describe('batching behavior', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('should batch multiple requests within 300ms window', async () => {
       const request1 = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
       const request2 = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
@@ -559,6 +577,9 @@ describe('safeOverviews', () => {
         query: useGetMultipleSafeOverviewsQuery(request),
       }))
 
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
       await waitFor(() => {
         expect(result.current.query.data).toEqual([staleOverview])
       })
@@ -570,8 +591,10 @@ describe('safeOverviews', () => {
         result.current.dispatch(gatewayApi.util.invalidateTags(['SafeOverviews']))
       })
 
+      await advanceClock(SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+      expect(mockedInitiate).toHaveBeenCalledTimes(2)
+
       await waitFor(() => {
-        expect(mockedInitiate).toHaveBeenCalledTimes(2)
         expect(result.current.query.data).toEqual([freshOverview])
       })
     })

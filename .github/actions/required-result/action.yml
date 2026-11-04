@@ -1,0 +1,34 @@
+name: Required result
+description: >-
+  Fails unless every needed job succeeded. A skipped job passes only when the pull request changes nothing that the
+  checks cover. Use it in the one job of a workflow that branch protection requires.
+
+inputs:
+  needs:
+    description: The `needs` context of the calling job, as `toJSON(needs)`
+    required: true
+  relevant:
+    description: The `relevant` output of the pr-changes action
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Check needed jobs
+      shell: bash
+      env:
+        NEEDS: ${{ inputs.needs }}
+        RELEVANT: ${{ inputs.relevant }}
+      run: |
+        failed=$(jq -r --arg relevant "$RELEVANT" '
+          to_entries[]
+          | select(.value.result != "success" and (.value.result != "skipped" or $relevant == "true"))
+          | "\(.key) ended with \(.value.result)"
+        ' <<< "$NEEDS")
+        if [ -n "$failed" ]; then
+          echo "$failed" >&2
+          exit 1
+        fi
+        if [ "$RELEVANT" != true ]; then
+          echo 'No change that these checks cover'
+        fi

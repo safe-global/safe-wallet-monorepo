@@ -2,7 +2,7 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import React, { type ReactElement } from 'react'
 import { useMemo } from 'react'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { getLatestTransactions } from '@/utils/tx-list'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'

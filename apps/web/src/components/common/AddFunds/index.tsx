@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import QRCode from '@/components/common/QRCode'
 import { Switch } from '@safe-global/views/components/ui/switch'
@@ -15,6 +16,7 @@ const AddFundsCTA = () => {
   const settings = useAppSelector(selectSettings)
   const qrPrefix = settings.shortName.qr ? `${chain?.shortName}:` : ''
   const qrCode = `${qrPrefix}${safeAddress}`
+  const qrPrefixLabelId = useId()
 
   return (
     <div data-testid="add-funds-section" className="rounded-lg bg-[var(--color-background-paper)]">
@@ -26,13 +28,13 @@ const AddFundsCTA = () => {
             </div>
           </div>
 
-          <Label htmlFor="qr-chain-prefix" className="mt-2">
+          <Label className="mt-2">
             <Switch
-              id="qr-chain-prefix"
+              aria-labelledby={qrPrefixLabelId}
               checked={settings.shortName.qr}
               onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
             />
-            QR code with chain prefix
+            <span id={qrPrefixLabelId}>QR code with chain prefix</span>
           </Label>
         </div>
 

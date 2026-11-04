@@ -7,9 +7,9 @@ import {
 } from '@safe-global/utils/features/safe-shield/types'
 import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import isEmpty from 'lodash/isEmpty'
 import { HypernativeFeature, type HypernativeAuthStatus, HnViewMoreOnHypernativeRow } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
@@ -42,12 +42,11 @@ export const ThreatAnalysis = ({
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
 
   const { threatData, overflow } = useMemo(() => {
-    const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, request_id: ___, ...groupedThreatResults } = threatResults || {}
-
-    if (Object.keys(groupedThreatResults).length === 0) {
+    if (!hasThreatCardResults(threatResults)) {
       return { threatData: undefined, overflow: 0 }
     }
 
+    const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, request_id: ___, ...groupedThreatResults } = threatResults || {}
     const { visible, overflow } = sliceTopBySeverity(groupedThreatResults.THREAT ?? [], VISIBLE_CAP)
     const next: GroupedAnalysisResults = { ...groupedThreatResults, THREAT: visible }
     return { threatData: { '0x': next } as Record<string, GroupedAnalysisResults>, overflow }
@@ -59,7 +58,7 @@ export const ThreatAnalysis = ({
     )
   }
 
-  if (!threatResults || !threatData || isEmpty(threatData)) {
+  if (!threatData) {
     return null
   }
 

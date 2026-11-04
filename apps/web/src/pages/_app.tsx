@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
@@ -24,11 +24,12 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
+import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -56,7 +57,7 @@ const RecoveryLoader = () => {
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
  * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered next/dynamic imports.
+ * through handle.ts rather than scattered dynamic() imports.
  */
 const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
@@ -141,7 +142,6 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
   useStepUpCallback()
@@ -207,6 +207,10 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           </PageLayout>
 
           <CookieAndTermBanner />
+
+          <WhatsNewTopBar />
+
+          <WhatsNewUpdatesFrame />
 
           <TargetedOutreachPopupLoader />
 
