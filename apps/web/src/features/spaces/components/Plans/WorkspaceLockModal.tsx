@@ -13,6 +13,7 @@ import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorks
 import { claimCopy } from './ClaimTrialModal'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal, { chooserCopy } from './PlanChooserModal'
+import TrialEndedModal from './proTrial/TrialEndedModal'
 
 export const _memberCopy = (
   reason: WorkspaceLockReason,
@@ -111,6 +112,9 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   }
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
+
+  // A lapsed plan opens on "Your Safes still work"; the chooser is one click away inside it.
+  if (reason === 'lapsed') return <TrialEndedModal spaceId={spaceId} endedAt={endedAt} onContinue={goBack} />
 
   return <PlanChooserModal spaceId={spaceId} reason={reason} endedAt={endedAt} onBack={goBack} />
 }

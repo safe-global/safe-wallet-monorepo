@@ -5,6 +5,7 @@ import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import SpaceDashboard from '@/pages/spaces'
 import SpacePlansPage from '@/pages/spaces/plans'
 import SpaceSafeAccounts from '@/pages/spaces/safe-accounts'
+import MyAccountsPage from '@/pages/welcome/accounts'
 import { PLAN_STATES, SAFE_COUNTS, scenarioHandlers, type PlanState, type Region } from './scenario'
 
 type Page = 'home' | 'accounts' | 'plans'
@@ -75,3 +76,10 @@ export const TrialEnded = at('home', { plan: 'ended' })
 export const Paid = at('home', { plan: 'paid' })
 export const PlansDuringTrial = at('plans')
 export const SafeAccounts = at('accounts')
+
+/** Where "Continue to my Safes" leads once the trial ends: the user's own accounts, outside the Workspace. */
+export const MySafesAfterTrial: Story = {
+  args: { plan: 'ended' },
+  parameters: { nextjs: { router: { pathname: '/welcome/accounts', query: {} } } },
+  render: () => <MyAccountsPage />,
+}
