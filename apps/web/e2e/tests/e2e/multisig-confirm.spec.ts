@@ -3,7 +3,7 @@ import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { seedSafe } from '../../src/seed/safe'
+import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
@@ -50,5 +50,28 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
 
     await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
+  })
+
+  test('should leave the transfer fully signed in the queue when the last signer picks Sign over Execute', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }) => {
+    const safe = await seedSafe(journey, { owners: ['owner1', 'owner4'], threshold: 2 })
+    await seedQueuedTransfer(safe, { nonce: 0, recipient: Wallet.createRandom().address, amount: AMOUNT })
+
+    const queue = new TxQueuePage(safePage)
+    const review = new TxReviewPage(safePage)
+    await queue.goto(safe.prefixedAddress)
+    await expect(queue.transactionWithNonce(0)).toContainText('1/2')
+    await queue.confirm(0)
+    await review.continueAndChooseSign()
+    await expect(review.lastSignatureNotice).toBeVisible()
+    await review.signButton.click()
+
+    await expect(safePage.getByRole('dialog')).toBeHidden()
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([2])
+    await expect(queue.transactionWithNonce(0)).toContainText('2/2')
+    expect(await safeApiClient.getNonce(safe.address)).toBe(0)
   })
 })

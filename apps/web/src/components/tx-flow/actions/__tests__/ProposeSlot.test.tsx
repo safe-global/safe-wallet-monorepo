@@ -17,6 +17,11 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useTxActions } from '@/components/tx/shared/hooks'
 import { getTxOrigin } from '@/utils/transactions'
 
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),

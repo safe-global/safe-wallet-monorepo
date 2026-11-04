@@ -1,9 +1,7 @@
-import Image from 'next/image'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 
 import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import StarIcon from '@/public/images/common/star.svg'
@@ -98,7 +96,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </div>
 
             <div className="relative hidden items-center justify-center bg-[var(--color-background-main)] sm:flex md:w-5/12">
-              <Image src={EarnIllustrationLight} alt="Earn illustration" width={239} height={239} />
+              <img src="/images/common/earn-illustration-light.png" alt="Earn illustration" width={239} height={239} />
             </div>
           </div>
         </CardContent>
