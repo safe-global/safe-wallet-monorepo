@@ -159,7 +159,7 @@ const renderBatch = (flagged: Hex[], safenetEnabled = true) => {
   return render(<DecodedTxs txs={batch} />, {
     initialReduxState: {
       safeInfo: { loading: false, loaded: true, data: safe },
-      safenetChecks: { pinned: pinnedRisk(flagged) },
+      safenetChecks: { pinned: pinnedRisk(flagged), requested: {} },
     },
   })
 }
