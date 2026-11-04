@@ -915,22 +915,41 @@
         ]
       },
       "delete": {
-        "description": "Clears all cached Zerion portfolio data (overview, portfolio, positions) for a specific address",
+        "description": "Clears all cached Zerion portfolio data (overview, portfolio, positions) for a Safe. Repeat clears for the same Safe within a short cooldown are skipped.",
         "operationId": "portfolioClearPortfolioV1",
         "parameters": [
           {
             "name": "address",
             "required": true,
             "in": "path",
-            "description": "Wallet address (0x prefixed hex string)",
+            "description": "Safe address (0x prefixed hex string)",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "query",
+            "description": "A chain on which the address is a Safe",
+            "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": ""
+            "description": "Cleared, or skipped within cooldown"
+          },
+          "404": {
+            "description": "The address is not a Safe on chainId"
+          },
+          "422": {
+            "description": "Invalid address or chainId"
+          },
+          "429": {
+            "description": "Rate limit reached"
           }
         },
         "summary": "Clear portfolio cache",

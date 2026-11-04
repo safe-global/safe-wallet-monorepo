@@ -19,7 +19,7 @@ const useClearPortfolioOnTx = (): void => {
       const chain = configs.find((config) => config.chainId === chainId)
       if (!chain || !PORTFOLIO_SUMMARIES_FEATURES.some((feature) => hasFeature(chain, feature))) return
 
-      clearPortfolio({ address: safeAddress })
+      clearPortfolio({ address: safeAddress, chainId })
     })
   }, [configs, clearPortfolio])
 }

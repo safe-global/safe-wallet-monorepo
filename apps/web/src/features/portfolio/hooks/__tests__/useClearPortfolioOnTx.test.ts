@@ -43,7 +43,7 @@ describe('useClearPortfolioOnTx', () => {
 
     dispatchSuccess('1')
 
-    expect(clearPortfolio).toHaveBeenCalledWith({ address: SAFE })
+    expect(clearPortfolio).toHaveBeenCalledWith({ address: SAFE, chainId: '1' })
   })
 
   it('does nothing on a chain without a summaries flag', () => {

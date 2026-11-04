@@ -20,7 +20,13 @@ const injectedRtkApi = api
         providesTags: ['portfolio'],
       }),
       portfolioClearPortfolioV1: build.mutation<PortfolioClearPortfolioV1ApiResponse, PortfolioClearPortfolioV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/portfolio/${queryArg.address}`, method: 'DELETE' }),
+        query: (queryArg) => ({
+          url: `/v1/portfolio/${queryArg.address}`,
+          method: 'DELETE',
+          params: {
+            chainId: queryArg.chainId,
+          },
+        }),
         invalidatesTags: ['portfolio'],
       }),
       portfolioSummariesGetSummariesV2: build.query<
@@ -58,8 +64,10 @@ export type PortfolioGetPortfolioV1ApiArg = {
 }
 export type PortfolioClearPortfolioV1ApiResponse = unknown
 export type PortfolioClearPortfolioV1ApiArg = {
-  /** Wallet address (0x prefixed hex string) */
+  /** Safe address (0x prefixed hex string) */
   address: string
+  /** A chain on which the address is a Safe */
+  chainId: string
 }
 export type PortfolioSummariesGetSummariesV2ApiResponse = /** status 200  */ PortfolioSummary[]
 export type PortfolioSummariesGetSummariesV2ApiArg = {
