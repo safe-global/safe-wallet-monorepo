@@ -1,7 +1,12 @@
 import { renderHook } from '@testing-library/react'
 import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
-import type { PinnedVerdict } from '@safe-global/store/safenet/safenetCheckSlice'
+import {
+  checkKey,
+  safenetCheckSlice,
+  type PinnedVerdict,
+  type SafenetCheckSliceState,
+} from '@safe-global/store/safenet/safenetCheckSlice'
 import { forgetAim, recordAim, resolveAim } from '@safe-global/store/safenet/safenetAimRegistry'
 import { useSafenetCheck } from '../useSafenetCheck'
 import {
@@ -26,6 +31,7 @@ const mockSelector = useSelector as unknown as jest.Mock
 
 const HASH = ('0x' + 'ab'.repeat(32)) as `0x${string}`
 const TARGET = { chainId: '100', safeAddress: '0x0000000000000000000000000000000000000abc' }
+const IDENTITY = { safeTxHash: HASH, ...TARGET }
 const OTHER_HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
 /** A transaction's submission date, and a later surrogate a surface might offer. */
 const PROPOSED_AT = 1_700_000_000_000
@@ -58,11 +64,16 @@ const FETCH_ERROR = { message: 'rpc down' }
 /** Last options object the query hook was invoked with. */
 const lastOptions = () => mockQuery.mock.calls[mockQuery.mock.calls.length - 1][1]
 
+const mockSliceState = (slice: Partial<SafenetCheckSliceState>) =>
+  mockSelector.mockImplementation((select: (state: unknown) => unknown) =>
+    select({ [safenetCheckSlice.name]: { pinned: {}, requested: {}, ...slice } }),
+  )
+
 beforeEach(() => {
   mockQuery.mockReset()
   mockSelector.mockReset()
   refetchFn.mockReset()
-  mockSelector.mockReturnValue(undefined)
+  mockSliceState({})
   // The aim registry is module state shared by every surface, so one test's
   // offer would aim the next test's read.
   forgetAim({ safeTxHash: HASH, ...TARGET })
@@ -358,6 +369,40 @@ describe('useSafenetCheck', () => {
       expect(result.current.unavailableReason).toBeUndefined()
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
     })
+
+    describe('a check requested after the transaction was created', () => {
+      const NOW = SUBMITTED + 2 * UNAVAILABLE_GRACE_MS
+
+      beforeEach(() => {
+        jest.useFakeTimers()
+        jest.setSystemTime(NOW)
+        mockQuery.mockReturnValue(queryResult({ currentData: noCheck(), fulfilledTimeStamp: 1 }))
+      })
+
+      it('polls slowly from the request instead of the creation time', () => {
+        mockSliceState({ requested: { [checkKey(IDENTITY)]: NOW - 60_000 } })
+
+        renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
+
+        expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
+      })
+
+      it('does not poll a transaction this client never requested', () => {
+        renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
+
+        expect(lastOptions().pollingInterval).toBe(0)
+      })
+
+      it('restarts polling when the request is recorded after polling stopped', () => {
+        const { rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
+        expect(lastOptions().pollingInterval).toBe(0)
+
+        mockSliceState({ requested: { [checkKey(IDENTITY)]: NOW } })
+        rerender()
+
+        expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
+      })
+    })
   })
 
   describe('error mapping', () => {
@@ -476,7 +521,7 @@ describe('useSafenetCheck', () => {
   describe('read-path pin merge', () => {
     it('never downgrades below the pinned verdict', () => {
       const pinned: PinnedVerdict = { status: CheckStatus.BENIGN, atBlock: '10', verification: UNVERIFIED_ATTESTATION }
-      mockSelector.mockReturnValue(pinned)
+      mockSliceState({ pinned: { [checkKey(IDENTITY)]: pinned } })
       // A reorg drops the attestation and the fresh read derives IN_PROGRESS.
       mockQuery.mockReturnValue(
         queryResult({ currentData: buildSnapshot({ status: CheckStatus.IN_PROGRESS, safeTxHash: HASH }) }),
@@ -494,7 +539,7 @@ describe('useSafenetCheck', () => {
         atBlock: '10',
         verification: UNVERIFIED_ATTESTATION,
       }
-      mockSelector.mockReturnValue(pinned)
+      mockSliceState({ pinned: { [checkKey(IDENTITY)]: pinned } })
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
 
       const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
