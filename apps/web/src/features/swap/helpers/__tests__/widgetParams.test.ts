@@ -47,6 +47,12 @@ describe('getSwapWidgetParams', () => {
     })
   })
 
+  it('approves only the trade amount instead of an unlimited allowance', () => {
+    const params = getSwapWidgetParams(buildInput())
+
+    expect(params.disableInfiniteApprove).toBe(true)
+  })
+
   it('preselects the sell token from the route and leaves the buy token empty', () => {
     const sell = { asset: faker.finance.ethereumAddress(), amount: '1.5' }
 
