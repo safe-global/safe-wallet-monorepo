@@ -6,7 +6,6 @@ import {
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import { createMockStory } from '@/stories/mocks'
-import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
 import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
 import { SafenetAuditRowView } from './SafenetAuditRow'
 import {
@@ -33,7 +32,6 @@ const meta: Meta<typeof SafenetAuditRowView> = {
   parameters: {
     layout: 'centered',
     ...setup.parameters,
-    msw: { handlers: [safenetChainsHandler(), ...setup.parameters.msw.handlers] },
   },
   decorators: [
     (Story) => (
@@ -68,7 +66,7 @@ const story = (snapshot: SafenetCheckSnapshot, description: string): Story => ({
 
 export const Submitted = story(exampleSnapshot(CheckStatus.SUBMITTED), 'SUBMITTED.')
 export const InProgress = story(inProgressWithDeadline(), 'IN_PROGRESS: label is "Simulating".')
-export const Benign = story(exampleSnapshot(CheckStatus.BENIGN), 'BENIGN, verified: "Safenet" links the attestation.')
+export const Benign = story(exampleSnapshot(CheckStatus.BENIGN), 'BENIGN: "Safenet" links the explorer.')
 export const MaliciousOneRule = story(
   rejectedSnapshot(SAFENET_EXAMPLE_VOTES.settingsChange),
   'MALICIOUS, example #1: the rule is in the label, "Safenet" links the explorer.',
