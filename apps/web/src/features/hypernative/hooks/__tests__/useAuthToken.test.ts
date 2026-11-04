@@ -9,6 +9,7 @@ jest.mock('../../store/cookieStorage', () => ({
   getAuthCookieData: jest.fn(),
   setAuthCookie: jest.fn(),
   clearAuthCookie: jest.fn(),
+  markRefreshAbandoned: jest.fn(),
 }))
 
 // Mock the store's imperative accessor (used outside React components) rather than the whole
@@ -33,6 +34,9 @@ const mockGetAuthCookieData = cookieStorage.getAuthCookieData as jest.MockedFunc
 >
 const mockSetAuthCookie = cookieStorage.setAuthCookie as jest.MockedFunction<typeof cookieStorage.setAuthCookie>
 const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction<typeof cookieStorage.clearAuthCookie>
+const mockMarkRefreshAbandoned = cookieStorage.markRefreshAbandoned as jest.MockedFunction<
+  typeof cookieStorage.markRefreshAbandoned
+>
 const mockGetStoreInstance = getStoreInstance as jest.MockedFunction<typeof getStoreInstance>
 const mockInitiate = hypernativeApi.endpoints.exchangeToken.initiate as jest.Mock
 
@@ -118,7 +122,12 @@ describe('useAuthToken', () => {
       expect(result.current[0].isExpired).toBe(false)
     })
 
-    it('should return expired state when token is expired', () => {
+    /**
+     * The cookie now outlives the access token while a refresh window is open, so an expired token
+     * can sit in it. Consumers that only read `token` (Safe Shield, the queue batch) would send it
+     * and get 401s - an expired token must look exactly like no token, as it did before.
+     */
+    it('should treat an expired token as not authenticated and not expose it', () => {
       const now = Date.now()
       mockGetAuthCookieData.mockReturnValue({
         token: 'expired-token',
@@ -128,7 +137,8 @@ describe('useAuthToken', () => {
 
       const { result } = renderHook(() => useAuthToken())
 
-      expect(result.current[0].isAuthenticated).toBe(true)
+      expect(result.current[0].token).toBeUndefined()
+      expect(result.current[0].isAuthenticated).toBe(false)
       expect(result.current[0].isExpired).toBe(true)
     })
 
@@ -395,6 +405,8 @@ describe('useAuthToken', () => {
 
       await waitFor(() => {
         expect(result.current[0].isExpired).toBe(true)
+        expect(result.current[0].isAuthenticated).toBe(false)
+        expect(result.current[0].token).toBeUndefined()
       })
     })
 
@@ -608,6 +620,11 @@ describe('useAuthToken', () => {
       mockClearAuthCookie.mockImplementation(() => {
         fakeCookie = undefined
       })
+      mockMarkRefreshAbandoned.mockImplementation((refreshToken) => {
+        if (fakeCookie?.refreshToken === refreshToken) {
+          fakeCookie = { ...fakeCookie, refreshAbandoned: true }
+        }
+      })
 
       mockGetStoreInstance.mockReturnValue({
         dispatch: jest.fn((action: unknown) => action),
@@ -668,12 +685,27 @@ describe('useAuthToken', () => {
         }),
     })
 
+    /** Inside the 60s refresh margin, so a refresh is due, but the access token itself is still valid */
     const staleCookie = (refreshToken = 'current-refresh-token') => ({
       token: 'stale-token',
       tokenType: 'Bearer',
-      expiry: Date.now() - 1,
+      expiry: Date.now() + 30_000,
       refreshToken,
       refreshExpiry: Date.now() + 2592000000,
+    })
+
+    /** Lets the retry schedule (1s, 2s, 4s, 8s) run out, so the token is either abandoned or parked */
+    const waitForRetriesToBeSpent = () =>
+      waitFor(() => expect(mockInitiate).toHaveBeenCalledTimes(REFRESH_RETRY_ATTEMPTS + 1), {
+        timeout: 25_000,
+        interval: 250,
+      })
+
+    const setOnline = (onLine: boolean) =>
+      Object.defineProperty(window.navigator, 'onLine', { value: onLine, configurable: true })
+
+    afterEach(() => {
+      delete (window.navigator as { onLine?: boolean }).onLine
     })
 
     it.each(['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request'])(
@@ -695,6 +727,23 @@ describe('useAuthToken', () => {
       },
     )
 
+    it('recognises a terminal code that arrives flat at `error` rather than nested', async () => {
+      mockInitiate.mockReturnValue({
+        unwrap: () => Promise.reject({ success: false, data: null, error: 'invalid_grant' }),
+      })
+      fakeCookie = staleCookie('dead-refresh-token')
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitFor(() => {
+        expect(mockClearAuthCookie).toHaveBeenCalled()
+        expect(result.current[0].isAuthenticated).toBe(false)
+      })
+      expect(mockInitiate).toHaveBeenCalledTimes(1)
+
+      unmount()
+    })
+
     /**
      * The case that matters most: a refresh can fail without the chain being dead. Logging the
      * user out on a dropped connection would turn a blip into a re-login, and the access token is
@@ -706,7 +755,15 @@ describe('useAuthToken', () => {
       ['an unreachable server', { message: 'Rejected' }],
       ['a transport failure with no body', undefined],
       ['a gateway error with no OAuth code', { success: false, data: null }],
-      ['a 5xx envelope carrying an unrelated error', { success: false, data: null, error: { error: 'server_error' } }],
+      // The body the API really returns for a 500: the code sits flat at `error`, not nested
+      [
+        'a 5xx envelope carrying server_error',
+        { success: false, data: {}, error: 'server_error', errorCode: 500, service: '@hypernative/server' },
+      ],
+      [
+        'a validation 400 with a free-text message',
+        { success: false, data: null, error: 'refresh_token must be a string' },
+      ],
     ])('keeps the session on %s', async (_label, rejection) => {
       mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(rejection) })
       fakeCookie = staleCookie()
@@ -748,61 +805,98 @@ describe('useAuthToken', () => {
     /**
      * Retries stay inside the server's reuse grace window, where re-presenting the same token is
      * idempotent. Once they are spent the token is left alone rather than presented again later,
-     * which would read as a replay and revoke the family.
+     * which would read as a replay and revoke the family. The marker goes in the cookie, so a
+     * reload, another tab, or another mounted instance of this hook sees it too.
      */
+    it('marks the token abandoned in the cookie once its retries are spent, without logging out', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(undefined) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      await waitForRetriesToBeSpent()
+      await waitFor(() => expect(mockMarkRefreshAbandoned).toHaveBeenCalledWith('current-refresh-token'))
+
+      expect(fakeCookie?.refreshAbandoned).toBe(true)
+      expect(mockClearAuthCookie).not.toHaveBeenCalled()
+      // The access token is still valid until its own expiry
+      expect(result.current[0].isAuthenticated).toBe(true)
+
+      unmount()
+    }, 40_000)
+
+    it('never presents a token that is already marked abandoned (a reload, another tab or instance)', async () => {
+      fakeCookie = { ...staleCookie(), refreshAbandoned: true }
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      // Give the mount check and a full polling cycle the chance to (wrongly) present it
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 5_500))
+      })
+
+      expect(mockInitiate).not.toHaveBeenCalled()
+      expect(result.current[0].isAuthenticated).toBe(true)
+
+      unmount()
+    }, 15_000)
+
     /**
-     * CDP's offline emulation does not fire the `online` event, so this path cannot be checked in
-     * a driven browser - a real connectivity change does fire it, so it is asserted here instead.
+     * Coming back online says nothing about where the earlier failures went when the browser
+     * believed it was online throughout - a 5xx or a proxy error may have reached the server and
+     * consumed the token. Only a token parked while offline is safe to present again.
      */
-    it('retries again when connectivity returns after the retries were spent', async () => {
-      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject({ message: 'Rejected' }) })
+    it('does not revive an abandoned token on an online event', async () => {
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(undefined) })
       fakeCookie = staleCookie()
 
       const { unmount } = renderHook(() => useAuthToken())
 
-      // Wait for the backoff schedule to be genuinely exhausted - the last step is 8s, so a
-      // shorter settle window would call it spent while a retry was still pending, and the extra
-      // call below could then be that retry rather than the online event.
-      await waitFor(() => expect(mockInitiate).toHaveBeenCalledTimes(REFRESH_RETRY_ATTEMPTS + 1), {
+      await waitForRetriesToBeSpent()
+      await waitFor(() => expect(fakeCookie?.refreshAbandoned).toBe(true))
+      const callsBeforeOnline = mockInitiate.mock.calls.length
+
+      await act(async () => {
+        ;(window as unknown as { triggerWindowEvent: (event: string) => void }).triggerWindowEvent('online')
+        await new Promise((resolve) => setTimeout(resolve, 1_000))
+      })
+
+      expect(mockInitiate).toHaveBeenCalledTimes(callsBeforeOnline)
+
+      unmount()
+    }, 40_000)
+
+    it('resumes a token whose retries were spent while offline once connectivity returns', async () => {
+      setOnline(false)
+      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject({ message: 'Rejected' }) })
+      fakeCookie = staleCookie()
+
+      const { result, unmount } = renderHook(() => useAuthToken())
+
+      // At least, not exactly: a parked token is picked up again as soon as its retries run out
+      // (offline the attempts never leave the browser), so the count keeps climbing past the schedule
+      await waitFor(() => expect(mockInitiate.mock.calls.length).toBeGreaterThanOrEqual(REFRESH_RETRY_ATTEMPTS + 1), {
         timeout: 25_000,
         interval: 250,
       })
+      // Offline proves the requests never left the browser, so the token is parked, not abandoned
+      expect(mockMarkRefreshAbandoned).not.toHaveBeenCalled()
 
-      const callsBeforeOnline = mockInitiate.mock.calls.length
+      setOnline(true)
       mockInitiate.mockReturnValue({ unwrap: () => Promise.resolve(REFRESHED_RESPONSE) })
 
       await act(async () => {
         ;(window as unknown as { triggerWindowEvent: (event: string) => void }).triggerWindowEvent('online')
       })
 
-      await waitFor(
-        () => {
-          expect(mockInitiate.mock.calls.length).toBeGreaterThan(callsBeforeOnline)
-        },
-        { timeout: 15_000, interval: 250 },
-      )
+      await waitFor(() => expect(result.current[0].token).toBe('Bearer refreshed-token'), {
+        timeout: 15_000,
+        interval: 250,
+      })
       expect(mockClearAuthCookie).not.toHaveBeenCalled()
 
       unmount()
     }, 40_000)
-
-    it('stops presenting a token once its retries are spent, without logging out', async () => {
-      mockInitiate.mockReturnValue({ unwrap: () => Promise.reject(undefined) })
-      fakeCookie = staleCookie()
-
-      const { result, unmount } = renderHook(() => useAuthToken())
-
-      await waitFor(() => {
-        expect(mockInitiate).toHaveBeenCalled()
-      })
-
-      const callsAfterFirstFailure = mockInitiate.mock.calls.length
-      expect(callsAfterFirstFailure).toBeLessThanOrEqual(REFRESH_RETRY_ATTEMPTS + 1)
-      expect(mockClearAuthCookie).not.toHaveBeenCalled()
-      expect(result.current[0].isAuthenticated).toBe(true)
-
-      unmount()
-    })
 
     it('yields a single rotation when two tabs race to refresh the same token', async () => {
       // navigator.locks isn't implemented in jsdom - stub a real FIFO queue so this exercises the

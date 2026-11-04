@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { setAuthCookie, getAuthCookieData, clearAuthCookie } from '../cookieStorage'
+import { setAuthCookie, getAuthCookieData, clearAuthCookie, markRefreshAbandoned } from '../cookieStorage'
 
 // Mock js-cookie
 jest.mock('js-cookie', () => ({
@@ -438,6 +438,75 @@ describe('cookieStorage', () => {
 
       expect(parsedValue.refreshToken).toBeUndefined()
       expect(parsedValue.refreshExpiry).toBeUndefined()
+    })
+  })
+
+  /**
+   * The abandoned marker has to live in the cookie, not in hook state: every hook instance, every
+   * tab and every reload reads the cookie, and any one of them presenting an abandoned token past
+   * the server's grace window reads as a replay and revokes the family.
+   */
+  describe('abandoned refresh token', () => {
+    const now = 1000000000
+
+    const cookieWith = (overrides: Record<string, unknown> = {}) =>
+      JSON.stringify({
+        token: 'access-token',
+        tokenType: 'Bearer',
+        expiry: now + 30_000,
+        refreshToken: 'refresh-token',
+        refreshExpiry: now + 2592000 * 1000,
+        ...overrides,
+      })
+
+    beforeEach(() => {
+      Date.now = jest.fn(() => now)
+    })
+
+    it('should mark the refresh token abandoned in the cookie, keeping the data and the refresh-window lifetime', () => {
+      mockGetReturn(cookieWith())
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(mockCookiesSet).toHaveBeenCalledTimes(1)
+      const [cookieKey, cookieValue, options] = mockCookiesSet.mock.calls[0]
+      expect(cookieKey).toBe('hn_auth')
+      expect(JSON.parse(cookieValue as string)).toEqual(JSON.parse(cookieWith({ refreshAbandoned: true })))
+      expect(options?.expires).toBe(30)
+    })
+
+    it('should not mark a cookie whose refresh token has already been rotated by someone else', () => {
+      mockGetReturn(cookieWith({ refreshToken: 'newer-refresh-token' }))
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(mockCookiesSet).not.toHaveBeenCalled()
+    })
+
+    it('should keep an abandoned cookie while its access token is still valid', () => {
+      mockGetReturn(cookieWith({ refreshAbandoned: true }))
+
+      const result = getAuthCookieData()
+
+      expect(result?.token).toBe('access-token')
+      expect(result?.refreshAbandoned).toBe(true)
+      expect(mockCookiesRemove).not.toHaveBeenCalled()
+    })
+
+    it('should clear an abandoned cookie once its access token expires, since nothing can recover it', () => {
+      mockGetReturn(cookieWith({ refreshAbandoned: true, expiry: now - 1 }))
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeUndefined()
+      expect(mockCookiesRemove).toHaveBeenCalledWith('hn_auth', { path: '/' })
+    })
+
+    it('should drop the abandoned flag when a new token pair is written', () => {
+      setAuthCookie('access-token', 'Bearer', 300, 'fresh-refresh-token', 2592000)
+
+      const [, cookieValue] = mockCookiesSet.mock.calls[0]
+      expect(JSON.parse(cookieValue as string).refreshAbandoned).toBeUndefined()
     })
   })
 })

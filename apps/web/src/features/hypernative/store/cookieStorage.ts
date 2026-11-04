@@ -19,6 +19,9 @@ interface AuthTokenData {
   expiry: number // access token expiry, timestamp in milliseconds
   refreshToken?: string
   refreshExpiry?: number // absolute end of the refresh window, timestamp in milliseconds
+  // Set once this refresh token's retries are spent. Shared by every hook instance, tab and
+  // reload, so none of them presents it again past the server's reuse grace window.
+  refreshAbandoned?: boolean
 }
 
 /**
@@ -50,7 +53,8 @@ const getCookieOptions = (maxAgeInSeconds?: number): Cookies.CookieAttributes =>
  *
  * The cookie is only cleared once the refresh window (refreshExpiry) has closed - an expired
  * access token alongside a live refresh window is a normal, recoverable state. A cookie with no
- * refresh token (legacy, or no refresh grant) falls back to clearing on the access token expiry.
+ * usable refresh token (legacy, no refresh grant, or abandoned) falls back to clearing on the
+ * access token expiry, since nothing can recover it after that.
  * @returns Parsed auth token data or undefined if not found, expired, or invalid
  */
 export const getAuthCookieData = (): AuthTokenData | undefined => {
@@ -61,7 +65,7 @@ export const getAuthCookieData = (): AuthTokenData | undefined => {
 
   try {
     const data: AuthTokenData = JSON.parse(cookieValue)
-    const hasRefresh = !!data.refreshToken && data.refreshExpiry !== undefined
+    const hasRefresh = !!data.refreshToken && data.refreshExpiry !== undefined && !data.refreshAbandoned
     const clearAt = hasRefresh ? data.refreshExpiry : data.expiry
     if (Date.now() >= clearAt!) {
       // Refresh window (or access token, if there is no refresh) expired, clean up cookie
@@ -103,6 +107,21 @@ export const setAuthCookie = (
   // refresh token stored inside it is lost before it can ever be used.
   const cookieMaxAgeSeconds = hasRefresh ? refreshExpiresIn! : expiresIn
   Cookies.set(AUTH_COOKIE_KEY, JSON.stringify(data), getCookieOptions(cookieMaxAgeSeconds))
+}
+
+/**
+ * Mark the cookie's refresh token as abandoned: its retries are spent, and presenting it again
+ * past the server's reuse grace window would read as a replay and revoke the whole family.
+ * A no-op if the cookie already carries a different refresh token (another tab rotated it).
+ * @param refreshToken - The refresh token whose retries were spent
+ */
+export const markRefreshAbandoned = (refreshToken: string): void => {
+  const data = getAuthCookieData()
+  if (!data || data.refreshToken !== refreshToken || data.refreshExpiry === undefined) {
+    return
+  }
+  const remainingSeconds = (data.refreshExpiry - Date.now()) / 1000
+  Cookies.set(AUTH_COOKIE_KEY, JSON.stringify({ ...data, refreshAbandoned: true }), getCookieOptions(remainingSeconds))
 }
 
 /**

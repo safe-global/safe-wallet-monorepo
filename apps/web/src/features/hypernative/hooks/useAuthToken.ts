@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { clearAuthCookie, getAuthCookieData, setAuthCookie } from '../store/cookieStorage'
+import { clearAuthCookie, getAuthCookieData, markRefreshAbandoned, setAuthCookie } from '../store/cookieStorage'
 import { getStoreInstance } from '@/store'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { HYPERNATIVE_OAUTH_CONFIG } from '../config/oauth'
@@ -67,18 +67,23 @@ const TERMINAL_OAUTH_ERRORS = ['invalid_grant', 'invalid_client', 'unsupported_g
  */
 const REFRESH_RETRY_DELAYS_MS = [1_000, 2_000, 4_000, 8_000]
 
-type RefreshOutcome = 'refreshed' | 'terminal' | 'transient'
+// 'abandoned' - the token is marked as spent in the cookie, so it is never presented again
+type RefreshOutcome = 'refreshed' | 'terminal' | 'transient' | 'abandoned'
 
 /**
  * Reads the OAuth error code out of a failed refresh.
  *
- * The API wraps errors in an envelope, so the code sits at `error.error` rather than at the top
- * level of the body. A failure with no code at all - a network error, a gateway page - resolves to
- * undefined and is treated as transient.
+ * The API wraps errors in an envelope. A 4xx OAuth error nests the RFC 6749 body, so the code sits
+ * at `error.error`; a 500 carries it flat at `error`. Both are read. A free-text message there
+ * (a validation 400) is not a known code, so it stays transient. A failure with no code at all -
+ * a network error, a gateway page - resolves to undefined and is treated as transient.
  * @param rejection - The value `.unwrap()` rejected with
  */
 const readOAuthErrorCode = (rejection: unknown): string | undefined => {
   const envelopeError = (rejection as { error?: unknown } | undefined)?.error
+  if (typeof envelopeError === 'string') {
+    return envelopeError
+  }
   const code = (envelopeError as { error?: unknown } | undefined)?.error
   return typeof code === 'string' ? code : undefined
 }
@@ -95,10 +100,14 @@ const readOAuthErrorCode = (rejection: unknown): string | undefined => {
  */
 const refreshAuthToken = async (refreshToken: string): Promise<RefreshOutcome> => {
   const runRefresh = async (): Promise<RefreshOutcome> => {
-    // Re-read inside the lock: another tab (or hook instance) may have already rotated this token
+    // Re-read inside the lock: another tab (or hook instance) may have already rotated this token,
+    // or spent its retries and abandoned it
     const current = getAuthCookieData()
     if (!current?.refreshToken || current.refreshToken !== refreshToken) {
       return 'refreshed'
+    }
+    if (current.refreshAbandoned) {
+      return 'abandoned'
     }
 
     let store
@@ -159,9 +168,6 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
   const scheduledRefreshTokenRef = useRef<string | undefined>(undefined)
   const isRefreshingRef = useRef(false)
   const checkAuthStateRef = useRef<() => void>(() => {})
-  // A token whose retries are spent. Kept so the polling loop does not present it again once the
-  // grace window has closed, which would read as a replay and revoke the family.
-  const abandonedRefreshTokenRef = useRef<string | undefined>(undefined)
   const attemptRefreshRef = useRef<(refreshToken: string, attempt?: number) => void>(() => {})
 
   const clearScheduledRefresh = useCallback(() => {
@@ -183,14 +189,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     isRefreshingRef.current = true
     void refreshAuthToken(refreshToken)
       .then((outcome) => {
-        if (outcome === 'refreshed') {
-          abandonedRefreshTokenRef.current = undefined
+        if (outcome === 'refreshed' || outcome === 'abandoned') {
           return
         }
 
         if (outcome === 'terminal') {
           // The server says this chain is gone. Only a fresh login recovers it.
-          abandonedRefreshTokenRef.current = undefined
           clearAuthCookie()
           return
         }
@@ -203,10 +207,11 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
             return
           }
 
-          // Retries spent inside the grace window. The cookie stays: the access token is still
-          // usable until its own expiry, and presenting this refresh token again now would look
-          // like theft rather than a retry.
-          abandonedRefreshTokenRef.current = refreshToken
+          // Retries spent inside the grace window. Presenting this refresh token again later would
+          // look like theft rather than a retry, so it is marked in the cookie - where every hook
+          // instance, tab and reload sees it - and never presented again. The access token stays
+          // usable until its own expiry; after that the cookie clears itself.
+          markRefreshAbandoned(refreshToken)
           return
         }
 
@@ -232,12 +237,8 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
   // runs out at its own expiry and the user has to log in again.
   const scheduleRefresh = useCallback(
     (data: CookieAuthData) => {
-      if (!data?.refreshToken) {
+      if (!data?.refreshToken || data.refreshAbandoned) {
         clearScheduledRefresh()
-        return
-      }
-
-      if (abandonedRefreshTokenRef.current === data.refreshToken) {
         return
       }
 
@@ -271,8 +272,10 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
-    const newToken = token ? `${normalizedTokenType} ${token}` : undefined
-    const newIsAuthenticated = !!token
+    // The cookie outlives the access token while a refresh window is open. An expired token must
+    // look like no token to consumers, or they send it and get a 401 - so it is never exposed.
+    const newToken = token && !isExpired ? `${normalizedTokenType} ${token}` : undefined
+    const newIsAuthenticated = !!newToken
 
     setAuthState((prevState) => {
       // Only update state if values actually changed
@@ -305,14 +308,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     refreshExpiresIn?: number,
   ) => {
     setAuthCookie(token, tokenType, expiresIn, refreshToken, refreshExpiresIn)
-    abandonedRefreshTokenRef.current = undefined
     checkAuthState()
   }
 
   const clearToken = () => {
     clearAuthCookie()
     clearScheduledRefresh()
-    abandonedRefreshTokenRef.current = undefined
     setAuthState({
       token: undefined,
       isAuthenticated: false,
@@ -329,18 +330,14 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
         checkAuthState()
       }
     }
-    // Coming back online means the failures that spent this token's retries never reached the
-    // server, so the token is still live and presenting it again is a retry rather than a replay.
-    // Ambiguous failures - a 5xx, a proxy error - do not come back through here and stay abandoned.
-    const handleOnline = () => {
-      abandonedRefreshTokenRef.current = undefined
-      checkAuthState()
-    }
-
+    // A token whose retries ran out while offline is parked, not abandoned - those requests never
+    // left the browser - so coming back online picks it up again. A token abandoned while online
+    // stays abandoned: a 5xx or a proxy error may have reached the server and consumed it, and an
+    // online event says nothing about that.
     window.addEventListener('storage', handleStorageEvent)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('focus', checkAuthState)
-    window.addEventListener('online', handleOnline)
+    window.addEventListener('online', checkAuthState)
 
     const interval = setInterval(checkAuthState, AUTH_POLLING_INTERVAL)
     checkAuthState() // Initial check
@@ -349,7 +346,7 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
       window.removeEventListener('storage', handleStorageEvent)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', checkAuthState)
-      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('online', checkAuthState)
       clearInterval(interval)
       clearScheduledRefresh()
     }
