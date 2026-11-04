@@ -72,8 +72,6 @@ export default {
   SEP_STATIC_SAFE_41: 'sep:0xE5577b9E75F94C4a900E74F63F79A7968e812208',
   /** Mass payouts testing - Used in: mass_payouts.cy.js (happypath_2) */
   SEP_STATIC_SAFE_42: 'sep:0x7AaE77F475E718AdD032C7665427C6d4e6104D3c',
-  /** Transaction builder testing - Used in: tx-builder_3.cy.js */
-  SEP_STATIC_SAFE_43: 'sep:0xC5AaBf061f2412F9D84585755dc517EF040becF9',
   /** Sidebar testing */
   SEP_STATIC_SAFE_44: 'sep:0x8A3faB996b721d68357B42eD0D6328eBE6113e00',
   /** Nested safes review and fund asset testing - Used in: nested_safes_review.cy.js, nested_safes_fund_asset.cy.js */
