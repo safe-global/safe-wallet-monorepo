@@ -1,0 +1,4 @@
+{
+  "prompt": "On the Safe settings page of the web app, show a banner when the Safe's version is outdated, with a button \"Update Safe\" that starts the existing update flow.",
+  "expectation": "The markup and styles of the banner (JSX elements, Tailwind classes, CSS) are in a view under packages/views/src that only turns props into markup and receives the click handler as a prop. Files changed in apps/web may decide when the banner is shown, start the update flow and render the view, but do not write the banner's own JSX layout or styles. FAIL if the banner's markup or styles are written in apps/web."
+}
